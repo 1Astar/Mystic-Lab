@@ -1,0 +1,23 @@
+:root {
+  --bg-deep: #0b0b14;
+  --bg-panel: rgba(26, 18, 48, 0.92);
+  --bg-card: rgba(46, 27, 75, 0.95);
+  --ink: #ffffff;
+  --ink-muted: #bfa3ff;
+  --gold: #ffd6a6;
+  --gold-soft: rgba(255, 214, 166, 0.12);
+  --purple: #bfa3ff;
+  --purple-deep: #2e1b4b;
+  --purple-mid: #1a1230;
+  --accent: #bfa3ff;
+  --warn: #e6b422;
+  --warn-bg: rgba(230, 180, 34, 0.12);
+  --danger: #e05c5c;
+  --line: rgba(191, 163, 255, 0.22);
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --page-width: 430px;
+  --font-sans: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  --font-serif: "Times New Roman", Georgia, serif;
+}

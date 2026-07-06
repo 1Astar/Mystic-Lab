@@ -1,0 +1,195 @@
+import type { CardKnowledge, CardVisualHotspots } from '../types.ts';
+
+/** P1 示例：星星、月亮、愚者、恋人、高塔 */
+export const MAJOR_FIVE_KNOWLEDGE: CardKnowledge[] = [
+  {
+    id: 'the_fool',
+    deckId: 'major-0',
+    nameCn: '愚者',
+    nameEn: 'The Fool',
+    arcana: 'major',
+    number: 0,
+    keywords: ['出发', '天真', '未知', '信任', '新旅程'],
+    oneSentence: '这是一张关于带着未知出发、仍愿意相信下一步的牌。',
+    uprightMeaning:
+      '愚者正位象征旅程的起点。你未必看清全貌，但内心愿意向前。它鼓励保持开放，也提醒你看清脚下的路——天真不是莽撞，而是尚未被恐惧定义的自己。',
+    reversedMeaning:
+      '愚者逆位提醒冲动与准备不足。你可能高估了安全感，或低估风险。先停下来整理行囊，再决定要不要迈出那一步。',
+    workMeaning:
+      '工作上，愚者像一次新的尝试或转轨。机会真实存在，但你需要区分「勇敢出发」和「毫无准备地跳下」。',
+    loveMeaning:
+      '感情上，愚者代表轻松、试探与尚未命名的关系。享受当下的真诚，也留意自己是否回避了必要的沟通。',
+    studyMeaning:
+      '学业上，愚者鼓励探索新方向或学习方法。好奇心是动力，但别因为新鲜而分散核心目标。',
+    selfMeaning:
+      '自我层面，愚者问你：你还愿不愿意相信生活会出现新的可能？恐惧常常伪装成「务实」。',
+    foolJourney: {
+      order: 0,
+      title: '出发',
+      summary: '愚人之旅的起点——带着天真与未知走上旅途。',
+    },
+  },
+  {
+    id: 'the_lovers',
+    deckId: 'major-6',
+    nameCn: '恋人',
+    nameEn: 'The Lovers',
+    arcana: 'major',
+    number: 6,
+    keywords: ['选择', '价值', '联结', '吸引', '一致'],
+    oneSentence: '这是一张关于价值选择与真心联结的牌，不只关乎爱情。',
+    uprightMeaning:
+      '恋人正位关乎选择与价值一致。你在两个方向、两段关系或两种自我之间做决定。牌面问的不是「哪边更诱人」，而是「哪边更像真实的我」。',
+    reversedMeaning:
+      '恋人逆位暗示分歧、犹豫或价值观冲突。表面和谐下可能有未说清的拉扯，需要诚实面对。',
+    workMeaning:
+      '工作上，恋人常指向合作、团队契合或职业价值选择。关键不在机会好不好，而在是否与你的原则一致。',
+    loveMeaning:
+      '感情上，恋人强调吸引与选择并存。你在衡量彼此是否同行，而不只是是否心动。',
+    studyMeaning:
+      '学业上，恋人可能意味路径选择：专业、导师或学习伙伴。问问自己真正认同哪种成长方式。',
+    selfMeaning:
+      '自我层面，恋人照见内在分裂的部分。你能否让行动与价值观重新对齐？',
+    foolJourney: {
+      order: 6,
+      title: '选择',
+      summary: '学会在关系与价值之间做出清醒抉择。',
+    },
+  },
+  {
+    id: 'the_tower',
+    deckId: 'major-16',
+    nameCn: '高塔',
+    nameEn: 'The Tower',
+    arcana: 'major',
+    number: 16,
+    keywords: ['崩塌', '真相', '突变', '觉醒', '旧结构瓦解'],
+    oneSentence: '这是一张关于旧结构崩塌、真相被迫现身的牌。',
+    uprightMeaning:
+      '高塔正位预示突发变故或长期隐患的一次性暴露。震撼很痛苦，但它拆除的是不再真实的结构。危机之后，才有真正可重建的地基。',
+    reversedMeaning:
+      '高塔逆位表示危机被延迟或冲击减弱。别因侥幸忽视裂缝；主动调整好过被动崩塌。',
+    workMeaning:
+      '工作上，高塔可能对应组织变动、项目失败或规则突变。重点不是「为什么是我」，而是「什么已经不能再假装没事」。',
+    loveMeaning:
+      '感情上，高塔常揭露隐藏的矛盾或失衡。痛，但虚假和平比真相更耗人。',
+    studyMeaning:
+      '学业上，高塔像一次方法或计划的彻底失效。把它当作强制重启，而非全盘否定自己。',
+    selfMeaning:
+      '自我层面，高塔打破你依赖的旧自我叙事。崩塌之后，你才有机会诚实重建。',
+    foolJourney: {
+      order: 16,
+      title: '崩塌',
+      summary: '旧信念与虚假结构被闪电击穿，为觉醒腾出空间。',
+    },
+  },
+  {
+    id: 'the_star',
+    deckId: 'major-17',
+    nameCn: '星星',
+    nameEn: 'The Star',
+    arcana: 'major',
+    number: 17,
+    keywords: ['希望', '疗愈', '恢复', '指引', '重新相信'],
+    oneSentence: '这是一张关于重新看见希望、让内在慢慢恢复的牌。',
+    uprightMeaning:
+      '星星正位带来希望、疗愈与灵感。黑暗之后，微光仍在。它不是保证结果，而是提醒你：恢复信任感本身，就是向前的一步。',
+    reversedMeaning:
+      '星星逆位暗示失望或信心暂时被遮蔽。希望没有消失，只是你需要更小的、可执行的相信方式。',
+    workMeaning:
+      '工作上，星星不像催你立刻做决定，更像在问：这件事是否重新点亮了你对未来的期待？这份期待有没有转化为行动力？',
+    loveMeaning:
+      '感情上，星星代表温柔的修复与坦诚。适合慢慢靠近，而非急于定义关系。',
+    studyMeaning:
+      '学业上，星星鼓励长期主义。进步可能缓慢，但方向正在变得清晰。',
+    selfMeaning:
+      '自我层面，星星邀请你善待疲惫的自己。疗愈不是逃避，而是为下一步蓄力。',
+    foolJourney: {
+      order: 17,
+      title: '疗愈',
+      summary: '在崩塌之后重新看见希望，让内在缓慢恢复。',
+    },
+  },
+  {
+    id: 'the_moon',
+    deckId: 'major-18',
+    nameCn: '月亮',
+    nameEn: 'The Moon',
+    arcana: 'major',
+    number: 18,
+    keywords: ['迷雾', '潜意识', '恐惧', '直觉', '不确定'],
+    oneSentence: '这是一张关于迷雾、潜意识与尚未说清真相的牌。',
+    uprightMeaning:
+      '月亮正位表示事情并非表面所见。恐惧、想象与直觉交织，你需要分辨哪些是真实信号，哪些是焦虑的投影。',
+    reversedMeaning:
+      '月亮逆位象征迷雾渐散。困惑减轻，但仍需时间整合刚浮现的真相。',
+    workMeaning:
+      '工作上，月亮提醒信息不全或局势暧昧。别在模糊中做绝对判断，先收集事实与感受。',
+    loveMeaning:
+      '感情上，月亮常伴随不安、猜测或未说出口的需要。温柔比追问更重要，但逃避也会加深迷雾。',
+    studyMeaning:
+      '学业上，月亮像备考或方向上的不确定期。焦虑正常，把它转化为具体的问题清单。',
+    selfMeaning:
+      '自我层面，月亮照见潜意识里的恐惧。你害怕的，未必会发生；但未觉察的恐惧会左右选择。',
+    foolJourney: {
+      order: 18,
+      title: '迷雾',
+      summary: '走入潜意识与不确定，学习分辨恐惧与直觉。',
+    },
+  },
+];
+
+export const MAJOR_FIVE_HOTSPOTS: CardVisualHotspots[] = [
+  {
+    cardId: 'the_fool',
+    deckId: 'major-0',
+    hotspots: [
+      { id: 'cliff', label: '悬崖边', x: 50, y: 78, meaning: '未知的前方，迈出一步前未必看清全貌。' },
+      { id: 'dog', label: '小狗', x: 72, y: 70, meaning: '本能的提醒——天真不等于忽视现实。' },
+      { id: 'bundle', label: '行囊', x: 38, y: 55, meaning: '你已携带的经验与行李，不必空手出发。' },
+      { id: 'sun', label: '远方', x: 50, y: 12, meaning: '尚未抵达的可能，召唤你向前。' },
+    ],
+  },
+  {
+    cardId: 'the_lovers',
+    deckId: 'major-6',
+    hotspots: [
+      { id: 'figures', label: '两个人物', x: 50, y: 52, meaning: '联结与选择同时存在，不只有吸引。' },
+      { id: 'angel', label: '天使', x: 50, y: 10, meaning: '更高层面的价值见证，提醒对齐真心。' },
+      { id: 'tree', label: '生命之树', x: 22, y: 40, meaning: '成长与生命能量的选择。' },
+      { id: 'snake', label: '知识之树', x: 78, y: 40, meaning: '诱惑与认知的诱惑，选择伴随代价。' },
+    ],
+  },
+  {
+    cardId: 'the_tower',
+    deckId: 'major-16',
+    hotspots: [
+      { id: 'lightning', label: '闪电', x: 50, y: 8, meaning: '突发的真相与强制觉醒。' },
+      { id: 'tower', label: '高塔', x: 50, y: 42, meaning: '旧结构、旧信念、不再真实的依靠。' },
+      { id: 'falling', label: '坠落的人', x: 50, y: 72, meaning: '被迫放下伪装，痛苦但解放。' },
+      { id: 'crown', label: '坠落王冠', x: 42, y: 58, meaning: '失效的权威与头衔，不再定义你。' },
+    ],
+  },
+  {
+    cardId: 'the_star',
+    deckId: 'major-17',
+    hotspots: [
+      { id: 'big_star', label: '星星', x: 52, y: 18, meaning: '远方的指引，希望与精神层面的照亮。' },
+      { id: 'figure', label: '裸身人物', x: 50, y: 55, meaning: '坦诚、脆弱、卸下防御后的真实。' },
+      { id: 'water', label: '水流', x: 50, y: 72, meaning: '情绪流动、疗愈、把能量重新倒回生活。' },
+      { id: 'land', label: '陆地', x: 50, y: 88, meaning: '现实层面的恢复与扎根。' },
+      { id: 'bird', label: '远处鸟树', x: 78, y: 42, meaning: '未来的消息与长期成长的征兆。' },
+    ],
+  },
+  {
+    cardId: 'the_moon',
+    deckId: 'major-18',
+    hotspots: [
+      { id: 'moon', label: '月亮', x: 50, y: 14, meaning: '潜意识、周期与尚未说清的真相。' },
+      { id: 'path', label: '小路', x: 50, y: 68, meaning: '在迷雾中仍要前行，但别赶结论。' },
+      { id: 'dog_wolf', label: '狗与狼', x: 35, y: 58, meaning: '驯服的本能与野性的恐惧并存。' },
+      { id: 'crayfish', label: '小龙虾', x: 50, y: 82, meaning: '从深处浮现的情绪与旧有模式。' },
+      { id: 'towers', label: '远处双塔', x: 50, y: 38, meaning: '未知彼岸，真相尚在远方。' },
+    ],
+  },
+];

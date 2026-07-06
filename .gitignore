@@ -1,0 +1,32 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# MediaPipe 大文件（npm run dev / build 时 scripts/copy-mediapipe.mjs 自动下载）
+public/mediapipe/wasm/*.wasm
+public/mediapipe/gesture_recognizer.task
+
+# 环境变量
+.env
+.env.*
