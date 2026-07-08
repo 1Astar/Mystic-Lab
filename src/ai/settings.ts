@@ -1,5 +1,8 @@
+import { inferProviderId } from './providers.ts';
+
 export type AiSettings = {
   enabled: boolean;
+  providerId: string;
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -9,6 +12,7 @@ const STORAGE_KEY = 'mystic-lab-ai-settings';
 
 export const DEFAULT_AI_SETTINGS: AiSettings = {
   enabled: false,
+  providerId: 'openai',
   baseUrl: 'https://api.openai.com/v1',
   apiKey: '',
   model: 'gpt-4o-mini',
@@ -19,9 +23,12 @@ export function loadAiSettings(): AiSettings {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_AI_SETTINGS };
     const parsed = JSON.parse(raw) as Partial<AiSettings>;
+    const baseUrl = parsed.baseUrl?.trim() || DEFAULT_AI_SETTINGS.baseUrl;
+    const providerId = parsed.providerId ?? inferProviderId(baseUrl);
     return {
       enabled: parsed.enabled ?? false,
-      baseUrl: parsed.baseUrl?.trim() || DEFAULT_AI_SETTINGS.baseUrl,
+      providerId,
+      baseUrl,
       apiKey: parsed.apiKey ?? '',
       model: parsed.model?.trim() || DEFAULT_AI_SETTINGS.model,
     };

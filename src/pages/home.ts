@@ -45,8 +45,8 @@ export function renderHome(root: HTMLElement): () => void {
       <p class="page-subtitle">
         提问 → 占问 → 解读 → 解锁图鉴 → 写下感悟
       </p>
+      <div id="ai-settings-host" class="home-ai-settings"></div>
     </header>
-    <div id="ai-settings-host"></div>
     <nav class="home-nav" aria-label="模块入口"></nav>
   `;
 
