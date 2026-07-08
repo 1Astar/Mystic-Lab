@@ -1,4 +1,4 @@
-import type { CardKnowledge, CardVisualHotspots } from '../types.ts';
+import type { CardKnowledge } from '../types.ts';
 
 /** P1 示例：星星、月亮、愚者、恋人、高塔 */
 export const MAJOR_FIVE_KNOWLEDGE: CardKnowledge[] = [
@@ -136,60 +136,5 @@ export const MAJOR_FIVE_KNOWLEDGE: CardKnowledge[] = [
       title: '迷雾',
       summary: '走入潜意识与不确定，学习分辨恐惧与直觉。',
     },
-  },
-];
-
-export const MAJOR_FIVE_HOTSPOTS: CardVisualHotspots[] = [
-  {
-    cardId: 'the_fool',
-    deckId: 'major-0',
-    hotspots: [
-      { id: 'cliff', label: '悬崖边', x: 50, y: 78, meaning: '未知的前方，迈出一步前未必看清全貌。' },
-      { id: 'dog', label: '小狗', x: 72, y: 70, meaning: '本能的提醒——天真不等于忽视现实。' },
-      { id: 'bundle', label: '行囊', x: 38, y: 55, meaning: '你已携带的经验与行李，不必空手出发。' },
-      { id: 'sun', label: '远方', x: 50, y: 12, meaning: '尚未抵达的可能，召唤你向前。' },
-    ],
-  },
-  {
-    cardId: 'the_lovers',
-    deckId: 'major-6',
-    hotspots: [
-      { id: 'figures', label: '两个人物', x: 50, y: 52, meaning: '联结与选择同时存在，不只有吸引。' },
-      { id: 'angel', label: '天使', x: 50, y: 10, meaning: '更高层面的价值见证，提醒对齐真心。' },
-      { id: 'tree', label: '生命之树', x: 22, y: 40, meaning: '成长与生命能量的选择。' },
-      { id: 'snake', label: '知识之树', x: 78, y: 40, meaning: '诱惑与认知的诱惑，选择伴随代价。' },
-    ],
-  },
-  {
-    cardId: 'the_tower',
-    deckId: 'major-16',
-    hotspots: [
-      { id: 'lightning', label: '闪电', x: 50, y: 8, meaning: '突发的真相与强制觉醒。' },
-      { id: 'tower', label: '高塔', x: 50, y: 42, meaning: '旧结构、旧信念、不再真实的依靠。' },
-      { id: 'falling', label: '坠落的人', x: 50, y: 72, meaning: '被迫放下伪装，痛苦但解放。' },
-      { id: 'crown', label: '坠落王冠', x: 42, y: 58, meaning: '失效的权威与头衔，不再定义你。' },
-    ],
-  },
-  {
-    cardId: 'the_star',
-    deckId: 'major-17',
-    hotspots: [
-      { id: 'big_star', label: '星星', x: 52, y: 18, meaning: '远方的指引，希望与精神层面的照亮。' },
-      { id: 'figure', label: '裸身人物', x: 50, y: 55, meaning: '坦诚、脆弱、卸下防御后的真实。' },
-      { id: 'water', label: '水流', x: 50, y: 72, meaning: '情绪流动、疗愈、把能量重新倒回生活。' },
-      { id: 'land', label: '陆地', x: 50, y: 88, meaning: '现实层面的恢复与扎根。' },
-      { id: 'bird', label: '远处鸟树', x: 78, y: 42, meaning: '未来的消息与长期成长的征兆。' },
-    ],
-  },
-  {
-    cardId: 'the_moon',
-    deckId: 'major-18',
-    hotspots: [
-      { id: 'moon', label: '月亮', x: 50, y: 14, meaning: '潜意识、周期与尚未说清的真相。' },
-      { id: 'path', label: '小路', x: 50, y: 68, meaning: '在迷雾中仍要前行，但别赶结论。' },
-      { id: 'dog_wolf', label: '狗与狼', x: 35, y: 58, meaning: '驯服的本能与野性的恐惧并存。' },
-      { id: 'crayfish', label: '小龙虾', x: 50, y: 82, meaning: '从深处浮现的情绪与旧有模式。' },
-      { id: 'towers', label: '远处双塔', x: 50, y: 38, meaning: '未知彼岸，真相尚在远方。' },
-    ],
   },
 ];

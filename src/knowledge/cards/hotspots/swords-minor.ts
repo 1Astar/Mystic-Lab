@@ -1,0 +1,140 @@
+import type { CardVisualHotspots } from '../../types.ts';
+
+/** 宝剑组牌面热点（14 张） */
+export const SWORDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
+  {
+    cardId: 'swords-ace',
+    deckId: 'swords-ace',
+    hotspots: [
+      { id: 'hand', label: '云端之手', x: 50, y: 28, meaning: '从更高视角递来的一把剑——清晰的新念头或决断。' },
+      { id: 'sword', label: '宝剑', x: 50, y: 48, meaning: '锋利、直接、切开混乱——真相可能不好听，但能指路。' },
+      { id: 'crown', label: '剑尖王冠', x: 50, y: 18, meaning: '突破旧框架的可能，但权力伴随责任。' },
+      { id: 'mountains', label: '远山', x: 50, y: 82, meaning: '目标仍在远方，清晰只是第一步。' },
+    ],
+  },
+  {
+    cardId: 'swords-two',
+    deckId: 'swords-two',
+    hotspots: [
+      { id: 'blindfold', label: '蒙眼', x: 50, y: 22, meaning: '刻意不看、或尚未准备好面对的信息。' },
+      { id: 'swords', label: '双剑交叉', x: 50, y: 48, meaning: '两种立场在内心角力——僵持不是和平，是暂停。' },
+      { id: 'water', label: '背后水面', x: 50, y: 78, meaning: '情绪在暗处流动，理性只是表面平衡。' },
+    ],
+  },
+  {
+    cardId: 'swords-three',
+    deckId: 'swords-three',
+    hotspots: [
+      { id: 'heart', label: '红心', x: 50, y: 42, meaning: '被刺中的感受——失望、分离或言语伤人。' },
+      { id: 'swords', label: '三把剑', x: 50, y: 28, meaning: '伤害往往来自多个方向：他人、自己、或过去的累积。' },
+      { id: 'clouds', label: '乌云', x: 50, y: 12, meaning: '痛苦真实，但云层也会散去——不必把此刻当永恒。' },
+    ],
+  },
+  {
+    cardId: 'swords-four',
+    deckId: 'swords-four',
+    hotspots: [
+      { id: 'knight', label: '骑士', x: 50, y: 52, meaning: '主动休息——不是放弃，是恢复战斗力。' },
+      { id: 'swords', label: '墙上三剑', x: 50, y: 28, meaning: '暂时收起的武器，仍随时可用。' },
+      { id: 'stained_glass', label: '彩窗', x: 50, y: 18, meaning: '在静中重新连接信念与意义。' },
+    ],
+  },
+  {
+    cardId: 'swords-five',
+    deckId: 'swords-five',
+    hotspots: [
+      { id: 'winner', label: '持剑者', x: 62, y: 48, meaning: '表面胜利——但代价可能是关系或自尊。' },
+      { id: 'losers', label: '离去的人', x: 28, y: 62, meaning: '冲突后的疏离，赢了一局却可能输掉更多。' },
+      { id: 'swords', label: '地上双剑', x: 38, y: 78, meaning: '未带走的武器——怨恨或遗憾仍留在现场。' },
+    ],
+  },
+  {
+    cardId: 'swords-six',
+    deckId: 'swords-six',
+    hotspots: [
+      { id: 'boat', label: '小舟', x: 50, y: 55, meaning: '过渡与离开——从混乱地带驶向较平静的水域。' },
+      { id: 'figure', label: '撑船人', x: 50, y: 42, meaning: '有人引导过渡，但最终你要自己上岸。' },
+      { id: 'swords', label: '六把竖剑', x: 50, y: 38, meaning: '带走的只有必要的——其余放下，才能轻行。' },
+      { id: 'far_shore', label: '远岸', x: 50, y: 22, meaning: '新阶段已在眼前，但尚未抵达。' },
+    ],
+  },
+  {
+    cardId: 'swords-seven',
+    deckId: 'swords-seven',
+    hotspots: [
+      { id: 'thief', label: '潜行者', x: 55, y: 52, meaning: '策略、迂回或不够光明正大的路径——动机值得审视。' },
+      { id: 'swords', label: '偷走的剑', x: 45, y: 38, meaning: '只拿走得动的那几把——资源有限，需取舍。' },
+      { id: 'camp', label: '远处营帐', x: 50, y: 22, meaning: '他人尚未察觉——窗口期不会永远存在。' },
+    ],
+  },
+  {
+    cardId: 'swords-eight',
+    deckId: 'swords-eight',
+    hotspots: [
+      { id: 'blindfold', label: '蒙眼绑缚', x: 50, y: 38, meaning: '感觉被困，但束缚未必如想象中坚固。' },
+      { id: 'ropes', label: '松散绳结', x: 50, y: 55, meaning: '限制部分来自想象——松绑的可能比你看见的更大。' },
+      { id: 'swords', label: '剑阵', x: 50, y: 18, meaning: '威胁环绕，但仍有缝隙可出——关键是视角。' },
+      { id: 'water', label: '脚边水洼', x: 50, y: 82, meaning: '情绪仍在流动，你并未真正干涸。' },
+    ],
+  },
+  {
+    cardId: 'swords-nine',
+    deckId: 'swords-nine',
+    hotspots: [
+      { id: 'figure', label: '床上的人', x: 50, y: 48, meaning: '焦虑失眠——脑中的灾难往往比现实更大声。' },
+      { id: 'swords', label: '墙上九剑', x: 50, y: 22, meaning: '反复盘旋的念头，像悬在头顶的判决。' },
+      { id: 'quilt', label: '床榻', x: 50, y: 68, meaning: '痛苦发生在最私密处——别人未必看得见。' },
+      { id: 'carving', label: '床板雕刻', x: 50, y: 58, meaning: '旧有的恐惧模式，可能已重复许多次。' },
+    ],
+  },
+  {
+    cardId: 'swords-ten',
+    deckId: 'swords-ten',
+    hotspots: [
+      { id: 'figure', label: '倒地的人', x: 50, y: 58, meaning: '压力累积后的终点——像「已经撑到极限」的信号。' },
+      { id: 'swords', label: '十把剑', x: 50, y: 32, meaning: '不只是一把剑的伤害，而是反复的自我攻击与灾难化想象。' },
+      { id: 'hand', label: '手势', x: 62, y: 68, meaning: '仍有生命迹象——触底不等于毁灭，旧模式可以结束。' },
+      { id: 'dawn', label: '远方曙光', x: 50, y: 12, meaning: '最暗处过去后，新的阶段会开始——但需先承认已到底。' },
+      { id: 'water', label: '暗水', x: 50, y: 88, meaning: '情绪与潜意识仍在流动，结束的是模式，不是全部希望。' },
+    ],
+  },
+  {
+    cardId: 'swords-page',
+    deckId: 'swords-page',
+    hotspots: [
+      { id: 'youth', label: '侍从', x: 50, y: 48, meaning: '好奇、观察、新消息——思维正在成形。' },
+      { id: 'sword', label: '举起的剑', x: 62, y: 28, meaning: '尚未成熟的判断，但已准备好提问与探索。' },
+      { id: 'clouds', label: '风与云', x: 50, y: 18, meaning: '想法多变，需落地验证，别只停在脑内。' },
+    ],
+  },
+  {
+    cardId: 'swords-knight',
+    deckId: 'swords-knight',
+    hotspots: [
+      { id: 'knight', label: '骑士', x: 50, y: 45, meaning: '急速推进——行动快，但可能忽略感受与后果。' },
+      { id: 'horse', label: '奔马', x: 50, y: 62, meaning: '冲劲是资源，失控则是风险。' },
+      { id: 'sword', label: '高举的剑', x: 50, y: 22, meaning: '目标明确、态度直接——问：你要切开什么？' },
+      { id: 'birds', label: '飞鸟', x: 72, y: 18, meaning: '混乱中的细节仍在——别只看见自己的方向。' },
+    ],
+  },
+  {
+    cardId: 'swords-queen',
+    deckId: 'swords-queen',
+    hotspots: [
+      { id: 'queen', label: '王后', x: 50, y: 42, meaning: '清晰的边界与独立判断——情感不淹没理性。' },
+      { id: 'sword', label: '竖直的剑', x: 58, y: 32, meaning: '真相优先，即使温柔也要准确。' },
+      { id: 'cloud', label: '单云', x: 50, y: 12, meaning: '高处仍有不确定——清晰不等于全知。' },
+      { id: 'butterfly', label: '蝶与冠', x: 50, y: 18, meaning: '转化与蜕变的可能，在冷静中发生。' },
+    ],
+  },
+  {
+    cardId: 'swords-king',
+    deckId: 'swords-king',
+    hotspots: [
+      { id: 'king', label: '国王', x: 50, y: 42, meaning: '权威、逻辑与决断——用头脑掌舵。' },
+      { id: 'sword', label: '斜持的剑', x: 62, y: 55, meaning: '力量随时可用，但何时出剑需要判断。' },
+      { id: 'throne', label: '石座', x: 50, y: 68, meaning: '稳固来自原则——但原则也可能变成僵化。' },
+      { id: 'birds', label: '双鸟', x: 28, y: 22, meaning: '仍要听见不同声音，避免陷入绝对正确。' },
+    ],
+  },
+];

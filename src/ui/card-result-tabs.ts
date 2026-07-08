@@ -174,9 +174,9 @@ function renderVisualTab(r: CardReading): string {
 
         <div class="result-empty">
 
-          <p>这张牌的牌面热点正在整理中。</p>
+          <p>这张牌的牌面热点还在整理中。</p>
 
-          <p class="result-empty-sub">P2 将支持点击星星、水流等元素，从画面里读懂牌意。先看符号与关键词，也能读懂大半。</p>
+          <p class="result-empty-sub">目前已支持 22 张大阿尔克那与宝剑组共 36 张。权杖、圣杯、星币将陆续上线。</p>
 
         </div>
 
@@ -190,9 +190,9 @@ function renderVisualTab(r: CardReading): string {
 
     .map(
 
-      (h) => `
+      (h, i) => `
 
-      <button type="button" class="hotspot-marker" style="left:${h.x}%;top:${h.y}%;" data-meaning="${escapeHtml(h.meaning)}" aria-label="${escapeHtml(h.label)}">
+      <button type="button" class="hotspot-marker${i === 0 ? ' is-hint' : ''}" style="left:${h.x}%;top:${h.y}%;" data-meaning="${escapeHtml(h.meaning)}" data-label="${escapeHtml(h.label)}" aria-label="${escapeHtml(h.label)}">
 
         <span class="hotspot-dot"></span>
 
@@ -210,7 +210,7 @@ function renderVisualTab(r: CardReading): string {
 
     <div class="result-tab-panel" data-panel="visual">
 
-      <p class="visual-hint">点击牌面元素，看为什么这样理解</p>
+      <p class="visual-hint">点击牌面光点（${visual.hotspots.length} 处），从画面元素读懂牌意</p>
 
       <div class="visual-card-stage">
         <div class="visual-card-face ${r.orientation === 'reversed' ? 'is-reversed' : ''}" style="--card-color: ${cardColor}">
@@ -392,13 +392,21 @@ export function mountCardResultTabs(
 
   const tabs = (Object.keys(TAB_LABELS) as ResultTabId[]).map(
 
-    (id) => `
+    (id) => {
+
+      const hotspotDot = id === 'visual' && reading.hasVisualHotspots
+        ? '<span class="tab-hotspot-dot" aria-hidden="true"></span>'
+        : '';
+
+      return `
 
     <button type="button" class="result-tab-btn ${id === activeTab ? 'is-active' : ''}" data-tab="${id}" role="tab" aria-selected="${id === activeTab}">
 
-      ${TAB_LABELS[id]}
+      ${TAB_LABELS[id]}${hotspotDot}
 
-    </button>`,
+    </button>`;
+
+    },
 
   ).join('');
 
@@ -468,23 +476,51 @@ function wireHotspotClicks(panelHost: Element, cardId: string): void {
 
   const detail = panelHost.querySelector(`#hotspot-detail-${cardId}`) as HTMLElement | null;
 
-  panelHost.querySelectorAll<HTMLButtonElement>('.hotspot-marker').forEach((btn) => {
+  const markers = panelHost.querySelectorAll<HTMLButtonElement>('.hotspot-marker');
+
+  markers.forEach((btn) => {
 
     btn.addEventListener('click', () => {
 
-      panelHost.querySelectorAll('.hotspot-marker').forEach((m) => m.classList.remove('is-active'));
+      panelHost.querySelectorAll('.hotspot-marker').forEach((m) => m.classList.remove('is-active', 'is-hint'));
 
       btn.classList.add('is-active');
 
       if (detail) {
 
-        detail.textContent = btn.dataset.meaning ?? '';
+        const label = btn.dataset.label ?? '';
+
+        const meaning = btn.dataset.meaning ?? '';
+
+        detail.innerHTML = label
+
+          ? `<strong>${escapeHtml(label)}</strong>：${escapeHtml(meaning)}`
+
+          : escapeHtml(meaning);
 
       }
 
     });
 
   });
+
+  const first = markers[0];
+
+  if (first && detail) {
+
+    first.classList.add('is-active');
+
+    const label = first.dataset.label ?? '';
+
+    const meaning = first.dataset.meaning ?? '';
+
+    detail.innerHTML = label
+
+      ? `<strong>${escapeHtml(label)}</strong>：${escapeHtml(meaning)}`
+
+      : escapeHtml(meaning);
+
+  }
 
 }
 

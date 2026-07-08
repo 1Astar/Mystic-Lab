@@ -1,5 +1,6 @@
 import { CARD_KNOWLEDGE_OVERRIDES } from './card-overrides.ts';
-import { MAJOR_FIVE_HOTSPOTS, MAJOR_FIVE_KNOWLEDGE } from './cards/major-five.ts';
+import { MAJOR_FIVE_KNOWLEDGE } from './cards/major-five.ts';
+import { CARD_HOTSPOTS } from './cards/hotspots/index.ts';
 import type { CardKnowledge, CardVisualHotspots, SceneMeaningKey } from './types.ts';
 import { TOPIC_TO_SCENE_KEY, type QuestionTopic } from './types.ts';
 import type { CardDefinition } from '../tarot/deck.ts';
@@ -57,7 +58,7 @@ for (const card of MAJOR_FIVE_KNOWLEDGE) {
   knowledgeById.set(card.id, card);
 }
 
-for (const visual of MAJOR_FIVE_HOTSPOTS) {
+for (const visual of CARD_HOTSPOTS) {
   hotspotsByDeckId.set(visual.deckId, visual);
 }
 
@@ -71,6 +72,11 @@ export function getCardKnowledgeById(knowledgeId: string): CardKnowledge | undef
 
 export function getVisualHotspots(deckId: string): CardVisualHotspots | undefined {
   return hotspotsByDeckId.get(deckId);
+}
+
+export function hasVisualHotspots(deckId: string): boolean {
+  const visual = hotspotsByDeckId.get(deckId);
+  return !!visual?.hotspots.length;
 }
 
 export function hasKnowledgeEntry(deckId: string): boolean {

@@ -5,8 +5,7 @@ import { buildEncounterRecord } from '../knowledge/encounter.ts';
 import { mockAIInterpretation } from '../knowledge/mock-ai.ts';
 import { buildSelfReflectionQuestions } from '../knowledge/reflection-prompts.ts';
 import {
-  getVisualHotspots,
-  hasKnowledgeEntry,
+  hasVisualHotspots,
   resolveCardKnowledge,
 } from '../knowledge/registry.ts';
 import type { ReadingContext, StandardMeaningLayer } from '../knowledge/types.ts';
@@ -99,7 +98,7 @@ function buildCardReading(
     selectedCard: knowledge,
     interpretationLayers,
     encounterRecord: buildEncounterRecord(drawn.card.id),
-    hasVisualHotspots: hasKnowledgeEntry(drawn.card.id) && !!getVisualHotspots(drawn.card.id)?.hotspots.length,
+    hasVisualHotspots: hasVisualHotspots(drawn.card.id),
   };
 }
 
