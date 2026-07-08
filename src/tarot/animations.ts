@@ -1,6 +1,7 @@
 import type { DrawnCard } from './engine.ts';
 import { formatCardNameZh, formatCardNameEn } from './card-names.ts';
-import { cardBackImageHtml, cardFaceImageHtml } from './card-images.ts';
+import { cardBackArtHtml } from './card-back.ts';
+import { cardFaceImageHtml } from './card-images.ts';
 
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,7 +66,7 @@ export function renderCardFace(
     <div class="tarot-card has-art${sizeClass} ${revealed ? 'is-revealed' : ''} ${reversed ? 'is-reversed' : ''}" style="--card-color: ${card.color}">
       <div class="tarot-card-inner">
         <div class="tarot-card-back">
-          ${cardBackImageHtml()}
+          ${cardBackArtHtml()}
         </div>
         <div class="tarot-card-front">
           ${cardFaceImageHtml(card.id, alt)}

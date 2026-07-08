@@ -18,6 +18,7 @@ import { saveJournalEntry } from '../journal/records.ts';
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
+import { cardBackArtHtml } from '../tarot/card-back.ts';
 import {
   defaultDrawMode,
   detectInputCapabilities,
@@ -139,7 +140,11 @@ export function renderTarot(root: HTMLElement): () => void {
     if (state === 'cardReview' || state === 'result') {
       hintBar.setStep(null);
       fallback.setVisible(false);
+      gestureStatus.el.hidden = true;
       return;
+    }
+    if (drawMode !== 'gesture' || !cameraOn) {
+      gestureStatus.el.hidden = true;
     }
     hintBar.setStep(step, drawMode);
     const showAssist = step !== null && drawMode === 'gesture' && gestureFallback;
@@ -256,7 +261,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const touch: Record<string, string> = {
       shuffle: '<strong>滑动或画圈</strong>洗牌',
       cut: '<strong>横划</strong>切牌',
-      draw: '<strong>长按</strong>你想抽的那张牌',
+      draw: '<strong>左右滑动</strong>选牌 · <strong>上滑或长按</strong>抽出',
       flip: '<strong>上滑</strong>翻开牌面',
     };
     const gesture: Record<string, string> = {
@@ -268,7 +273,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const free: Record<string, string> = {
       shuffle: '摇一摇，或<strong>画一个圈</strong>',
       cut: '再摇一次，或<strong>横划一条线</strong>',
-      draw: '<strong>画下念头</strong>，或按住松手',
+      draw: '<strong>左右滑动</strong>选牌 · <strong>上滑或长按</strong>抽出',
       flip: '<strong>上滑</strong>翻开牌面',
     };
     const map = drawMode === 'gesture' ? gesture : drawMode === 'free' ? free : touch;
@@ -460,14 +465,19 @@ export function renderTarot(root: HTMLElement): () => void {
     const teach = getTeachHint(spreadType, currentIndex);
     const pos = SPREADS[spreadType].positions[currentIndex];
     const fanCards = [0, 1, 2, 3, 4]
-      .map((i) => `<div class="fan-card" style="--fan-i: ${i}">✦</div>`)
+      .map(
+        (i) => `
+        <div class="fan-card ${i === 2 ? 'is-selected' : ''}" style="--fan-i: ${i}" data-fan-index="${i}">
+          ${cardBackArtHtml('mystic-card-back fan-card-back')}
+        </div>`,
+      )
       .join('');
     stage.innerHTML = `
       ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
       ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
       <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${pos.label}</strong></p>
       <p class="tarot-hint">${stepHintHtml('draw')}</p>
-      <p class="teach-hint teach-hint-soft">选最吸引你的那张。</p>
+      <p class="teach-hint teach-hint-soft">左右滑动浏览，上滑或长按抽出最吸引你的那张。</p>
       <div class="tarot-fan" id="tarot-fan">${fanCards}</div>
     `;
     syncCameraPlacement();

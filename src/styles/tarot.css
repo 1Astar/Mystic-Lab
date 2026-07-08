@@ -713,35 +713,51 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  min-height: 140px;
+  min-height: 150px;
   margin-top: 20px;
+  padding: 0 12px;
+  touch-action: pan-y;
+}
+
+.tarot-fan.is-interactive {
+  touch-action: none;
+  cursor: grab;
 }
 
 .fan-card {
+  position: relative;
   width: 72px;
   height: 108px;
   margin-left: -24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: var(--gold);
-  background: linear-gradient(145deg, var(--purple-deep), #1a1030);
-  border: 2px solid var(--gold);
   border-radius: 10px;
   box-shadow: var(--shadow);
   transform: rotate(calc((var(--fan-i, 0) - 2) * 7deg)) translateY(calc(var(--fan-i, 0) * -2px));
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, z-index 0s;
   touch-action: none;
   cursor: pointer;
+  overflow: hidden;
+}
+
+.fan-card-back {
+  border-radius: 8px;
 }
 
 .fan-card:first-child {
   margin-left: 0;
 }
 
+.fan-card.is-selected {
+  z-index: 2;
+  transform: rotate(0deg) translateY(-10px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px rgba(201, 168, 76, 0.25);
+}
+
 .fan-card.is-interactive:hover {
   transform: rotate(calc((var(--fan-i, 0) - 2) * 7deg)) translateY(-8px) scale(1.04);
+}
+
+.fan-card.is-selected.is-interactive:hover {
+  transform: rotate(0deg) translateY(-12px) scale(1.05);
 }
 
 .fan-card.is-charging {
@@ -750,8 +766,74 @@
 
 .fan-card.is-glowing {
   box-shadow: 0 0 28px rgba(255, 214, 166, 0.75);
-  transform: rotate(0deg) translateY(-16px) scale(1.06);
-  z-index: 2;
+  transform: rotate(0deg) translateY(-18px) scale(1.08);
+  z-index: 3;
+}
+
+/* ── 统一牌背（深紫 + 金纹，不用 RW Cover 图） ── */
+.mystic-card-back {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(155, 127, 212, 0.18), transparent 55%),
+    linear-gradient(155deg, #1a1030 0%, #2e1b4b 42%, #120a1e 100%);
+  border: 2px solid rgba(201, 168, 76, 0.55);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mystic-card-back::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.mystic-card-back-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  pointer-events: none;
+}
+
+.mystic-card-back-ring-outer {
+  width: 78%;
+  height: 78%;
+}
+
+.mystic-card-back-ring-inner {
+  width: 52%;
+  height: 52%;
+  border-color: rgba(255, 214, 166, 0.12);
+}
+
+.mystic-card-back-star {
+  position: relative;
+  z-index: 1;
+  font-size: 1.5rem;
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(255, 214, 166, 0.55);
+}
+
+.tarot-card.has-art .tarot-card-back {
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+}
+
+.tarot-card.has-art .mystic-card-back {
+  border-radius: 6px;
+}
+
+.card-back-img {
+  display: none;
 }
 
 @keyframes charge-pulse {

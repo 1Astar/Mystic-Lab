@@ -27,7 +27,7 @@ const TOUCH_HINTS: Record<RitualStep, Hint> = {
   ritual: { icon: '✨', label: '进入仪式', desc: '星尘聚拢，轻触继续' },
   shuffle: { icon: '👆', label: '滑动洗牌', desc: '在牌堆上左右滑或画圈' },
   cut: { icon: '↔️', label: '横划切牌', desc: '横向划过牌堆' },
-  draw: { icon: '👆', label: '长按抽牌', desc: '按住牌 0.8 秒后松手' },
+  draw: { icon: '👆', label: '滑动选牌', desc: '左右滑动选牌 · 上滑或长按抽出' },
   flip: { icon: '⬆️', label: '上滑翻牌', desc: '向上滑动或双击牌面' },
   reading: { icon: '⬆️', label: '向上滑动', desc: '放大细读 · 向下滑回' },
   confirm: { icon: '👆', label: '按住确认', desc: '按住屏幕约 1 秒' },

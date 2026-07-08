@@ -169,52 +169,92 @@ export function bindRitualInput(
   }
 
   if (step === 'draw') {
+    const fan = container.querySelector('#tarot-fan') as HTMLElement | null;
     const cards = container.querySelectorAll<HTMLElement>('.fan-card');
-    if (!cards.length) return () => {};
+    if (!fan || !cards.length) return () => {};
 
-    cards.forEach((card) => {
-      let pressTimer: number | null = null;
-      let charged = false;
-      let startX = 0;
-      let startY = 0;
+    let selectedIndex = Math.min(2, cards.length - 1);
+    let startX = 0;
+    let startY = 0;
+    let pressTimer: number | null = null;
+    let charged = false;
 
-      const clear = (): void => {
-        if (pressTimer !== null) {
-          window.clearTimeout(pressTimer);
-          pressTimer = null;
-        }
-        card.classList.remove('is-charging', 'is-glowing');
-        charged = false;
-      };
+    const updateSelection = (): void => {
+      cards.forEach((card, i) => {
+        card.classList.toggle('is-selected', i === selectedIndex);
+      });
+    };
+    updateSelection();
 
-      const onDown = (e: PointerEvent): void => {
-        startX = e.clientX;
-        startY = e.clientY;
-        card.classList.add('is-charging');
-        callbacks.onProgress?.('长按中…');
-        pressTimer = window.setTimeout(() => {
-          charged = true;
-          card.classList.add('is-glowing');
-          callbacks.onProgress?.('松手抽牌');
-        }, LONG_PRESS_MS);
-        card.setPointerCapture(e.pointerId);
-      };
+    const clearPress = (): void => {
+      if (pressTimer !== null) {
+        window.clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      cards.forEach((c) => c.classList.remove('is-charging', 'is-glowing'));
+      charged = false;
+    };
 
-      const onUp = (e: PointerEvent): void => {
-        const moved = Math.hypot(e.clientX - startX, e.clientY - startY);
-        const ok = charged && moved < 32;
-        clear();
-        if (ok) once(callbacks.onDraw);
-      };
+    const onDown = (e: PointerEvent): void => {
+      const card = (e.target as HTMLElement).closest('.fan-card') as HTMLElement | null;
+      if (card) {
+        const idx = Number(card.dataset.fanIndex);
+        if (!Number.isNaN(idx)) selectedIndex = idx;
+        updateSelection();
+      }
+      startX = e.clientX;
+      startY = e.clientY;
+      clearPress();
+      cards[selectedIndex]?.classList.add('is-charging');
+      callbacks.onProgress?.('左右滑动选牌 · 上滑或长按抽出');
+      pressTimer = window.setTimeout(() => {
+        charged = true;
+        cards[selectedIndex]?.classList.add('is-glowing');
+        callbacks.onProgress?.('松手抽牌');
+      }, LONG_PRESS_MS);
+      fan.setPointerCapture(e.pointerId);
+    };
 
-      card.classList.add('is-interactive');
-      on(card, 'pointerdown', onDown as EventListener);
-      on(card, 'pointerup', onUp as EventListener);
-      on(card, 'pointercancel', clear);
-    });
+    const onMove = (e: PointerEvent): void => {
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) > 18) clearPress();
+    };
+
+    const onUp = (e: PointerEvent): void => {
+      const dx = e.clientX - startX;
+      const dy = startY - e.clientY;
+
+      if (charged && Math.hypot(dx, dy) < 32) {
+        clearPress();
+        once(callbacks.onDraw);
+        return;
+      }
+
+      clearPress();
+
+      if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0 && selectedIndex < cards.length - 1) selectedIndex += 1;
+        if (dx > 0 && selectedIndex > 0) selectedIndex -= 1;
+        updateSelection();
+        callbacks.onProgress?.('继续滑动选牌');
+        return;
+      }
+
+      if (dy >= SWIPE_FLIP_PX && dy > Math.abs(dx)) {
+        cards[selectedIndex]?.classList.add('is-glowing');
+        once(callbacks.onDraw);
+      }
+    };
+
+    fan.classList.add('is-interactive');
+    on(fan, 'pointerdown', onDown as EventListener);
+    on(fan, 'pointermove', onMove as EventListener);
+    on(fan, 'pointerup', onUp as EventListener);
+    on(fan, 'pointercancel', clearPress);
 
     return () => {
-      cards.forEach((c) => c.classList.remove('is-interactive', 'is-charging', 'is-glowing'));
+      fan.classList.remove('is-interactive');
+      clearPress();
+      cards.forEach((c) => c.classList.remove('is-charging', 'is-glowing', 'is-selected'));
       cleanups.forEach((fn) => fn());
     };
   }
