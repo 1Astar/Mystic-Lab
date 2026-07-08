@@ -34,6 +34,14 @@ export function buildSelfReflectionQuestions(
   context: ReadingContext,
   _knowledge: CardKnowledge,
 ): string[] {
+  if (context.questionPattern === 'love_likes' || /喜欢我|是不是喜欢/.test(context.question)) {
+    return [
+      '他哪些行为让我觉得被在意，哪些只是礼貌？',
+      '如果答案暂时不明，我仍想靠近吗？',
+      '我可以用什么轻一点的方式试探关系温度？',
+    ];
+  }
+
   if (context.topic === 'work' && isInterviewQuestion(context.question)) {
     return [
       '明天面试前，你最需要讲清楚的一个能力是什么？',

@@ -1,7 +1,6 @@
 import type { QuestionTheme } from '../codex/collection.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
-
-export type QuestionTopic = QuestionTheme;
+import type { QuestionPattern } from '../tarot/question-coach.ts';
 
 export type FoolJourneyStep = {
   order: number;
@@ -43,12 +42,21 @@ export type CardVisualHotspots = {
   hotspots: VisualHotspot[];
 };
 
+export type QuestionTopic = QuestionTheme;
+
+export type ContextualSection = {
+  title: string;
+  body: string;
+};
+
 export type ReadingContext = {
   question: string;
   spreadType: SpreadType;
   cardPosition: string;
   topic: QuestionTopic;
   selectedCardId: string;
+  questionPattern?: QuestionPattern;
+  personName?: string;
 };
 
 export type EncounterRecord = {
@@ -71,6 +79,8 @@ export type InterpretationLayers = {
   standard: StandardMeaningLayer;
   /** 第二层：结合问题的解读（P3 接 LLM，P1 用 mock） */
   contextualReading: string;
+  /** 结构化解读段落（感情喜欢类等） */
+  contextualSections?: ContextualSection[];
   /** 第三层：引导用户自己判断 */
   selfReflection: string[];
 };

@@ -110,61 +110,50 @@ export function renderCardHero(r: CardReading): string {
 
 
 function renderReadingTab(r: CardReading): string {
-
-  const { standard, contextualReading, selfReflection } = r.interpretationLayers;
-
+  const { standard, contextualReading, contextualSections, selfReflection } = r.interpretationLayers;
   const reminderLabel = r.orientation === 'reversed' ? '逆位提醒' : '正位提醒';
-
   const questions = selfReflection
-
     .map((q) => `<li>${formatParagraph(q)}</li>`)
-
     .join('');
 
+  const contextBody = contextualSections?.length
+    ? contextualSections
+        .map(
+          (s) => `
+        <div class="context-section">
+          <h5 class="context-section-title">${escapeHtml(s.title)}</h5>
+          <p class="reading-block-text">${formatParagraph(s.body)}</p>
+        </div>`,
+        )
+        .join('')
+    : `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`;
 
+  const questionEcho = r.question
+    ? `<p class="context-question-echo">你正在问：${escapeHtml(r.question)}</p>`
+    : '';
 
   return `
-
     <div class="result-tab-panel" data-panel="reading">
-
       <section class="reading-layer-card">
-
         <h4 class="layer-tag">这张牌在说什么</h4>
-
         <div class="std-meaning-block">
-
           <p class="std-field"><span class="std-label">关键词</span><span class="std-value">${escapeHtml(standard.keywords.join('、'))}</span></p>
-
           <p class="std-field"><span class="std-label">一句话理解</span><span class="std-value">${formatParagraph(standard.oneSentence)}</span></p>
-
           <p class="std-field"><span class="std-label">${reminderLabel}</span><span class="std-value">${formatParagraph(stripReminderPrefix(standard.reminder))}</span></p>
-
         </div>
-
       </section>
-
       <section class="reading-layer-card reading-layer-context">
-
         <h4 class="layer-tag">结合你的问题</h4>
-
         <p class="layer-badge layer-badge-ai">模拟解读 · P3 接 AI</p>
-
-        <p class="reading-block-text">${formatParagraph(contextualReading)}</p>
-
+        ${questionEcho}
+        ${contextBody}
       </section>
-
       <section class="reading-layer-card reading-layer-reflect">
-
         <h4 class="layer-tag">给你的一个提问</h4>
-
         <p class="layer-badge">回到心里</p>
-
         <ul class="reflect-list">${questions}</ul>
-
       </section>
-
     </div>`;
-
 }
 
 

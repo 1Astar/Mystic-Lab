@@ -38,6 +38,7 @@ import { mountEnvBanner } from '../ui/banner.ts';
 import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
+import { mountQuestionCoach, type QuestionCoachHandle } from '../ui/question-coach.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 
 type TarotState =
@@ -65,6 +66,7 @@ export function renderTarot(root: HTMLElement): () => void {
   let spreadType: SpreadType = 'past-present-future';
   let drawMode: DrawMode = defaultDrawMode(inputCaps);
   let motionEnabled = false;
+  let questionCoach: QuestionCoachHandle | null = null;
   let ritualInputUnbind: (() => void) | null = null;
   let cardPool: DrawnCard[] = [];
   let drawnCards: DrawnCard[] = [];
@@ -293,14 +295,27 @@ export function renderTarot(root: HTMLElement): () => void {
         break;
 
       case 'question':
+        questionCoach?.destroy();
+        questionCoach = null;
         stage.innerHTML = `
           <h2 class="section-title">你想问什么？</h2>
-          <p class="tarot-hint">问题越具体，牌的指引越清晰。</p>
-          <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：我该不该换工作？"></textarea>
+          <p class="tarot-hint">开放式问题往往更容易读出脉络；封闭式问题也可以直接问。</p>
+          <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：明天面试顺不顺利？"></textarea>
+          <div id="question-coach-host"></div>
         `;
+        {
+          const input = document.querySelector<HTMLTextAreaElement>('#tarot-question')!;
+          const host = document.getElementById('question-coach-host')!;
+          questionCoach = mountQuestionCoach(host, (q) => {
+            question = q;
+          });
+          questionCoach.bindInput(input);
+          if (question) input.value = question;
+        }
         appendBtn('下一步 · 选择牌阵', () => {
           const input = document.querySelector<HTMLTextAreaElement>('#tarot-question');
-          question = input?.value.trim() ?? '';
+          const coached = questionCoach?.getActiveQuestion().trim();
+          question = coached || input?.value.trim() || '';
           setState('spread');
         });
         break;
@@ -817,6 +832,7 @@ export function renderTarot(root: HTMLElement): () => void {
   syncHintBar();
 
   return () => {
+    questionCoach?.destroy();
     ritualInputUnbind?.();
     gestureBridge?.stop();
     camera.stop();

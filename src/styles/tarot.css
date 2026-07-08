@@ -510,6 +510,129 @@
   resize: vertical;
 }
 
+/* ── 提问教练 ── */
+.question-coach {
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(46, 27, 75, 0.5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.coach-note {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+  margin: 0 0 12px;
+}
+
+.coach-prompt {
+  font-size: 0.85rem;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.coach-prompt strong {
+  color: var(--gold);
+}
+
+.coach-sub {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin: 0 0 10px;
+}
+
+.coach-angles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.coach-angle-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.coach-angle-btn.is-active {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.coach-angle-label {
+  font-size: 0.72rem;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+
+.coach-angle-q {
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.coach-generic {
+  margin-bottom: 10px;
+}
+
+.coach-generic-title {
+  font-size: 0.78rem;
+  color: var(--gold);
+  margin: 0 0 6px;
+}
+
+.coach-generic ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.coach-keep-btn {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  border: 1px dashed rgba(201, 168, 76, 0.4);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.coach-keep-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.context-question-echo {
+  font-size: 0.82rem;
+  color: var(--gold);
+  margin: 0 0 12px;
+}
+
+.context-section + .context-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.context-section-title {
+  font-size: 0.82rem;
+  color: var(--gold);
+  margin: 0 0 6px;
+}
+
 .spread-list {
   display: flex;
   flex-direction: column;
