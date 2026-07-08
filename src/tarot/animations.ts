@@ -1,4 +1,5 @@
 import type { DrawnCard } from './engine.ts';
+import { formatCardNameZh, formatCardNameEn } from './card-names.ts';
 
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -62,8 +63,9 @@ export function renderCardFace(
         </div>
         <div class="tarot-card-front">
           <span class="card-symbol">${card.symbol}</span>
-          <span class="card-name">${card.nameZh}</span>
-          <span class="card-name-en">${card.nameEn}</span>
+          <span class="card-art-line" aria-hidden="true"></span>
+          <span class="card-name">${formatCardNameZh(card)}</span>
+          <span class="card-name-en">${formatCardNameEn(card)}</span>
         </div>
       </div>
     </div>

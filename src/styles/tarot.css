@@ -893,6 +893,153 @@
 }
 
 /* ── 结果页 4 Tab ── */
+.result-card-hero {
+  text-align: center;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.result-hero-pos {
+  font-size: 0.78rem;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+.result-hero-visual {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.tarot-card.is-hero {
+  width: min(45vw, 200px);
+  height: auto;
+  aspect-ratio: 2 / 3;
+}
+
+.tarot-card.is-hero .tarot-card-inner {
+  transform: rotateY(180deg);
+}
+
+.tarot-card.is-hero.is-reversed .tarot-card-inner {
+  transform: rotateY(180deg) rotateZ(180deg);
+}
+
+.is-hero-face {
+  position: relative;
+  overflow: hidden;
+}
+
+.is-hero-face .card-symbol {
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+}
+
+.card-art-line {
+  display: block;
+  width: 60%;
+  height: 1px;
+  margin: 8px auto;
+  background: linear-gradient(90deg, transparent, rgba(255, 214, 166, 0.6), transparent);
+}
+
+.card-art-glow {
+  position: absolute;
+  inset: 20% 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.result-hero-name-cn {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+
+.result-hero-name-en {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+  margin: 0 0 12px;
+}
+
+.result-hero-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.hero-kw-tag {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.reading-layer-card {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: rgba(46, 27, 75, 0.45);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.reading-layer-card:last-child {
+  margin-bottom: 0;
+}
+
+.std-meaning-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.std-field {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
+.std-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+  letter-spacing: 0.06em;
+}
+
+.std-value {
+  display: block;
+  color: var(--ink);
+}
+
+.card-review-stage {
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+.card-review-lead {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+}
+
+.card-review-accept {
+  margin-top: 4px;
+}
+
+.tarot-page .tarot-actions {
+  padding-bottom: 28px;
+}
+
 .result-tab-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1112,5 +1259,78 @@
 
 .encounter-block li + li {
   margin-top: 6px;
+}
+
+/* ── 仪式完成弹窗 ── */
+.ritual-complete-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.ritual-complete-modal.is-visible {
+  opacity: 1;
+}
+
+.ritual-complete-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 14, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.ritual-complete-card {
+  position: relative;
+  z-index: 1;
+  width: min(360px, 100%);
+  padding: 32px 24px 28px;
+  text-align: center;
+  background: linear-gradient(165deg, rgba(46, 27, 75, 0.95), rgba(18, 12, 28, 0.98));
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.ritual-complete-stardust {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(255, 214, 166, 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+.ritual-complete-icon {
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.ritual-complete-title {
+  font-size: 1.25rem;
+  color: var(--gold);
+  margin: 0 0 12px;
+}
+
+.ritual-complete-summary {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.ritual-complete-slogan {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin: 0 0 20px;
+}
+
+.ritual-complete-btn {
+  width: 100%;
 }
 

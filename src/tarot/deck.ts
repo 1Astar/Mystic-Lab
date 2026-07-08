@@ -45,7 +45,7 @@ const SUITS = [
 ];
 
 const RANKS = [
-  { en: 'Ace', zh: 'Ace', theme: '新契机' },
+  { en: 'Ace', zh: '王牌', theme: '新契机' },
   { en: 'Two', zh: '二', theme: '平衡与选择' },
   { en: 'Three', zh: '三', theme: '成长与表达' },
   { en: 'Four', zh: '四', theme: '稳定与休息' },

@@ -60,9 +60,15 @@ export type EncounterRecord = {
   lastMetAt?: string;
 };
 
+export type StandardMeaningLayer = {
+  keywords: string[];
+  oneSentence: string;
+  reminder: string;
+};
+
 export type InterpretationLayers = {
-  /** 第一层：标准牌义（知识库固定） */
-  standardMeaning: string;
+  /** 第一层：标准牌义（结构化，避免重复渲染） */
+  standard: StandardMeaningLayer;
   /** 第二层：结合问题的解读（P3 接 LLM，P1 用 mock） */
   contextualReading: string;
   /** 第三层：引导用户自己判断 */

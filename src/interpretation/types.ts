@@ -15,9 +15,9 @@ export type CardReading = {
   orientation: 'upright' | 'reversed';
   keywords: string[];
   positionMeaning: string;
-  /** @deprecated 使用 interpretationLayers.standardMeaning */
+  /** @deprecated 使用 interpretationLayers.standard */
   text: string;
-  /** @deprecated 使用 interpretationLayers.standardMeaning */
+  /** @deprecated 使用 interpretationLayers.standard */
   baseMeaning: string;
   /** @deprecated 使用 interpretationLayers.contextualReading */
   inContext: string;

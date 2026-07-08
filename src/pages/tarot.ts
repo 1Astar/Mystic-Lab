@@ -2,19 +2,17 @@ import { detectBrowserEnv } from '../core/browser-env.ts';
 import { CameraService } from '../core/camera-service.ts';
 import {
   HeldGestureDetector,
-  HoldDetector,
   JoinedPalmsDetector,
   PinchDetector,
   SwipeDetector,
-  VerticalSwipeDetector,
 } from '../core/gesture-detector.ts';
 import { GestureBridge } from '../core/gesture-bridge.ts';
 import { createFallbackInput, type FallbackAction } from '../core/fallback-input.ts';
 import { createInterpretationProvider } from '../interpretation/llm-provider.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { unlockSingleCard } from '../codex/collection.ts';
-import { readingBlockHtml } from '../interpretation/contextual-reading.ts';
 import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
+import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
 import { saveJournalEntry } from '../journal/records.ts';
 import { navigate } from '../router.ts';
@@ -53,9 +51,7 @@ type TarotState =
   | 'cut'
   | 'draw'
   | 'flip'
-  | 'reading'
-  | 'readingZoom'
-  | 'confirm'
+  | 'cardReview'
   | 'result';
 
 export function renderTarot(root: HTMLElement): () => void {
@@ -77,15 +73,11 @@ export function renderTarot(root: HTMLElement): () => void {
   let learningNote = '';
   let gestureFallback = !env.canUseGesture;
   let cameraOn = false;
-  let isZoomed = false;
 
   const pinchDetector = new PinchDetector();
   const swipeDetector = new SwipeDetector();
-  const verticalSwipe = new VerticalSwipeDetector();
-  const holdDetector = new HoldDetector();
   const joinedPalms = new JoinedPalmsDetector();
   const heldPalm = new HeldGestureDetector();
-  let wristStableSamples: { x: number; y: number }[] = [];
 
   const unbindCamera = camera.bindLifecycle();
   const hintBar = createGestureHintBar();
@@ -123,17 +115,30 @@ export function renderTarot(root: HTMLElement): () => void {
   document.body.appendChild(hintBar.el);
 
   function ritualStep(): RitualStep | null {
-    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip', 'reading', 'readingZoom', 'confirm'] as const;
+    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip'] as const;
     if (!ritualStates.includes(state as (typeof ritualStates)[number])) {
       return null;
     }
-    if (state === 'readingZoom') return 'reading';
-    if (state === 'confirm') return 'confirm';
     return state as RitualStep;
+  }
+
+  function pauseCameraForReview(): void {
+    cameraWrap.hidden = true;
+    gestureStatus.el.hidden = true;
+    if (cameraOn) {
+      gestureBridge?.stop();
+      camera.stop();
+      cameraOn = false;
+    }
   }
 
   function syncHintBar(): void {
     const step = ritualStep();
+    if (state === 'cardReview' || state === 'result') {
+      hintBar.setStep(null);
+      fallback.setVisible(false);
+      return;
+    }
     hintBar.setStep(step, drawMode);
     const showAssist = step !== null && drawMode === 'gesture' && gestureFallback;
     fallback.setStep(showAssist ? step : null);
@@ -169,50 +174,27 @@ export function renderTarot(root: HTMLElement): () => void {
     }
   }
 
-  let confirmTimer: number | null = null;
-
-  function clearConfirmTimer(): void {
-    if (confirmTimer !== null) {
-      window.clearTimeout(confirmTimer);
-      confirmTimer = null;
-    }
-  }
-
-  function scheduleConfirmTransition(): void {
-    clearConfirmTimer();
-    hintBar.setProgress('可向上滑动放大 · 停留 1 秒确认');
-    confirmTimer = window.setTimeout(() => {
-      if (state === 'reading' || state === 'readingZoom') {
-        setState('confirm');
-      }
-    }, 2800);
-  }
-
   function resetDetectors(): void {
     pinchDetector.reset();
     swipeDetector.reset();
-    verticalSwipe.reset();
-    holdDetector.reset();
     joinedPalms.reset();
     heldPalm.reset();
-    wristStableSamples = [];
   }
 
   function setState(next: TarotState): void {
-    if (next !== 'reading' && next !== 'readingZoom' && next !== 'confirm') {
-      clearConfirmTimer();
-    }
     state = next;
     resetDetectors();
     debug?.setStatus(next);
+    if (next === 'cardReview' || next === 'result') {
+      pauseCameraForReview();
+    }
     syncHintBar();
     renderStage();
     bindRitualInputs();
   }
 
   function ritualInputStep(): RitualInputStep | null {
-    if (state === 'readingZoom') return 'readingZoom';
-    const steps: RitualInputStep[] = ['ritual', 'shuffle', 'cut', 'draw', 'flip', 'reading', 'confirm'];
+    const steps: RitualInputStep[] = ['ritual', 'shuffle', 'cut', 'draw', 'flip'];
     return steps.includes(state as RitualInputStep) ? (state as RitualInputStep) : null;
   }
 
@@ -223,15 +205,9 @@ export function renderTarot(root: HTMLElement): () => void {
       onCut: () => void onCut(),
       onDraw: () => void onDraw(),
       onFlip: () => void onFlip(),
-      onZoomIn: () => {
-        isZoomed = true;
-        setState('readingZoom');
-      },
-      onZoomOut: () => {
-        isZoomed = false;
-        setState('reading');
-      },
-      onConfirm: () => void onConfirm(),
+      onZoomIn: () => {},
+      onZoomOut: () => {},
+      onConfirm: () => {},
       onProgress: (text: string) => hintBar.setProgress(text),
     };
   }
@@ -251,7 +227,7 @@ export function renderTarot(root: HTMLElement): () => void {
     }
 
     if (drawMode === 'free') {
-      if (step === 'flip' || step === 'reading' || step === 'readingZoom' || step === 'confirm') {
+      if (step === 'flip') {
         ritualInputUnbind = bindRitualInput(stage, step, callbacks);
       } else {
         ritualInputUnbind = bindFreeDrawInput(stage, step, callbacks, motionEnabled);
@@ -455,17 +431,8 @@ export function renderTarot(root: HTMLElement): () => void {
         renderFlipStage(false);
         break;
 
-      case 'reading':
-        renderReadingStage(false);
-        break;
-
-      case 'readingZoom':
-        renderReadingStage(true);
-        break;
-
-      case 'confirm':
-        renderReadingStage(isZoomed);
-        hintBar.setProgress('请保持手部稳定…');
+      case 'cardReview':
+        renderCardReviewStage();
         break;
 
       case 'result':
@@ -505,23 +472,32 @@ export function renderTarot(root: HTMLElement): () => void {
     syncCameraPlacement();
   }
 
-  function renderReadingStage(zoomed: boolean): void {
-    const card = currentCard();
-    if (!card || !reading?.cards[currentIndex]) return;
-    const cardReading = reading.cards[currentIndex];
+  function renderCardReviewStage(): void {
+    const cardReading = reading?.cards[currentIndex];
+    if (!cardReading) return;
+
+    const hasMore = currentIndex < cardPool.length - 1;
+    const acceptLabel = hasMore ? '收下此解读 · 继续抽牌' : '收下此解读 · 完成占问';
+
     stage.innerHTML = `
-      ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
-      <div class="reading-view ${zoomed ? 'is-zoomed' : ''}">
-        <div class="tarot-slot-single" id="reading-card"></div>
-        <div class="reading-text">
-          <p class="result-pos">${cardReading.position} · ${cardReading.orientation === 'reversed' ? '逆位' : '正位'}</p>
-          ${readingBlockHtml(cardReading)}
-        </div>
+      <div class="card-review-stage">
+        <p class="card-review-lead">牌已翻开 · 慢慢读，答案在你心里</p>
+        <div class="card-review-tabs" id="card-review-tabs"></div>
       </div>
     `;
-    const slot = document.getElementById('reading-card')!;
-    renderCardFace(slot, card, true);
-    syncCameraPlacement();
+
+    actions.innerHTML = '';
+    const acceptBtn = document.createElement('button');
+    acceptBtn.type = 'button';
+    acceptBtn.className = 'btn card-review-accept';
+    acceptBtn.textContent = acceptLabel;
+    acceptBtn.addEventListener('click', () => void onAcceptCard());
+    actions.appendChild(acceptBtn);
+
+    const host = document.getElementById('card-review-tabs');
+    if (host) {
+      mountCardResultTabs(host, cardReading);
+    }
   }
 
   function renderResult(): void {
@@ -531,11 +507,10 @@ export function renderTarot(root: HTMLElement): () => void {
 
     stage.innerHTML = `
       <h2 class="section-title">占问结果</h2>
-      <p class="tarot-hint">新牌已收入图鉴 · 每张牌可切换四个视角</p>
+      <p class="tarot-hint">每张牌可切换四个视角 · 新牌已收入图鉴</p>
       <div class="result-panel" id="result-cards">
         ${reading.cards.map((c) => `
           <div class="result-card-item" data-card-id="${c.cardId}">
-            <div class="result-name">${c.position} · ${c.cardName} · ${c.orientation === 'reversed' ? '逆位' : '正位'}</div>
             <div class="result-tabs-host"></div>
           </div>`).join('')}
         <p class="result-summary">${reading.summary}</p>
@@ -583,10 +558,9 @@ export function renderTarot(root: HTMLElement): () => void {
     resultActions.append(shareBtn, codexBtn, journalBtn, retryBtn);
     actions.appendChild(resultActions);
 
-    hintBar.setStep('end');
+    hintBar.setStep(null);
     fallback.setVisible(false);
     cameraWrap.hidden = true;
-    cameraOn = false;
     gestureStatus.el.hidden = true;
   }
 
@@ -606,7 +580,6 @@ export function renderTarot(root: HTMLElement): () => void {
     currentIndex = 0;
     reading = null;
     learningNote = '';
-    isZoomed = false;
     drawMode = defaultDrawMode(inputCaps);
     motionEnabled = false;
     gestureBridge?.stop();
@@ -748,31 +721,6 @@ export function renderTarot(root: HTMLElement): () => void {
       if (pinch === 'confirmed') void onDraw();
       return;
     }
-
-    if ((state === 'reading' || state === 'readingZoom') && wrist) {
-      const vs = verticalSwipe.update(wrist);
-      if (vs === 'up' && state === 'reading') {
-        isZoomed = true;
-        setState('readingZoom');
-      }
-      if (vs === 'down' && state === 'readingZoom') {
-        isZoomed = false;
-        setState('reading');
-      }
-      return;
-    }
-
-    if (state === 'confirm' && wrist) {
-      wristStableSamples.push({ x: wrist.x, y: wrist.y });
-      if (wristStableSamples.length > 10) wristStableSamples.shift();
-      const stable =
-        wristStableSamples.length >= 6 &&
-        Math.hypot(
-          wristStableSamples[0].x - wrist.x,
-          wristStableSamples[0].y - wrist.y,
-        ) < 0.03;
-      if (holdDetector.update(stable)) void onConfirm();
-    }
   }
 
   function handleFallback(action: FallbackAction): void {
@@ -783,14 +731,8 @@ export function renderTarot(root: HTMLElement): () => void {
       case 'draw': void onDraw(); break;
       case 'flip': void onFlip(); break;
       case 'zoom_in':
-        isZoomed = true;
-        setState('readingZoom');
-        break;
       case 'zoom_out':
-        isZoomed = false;
-        setState('reading');
-        break;
-      case 'confirm': void onConfirm(); break;
+      case 'confirm':
       case 'end': break;
     }
   }
@@ -850,14 +792,11 @@ export function renderTarot(root: HTMLElement): () => void {
       reading.cards[currentIndex] = single.cards[0];
     }
 
-    isZoomed = false;
-    setState('reading');
-    scheduleConfirmTransition();
+    setState('cardReview');
   }
 
-  async function onConfirm(): Promise<void> {
-    if (state !== 'confirm') return;
-    clearConfirmTimer();
+  async function onAcceptCard(): Promise<void> {
+    if (state !== 'cardReview') return;
 
     currentIndex++;
     if (currentIndex < cardPool.length) {
@@ -869,15 +808,15 @@ export function renderTarot(root: HTMLElement): () => void {
     const provider = createInterpretationProvider();
     reading = await provider.interpret(drawnCards, question, spreadType);
     reading.learningNote = learningNote;
-    setState('result');
     saveJournalEntry(question, spreadType, drawnCards, reading, learningNote, '');
+
+    showRitualCompleteModal(reading, () => setState('result'));
   }
 
   renderStage();
   syncHintBar();
 
   return () => {
-    clearConfirmTimer();
     ritualInputUnbind?.();
     gestureBridge?.stop();
     camera.stop();

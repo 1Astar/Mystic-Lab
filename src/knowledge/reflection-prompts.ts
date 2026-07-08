@@ -23,19 +23,26 @@ const TOPIC_FRAMES: Record<QuestionTopic, [string, string, string]> = {
   ],
 };
 
+function isInterviewQuestion(q: string): boolean {
+  return /面试|应聘|offer|求职|复试/i.test(q);
+}
+
 /**
  * 第三层：引导用户自己判断（固定结构 + 按主题/牌义微调）
  */
 export function buildSelfReflectionQuestions(
   context: ReadingContext,
-  knowledge: CardKnowledge,
+  _knowledge: CardKnowledge,
 ): string[] {
-  const [q1, q2, q3] = TOPIC_FRAMES[context.topic];
-  const cardHook = `关于「${knowledge.nameCn}」——${knowledge.keywords[0]}与${knowledge.keywords[1] ?? '当下'}：`;
+  if (context.topic === 'work' && isInterviewQuestion(context.question)) {
+    return [
+      '明天面试前，你最需要讲清楚的一个能力是什么？',
+      '你有没有一段能证明它的具体经历？',
+      '如果结果不如预期，你仍能从这次经历里带走什么？',
+    ];
+  }
 
-  return [
-    `${cardHook} ${q1}`,
-    q2,
-    q3,
-  ];
+  const [q1, q2, q3] = TOPIC_FRAMES[context.topic];
+
+  return [q1, q2, q3];
 }
