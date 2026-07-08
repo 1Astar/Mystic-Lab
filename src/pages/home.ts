@@ -2,6 +2,7 @@ import { navigate } from '../router.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { getCollectedCount } from '../codex/collection.ts';
 import { loadJournalEntries } from '../journal/records.ts';
+import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 
 const MODULES = [
@@ -11,6 +12,7 @@ const MODULES = [
     desc: '塔罗抽牌 / 小六壬 / 梅花易数',
     primary: true,
     cta: '开始一次占问',
+    emblem: 'heart' as const,
   },
   {
     path: '/codex',
@@ -53,7 +55,11 @@ export function renderHome(root: HTMLElement): () => void {
     card.className = `entry-card ${mod.primary ? 'entry-card-primary' : ''}`;
     card.href = mod.path;
     const stat = mod.stat?.();
+    const emblem = mod.emblem
+      ? `<div class="entry-emblem-wrap">${mysticEmblemHtml(mod.emblem, 'md')}</div>`
+      : '';
     card.innerHTML = `
+      ${emblem}
       <h2>${mod.title}</h2>
       <p>${mod.desc}</p>
       ${stat ? `<span class="entry-stat">${stat}</span>` : ''}

@@ -148,7 +148,7 @@
 .unlock-toast-icon {
   font-size: 1.4rem;
   color: var(--gold);
-  animation: orb-heartbeat 1.2s ease-in-out infinite;
+  animation: heart-beat 1.2s ease-in-out infinite;
 }
 
 .unlock-toast-text {

@@ -40,6 +40,7 @@ import { mountEnvBanner } from '../ui/banner.ts';
 import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
+import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 
 type TarotState =
   | 'landing'
@@ -307,7 +308,7 @@ export function renderTarot(root: HTMLElement): () => void {
       case 'landing':
         stage.innerHTML = `
           <div class="tarot-hero">
-            <div class="tarot-orb" aria-hidden="true"></div>
+            ${mysticEmblemHtml('tarot', 'lg')}
             <h1 class="page-title">随心抽牌</h1>
             <p class="tarot-hint">触屏抽牌 · 牌阵 · 解读</p>
           </div>
@@ -873,6 +874,7 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   renderStage();
+  syncHintBar();
 
   return () => {
     clearConfirmTimer();

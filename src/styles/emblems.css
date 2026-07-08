@@ -1,0 +1,286 @@
+/* ── Mystic Lab 页面 emblem（参照美化稿） ── */
+
+.mystic-emblem {
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mystic-emblem-sm {
+  width: 56px;
+  height: 56px;
+}
+
+.mystic-emblem-md {
+  width: 100px;
+  height: 100px;
+}
+
+.mystic-emblem-lg {
+  width: 128px;
+  height: 128px;
+}
+
+.mystic-emblem-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 214, 166, 0.35);
+  box-shadow:
+    0 0 20px rgba(255, 214, 166, 0.12),
+    inset 0 0 24px rgba(191, 163, 255, 0.08);
+}
+
+.mystic-emblem-ticks {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 214, 166, 0.35) 0deg 2deg,
+    transparent 2deg 12deg
+  );
+  opacity: 0.35;
+  mask: radial-gradient(circle, transparent 62%, black 63%);
+  -webkit-mask: radial-gradient(circle, transparent 62%, black 63%);
+}
+
+.mystic-emblem-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72%;
+  height: 72%;
+}
+
+.mystic-emblem-aura {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(191, 163, 255, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
+/* 动态心 · 随心占问 */
+.mystic-emblem-heart.mystic-emblem-pulse .mystic-heart-shape {
+  animation: heart-beat 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.mystic-emblem-heart.mystic-emblem-pulse .mystic-emblem-ring {
+  animation: heart-ring 2.4s ease-in-out infinite;
+}
+
+.mystic-emblem-heart.mystic-emblem-pulse .mystic-emblem-aura {
+  animation: heart-aura 2.4s ease-in-out infinite;
+}
+
+.mystic-emblem-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes heart-beat {
+  0%, 100% { transform: scale(1); }
+  12% { transform: scale(1.12); }
+  24% { transform: scale(1); }
+  36% { transform: scale(1.07); }
+  48%, 72% { transform: scale(1); }
+  84% { transform: scale(1.05); }
+}
+
+@keyframes heart-ring {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  12% { transform: scale(1.12); opacity: 0.9; }
+  48% { transform: scale(1); opacity: 0.45; }
+}
+
+@keyframes heart-aura {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  12% { opacity: 0.85; transform: scale(1.15); }
+  48% { opacity: 0.4; transform: scale(1); }
+}
+
+/* 塔罗 · 牌灵符号（非球形） */
+.mystic-emblem-tarot .mystic-emblem-body {
+  width: 68%;
+  height: 68%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(255, 214, 166, 0.35), rgba(46, 27, 75, 0.95) 55%, #0b0b14);
+  box-shadow: 0 0 28px rgba(191, 163, 255, 0.35);
+  animation: tarot-breathe 3s ease-in-out infinite;
+}
+
+.mystic-tarot-core {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.mystic-tarot-symbol {
+  font-size: 1.75rem;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(255, 214, 166, 0.7);
+  z-index: 1;
+}
+
+.mystic-emblem-lg .mystic-tarot-symbol {
+  font-size: 2.2rem;
+}
+
+.mystic-tarot-shimmer {
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgba(255, 214, 166, 0.25), transparent);
+  animation: tarot-shimmer 4s linear infinite;
+}
+
+@keyframes tarot-breathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 24px rgba(191, 163, 255, 0.28); }
+  50% { transform: scale(1.04); box-shadow: 0 0 36px rgba(255, 214, 166, 0.35); }
+}
+
+@keyframes tarot-shimmer {
+  to { transform: rotate(360deg); }
+}
+
+/* 小六壬 · 八芒星 */
+.mystic-emblem-star .mystic-emblem-body {
+  animation: emblem-float 3s ease-in-out infinite;
+}
+
+/* 梅花 · 花形 */
+.mystic-emblem-plum .mystic-emblem-body {
+  animation: emblem-float 3.2s ease-in-out infinite;
+}
+
+@keyframes emblem-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── 首页 / 占问 hub ── */
+.home-header {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.home-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(191, 163, 255, 0.65);
+}
+
+.home-slogan {
+  margin-top: 8px;
+  font-size: 0.92rem;
+  color: var(--gold);
+  font-style: italic;
+}
+
+.entry-card-primary {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding-top: 22px;
+}
+
+.entry-card-primary .entry-emblem-wrap {
+  margin-bottom: 14px;
+}
+
+.entry-card-primary h2 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, var(--gold), var(--purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.divination-hero {
+  text-align: center;
+  padding: 12px 0 20px;
+}
+
+.divination-hero .page-title {
+  margin-top: 16px;
+}
+
+.method-list {
+  gap: 14px;
+}
+
+.method-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  text-align: left;
+}
+
+.method-card .method-emblem {
+  flex-shrink: 0;
+}
+
+.method-card .method-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.method-card .method-text h2 {
+  font-size: 1rem;
+}
+
+.method-card .method-text p {
+  margin-top: 4px;
+  font-size: 0.82rem;
+}
+
+.method-card .tag {
+  margin-top: 6px;
+}
+
+.coming-soon {
+  padding: 40px 0 60px;
+}
+
+.coming-soon-emblem {
+  margin-bottom: 20px;
+}
+
+.coming-soon-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  color: var(--gold);
+  background: var(--gold-soft);
+  border-radius: 999px;
+}
+
+.coming-soon-note {
+  margin-top: 20px;
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.tarot-hero .mystic-emblem {
+  margin-bottom: 18px;
+}

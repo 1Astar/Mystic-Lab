@@ -62,6 +62,24 @@ npm test
 
 部署 `dist/` 至 HTTPS 静态托管。首次克隆后执行 `npm install`，`npm run dev` 会自动拉取 MediaPipe 资源。
 
+## 版本与 Git
+
+- 当前版本见 `package.json`，页面左下角显示 `Mystic Lab v0.x.x`
+- 每次功能迭代：**改版本号 → 写 CHANGELOG → commit → push → 打 tag**
+
+```bash
+# 修订号（修 bug / 小 UI）
+npm version patch   # 0.1.1 → 0.1.2
+
+# 小版本（新模块）
+npm version minor   # 0.1.x → 0.2.0
+
+git push origin main --tags
+git checkout develop && git merge main && git push origin develop
+```
+
+详见 [CHANGELOG.md](./CHANGELOG.md)
+
 ## 分支管理
 
 | 分支 | 用途 |
@@ -69,12 +87,7 @@ npm test
 | `main` | 稳定可演示版本，可部署 |
 | `develop` | 日常开发，功能合并后再进 `main` |
 
-推荐流程：`develop` 开发 → 自测通过 → 合并到 `main` → 部署 / 作品集展示。
-
-```bash
-git checkout develop    # 日常开发
-git checkout main       # 发布 / 演示
-```
+推荐流程：`develop` 开发 → 自测通过 → 合并到 `main` → 打 tag → 部署。
 
 远程仓库：[github.com/1Astar/Mystic-Lab](https://github.com/1Astar/Mystic-Lab)
 
