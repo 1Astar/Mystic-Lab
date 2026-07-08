@@ -54,18 +54,54 @@ export type CodexStore = {
 
 const STORAGE_KEY = 'mystic-lab-codex';
 
+function saveStore(store: CodexStore): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+}
+
+function isDuplicateEncounter(a: CodexEncounter, b: CodexEncounter): boolean {
+  if (a.question.trim() !== b.question.trim()) return false;
+  if (a.spreadLabel !== b.spreadLabel) return false;
+  if (a.reversed !== b.reversed) return false;
+  const dt = Math.abs(new Date(a.at).getTime() - new Date(b.at).getTime());
+  return dt < 8000;
+}
+
+function dedupeEncounters(encounters: CodexEncounter[]): CodexEncounter[] {
+  const out: CodexEncounter[] = [];
+  for (const enc of encounters) {
+    if (out.some((prev) => isDuplicateEncounter(prev, enc))) continue;
+    out.push(enc);
+  }
+  return out;
+}
+
+function sanitizeEntry(entry: CodexEntry): CodexEntry {
+  const encounters = dedupeEncounters(entry.encounters);
+  return {
+    ...entry,
+    count: Math.max(encounters.length, 1),
+    encounters,
+  };
+}
+
 function loadStore(): CodexStore {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { entries: {} };
-    return JSON.parse(raw) as CodexStore;
+    const store = JSON.parse(raw) as CodexStore;
+    let changed = false;
+    for (const [id, entry] of Object.entries(store.entries)) {
+      const clean = sanitizeEntry(entry);
+      if (clean.count !== entry.count || clean.encounters.length !== entry.encounters.length) {
+        store.entries[id] = clean;
+        changed = true;
+      }
+    }
+    if (changed) saveStore(store);
+    return store;
   } catch {
     return { entries: {} };
   }
-}
-
-function saveStore(store: CodexStore): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
 export function detectQuestionTheme(question: string): QuestionTheme {
@@ -98,10 +134,13 @@ export function unlockSingleCard(
   let count = 1;
 
   if (existing) {
+    if (isDuplicateEncounter(encounter, existing.encounters[0] ?? encounter)) {
+      return { isFirstTime: false, count: existing.count, cardName: drawn.card.nameZh };
+    }
     existing.count += 1;
     count = existing.count;
     existing.encounters.unshift(encounter);
-    existing.encounters = existing.encounters.slice(0, 10);
+    existing.encounters = dedupeEncounters(existing.encounters).slice(0, 10);
   } else {
     isFirstTime = true;
     store.entries[id] = {

@@ -302,6 +302,12 @@
   gap: 10px;
 }
 
+.codex-grid .codex-empty {
+  grid-column: 1 / -1;
+  width: 100%;
+  text-align: center;
+}
+
 .codex-cell {
   position: relative;
   aspect-ratio: 3/4;

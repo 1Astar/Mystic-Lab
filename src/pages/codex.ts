@@ -78,11 +78,27 @@ export function renderCodex(root: HTMLElement): void {
     });
 
     if (cards.length === 0) {
+      const emptyMsg =
+        filter === 'favorite'
+          ? {
+              title: '还没有收藏的牌。',
+              sub: '在图鉴里点开已收集的牌，点「收藏此牌」即可加入这里。',
+            }
+          : filter === 'collected'
+            ? {
+                title: '还没有收集到牌。',
+                sub: '完成一次「随心占问」，抽到的牌会自动解锁到这里。',
+              }
+            : {
+                title: '图鉴空空如也。',
+                sub: '完成占问后，抽到的牌会出现在「已收集」里。',
+              };
+
       grid.innerHTML = `
-        <div class="meditate-box">
-          <p>还没有收集到牌。</p>
-          <p style="margin-top:8px">完成一次「随心占问」，抽到的牌会自动解锁到这里。</p>
-          <button type="button" class="btn" style="margin-top:14px">去占问</button>
+        <div class="codex-empty meditate-box">
+          <p>${emptyMsg.title}</p>
+          <p style="margin-top:8px">${emptyMsg.sub}</p>
+          ${filter !== 'favorite' ? '<button type="button" class="btn" style="margin-top:14px">去占问</button>' : ''}
         </div>`;
       grid.querySelector('button')?.addEventListener('click', () => navigate('/divination'));
     } else {

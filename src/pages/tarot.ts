@@ -68,6 +68,7 @@ export function renderTarot(root: HTMLElement): () => void {
   let drawMode: DrawMode = defaultDrawMode(inputCaps);
   let motionEnabled = false;
   let questionCoach: QuestionCoachHandle | null = null;
+  let drawLock = false;
   let ritualInputUnbind: (() => void) | null = null;
   let cardPool: DrawnCard[] = [];
   let drawnCards: DrawnCard[] = [];
@@ -190,6 +191,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
   function setState(next: TarotState): void {
     state = next;
+    if (next === 'draw') drawLock = false;
     resetDetectors();
     debug?.setStatus(next);
     if (next === 'cardReview' || next === 'result') {
@@ -783,9 +785,10 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   async function onDraw(): Promise<void> {
-    if (state !== 'draw') return;
+    if (state !== 'draw' || drawLock) return;
     const card = cardPool[currentIndex];
     if (!card) return;
+    drawLock = true;
     drawnCards.push(card);
 
     const unlock = unlockSingleCard(card, question, card.card.nameZh);

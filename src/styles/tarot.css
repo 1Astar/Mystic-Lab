@@ -1329,8 +1329,8 @@
 }
 
 .layer-badge-ai {
-  color: var(--purple);
-  background: rgba(155, 127, 212, 0.12);
+  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .reflect-list {
@@ -1492,6 +1492,34 @@
 
 .encounter-block li + li {
   margin-top: 6px;
+}
+
+.encounter-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.encounter-timeline-item {
+  padding: 10px 12px;
+  background: rgba(46, 27, 75, 0.45);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.encounter-timeline-item time {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.encounter-timeline-meta {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--purple);
 }
 
 /* ── 仪式完成弹窗 ── */

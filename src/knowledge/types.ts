@@ -66,6 +66,12 @@ export type EncounterRecord = {
   questions: string[];
   notes: string[];
   lastMetAt?: string;
+  timeline?: {
+    at: string;
+    question: string;
+    spreadLabel: string;
+    reversed: boolean;
+  }[];
 };
 
 export type StandardMeaningLayer = {

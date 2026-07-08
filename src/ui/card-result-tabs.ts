@@ -144,7 +144,7 @@ function renderReadingTab(r: CardReading): string {
       </section>
       <section class="reading-layer-card reading-layer-context">
         <h4 class="layer-tag">结合你的问题</h4>
-        <p class="layer-badge layer-badge-ai">模拟解读 · P3 接 AI</p>
+        <p class="layer-badge layer-badge-ai">规则解读 · AI 尚未接入</p>
         ${questionEcho}
         ${contextBody}
       </section>
@@ -303,84 +303,65 @@ function formatDate(iso: string): string {
 
 
 
+function formatDateTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+}
+
 function renderEncounterTab(r: CardReading): string {
-
   const enc = r.encounterRecord;
-
   if (!enc) {
-
     return `
-
       <div class="result-tab-panel" data-panel="encounter">
-
         <div class="result-empty">
-
           <p>尚未记录与这张牌的相遇。</p>
-
           <p class="result-empty-sub">完成抽牌后，图鉴会自动收录。</p>
-
         </div>
-
       </div>`;
-
   }
 
-
-
-  const questionList = enc.questions.length
-
-    ? enc.questions
-
-        .slice(0, 5)
-
-        .map((q) => `<li>${formatParagraph(q)}</li>`)
-
+  const timeline = enc.timeline?.length
+    ? enc.timeline
+        .map(
+          (e) => `
+        <div class="encounter-timeline-item">
+          <time>${formatDateTime(e.at)}</time>
+          <p>${e.question ? `问：${escapeHtml(e.question)}` : '（未记录问题）'}</p>
+          <p class="encounter-timeline-meta">${escapeHtml(e.spreadLabel)} · ${e.reversed ? '逆位' : '正位'}</p>
+        </div>`,
+        )
         .join('')
-
-    : '<li class="result-empty-sub">暂无记录的问题</li>';
-
-
+    : '<p class="result-empty-sub">暂无相遇记录</p>';
 
   const noteList = enc.notes.length
-
     ? enc.notes
-
         .slice(0, 3)
-
         .map((n) => `<li>${formatParagraph(n)}</li>`)
-
         .join('')
-
     : '<li class="result-empty-sub">还没有写手札，可在结果页下方记录感悟</li>';
 
-
-
   return `
-
     <div class="result-tab-panel" data-panel="encounter">
-
       <p class="encounter-stat">你已经与<strong>「${escapeHtml(r.cardName)}」</strong>相遇 <strong>${enc.encounterCount}</strong> 次</p>
-
       <p class="encounter-meta">首次遇见：${formatDate(enc.firstMetAt)}${enc.lastMetAt ? ` · 最近一次：${formatDate(enc.lastMetAt)}` : ''}</p>
-
       <section class="encounter-block">
-
-        <h4>当时问过什么</h4>
-
-        <ul>${questionList}</ul>
-
+        <h4>相遇记录</h4>
+        <div class="encounter-timeline">${timeline}</div>
       </section>
-
       <section class="encounter-block">
-
         <h4>手札与笔记</h4>
-
         <ul>${noteList}</ul>
-
       </section>
-
     </div>`;
-
 }
 
 
