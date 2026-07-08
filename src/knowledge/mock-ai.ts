@@ -9,8 +9,71 @@ function isInterviewQuestion(q: string): boolean {
   return /面试|应聘|offer|求职|复试/i.test(q);
 }
 
+function isWealthQuestion(q: string): boolean {
+  return /有钱|财富|变富|赚钱|财运|富裕|财务自由|发财|经济自由|成为.*富/.test(q);
+}
+
+function isObstaclePosition(context: ReadingContext): boolean {
+  return context.positionKey === 'obstacle' || context.cardPosition === '阻碍';
+}
+
 function isLoveLikesQuestion(context: ReadingContext): boolean {
   return context.questionPattern === 'love_likes' || /喜欢我|是不是喜欢|爱不爱|有感觉/.test(context.question);
+}
+
+function buildPositionLead(context: ReadingContext, knowledge: CardKnowledge): string {
+  const pos = context.cardPosition;
+  const key = context.positionKey;
+
+  if (key === 'obstacle' || pos === '阻碍') {
+    return `放在「阻碍」位置，${knowledge.nameCn}不是在否定你的问题本身，而是在指出：通往目标的路上，此刻真正卡住你的因素——可能是外在现实，也可能是内心的旧模式。`;
+  }
+  if (key === 'situation' || pos === '情况') {
+    return `放在「情况」位置，${knowledge.nameCn}映照的是你眼下所处的核心局面：问题长什么样，压力从哪里来。`;
+  }
+  if (key === 'advice' || pos === '建议') {
+    return `放在「建议」位置，${knowledge.nameCn}指向的不是标准答案，而是你可以尝试调整的方向。`;
+  }
+  if (key === 'past' || pos === '过去') {
+    return `放在「过去」位置，${knowledge.nameCn}帮你看见：这件事是如何走到现在的，哪些惯性仍在影响今天。`;
+  }
+  if (key === 'present' || pos === '现在') {
+    return `放在「现在」位置，${knowledge.nameCn}照见的是此刻正在作用的力量——你现在的状态，比「将来会怎样」更值得先看清楚。`;
+  }
+  if (key === 'future' || pos === '未来') {
+    return `放在「未来」位置，${knowledge.nameCn}提示的是：若保持当下路径，最可能展开的方向——不是定数，而是选择的延伸。`;
+  }
+  if (pos) {
+    return `放在${pos}位置，${knowledge.nameCn}需要在这个语境里理解，而不是孤立地看牌义。`;
+  }
+  return `${knowledge.nameCn}需要结合你当下的问题来读，而不是只背牌义。`;
+}
+
+function buildWealthObstacleSwordsTen(
+  context: ReadingContext,
+  knowledge: CardKnowledge,
+  reversed: boolean,
+): MockAIResult {
+  const q = context.question.trim();
+
+  if (reversed) {
+    const text = [
+      `你问的是「${q}」。`,
+      buildPositionLead(context, knowledge),
+      `放在「阻碍」位置，宝剑十逆位不是在说「你永远赚不到钱」，而是在提示：最消耗你的那段「触底期」可能正在过去，但你仍习惯用失败、比较、压力来审判自己。`,
+      `财富感往往先卡在心态：一边渴望变富，一边又很难相信路径还来得及。这张牌在问：你能不能先结束「非赢即输」的旧模式，把赚钱从一场自我处刑，改回可积累、可试错的过程？`,
+    ].join('\n\n');
+    return { text };
+  }
+
+  const text = [
+    `你问的是「${q}」。`,
+    buildPositionLead(context, knowledge),
+    `放在「阻碍」位置，宝剑十不是在否定你会不会有钱，而是在指出：你通往财富感的路上，最大的卡点可能是「过度焦虑 + 自我判死刑」。`,
+    `你可能一边渴望变富，一边又很容易被失败、比较、压力拖进一种「我是不是没戏了」的状态。`,
+    `这张牌提醒你，财富不是先从一个完美答案开始，而是从停止反复攻击自己开始。你需要先结束一种旧模式：把赚钱看成一场非赢即输的审判。`,
+  ].join('\n\n');
+  return { text };
 }
 
 function buildLoveLikesSections(
@@ -61,9 +124,17 @@ export function mockAIInterpretation(
     };
   }
 
+  if (
+    isWealthQuestion(q) &&
+    isObstaclePosition(context) &&
+    knowledge.deckId === 'swords-ten'
+  ) {
+    return buildWealthObstacleSwordsTen(context, knowledge, reversed);
+  }
+
   if (!q) {
     const text = [
-      `就${position}而言，${knowledge.nameCn}不像是在给你一个非黑即白的答案。`,
+      buildPositionLead(context, knowledge),
       knowledge.oneSentence,
       reversed
         ? '逆位提醒你：阻滞或失衡的部分也值得正视，不必急着用乐观盖过去。'
@@ -79,10 +150,26 @@ export function mockAIInterpretation(
 
     const text = [
       lead,
+      buildPositionLead(context, knowledge),
       `${knowledge.nameCn}在工作问题里，常常对应面试、方案表达、沟通、简历亮点、一次新的职业机会。它不是温柔安抚型的牌，更像一把刀：帮你切开混乱。`,
       reversed
         ? '逆位时，别急着自我否定。先列出你最想被看见的一个能力，再找一段能证明它的经历——这比反复猜结果更有用。'
         : `结合${position}，牌在问：明天之前，你最需要讲清楚的一个能力是什么？你有没有一段能证明它的具体经历？`,
+    ].join('\n\n');
+    return { text };
+  }
+
+  if (isWealthQuestion(q)) {
+    const text = [
+      `你问的是「${q}」。`,
+      buildPositionLead(context, knowledge),
+      isObstaclePosition(context)
+        ? `${knowledge.nameCn}在财富议题里落在「阻碍」，重点不是宣判「能不能有钱」，而是指出：当前拖慢你的，可能是焦虑、比较、对失败的预演，或把赚钱看成一场不能输的审判。`
+        : `${knowledge.nameCn}在财富议题里，更像在照见你对金钱、价值与安全感的关系——不是简单给「能」或「不能」，而是帮你看清路径上的关键张力。`,
+      knowledge.oneSentence,
+      reversed
+        ? '逆位时，先辨认：哪些是真正的现实限制，哪些是被放大后的灾难化想象。'
+        : '把牌当作提醒：财富感往往先来自结束旧模式，而不只是等待一个完美机会。',
     ].join('\n\n');
     return { text };
   }
@@ -96,6 +183,7 @@ export function mockAIInterpretation(
 
   const text = [
     topicOpen[context.topic],
+    buildPositionLead(context, knowledge),
     knowledge.oneSentence,
     reversed
       ? '逆位提醒你：阻滞或失衡的部分也值得正视。把牌当作提醒，而不是判决。'

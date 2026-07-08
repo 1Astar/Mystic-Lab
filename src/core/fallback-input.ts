@@ -19,6 +19,7 @@ const STEP_BUTTONS: Record<RitualStep, { action: FallbackAction; label: string }
   cut: [{ action: 'cut', label: '👋 切牌' }],
   draw: [{ action: 'draw', label: '🤏 捏合抽牌' }],
   flip: [{ action: 'flip', label: '🖐️ 手掌上翻' }],
+  review: [],
   reading: [
     { action: 'zoom_in', label: '⬆️ 放大细读' },
     { action: 'zoom_out', label: '⬇️ 回到牌阵' },

@@ -138,13 +138,19 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   function syncHintBar(): void {
-    const step = ritualStep();
-    if (state === 'cardReview' || state === 'result') {
+    if (state === 'cardReview') {
+      hintBar.setStep('review', drawMode);
+      fallback.setVisible(false);
+      gestureStatus.el.hidden = true;
+      return;
+    }
+    if (state === 'result') {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
       return;
     }
+    const step = ritualStep();
     if (drawMode !== 'gesture' || !cameraOn) {
       gestureStatus.el.hidden = true;
     }

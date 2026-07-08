@@ -41,6 +41,7 @@ function buildReadingContext(
     question,
     spreadType,
     cardPosition: drawn.position ?? '',
+    positionKey: drawn.positionKey ?? '',
     topic,
     selectedCardId: drawn.card.id,
     questionPattern: coach?.pattern,

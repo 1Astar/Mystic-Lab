@@ -53,6 +53,7 @@ export type ReadingContext = {
   question: string;
   spreadType: SpreadType;
   cardPosition: string;
+  positionKey: string;
   topic: QuestionTopic;
   selectedCardId: string;
   questionPattern?: QuestionPattern;

@@ -1,3 +1,4 @@
+import { CARD_KNOWLEDGE_OVERRIDES } from './card-overrides.ts';
 import { MAJOR_FIVE_HOTSPOTS, MAJOR_FIVE_KNOWLEDGE } from './cards/major-five.ts';
 import type { CardKnowledge, CardVisualHotspots, SceneMeaningKey } from './types.ts';
 import { TOPIC_TO_SCENE_KEY, type QuestionTopic } from './types.ts';
@@ -91,20 +92,23 @@ export function getSceneMeaning(
 export function fallbackKnowledgeFromDeck(card: CardDefinition): CardKnowledge {
   const nameCn = formatCardNameZh(card);
   const isMinorAce = card.arcana === 'minor' && card.rank === 'Ace' && card.suit;
+  const override = CARD_KNOWLEDGE_OVERRIDES[card.id];
 
-  const keywords = isMinorAce
-    ? MINOR_ACE_KEYWORDS[card.suit!] ?? card.keywords
-    : card.keywords;
+  const keywords = override?.keywords
+    ?? (isMinorAce ? MINOR_ACE_KEYWORDS[card.suit!] ?? card.keywords : card.keywords);
 
-  const oneSentence = isMinorAce
-    ? MINOR_ACE_ONE_SENTENCE[card.suit!] ?? `${nameCn}带来与当下议题相关的新开端。`
-    : card.upright.split('。')[0] + '。';
+  const oneSentence = override?.oneSentence
+    ?? (isMinorAce
+      ? MINOR_ACE_ONE_SENTENCE[card.suit!] ?? `${nameCn}带来与当下议题相关的新开端。`
+      : `${nameCn}指向与当下议题相关的关键主题。`);
 
-  const uprightMeaning = isMinorAce
-    ? MINOR_ACE_UPRIGHT[card.suit!] ?? '正位时，牌的能量顺畅流动，适合顺势而为。'
-    : card.upright.replace(/^[^：]+：/, '').trim();
+  const uprightMeaning = override?.uprightMeaning
+    ?? (isMinorAce
+      ? MINOR_ACE_UPRIGHT[card.suit!] ?? '正位时，牌的能量顺畅流动，适合顺势而为。'
+      : card.upright.replace(/^[^：]+：/, '').trim());
 
-  const reversedMeaning = card.reversed.replace(/^[^：]+：/, '').trim();
+  const reversedMeaning = override?.reversedMeaning
+    ?? card.reversed.replace(/^[^：]+：/, '').trim();
 
   return {
     id: card.id,

@@ -38,10 +38,10 @@ const MAJOR_DATA: Omit<CardDefinition, 'id' | 'arcana'>[] = [
 ];
 
 const SUITS = [
-  { key: 'wands' as const, zh: '权杖', symbol: '🔥', color: '#e07040' },
-  { key: 'cups' as const, zh: '圣杯', symbol: '💧', color: '#4a90c4' },
-  { key: 'swords' as const, zh: '宝剑', symbol: '💨', color: '#8898b0' },
-  { key: 'pentacles' as const, zh: '星币', symbol: '🌍', color: '#c9a040' },
+  { key: 'wands' as const, zh: '权杖', symbol: '🔥', color: '#e07040', hint: '它常和行动、动力、热情或创造冲动有关。' },
+  { key: 'cups' as const, zh: '圣杯', symbol: '💧', color: '#4a90c4', hint: '它常和情绪、关系、感受或直觉有关。' },
+  { key: 'swords' as const, zh: '宝剑', symbol: '💨', color: '#8898b0', hint: '它常和念头、判断、沟通压力或内在对话有关。' },
+  { key: 'pentacles' as const, zh: '星币', symbol: '🌍', color: '#c9a040', hint: '它常和资源、身体、金钱或现实积累有关。' },
 ];
 
 const RANKS = [
@@ -76,8 +76,8 @@ function buildMinorCards(): CardDefinition[] {
         keywords: [suit.zh, rank.theme],
         color: suit.color,
         symbol: suit.symbol,
-        upright: `${suit.zh}${rank.zh}正位：在${rank.theme}的主题下，${suit.zh}的能量正流动。你正经历与${suit.zh}相关的积极发展，保持觉察并顺势而为。`,
-        reversed: `${suit.zh}${rank.zh}逆位：${rank.theme}方面出现阻滞。${suit.zh}的能量受阻，需检视是否忽视内在信号或方向偏差。`,
+        upright: `${suit.zh}${rank.zh}正位：这张牌指向${rank.theme}相关的议题。${suit.hint}`,
+        reversed: `${suit.zh}${rank.zh}逆位：${rank.theme}方面出现阻滞或失衡。${suit.hint}此时更适合慢下来，辨认真实卡点。`,
       });
     }
   }

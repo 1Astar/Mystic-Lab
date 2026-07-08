@@ -27,6 +27,14 @@ function isInterviewQuestion(q: string): boolean {
   return /面试|应聘|offer|求职|复试/i.test(q);
 }
 
+function isWealthQuestion(q: string): boolean {
+  return /有钱|财富|变富|赚钱|财运|富裕|财务自由|发财|经济自由|成为.*富/.test(q);
+}
+
+function isObstaclePosition(context: ReadingContext): boolean {
+  return context.positionKey === 'obstacle' || context.cardPosition === '阻碍';
+}
+
 /**
  * 第三层：引导用户自己判断（固定结构 + 按主题/牌义微调）
  */
@@ -47,6 +55,26 @@ export function buildSelfReflectionQuestions(
       '明天面试前，你最需要讲清楚的一个能力是什么？',
       '你有没有一段能证明它的具体经历？',
       '如果结果不如预期，你仍能从这次经历里带走什么？',
+    ];
+  }
+
+  if (
+    isWealthQuestion(context.question) &&
+    isObstaclePosition(context) &&
+    context.selectedCardId === 'swords-ten'
+  ) {
+    return [
+      '如果把赚钱看成一场非赢即输的审判，你最先想放下的是哪一句自我批评？',
+      '最近哪一次「还没开始就先判自己没戏」，其实拖慢了你？',
+      '若允许自己慢慢积累，第一步可以小到什么程度？',
+    ];
+  }
+
+  if (isWealthQuestion(context.question)) {
+    return [
+      '我对「有钱」的定义，是来自比较，还是来自自己的安全感？',
+      '当前路径里，哪一步其实可以更小、更现实地开始？',
+      '如果先结束一种拖慢我的旧模式，我会先改哪一个念头？',
     ];
   }
 
