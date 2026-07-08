@@ -176,7 +176,7 @@ function renderVisualTab(r: CardReading): string {
 
           <p>这张牌的牌面热点还在整理中。</p>
 
-          <p class="result-empty-sub">目前已支持 22 张大阿尔克那与宝剑组共 36 张。权杖、圣杯、星币将陆续上线。</p>
+          <p class="result-empty-sub">78 张牌热点已全部上线，若仍看到此提示请刷新页面。</p>
 
         </div>
 
