@@ -64,3 +64,52 @@ export async function fetchContextualReading(
   if (!text) throw new Error('AI 返回为空');
   return text;
 }
+
+/** 最小请求，用于配置页验证 Base URL / Key / 模型是否可用 */
+export async function testAiConnection(settings: AiSettings): Promise<string> {
+  const baseUrl = settings.baseUrl.trim().replace(/\/$/, '');
+  const apiKey = settings.apiKey.trim();
+  const model = settings.model.trim();
+
+  if (!baseUrl) throw new Error('请先填写 API Base URL');
+  if (!apiKey) throw new Error('请先填写 API Key');
+  if (!model) throw new Error('请先选择或填写模型');
+
+  const res = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 20,
+      temperature: 0,
+      messages: [{ role: 'user', content: '请只回复两个字：成功' }],
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(formatApiError(res.status, errText));
+  }
+
+  const data = (await res.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
+  const text = data.choices?.[0]?.message?.content?.trim();
+  if (!text) throw new Error('接口已连通，但返回内容为空');
+  return text.length > 40 ? `${text.slice(0, 40)}…` : text;
+}
+
+function formatApiError(status: number, raw: string): string {
+  if (!raw) return `请求失败 (${status})`;
+  try {
+    const parsed = JSON.parse(raw) as { error?: { message?: string } };
+    const msg = parsed.error?.message?.trim();
+    if (msg) return `请求失败 (${status})：${msg.slice(0, 120)}`;
+  } catch {
+    /* ignore */
+  }
+  return `请求失败 (${status})：${raw.slice(0, 120)}`;
+}

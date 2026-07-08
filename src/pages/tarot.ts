@@ -18,7 +18,7 @@ import { saveJournalEntry, updateJournalReflection, upsertJournalProgress } from
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
-import { cardBackArtHtml } from '../tarot/card-back.ts';
+import { renderDeckFanHTML } from '../ui/tarot-deck-fan.ts';
 import {
   defaultDrawMode,
   detectInputCapabilities,
@@ -40,7 +40,7 @@ import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
 import { mountQuestionCoach, type QuestionCoachHandle } from '../ui/question-coach.ts';
-import { renderQuestionTypeGuide, wireQuestionTypeGuide } from '../ui/question-type-guide.ts';
+import { openQuestionGuideModal, renderQuestionStageBackdrop } from '../ui/question-type-guide.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 
 type TarotState =
@@ -313,20 +313,28 @@ export function renderTarot(root: HTMLElement): () => void {
         questionCoach?.destroy();
         questionCoach = null;
         stage.innerHTML = `
-          <h2 class="section-title">你想问什么？</h2>
-          <div id="question-type-guide-host"></div>
-          <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：找工作的阻碍和机会分别是什么？"></textarea>
-          <p class="tarot-hint tarot-hint-soft">上方可查看开放式 / 封闭式区别；点示例可一键填入。下方角度建议是规则引导，AI 解读需在首页配置。</p>
-          <div id="question-coach-host"></div>
+          <div class="question-stage">
+            ${renderQuestionStageBackdrop()}
+            <div class="question-main">
+              <div class="question-head">
+                <h2 class="section-title">你想问什么？</h2>
+                <button type="button" class="question-guide-trigger">怎么问更好？</button>
+              </div>
+              <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：找工作的阻碍和机会分别是什么？"></textarea>
+              <p class="tarot-hint tarot-hint-soft">背景是提问示例；需要时可点「怎么问更好？」查看开放式 / 封闭式对比。</p>
+              <div id="question-coach-host"></div>
+            </div>
+          </div>
         `;
         {
           const input = document.querySelector<HTMLTextAreaElement>('#tarot-question')!;
-          const guideHost = document.getElementById('question-type-guide-host')!;
-          guideHost.innerHTML = renderQuestionTypeGuide();
-          wireQuestionTypeGuide(guideHost, (text) => {
+          const pickExample = (text: string) => {
             input.value = text;
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.focus();
+          };
+          document.querySelector('.question-guide-trigger')?.addEventListener('click', () => {
+            openQuestionGuideModal(pickExample);
           });
           const host = document.getElementById('question-coach-host')!;
           questionCoach = mountQuestionCoach(host, (q) => {
@@ -482,22 +490,17 @@ export function renderTarot(root: HTMLElement): () => void {
   function renderDrawStage(): void {
     const teach = getTeachHint(spreadType, currentIndex);
     const pos = SPREADS[spreadType].positions[currentIndex];
-    const fanCards = [0, 1, 2, 3, 4]
-      .map(
-        (i) => `
-        <div class="fan-card ${i === 2 ? 'is-selected' : ''}" style="--fan-i: ${i}" data-fan-index="${i}">
-          ${cardBackArtHtml('mystic-card-back fan-card-back')}
-        </div>`,
-      )
-      .join('');
-    stage.innerHTML = `
-      ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
-      ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
-      <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${pos.label}</strong></p>
-      <p class="tarot-hint">${stepHintHtml('draw')}</p>
-      <p class="teach-hint teach-hint-soft">左右滑动浏览，上滑或长按抽出最吸引你的那张。</p>
-      <div class="tarot-fan" id="tarot-fan">${fanCards}</div>
-    `;
+    stage.innerHTML = renderDeckFanHTML();
+    const main = stage.querySelector('#tarot-draw-main');
+    if (main) {
+      main.innerHTML = `
+        ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
+        ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
+        <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${pos.label}</strong></p>
+        <p class="tarot-hint">${stepHintHtml('draw')}</p>
+        <p class="teach-hint teach-hint-soft">在底部牌堆左右滑动浏览，选中后上滑或长按抽出。</p>
+      `;
+    }
     syncCameraPlacement();
   }
 

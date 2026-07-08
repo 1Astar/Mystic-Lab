@@ -475,6 +475,27 @@ body {
   color: var(--warn);
 }
 
+.ai-test-result {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.ai-test-result.is-ok {
+  color: var(--gold);
+  border-color: rgba(201, 168, 76, 0.35);
+  background: var(--gold-soft);
+}
+
+.ai-test-result.is-err {
+  color: var(--warn);
+  border-color: rgba(192, 0, 0, 0.25);
+  background: rgba(192, 0, 0, 0.08);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .star {
     animation: none;

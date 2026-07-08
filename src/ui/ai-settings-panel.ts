@@ -1,4 +1,5 @@
 import { fetchAvailableModels, getFallbackModels } from '../ai/models.ts';
+import { testAiConnection } from '../ai/llm-client.ts';
 import { AI_PROVIDER_PRESETS, getProviderPreset } from '../ai/providers.ts';
 import {
   DEFAULT_AI_SETTINGS,
@@ -42,6 +43,8 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
   let modelOptions = getFallbackModels(settings.providerId, settings.model);
   let modelsLoading = false;
   let modelsError = '';
+  let testLoading = false;
+  let testResult: { ok: boolean; text: string } | null = null;
 
   const overlay = document.createElement('div');
   overlay.className = 'ai-settings-modal';
@@ -122,8 +125,12 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
         ${renderModelField()}
         <div class="ai-settings-actions">
           <button type="submit" class="btn btn-secondary btn-sm">保存配置</button>
+          <button type="button" class="btn btn-ghost btn-sm ai-test-api-btn" ${testLoading ? 'disabled' : ''}>
+            ${testLoading ? '测试中…' : '测试连接'}
+          </button>
           <button type="button" class="btn btn-ghost btn-sm" data-clear>清除密钥</button>
         </div>
+        ${testResult ? `<p class="ai-test-result ${testResult.ok ? 'is-ok' : 'is-err'}">${escapeHtml(testResult.text)}</p>` : ''}
         <p class="ai-save-msg" hidden></p>
       </form>
     `;
@@ -147,6 +154,20 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
   requestAnimationFrame(() => overlay.classList.add('is-visible'));
 
   const body = overlay.querySelector('.ai-settings-modal-body')!;
+
+  function readFormSettings(form: HTMLFormElement): AiSettings {
+    const fd = new FormData(form);
+    const nextKey = String(fd.get('apiKey') ?? '').trim();
+    const modelFromSelect = String(fd.get('model') ?? '').trim();
+    const modelFromCustom = String(fd.get('modelCustom') ?? '').trim();
+    return {
+      enabled: fd.get('enabled') === 'on',
+      providerId: settings.providerId,
+      baseUrl: String(fd.get('baseUrl') ?? DEFAULT_AI_SETTINGS.baseUrl).trim() || DEFAULT_AI_SETTINGS.baseUrl,
+      apiKey: nextKey || savedKey,
+      model: modelFromCustom || modelFromSelect || DEFAULT_AI_SETTINGS.model,
+    };
+  }
 
   function refreshForm(): void {
     body.innerHTML = renderForm();
@@ -180,6 +201,35 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
       modelsError = err instanceof Error ? err.message : '拉取失败，已显示预设模型';
     } finally {
       modelsLoading = false;
+      refreshForm();
+    }
+  }
+
+  async function runApiTest(): Promise<void> {
+    const form = body.querySelector<HTMLFormElement>('.ai-settings-form');
+    if (!form) return;
+
+    const draft = readFormSettings(form);
+    if (!draft.apiKey.trim()) {
+      testResult = { ok: false, text: '请先填写 API Key' };
+      refreshForm();
+      return;
+    }
+
+    testLoading = true;
+    testResult = null;
+    refreshForm();
+
+    try {
+      const preview = await testAiConnection(draft);
+      testResult = { ok: true, text: `连接成功 · 模型 ${draft.model} · 回复：${preview}` };
+    } catch (err) {
+      testResult = {
+        ok: false,
+        text: err instanceof Error ? err.message : '连接失败，请检查 URL、Key 与模型名',
+      };
+    } finally {
+      testLoading = false;
       refreshForm();
     }
   }
@@ -225,6 +275,10 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
       void loadModels();
     });
 
+    body.querySelector('.ai-test-api-btn')?.addEventListener('click', () => {
+      void runApiTest();
+    });
+
     function showMsg(text: string, ok = true): void {
       saveMsg.hidden = false;
       saveMsg.textContent = text;
@@ -236,17 +290,7 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      const nextKey = String(fd.get('apiKey') ?? '').trim();
-      const modelFromSelect = String(fd.get('model') ?? '').trim();
-      const modelFromCustom = String(fd.get('modelCustom') ?? '').trim();
-      settings = {
-        enabled: fd.get('enabled') === 'on',
-        providerId: settings.providerId,
-        baseUrl: String(fd.get('baseUrl') ?? DEFAULT_AI_SETTINGS.baseUrl).trim() || DEFAULT_AI_SETTINGS.baseUrl,
-        apiKey: nextKey || savedKey,
-        model: modelFromCustom || modelFromSelect || DEFAULT_AI_SETTINGS.model,
-      };
+      settings = readFormSettings(form);
       if (settings.enabled && !settings.apiKey.trim()) {
         showMsg('请填写 API Key，或先关闭「启用 AI 解读」', false);
         return;
@@ -264,6 +308,7 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
       savedKey = '';
       modelOptions = getFallbackModels(settings.providerId);
       modelsError = '';
+      testResult = null;
       saveAiSettings(settings);
       refreshForm();
       onSaved?.(settings);
