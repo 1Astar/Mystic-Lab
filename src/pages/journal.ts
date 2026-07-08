@@ -1,5 +1,6 @@
 import { navigate } from '../router.ts';
 import {
+  backfillJournalFromCodex,
   loadJournalEntries,
   updateJournalFulfilled,
   updateJournalReflection,
@@ -24,6 +25,7 @@ export function renderJournal(root: HTMLElement): void {
   `;
   page.appendChild(header);
 
+  backfillJournalFromCodex();
   const entries = loadJournalEntries();
 
   if (entries.length === 0) {

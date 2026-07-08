@@ -14,7 +14,7 @@ import { unlockSingleCard } from '../codex/collection.ts';
 import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
-import { saveJournalEntry } from '../journal/records.ts';
+import { saveJournalEntry, updateJournalReflection } from '../journal/records.ts';
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
@@ -69,6 +69,7 @@ export function renderTarot(root: HTMLElement): () => void {
   let motionEnabled = false;
   let questionCoach: QuestionCoachHandle | null = null;
   let drawLock = false;
+  let currentJournalId: string | null = null;
   let ritualInputUnbind: (() => void) | null = null;
   let cardPool: DrawnCard[] = [];
   let drawnCards: DrawnCard[] = [];
@@ -527,11 +528,21 @@ export function renderTarot(root: HTMLElement): () => void {
     }
   }
 
+  function ensureJournalSaved(): string | null {
+    if (!reading || drawnCards.length === 0) return currentJournalId;
+    if (currentJournalId) return currentJournalId;
+    learningNote = learningNote || buildLearningNote(spreadType, question);
+    const entry = saveJournalEntry(question, spreadType, drawnCards, reading, learningNote, '');
+    currentJournalId = entry.id;
+    return entry.id;
+  }
+
   function renderResult(): void {
     if (!reading) return;
 
-    actions.innerHTML = '';
+    const journalId = ensureJournalSaved();
 
+    actions.innerHTML = '';
     stage.innerHTML = `
       <h2 class="section-title">占问结果</h2>
       <p class="tarot-hint">每张牌可切换四个视角 · 新牌已收入图鉴</p>
@@ -543,7 +554,7 @@ export function renderTarot(root: HTMLElement): () => void {
         <p class="result-summary">${reading.summary}</p>
         <div class="learning-card">
           <h3>写下此刻的感悟</h3>
-          <textarea id="result-reflection" class="question-input" rows="3" placeholder="这次占问，你想记住什么？">${learningNote}</textarea>
+          <textarea id="result-reflection" class="question-input" rows="3" placeholder="这次占问，你想记住什么？"></textarea>
         </div>
       </div>
     `;
@@ -555,6 +566,13 @@ export function renderTarot(root: HTMLElement): () => void {
         mountCardResultTabs(host, cardReading);
       }
     });
+
+    const reflectionEl = document.getElementById('result-reflection') as HTMLTextAreaElement | null;
+    if (reflectionEl && journalId) {
+      reflectionEl.addEventListener('input', () => {
+        updateJournalReflection(journalId, reflectionEl.value.trim());
+      });
+    }
 
     const shareBtn = document.createElement('button');
     shareBtn.type = 'button';
@@ -607,6 +625,7 @@ export function renderTarot(root: HTMLElement): () => void {
     currentIndex = 0;
     reading = null;
     learningNote = '';
+    currentJournalId = null;
     drawMode = defaultDrawMode(inputCaps);
     motionEnabled = false;
     gestureBridge?.stop();
@@ -836,7 +855,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const provider = createInterpretationProvider();
     reading = await provider.interpret(drawnCards, question, spreadType);
     reading.learningNote = learningNote;
-    saveJournalEntry(question, spreadType, drawnCards, reading, learningNote, '');
+    currentJournalId = ensureJournalSaved();
 
     showRitualCompleteModal(reading, () => setState('result'));
   }

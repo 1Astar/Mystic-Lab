@@ -1,6 +1,9 @@
 import type { DrawnCard } from '../tarot/engine.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
+import { getAllEntries } from '../codex/collection.ts';
+import { TAROT_DECK } from '../tarot/deck.ts';
+import { buildLearningNote } from '../tarot/spreads.ts';
 
 export type JournalEntry = {
   id: string;
@@ -16,6 +19,125 @@ export type JournalEntry = {
 };
 
 const STORAGE_KEY = 'mystic-lab-journal';
+const SESSION_BUCKET_MS = 15 * 60 * 1000;
+
+function persist(list: JournalEntry[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 80)));
+}
+
+function inferSpreadType(cardCount: number): SpreadType {
+  if (cardCount === 1) return 'single';
+  if (cardCount === 3) return 'past-present-future';
+  return 'past-present-future';
+}
+
+function sessionBucketKey(question: string, at: string): string {
+  const bucket = Math.floor(new Date(at).getTime() / SESSION_BUCKET_MS);
+  return `${question.trim()}|${bucket}`;
+}
+
+function sameCardSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const sa = [...a].sort().join(',');
+  const sb = [...b].sort().join(',');
+  return sa === sb;
+}
+
+function hasSimilarEntry(
+  list: JournalEntry[],
+  question: string,
+  at: string,
+  cardIds: string[],
+): boolean {
+  const t = new Date(at).getTime();
+  return list.some((e) => {
+    if (e.question.trim() !== question.trim()) return false;
+    if (!sameCardSet(e.cardIds, cardIds)) return false;
+    return Math.abs(new Date(e.createdAt).getTime() - t) < SESSION_BUCKET_MS;
+  });
+}
+
+/** 从图鉴相遇记录回填缺失的手札 */
+export function backfillJournalFromCodex(): number {
+  const existing = loadJournalEntries();
+  const codexEntries = getAllEntries();
+  if (codexEntries.length === 0) return 0;
+
+  type FlatEnc = {
+    at: string;
+    question: string;
+    cardId: string;
+    spreadLabel: string;
+    reversed: boolean;
+    cardName: string;
+  };
+
+  const flat: FlatEnc[] = [];
+  for (const ce of codexEntries) {
+    const card = TAROT_DECK.find((c) => c.id === ce.cardId);
+    const cardName = card?.nameZh ?? ce.cardId;
+    for (const enc of ce.encounters) {
+      flat.push({
+        at: enc.at,
+        question: enc.question,
+        cardId: ce.cardId,
+        spreadLabel: enc.spreadLabel,
+        reversed: enc.reversed,
+        cardName,
+      });
+    }
+  }
+
+  if (flat.length === 0) return 0;
+
+  const groups = new Map<string, FlatEnc[]>();
+  for (const enc of flat) {
+    const key = sessionBucketKey(enc.question, enc.at);
+    const list = groups.get(key) ?? [];
+    list.push(enc);
+    groups.set(key, list);
+  }
+
+  const created: JournalEntry[] = [];
+  for (const group of groups.values()) {
+    group.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+    const deduped: FlatEnc[] = [];
+    for (const enc of group) {
+      if (deduped.some((d) => d.cardId === enc.cardId && d.spreadLabel === enc.spreadLabel)) continue;
+      deduped.push(enc);
+    }
+
+    const question = deduped[0]?.question ?? '';
+    const createdAt = deduped[0]?.at ?? new Date().toISOString();
+    const cardIds = deduped.map((d) => d.cardId);
+    if (hasSimilarEntry([...existing, ...created], question, createdAt, cardIds)) continue;
+
+    const spreadType = inferSpreadType(deduped.length);
+    const names = deduped.map((d) => d.cardName).join('、');
+    created.push({
+      id: `j-backfill-${createdAt}-${cardIds.join('-')}`,
+      createdAt,
+      question,
+      spreadType,
+      cardIds,
+      cards: deduped.map((d) => ({
+        name: d.cardName,
+        position: d.spreadLabel,
+        reversed: d.reversed,
+      })),
+      summary: `「${names}」已收入图鉴。答案不在牌里，在你心里。`,
+      learningNote: buildLearningNote(spreadType, question),
+      reflection: '',
+      fulfilled: null,
+    });
+  }
+
+  if (created.length === 0) return 0;
+
+  created.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  persist([...created, ...existing]);
+  return created.length;
+}
 
 export function saveJournalEntry(
   question: string,
@@ -25,12 +147,22 @@ export function saveJournalEntry(
   learningNote: string,
   reflection = '',
 ): JournalEntry {
+  const list = loadJournalEntries();
+  const cardIds = cards.map((c) => c.card.id);
+  const duplicate = list.find(
+    (e) =>
+      e.question.trim() === question.trim() &&
+      sameCardSet(e.cardIds, cardIds) &&
+      Math.abs(new Date(e.createdAt).getTime() - Date.now()) < 60_000,
+  );
+  if (duplicate) return duplicate;
+
   const entry: JournalEntry = {
     id: `j-${Date.now()}`,
     createdAt: new Date().toISOString(),
     question,
     spreadType,
-    cardIds: cards.map((c) => c.card.id),
+    cardIds,
     cards: cards.map((c) => ({
       name: c.card.nameZh,
       position: c.position ?? '',
@@ -42,9 +174,8 @@ export function saveJournalEntry(
     fulfilled: null,
   };
 
-  const list = loadJournalEntries();
   list.unshift(entry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 80)));
+  persist(list);
   return entry;
 }
 
@@ -53,7 +184,7 @@ export function updateJournalReflection(id: string, reflection: string): void {
   const item = list.find((e) => e.id === id);
   if (!item) return;
   item.reflection = reflection;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  persist(list);
 }
 
 export function updateJournalFulfilled(id: string, fulfilled: boolean): void {
@@ -61,7 +192,7 @@ export function updateJournalFulfilled(id: string, fulfilled: boolean): void {
   const item = list.find((e) => e.id === id);
   if (!item) return;
   item.fulfilled = fulfilled;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  persist(list);
 }
 
 export function loadJournalEntries(): JournalEntry[] {
