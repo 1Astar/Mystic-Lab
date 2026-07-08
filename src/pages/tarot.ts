@@ -14,7 +14,7 @@ import { unlockSingleCard } from '../codex/collection.ts';
 import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
-import { saveJournalEntry, updateJournalReflection } from '../journal/records.ts';
+import { saveJournalEntry, updateJournalReflection, upsertJournalProgress } from '../journal/records.ts';
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
@@ -530,12 +530,37 @@ export function renderTarot(root: HTMLElement): () => void {
 
   function ensureJournalSaved(): string | null {
     if (!reading || drawnCards.length === 0) return currentJournalId;
-    if (currentJournalId) return currentJournalId;
     learningNote = learningNote || buildLearningNote(spreadType, question);
-    const entry = saveJournalEntry(question, spreadType, drawnCards, reading, learningNote, '');
+    const entry = saveJournalEntry(
+      question,
+      spreadType,
+      drawnCards,
+      reading,
+      learningNote,
+      '',
+      currentJournalId,
+    );
     currentJournalId = entry.id;
     return entry.id;
   }
+
+  function savePartialProgress(): void {
+    if (drawnCards.length === 0 || !question) return;
+    if (state === 'result') return;
+
+    const entry = upsertJournalProgress(
+      currentJournalId,
+      question,
+      spreadType,
+      drawnCards,
+      reading,
+      'partial',
+      SPREADS[spreadType].positions.length,
+    );
+    currentJournalId = entry.id;
+  }
+
+  const onPageHide = (): void => savePartialProgress();
 
   function renderResult(): void {
     if (!reading) return;
@@ -840,6 +865,7 @@ export function renderTarot(root: HTMLElement): () => void {
     }
 
     setState('cardReview');
+    savePartialProgress();
   }
 
   async function onAcceptCard(): Promise<void> {
@@ -847,6 +873,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
     currentIndex++;
     if (currentIndex < cardPool.length) {
+      savePartialProgress();
       setState('draw');
       return;
     }
@@ -863,7 +890,11 @@ export function renderTarot(root: HTMLElement): () => void {
   renderStage();
   syncHintBar();
 
+  window.addEventListener('pagehide', onPageHide);
+
   return () => {
+    savePartialProgress();
+    window.removeEventListener('pagehide', onPageHide);
     questionCoach?.destroy();
     ritualInputUnbind?.();
     gestureBridge?.stop();

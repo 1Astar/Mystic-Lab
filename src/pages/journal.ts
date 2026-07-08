@@ -51,24 +51,26 @@ export function renderJournal(root: HTMLElement): void {
       const item = document.createElement('article');
       item.className = 'journal-item';
       const date = new Date(entry.createdAt).toLocaleString('zh-CN');
+      const isPartial = entry.status === 'partial';
       const fulfilledLabel =
-        entry.fulfilled === true
+        !isPartial && entry.fulfilled === true
           ? '后来觉得：有呼应'
-          : entry.fulfilled === false
+          : !isPartial && entry.fulfilled === false
             ? '后来觉得：不太准'
             : '';
 
       item.innerHTML = `
-        <time class="journal-date">${date}</time>
+        <time class="journal-date">${date}${isPartial ? ' · <span class="journal-badge">未完成</span>' : ''}</time>
         <p class="journal-question">${entry.question || '（未记录问题）'}</p>
         <p class="journal-cards">${entry.cards.map((c) => `${c.position}·${c.name}`).join(' / ')}</p>
-        <p class="journal-note">${entry.learningNote}</p>
+        <p class="journal-note">${isPartial ? entry.summary : entry.learningNote}</p>
         ${fulfilledLabel ? `<p class="journal-fulfilled">${fulfilledLabel}</p>` : ''}
         <textarea class="journal-reflection" rows="2" placeholder="后来的感悟…">${entry.reflection}</textarea>
         <div class="journal-actions">
           <button type="button" class="btn btn-secondary btn-sm" data-save>保存感悟</button>
+          ${isPartial ? '' : `
           <button type="button" class="btn btn-ghost btn-sm" data-yes>有呼应</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-no>不太准</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-no>不太准</button>`}
         </div>
       `;
 

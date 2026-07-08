@@ -3,7 +3,7 @@ import type { SpreadType } from '../tarot/spreads.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { getAllEntries } from '../codex/collection.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
-import { buildLearningNote } from '../tarot/spreads.ts';
+import { buildLearningNote, SPREADS } from '../tarot/spreads.ts';
 
 export type JournalEntry = {
   id: string;
@@ -16,6 +16,8 @@ export type JournalEntry = {
   learningNote: string;
   reflection: string;
   fulfilled?: boolean | null;
+  /** 未完成占问时为 partial */
+  status?: 'complete' | 'partial';
 };
 
 const STORAGE_KEY = 'mystic-lab-journal';
@@ -129,6 +131,7 @@ export function backfillJournalFromCodex(): number {
       learningNote: buildLearningNote(spreadType, question),
       reflection: '',
       fulfilled: null,
+      status: 'complete',
     });
   }
 
@@ -139,27 +142,39 @@ export function backfillJournalFromCodex(): number {
   return created.length;
 }
 
-export function saveJournalEntry(
+function buildPartialSummary(drawn: number, total: number): string {
+  return `已抽 ${drawn}/${total} 张 · 占问未完成`;
+}
+
+/** 创建或更新手札（支持中途离开的 partial 草稿） */
+export function upsertJournalProgress(
+  existingId: string | null,
   question: string,
   spreadType: SpreadType,
   cards: DrawnCard[],
-  reading: ReadingResult,
-  learningNote: string,
+  reading: ReadingResult | null,
+  status: 'partial' | 'complete',
+  totalCards: number,
   reflection = '',
 ): JournalEntry {
   const list = loadJournalEntries();
   const cardIds = cards.map((c) => c.card.id);
-  const duplicate = list.find(
-    (e) =>
-      e.question.trim() === question.trim() &&
-      sameCardSet(e.cardIds, cardIds) &&
-      Math.abs(new Date(e.createdAt).getTime() - Date.now()) < 60_000,
-  );
-  if (duplicate) return duplicate;
+  const id = existingId ?? `j-${Date.now()}`;
+  const prev = list.find((e) => e.id === id);
+
+  const summary =
+    status === 'complete' && reading?.summary
+      ? reading.summary
+      : buildPartialSummary(cards.length, totalCards);
+
+  const note =
+    status === 'complete'
+      ? reading?.learningNote ?? buildLearningNote(spreadType, question)
+      : prev?.learningNote || buildLearningNote(spreadType, question);
 
   const entry: JournalEntry = {
-    id: `j-${Date.now()}`,
-    createdAt: new Date().toISOString(),
+    id,
+    createdAt: prev?.createdAt ?? new Date().toISOString(),
     question,
     spreadType,
     cardIds,
@@ -168,15 +183,40 @@ export function saveJournalEntry(
       position: c.position ?? '',
       reversed: c.reversed,
     })),
-    summary: reading.summary,
-    learningNote,
-    reflection,
-    fulfilled: null,
+    summary,
+    learningNote: note,
+    reflection: prev?.reflection ?? reflection,
+    fulfilled: status === 'complete' ? (prev?.fulfilled ?? null) : null,
+    status,
   };
 
-  list.unshift(entry);
+  const idx = list.findIndex((e) => e.id === id);
+  if (idx >= 0) list[idx] = entry;
+  else list.unshift(entry);
   persist(list);
   return entry;
+}
+
+export function saveJournalEntry(
+  question: string,
+  spreadType: SpreadType,
+  cards: DrawnCard[],
+  reading: ReadingResult,
+  learningNote: string,
+  reflection = '',
+  existingId: string | null = null,
+): JournalEntry {
+  reading.learningNote = learningNote;
+  return upsertJournalProgress(
+    existingId,
+    question,
+    spreadType,
+    cards,
+    reading,
+    'complete',
+    SPREADS[spreadType].positions.length,
+    reflection,
+  );
 }
 
 export function updateJournalReflection(id: string, reflection: string): void {
@@ -205,6 +245,7 @@ export function loadJournalEntries(): JournalEntry[] {
       cardIds: e.cardIds ?? [],
       reflection: e.reflection ?? '',
       fulfilled: e.fulfilled ?? null,
+      status: e.status ?? 'complete',
     }));
   } catch {
     return [];
