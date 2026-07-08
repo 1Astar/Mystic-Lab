@@ -1,4 +1,5 @@
 import { detectQuestionTheme, type QuestionTheme } from '../codex/collection.ts';
+import { isClosedQuestion, questionKindLabel } from './question-guide.ts';
 
 export type QuestionPattern =
   | 'love_likes'
@@ -34,7 +35,11 @@ const GENERIC_OPEN_SUGGESTIONS = [
 ];
 
 const CLOSED_RE =
-  /会不会|能不能|是不是|该不该|顺不顺|喜不喜欢|要不要|可不可以|能否|会不会|有没有可能|吗[？?]?$/;
+  /会不会|能不能|是不是|该不该|顺不顺|喜不喜欢|要不要|可不可以|能否|有没有可能|什么时候|何时|多久|哪一天|吗[？?]?$/;
+
+function detectClosed(q: string): boolean {
+  return isClosedQuestion(q) || CLOSED_RE.test(q);
+}
 
 function extractPersonName(q: string): string | undefined {
   const patterns = [
@@ -61,7 +66,7 @@ function detectPattern(q: string, topic: QuestionTheme): QuestionPattern {
   if (/面试/.test(q) && topic === 'work') return 'interview';
   if (/offer|录用|拿到.*机会|能不能进/.test(q) && topic === 'work') return 'offer';
   if (/辞职|离职|要不要走|该不该走/.test(q) && topic === 'work') return 'quit';
-  if (CLOSED_RE.test(q)) return 'generic_closed';
+  if (detectClosed(q)) return 'generic_closed';
   return 'open';
 }
 
@@ -115,6 +120,14 @@ function buildAngles(
       ];
 
     case 'generic_closed':
+      if (/找工作|新工作|失业|换工作|offer|录用/.test(q)) {
+        return [
+          { id: 'direct', label: '直接问', question: q },
+          { id: 'block', label: '看阻碍', question: '我找工作路上最大的阻碍是什么？' },
+          { id: 'both', label: '看两面', question: '找工作的阻碍和机会分别是什么？' },
+          { id: 'action', label: '看行动', question: '我下一步该怎样提高找到工作的可能性？' },
+        ];
+      }
       return [
         { id: 'direct', label: '直接问', question: q },
         { id: 'see', label: '看本质', question: '我现在需要看清什么？' },
@@ -145,10 +158,10 @@ function buildNote(pattern: QuestionPattern, _q: string, personName?: string): s
       return '要不要辞职可以直接问。也可以先看真实感受与风险，再决定下一步。';
 
     case 'generic_closed':
-      return '这个问题可以直接占问。开放式角度有时更容易读出牌里的脉络。';
+      return '这是封闭式问题（想要一个确定答案）。可以直接占问；若换成开放式角度，牌往往更容易给出「看清什么、怎么调整」。';
 
     default:
-      return undefined;
+      return '这是开放式问题，适合看清阻碍、机会与行动方向。';
   }
 }
 
@@ -156,6 +169,12 @@ function buildGenericSuggestions(pattern: QuestionPattern): string[] {
   if (pattern === 'open') return [];
   return [...GENERIC_OPEN_SUGGESTIONS];
 }
+
+export function getQuestionTypeLabel(isClosed: boolean): string {
+  return isClosed ? '封闭式' : '开放式';
+}
+
+export { questionKindLabel };
 
 export function analyzeQuestion(raw: string): QuestionCoachResult | null {
   const originalQuestion = raw.trim();

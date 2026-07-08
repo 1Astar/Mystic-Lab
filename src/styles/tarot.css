@@ -581,6 +581,130 @@
   line-height: 1.5;
 }
 
+.coach-keep-btn {
+  margin-top: 4px;
+}
+
+.coach-type-badge {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.coach-type-badge.is-open {
+  color: var(--gold);
+  background: var(--gold-soft);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+}
+
+.coach-type-badge.is-closed {
+  color: var(--purple);
+  background: rgba(191, 163, 255, 0.12);
+  border: 1px solid rgba(191, 163, 255, 0.35);
+}
+
+.question-type-guide {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(46, 27, 75, 0.35);
+}
+
+.question-type-guide-summary {
+  padding: 12px 14px;
+  font-size: 0.84rem;
+  color: var(--gold);
+  cursor: pointer;
+  list-style: none;
+}
+
+.question-type-guide-summary::-webkit-details-marker {
+  display: none;
+}
+
+.question-type-guide-body {
+  padding: 0 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.guide-type-title {
+  font-size: 0.82rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.guide-type-desc {
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.guide-example-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide-example-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.guide-example-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.guide-starters-label {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.guide-starters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guide-starter-btn {
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.guide-starter-btn[data-kind='open']:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.guide-starter-btn[data-kind='closed']:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
 .coach-generic {
   margin-bottom: 10px;
 }

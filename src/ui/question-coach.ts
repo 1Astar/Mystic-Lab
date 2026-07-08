@@ -1,6 +1,7 @@
 import {
   analyzeQuestion,
   applyQuestionAngle,
+  getQuestionTypeLabel,
   type QuestionCoachResult,
 } from '../tarot/question-coach.ts';
 
@@ -52,13 +53,22 @@ export function mountQuestionCoach(
         </div>`
         : '';
 
+    const typeBadge = `<span class="coach-type-badge ${coach.isClosed ? 'is-closed' : 'is-open'}">${getQuestionTypeLabel(coach.isClosed)}</span>`;
+
     const anglesBlock =
       coach.isClosed && coach.angles.length > 1
         ? `
-        <p class="coach-prompt">你正在问：<strong>${escapeHtml(coach.originalQuestion)}</strong></p>
-        <p class="coach-sub">可以直接占问，也可以换一个更容易解读的角度：</p>
+        <p class="coach-prompt">你正在问：${typeBadge}<strong>${escapeHtml(coach.originalQuestion)}</strong></p>
+        <p class="coach-sub">封闭式问题可以直接占问；也可以点下面换成开放式，更容易读出「看清什么、怎么调整」：</p>
         <div class="coach-angles" role="group">${angleBtns}</div>`
-        : '';
+        : coach.angles.length > 1
+          ? `
+        <p class="coach-prompt">你正在问：${typeBadge}<strong>${escapeHtml(coach.originalQuestion)}</strong></p>
+        <div class="coach-angles" role="group">${angleBtns}</div>`
+          : coach.pattern === 'open'
+            ? `
+        <p class="coach-prompt">你正在问：${typeBadge}<strong>${escapeHtml(coach.originalQuestion)}</strong></p>`
+            : '';
 
     root.innerHTML = `
       ${coach.note ? `<p class="coach-note">${escapeHtml(coach.note)}</p>` : ''}

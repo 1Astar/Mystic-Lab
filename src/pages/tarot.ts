@@ -40,6 +40,7 @@ import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
 import { mountQuestionCoach, type QuestionCoachHandle } from '../ui/question-coach.ts';
+import { renderQuestionTypeGuide, wireQuestionTypeGuide } from '../ui/question-type-guide.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 
 type TarotState =
@@ -313,13 +314,20 @@ export function renderTarot(root: HTMLElement): () => void {
         questionCoach = null;
         stage.innerHTML = `
           <h2 class="section-title">你想问什么？</h2>
-          <p class="tarot-hint">开放式问题往往更容易读出脉络；封闭式问题也可以直接问。</p>
-          <p class="tarot-hint tarot-hint-soft">下方角度建议是规则引导，不是 AI；AI 解读需在首页配置 API。</p>
-          <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：明天面试顺不顺利？"></textarea>
+          <div id="question-type-guide-host"></div>
+          <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：找工作的阻碍和机会分别是什么？"></textarea>
+          <p class="tarot-hint tarot-hint-soft">上方可查看开放式 / 封闭式区别；点示例可一键填入。下方角度建议是规则引导，AI 解读需在首页配置。</p>
           <div id="question-coach-host"></div>
         `;
         {
           const input = document.querySelector<HTMLTextAreaElement>('#tarot-question')!;
+          const guideHost = document.getElementById('question-type-guide-host')!;
+          guideHost.innerHTML = renderQuestionTypeGuide();
+          wireQuestionTypeGuide(guideHost, (text) => {
+            input.value = text;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+          });
           const host = document.getElementById('question-coach-host')!;
           questionCoach = mountQuestionCoach(host, (q) => {
             question = q;
