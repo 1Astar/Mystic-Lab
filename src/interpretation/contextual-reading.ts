@@ -99,6 +99,7 @@ function buildCardReading(
     interpretationLayers,
     encounterRecord: buildEncounterRecord(drawn.card.id),
     hasVisualHotspots: hasVisualHotspots(drawn.card.id),
+    interpretationProvider: 'mock',
   };
 }
 

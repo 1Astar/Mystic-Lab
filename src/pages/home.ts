@@ -4,6 +4,7 @@ import { getCollectedCount } from '../codex/collection.ts';
 import { loadJournalEntries } from '../journal/records.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountAiSettingsPanel } from '../ui/ai-settings-panel.ts';
 
 const MODULES = [
   {
@@ -45,10 +46,13 @@ export function renderHome(root: HTMLElement): () => void {
         提问 → 占问 → 解读 → 解锁图鉴 → 写下感悟
       </p>
     </header>
+    <div id="ai-settings-host"></div>
     <nav class="home-nav" aria-label="模块入口"></nav>
   `;
 
   const nav = page.querySelector('.home-nav')!;
+
+  mountAiSettingsPanel(page.querySelector('#ai-settings-host')!);
 
   for (const mod of MODULES) {
     const card = document.createElement('a');

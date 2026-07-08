@@ -144,7 +144,7 @@ export function renderTarot(root: HTMLElement): () => void {
       gestureStatus.el.hidden = true;
       return;
     }
-    if (state === 'result') {
+    if (state === 'result' || ['landing', 'question', 'spread', 'modeSelect', 'loading'].includes(state)) {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
@@ -314,6 +314,7 @@ export function renderTarot(root: HTMLElement): () => void {
         stage.innerHTML = `
           <h2 class="section-title">你想问什么？</h2>
           <p class="tarot-hint">开放式问题往往更容易读出脉络；封闭式问题也可以直接问。</p>
+          <p class="tarot-hint tarot-hint-soft">下方角度建议是规则引导，不是 AI；AI 解读需在首页配置 API。</p>
           <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：明天面试顺不顺利？"></textarea>
           <div id="question-coach-host"></div>
         `;

@@ -1,5 +1,7 @@
 import type { CardReading } from '../interpretation/types.ts';
 
+import { isAiConfigured } from '../ai/settings.ts';
+
 import { getSceneMeaning, getVisualHotspots } from '../knowledge/registry.ts';
 
 import type { QuestionTopic } from '../knowledge/types.ts';
@@ -109,6 +111,16 @@ export function renderCardHero(r: CardReading): string {
 
 
 
+function contextualBadge(r: CardReading): string {
+  if (r.interpretationProvider === 'llm') {
+    return '<p class="layer-badge layer-badge-ai">AI 解读</p>';
+  }
+  if (isAiConfigured()) {
+    return '<p class="layer-badge layer-badge-ai">规则解读 · AI 调用失败，已回退</p>';
+  }
+  return '<p class="layer-badge layer-badge-ai">规则解读 · 未配置 AI</p>';
+}
+
 function renderReadingTab(r: CardReading): string {
   const { standard, contextualReading, contextualSections, selfReflection } = r.interpretationLayers;
   const reminderLabel = r.orientation === 'reversed' ? '逆位提醒' : '正位提醒';
@@ -144,7 +156,7 @@ function renderReadingTab(r: CardReading): string {
       </section>
       <section class="reading-layer-card reading-layer-context">
         <h4 class="layer-tag">结合你的问题</h4>
-        <p class="layer-badge layer-badge-ai">规则解读 · AI 尚未接入</p>
+        ${contextualBadge(r)}
         ${questionEcho}
         ${contextBody}
       </section>

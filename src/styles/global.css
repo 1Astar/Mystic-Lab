@@ -221,6 +221,86 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.ai-settings-card {
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.ai-settings-title {
+  font-size: 1rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.ai-settings-desc {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.ai-settings-status {
+  margin: 12px 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.ai-settings-status.is-on {
+  color: var(--gold);
+}
+
+.ai-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-field-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+
+.ai-label {
+  font-size: 0.72rem;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.ai-hint {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+.ai-settings-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-save-msg {
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+.ai-save-msg.is-ok {
+  color: var(--gold);
+}
+
+.ai-save-msg.is-err {
+  color: var(--warn);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .star {
     animation: none;

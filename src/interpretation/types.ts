@@ -34,6 +34,8 @@ export type CardReading = {
   interpretationLayers: InterpretationLayers;
   encounterRecord: EncounterRecord | null;
   hasVisualHotspots: boolean;
+  /** mock=规则模板，llm=已调用大模型 */
+  interpretationProvider: 'mock' | 'llm';
 };
 
 export type ReadingResult = {
