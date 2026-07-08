@@ -5,6 +5,7 @@ import { getSceneMeaning, getVisualHotspots } from '../knowledge/registry.ts';
 import type { QuestionTopic } from '../knowledge/types.ts';
 
 import { getCardById } from '../tarot/deck.ts';
+import { cardFaceImageHtml } from '../tarot/card-images.ts';
 
 
 
@@ -76,47 +77,24 @@ function stripReminderPrefix(text: string): string {
 export function renderCardHero(r: CardReading): string {
 
   const deckCard = getCardById(r.cardId);
-
   const cardColor = deckCard?.color ?? 'var(--purple)';
-
-  const symbol = deckCard?.symbol ?? '✦';
-
   const orient = r.orientation === 'reversed' ? '逆位' : '正位';
-
+  const alt = `${r.selectedCard.nameCn} · ${r.selectedCard.nameEn}`;
   const kwTags = r.keywords
-
     .map((k) => `<span class="hero-kw-tag">${escapeHtml(k)}</span>`)
-
     .join('');
 
-
-
   return `
-
     <header class="result-card-hero">
-
       <p class="result-hero-pos">${escapeHtml(r.position)} · ${orient}</p>
-
       <div class="result-hero-visual">
-
-        <div class="tarot-card is-revealed ${r.orientation === 'reversed' ? 'is-reversed' : ''} is-hero" style="--card-color: ${cardColor}">
-
+        <div class="tarot-card has-art is-revealed ${r.orientation === 'reversed' ? 'is-reversed' : ''} is-hero" style="--card-color: ${cardColor}">
           <div class="tarot-card-inner">
-
             <div class="tarot-card-front is-hero-face">
-
-              <span class="card-symbol">${escapeHtml(symbol)}</span>
-
-              <span class="card-art-line" aria-hidden="true"></span>
-
-              <span class="card-art-glow" aria-hidden="true"></span>
-
+              ${cardFaceImageHtml(r.cardId, alt, 'card-face-img card-face-img-hero')}
             </div>
-
           </div>
-
         </div>
-
       </div>
 
       <h3 class="result-hero-name-cn">${escapeHtml(r.selectedCard.nameCn)}</h3>
@@ -246,15 +224,10 @@ function renderVisualTab(r: CardReading): string {
       <p class="visual-hint">点击牌面元素，看为什么这样理解</p>
 
       <div class="visual-card-stage">
-
-        <div class="visual-card-face" style="--card-color: ${cardColor}">
-
-          <span class="visual-card-symbol">${escapeHtml(deckCard?.symbol ?? '✦')}</span>
-
+        <div class="visual-card-face ${r.orientation === 'reversed' ? 'is-reversed' : ''}" style="--card-color: ${cardColor}">
+          ${cardFaceImageHtml(r.cardId, `${r.selectedCard.nameCn} · ${r.selectedCard.nameEn}`, 'card-face-img card-face-img-visual')}
           <div class="hotspot-layer">${markers}</div>
-
         </div>
-
       </div>
 
       <p class="hotspot-detail" id="hotspot-detail-${r.cardId}">点选上方元素查看含义</p>

@@ -185,6 +185,28 @@
   margin-top: 2px;
 }
 
+.tarot-card.has-art .tarot-card-front,
+.tarot-card.has-art .tarot-card-back {
+  padding: 0;
+  overflow: hidden;
+  background: #1a1030;
+}
+
+.card-face-img,
+.card-back-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.tarot-slot-single .tarot-card.has-art {
+  width: min(45vw, 200px);
+  height: auto;
+  aspect-ratio: 2 / 3;
+}
+
 .tarot-slot.is-dealing .tarot-card {
   animation: deal-in 0.4s ease-out;
 }
@@ -932,25 +954,34 @@
   overflow: hidden;
 }
 
-.is-hero-face .card-symbol {
-  font-size: 2.4rem;
-  margin-bottom: 8px;
+.card-face-img-hero {
+  border-radius: 10px;
 }
 
-.card-art-line {
-  display: block;
-  width: 60%;
-  height: 1px;
-  margin: 8px auto;
-  background: linear-gradient(90deg, transparent, rgba(255, 214, 166, 0.6), transparent);
+.visual-card-face {
+  position: relative;
+  width: min(200px, 70vw);
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  border: 2px solid var(--gold);
+  background: #1a1030;
+  overflow: hidden;
 }
 
-.card-art-glow {
+.visual-card-face.is-reversed .card-face-img-visual {
+  transform: rotate(180deg);
+}
+
+.visual-card-face .hotspot-layer {
   position: absolute;
-  inset: 20% 10%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
-  pointer-events: none;
+  inset: 0;
+}
+
+.card-face-img-visual {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .result-hero-name-cn {
@@ -1141,15 +1172,12 @@
   aspect-ratio: 2 / 3;
   border-radius: 12px;
   border: 2px solid var(--gold);
-  background: linear-gradient(160deg, var(--card-color, var(--purple)), #1a1030);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #1a1030;
+  overflow: hidden;
 }
 
-.visual-card-symbol {
-  font-size: 2rem;
-  opacity: 0.35;
+.visual-card-face.is-reversed .card-face-img-visual {
+  transform: rotate(180deg);
 }
 
 .hotspot-layer {

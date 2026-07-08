@@ -1,5 +1,6 @@
 import type { DrawnCard } from './engine.ts';
 import { formatCardNameZh, formatCardNameEn } from './card-names.ts';
+import { cardBackImageHtml, cardFaceImageHtml } from './card-images.ts';
 
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,19 +54,21 @@ export function renderCardFace(
   slot: HTMLElement,
   drawn: DrawnCard,
   revealed: boolean,
+  size: 'default' | 'hero' = 'default',
 ): void {
   const { card, reversed } = drawn;
+  const nameZh = formatCardNameZh(card);
+  const sizeClass = size === 'hero' ? ' is-hero' : '';
+  const alt = `${nameZh} · ${formatCardNameEn(card)}`;
+
   slot.innerHTML = `
-    <div class="tarot-card ${revealed ? 'is-revealed' : ''} ${reversed ? 'is-reversed' : ''}" style="--card-color: ${card.color}">
+    <div class="tarot-card has-art${sizeClass} ${revealed ? 'is-revealed' : ''} ${reversed ? 'is-reversed' : ''}" style="--card-color: ${card.color}">
       <div class="tarot-card-inner">
         <div class="tarot-card-back">
-          <span class="card-back-symbol">✦</span>
+          ${cardBackImageHtml()}
         </div>
         <div class="tarot-card-front">
-          <span class="card-symbol">${card.symbol}</span>
-          <span class="card-art-line" aria-hidden="true"></span>
-          <span class="card-name">${formatCardNameZh(card)}</span>
-          <span class="card-name-en">${formatCardNameEn(card)}</span>
+          ${cardFaceImageHtml(card.id, alt)}
         </div>
       </div>
     </div>
