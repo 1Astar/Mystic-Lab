@@ -12,6 +12,7 @@ import {
 } from '../codex/collection.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountCodexDetail } from '../ui/codex-detail.ts';
+import { mountCodexPreview } from '../ui/codex-preview.ts';
 
 type CodexFilter = 'all' | 'collected' | 'favorite';
 
@@ -112,18 +113,14 @@ export function renderCodex(root: HTMLElement): void {
         const nameCn = formatCardNameZh(card);
         cell.innerHTML = `
           <div class="codex-cell-face">
-            ${
-              col
-                ? cardFaceImageHtml(card.id, nameCn, 'codex-cell-img')
-                : `<span class="codex-symbol" style="--card-color:${card.color}">${card.symbol}</span>`
-            }
+            ${cardFaceImageHtml(card.id, nameCn, 'codex-cell-img')}
+            ${col ? '' : '<span class="codex-cell-lock" aria-hidden="true">未遇</span>'}
           </div>
           <span class="codex-name">${nameCn}</span>
           ${entry && entry.count > 1 ? `<span class="codex-count">×${entry.count}</span>` : ''}
           ${entry?.favorite ? '<span class="codex-fav">★</span>' : ''}
         `;
         cell.addEventListener('click', () => {
-          if (!col) return;
           selectedId = card.id;
           renderDetail();
         });
@@ -141,21 +138,33 @@ export function renderCodex(root: HTMLElement): void {
     if (!selectedId) return;
 
     const card = TAROT_DECK.find((c) => c.id === selectedId);
-    const entry = getCodexEntry(selectedId);
-    if (!card || !entry) return;
+    if (!card) return;
 
     const detail = document.createElement('aside');
-    mountCodexDetail(detail, card, entry, {
-      onClose: () => {
-        selectedId = null;
-        detail.remove();
-      },
-      onSaveNote: (note) => savePersonalNote(selectedId!, note),
-      onToggleFavorite: () => {
-        toggleFavorite(selectedId!);
-        render();
-      },
-    });
+    const collected = isCardCollected(selectedId);
+    const entry = getCodexEntry(selectedId);
+
+    if (collected && entry) {
+      mountCodexDetail(detail, card, entry, {
+        onClose: () => {
+          selectedId = null;
+          detail.remove();
+        },
+        onSaveNote: (note) => savePersonalNote(selectedId!, note),
+        onToggleFavorite: () => {
+          toggleFavorite(selectedId!);
+          render();
+        },
+      });
+    } else {
+      mountCodexPreview(detail, card, {
+        onClose: () => {
+          selectedId = null;
+          detail.remove();
+        },
+        onDraw: () => navigate('/divination'),
+      });
+    }
 
     page.appendChild(detail);
   }

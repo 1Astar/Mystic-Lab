@@ -8,12 +8,29 @@ import {
 } from '../knowledge/registry.ts';
 import type { CodexEntry } from '../codex/collection.ts';
 
+type CodexDetailTab = 'basic' | 'scene' | 'visual' | 'encounter';
+
+const TAB_LABELS: Record<CodexDetailTab, string> = {
+  basic: '基础牌义',
+  scene: '场景解读',
+  visual: '看懂牌面',
+  encounter: '我的相遇',
+};
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function formatAnswerTendency(summary: string, cardName: string): string {
+  const trimmed = summary.trim();
+  if (!trimmed || trimmed === cardName) {
+    return '（完成占问后，整体答案倾向会记录在这里）';
+  }
+  return trimmed;
 }
 
 export type CodexDetailCallbacks = {
@@ -46,7 +63,43 @@ export function mountCodexDetail(
     ? knowledge.misreadings.map((m) => `<li>${escapeHtml(m)}</li>`).join('')
     : '<li class="codex-muted">暂无专项误读说明，请以正逆位语境理解</li>';
 
-  container.className = 'codex-detail';
+  const latest = entry.encounters[0];
+  const latestTendency = latest
+    ? formatAnswerTendency(latest.summary, nameCn)
+    : '（暂无记录）';
+
+  const historyHtml = entry.encounters.length
+    ? entry.encounters
+        .map(
+          (e) => `
+        <div class="codex-encounter">
+          <time>${new Date(e.at).toLocaleString('zh-CN')}</time>
+          <p>${e.question ? `问：${escapeHtml(e.question)}` : '（未记录问题）'}</p>
+          <p>${escapeHtml(e.spreadLabel || '占问')} · ${e.reversed ? '逆位' : '正位'}</p>
+          ${
+            e.summary && e.summary !== nameCn
+              ? `<p class="codex-encounter-tendency">答案倾向：${escapeHtml(e.summary)}</p>`
+              : ''
+          }
+        </div>`,
+        )
+        .join('')
+    : '<p class="codex-muted">暂无历史占问记录</p>';
+
+  let activeTab: CodexDetailTab = 'basic';
+
+  function renderTabs(): void {
+    container.querySelectorAll<HTMLButtonElement>('.codex-detail-tab').forEach((btn) => {
+      const tab = btn.dataset.tab as CodexDetailTab;
+      btn.classList.toggle('is-active', tab === activeTab);
+      btn.setAttribute('aria-selected', tab === activeTab ? 'true' : 'false');
+    });
+    container.querySelectorAll<HTMLElement>('.codex-detail-panel').forEach((panel) => {
+      panel.hidden = panel.dataset.panel !== activeTab;
+    });
+  }
+
+  container.className = 'codex-detail codex-detail-unlocked';
   container.innerHTML = `
     <button type="button" class="codex-detail-close" aria-label="关闭">✕</button>
     <div class="codex-meet-banner">
@@ -61,52 +114,77 @@ export function mountCodexDetail(
         <p>${escapeHtml(knowledge.nameEn)} · ${card.arcana === 'major' ? '大阿尔克那' : '小阿尔克那'}</p>
       </div>
     </div>
-    <section class="codex-section">
-      <h3>关键词</h3>
-      <p class="codex-kw-row"><span class="codex-kw-label">正位</span>${escapeHtml(uprightKw.join('、'))}</p>
-      <p class="codex-kw-row"><span class="codex-kw-label">逆位</span>${escapeHtml(reversedKw.join('、'))}</p>
-    </section>
-    <section class="codex-section">
-      <h3>整牌总览</h3>
-      <p class="codex-body-text">${escapeHtml(overview)}</p>
-    </section>
-    <section class="codex-section">
-      <h3>在不同问题里</h3>
-      <ul class="codex-theme-list">
-        <li><strong>感情</strong>：${escapeHtml(knowledge.loveMeaning)}</li>
-        <li><strong>工作</strong>：${escapeHtml(knowledge.workMeaning)}</li>
-        <li><strong>财富</strong>：${escapeHtml(knowledge.wealthMeaning ?? knowledge.studyMeaning)}</li>
-        <li><strong>自我</strong>：${escapeHtml(knowledge.selfMeaning)}</li>
-      </ul>
-    </section>
-    <section class="codex-section">
-      <h3>牌面元素</h3>
-      <ul class="codex-hotspot-list">${hotspotList}</ul>
-    </section>
-    <section class="codex-section">
-      <h3>容易误读的点</h3>
-      <ul class="codex-misread-list">${misreadings}</ul>
-    </section>
-    <section class="codex-section">
-      <h3>相遇记录</h3>
-      ${entry.encounters
+    <div class="codex-detail-tab-bar" role="tablist">
+      ${(Object.keys(TAB_LABELS) as CodexDetailTab[])
         .map(
-          (e) => `
-        <div class="codex-encounter">
-          <time>${new Date(e.at).toLocaleString('zh-CN')}</time>
-          <p>${e.question ? `问：${escapeHtml(e.question)}` : '（未记录问题）'}</p>
-          <p>${escapeHtml(e.spreadLabel)} · ${e.reversed ? '逆位' : '正位'}</p>
-        </div>`,
+          (id) =>
+            `<button type="button" class="codex-detail-tab${id === 'basic' ? ' is-active' : ''}" role="tab" data-tab="${id}" aria-selected="${id === 'basic'}">${TAB_LABELS[id]}</button>`,
         )
         .join('')}
-    </section>
-    <section class="codex-section">
-      <h3>我的感想</h3>
-      <textarea class="codex-note-input" rows="3" placeholder="写下对这张牌的感想…">${escapeHtml(entry.personalNote)}</textarea>
-      <button type="button" class="btn btn-secondary codex-save-note">保存感想</button>
-    </section>
-    <button type="button" class="btn btn-ghost codex-fav-btn">${entry.favorite ? '取消收藏' : '收藏此牌'}</button>
+    </div>
+    <div class="codex-detail-panels">
+      <section class="codex-detail-panel" data-panel="basic" role="tabpanel">
+        <div class="codex-section">
+          <h3>正位关键词</h3>
+          <p class="codex-body-text">${escapeHtml(uprightKw.join('、'))}</p>
+        </div>
+        <div class="codex-section">
+          <h3>逆位关键词</h3>
+          <p class="codex-body-text">${escapeHtml(reversedKw.join('、'))}</p>
+        </div>
+        <div class="codex-section">
+          <h3>一句话牌义</h3>
+          <p class="codex-body-text">${escapeHtml(knowledge.oneSentence)}</p>
+        </div>
+        <div class="codex-section">
+          <h3>容易误读的点</h3>
+          <ul class="codex-misread-list">${misreadings}</ul>
+        </div>
+      </section>
+      <section class="codex-detail-panel" data-panel="scene" role="tabpanel" hidden>
+        <ul class="codex-theme-list codex-scene-list">
+          <li><strong>感情</strong>：${escapeHtml(knowledge.loveMeaning)}</li>
+          <li><strong>工作</strong>：${escapeHtml(knowledge.workMeaning)}</li>
+          <li><strong>财富</strong>：${escapeHtml(knowledge.wealthMeaning ?? knowledge.studyMeaning)}</li>
+          <li><strong>自我</strong>：${escapeHtml(knowledge.selfMeaning)}</li>
+        </ul>
+      </section>
+      <section class="codex-detail-panel" data-panel="visual" role="tabpanel" hidden>
+        <div class="codex-section">
+          <h3>整牌总览</h3>
+          <p class="codex-body-text">${escapeHtml(overview)}</p>
+        </div>
+        <div class="codex-section">
+          <h3>牌面热点</h3>
+          <ul class="codex-hotspot-list">${hotspotList}</ul>
+        </div>
+      </section>
+      <section class="codex-detail-panel" data-panel="encounter" role="tabpanel" hidden>
+        <div class="codex-encounter-summary">
+          <p><span class="codex-encounter-label">抽到次数</span><strong>${entry.count}</strong> 次</p>
+          <p><span class="codex-encounter-label">最近一次问题</span>${latest?.question ? escapeHtml(latest.question) : '（未记录）'}</p>
+          <p><span class="codex-encounter-label">最近一次答案倾向</span>${escapeHtml(latestTendency)}</p>
+        </div>
+        <div class="codex-section">
+          <h3>历史占问记录</h3>
+          ${historyHtml}
+        </div>
+        <div class="codex-section">
+          <h3>我的感想</h3>
+          <textarea class="codex-note-input" rows="3" placeholder="写下对这张牌的感想…">${escapeHtml(entry.personalNote)}</textarea>
+          <button type="button" class="btn btn-secondary codex-save-note">保存感想</button>
+        </div>
+        <button type="button" class="btn btn-ghost codex-fav-btn">${entry.favorite ? '取消收藏' : '收藏此牌'}</button>
+      </section>
+    </div>
   `;
+
+  container.querySelectorAll<HTMLButtonElement>('.codex-detail-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab as CodexDetailTab;
+      renderTabs();
+    });
+  });
 
   container.querySelector('.codex-detail-close')?.addEventListener('click', callbacks.onClose);
   container.querySelector('.codex-save-note')?.addEventListener('click', () => {
@@ -114,4 +192,6 @@ export function mountCodexDetail(
     if (ta) callbacks.onSaveNote(ta.value);
   });
   container.querySelector('.codex-fav-btn')?.addEventListener('click', callbacks.onToggleFavorite);
+
+  renderTabs();
 }
