@@ -336,14 +336,6 @@
   justify-content: center;
 }
 
-.codex-cell.is-locked .codex-cell-img {
-  filter: grayscale(0.3) brightness(0.88);
-}
-
-.codex-cell.is-locked:hover .codex-cell-img {
-  filter: grayscale(0.15) brightness(0.95);
-}
-
 .codex-cell-lock {
   position: absolute;
   bottom: 4px;
@@ -440,10 +432,27 @@
 
 .codex-cell.is-locked {
   cursor: pointer;
+  background: rgba(20, 18, 32, 0.85);
+  border-color: rgba(120, 120, 140, 0.2);
+}
+
+.codex-cell.is-locked .codex-cell-img {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.45;
+}
+
+.codex-cell.is-locked .codex-name {
+  color: var(--ink-muted);
+  opacity: 0.65;
 }
 
 .codex-cell.is-locked:hover {
-  border-color: rgba(255, 214, 166, 0.2);
+  border-color: rgba(255, 214, 166, 0.15);
+}
+
+.codex-cell.is-locked:hover .codex-cell-img {
+  filter: grayscale(0.85) brightness(0.65);
+  opacity: 0.55;
 }
 
 .codex-symbol {
@@ -1028,4 +1037,864 @@
   font-size: 0.72rem;
   color: var(--ink-muted);
   line-height: 1.5;
+}
+
+/* 学习入口卡 */
+.codex-learn-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0 4px;
+}
+
+@media (max-width: 400px) {
+  .codex-learn-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.codex-learn-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: linear-gradient(145deg, rgba(46, 27, 75, 0.7), rgba(26, 18, 48, 0.85));
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.codex-learn-card:hover {
+  border-color: rgba(255, 214, 166, 0.4);
+  background: rgba(255, 214, 166, 0.06);
+}
+
+.codex-learn-icon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.codex-learn-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.codex-learn-title {
+  font-size: 0.82rem;
+  color: var(--gold);
+}
+
+.codex-learn-desc {
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.codex-learn-arrow {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  opacity: 0.5;
+  align-self: center;
+}
+
+/* 全部 Tab 牌组分区 */
+.codex-grid-grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.codex-grid-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.codex-grid-section-title {
+  font-size: 0.88rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.codex-grid-section-hint {
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.codex-grid-journey-link {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.7rem;
+  color: var(--gold);
+  background: var(--gold-soft);
+  border: 1px solid rgba(255, 214, 166, 0.25);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.codex-grid-section-cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* 愚人之旅 · 故事路径地图 */
+.fool-journey-continue {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.fool-path-chapter {
+  margin-bottom: 28px;
+}
+
+.fool-path-chapter-head {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 214, 166, 0.05);
+  border-left: 3px solid var(--gold);
+}
+
+.fool-path-chapter-head h3 {
+  font-size: 0.9rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.fool-path-chapter-head p {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.fool-path-track {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px;
+  position: relative;
+}
+
+.fool-path-track::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 214, 166, 0.35),
+    rgba(255, 214, 166, 0.08)
+  );
+  pointer-events: none;
+}
+
+.fool-path-node {
+  position: relative;
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.fool-path-node.is-left .fool-path-btn {
+  margin-right: auto;
+  flex-direction: row;
+}
+
+.fool-path-node.is-right .fool-path-btn {
+  margin-left: auto;
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.fool-path-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 320px);
+  padding: 12px 14px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.fool-path-btn:hover {
+  border-color: rgba(255, 214, 166, 0.4);
+  transform: translateY(-1px);
+}
+
+.fool-path-node.is-lit .fool-path-btn {
+  border-color: rgba(255, 214, 166, 0.35);
+  box-shadow: 0 4px 20px rgba(255, 214, 166, 0.08);
+}
+
+.fool-path-order {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--bg-deep);
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.fool-path-node.is-dim .fool-path-order {
+  background: rgba(255, 214, 166, 0.35);
+  color: var(--ink-muted);
+}
+
+.fool-path-face {
+  flex-shrink: 0;
+  width: 72px;
+  height: 108px;
+}
+
+.fool-path-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.fool-path-node.is-dim .fool-path-img {
+  filter: grayscale(0.55) brightness(0.72);
+  opacity: 0.85;
+}
+
+.fool-path-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.fool-path-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.fool-path-theme {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.fool-path-node.is-right .fool-path-text {
+  text-align: right;
+}
+
+/* 愚人之旅详情 */
+.journey-detail-head {
+  margin-top: 28px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.journey-detail-chapter {
+  font-size: 0.72rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.journey-detail-name {
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.journey-detail-title {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+.journey-detail-hero {
+  margin: 18px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.journey-detail-face {
+  position: relative;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(46, 27, 75, 0.6), rgba(26, 18, 48, 0.9));
+  border: 1px solid var(--line);
+}
+
+.journey-detail-img {
+  display: block;
+  width: min(52vw, 220px);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.journey-detail-face.is-dim .journey-detail-img {
+  filter: grayscale(0.4) brightness(0.8);
+}
+
+.journey-detail-lit {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  color: var(--gold);
+  background: rgba(11, 11, 20, 0.82);
+  border: 1px solid rgba(255, 214, 166, 0.3);
+  border-radius: 999px;
+}
+
+.journey-detail-lit.is-dim {
+  color: var(--ink-muted);
+}
+
+.journey-detail-section {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.journey-detail-section h3 {
+  font-size: 0.82rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.journey-detail-section p {
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+.journey-detail-next p strong {
+  color: var(--ink);
+}
+
+.journey-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  padding-bottom: 24px;
+}
+
+.journey-detail-unlock {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(255, 214, 166, 0.06);
+  border-radius: var(--radius-sm);
+}
+
+.journey-continue {
+  width: 100%;
+}
+
+/* 牌组 × 数字 */
+.suit-numbers-intro {
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(46, 27, 75, 0.55), rgba(26, 18, 48, 0.85));
+  border: 1px solid rgba(255, 214, 166, 0.2);
+}
+
+.suit-numbers-title {
+  font-size: 1.15rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.suit-numbers-subtitle {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.suit-numbers-lead {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.suit-numbers-block {
+  margin-bottom: 22px;
+}
+
+.suit-numbers-block h3 {
+  font-size: 0.88rem;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.suit-numbers-suits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .suit-numbers-suits {
+    grid-template-columns: 1fr;
+  }
+}
+
+.suit-numbers-suit-card {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+}
+
+.suit-numbers-suit-card h4 {
+  font-size: 0.86rem;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.suit-numbers-theme {
+  font-size: 0.78rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.suit-numbers-hint {
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.suit-numbers-nums {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.suit-numbers-nums li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.suit-num-badge {
+  flex-shrink: 0;
+  width: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+}
+
+.suit-num-label {
+  flex-shrink: 0;
+  min-width: 2.5em;
+  color: var(--ink);
+}
+
+.suit-num-theme {
+  color: var(--ink-muted);
+}
+
+.suit-numbers-formula {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+
+.suit-numbers-example {
+  margin-bottom: 12px;
+}
+
+.suit-example-btn {
+  width: 100%;
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.suit-example-btn:hover {
+  border-color: rgba(255, 214, 166, 0.35);
+}
+
+.suit-example-face {
+  flex-shrink: 0;
+  width: 56px;
+  height: 84px;
+}
+
+.suit-example-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.suit-example-body h4 {
+  font-size: 0.84rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.suit-example-parts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.suit-example-reading {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.suit-numbers-court {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  line-height: 1.55;
+  padding: 12px;
+  background: rgba(255, 214, 166, 0.05);
+  border-radius: var(--radius-sm);
+}
+
+.codex-learn-page .codex-learn-body {
+  padding-bottom: 32px;
+}
+
+/* 你的塔罗旅程 */
+.codex-journey-panel {
+  margin: 14px 0 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(191, 163, 255, 0.06);
+  border: 1px solid rgba(191, 163, 255, 0.18);
+}
+
+.codex-journey-title {
+  font-size: 0.88rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.codex-journey-meta {
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+
+.codex-journey-empty {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.codex-journey-trends {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.codex-journey-trend {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(26, 18, 48, 0.5);
+  border: 1px solid var(--line);
+}
+
+.codex-journey-trend.is-rising {
+  border-color: rgba(255, 214, 166, 0.28);
+  background: rgba(255, 214, 166, 0.05);
+}
+
+.codex-journey-trend-head {
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+
+.codex-journey-trend-head strong {
+  color: var(--gold);
+}
+
+.codex-journey-trend-insight {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/* 第一次相遇 */
+.codex-first-meet {
+  margin-top: 28px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(46, 27, 75, 0.55), rgba(26, 18, 48, 0.85));
+  border: 1px solid rgba(255, 214, 166, 0.22);
+}
+
+.codex-first-meet-label {
+  font-size: 0.78rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.codex-first-meet-date {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.codex-first-meet-q {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.codex-first-meet-ai {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(11, 11, 20, 0.35);
+  border-left: 3px solid var(--purple);
+}
+
+.codex-first-meet-ai-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--purple);
+  margin-bottom: 6px;
+}
+
+.codex-first-meet-ai p {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+.codex-first-meet-more {
+  margin-top: 10px;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+
+.codex-first-meet-more strong {
+  color: var(--gold);
+}
+
+/* 全部 · 塔罗世界 */
+.codex-all-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.codex-world-intro {
+  padding: 16px;
+  border-radius: var(--radius);
+  background: linear-gradient(145deg, rgba(46, 27, 75, 0.6), rgba(26, 18, 48, 0.9));
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  text-align: center;
+}
+
+.codex-world-title {
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.codex-world-split {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.codex-world-block h3 {
+  font-size: 0.92rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.codex-world-block p {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.codex-world-arrow {
+  font-size: 1rem;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.codex-world-hubs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.codex-hub-label {
+  font-size: 0.76rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.codex-hub-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 214, 166, 0.25);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.codex-hub-card:hover {
+  border-color: rgba(255, 214, 166, 0.45);
+  background: rgba(255, 214, 166, 0.04);
+}
+
+.codex-hub-icon {
+  font-size: 1.4rem;
+}
+
+.codex-hub-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.codex-hub-text strong {
+  font-size: 0.9rem;
+  color: var(--gold);
+}
+
+.codex-hub-text span {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+.codex-hub-go {
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+
+.codex-hub-suits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 400px) {
+  .codex-hub-suits {
+    grid-template-columns: 1fr;
+  }
+}
+
+.codex-hub-suit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.codex-hub-suit:hover {
+  border-color: rgba(255, 214, 166, 0.3);
+}
+
+.codex-hub-suit-icon {
+  font-size: 1.2rem;
+}
+
+.codex-hub-suit-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.codex-hub-suit-text strong {
+  font-size: 0.82rem;
+}
+
+.codex-hub-suit-text span {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+.codex-all-decks-title {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.codex-all-decks-host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.codex-all-decks-host .codex-grid-section-cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }

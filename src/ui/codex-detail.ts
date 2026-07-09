@@ -7,6 +7,7 @@ import {
   resolveCardKnowledge,
 } from '../knowledge/registry.ts';
 import type { CodexEntry } from '../codex/collection.ts';
+import { formatCodexDate, getFirstEncounter } from '../codex/journey-insights.ts';
 
 type CodexDetailTab = 'basic' | 'scene' | 'visual' | 'encounter';
 
@@ -63,6 +64,12 @@ export function mountCodexDetail(
     ? knowledge.misreadings.map((m) => `<li>${escapeHtml(m)}</li>`).join('')
     : '<li class="codex-muted">暂无专项误读说明，请以正逆位语境理解</li>';
 
+  const firstMeet = getFirstEncounter(entry);
+  const firstSummary =
+    firstMeet && firstMeet.summary.trim() && firstMeet.summary !== nameCn
+      ? firstMeet.summary
+      : '（当时尚未记录完整解读，可在手札中回看）';
+
   const latest = entry.encounters[0];
   const latestTendency = latest
     ? formatAnswerTendency(latest.summary, nameCn)
@@ -102,9 +109,16 @@ export function mountCodexDetail(
   container.className = 'codex-detail codex-detail-unlocked';
   container.innerHTML = `
     <button type="button" class="codex-detail-close" aria-label="关闭">✕</button>
-    <div class="codex-meet-banner">
-      你已经与这张牌相遇 <strong>${entry.count}</strong> 次
-    </div>
+    <section class="codex-first-meet">
+      <h3 class="codex-first-meet-label">第一次相遇</h3>
+      <time class="codex-first-meet-date">${formatCodexDate(firstMeet?.at ?? entry.firstSeenAt)}</time>
+      <p class="codex-first-meet-q">${firstMeet?.question ? `你问：${escapeHtml(firstMeet.question)}` : '（未记录问题）'}</p>
+      <div class="codex-first-meet-ai">
+        <span class="codex-first-meet-ai-label">AI 解读</span>
+        <p>${escapeHtml(firstSummary)}</p>
+      </div>
+      ${entry.count > 1 ? `<p class="codex-first-meet-more">此后又与这张牌相遇 <strong>${entry.count - 1}</strong> 次</p>` : ''}
+    </section>
     <div class="codex-detail-hero">
       <div class="codex-detail-face">
         ${cardFaceImageHtml(card.id, `${nameCn} · ${knowledge.nameEn}`, 'codex-face-img')}

@@ -3,6 +3,8 @@ import './styles/emblems.css';
 import './styles/tarot.css';
 import './styles/codex.css';
 import { renderCodex } from './pages/codex.ts';
+import { renderCodexFoolJourney } from './pages/codex-fool-journey.ts';
+import { renderCodexSuitNumbers } from './pages/codex-suit-numbers.ts';
 import { renderComingSoon } from './pages/coming-soon.ts';
 import { renderDivination } from './pages/divination.ts';
 import { renderHome } from './pages/home.ts';
@@ -15,6 +17,8 @@ registerRoute('/', renderHome);
 registerRoute('/divination', renderDivination);
 registerRoute('/tarot', renderTarot);
 registerRoute('/codex', renderCodex);
+registerRoute('/codex/fool-journey', renderCodexFoolJourney);
+registerRoute('/codex/suit-numbers', renderCodexSuitNumbers);
 registerRoute('/journal', renderJournal);
 registerRoute('/xiao-liu-ren', (root) =>
   renderComingSoon(root, '小六壬', '大安 · 留连 · 速喜 · 赤口 · 小吉 · 空亡', 'star'),

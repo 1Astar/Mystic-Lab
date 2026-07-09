@@ -34,12 +34,12 @@ export function mountCodexPreview(
       </div>
       <div class="codex-preview-titles">
         <h2>${escapeHtml(preview.nameCn)}<span class="codex-preview-sep">｜</span>${escapeHtml(preview.nameEn)}</h2>
-        <p class="codex-preview-status">未解锁</p>
+        <p class="codex-preview-status">尚未相遇</p>
       </div>
     </div>
     <p class="codex-preview-lead">
-      这张牌还没有在你的占问中出现。<br>
-      当你抽到它时，会解锁完整牌义、牌面细节和你的相遇记录。
+      这张牌还在等待与你相遇。<br>
+      在占问里抽到它时，会记录<strong>第一次相遇</strong>的时间、问题与解读。
     </p>
     <section class="codex-preview-box">
       <h3>可预览</h3>
@@ -52,7 +52,7 @@ export function mountCodexPreview(
         </li>
       </ul>
     </section>
-    <p class="codex-preview-unlock">解锁方式：完成一次随心占问，抽到此牌即可解锁。</p>
+    <p class="codex-preview-unlock">去占问，让这张牌进入你的旅程。</p>
     <button type="button" class="btn codex-preview-draw">去抽牌</button>
   `;
 
