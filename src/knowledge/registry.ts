@@ -1,5 +1,7 @@
 import { CARD_KNOWLEDGE_OVERRIDES } from './card-overrides.ts';
 import { MAJOR_FIVE_KNOWLEDGE } from './cards/major-five.ts';
+import { MAJOR_REST_KNOWLEDGE } from './cards/major-rest.ts';
+import { MINOR_EXTENDED_KNOWLEDGE } from './cards/minor-extended.ts';
 import { DEEP_TEN_KNOWLEDGE, enrichMajorFive } from './cards/deep-ten.ts';
 import { CARD_HOTSPOTS } from './cards/hotspots/index.ts';
 import type { CardKnowledge, CardVisualHotspots, SceneMeaningKey } from './types.ts';
@@ -54,19 +56,37 @@ const knowledgeByDeckId = new Map<string, CardKnowledge>();
 const knowledgeById = new Map<string, CardKnowledge>();
 const hotspotsByDeckId = new Map<string, CardVisualHotspots>();
 
-for (const card of MAJOR_FIVE_KNOWLEDGE) {
-  const enriched = enrichMajorFive(card);
-  knowledgeByDeckId.set(enriched.deckId, enriched);
-  knowledgeById.set(enriched.id, enriched);
-}
-
-for (const card of DEEP_TEN_KNOWLEDGE) {
+function registerKnowledge(card: CardKnowledge): void {
   knowledgeByDeckId.set(card.deckId, card);
   knowledgeById.set(card.id, card);
 }
 
+for (const card of MAJOR_FIVE_KNOWLEDGE) {
+  registerKnowledge(enrichMajorFive(card));
+}
+
+for (const card of MAJOR_REST_KNOWLEDGE) {
+  registerKnowledge(card);
+}
+
+for (const card of MINOR_EXTENDED_KNOWLEDGE) {
+  registerKnowledge(card);
+}
+
+for (const card of DEEP_TEN_KNOWLEDGE) {
+  registerKnowledge(card);
+}
+
 for (const visual of CARD_HOTSPOTS) {
   hotspotsByDeckId.set(visual.deckId, visual);
+}
+
+for (const knowledge of knowledgeByDeckId.values()) {
+  if (!knowledge.visualOverview) continue;
+  const visual = hotspotsByDeckId.get(knowledge.deckId);
+  if (visual && !visual.overview) {
+    visual.overview = knowledge.visualOverview;
+  }
 }
 
 export function getCardKnowledgeByDeckId(deckId: string): CardKnowledge | undefined {
@@ -87,7 +107,10 @@ export function hasVisualHotspots(deckId: string): boolean {
 }
 
 export function getVisualOverview(deckId: string): string | undefined {
-  return hotspotsByDeckId.get(deckId)?.overview;
+  const fromHotspot = hotspotsByDeckId.get(deckId)?.overview;
+  if (fromHotspot) return fromHotspot;
+  const knowledge = knowledgeByDeckId.get(deckId);
+  return knowledge?.visualOverview ?? knowledge?.oneSentence;
 }
 
 export function hasKnowledgeEntry(deckId: string): boolean {
@@ -127,6 +150,13 @@ export function fallbackKnowledgeFromDeck(card: CardDefinition): CardKnowledge {
   const reversedMeaning = override?.reversedMeaning
     ?? card.reversed.replace(/^[^：]+：/, '').trim();
 
+  const uprightKeywords = override?.uprightKeywords ?? keywords;
+  const reversedKeywords = override?.reversedKeywords ?? [
+    ...keywords.slice(0, 3),
+    '阻滞',
+    '失衡',
+  ];
+
   return {
     id: card.id,
     deckId: card.id,
@@ -135,6 +165,8 @@ export function fallbackKnowledgeFromDeck(card: CardDefinition): CardKnowledge {
     arcana: card.arcana,
     number: 0,
     keywords,
+    uprightKeywords,
+    reversedKeywords,
     oneSentence,
     uprightMeaning,
     reversedMeaning,
@@ -142,6 +174,12 @@ export function fallbackKnowledgeFromDeck(card: CardDefinition): CardKnowledge {
     loveMeaning: minorLoveMeaning(nameCn),
     studyMeaning: minorStudyMeaning(nameCn),
     selfMeaning: minorSelfMeaning(nameCn),
+    wealthMeaning: override?.wealthMeaning ?? `财富议题里，${nameCn}映照资源与安全感相关的主题。结合现实账目与内心焦虑一并审视。`,
+    misreadings: override?.misreadings ?? [
+      `误读为「绝对好/坏」——${nameCn}是提醒，不是预言。`,
+      '误读为「与问题无关」——牌面总在回应你此刻的议题。',
+    ],
+    visualOverview: override?.visualOverview ?? oneSentence,
   };
 }
 

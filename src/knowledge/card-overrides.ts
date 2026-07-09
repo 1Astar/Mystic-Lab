@@ -4,6 +4,11 @@ export type CardKnowledgeOverride = {
   oneSentence: string;
   uprightMeaning: string;
   reversedMeaning: string;
+  uprightKeywords?: string[];
+  reversedKeywords?: string[];
+  wealthMeaning?: string;
+  misreadings?: string[];
+  visualOverview?: string;
 };
 
 export const CARD_KNOWLEDGE_OVERRIDES: Record<string, CardKnowledgeOverride> = {

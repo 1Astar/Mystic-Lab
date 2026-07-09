@@ -31,6 +31,8 @@ export type CardKnowledge = {
   wealthMeaning?: string;
   /** 容易误读的点 */
   misreadings?: string[];
+  /** 整牌总览（牌面画面描述，图鉴 / 看懂牌面） */
+  visualOverview?: string;
   foolJourney?: FoolJourneyStep;
 };
 
