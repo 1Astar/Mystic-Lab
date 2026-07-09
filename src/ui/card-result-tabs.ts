@@ -2,7 +2,7 @@ import type { CardReading } from '../interpretation/types.ts';
 
 import { isAiConfigured } from '../ai/settings.ts';
 
-import { getSceneMeaning, getVisualHotspots } from '../knowledge/registry.ts';
+import { getSceneMeaning, getVisualHotspots, getVisualOverview } from '../knowledge/registry.ts';
 
 import type { QuestionTopic } from '../knowledge/types.ts';
 
@@ -121,6 +121,22 @@ function contextualBadge(r: CardReading): string {
   return '<p class="layer-badge layer-badge-ai">规则解读 · 未配置 AI</p>';
 }
 
+function renderAnswerTendency(r: CardReading): string {
+  const t = r.interpretationLayers.answerTendency;
+  if (!t) return '';
+
+  return `
+      <section class="reading-layer-card reading-layer-answer">
+        <h4 class="layer-tag">你的答案倾向</h4>
+        <div class="answer-tendency-grid">
+          <p class="answer-tendency-field"><span class="answer-tendency-label">整体判断</span><span class="answer-tendency-value">${escapeHtml(t.overall)}</span></p>
+          <p class="answer-tendency-field"><span class="answer-tendency-label">结果倾向</span><span class="answer-tendency-value">${escapeHtml(t.tendency)}</span></p>
+        </div>
+        <p class="answer-tendency-oneliner"><span class="answer-tendency-label">一句话答案</span>${formatParagraph(t.oneLiner)}</p>
+        <p class="answer-tendency-action"><span class="answer-tendency-label">关键提醒</span>${formatParagraph(t.actionTip)}</p>
+      </section>`;
+}
+
 function renderReadingTab(r: CardReading): string {
   const { standard, contextualReading, contextualSections, selfReflection } = r.interpretationLayers;
   const reminderLabel = r.orientation === 'reversed' ? '逆位提醒' : '正位提醒';
@@ -154,6 +170,7 @@ function renderReadingTab(r: CardReading): string {
           <p class="std-field"><span class="std-label">${reminderLabel}</span><span class="std-value">${formatParagraph(stripReminderPrefix(standard.reminder))}</span></p>
         </div>
       </section>
+      ${renderAnswerTendency(r)}
       <section class="reading-layer-card reading-layer-context">
         <h4 class="layer-tag">结合你的问题</h4>
         ${contextualBadge(r)}
@@ -177,6 +194,9 @@ function renderVisualTab(r: CardReading): string {
   const deckCard = getCardById(r.cardId);
 
   const cardColor = deckCard?.color ?? 'var(--purple)';
+
+  const overview = getVisualOverview(r.cardId) ?? r.selectedCard.oneSentence;
+  const questionBridge = r.interpretationLayers.visualQuestionBridge;
 
   if (!visual?.hotspots.length) {
 
@@ -218,11 +238,28 @@ function renderVisualTab(r: CardReading): string {
 
 
 
+  const elementList = visual.hotspots
+    .map((h) => `<li><strong>${escapeHtml(h.label)}</strong>：${escapeHtml(h.meaning)}</li>`)
+    .join('');
+
+  const bridgeBlock = questionBridge
+    ? `<section class="visual-bridge-block"><h4 class="visual-section-title">回到你的问题</h4><p class="visual-bridge-text">${formatParagraph(questionBridge)}</p></section>`
+    : '';
+
   return `
 
     <div class="result-tab-panel" data-panel="visual">
 
-      <p class="visual-hint">点击牌面光点（${visual.hotspots.length} 处），从画面元素读懂牌意</p>
+      <section class="visual-overview-block">
+        <h4 class="visual-section-title">整牌总览</h4>
+        <p class="visual-overview-text">${formatParagraph(overview)}</p>
+      </section>
+
+      <section class="visual-elements-block">
+        <h4 class="visual-section-title">牌面元素</h4>
+        <p class="visual-hint">点击牌面光点查看；也可直接看下方列表</p>
+        <ul class="visual-elements-list">${elementList}</ul>
+      </section>
 
       <div class="visual-card-stage">
         <div class="visual-card-face ${r.orientation === 'reversed' ? 'is-reversed' : ''}" style="--card-color: ${cardColor}">
@@ -232,6 +269,8 @@ function renderVisualTab(r: CardReading): string {
       </div>
 
       <p class="hotspot-detail" id="hotspot-detail-${r.cardId}">点选上方元素查看含义</p>
+
+      ${bridgeBlock}
 
     </div>`;
 

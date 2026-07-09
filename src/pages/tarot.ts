@@ -131,21 +131,21 @@ export function renderTarot(root: HTMLElement): () => void {
   function pauseCameraForReview(): void {
     cameraWrap.hidden = true;
     gestureStatus.el.hidden = true;
+    gestureBridge?.stop();
     if (cameraOn) {
-      gestureBridge?.stop();
       camera.stop();
       cameraOn = false;
     }
   }
 
   function syncHintBar(): void {
-    if (state === 'cardReview') {
-      hintBar.setStep('review', drawMode);
+    if (state === 'cardReview' || state === 'result') {
+      hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
       return;
     }
-    if (state === 'result' || ['landing', 'question', 'spread', 'modeSelect', 'loading'].includes(state)) {
+    if (['landing', 'question', 'spread', 'modeSelect', 'loading'].includes(state)) {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
@@ -321,7 +321,6 @@ export function renderTarot(root: HTMLElement): () => void {
                 <button type="button" class="question-guide-trigger">怎么问更好？</button>
               </div>
               <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：找工作的阻碍和机会分别是什么？"></textarea>
-              <p class="tarot-hint tarot-hint-soft">背景是提问示例；需要时可点「怎么问更好？」查看开放式 / 封闭式对比。</p>
               <div id="question-coach-host"></div>
             </div>
           </div>
@@ -739,6 +738,8 @@ export function renderTarot(root: HTMLElement): () => void {
           onGesture: handleNamedGesture,
           onFrame: handleFrame,
           onUpdate: (ev) => {
+            const ritualActive = ['ritual', 'shuffle', 'cut', 'draw', 'flip'].includes(state);
+            if (!ritualActive) return;
             gestureStatus.update(ev.handCount, ev.gesture, ev.confidence, true);
             if (state === 'ritual' && ev.recognized) {
               if (heldPalm.update(ev.recognized, ['Open_Palm', 'ILoveYou'])) {

@@ -35,11 +35,13 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-four',
     deckId: 'pentacles-four',
+    overview:
+      '一个人坐在城镇边缘，紧紧抱着自己的金币，头顶、胸前、脚下都被金币占据。他拥有资源，但也被资源困住——想守住安全感，却因为太害怕失去，身体和心都不太流动。',
     hotspots: [
-      { id: 'figure', label: '抱币者', x: 50, y: 48, meaning: '紧握资源、控制与安全感——怕失去。' },
-      { id: 'head_coin', label: '头顶星币', x: 50, y: 22, meaning: '金钱占据思维，可能遮住其他价值。' },
-      { id: 'feet_coins', label: '脚下双币', x: 50, y: 72, meaning: '站稳了，但也可能被物质钉在原地。' },
-      { id: 'city', label: '远城', x: 50, y: 12, meaning: '更大的世界在旁，是否愿意分享或投资？' },
+      { id: 'head_coin', label: '头顶星币', x: 50, y: 22, meaning: '脑子里一直想着安全、资源、结果。' },
+      { id: 'chest_coin', label: '胸前星币', x: 50, y: 42, meaning: '把重要东西抱得很紧，不太愿意冒险。' },
+      { id: 'feet_coins', label: '脚下双币', x: 50, y: 72, meaning: '站稳了，但也被固定在原地。' },
+      { id: 'city', label: '背后城市', x: 50, y: 12, meaning: '现实世界、机会、资源场，但你和它之间有距离。' },
     ],
   },
   {

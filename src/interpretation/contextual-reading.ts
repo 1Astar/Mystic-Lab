@@ -1,6 +1,7 @@
 import type { DrawnCard } from '../tarot/engine.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
 import { detectQuestionTheme } from '../codex/collection.ts';
+import { buildAnswerTendency, buildVisualQuestionBridge } from '../knowledge/answer-tendency.ts';
 import { buildEncounterRecord } from '../knowledge/encounter.ts';
 import { mockAIInterpretation } from '../knowledge/mock-ai.ts';
 import { buildSelfReflectionQuestions } from '../knowledge/reflection-prompts.ts';
@@ -63,11 +64,15 @@ function buildCardReading(
   const standard = buildStandardLayer(knowledge, reversed);
   const mockResult = mockAIInterpretation(readingContext, knowledge, reversed);
   const selfReflection = buildSelfReflectionQuestions(readingContext, knowledge);
+  const answerTendency = buildAnswerTendency(readingContext, knowledge, reversed);
+  const visualQuestionBridge = buildVisualQuestionBridge(readingContext, knowledge, reversed);
 
   const interpretationLayers = {
     standard,
+    answerTendency: answerTendency ?? undefined,
     contextualReading: mockResult.text,
     contextualSections: mockResult.sections,
+    visualQuestionBridge,
     selfReflection,
   };
 

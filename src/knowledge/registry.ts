@@ -79,6 +79,10 @@ export function hasVisualHotspots(deckId: string): boolean {
   return !!visual?.hotspots.length;
 }
 
+export function getVisualOverview(deckId: string): string | undefined {
+  return hotspotsByDeckId.get(deckId)?.overview;
+}
+
 export function hasKnowledgeEntry(deckId: string): boolean {
   return knowledgeByDeckId.has(deckId);
 }

@@ -39,7 +39,20 @@ export type VisualHotspot = {
 export type CardVisualHotspots = {
   cardId: string;
   deckId: string;
+  /** 整牌画面总览（看懂牌面 Tab 顶部） */
+  overview?: string;
   hotspots: VisualHotspot[];
+};
+
+export type AnswerTendency = {
+  /** 整体判断，如 偏稳 / 偏卡 / 有机会但需调整 */
+  overall: string;
+  /** 结果倾向：正向 / 中性偏正 / 中性 / 中性偏负 / 偏负 */
+  tendency: string;
+  /** 一句话直接回答用户原问题 */
+  oneLiner: string;
+  /** 关键行动提醒 */
+  actionTip: string;
 };
 
 export type QuestionTopic = QuestionTheme;
@@ -84,10 +97,14 @@ export type StandardMeaningLayer = {
 export type InterpretationLayers = {
   /** 第一层：标准牌义（结构化，避免重复渲染） */
   standard: StandardMeaningLayer;
+  /** 直接结论（有提问时优先展示） */
+  answerTendency?: AnswerTendency;
   /** 第二层：结合问题的解读（P3 接 LLM，P1 用 mock） */
   contextualReading: string;
   /** 结构化解读段落（感情喜欢类等） */
   contextualSections?: ContextualSection[];
+  /** 看懂牌面：回到你的问题 */
+  visualQuestionBridge?: string;
   /** 第三层：引导用户自己判断 */
   selfReflection: string[];
 };
