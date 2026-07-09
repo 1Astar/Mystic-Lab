@@ -24,8 +24,8 @@ export function renderCodex(root: HTMLElement): void {
   const back = document.createElement('button');
   back.type = 'button';
   back.className = 'back-link';
-  back.textContent = '← 返回首页';
-  back.addEventListener('click', () => navigate('/'));
+  back.textContent = '← 返回塔罗';
+  back.addEventListener('click', () => navigate('/tarot'));
   page.append(back);
   root.appendChild(page);
 
@@ -140,7 +140,7 @@ export function renderCodex(root: HTMLElement): void {
           <p style="margin-top:8px">${emptyMsg.sub}</p>
           ${filter !== 'favorite' ? '<button type="button" class="btn" style="margin-top:14px">去占问</button>' : ''}
         </div>`;
-      gridHost.querySelector('button')?.addEventListener('click', () => navigate('/divination'));
+      gridHost.querySelector('button')?.addEventListener('click', () => navigate('/tarot/reading'));
     } else if (filter === 'all') {
       mountCodexAllView(gridHost, cards, onSelect);
     } else {

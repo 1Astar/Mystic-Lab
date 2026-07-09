@@ -16,8 +16,8 @@ export function renderJournal(root: HTMLElement): void {
   const back = document.createElement('button');
   back.type = 'button';
   back.className = 'back-link';
-  back.textContent = '← 返回首页';
-  back.addEventListener('click', () => navigate('/'));
+  back.textContent = '← 返回塔罗';
+  back.addEventListener('click', () => navigate('/tarot'));
 
   page.append(back);
 
@@ -66,7 +66,7 @@ export function renderJournal(root: HTMLElement): void {
       btn.className = 'btn';
       btn.style.marginTop = '16px';
       btn.textContent = '去占问';
-      btn.addEventListener('click', () => navigate('/divination'));
+      btn.addEventListener('click', () => navigate('/tarot/reading'));
       empty.appendChild(btn);
       page.appendChild(empty);
       return;

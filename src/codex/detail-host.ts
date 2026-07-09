@@ -45,7 +45,7 @@ export function openCodexCardDetail(host: CodexDetailHost, deckId: string): void
         host.onClose();
         detail.remove();
       },
-      onDraw: () => navigate('/divination'),
+      onDraw: () => navigate('/tarot/reading'),
     });
   }
 

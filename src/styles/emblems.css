@@ -254,6 +254,32 @@
   padding: 40px 0 60px;
 }
 
+.lab-section {
+  margin-top: 28px;
+}
+
+.lab-section-label {
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(191, 163, 255, 0.5);
+}
+
+.lab-systems .entry-card-primary {
+  text-align: center;
+}
+
+.entry-card-soon {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.entry-card-soon:hover {
+  transform: none;
+  border-color: var(--line);
+}
+
 .coming-soon-emblem {
   margin-bottom: 20px;
 }

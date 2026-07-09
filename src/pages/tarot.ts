@@ -99,8 +99,8 @@ export function renderTarot(root: HTMLElement): () => void {
   const back = document.createElement('button');
   back.type = 'button';
   back.className = 'back-link';
-  back.textContent = '← 返回占问';
-  back.addEventListener('click', () => navigate('/divination'));
+  back.textContent = '← 返回塔罗';
+  back.addEventListener('click', () => navigate('/tarot'));
 
   const stage = document.createElement('div');
   stage.className = 'tarot-stage';
