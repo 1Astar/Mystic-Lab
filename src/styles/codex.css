@@ -170,7 +170,7 @@
 }
 
 .codex-progress {
-  margin: 14px 0 4px;
+  margin: 0;
   padding: 14px 16px;
   background: var(--gold-soft);
   border: 1px solid rgba(255, 214, 166, 0.25);
@@ -1044,7 +1044,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin: 14px 0 4px;
+  margin: 0;
 }
 
 @media (max-width: 400px) {
@@ -1307,9 +1307,152 @@
   text-align: right;
 }
 
-/* 愚人之旅详情 */
+/* 愚人之旅详情 · 抽屉 / 侧栏 */
+.journey-sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+
+.journey-sheet-root.is-open {
+  pointer-events: auto;
+}
+
+.journey-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(11, 11, 20, 0.45);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  cursor: pointer;
+}
+
+.journey-sheet-root.is-open .journey-sheet-backdrop {
+  opacity: 1;
+}
+
+.journey-sheet-panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(30, 22, 52, 0.98), rgba(11, 11, 20, 0.99));
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* 移动端：底部半屏抽屉 */
+.journey-sheet-panel {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: min(88vh, 720px);
+  border-radius: 18px 18px 0 0;
+  transform: translateY(100%);
+}
+
+.journey-sheet-root.is-open .journey-sheet-panel {
+  transform: translateY(0);
+}
+
+.journey-sheet-handle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 4px;
+  margin: 10px auto 0;
+  border-radius: 999px;
+  background: rgba(255, 214, 166, 0.35);
+}
+
+.journey-sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  background: rgba(11, 11, 20, 0.5);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  color: var(--ink-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.journey-sheet-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 18px 28px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 桌面端：右侧展开面板 */
+@media (min-width: 768px) {
+  .journey-sheet-backdrop {
+    background: rgba(11, 11, 20, 0.28);
+  }
+
+  .journey-sheet-panel {
+    top: 0;
+    right: 0;
+    left: auto;
+    bottom: 0;
+    width: min(420px, 42vw);
+    max-height: none;
+    border-radius: 0;
+    border-left: 1px solid rgba(255, 214, 166, 0.18);
+    border-top: 0;
+    transform: translateX(100%);
+  }
+
+  .journey-sheet-root.is-open .journey-sheet-panel {
+    transform: translateX(0);
+  }
+
+  .journey-sheet-handle {
+    display: none;
+  }
+}
+
+.journey-detail-when strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 图鉴分区标题 */
+.codex-section-block {
+  margin-bottom: 18px;
+}
+
+.codex-section-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.codex-section-block .codex-progress {
+  margin-top: 0;
+}
+
+.codex-filter-block .codex-tabs {
+  margin-top: 0;
+}
+
+.codex-filter-block .codex-grid-host,
+.codex-filter-block .codex-all-view,
+.codex-filter-block .codex-grid {
+  margin-top: 12px;
+}
+
+/* 愚人之旅详情（内容区） */
 .journey-detail-head {
-  margin-top: 28px;
+  margin-top: 8px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
@@ -1607,7 +1750,7 @@
 
 /* 你的塔罗旅程 */
 .codex-journey-panel {
-  margin: 14px 0 4px;
+  margin: 0;
   padding: 14px 16px;
   border-radius: var(--radius-sm);
   background: rgba(191, 163, 255, 0.06);

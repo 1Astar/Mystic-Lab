@@ -65,19 +65,29 @@ export function renderCodex(root: HTMLElement): void {
         <h1 class="page-title">随心图鉴</h1>
         <p class="page-subtitle">已收集的牌与卦 · 点开慢慢看懂</p>
       </header>
-      <div class="codex-progress">
-        <p class="codex-progress-main">已收集 <strong>${progress.collected}</strong> / ${progress.total} 张塔罗牌</p>
-        ${progress.topSuitLabel ? `<p class="codex-progress-sub">最近遇见最多的是：<strong>${progress.topSuitLabel}</strong></p>` : ''}
-        ${progress.topThemeLabel ? `<p class="codex-progress-sub">你最近最常问的是：<strong>${progress.topThemeLabel}</strong></p>` : ''}
-      </div>
-      <div class="codex-journey-host"></div>
-      <div class="codex-learn-host"></div>
-      <div class="codex-tabs" role="tablist">
-        <button type="button" data-f="collected" class="${filter === 'collected' ? 'is-active' : ''}">已收集</button>
-        <button type="button" data-f="all" class="${filter === 'all' ? 'is-active' : ''}">全部</button>
-        <button type="button" data-f="favorite" class="${filter === 'favorite' ? 'is-active' : ''}">收藏</button>
-      </div>
-      <div class="codex-grid-host"></div>
+      <section class="codex-section-block">
+        <h2 class="codex-section-label">已收集概览</h2>
+        <div class="codex-progress">
+          <p class="codex-progress-main">已收集 <strong>${progress.collected}</strong> / ${progress.total} 张塔罗牌</p>
+          ${progress.topSuitLabel ? `<p class="codex-progress-sub">最近遇见最多的是：<strong>${progress.topSuitLabel}</strong></p>` : ''}
+          ${progress.topThemeLabel ? `<p class="codex-progress-sub">你最近最常问的是：<strong>${progress.topThemeLabel}</strong></p>` : ''}
+        </div>
+      </section>
+      <section class="codex-section-block">
+        <div class="codex-journey-host"></div>
+      </section>
+      <section class="codex-section-block">
+        <h2 class="codex-section-label">学习入口</h2>
+        <div class="codex-learn-host"></div>
+      </section>
+      <section class="codex-section-block codex-filter-block">
+        <div class="codex-tabs" role="tablist">
+          <button type="button" data-f="collected" class="${filter === 'collected' ? 'is-active' : ''}">已收集</button>
+          <button type="button" data-f="all" class="${filter === 'all' ? 'is-active' : ''}">全部</button>
+          <button type="button" data-f="favorite" class="${filter === 'favorite' ? 'is-active' : ''}">收藏</button>
+        </div>
+        <div class="codex-grid-host"></div>
+      </section>
     `;
 
     const journeyHost = body.querySelector('.codex-journey-host') as HTMLElement;

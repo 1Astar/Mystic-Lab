@@ -21,6 +21,7 @@ export function renderCodexFoolJourney(root: HTMLElement): void {
 
   function closeDetail(): void {
     selectedId = null;
+    page.querySelector('.journey-sheet-root')?.remove();
     page.querySelector('.codex-detail')?.remove();
   }
 
@@ -28,12 +29,12 @@ export function renderCodexFoolJourney(root: HTMLElement): void {
     closeDetail();
     selectedId = deckId;
     detailMode = 'journey';
-    const detail = document.createElement('aside');
-    mountJourneyDetail(detail, deckId, {
-      onClose: closeDetail,
+    mountJourneyDetail(page, deckId, {
+      onClose: () => {
+        selectedId = null;
+      },
       onContinue: (nextId) => openJourneyDetail(nextId),
       onOpenCodex: (id) => {
-        closeDetail();
         detailMode = 'codex';
         openCodexCardDetail(
           {
@@ -48,7 +49,6 @@ export function renderCodexFoolJourney(root: HTMLElement): void {
         );
       },
     });
-    page.appendChild(detail);
   }
 
   function render(): void {

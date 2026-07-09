@@ -8,6 +8,8 @@ export type JourneyMapStep = {
   theme: string;
   symbolism?: string;
   lifeStage?: string;
+  /** 占问里常见的生活场景，用于「你可能会在…遇见它」 */
+  encounterWhen?: string;
 };
 
 export type JourneyMapChapter = {
