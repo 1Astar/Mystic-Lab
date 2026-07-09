@@ -7,6 +7,7 @@ import {
   resolveCardKnowledge,
 } from '../knowledge/registry.ts';
 import type { CodexEntry } from '../codex/collection.ts';
+import { getCardRoleHint } from '../codex/card-role.ts';
 import { formatCodexDate, getFirstEncounter } from '../codex/journey-insights.ts';
 
 type CodexDetailTab = 'basic' | 'scene' | 'visual' | 'encounter';
@@ -47,6 +48,7 @@ export function mountCodexDetail(
   callbacks: CodexDetailCallbacks,
 ): void {
   const knowledge = resolveCardKnowledge(card);
+  const role = getCardRoleHint(card);
   const visual = getVisualHotspots(card.id);
   const overview = getVisualOverview(card.id) ?? knowledge.oneSentence;
   const nameCn = formatCardNameZh(card);
@@ -126,6 +128,7 @@ export function mountCodexDetail(
       <div class="codex-detail-head" style="--card-color:${card.color}">
         <h2>${escapeHtml(nameCn)}</h2>
         <p>${escapeHtml(knowledge.nameEn)} · ${card.arcana === 'major' ? '大阿尔克那' : '小阿尔克那'}</p>
+        <p class="codex-detail-role">${escapeHtml(role.formula)}</p>
       </div>
     </div>
     <div class="codex-detail-tab-bar" role="tablist">

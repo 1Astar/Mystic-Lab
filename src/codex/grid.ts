@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../tarot/deck.ts';
 import { formatCardNameZh } from '../tarot/card-names.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
+import { getCardRoleHint } from './card-role.ts';
 import { getCodexEntry, isCardCollected } from './collection.ts';
 import { navigate } from '../router.ts';
 
@@ -65,20 +66,23 @@ export function buildCodexGridGroups(cards: CardDefinition[]): CodexGridGroup[] 
 export function renderCodexCell(
   card: CardDefinition,
   onSelect: (deckId: string) => void,
+  options?: { showRole?: boolean },
 ): HTMLButtonElement {
   const col = isCardCollected(card.id);
   const entry = getCodexEntry(card.id);
   const nameCn = formatCardNameZh(card);
+  const role = options?.showRole ? getCardRoleHint(card) : null;
 
   const cell = document.createElement('button');
   cell.type = 'button';
-  cell.className = `codex-cell ${col ? 'is-collected' : 'is-locked'}`;
+  cell.className = `codex-cell ${col ? 'is-collected' : 'is-locked'}${role ? ' has-role' : ''}`;
   cell.innerHTML = `
     <div class="codex-cell-face">
       ${cardFaceImageHtml(card.id, nameCn, 'codex-cell-img')}
       ${col ? '' : '<span class="codex-cell-lock" aria-hidden="true">未遇</span>'}
     </div>
     <span class="codex-name">${nameCn}</span>
+    ${role ? `<span class="codex-cell-role" title="${role.formula.replace(/"/g, '&quot;')}">${role.badge}</span>` : ''}
     ${entry && entry.count > 1 ? `<span class="codex-count">×${entry.count}</span>` : ''}
     ${entry?.favorite ? '<span class="codex-fav">★</span>' : ''}
   `;
@@ -114,7 +118,7 @@ export function mountCodexGroupedGrid(
 
     const cells = section.querySelector('.codex-grid-section-cells')!;
     for (const card of group.cards) {
-      cells.appendChild(renderCodexCell(card, onSelect));
+      cells.appendChild(renderCodexCell(card, onSelect, { showRole: true }));
     }
 
     container.appendChild(section);

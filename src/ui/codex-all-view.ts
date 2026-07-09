@@ -122,7 +122,7 @@ export function mountCodexAllView(
 
     const cells = section.querySelector('.codex-grid-section-cells')!;
     for (const card of group.cards) {
-      cells.appendChild(renderCodexCell(card, onSelect));
+      cells.appendChild(renderCodexCell(card, onSelect, { showRole: true }));
     }
     decksHost.appendChild(section);
   }

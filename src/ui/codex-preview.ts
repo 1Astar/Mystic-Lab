@@ -1,6 +1,7 @@
 import type { CardDefinition } from '../tarot/deck.ts';
 import { formatCardNameZh } from '../tarot/card-names.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
+import { getCardRoleHint } from '../codex/card-role.ts';
 import { getCodexPreviewInfo } from '../codex/preview.ts';
 
 function escapeHtml(text: string): string {
@@ -22,6 +23,7 @@ export function mountCodexPreview(
   callbacks: CodexPreviewCallbacks,
 ): void {
   const preview = getCodexPreviewInfo(card);
+  const role = getCardRoleHint(card);
   const nameCn = formatCardNameZh(card);
 
   container.className = 'codex-detail codex-preview';
@@ -41,6 +43,10 @@ export function mountCodexPreview(
       这张牌还在等待与你相遇。<br>
       在占问里抽到它时，会记录<strong>第一次相遇</strong>的时间、问题与解读。
     </p>
+    <section class="codex-preview-box">
+      <h3>在牌组中的位置</h3>
+      <p class="codex-preview-role-formula">${escapeHtml(role.formula)}</p>
+    </section>
     <section class="codex-preview-box">
       <h3>可预览</h3>
       <ul class="codex-preview-list">

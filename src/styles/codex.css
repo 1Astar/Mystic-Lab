@@ -465,6 +465,53 @@
   line-height: 1.2;
 }
 
+.codex-cell.has-role {
+  aspect-ratio: auto;
+  min-height: 118px;
+  padding-bottom: 6px;
+}
+
+.codex-cell.has-role .codex-cell-face {
+  flex: none;
+  width: 100%;
+  height: 68px;
+  min-height: 68px;
+}
+
+.codex-cell-role {
+  display: block;
+  width: 100%;
+  margin-top: 2px;
+  padding: 0 2px;
+  font-size: 0.5rem;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--gold);
+  opacity: 0.88;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.codex-cell.is-locked .codex-cell-role {
+  color: var(--ink-muted);
+  opacity: 0.75;
+}
+
+.codex-detail-role {
+  margin-top: 8px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--gold);
+  opacity: 0.9;
+}
+
+.codex-preview-role-formula {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
 .codex-fav {
   position: absolute;
   top: 4px;
