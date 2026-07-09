@@ -5,6 +5,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-0',
     deckId: 'major-0',
+    overview:
+      '一个年轻人站在悬崖边，背着行囊望向远方日光，脚边白狗抬头提醒。像一次尚未看清全貌的出发——天真与信任并存，本能也在轻声示警。',
     hotspots: [
       { id: 'cliff', label: '悬崖边', x: 50, y: 78, meaning: '未知的前方——迈出一步前，未必看清全貌。' },
       { id: 'dog', label: '白狗', x: 72, y: 70, meaning: '本能的提醒：天真不等于忽视现实。' },
@@ -27,6 +29,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-2',
     deckId: 'major-2',
+    overview:
+      '女祭司端坐黑白双柱之间，膝上放着半遮卷轴，脚边有一弯月亮。答案不在喧嚣的外界，而在你尚未说出口的内在知晓里。',
     hotspots: [
       { id: 'priestess', label: '女祭司', x: 50, y: 45, meaning: '静默的知晓——答案在内在，不在喧嚣里。' },
       { id: 'scroll', label: '卷轴', x: 55, y: 58, meaning: '部分真相仍被遮掩，适合等待而非强推。' },
@@ -66,6 +70,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-6',
     deckId: 'major-6',
+    overview:
+      '天使在两人头顶见证，一人望向生命之树，一人望向知识之树。联结与选择同时存在——吸引之外，更是价值观是否对齐。',
     hotspots: [
       { id: 'figures', label: '两个人物', x: 50, y: 52, meaning: '联结与选择同时存在，不只有吸引。' },
       { id: 'angel', label: '天使', x: 50, y: 10, meaning: '更高层面的价值见证，提醒对齐真心。' },
@@ -163,6 +169,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-16',
     deckId: 'major-16',
+    overview:
+      '闪电击中高塔，王冠坠落，两人从塔上跌下。旧结构、旧信念被强制震塌——痛苦，但也在逼你放下不再真实的依靠。',
     hotspots: [
       { id: 'lightning', label: '闪电', x: 50, y: 8, meaning: '突发的真相与强制觉醒。' },
       { id: 'tower', label: '高塔', x: 50, y: 42, meaning: '旧结构、旧信念——不再真实的依靠。' },
@@ -173,6 +181,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-17',
     deckId: 'major-17',
+    overview:
+      '裸身人物跪在水边，一手倒水入池、一手倒入河，头顶八星环绕一大星。像疗愈与希望重新流动——不是暴富，是慢慢恢复信任与方向。',
     hotspots: [
       { id: 'big_star', label: '大星', x: 52, y: 18, meaning: '远方的指引——希望与精神层面的照亮。' },
       { id: 'figure', label: '裸身人物', x: 50, y: 55, meaning: '坦诚、脆弱、卸下防御后的真实。' },
@@ -183,6 +193,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-18',
     deckId: 'major-18',
+    overview:
+      '一轮满月悬在双塔之间，脚下小路蜿蜒，狗与狼对月长啸，水中浮出小龙虾。迷雾未散——真相尚在潜意识深处，直觉比匆忙结论更可靠。',
     hotspots: [
       { id: 'moon', label: '月亮', x: 50, y: 14, meaning: '潜意识、周期与尚未说清的真相。' },
       { id: 'path', label: '小路', x: 50, y: 68, meaning: '在迷雾中仍要前行，但别急着下结论。' },

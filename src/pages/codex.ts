@@ -1,16 +1,17 @@
 import { navigate } from '../router.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
+import { formatCardNameZh } from '../tarot/card-names.ts';
+import { cardFaceImageHtml } from '../tarot/card-images.ts';
 import {
   getAllEntries,
   getCodexEntry,
   getCodexProgress,
   isCardCollected,
   savePersonalNote,
-  themeMeanings,
   toggleFavorite,
-  cardOneLiner,
 } from '../codex/collection.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountCodexDetail } from '../ui/codex-detail.ts';
 
 type CodexFilter = 'all' | 'collected' | 'favorite';
 
@@ -108,9 +109,16 @@ export function renderCodex(root: HTMLElement): void {
         const cell = document.createElement('button');
         cell.type = 'button';
         cell.className = `codex-cell ${col ? 'is-collected' : 'is-locked'}`;
+        const nameCn = formatCardNameZh(card);
         cell.innerHTML = `
-          <span class="codex-symbol" style="--card-color:${card.color}">${card.symbol}</span>
-          <span class="codex-name">${card.nameZh}</span>
+          <div class="codex-cell-face">
+            ${
+              col
+                ? cardFaceImageHtml(card.id, nameCn, 'codex-cell-img')
+                : `<span class="codex-symbol" style="--card-color:${card.color}">${card.symbol}</span>`
+            }
+          </div>
+          <span class="codex-name">${nameCn}</span>
           ${entry && entry.count > 1 ? `<span class="codex-count">×${entry.count}</span>` : ''}
           ${entry?.favorite ? '<span class="codex-fav">★</span>' : ''}
         `;
@@ -136,62 +144,17 @@ export function renderCodex(root: HTMLElement): void {
     const entry = getCodexEntry(selectedId);
     if (!card || !entry) return;
 
-    const themes = themeMeanings(card);
     const detail = document.createElement('aside');
-    detail.className = 'codex-detail';
-    detail.innerHTML = `
-      <button type="button" class="codex-detail-close" aria-label="关闭">✕</button>
-      <div class="codex-meet-banner">
-        你已经与这张牌相遇 <strong>${entry.count}</strong> 次
-      </div>
-      <div class="codex-detail-head" style="--card-color:${card.color}">
-        <span class="codex-detail-symbol">${card.symbol}</span>
-        <div>
-          <h2>${card.nameZh}</h2>
-          <p>${card.nameEn} · ${card.arcana === 'major' ? '大阿卡纳' : '小阿卡纳'}</p>
-          <p class="codex-keywords">关键词：${card.keywords.join(' / ')}</p>
-        </div>
-      </div>
-      <p class="codex-oneliner">${cardOneLiner(card, false)}</p>
-      <section class="codex-section">
-        <h3>在不同问题里</h3>
-        <ul class="codex-theme-list">
-          <li>${themes.work}</li>
-          <li>${themes.love}</li>
-          <li>${themes.study}</li>
-          <li>${themes.self}</li>
-        </ul>
-      </section>
-      <section class="codex-section">
-        <h3>相遇记录</h3>
-        ${entry.encounters.map((e) => `
-          <div class="codex-encounter">
-            <time>${new Date(e.at).toLocaleString('zh-CN')}</time>
-            <p>${e.question ? `问：${e.question}` : '（未记录问题）'}</p>
-            <p>${e.spreadLabel} · ${e.reversed ? '逆位' : '正位'}</p>
-          </div>`).join('')}
-      </section>
-      <section class="codex-section">
-        <h3>我的感想</h3>
-        <textarea class="codex-note-input" rows="3" placeholder="写下对这张牌的感想…">${entry.personalNote}</textarea>
-        <button type="button" class="btn btn-secondary codex-save-note">保存感想</button>
-      </section>
-      <button type="button" class="btn btn-ghost codex-fav-btn">${entry.favorite ? '取消收藏' : '收藏此牌'}</button>
-    `;
-
-    detail.querySelector('.codex-detail-close')?.addEventListener('click', () => {
-      selectedId = null;
-      detail.remove();
-    });
-
-    detail.querySelector('.codex-save-note')?.addEventListener('click', () => {
-      const ta = detail.querySelector<HTMLTextAreaElement>('.codex-note-input');
-      if (ta) savePersonalNote(selectedId!, ta.value);
-    });
-
-    detail.querySelector('.codex-fav-btn')?.addEventListener('click', () => {
-      toggleFavorite(selectedId!);
-      render();
+    mountCodexDetail(detail, card, entry, {
+      onClose: () => {
+        selectedId = null;
+        detail.remove();
+      },
+      onSaveNote: (note) => savePersonalNote(selectedId!, note),
+      onToggleFavorite: () => {
+        toggleFavorite(selectedId!);
+        render();
+      },
     });
 
     page.appendChild(detail);

@@ -71,6 +71,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-eight',
     deckId: 'wands-eight',
+    overview:
+      '八根权杖划过晴朗天空，下方是开阔田野。事态正在加速——消息、进展或变动可能在路上，关键是准备好接住这波动能。',
     hotspots: [
       { id: 'wands', label: '飞行权杖', x: 50, y: 42, meaning: '事态加速推进——消息、行动或变化来得很快。' },
       { id: 'land', label: '下方田野', x: 50, y: 82, meaning: '落地在即，准备好接住这波动能。' },

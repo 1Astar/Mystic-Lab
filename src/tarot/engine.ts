@@ -24,6 +24,19 @@ export function drawCards(count: number, reversedChance = 0.3): DrawnCard[] {
   }));
 }
 
+export function drawClarifierCard(excludeIds: string[]): DrawnCard | null {
+  const available = TAROT_DECK.filter((c) => !excludeIds.includes(c.id));
+  if (available.length === 0) return null;
+  const shuffled = shuffleDeck(available);
+  const card = shuffled[0]!;
+  return {
+    card,
+    reversed: Math.random() < 0.3,
+    position: '补牌',
+    positionKey: 'clarifier',
+  };
+}
+
 export function cardLabel(drawn: DrawnCard): string {
   const suffix = drawn.reversed ? '（逆位）' : '（正位）';
   return `${drawn.card.nameZh}${suffix}`;

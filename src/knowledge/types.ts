@@ -23,6 +23,14 @@ export type CardKnowledge = {
   loveMeaning: string;
   studyMeaning: string;
   selfMeaning: string;
+  /** 正位关键词（图鉴深度解读） */
+  uprightKeywords?: string[];
+  /** 逆位关键词 */
+  reversedKeywords?: string[];
+  /** 财富议题 */
+  wealthMeaning?: string;
+  /** 容易误读的点 */
+  misreadings?: string[];
   foolJourney?: FoolJourneyStep;
 };
 

@@ -1,5 +1,6 @@
 import { CARD_KNOWLEDGE_OVERRIDES } from './card-overrides.ts';
 import { MAJOR_FIVE_KNOWLEDGE } from './cards/major-five.ts';
+import { DEEP_TEN_KNOWLEDGE, enrichMajorFive } from './cards/deep-ten.ts';
 import { CARD_HOTSPOTS } from './cards/hotspots/index.ts';
 import type { CardKnowledge, CardVisualHotspots, SceneMeaningKey } from './types.ts';
 import { TOPIC_TO_SCENE_KEY, type QuestionTopic } from './types.ts';
@@ -54,6 +55,12 @@ const knowledgeById = new Map<string, CardKnowledge>();
 const hotspotsByDeckId = new Map<string, CardVisualHotspots>();
 
 for (const card of MAJOR_FIVE_KNOWLEDGE) {
+  const enriched = enrichMajorFive(card);
+  knowledgeByDeckId.set(enriched.deckId, enriched);
+  knowledgeById.set(enriched.id, enriched);
+}
+
+for (const card of DEEP_TEN_KNOWLEDGE) {
   knowledgeByDeckId.set(card.deckId, card);
   knowledgeById.set(card.id, card);
 }

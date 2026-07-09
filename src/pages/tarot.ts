@@ -27,7 +27,7 @@ import {
 } from '../tarot/draw-modes.ts';
 import { bindFreeDrawInput, requestMotionPermission } from '../tarot/free-draw-input.ts';
 import { bindRitualInput, type RitualInputStep } from '../tarot/ritual-input.ts';
-import type { DrawnCard } from '../tarot/engine.ts';
+import { drawClarifierCard, type DrawnCard } from '../tarot/engine.ts';
 import {
   SPREADS,
   buildLearningNote,
@@ -79,6 +79,8 @@ export function renderTarot(root: HTMLElement): () => void {
   let learningNote = '';
   let gestureFallback = !env.canUseGesture;
   let cameraOn = false;
+  let supplementCount = 0;
+  const MAX_SUPPLEMENT = 2;
 
   const pinchDetector = new PinchDetector();
   const swipeDetector = new SwipeDetector();
@@ -488,14 +490,16 @@ export function renderTarot(root: HTMLElement): () => void {
 
   function renderDrawStage(): void {
     const teach = getTeachHint(spreadType, currentIndex);
-    const pos = SPREADS[spreadType].positions[currentIndex];
+    const spreadPos = SPREADS[spreadType].positions[currentIndex];
+    const poolCard = cardPool[currentIndex];
+    const posLabel = poolCard?.position ?? spreadPos?.label ?? `第 ${currentIndex + 1} 张`;
     stage.innerHTML = renderDeckFanHTML();
     const main = stage.querySelector('#tarot-draw-main');
     if (main) {
       main.innerHTML = `
         ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
         ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
-        <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${pos.label}</strong></p>
+        <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${posLabel}</strong></p>
         <p class="tarot-hint">${stepHintHtml('draw')}</p>
         <p class="teach-hint teach-hint-soft">在底部牌堆左右滑动浏览，选中后上滑或长按抽出。</p>
       `;
@@ -539,6 +543,17 @@ export function renderTarot(root: HTMLElement): () => void {
     acceptBtn.addEventListener('click', () => void onAcceptCard());
     actions.appendChild(acceptBtn);
 
+    const canSupplement =
+      supplementCount < MAX_SUPPLEMENT && currentIndex === cardPool.length - 1;
+    if (canSupplement) {
+      const supplementBtn = document.createElement('button');
+      supplementBtn.type = 'button';
+      supplementBtn.className = 'btn btn-ghost card-review-supplement';
+      supplementBtn.textContent = '还想补一张？';
+      supplementBtn.addEventListener('click', () => void onRequestSupplement());
+      actions.appendChild(supplementBtn);
+    }
+
     const host = document.getElementById('card-review-tabs');
     if (host) {
       mountCardResultTabs(host, cardReading);
@@ -572,7 +587,7 @@ export function renderTarot(root: HTMLElement): () => void {
       drawnCards,
       reading,
       'partial',
-      SPREADS[spreadType].positions.length,
+      cardPool.length,
     );
     currentJournalId = entry.id;
   }
@@ -665,6 +680,7 @@ export function renderTarot(root: HTMLElement): () => void {
     drawnCards = [];
     cardPool = [];
     currentIndex = 0;
+    supplementCount = 0;
     reading = null;
     learningNote = '';
     currentJournalId = null;
@@ -885,6 +901,18 @@ export function renderTarot(root: HTMLElement): () => void {
 
     setState('cardReview');
     savePartialProgress();
+  }
+
+  async function onRequestSupplement(): Promise<void> {
+    if (state !== 'cardReview' || supplementCount >= MAX_SUPPLEMENT) return;
+    const excludeIds = drawnCards.map((d) => d.card.id);
+    const clarifier = drawClarifierCard(excludeIds);
+    if (!clarifier) return;
+    cardPool.push(clarifier);
+    supplementCount++;
+    currentIndex++;
+    savePartialProgress();
+    setState('draw');
   }
 
   async function onAcceptCard(): Promise<void> {

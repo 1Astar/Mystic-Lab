@@ -5,6 +5,8 @@ export const SWORDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'swords-ace',
     deckId: 'swords-ace',
+    overview:
+      '一只从云中伸出的手，握着一把直指天空的宝剑，剑尖戴着王冠，脚下是远山。像一道突然劈开迷雾的光——清晰的新念头、理性判断，或一个需要直接面对的真相。',
     hotspots: [
       { id: 'hand', label: '云端之手', x: 50, y: 28, meaning: '从更高视角递来的一把剑——清晰的新念头或决断。' },
       { id: 'sword', label: '宝剑', x: 50, y: 48, meaning: '锋利、直接、切开混乱——真相可能不好听，但能指路。' },
@@ -90,6 +92,8 @@ export const SWORDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'swords-ten',
     deckId: 'swords-ten',
+    overview:
+      '一个人俯卧在地，背上插着十把剑，远方已有曙光，脚边仍有暗水。画面残酷，但常指向「已经到极限」——旧模式结束，而非永远完了。',
     hotspots: [
       { id: 'figure', label: '倒地的人', x: 50, y: 58, meaning: '压力累积后的终点——像「已经撑到极限」的信号。' },
       { id: 'swords', label: '十把剑', x: 50, y: 32, meaning: '不只是一把剑的伤害，而是反复的自我攻击与灾难化想象。' },
