@@ -18,6 +18,8 @@ export type JournalEntry = {
   fulfilled?: boolean | null;
   /** 未完成占问时为 partial */
   status?: 'complete' | 'partial';
+  /** 占问完成时的解读快照，用于手札回看 */
+  readingSnapshot?: ReadingResult;
 };
 
 const STORAGE_KEY = 'mystic-lab-journal';
@@ -188,6 +190,10 @@ export function upsertJournalProgress(
     reflection: prev?.reflection ?? reflection,
     fulfilled: status === 'complete' ? (prev?.fulfilled ?? null) : null,
     status,
+    readingSnapshot:
+      reading && cards.length > 0
+        ? reading
+        : prev?.readingSnapshot,
   };
 
   const idx = list.findIndex((e) => e.id === id);
@@ -246,6 +252,7 @@ export function loadJournalEntries(): JournalEntry[] {
       reflection: e.reflection ?? '',
       fulfilled: e.fulfilled ?? null,
       status: e.status ?? 'complete',
+      readingSnapshot: e.readingSnapshot,
     }));
   } catch {
     return [];

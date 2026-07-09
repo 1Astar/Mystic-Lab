@@ -4,7 +4,10 @@ import {
   loadJournalEntries,
   updateJournalFulfilled,
   updateJournalReflection,
+  type JournalEntry,
 } from '../journal/records.ts';
+import { resolveJournalReading } from '../journal/replay.ts';
+import { mountJournalDetail } from '../ui/journal-detail.ts';
 
 export function renderJournal(root: HTMLElement): void {
   const page = document.createElement('div');
@@ -25,31 +28,56 @@ export function renderJournal(root: HTMLElement): void {
   `;
   page.appendChild(header);
 
-  backfillJournalFromCodex();
-  const entries = loadJournalEntries();
+  function closeDetail(): void {
+    page.querySelector('.journal-detail')?.remove();
+  }
 
-  if (entries.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'meditate-box';
-    empty.innerHTML = `
-      <p>还没有手札。</p>
-      <p style="margin-top:10px">完成占问后，可在这里回看问题、结果，并补充后来的感悟。</p>
-    `;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn';
-    btn.style.marginTop = '16px';
-    btn.textContent = '去占问';
-    btn.addEventListener('click', () => navigate('/divination'));
-    empty.appendChild(btn);
-    page.appendChild(empty);
-  } else {
+  function openDetail(entry: JournalEntry): void {
+    try {
+      const { reading, regenerated } = resolveJournalReading(entry);
+      closeDetail();
+      const detail = document.createElement('aside');
+      mountJournalDetail(detail, {
+        entry,
+        reading,
+        regenerated,
+        onClose: closeDetail,
+      });
+      page.appendChild(detail);
+    } catch {
+      /* 卡牌数据异常时静默跳过 */
+    }
+  }
+
+  function renderList(): void {
+    page.querySelector('.journal-list')?.remove();
+    backfillJournalFromCodex();
+    const entries = loadJournalEntries();
+
+    if (entries.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'meditate-box';
+      empty.innerHTML = `
+        <p>还没有手札。</p>
+        <p style="margin-top:10px">完成占问后，可在这里回看问题、结果，并补充后来的感悟。</p>
+      `;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn';
+      btn.style.marginTop = '16px';
+      btn.textContent = '去占问';
+      btn.addEventListener('click', () => navigate('/divination'));
+      empty.appendChild(btn);
+      page.appendChild(empty);
+      return;
+    }
+
     const list = document.createElement('div');
     list.className = 'journal-list';
 
     for (const entry of entries) {
       const item = document.createElement('article');
-      item.className = 'journal-item';
+      item.className = 'journal-item journal-item-clickable';
       const date = new Date(entry.createdAt).toLocaleString('zh-CN');
       const isPartial = entry.status === 'partial';
       const fulfilledLabel =
@@ -64,6 +92,7 @@ export function renderJournal(root: HTMLElement): void {
         <p class="journal-question">${entry.question || '（未记录问题）'}</p>
         <p class="journal-cards">${entry.cards.map((c) => `${c.position}·${c.name}`).join(' / ')}</p>
         <p class="journal-note">${isPartial ? entry.summary : entry.learningNote}</p>
+        <p class="journal-open-hint">点击查看牌面与解读 →</p>
         ${fulfilledLabel ? `<p class="journal-fulfilled">${fulfilledLabel}</p>` : ''}
         <textarea class="journal-reflection" rows="2" placeholder="后来的感悟…">${entry.reflection}</textarea>
         <div class="journal-actions">
@@ -74,17 +103,21 @@ export function renderJournal(root: HTMLElement): void {
         </div>
       `;
 
+      item.addEventListener('click', () => openDetail(entry));
+      item.querySelector('.journal-reflection')?.addEventListener('click', (e) => e.stopPropagation());
+      item.querySelector('.journal-actions')?.addEventListener('click', (e) => e.stopPropagation());
+
       item.querySelector('[data-save]')?.addEventListener('click', () => {
         const ta = item.querySelector<HTMLTextAreaElement>('.journal-reflection');
         if (ta) updateJournalReflection(entry.id, ta.value);
       });
       item.querySelector('[data-yes]')?.addEventListener('click', () => {
         updateJournalFulfilled(entry.id, true);
-        navigate('/journal');
+        renderList();
       });
       item.querySelector('[data-no]')?.addEventListener('click', () => {
         updateJournalFulfilled(entry.id, false);
-        navigate('/journal');
+        renderList();
       });
 
       list.appendChild(item);
@@ -92,5 +125,6 @@ export function renderJournal(root: HTMLElement): void {
     page.appendChild(list);
   }
 
+  renderList();
   root.appendChild(page);
 }

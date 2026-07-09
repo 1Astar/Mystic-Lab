@@ -330,14 +330,18 @@
   position: relative;
   flex: 1;
   width: 100%;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 0;
 }
 
 .codex-cell.is-locked .codex-cell-img {
-  filter: grayscale(0.55) brightness(0.72);
+  filter: grayscale(0.3) brightness(0.88);
+}
+
+.codex-cell.is-locked:hover .codex-cell-img {
+  filter: grayscale(0.15) brightness(0.95);
 }
 
 .codex-cell-lock {
@@ -435,13 +439,10 @@
 }
 
 .codex-cell.is-locked {
-  opacity: 0.55;
   cursor: pointer;
-  filter: grayscale(0.65);
 }
 
 .codex-cell.is-locked:hover {
-  opacity: 0.72;
   border-color: rgba(255, 214, 166, 0.2);
 }
 
@@ -763,4 +764,268 @@
 
 .codex-preview-draw {
   width: 100%;
+}
+
+/* 图鉴双视图 */
+.codex-view-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 16px;
+}
+
+.codex-view-tabs button {
+  flex: 1;
+  padding: 10px 8px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.codex-view-tabs button.is-active {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  font-weight: 600;
+}
+
+/* 愚人之旅故事地图 */
+.fool-journey-intro {
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(46, 27, 75, 0.55), rgba(26, 18, 48, 0.85));
+  border: 1px solid rgba(255, 214, 166, 0.2);
+}
+
+.fool-journey-title {
+  font-size: 1.2rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.fool-journey-subtitle {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.fool-journey-lead {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.fool-journey-progress {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.fool-journey-progress strong {
+  color: var(--gold);
+}
+
+.fool-journey-chapter {
+  margin-bottom: 24px;
+}
+
+.fool-chapter-head {
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--gold);
+}
+
+.fool-chapter-head h3 {
+  font-size: 0.92rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.fool-chapter-head p {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.fool-journey-path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fool-step {
+  position: relative;
+}
+
+.fool-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  top: 100%;
+  width: 2px;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(255, 214, 166, 0.35), transparent);
+}
+
+.fool-step-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.fool-step-btn:hover {
+  border-color: rgba(255, 214, 166, 0.35);
+  background: rgba(255, 214, 166, 0.04);
+}
+
+.fool-step.is-lit .fool-step-btn {
+  border-color: rgba(255, 214, 166, 0.3);
+}
+
+.fool-step-order {
+  flex-shrink: 0;
+  width: 24px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+}
+
+.fool-step-face {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 62px;
+}
+
+.fool-step-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.fool-step.is-dim .fool-step-img {
+  filter: grayscale(0.6) brightness(0.7);
+}
+
+.fool-step-dim {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: rgba(11, 11, 20, 0.25);
+  pointer-events: none;
+}
+
+.fool-step-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.fool-step-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.fool-step-theme {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.fool-step-arrow {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  opacity: 0.6;
+}
+
+/* 小阿尔克那速览 */
+.minor-brief-box {
+  margin-top: 28px;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+}
+
+.minor-brief-box h3 {
+  font-size: 0.9rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.minor-brief-lead {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+}
+
+.minor-brief-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 480px) {
+  .minor-brief-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.minor-brief-col h4 {
+  font-size: 0.78rem;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.minor-brief-col ul {
+  list-style: none;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.minor-brief-col li {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.minor-brief-col li:last-child {
+  border-bottom: 0;
+}
+
+.minor-number-list .minor-num {
+  display: inline-block;
+  min-width: 1.2em;
+  margin-right: 6px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.minor-brief-note {
+  margin-top: 12px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
 }
