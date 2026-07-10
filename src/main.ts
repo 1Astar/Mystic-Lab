@@ -12,6 +12,11 @@ import { renderLabHome } from './pages/lab-home.ts';
 import { renderMeihuaHome } from './pages/meihua-home.ts';
 import { renderTarot } from './pages/tarot.ts';
 import { renderTarotHome } from './pages/tarot-home.ts';
+import './styles/xiaoliuren.css';
+import { renderXiaoliurenCodex } from './pages/xiaoliuren-codex.ts';
+import { renderXiaoliurenHourGuide } from './pages/xiaoliuren-hour-guide.ts';
+import { renderXiaoliurenJournal } from './pages/xiaoliuren-journal.ts';
+import { renderXiaoliurenReading } from './pages/xiaoliuren-reading.ts';
 import { renderXiaoliurenHome } from './pages/xiaoliuren-home.ts';
 import { initRouter, navigate, registerRoute } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
@@ -24,6 +29,10 @@ registerRoute('/codex/fool-journey', renderCodexFoolJourney);
 registerRoute('/codex/suit-numbers', renderCodexSuitNumbers);
 registerRoute('/journal', renderJournal);
 registerRoute('/xiaoliuren', renderXiaoliurenHome);
+registerRoute('/xiaoliuren/reading', renderXiaoliurenReading);
+registerRoute('/xiaoliuren/codex', renderXiaoliurenCodex);
+registerRoute('/xiaoliuren/journal', renderXiaoliurenJournal);
+registerRoute('/xiaoliuren/hour-guide', renderXiaoliurenHourGuide);
 registerRoute('/meihua', renderMeihuaHome);
 registerRoute('/records', (root) =>
   renderGlobalPlaceholder(root, '我的手札', '查看所有占问记录'),

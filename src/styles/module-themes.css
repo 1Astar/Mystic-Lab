@@ -318,9 +318,14 @@
 
 .theme-secondary-link {
   margin-top: 12px;
+  font: inherit;
   font-size: 0.76rem;
   color: rgba(191, 163, 255, 0.48);
   letter-spacing: 0.04em;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
 }
 
 .theme-meihua .theme-secondary-link {
@@ -471,121 +476,92 @@
   align-items: stretch;
 }
 
-/* 时辰轮 */
-.xlr-time-wheel {
+.xlr-hero-dial .xlr-shichen-scene {
+  margin: 0;
+  max-width: none;
+}
+
+.xlr-hero-dial .xlr-shichen-center {
+  padding: 26% 20%;
+}
+
+.xlr-hero-dial .xlr-shichen-time {
+  font-size: 1rem;
+}
+
+.xlr-hero-dial .xlr-shichen-hour-label {
+  font-size: 0.62rem;
+}
+
+.xlr-hero-dial .xlr-shichen-lunar,
+.xlr-hero-dial .xlr-shichen-weekday {
+  display: none;
+}
+
+/* 手掌演算 · 素材版 */
+.theme-xiaoliuren {
+  --ink-muted: rgba(255, 214, 166, 0.58);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(46, 27, 75, 0.45), transparent 55%),
+    url('/xiaoliuren/scene-bg.webp') center top / cover no-repeat fixed;
+}
+
+.theme-xiaoliuren .back-link {
+  color: rgba(255, 214, 166, 0.62);
+}
+
+.xlr-hand-panel-asset {
+  padding: 10px 8px;
+  background: rgba(10, 10, 18, 0.65);
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  border-radius: 12px;
+}
+
+.xlr-hand-asset-stage {
   position: relative;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(58, 42, 28, 0.4), rgba(11, 11, 20, 0.98));
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  box-shadow:
-    inset 0 0 40px rgba(255, 214, 166, 0.05),
-    0 8px 28px rgba(0, 0, 0, 0.25);
+  flex: 1;
+  aspect-ratio: 819 / 1024;
+  max-height: 168px;
+  margin: 6px auto 4px;
 }
 
-.xlr-wheel-glow {
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  opacity: 0;
-  background: conic-gradient(from 0deg, transparent, rgba(255, 214, 166, 0.15), transparent);
-  animation: wheel-spin 24s linear infinite;
-  transition: opacity 0.4s;
+.xlr-hand-asset-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
-.xlr-wheel-glow.is-live {
-  opacity: 1;
-}
-
-.xlr-wheel-ring {
-  position: absolute;
-  inset: 7%;
-  border-radius: 50%;
-  border: 1px dashed rgba(255, 214, 166, 0.22);
-}
-
-.xlr-wheel-ticks {
+.xlr-hand-svg-overlay {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.xlr-wheel-tick {
-  position: absolute;
-  left: 50%;
-  top: 6%;
-  width: 1px;
-  height: 8%;
-  margin-left: -0.5px;
-  transform-origin: 50% 440%;
-  background: rgba(255, 214, 166, 0.15);
+.xlr-hand-god-icon {
+  filter: drop-shadow(0 0 4px rgba(255, 214, 166, 0.35));
 }
 
-.xlr-branch {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  font-size: 0.62rem;
-  color: rgba(255, 214, 166, 0.38);
-  transition: color 0.3s, text-shadow 0.3s, transform 0.3s;
+.xlr-hand-point.is-origin .xlr-hand-god-icon {
+  filter: drop-shadow(0 0 8px rgba(255, 214, 166, 0.65));
 }
 
-.xlr-branch.is-active {
-  color: var(--gold);
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-shadow: 0 0 12px rgba(255, 214, 166, 0.7);
-  transform: translate(-50%, -50%) scale(1.15);
+.xlr-scroll-strip-asset .xlr-scroll-body {
+  padding: 12px 10px;
+  background: rgba(10, 10, 18, 0.65);
+  border: 1px solid rgba(255, 214, 166, 0.12);
+  border-radius: 12px;
 }
 
-.xlr-wheel-core {
-  position: absolute;
-  inset: 27%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(11, 11, 20, 0.95), rgba(26, 18, 48, 0.98));
-  border: 1px solid rgba(255, 214, 166, 0.35);
-  box-shadow:
-    0 0 24px rgba(255, 214, 166, 0.15),
-    inset 0 0 16px rgba(255, 214, 166, 0.05);
+.xlr-scroll-strip-asset .xlr-scroll-cap {
+  display: none;
 }
 
-.xlr-wheel-time {
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: #fff;
-}
-
-.xlr-wheel-branch {
-  margin-top: 3px;
-  font-size: 0.68rem;
-  color: var(--gold);
-  letter-spacing: 0.1em;
-}
-
-/* 手掌演算 */
 .xlr-hand-panel {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 12px 10px;
-  background:
-    linear-gradient(180deg, rgba(58, 42, 28, 0.35), rgba(26, 18, 48, 0.88));
-  border: 1px solid rgba(255, 214, 166, 0.18);
-  border-radius: var(--radius-sm);
-  box-shadow: inset 0 1px 0 rgba(255, 214, 166, 0.06);
-}
-
-.xlr-hand-scroll-edge {
-  height: 4px;
-  margin: 0 -10px;
-  background: linear-gradient(90deg, transparent, rgba(255, 214, 166, 0.2), transparent);
-}
-
-.xlr-hand-scroll-edge-bottom {
-  margin-top: 8px;
 }
 
 .xlr-hand-caption {
@@ -721,23 +697,18 @@
   animation-delay: calc(var(--i) * 0.06s);
 }
 
-.xlr-god-symbol {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.xlr-god-chip-icon {
+  display: block;
   width: 38px;
   height: 38px;
-  font-size: 0.88rem;
+  object-fit: cover;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 214, 166, 0.1), rgba(255, 214, 166, 0.03));
-  border: 1px solid rgba(255, 214, 166, 0.22);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, filter 0.2s;
 }
 
-.xlr-god-chip:hover .xlr-god-symbol {
+.xlr-god-chip:hover .xlr-god-chip-icon {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 214, 166, 0.15);
+  filter: drop-shadow(0 4px 10px rgba(255, 214, 166, 0.2));
 }
 
 .xlr-god-name {
@@ -1059,7 +1030,7 @@
     grid-template-columns: 1fr;
   }
 
-  .xlr-time-wheel {
+  .xlr-hero-dial {
     max-width: 190px;
     margin: 0 auto;
   }
@@ -1084,7 +1055,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xlr-wheel-glow,
+  .xlr-shichen-pointer-wrap,
   .mh-bagua-orbit,
   .mh-scene-moon,
   .mh-bagua-core,
