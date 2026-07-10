@@ -20,7 +20,7 @@ export interface ThemedModuleConfig {
   hint?: string;
   sideInscription: string;
   heroHtml: string;
-  primaryCta: { label: string; comingSoon?: boolean };
+  primaryCta: { label: string; comingSoon?: boolean; path?: string };
   secondaryLink?: string;
   entries: ThemedEntry[];
 }
@@ -72,12 +72,12 @@ export function renderThemedModuleHome(root: HTMLElement, config: ThemedModuleCo
     </div>
     <div class="theme-hero-slot">${config.heroHtml}</div>
     <div class="theme-primary-wrap">
-      <button type="button" class="theme-primary-btn${config.primaryCta.comingSoon ? ' is-soon' : ''}" ${config.primaryCta.comingSoon ? 'disabled' : ''}>
+      <button type="button" class="theme-primary-btn${config.primaryCta.comingSoon ? ' is-soon' : ''}" ${config.primaryCta.comingSoon ? 'disabled' : ''} data-primary-path="${config.primaryCta.path ?? ''}">
         ${primaryBtnDecor(config.theme)}
         <span class="theme-primary-label">${config.primaryCta.label}</span>
         ${config.primaryCta.comingSoon ? '<span class="tag">即将开放</span>' : ''}
       </button>
-      ${config.secondaryLink ? `<p class="theme-secondary-link">${config.secondaryLink}</p>` : ''}
+      ${config.secondaryLink ? `<button type="button" class="theme-secondary-link">${config.secondaryLink}</button>` : ''}
     </div>
     <nav class="theme-entries" aria-label="模块入口"></nav>
     <footer class="theme-footer">
@@ -118,6 +118,16 @@ export function renderThemedModuleHome(root: HTMLElement, config: ThemedModuleCo
 
   page.append(body);
   root.appendChild(page);
+
+  const primaryBtn = body.querySelector<HTMLButtonElement>('.theme-primary-btn');
+  const path = config.primaryCta.path;
+  if (primaryBtn && path && !config.primaryCta.comingSoon) {
+    primaryBtn.addEventListener('click', () => navigate(path));
+  }
+
+  body.querySelector('.theme-secondary-link')?.addEventListener('click', () => {
+    navigate(path ?? '/xiaoliuren/reading');
+  });
 
   return () => stars.remove();
 }
