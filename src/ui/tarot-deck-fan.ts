@@ -31,9 +31,10 @@ export type DeckFanCallbacks = {
   onProgress?: (message: string) => void;
 };
 
-const SWIPE_PX = 36;
-const SWIPE_FLIP_PX = 52;
-const LONG_PRESS_MS = 700;
+const SWIPE_PX = 24;
+const SWIPE_FLIP_PX = 36;
+const LONG_PRESS_MS = 520;
+const PRESS_CANCEL_PX = 30;
 
 function layoutFanCards(
   cards: NodeListOf<HTMLElement>,
@@ -156,14 +157,16 @@ export function bindDeckFanInteraction(
   };
 
   const onMove = (e: PointerEvent): void => {
-    if (Math.hypot(e.clientX - startX, e.clientY - startY) > 18) clearPress();
+    if (Math.hypot(e.clientX - startX, e.clientY - startY) > PRESS_CANCEL_PX) {
+      clearPress();
+    }
   };
 
   const onUp = (e: PointerEvent): void => {
     const dx = e.clientX - startX;
     const dy = startY - e.clientY;
 
-    if (charged && Math.hypot(dx, dy) < 32) {
+    if (charged && Math.hypot(dx, dy) < 40) {
       clearPress();
       once(callbacks.onDraw);
       return;

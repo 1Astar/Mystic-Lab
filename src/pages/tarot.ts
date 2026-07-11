@@ -123,17 +123,24 @@ export function renderTarot(root: HTMLElement): () => void {
   document.body.appendChild(hintBar.el);
 
   function ritualStep(): RitualStep | null {
-    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip'] as const;
+    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip', 'cardReview'] as const;
     if (!ritualStates.includes(state as (typeof ritualStates)[number])) {
       return null;
     }
+    if (state === 'cardReview') return 'review';
     return state as RitualStep;
   }
 
   function pauseCameraForReview(): void {
     cameraWrap.hidden = true;
     gestureStatus.el.hidden = true;
+  }
+
+  function stopCameraSession(): void {
+    cameraWrap.hidden = true;
+    gestureStatus.el.hidden = true;
     gestureBridge?.stop();
+    gestureBridge = null;
     if (cameraOn) {
       camera.stop();
       cameraOn = false;
@@ -141,7 +148,7 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   function syncHintBar(): void {
-    if (state === 'cardReview' || state === 'result') {
+    if (state === 'result') {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
@@ -204,8 +211,10 @@ export function renderTarot(root: HTMLElement): () => void {
     if (next === 'draw') drawLock = false;
     resetDetectors();
     debug?.setStatus(next);
-    if (next === 'cardReview' || next === 'result') {
+    if (next === 'cardReview') {
       pauseCameraForReview();
+    } else if (next === 'result') {
+      stopCameraSession();
     }
     syncHintBar();
     renderStage();
@@ -944,8 +953,7 @@ export function renderTarot(root: HTMLElement): () => void {
     window.removeEventListener('pagehide', onPageHide);
     questionCoach?.destroy();
     ritualInputUnbind?.();
-    gestureBridge?.stop();
-    camera.stop();
+    stopCameraSession();
     unbindCamera();
     debug?.el.remove();
     hintBar.el.remove();
