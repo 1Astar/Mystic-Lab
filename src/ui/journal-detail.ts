@@ -2,6 +2,7 @@ import type { ReadingResult } from '../interpretation/types.ts';
 import type { JournalEntry } from '../journal/records.ts';
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountCardResultTabs } from './card-result-tabs.ts';
+import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -37,6 +38,7 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
     <p class="journal-detail-summary">${escapeHtml(reading.summary)}</p>
     ${reading.learningNote ? `<div class="journal-detail-learning"><h3>学习笔记</h3><p>${escapeHtml(reading.learningNote)}</p></div>` : ''}
     ${entry.reflection ? `<div class="journal-detail-reflection"><h3>后来的感悟</h3><p>${escapeHtml(entry.reflection)}</p></div>` : ''}
+    <div id="journal-detail-feedback"></div>
   `;
 
   const cardsHost = container.querySelector('#journal-detail-cards');
@@ -50,6 +52,16 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
       cardsHost.appendChild(item);
       mountCardResultTabs(host, cardReading);
     }
+  }
+
+  const feedbackHost = container.querySelector('#journal-detail-feedback');
+  if (feedbackHost && !isPartial) {
+    mountReadingFeedbackPanel(feedbackHost as HTMLElement, {
+      journalId: entry.id,
+      question: entry.question,
+      cardIds: entry.cardIds,
+      initial: entry.feedback,
+    });
   }
 
   container.querySelector('.journal-detail-close')?.addEventListener('click', onClose);

@@ -5,6 +5,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-ace',
     deckId: 'wands-ace',
+    overview:
+      '云端之手递出一根发芽的权杖，远方城堡静立。灵感与行动力从高处落下——适合点燃第一步，而非空想。',
     hotspots: [
       { id: 'hand', label: '云端之手', x: 50, y: 28, meaning: '灵感从更高处递来——一股新生的行动力正在等你接住。' },
       { id: 'wand', label: '权杖', x: 50, y: 48, meaning: '火种、热情与创造冲动——适合启动，而非空想。' },
@@ -15,6 +17,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-two',
     deckId: 'wands-two',
+    overview:
+      '持杖者站在城墙高处眺望，手托地球仪，海面有船队。规划与视野齐备，行动尚未开始——选择比冲动更重要。',
     hotspots: [
       { id: 'figure', label: '持杖者', x: 50, y: 48, meaning: '站在高点眺望——规划与视野，但尚未行动。' },
       { id: 'globe', label: '手中地球', x: 62, y: 42, meaning: '世界在手中，选择比冲动更重要。' },
@@ -25,6 +29,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-three',
     deckId: 'wands-three',
+    overview:
+      '人立高地眺望归来船只，三根权杖立于身后。前期投入开始显影——根基已立，回报仍需等待时间兑现。',
     hotspots: [
       { id: 'figure', label: '眺望者', x: 50, y: 42, meaning: '等待回报的阶段——前期投入开始显现迹象。' },
       { id: 'wands', label: '三根权杖', x: 50, y: 68, meaning: '已建立的根基，支撑你看得更远。' },
@@ -34,6 +40,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-four',
     deckId: 'wands-four',
+    overview:
+      '人在花棚下举花庆祝，四根权杖撑起结构，远城在望。阶段性安稳值得认可——可休整，却不是永远的终点。',
     hotspots: [
       { id: 'figure', label: '举花者', x: 50, y: 52, meaning: '庆祝阶段性成果——值得停下来认可自己。' },
       { id: 'canopy', label: '花棚', x: 50, y: 28, meaning: '暂时的安稳与庇护，但不是终点。' },
@@ -44,6 +52,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-five',
     deckId: 'wands-five',
+    overview:
+      '五名青年在晴天下举着交错权杖争持。场面混乱却有活力——更像方向磨合与较劲，而非毁灭。',
     hotspots: [
       { id: 'youths', label: '五人争持', x: 50, y: 48, meaning: '竞争、摩擦与各自立场——混乱中仍有活力。' },
       { id: 'wands', label: '交错权杖', x: 50, y: 38, meaning: '冲突未必是坏事，可能是方向磨合。' },
@@ -53,6 +63,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-six',
     deckId: 'wands-six',
+    overview:
+      '凯旋者骑白马，头戴桂冠，人群跟随。被看见、被认可的阶段性胜利——荣誉扩大，责任也随之而来。',
     hotspots: [
       { id: 'rider', label: '凯旋者', x: 50, y: 42, meaning: '被看见、被认可——阶段性胜利值得承认。' },
       { id: 'wreath', label: '桂冠', x: 50, y: 22, meaning: '荣誉与公众认可，但别让它变成唯一动力。' },
@@ -62,6 +74,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-seven',
     deckId: 'wands-seven',
+    overview:
+      '一人站在高处守住权杖，下方多支权杖上举进逼。以少敌多仍守立场——优势在高度与决心，不在数量。',
     hotspots: [
       { id: 'defender', label: '守势者', x: 50, y: 48, meaning: '以少敌多仍坚守——立场需要捍卫。' },
       { id: 'wand', label: '手中权杖', x: 55, y: 35, meaning: '你的优势在高度与决心，不在数量。' },
@@ -82,6 +96,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-nine',
     deckId: 'wands-nine',
+    overview:
+      '带伤者扶杖守卫，身后八杖立成防线。疲惫但仍未放弃——韧性比完美重要，资源已消耗却防线尚在。',
     hotspots: [
       { id: 'wounded', label: '带伤守者', x: 50, y: 48, meaning: '疲惫但仍未放弃——韧性比完美更重要。' },
       { id: 'bandage', label: '头上绷带', x: 50, y: 28, meaning: '过去的战斗留下痕迹，也换来经验。' },
@@ -91,6 +107,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-ten',
     deckId: 'wands-ten',
+    overview:
+      '一人怀抱十根权杖埋头前行，远方房屋已在眼前。责任过重——终点不远，但需学会分担或放下不必亲自扛的项。',
     hotspots: [
       { id: 'burden', label: '负杖者', x: 50, y: 52, meaning: '责任过重——是否什么都自己扛？' },
       { id: 'wands', label: '十根权杖', x: 50, y: 32, meaning: '负担来自累积，未必每一项都必要。' },
@@ -100,6 +118,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-page',
     deckId: 'wands-page',
+    overview:
+      '侍从在荒漠举起权杖，眼神跃跃欲试。热情正在成形——好奇可贵，经验尚浅，需实践验证。',
     hotspots: [
       { id: 'youth', label: '侍从', x: 50, y: 48, meaning: '好奇、探索、新消息——热情正在成形。' },
       { id: 'wand', label: '举起的权杖', x: 58, y: 28, meaning: '跃跃欲试，但经验尚浅，需实践验证。' },
@@ -109,6 +129,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-knight',
     deckId: 'wands-knight',
+    overview:
+      '骑士策马冲锋，权杖高举，远方金字塔矗立。急速冲锋、态度热烈——目标鲜明，也可能忽略细节与体力。',
     hotspots: [
       { id: 'knight', label: '骑士', x: 50, y: 45, meaning: '急速冲锋——行动力强，但可能忽略细节。' },
       { id: 'horse', label: '奔马', x: 50, y: 62, meaning: '冲劲是资源，失控则是风险。' },
@@ -119,6 +141,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-queen',
     deckId: 'wands-queen',
+    overview:
+      '王后坐狮椅，向日葵权杖在握，黑猫静卧脚边。自信而温暖的热情——向外绽放，也保留直觉与边界。',
     hotspots: [
       { id: 'queen', label: '王后', x: 50, y: 42, meaning: '自信、温暖、有感染力——热情而不莽撞。' },
       { id: 'wand', label: '向日葵权杖', x: 58, y: 32, meaning: '生命力向外绽放，也照亮他人。' },
@@ -129,6 +153,8 @@ export const WANDS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'wands-king',
     deckId: 'wands-king',
+    overview:
+      '国王端坐，权杖在手，袍上火纹与蜥蜴图案环绕。成熟热情与远见——能点燃愿景，也能掌舵节制。',
     hotspots: [
       { id: 'king', label: '国王', x: 50, y: 42, meaning: '远见、领导力与成熟热情——能点燃也能掌舵。' },
       { id: 'wand', label: '权杖', x: 62, y: 55, meaning: '权力用于推动愿景，而非炫耀。' },

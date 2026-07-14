@@ -1009,7 +1009,20 @@ export function renderTarot(root: HTMLElement): () => void {
     drawLock = true;
     drawnCards.push(card);
 
-    const unlock = unlockSingleCard(card, question, card.card.nameZh);
+    if (!currentJournalId) {
+      const draft = upsertJournalProgress(
+        null,
+        question,
+        spreadType,
+        drawnCards,
+        reading,
+        'partial',
+        cardPool.length,
+      );
+      currentJournalId = draft.id;
+    }
+
+    const unlock = unlockSingleCard(card, question, card.card.nameZh, currentJournalId);
     showUnlockToast(unlock);
 
     hintBar.setProgress('抽牌成功');

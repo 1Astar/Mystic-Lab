@@ -1,9 +1,22 @@
 import type { DrawnCard } from '../tarot/engine.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
-import { getAllEntries } from '../codex/collection.ts';
+import { getAllEntries, linkEncountersToJournal } from '../codex/collection.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
 import { buildLearningNote, SPREADS } from '../tarot/spreads.ts';
+
+export type ReadingFeedbackVerdict = 'echo' | 'miss';
+
+export type ReadingFeedbackReason = '解读不准' | '问法问题' | '牌感不对' | '其他';
+
+export type JournalReadingFeedback = {
+  verdict: ReadingFeedbackVerdict;
+  reasons: ReadingFeedbackReason[];
+  /** 针对焦点牌或整次占问的细节 */
+  cardNote: string;
+  focusCardId?: string;
+  at: string;
+};
 
 export type JournalEntry = {
   id: string;
@@ -20,6 +33,8 @@ export type JournalEntry = {
   status?: 'complete' | 'partial';
   /** 占问完成时的解读快照，用于手札回看 */
   readingSnapshot?: ReadingResult;
+  /** 对这次占问结果的反馈 */
+  feedback?: JournalReadingFeedback;
 };
 
 const STORAGE_KEY = 'mystic-lab-journal';
@@ -197,9 +212,16 @@ export function upsertJournalProgress(
   };
 
   const idx = list.findIndex((e) => e.id === id);
-  if (idx >= 0) list[idx] = entry;
-  else list.unshift(entry);
+  if (idx >= 0) {
+    entry.feedback = list[idx]?.feedback;
+    list[idx] = entry;
+  } else list.unshift(entry);
   persist(list);
+
+  if (status === 'complete') {
+    linkEncountersToJournal(entry.id, question, cardIds, entry.createdAt);
+  }
+
   return entry;
 }
 
@@ -241,6 +263,19 @@ export function updateJournalFulfilled(id: string, fulfilled: boolean): void {
   persist(list);
 }
 
+export function updateJournalFeedback(id: string, feedback: JournalReadingFeedback): void {
+  const list = loadJournalEntries();
+  const item = list.find((e) => e.id === id);
+  if (!item) return;
+  item.feedback = feedback;
+  item.fulfilled = feedback.verdict === 'echo';
+  persist(list);
+}
+
+export function getJournalEntryById(id: string): JournalEntry | undefined {
+  return loadJournalEntries().find((e) => e.id === id);
+}
+
 export function loadJournalEntries(): JournalEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -253,6 +288,7 @@ export function loadJournalEntries(): JournalEntry[] {
       fulfilled: e.fulfilled ?? null,
       status: e.status ?? 'complete',
       readingSnapshot: e.readingSnapshot,
+      feedback: e.feedback,
     }));
   } catch {
     return [];

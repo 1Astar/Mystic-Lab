@@ -37,6 +37,8 @@ export type CodexEncounter = {
   summary: string;
   reversed: boolean;
   spreadLabel: string;
+  /** 关联手札，用于复原完整结果页 */
+  journalId?: string;
 };
 
 export type CodexEntry = {
@@ -116,6 +118,7 @@ export function unlockSingleCard(
   drawn: DrawnCard,
   question: string,
   summary: string,
+  journalId?: string | null,
 ): UnlockResult {
   const store = loadStore();
   const now = new Date().toISOString();
@@ -128,6 +131,7 @@ export function unlockSingleCard(
     summary,
     reversed: drawn.reversed,
     spreadLabel: drawn.position ?? '',
+    journalId: journalId?.trim() || undefined,
   };
 
   let isFirstTime = false;
@@ -198,6 +202,35 @@ export function unlockCardsFromReading(
 
 export function getCodexEntry(cardId: string): CodexEntry | undefined {
   return loadStore().entries[cardId];
+}
+
+/** 把手札 id 写回对应牌的相遇记录（完成占问时调用） */
+export function linkEncountersToJournal(
+  journalId: string,
+  question: string,
+  cardIds: string[],
+  aroundIso: string,
+  windowMs = 45 * 60 * 1000,
+): void {
+  const store = loadStore();
+  const q = question.trim();
+  const t = new Date(aroundIso).getTime();
+  let changed = false;
+
+  for (const cardId of cardIds) {
+    const entry = store.entries[cardId];
+    if (!entry) continue;
+    for (const enc of entry.encounters) {
+      if (enc.journalId === journalId) continue;
+      if (enc.question.trim() !== q) continue;
+      const dt = Math.abs(new Date(enc.at).getTime() - t);
+      if (dt > windowMs) continue;
+      enc.journalId = journalId;
+      changed = true;
+    }
+  }
+
+  if (changed) saveStore(store);
 }
 
 export function isCardCollected(cardId: string): boolean {

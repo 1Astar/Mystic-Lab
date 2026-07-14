@@ -98,6 +98,7 @@ export function buildVisualQuestionBridge(
   context: ReadingContext,
   knowledge: CardKnowledge,
   reversed: boolean,
+  visualOverview?: string,
 ): string | undefined {
   const q = context.question.trim();
   if (!q) return undefined;
@@ -112,5 +113,44 @@ export function buildVisualQuestionBridge(
     return `你问的是「${q}」。${posHint}星币四提醒：你不是没准备，而是可能太想稳住，导致表达不够放开。这张牌不是「冲刺爆发型」，而是「守住基本盘型」——能稳住，但要避免太收着。`;
   }
 
-  return `你问的是「${q}」。${knowledge.nameCn}${reversed ? '逆位' : '正位'}的画面元素，需要放回你的具体问题里理解——下面每处符号都在补充这个语境。`;
+  const orient = reversed ? '逆位' : '正位';
+  const overview =
+    visualOverview?.trim() ||
+    knowledge.visualOverview?.trim() ||
+    knowledge.oneSentence.trim();
+
+  const topicHint = topicBridgeHint(context.topic, knowledge.nameCn, reversed);
+
+  return [
+    `你问的是「${q}」。`,
+    `${knowledge.nameCn}${orient}的整体画面：${overview}`,
+    topicHint,
+  ]
+    .filter(Boolean)
+    .join('');
+}
+
+function topicBridgeHint(
+  topic: ReadingContext['topic'],
+  nameCn: string,
+  reversed: boolean,
+): string {
+  if (topic === 'work') {
+    return reversed
+      ? `放到求职/工作语境里：这更像提醒你检视策略是否在绕弯路、透支信用，或该换更直的路径，而不是坐等「哪一天一定发生」。`
+      : `放到求职/工作语境里：${nameCn}更像在问「你正在用什么策略靠近机会、又放下了什么」——看清取舍与窗口，比盯着准确日期更有用。`;
+  }
+  if (topic === 'love') {
+    return reversed
+      ? `放到感情语境里：留意关系里是否有回避、隐瞒或迂回——真诚比「赢一招」更重要。`
+      : `放到感情语境里：留意对方（或你）接近与保留的部分——意图与时机往往藏在画面细节里。`;
+  }
+  if (topic === 'study') {
+    return reversed
+      ? `放到学业语境里：方法或节奏可能需要调整，别只靠走捷径。`
+      : `放到学业语境里：看清你带走的是真正有用的准备，还是只在搬走焦虑。`;
+  }
+  return reversed
+    ? `整幅热点合起来读：阻滞往往出在策略与自洽上，先辨认你在回避什么。`
+    : `整幅热点合起来读：它们共同指向一个主题——你正在选择什么路径、留下什么。`;
 }

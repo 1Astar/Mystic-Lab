@@ -604,6 +604,32 @@
   color: var(--ink-muted);
 }
 
+.codex-encounter-clickable {
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.codex-encounter-clickable:hover {
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+.codex-encounter-open {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--gold);
+}
+
 .codex-encounter time {
   font-size: 0.72rem;
   color: var(--gold);

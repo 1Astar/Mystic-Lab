@@ -39,6 +39,7 @@ export type CodexDetailCallbacks = {
   onClose: () => void;
   onSaveNote: (note: string) => void;
   onToggleFavorite: () => void;
+  onOpenEncounter?: (encounterAt: string) => void;
 };
 
 export function mountCodexDetail(
@@ -80,8 +81,8 @@ export function mountCodexDetail(
   const historyHtml = entry.encounters.length
     ? entry.encounters
         .map(
-          (e) => `
-        <div class="codex-encounter">
+          (e, i) => `
+        <button type="button" class="codex-encounter codex-encounter-clickable" data-enc-idx="${i}">
           <time>${new Date(e.at).toLocaleString('zh-CN')}</time>
           <p>${e.question ? `问：${escapeHtml(e.question)}` : '（未记录问题）'}</p>
           <p>${escapeHtml(e.spreadLabel || '占问')} · ${e.reversed ? '逆位' : '正位'}</p>
@@ -90,7 +91,8 @@ export function mountCodexDetail(
               ? `<p class="codex-encounter-tendency">答案倾向：${escapeHtml(e.summary)}</p>`
               : ''
           }
-        </div>`,
+          <span class="codex-encounter-open">复原当时结果 →</span>
+        </button>`,
         )
         .join('')
     : '<p class="codex-muted">暂无历史占问记录</p>';
@@ -209,6 +211,14 @@ export function mountCodexDetail(
     if (ta) callbacks.onSaveNote(ta.value);
   });
   container.querySelector('.codex-fav-btn')?.addEventListener('click', callbacks.onToggleFavorite);
+
+  container.querySelectorAll<HTMLButtonElement>('.codex-encounter-clickable').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.encIdx ?? -1);
+      const enc = entry.encounters[idx];
+      if (enc) callbacks.onOpenEncounter?.(enc.at);
+    });
+  });
 
   renderTabs();
 }
