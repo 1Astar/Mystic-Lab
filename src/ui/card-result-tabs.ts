@@ -243,7 +243,7 @@ function renderVisualTab(r: CardReading): string {
     .join('');
 
   const bridgeBlock = questionBridge
-    ? `<section class="visual-bridge-block"><h4 class="visual-section-title">回到你的问题</h4><p class="visual-bridge-text">${formatParagraph(questionBridge)}</p></section>`
+    ? `<section class="visual-bridge-block"><h4 class="visual-section-title">热点整体解读 · 回到你的问题</h4><p class="visual-bridge-text">${formatParagraph(questionBridge)}</p></section>`
     : '';
 
   return `
@@ -254,6 +254,8 @@ function renderVisualTab(r: CardReading): string {
         <h4 class="visual-section-title">整牌总览</h4>
         <p class="visual-overview-text">${formatParagraph(overview)}</p>
       </section>
+
+      ${bridgeBlock}
 
       <section class="visual-elements-block">
         <h4 class="visual-section-title">牌面元素</h4>
@@ -269,8 +271,6 @@ function renderVisualTab(r: CardReading): string {
       </div>
 
       <p class="hotspot-detail" id="hotspot-detail-${r.cardId}">点选上方元素查看含义</p>
-
-      ${bridgeBlock}
 
     </div>`;
 

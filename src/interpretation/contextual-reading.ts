@@ -6,6 +6,7 @@ import { buildEncounterRecord } from '../knowledge/encounter.ts';
 import { mockAIInterpretation } from '../knowledge/mock-ai.ts';
 import { buildSelfReflectionQuestions } from '../knowledge/reflection-prompts.ts';
 import {
+  getVisualOverview,
   hasVisualHotspots,
   resolveCardKnowledge,
 } from '../knowledge/registry.ts';
@@ -65,7 +66,12 @@ function buildCardReading(
   const mockResult = mockAIInterpretation(readingContext, knowledge, reversed);
   const selfReflection = buildSelfReflectionQuestions(readingContext, knowledge);
   const answerTendency = buildAnswerTendency(readingContext, knowledge, reversed);
-  const visualQuestionBridge = buildVisualQuestionBridge(readingContext, knowledge, reversed);
+  const visualQuestionBridge = buildVisualQuestionBridge(
+    readingContext,
+    knowledge,
+    reversed,
+    getVisualOverview(drawn.card.id),
+  );
 
   const interpretationLayers = {
     standard,

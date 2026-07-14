@@ -8,6 +8,7 @@ import { navigate } from '../router.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
 import { mountCodexDetail } from '../ui/codex-detail.ts';
 import { mountCodexPreview } from '../ui/codex-preview.ts';
+import { openEncounterReplay } from '../ui/reading-replay.ts';
 
 export type CodexDetailHost = {
   page: HTMLElement;
@@ -18,6 +19,7 @@ export type CodexDetailHost = {
 
 export function openCodexCardDetail(host: CodexDetailHost, deckId: string): void {
   host.page.querySelector('.codex-detail')?.remove();
+  host.page.querySelector('.reading-replay')?.remove();
   host.selectedId = deckId;
 
   const card = TAROT_DECK.find((c) => c.id === deckId);
@@ -37,6 +39,11 @@ export function openCodexCardDetail(host: CodexDetailHost, deckId: string): void
       onToggleFavorite: () => {
         toggleFavorite(deckId);
         host.onRefresh();
+      },
+      onOpenEncounter: (encounterAt: string) => {
+        const enc = entry.encounters.find((e) => e.at === encounterAt);
+        if (!enc) return;
+        openEncounterReplay(host.page, deckId, enc);
       },
     });
   } else {

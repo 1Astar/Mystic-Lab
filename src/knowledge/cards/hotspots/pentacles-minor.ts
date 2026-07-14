@@ -5,6 +5,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-ace',
     deckId: 'pentacles-ace',
+    overview:
+      '云端之手托着一枚大星币，下方花园与小径展开。务实新机会从高处递来——种子需要土壤与时间，急不得。',
     hotspots: [
       { id: 'hand', label: '云端之手', x: 50, y: 28, meaning: '务实的新机会或资源——从高处递到手中。' },
       { id: 'coin', label: '星币', x: 50, y: 48, meaning: '物质、金钱或身体层面的新起点，值得培育。' },
@@ -15,6 +17,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-two',
     deckId: 'pentacles-two',
+    overview:
+      '青年在海边杂耍双币，无限带相连，远船起伏。多任务与取舍——在波动中找节奏，外在再动也要稳住重心。',
     hotspots: [
       { id: 'juggler', label: '杂耍者', x: 50, y: 48, meaning: '多任务、平衡与灵活——在波动中保持节奏。' },
       { id: 'coins', label: '双币', x: 50, y: 38, meaning: '资源有限，需取舍与优先级。' },
@@ -25,6 +29,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-three',
     deckId: 'pentacles-three',
+    overview:
+      '工匠、持图者与僧侣同看教堂工程。技能、协作与意义并置——质量来自细节，长期工程靠分段完成。',
     hotspots: [
       { id: 'craftsman', label: '工匠', x: 50, y: 52, meaning: '技能、协作与打磨——质量来自细节。' },
       { id: 'architect', label: '持图者', x: 28, y: 42, meaning: '规划与设计，蓝图需要人手实现。' },
@@ -47,6 +53,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-five',
     deckId: 'pentacles-five',
+    overview:
+      '风雪中两人蹒跚走过教堂彩窗，窗外光暖。匮乏与孤立真实——帮助可能近在咫尺，需抬头看见与求助。',
     hotspots: [
       { id: 'poor', label: '雪中二人', x: 50, y: 55, meaning: '匮乏、孤立或健康/资源上的困境——需要支持。' },
       { id: 'crutches', label: '拐杖', x: 42, y: 62, meaning: '身体或现实层面的限制，值得正视。' },
@@ -57,6 +65,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-six',
     deckId: 'pentacles-six',
+    overview:
+      '富人手持天平向跪地者分发星币。给予、衡量与公平——施与受是健康循环，分配也包括善待自己。',
     hotspots: [
       { id: 'merchant', label: '施予者', x: 50, y: 42, meaning: '给予、衡量与公平——施与受的平衡。' },
       { id: 'scales', label: '天平', x: 50, y: 32, meaning: '资源分配需公正，也包括对自己。' },
@@ -67,6 +77,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-seven',
     deckId: 'pentacles-seven',
+    overview:
+      '农夫倚锄凝视藤上六枚星币，一枚尚在手中。投入已发生，收成在路上——评估阶段：继续、调整，或耐心再等一季。',
     hotspots: [
       { id: 'farmer', label: '农夫', x: 50, y: 52, meaning: '耐心等待收成——投入已发生，结果在路上。' },
       { id: 'vine', label: '星币藤', x: 50, y: 38, meaning: '一颗一颗结出的果实，成长可见但缓慢。' },
@@ -76,6 +88,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-eight',
     deckId: 'pentacles-eight',
+    overview:
+      '学徒伏案打磨，墙上挂满星币成品，远镇可见。专注与重复——熟能生巧，质量来自日常纪律多于灵感爆发。',
     hotspots: [
       { id: 'apprentice', label: '学徒', x: 50, y: 48, meaning: '专注、重复、打磨技艺——熟能生巧。' },
       { id: 'coins', label: '墙上星币', x: 50, y: 32, meaning: '每一件作品都是累积，质量来自细节。' },
@@ -86,6 +100,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-nine',
     deckId: 'pentacles-nine',
+    overview:
+      '女子立于葡萄园，手套上栖猎鹰，蜗牛缓爬。自足地享受劳动成果——独立而丰盛，节奏可由自己定义。',
     hotspots: [
       { id: 'lady', label: '园中女子', x: 50, y: 48, meaning: '自足、享受劳动成果——独立而丰盛。' },
       { id: 'falcon', label: '手套猎鹰', x: 62, y: 38, meaning: '掌控与优雅，资源在握但不张扬。' },
@@ -96,6 +112,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-ten',
     deckId: 'pentacles-ten',
+    overview:
+      '家族在拱门与十币纹下相聚，长者、家人与犬。长期积累与传承——物质安全需要情感一起维护。',
     hotspots: [
       { id: 'patriarch', label: '长者', x: 50, y: 42, meaning: '家族、传承与长期积累——财富跨越世代。' },
       { id: 'family', label: '家人与犬', x: 50, y: 62, meaning: '物质安全与归属，也需情感维护。' },
@@ -106,6 +124,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-page',
     deckId: 'pentacles-page',
+    overview:
+      '侍从蹲身端详手中星币，田野与远山铺开。学习与务实探索的开始——潜力在脚下，每一步都算数。',
     hotspots: [
       { id: 'youth', label: '侍从', x: 50, y: 48, meaning: '学习、好奇、新机会——务实探索的开始。' },
       { id: 'coin', label: '手中星币', x: 58, y: 42, meaning: '仔细端详资源，培养珍惜与辨识力。' },
@@ -116,6 +136,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-knight',
     deckId: 'pentacles-knight',
+    overview:
+      '骑士缓行黑马，专注手中星币，脚下是犁过的地。稳健勤勉、慢但可靠——耐力比爆发更能换来收成。',
     hotspots: [
       { id: 'knight', label: '骑士', x: 50, y: 45, meaning: '稳健、勤勉、按部就班——慢但可靠。' },
       { id: 'horse', label: '黑马', x: 50, y: 62, meaning: '不炫耀的速度，耐力比爆发重要。' },
@@ -126,6 +148,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-queen',
     deckId: 'pentacles-queen',
+    overview:
+      '王后坐玫瑰园，怀中星币，脚边有兔。务实滋养与身体智慧——丰盛且接地气，生活可被精心打理。',
     hotspots: [
       { id: 'queen', label: '王后', x: 50, y: 42, meaning: '务实、滋养、身体与智慧——丰盛且接地气。' },
       { id: 'coin', label: '怀中星币', x: 50, y: 55, meaning: '珍惜资源，也懂得享受劳动成果。' },
@@ -136,6 +160,8 @@ export const PENTACLES_MINOR_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'pentacles-king',
     deckId: 'pentacles-king',
+    overview:
+      '国王端坐握币，袍饰牛首与葡萄。物质成功与商业头脑——能建也能守，财富是工具，用法定义格局。',
     hotspots: [
       { id: 'king', label: '国王', x: 50, y: 42, meaning: '物质成功、稳定与商业头脑——能建也能守。' },
       { id: 'coin', label: '手中星币', x: 62, y: 48, meaning: '财富是工具，如何使用定义格局。' },

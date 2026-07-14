@@ -107,8 +107,16 @@ export function hasVisualHotspots(deckId: string): boolean {
 }
 
 export function getVisualOverview(deckId: string): string | undefined {
-  const fromHotspot = hotspotsByDeckId.get(deckId)?.overview;
-  if (fromHotspot) return fromHotspot;
+  const visual = hotspotsByDeckId.get(deckId);
+  if (visual?.overview?.trim()) return visual.overview.trim();
+
+  if (visual?.hotspots.length) {
+    const bits = visual.hotspots
+      .slice(0, 4)
+      .map((h) => `${h.label}（${h.meaning.replace(/。$/, '')}）`);
+    return `画面里可一起看：${bits.join('；')}。`;
+  }
+
   const knowledge = knowledgeByDeckId.get(deckId);
   return knowledge?.visualOverview ?? knowledge?.oneSentence;
 }

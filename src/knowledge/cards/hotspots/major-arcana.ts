@@ -17,6 +17,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-1',
     deckId: 'major-1',
+    overview:
+      '魔术师一手指天一手接地，桌面摆着权杖、圣杯、宝剑与星币，头顶是无限符。四元素齐备——意志若集中，想法便有机会落成行动。',
     hotspots: [
       { id: 'figure', label: '魔术师', x: 50, y: 42, meaning: '意志集中在一点——你有能力把想法化为行动。' },
       { id: 'wand', label: '权杖', x: 22, y: 18, meaning: '灵感与行动力，已握在手中。' },
@@ -41,6 +43,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-3',
     deckId: 'major-3',
+    overview:
+      '皇后安坐麦田软垫，头戴星冠，身周果实与流水。像丰饶之母：成果靠持续滋养，不是催促与速成。',
     hotspots: [
       { id: 'empress', label: '皇后', x: 50, y: 42, meaning: '滋养、创造与丰盛——适合培育而非催促。' },
       { id: 'wheat', label: '麦田', x: 50, y: 78, meaning: '成果来自持续照料，不是一夜速成。' },
@@ -51,6 +55,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-4',
     deckId: 'major-4',
+    overview:
+      '皇帝端坐石制王座，手握权杖，身后远山矗立。秩序、边界与理性决断在此成型——混乱时先建立框架。',
     hotspots: [
       { id: 'emperor', label: '皇帝', x: 50, y: 40, meaning: '结构、边界与决断——混乱时需要框架。' },
       { id: 'throne', label: '石座', x: 50, y: 68, meaning: '稳固来自规则与自律，而非一时冲动。' },
@@ -61,6 +67,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-5',
     deckId: 'major-5',
+    overview:
+      '教皇端坐神殿，脚前交叉双钥，两侧侍从聆听。传统、传承与信念体系同时在场——可借力，也可重新审视你站在哪一套「规则」里。',
     hotspots: [
       { id: 'hierophant', label: '教皇', x: 50, y: 38, meaning: '传统、信念与传承——可借力，也可审视。' },
       { id: 'keys', label: '交叉钥匙', x: 50, y: 58, meaning: '通往理解的钥匙：一套是规则，一套是内在领悟。' },
@@ -82,6 +90,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-7',
     deckId: 'major-7',
+    overview:
+      '驭者立于战车之中，黑白狮身一左一右，身后城邦远去。意志要向前，内在冲突却先得调和——方向一致时力量才会汇聚。',
     hotspots: [
       { id: 'chariot', label: '战车', x: 50, y: 45, meaning: '意志驱动向前——方向一致时，力量才会汇聚。' },
       { id: 'sphinx', label: '双狮身', x: 38, y: 72, meaning: '内在冲突需先调和：一黑一白，一退一进。' },
@@ -92,6 +102,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-8',
     deckId: 'major-8',
+    overview:
+      '女子头戴花环，轻合狮口，头顶无限符号。温柔与耐心驯服野性，才是真力量——压制不等于掌控。',
     hotspots: [
       { id: 'woman', label: '女子', x: 50, y: 48, meaning: '以温柔驯服野性——力量不必等于压制。' },
       { id: 'lion', label: '狮子', x: 50, y: 68, meaning: '原始冲动与欲望，可被引导而非消灭。' },
@@ -101,6 +113,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-9',
     deckId: 'major-9',
+    overview:
+      '灰袍老者立于山巅，手提灯笼，杖伴身侧。灯光只照下一步，内省之路漫长而清醒——独处为了听见自己，不是逃避。',
     hotspots: [
       { id: 'hermit', label: '隐者', x: 50, y: 42, meaning: '独处不是为了逃避，而是为了听见自己。' },
       { id: 'lantern', label: '灯笼', x: 58, y: 28, meaning: '微光只照亮下一步——不必要求全盘看清。' },
@@ -111,6 +125,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-10',
     deckId: 'major-10',
+    overview:
+      '巨大轮盘中央转动，斯芬克斯端坐上方，蛇与阿努比斯分列升降。命运起落是常态——关键不在预测下一格，而在你如何站位。',
     hotspots: [
       { id: 'wheel', label: '命运之轮', x: 50, y: 45, meaning: '周期转动——起落是常态，关键是你如何站位。' },
       { id: 'sphinx', label: 'sphinx', x: 50, y: 28, meaning: '谜题仍在：变化中保持觉察，比预测更重要。' },
@@ -121,6 +137,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-11',
     deckId: 'major-11',
+    overview:
+      '正义端坐王座，一手天平一手宝剑。公平、真相与因果在此权衡——锋利，但拖延不会让问题消失。',
     hotspots: [
       { id: 'justice', label: '正义', x: 50, y: 40, meaning: '公平、因果与诚实——对自己也对他人。' },
       { id: 'scales', label: '天平', x: 50, y: 58, meaning: '权衡两端：事实、感受、责任，哪边被忽略了？' },
@@ -130,6 +148,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-12',
     deckId: 'major-12',
+    overview:
+      '男子倒吊生命之树，一腿交叉，头后光环平静。暂停不是失败，是为换取新视角——有时放手比硬推更有效。',
     hotspots: [
       { id: 'figure', label: '倒吊人', x: 50, y: 42, meaning: '暂停与换位思考——有时放手比硬推更有效。' },
       { id: 'halo', label: '头后光环', x: 50, y: 28, meaning: '牺牲或等待中，也可能获得新的领悟。' },
@@ -139,6 +159,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-13',
     deckId: 'major-13',
+    overview:
+      '骷髅骑士骑白马，白旗飘扬，国王与妇孺跪迎。旧章落幕可以干净而必然——结束是为新生命腾出空间，远方仍有日升。',
     hotspots: [
       { id: 'skeleton', label: '骷髅骑士', x: 50, y: 38, meaning: '结束与转化——旧章落幕，为新生命腾出空间。' },
       { id: 'flag', label: '白旗', x: 62, y: 22, meaning: '纯白象征净化，结束也可以是干净的。' },
@@ -149,6 +171,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-14',
     deckId: 'major-14',
+    overview:
+      '天使一脚踩水一脚踩岸，双杯间流水循环，远方阳光小径。极端之间仍有第三条路——疗愈是调和，不是一次到位。',
     hotspots: [
       { id: 'angel', label: '天使', x: 50, y: 22, meaning: '调和者出现——极端之间，还有第三条路。' },
       { id: 'cups', label: '双杯', x: 50, y: 52, meaning: '流动与混合：把不同元素慢慢调成平衡。' },
@@ -159,6 +183,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-15',
     deckId: 'major-15',
+    overview:
+      '恶魔坐石座，倒火炬在握，二人被松散锁链拴住。束缚看似坚固，实则仍有松绑空间——觉察执念，比猛冲或回避都更重要。',
     hotspots: [
       { id: 'devil', label: '恶魔', x: 50, y: 28, meaning: '欲望、执念与无形束缚——觉察什么在控制你。' },
       { id: 'chains', label: '锁链', x: 38, y: 58, meaning: '枷锁看似坚固，其实松垮——你有松绑的空间。' },
@@ -205,6 +231,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-19',
     deckId: 'major-19',
+    overview:
+      '巨日当空，孩童骑马持旗穿过向日葵，矮墙在后。喜悦、清晰与生命力一并绽放——阴霾暂退，方向对了能量就会回来。',
     hotspots: [
       { id: 'sun', label: '太阳', x: 50, y: 14, meaning: '清晰、喜悦与生命力——阴霾暂退，真相可见。' },
       { id: 'child', label: '骑马孩童', x: 50, y: 52, meaning: '天真与自信回归，不必过度防御。' },
@@ -215,6 +243,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-20',
     deckId: 'major-20',
+    overview:
+      '天使云端吹号，人们从棺中起身仰望，远方雪山。召唤与觉醒响起——旧我需要整合，新的抉择等你回应。',
     hotspots: [
       { id: 'angel', label: '天使', x: 50, y: 12, meaning: '召唤与觉醒——听见内心更高层面的声音。' },
       { id: 'trumpet', label: '号角', x: 50, y: 28, meaning: '不能再假装没听见——该回应的召唤已到。' },
@@ -225,6 +255,8 @@ export const MAJOR_ARCANA_HOTSPOTS: CardVisualHotspots[] = [
   {
     cardId: 'major-21',
     deckId: 'major-21',
+    overview:
+      '舞者在花环中起舞，四角有天使、鹰、牛、狮。一周期圆满完成——身心灵与物质元素齐备，新循环也即将展开。',
     hotspots: [
       { id: 'dancer', label: '舞者', x: 50, y: 48, meaning: '整合与完成——旅程的一个阶段圆满收束。' },
       { id: 'wreath', label: '花环', x: 50, y: 22, meaning: '保护圈仍在，但你已学会在其中自由移动。' },
