@@ -106,7 +106,7 @@ function loadStore(): CodexStore {
 
 export function detectQuestionTheme(question: string): QuestionTheme {
   const q = question.trim();
-  if (/工作|事业|职场|换工作|offer|面试|跳槽|升职|项目/.test(q)) return 'work';
+  if (/工作|事业|职场|换工作|找工作|求职|offer|面试|跳槽|升职|项目|辞职|离职/.test(q)) return 'work';
   if (/感情|爱情|关系|喜欢|分手|复合|婚姻|伴侣|表白/.test(q)) return 'love';
   if (/学业|考试|学习|考研|留学|论文|学校/.test(q)) return 'study';
   return 'self';

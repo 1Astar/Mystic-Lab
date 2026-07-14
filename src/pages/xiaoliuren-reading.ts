@@ -22,7 +22,7 @@ import {
   mountShichenDialAnimation,
   renderShichenDial,
 } from '../ui/xiaoliuren/shichen-dial.ts';
-import { getHuangliBrief } from '../xiaoliuren/huangli.ts';
+import { getHuangliBrief, getHuangliCalendarLayout } from '../xiaoliuren/huangli.ts';
 import { getLunarConvertView } from '../xiaoliuren/lunar-convert.ts';
 import { playLunarFlipAnimation, renderLunarFlipScroll } from '../ui/xiaoliuren/lunar-flip.ts';
 import {
@@ -346,7 +346,11 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
       case 'lunar':
         stage.innerHTML = renderFlowPanel(
           { section: '翻黄历', title: '认识时间' },
-          renderLunarFlipScroll(getLunarConvertView(at, hour.label), { flipped: lunarFlipped }),
+          renderLunarFlipScroll(
+            getLunarConvertView(at, hour.label),
+            getHuangliCalendarLayout(at, hour.label, hour.name),
+            { flipped: lunarFlipped },
+          ),
           'xlr-flow-lunar',
         );
         mountHuangliInteractions(stage, setHuangliOpen);

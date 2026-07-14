@@ -40,6 +40,11 @@ import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
 import { mountQuestionCoach, type QuestionCoachHandle } from '../ui/question-coach.ts';
+import {
+  createAiOptimizeTrigger,
+  mountQuestionRewritePanel,
+  type QuestionRewritePanelHandle,
+} from '../ui/question-rewrite-panel.ts';
 import { openQuestionGuideModal, renderQuestionStageBackdrop } from '../ui/question-type-guide.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 
@@ -69,6 +74,7 @@ export function renderTarot(root: HTMLElement): () => void {
   let drawMode: DrawMode = defaultDrawMode(inputCaps);
   let motionEnabled = false;
   let questionCoach: QuestionCoachHandle | null = null;
+  let questionRewrite: QuestionRewritePanelHandle | null = null;
   let drawLock = false;
   let currentJournalId: string | null = null;
   let ritualInputUnbind: (() => void) | null = null;
@@ -151,14 +157,17 @@ export function renderTarot(root: HTMLElement): () => void {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
+      page.classList.remove('is-ritual-active');
       return;
     }
+    page.classList.add('is-ritual-active');
     const step = ritualStep();
     if (drawMode !== 'gesture' || !cameraOn) {
       gestureStatus.el.hidden = true;
     }
     hintBar.setStep(step, drawMode);
-    const showAssist = step !== null && drawMode === 'gesture' && gestureFallback;
+    const showAssist =
+      step !== null && drawMode === 'gesture' && (gestureFallback || !cameraOn);
     fallback.setStep(showAssist ? step : null);
     fallback.setVisible(showAssist);
     if (gestureFallback && cameraOn) {
@@ -210,6 +219,13 @@ export function renderTarot(root: HTMLElement): () => void {
     syncHintBar();
     renderStage();
     bindRitualInputs();
+    if (
+      drawMode === 'gesture' &&
+      ['draw', 'flip', 'shuffle', 'cut'].includes(next) &&
+      !cameraOn
+    ) {
+      void resumeGestureRitual();
+    }
   }
 
   function ritualInputStep(): RitualInputStep | null {
@@ -254,8 +270,17 @@ export function renderTarot(root: HTMLElement): () => void {
       return;
     }
 
-    if (drawMode === 'gesture' && step === 'ritual') {
-      ritualInputUnbind = bindRitualInput(stage, 'ritual', callbacks);
+    if (drawMode === 'gesture') {
+      if (
+        step === 'ritual' ||
+        step === 'shuffle' ||
+        step === 'cut' ||
+        step === 'draw' ||
+        step === 'flip'
+      ) {
+        ritualInputUnbind = bindRitualInput(stage, step, callbacks);
+      }
+      return;
     }
   }
 
@@ -279,7 +304,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const gesture: Record<string, string> = {
       shuffle: '<strong>手掌收起</strong>并轻晃',
       cut: '<strong>左右挥手</strong>切牌',
-      draw: '<strong>拇指食指捏合</strong>，保持 0.3 秒',
+      draw: '<strong>拇指食指捏合</strong>，保持 0.3 秒 · 也可点击/上滑牌堆',
       flip: '<strong>手掌上翻</strong>，翻开牌面',
     };
     const free: Record<string, string> = {
@@ -314,15 +339,21 @@ export function renderTarot(root: HTMLElement): () => void {
       case 'question':
         questionCoach?.destroy();
         questionCoach = null;
+        questionRewrite?.destroy();
+        questionRewrite = null;
         stage.innerHTML = `
           <div class="question-stage">
             ${renderQuestionStageBackdrop()}
             <div class="question-main">
               <div class="question-head">
                 <h2 class="section-title">你想问什么？</h2>
-                <button type="button" class="question-guide-trigger">怎么问更好？</button>
+                <div class="question-head-actions">
+                  <span class="question-ai-optimize-slot"></span>
+                  <button type="button" class="question-guide-trigger">怎么问更好？</button>
+                </div>
               </div>
               <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：找工作的阻碍和机会分别是什么？"></textarea>
+              <div id="question-rewrite-host"></div>
               <div id="question-coach-host"></div>
             </div>
           </div>
@@ -343,6 +374,24 @@ export function renderTarot(root: HTMLElement): () => void {
           });
           questionCoach.bindInput(input);
           if (question) input.value = question;
+
+          const rewriteHost = document.getElementById('question-rewrite-host')!;
+          questionRewrite = mountQuestionRewritePanel(rewriteHost, {
+            source: 'question',
+            getQuestion: () => input.value.trim() || question,
+            onApply: (q) => {
+              input.value = q;
+              question = q;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.focus();
+            },
+          });
+          const aiSlot = document.querySelector('.question-ai-optimize-slot');
+          aiSlot?.appendChild(
+            createAiOptimizeTrigger(() => {
+              questionRewrite?.open();
+            }),
+          );
         }
         appendBtn('下一步 · 选择牌阵', () => {
           const input = document.querySelector<HTMLTextAreaElement>('#tarot-question');
@@ -501,7 +550,7 @@ export function renderTarot(root: HTMLElement): () => void {
         ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
         <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${posLabel}</strong></p>
         <p class="tarot-hint">${stepHintHtml('draw')}</p>
-        <p class="teach-hint teach-hint-soft">在底部牌堆左右滑动浏览，选中后上滑或长按抽出。</p>
+        <p class="teach-hint teach-hint-soft">在底部牌堆左右滑动浏览，点击选中牌或上滑/长按抽出。</p>
       `;
     }
     syncCameraPlacement();
@@ -597,6 +646,9 @@ export function renderTarot(root: HTMLElement): () => void {
   function renderResult(): void {
     if (!reading) return;
 
+    questionRewrite?.destroy();
+    questionRewrite = null;
+
     const journalId = ensureJournalSaved();
 
     actions.innerHTML = '';
@@ -613,6 +665,12 @@ export function renderTarot(root: HTMLElement): () => void {
           <h3>写下此刻的感悟</h3>
           <textarea id="result-reflection" class="question-input" rows="3" placeholder="这次占问，你想记住什么？"></textarea>
         </div>
+        <div class="result-rewrite-block">
+          <button type="button" class="result-rewrite-trigger">
+            对结果有疑问？可能是问法不对 — 让 AI 帮你改问
+          </button>
+          <div id="result-rewrite-host"></div>
+        </div>
       </div>
     `;
 
@@ -628,6 +686,21 @@ export function renderTarot(root: HTMLElement): () => void {
     if (reflectionEl && journalId) {
       reflectionEl.addEventListener('input', () => {
         updateJournalReflection(journalId, reflectionEl.value.trim());
+      });
+    }
+
+    const rewriteHost = document.getElementById('result-rewrite-host');
+    if (rewriteHost) {
+      questionRewrite = mountQuestionRewritePanel(rewriteHost, {
+        source: 'result',
+        getQuestion: () => question,
+        onApply: (q) => {
+          question = q;
+        },
+        onRestartWithQuestion: (q) => restartWithQuestion(q),
+      });
+      stage.querySelector('.result-rewrite-trigger')?.addEventListener('click', () => {
+        questionRewrite?.open();
       });
     }
 
@@ -684,6 +757,8 @@ export function renderTarot(root: HTMLElement): () => void {
     reading = null;
     learningNote = '';
     currentJournalId = null;
+    questionRewrite?.destroy();
+    questionRewrite = null;
     drawMode = defaultDrawMode(inputCaps);
     motionEnabled = false;
     gestureBridge?.stop();
@@ -692,6 +767,28 @@ export function renderTarot(root: HTMLElement): () => void {
     cameraOn = false;
     gestureFallback = !env.canUseGesture;
     setState('landing');
+  }
+
+  /** 结果页采用新问法后，保留问题并回到选牌阵 */
+  function restartWithQuestion(nextQuestion: string): void {
+    question = nextQuestion.trim();
+    drawnCards = [];
+    cardPool = [];
+    currentIndex = 0;
+    supplementCount = 0;
+    reading = null;
+    learningNote = '';
+    currentJournalId = null;
+    questionRewrite?.destroy();
+    questionRewrite = null;
+    drawMode = defaultDrawMode(inputCaps);
+    motionEnabled = false;
+    gestureBridge?.stop();
+    gestureBridge = null;
+    camera.stop();
+    cameraOn = false;
+    gestureFallback = !env.canUseGesture;
+    setState(question ? 'spread' : 'question');
   }
 
   async function startRitualWithMode(): Promise<void> {
@@ -713,6 +810,78 @@ export function renderTarot(root: HTMLElement): () => void {
     gestureFallback = false;
     cameraOn = false;
     setState('ritual');
+  }
+
+  async function startGesturePipeline(video: HTMLVideoElement): Promise<boolean> {
+    if (!env.canUseGesture) {
+      gestureFallback = true;
+      return false;
+    }
+    try {
+      gestureBridge?.stop();
+      gestureBridge = new GestureBridge({
+        onGesture: handleNamedGesture,
+        onFrame: handleFrame,
+        onUpdate: (ev) => {
+          const ritualActive = ['ritual', 'shuffle', 'cut', 'draw', 'flip'].includes(state);
+          if (!ritualActive) return;
+          gestureStatus.update(ev.handCount, ev.gesture, ev.confidence, true);
+          if (state === 'ritual' && ev.recognized) {
+            if (heldPalm.update(ev.recognized, ['Open_Palm', 'ILoveYou'])) {
+              void onRitualEnter();
+            }
+          }
+          debug?.update({
+            gesture: ev.gesture ?? '无',
+            handCount: ev.handCount,
+            fps: ev.fps,
+            confidence: ev.confidence,
+          });
+        },
+        onError: (msg, stage) => {
+          gestureFallback = true;
+          const hint =
+            stage === 'wasm'
+              ? '（WASM 运行库）'
+              : stage === 'model'
+                ? '（模型文件）'
+                : '';
+          gestureStatus.setMessage(`手势加载失败${hint}：${msg}`);
+          syncHintBar();
+        },
+      });
+      await gestureBridge.init();
+      gestureBridge.start(video);
+      gestureFallback = false;
+      return true;
+    } catch (err) {
+      gestureFallback = true;
+      const msg = err instanceof Error ? err.message : '手势初始化失败';
+      gestureStatus.setMessage(`手势模型加载失败：${msg}`);
+      syncHintBar();
+      return false;
+    }
+  }
+
+  async function resumeGestureRitual(): Promise<void> {
+    if (drawMode !== 'gesture' || env.shouldBlockCamera || cameraOn) return;
+
+    gestureStatus.setMessage('正在恢复摄像头与手势…');
+    const camResult = await camera.start(cameraWrap);
+    if (!camResult.ok) {
+      gestureFallback = true;
+      cameraOn = false;
+      syncHintBar();
+      bindRitualInputs();
+      return;
+    }
+
+    cameraOn = true;
+    cameraWrap.hidden = false;
+    await startGesturePipeline(camResult.video);
+    syncCameraPlacement();
+    syncHintBar();
+    bindRitualInputs();
   }
 
   async function beginGestureRitual(): Promise<void> {
@@ -749,49 +918,10 @@ export function renderTarot(root: HTMLElement): () => void {
     gestureStatus.setMessage('正在加载手势模型…');
 
     if (env.canUseGesture) {
-      try {
-        gestureBridge = new GestureBridge({
-          onGesture: handleNamedGesture,
-          onFrame: handleFrame,
-          onUpdate: (ev) => {
-            const ritualActive = ['ritual', 'shuffle', 'cut', 'draw', 'flip'].includes(state);
-            if (!ritualActive) return;
-            gestureStatus.update(ev.handCount, ev.gesture, ev.confidence, true);
-            if (state === 'ritual' && ev.recognized) {
-              if (heldPalm.update(ev.recognized, ['Open_Palm', 'ILoveYou'])) {
-                void onRitualEnter();
-              }
-            }
-            debug?.update({
-              gesture: ev.gesture ?? '无',
-              handCount: ev.handCount,
-              fps: ev.fps,
-              confidence: ev.confidence,
-            });
-          },
-          onError: (msg, stage) => {
-            gestureFallback = true;
-            const hint =
-              stage === 'wasm'
-                ? '（WASM 运行库）'
-                : stage === 'model'
-                  ? '（模型文件）'
-                  : '';
-            gestureStatus.setMessage(`手势加载失败${hint}：${msg}`);
-            syncHintBar();
-          },
-        });
-        await gestureBridge.init();
-        gestureBridge.start(camResult.video);
-        gestureFallback = false;
-      } catch (err) {
-        gestureFallback = true;
-        const msg = err instanceof Error ? err.message : '手势初始化失败';
-        gestureStatus.setMessage(`手势模型加载失败：${msg}`);
-      }
+      await startGesturePipeline(camResult.video);
     } else {
       gestureFallback = true;
-      gestureStatus.setMessage('当前环境不支持手势识别，请用辅助按钮');
+      gestureStatus.setMessage('当前环境不支持手势识别，请用触屏或辅助按钮');
     }
 
     setState('ritual');
@@ -943,6 +1073,7 @@ export function renderTarot(root: HTMLElement): () => void {
     savePartialProgress();
     window.removeEventListener('pagehide', onPageHide);
     questionCoach?.destroy();
+    questionRewrite?.destroy();
     ritualInputUnbind?.();
     gestureBridge?.stop();
     camera.stop();

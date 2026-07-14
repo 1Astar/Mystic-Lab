@@ -23,6 +23,11 @@ declare module 'lunar-javascript' {
     getDayChongShengXiao(): string;
     getDaySha(): string;
     getDayChongDesc(): string;
+    getDayTianShenLuck(): string;
+    getTimes(): Array<{
+      getZhi: () => string;
+      getTianShenLuck: () => string;
+    }>;
     toString(): string;
   }
 }
