@@ -3,11 +3,16 @@ import { Solar } from 'lunar-javascript';
 export type LunarConvertView = {
   solarDateTime: string;
   solarLabel: string;
+  solarDay: string;
+  solarMonthDay: string;
   weekdayLabel: string;
   lunarTitle: string;
   lunarMain: string;
+  lunarDay: string;
   lunarLabel: string;
   ganzhiLine: string;
+  ganzhiDate: string;
+  ganzhiYearMonth: string;
   hourLabel: string;
 };
 
@@ -58,15 +63,23 @@ export function getLunarConvertView(date: Date, hourLabel: string): LunarConvert
   const monthName = lunar.getMonthInChinese();
   const dayName = lunar.getDayInChinese();
   const lunarMain = `${monthName}月${dayName}`;
+  const m = date.getMonth();
+  const d = date.getDate();
+  const solarMonthDay = `${SOLAR_MONTHS[m]}${DAY_CN[d - 1] ?? `${d}日`}`;
 
   return {
     solarDateTime: formatSolarDateTime(date),
     solarLabel: formatSolarLabel(date),
+    solarDay: String(d),
+    solarMonthDay,
     weekdayLabel: formatWeekdayLabel(solar.getWeekInChinese()),
     lunarTitle: '对应',
     lunarMain,
+    lunarDay: dayName,
     lunarLabel: `农历 ${lunarMain}`,
     ganzhiLine: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日 · ${hourLabel}`,
+    ganzhiDate: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`,
+    ganzhiYearMonth: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月`,
     hourLabel,
   };
 }

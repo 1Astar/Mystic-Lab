@@ -37,19 +37,19 @@ export function mountHuangliMiniMotion(container: HTMLElement): void {
   mini.classList.add('is-visible');
 }
 
-/** 挂历区：纸张展开 */
+/** 黄历纸页：轻量入场 */
 export function mountLunarScrollMotion(container: HTMLElement): void {
-  const scroll = container.querySelector('.xlr-lunar-scroll');
-  if (!scroll) return;
+  const calendar = container.querySelector('.xlr-lunar-calendar');
+  if (!calendar) return;
 
   if (prefersReducedMotion()) {
-    scroll.classList.add('is-unfolded');
+    calendar.classList.add('is-entered');
     return;
   }
 
   requestAnimationFrame(() => {
-    scroll.classList.add('is-unfolding');
-    window.setTimeout(() => scroll.classList.add('is-unfolded'), 520);
+    calendar.classList.add('is-entering');
+    window.setTimeout(() => calendar.classList.add('is-entered'), 480);
   });
 }
 

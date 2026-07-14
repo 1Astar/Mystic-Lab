@@ -1,4 +1,5 @@
 import { Solar } from 'lunar-javascript';
+import { EARTHLY_BRANCHES } from './chinese-hour.ts';
 
 const WUXING_CHARS = ['金', '木', '水', '火', '土'] as const;
 type WuxingChar = (typeof WUXING_CHARS)[number];
@@ -40,6 +41,39 @@ export type HuangliBrief = {
   chongsha: string;
   mood: string;
 };
+
+export type ShichenLuck = {
+  branch: string;
+  luck: '吉' | '凶';
+  active: boolean;
+};
+
+export type HuangliCalendarLayout = HuangliBrief & {
+  yiColumn: string[];
+  jiColumn: string[];
+  dayLuck: '吉' | '凶';
+  dayLuckLabel: string;
+  shichenRow: ShichenLuck[];
+};
+
+function columnActivities(items: string[], max = 4): string[] {
+  const cleaned = cleanActivities(items);
+  return cleaned.length > 0 ? cleaned.slice(0, max) : ['—'];
+}
+
+function buildShichenRow(lunar: import('lunar-javascript').Lunar, activeBranch: string): ShichenLuck[] {
+  const luckByBranch = new Map<string, '吉' | '凶'>();
+  for (const time of lunar.getTimes()) {
+    const branch = time.getZhi();
+    if (luckByBranch.has(branch)) continue;
+    luckByBranch.set(branch, time.getTianShenLuck() === '吉' ? '吉' : '凶');
+  }
+  return EARTHLY_BRANCHES.map((branch) => ({
+    branch,
+    luck: luckByBranch.get(branch) ?? '吉',
+    active: branch === activeBranch,
+  }));
+}
 
 function extractWuxing(nayin: string): WuxingChar | null {
   for (let i = nayin.length - 1; i >= 0; i--) {
@@ -120,5 +154,25 @@ export function getHuangliBrief(date: Date, hourLabel: string, hourBranch: strin
     wuxingNayin: nayin,
     chongsha: buildChongsha(lunar.getDayChongShengXiao(), lunar.getDaySha()),
     mood: buildMood(wuxing, hourBranch),
+  };
+}
+
+/** 黄历纸页排版数据（宜忌列、日吉凶、时辰吉凶） */
+export function getHuangliCalendarLayout(
+  date: Date,
+  hourLabel: string,
+  hourBranch: string,
+): HuangliCalendarLayout {
+  const brief = getHuangliBrief(date, hourLabel, hourBranch);
+  const lunar = Solar.fromDate(date).getLunar();
+  const dayLuck = lunar.getDayTianShenLuck() === '吉' ? '吉' : '凶';
+
+  return {
+    ...brief,
+    yiColumn: columnActivities(brief.yi),
+    jiColumn: columnActivities(brief.ji),
+    dayLuck,
+    dayLuckLabel: dayLuck === '吉' ? '黄道吉日' : '黑道日',
+    shichenRow: buildShichenRow(lunar, hourBranch),
   };
 }

@@ -35,11 +35,12 @@ export function mountAiSettingsPanel(container: HTMLElement): void {
   container.appendChild(trigger);
 }
 
-function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
+export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
   document.querySelector('.ai-settings-modal')?.remove();
 
   let settings = loadAiSettings();
   let savedKey = settings.apiKey;
+  let savedStarSecret = settings.starPmCaptureSecret;
   let modelOptions = getFallbackModels(settings.providerId, settings.model);
   let modelsLoading = false;
   let modelsError = '';
@@ -123,6 +124,12 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
           <span class="ai-hint">${savedKey ? `已保存 ${escapeHtml(maskApiKey(savedKey))}，留空则保持不变` : '密钥仅保存在本机'}</span>
         </label>
         ${renderModelField()}
+        <div class="ai-field ai-starpm-block">
+          <span class="ai-label">问法反馈同步到 Star PM（可选）</span>
+          <input type="url" name="starPmBaseUrl" class="question-input" value="${escapeAttr(settings.starPmBaseUrl)}" placeholder="https://your-star-pm.vercel.app" />
+          <input type="password" name="starPmCaptureSecret" class="question-input" value="" placeholder="${savedStarSecret ? maskApiKey(savedStarSecret) : 'IDEAS_CAPTURE_SECRET'}" autocomplete="off" />
+          <span class="ai-hint">${savedStarSecret ? `已保存 ${escapeHtml(maskApiKey(savedStarSecret))}，留空保持不变。` : ''}不满意问法时写入随心而行收件箱；密钥仅本机。</span>
+        </div>
         <div class="ai-settings-actions">
           <button type="submit" class="btn btn-secondary btn-sm">保存配置</button>
           <button type="button" class="btn btn-ghost btn-sm ai-test-api-btn" ${testLoading ? 'disabled' : ''}>
@@ -158,6 +165,7 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
   function readFormSettings(form: HTMLFormElement): AiSettings {
     const fd = new FormData(form);
     const nextKey = String(fd.get('apiKey') ?? '').trim();
+    const nextStarSecret = String(fd.get('starPmCaptureSecret') ?? '').trim();
     const modelFromSelect = String(fd.get('model') ?? '').trim();
     const modelFromCustom = String(fd.get('modelCustom') ?? '').trim();
     return {
@@ -166,6 +174,8 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
       baseUrl: String(fd.get('baseUrl') ?? DEFAULT_AI_SETTINGS.baseUrl).trim() || DEFAULT_AI_SETTINGS.baseUrl,
       apiKey: nextKey || savedKey,
       model: modelFromCustom || modelFromSelect || DEFAULT_AI_SETTINGS.model,
+      starPmBaseUrl: String(fd.get('starPmBaseUrl') ?? '').trim(),
+      starPmCaptureSecret: nextStarSecret || savedStarSecret,
     };
   }
 
@@ -297,7 +307,10 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
       }
       saveAiSettings(settings);
       savedKey = settings.apiKey;
+      savedStarSecret = settings.starPmCaptureSecret;
       (form.querySelector('[name="apiKey"]') as HTMLInputElement).value = '';
+      const starSecretInput = form.querySelector('[name="starPmCaptureSecret"]') as HTMLInputElement | null;
+      if (starSecretInput) starSecretInput.value = '';
       statusWrap.innerHTML = renderStatus();
       showMsg('已保存到本机');
       onSaved?.(settings);
@@ -306,6 +319,7 @@ function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): void {
     body.querySelector('[data-clear]')?.addEventListener('click', () => {
       settings = { ...DEFAULT_AI_SETTINGS };
       savedKey = '';
+      savedStarSecret = '';
       modelOptions = getFallbackModels(settings.providerId);
       modelsError = '';
       testResult = null;

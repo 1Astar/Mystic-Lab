@@ -147,7 +147,7 @@ export function bindDeckFanInteraction(
     startY = e.clientY;
     clearPress();
     cards[selectedInWindow]?.classList.add('is-charging');
-    callbacks.onProgress?.('左右滑动选牌 · 上滑或长按抽出');
+    callbacks.onProgress?.('左右滑动选牌 · 点击/上滑/长按抽出');
     pressTimer = window.setTimeout(() => {
       charged = true;
       cards[selectedInWindow]?.classList.add('is-glowing');
@@ -173,6 +173,11 @@ export function bindDeckFanInteraction(
     }
 
     clearPress();
+
+    if (Math.hypot(dx, dy) < 14 && Math.abs(dy) < SWIPE_FLIP_PX) {
+      once(callbacks.onDraw);
+      return;
+    }
 
     if (Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
       shiftSelection(dx < 0 ? 1 : -1);
