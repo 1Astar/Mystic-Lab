@@ -1,4 +1,4 @@
-import { bindDeckFanInteraction } from '../ui/tarot-deck-fan.ts';
+import { bindDeckFanInteraction, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
 
 export type RitualInputStep =
   | 'ritual'
@@ -20,6 +20,8 @@ export type RitualInputCallbacks = {
   onZoomOut: () => void;
   onConfirm: () => void;
   onProgress?: (text: string) => void;
+  /** 抽牌扇面就绪时回调，便于手势左右挥浏览 */
+  onDeckFanReady?: (fan: DeckFanHandle | null) => void;
 };
 
 const SWIPE_CUT_PX = 72;
@@ -170,7 +172,12 @@ export function bindRitualInput(
   }
 
   if (step === 'draw') {
-    return bindDeckFanInteraction(container, callbacks);
+    const fan = bindDeckFanInteraction(container, callbacks);
+    callbacks.onDeckFanReady?.(fan);
+    return () => {
+      fan.destroy();
+      callbacks.onDeckFanReady?.(null);
+    };
   }
 
   if (step === 'flip') {

@@ -52,7 +52,34 @@ describe('visual hotspot overall reading', () => {
     expect(bridge).toBeTruthy();
     expect(bridge!).toContain('什么时候能找到下一份工作');
     expect(bridge!).toMatch(/整体画面|潜行|取舍/);
-    expect(bridge!).toMatch(/求职|工作|策略/);
+    expect(bridge!).toMatch(/求职|工作/);
+    expect(bridge!).toMatch(/策略|取舍/);
+    expect(bridge!).toMatch(/日历日期|可改的一步/);
+    expect(bridge!).not.toContain('你正在用什么策略靠近机会、又放下了什么');
     expect(bridge!).not.toContain('下面每处符号都在补充这个语境');
+  });
+
+  it('differs work bridge by card keywords', () => {
+    const context: ReadingContext = {
+      question: '什么时候能找到新工作？',
+      spreadType: 'single',
+      cardPosition: '',
+      positionKey: '',
+      topic: 'work',
+      selectedCardId: 'swords-three',
+    };
+    const swordsThree = {
+      ...knowledge,
+      id: 'swords_three',
+      deckId: 'swords-three',
+      nameCn: '宝剑三',
+      keywords: ['心碎', '失望'],
+      oneSentence: '伤痛真实，也终会散。',
+    } as CardKnowledge;
+    const a = buildVisualQuestionBridge(context, knowledge, false, '七的画面');
+    const b = buildVisualQuestionBridge(context, swordsThree, false, '三的画面');
+    expect(a).toContain('策略');
+    expect(b).toContain('心碎');
+    expect(a).not.toEqual(b);
   });
 });

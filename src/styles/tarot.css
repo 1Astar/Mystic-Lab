@@ -3,7 +3,7 @@
 }
 
 .tarot-page.is-ritual-active {
-  padding-bottom: max(120px, calc(48px + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: max(168px, calc(96px + env(safe-area-inset-bottom, 0px)));
 }
 
 .tarot-hero {
@@ -261,6 +261,12 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 16px;
+  width: min(100%, 360px);
+  align-self: center;
+}
+
+.fallback-input[hidden] {
+  display: none !important;
 }
 
 .fallback-hint {
