@@ -17,6 +17,7 @@ import { renderXiaoliurenCodex } from './pages/xiaoliuren-codex.ts';
 import { renderXiaoliurenHourGuide } from './pages/xiaoliuren-hour-guide.ts';
 import { renderXiaoliurenJournal } from './pages/xiaoliuren-journal.ts';
 import { renderXiaoliurenReading } from './pages/xiaoliuren-reading.ts';
+import { renderXiaoliurenPalmJourney } from './pages/xiaoliuren-palm-journey.ts';
 import { renderXiaoliurenHome } from './pages/xiaoliuren-home.ts';
 import { initRouter, navigate, registerRoute } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
@@ -24,15 +25,16 @@ import { mountAppVersion } from './ui/app-version.ts';
 registerRoute('/', renderLabHome);
 registerRoute('/tarot', renderTarotHome);
 registerRoute('/tarot/reading', renderTarot);
-registerRoute('/codex', renderCodex);
-registerRoute('/codex/fool-journey', renderCodexFoolJourney);
-registerRoute('/codex/suit-numbers', renderCodexSuitNumbers);
+registerRoute('/tarot/tujian', renderCodex);
+registerRoute('/tarot/tujian/fool-journey', renderCodexFoolJourney);
+registerRoute('/tarot/tujian/suit-numbers', renderCodexSuitNumbers);
 registerRoute('/journal', renderJournal);
 registerRoute('/xiaoliuren', renderXiaoliurenHome);
 registerRoute('/xiaoliuren/reading', renderXiaoliurenReading);
 registerRoute('/xiaoliuren/codex', renderXiaoliurenCodex);
 registerRoute('/xiaoliuren/journal', renderXiaoliurenJournal);
 registerRoute('/xiaoliuren/hour-guide', renderXiaoliurenHourGuide);
+registerRoute('/xiaoliuren/palm-journey', renderXiaoliurenPalmJourney);
 registerRoute('/meihua', renderMeihuaHome);
 registerRoute('/records', (root) =>
   renderGlobalPlaceholder(root, '我的手札', '查看所有占问记录'),
@@ -42,6 +44,15 @@ registerRoute('/knowledge', (root) =>
 );
 
 // 旧路径兼容
+registerRoute('/codex', () => {
+  navigate('/tarot/tujian');
+});
+registerRoute('/codex/fool-journey', () => {
+  navigate('/tarot/tujian/fool-journey');
+});
+registerRoute('/codex/suit-numbers', () => {
+  navigate('/tarot/tujian/suit-numbers');
+});
 registerRoute('/divination', () => {
   navigate('/tarot/reading');
 });

@@ -1,8 +1,8 @@
-/** 掌上演算 · 三步进度 1/3 2/3 3/3 */
+/** 掌上演算 · 三步进度 */
 const STEPS = [
   { id: 0, label: '从月起' },
-  { id: 1, label: '再数日' },
-  { id: 2, label: '数时辰' },
+  { id: 1, label: '从日起' },
+  { id: 2, label: '从时起' },
 ] as const;
 
 export function renderCountSteps(activeIndex: number): string {

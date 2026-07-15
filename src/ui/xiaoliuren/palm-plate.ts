@@ -1,6 +1,5 @@
 import { getSixGodByIndex, getSixGodIconUrl } from '../../xiaoliuren/six-gods.ts';
 import {
-  LIUREN_ORIGIN,
   LIUREN_POINTS,
   getLiurenPoint,
 } from '../../xiaoliuren/liuren-points.ts';
@@ -16,7 +15,6 @@ export type PalmPlateOptions = {
   stepIndex?: number | null;
   showOrderPath?: boolean;
   showGodIcons?: boolean;
-  showOrigin?: boolean;
   caption?: string;
   interactive?: boolean;
   starPoints?: boolean;
@@ -53,10 +51,11 @@ function renderPointHtmlLayer(opts: {
     const isOrigin = p.index === 0;
     const originAttr = opts.interactive && isOrigin ? ' data-origin-point tabindex="0" role="button"' : '';
     const icon = opts.showGodIcons
-      ? `<img class="xlr-palm-god-chip" src="${getSixGodIconUrl(p.godId)}" alt="${p.name}" width="28" height="28" loading="lazy" />`
-      : `<span class="xlr-palm-point-num">${p.id}</span>`;
+      ? `<img class="xlr-palm-god-chip" src="${getSixGodIconUrl(p.godId)}" alt="" width="22" height="22" loading="lazy" />`
+      : '';
     return `
-      <div class="xlr-palm-point-html${lit}${land}${active}${star}${isOrigin && opts.interactive ? ' is-origin-tap' : ''}" data-index="${p.index}" style="--px:${p.x}%;--py:${p.y}%"${originAttr}>
+      <div class="xlr-palm-point-html is-marked${lit}${land}${active}${star}${isOrigin && opts.interactive ? ' is-origin-tap' : ''}" data-index="${p.index}" style="--px:${p.x}%;--py:${p.y}%;--lx:${p.lx}px;--ly:${p.ly}px"${originAttr}>
+        <span class="xlr-palm-point-num">${p.id}</span>
         ${icon}
         <span class="xlr-palm-point-label">${p.name}</span>
       </div>`;
@@ -67,7 +66,6 @@ function renderSvgInteractionLayer(opts: {
   showOrderPath: boolean;
   hopIndices: number[];
   dotIndex: number | null;
-  showOrigin: boolean;
 }): string {
   const pathD = orderPathD();
   const hopD = opts.hopIndices.length > 1 ? hopPathD(opts.hopIndices) : '';
@@ -84,14 +82,9 @@ function renderSvgInteractionLayer(opts: {
         })()
       : '';
 
-  const originDot = opts.showOrigin
-    ? `<circle class="xlr-palm-origin-dot" cx="${LIUREN_ORIGIN.x}" cy="${LIUREN_ORIGIN.y}" r="4"/>`
-    : '';
-
   return `
     ${opts.showOrderPath ? `<path class="xlr-palm-order-path" d="${pathD}"/>` : ''}
     ${hopD ? `<path class="xlr-palm-hop-path" d="${hopD}"/>` : ''}
-    ${originDot}
     ${activeDot}
   `;
 }
@@ -105,13 +98,18 @@ export function renderPalmPlate(opts: PalmPlateOptions = {}): string {
     stepIndex = null,
     showOrderPath = mode !== 'preview',
     showGodIcons = mode === 'preview',
-    showOrigin = mode !== 'preview',
     caption,
     interactive = false,
     starPoints = false,
   } = opts;
 
-  const hopIndices = litIndices.filter((v, i, a) => a.indexOf(v) === i);
+  const hopIndices = (() => {
+    const uniq = litIndices.filter((v, i, a) => a.indexOf(v) === i);
+    if (dotIndex === null || dotIndex === undefined) return uniq;
+    if (uniq.length >= 2) return uniq.slice(-2);
+    if (uniq.length === 1 && uniq[0] !== dotIndex) return [uniq[0], dotIndex];
+    return uniq;
+  })();
   const useStagger = mode === 'preview';
 
   const stepBadge =
@@ -132,15 +130,15 @@ export function renderPalmPlate(opts: PalmPlateOptions = {}): string {
         <p class="xlr-palm-plate-caption">${cap}</p>
       </div>
       <div class="xlr-palm-stage${useStagger ? ' xlr-stagger-item' : ''}" style="--si:3">
-        <div class="xlr-palm-hand-base">
+        <div class="xlr-palm-map">
           <img class="xlr-palm-hand-img" src="${XLR_ASSETS.palmChart}" alt="掌诀示意" loading="lazy" />
+          <div class="xlr-palm-points-html"${interactive ? '' : ' aria-hidden="true"'}>
+            ${renderPointHtmlLayer({ litIndices, landingIndex, dotIndex, showGodIcons, interactive, starPoints })}
+          </div>
+          <svg class="xlr-palm-overlay" viewBox="0 0 100 100" aria-hidden="true">
+            ${renderSvgInteractionLayer({ showOrderPath, hopIndices, dotIndex })}
+          </svg>
         </div>
-        <div class="xlr-palm-points-html"${interactive ? '' : ' aria-hidden="true"'}>
-          ${renderPointHtmlLayer({ litIndices, landingIndex, dotIndex, showGodIcons, interactive, starPoints })}
-        </div>
-        <svg class="xlr-palm-overlay" viewBox="0 0 100 125" aria-hidden="true">
-          ${renderSvgInteractionLayer({ showOrderPath, hopIndices, dotIndex, showOrigin })}
-        </svg>
       </div>
     </div>
   `;
@@ -156,11 +154,17 @@ export function renderPalmStepExplain(
   const phase = phaseNames[stepIndex] ?? '步';
   const landing = landingIndex !== null ? getSixGodByIndex(landingIndex).name : '—';
   const active = dotIndex !== null ? getSixGodByIndex(dotIndex).name : '起数中';
+  const cont =
+    stepIndex === 0
+      ? '从大安起顺数（正月起大安）'
+      : stepIndex === 1
+        ? '从月落点继续数日，不重回大安'
+        : '从日落点继续数时辰';
   return `
     <p class="xlr-palm-explain xlr-stagger-item" style="--si:4">
-      从<strong>${phase}</strong>起，顺数定位 · 当前落在 <strong>${active}</strong>
-      ${landingIndex !== null ? `· 本步落点 <em>${landing}</em>` : ''}
-      <span class="xlr-palm-explain-sub">${phaseLabel}</span>
+      数<strong>${phase}</strong> · 当前在 <strong>${active}</strong>
+      ${landingIndex !== null ? `· 本步落 <em>${landing}</em>` : ''}
+      <span class="xlr-palm-explain-sub">${phaseLabel} · ${cont}</span>
     </p>
   `;
 }

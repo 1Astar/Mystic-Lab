@@ -1,5 +1,5 @@
 import { getSixGodByIndex } from '../../xiaoliuren/six-gods.ts';
-import { LIUREN_ORIGIN } from '../../xiaoliuren/liuren-points.ts';
+import { formatPalmAnchor, LIUREN_ORIGIN } from '../../xiaoliuren/liuren-points.ts';
 import { renderPalmPlate, renderPalmStepExplain } from './palm-plate.ts';
 
 export type LearnSubPhase = 'await-origin' | 'ready' | 'hopping' | 'step-done';
@@ -14,12 +14,12 @@ export type LearnPalmOptions = {
 };
 
 const PHASE_LABELS: Record<string, string> = {
-  month: '第一步：从「月」起，顺数定位',
-  day: '第二步：从上一落点继续顺数',
-  hour: '第三步：时辰落点即为结果',
+  month: '第一步：从月起 · 正月起大安',
+  day: '第二步：从日起 · 从上一步落点继续',
+  hour: '第三步：从时起 · 十二时辰顺数',
 };
 
-const ORIGIN_HINT = '大安为起点，象征稳定与开始。';
+const ORIGIN_HINT = `${formatPalmAnchor(LIUREN_ORIGIN)}是顺数的起点。正月从此起。`;
 
 export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
   const {
@@ -32,11 +32,12 @@ export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
   } = opts;
 
   const awaitOrigin = learnSubPhase === 'await-origin' && stepIndex === 0;
+  const originLabel = formatPalmAnchor(LIUREN_ORIGIN);
 
   const intro = awaitOrigin
     ? `
       <p class="xlr-learn-intro">六个宫位像星点分布在掌上。</p>
-      <p class="xlr-learn-ask">为什么从这里开始？<span>点无名指第三节</span></p>
+      <p class="xlr-learn-ask">为什么从这里开始？<span>点${originLabel} · 大安</span></p>
     `
     : '';
 
@@ -68,11 +69,10 @@ export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
         litIndices,
         landingIndex,
         stepIndex,
-        showOrderPath: !awaitOrigin,
-        showGodIcons: awaitOrigin,
-        showOrigin: !awaitOrigin,
+        showOrderPath: true,
+        showGodIcons: false,
         interactive: awaitOrigin,
-        starPoints: awaitOrigin,
+        starPoints: false,
       })}
     </div>
   `;
@@ -105,11 +105,6 @@ export function renderStepTally(
         .join('')}
     </div>
   `;
-}
-
-/** @deprecated */
-export function renderLearnChain(): string {
-  return '';
 }
 
 export { LIUREN_ORIGIN, ORIGIN_HINT };

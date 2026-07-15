@@ -48,7 +48,7 @@ function buildStep(
   };
 }
 
-/** 从大安起，顺数农历月 → 日 → 时辰（子=1 … 亥=12） */
+/** 从食指下节大安起，顺数农历月 → 日 → 时辰（子=1 … 亥=12） */
 export function computeLesson(
   lunar: LunarDate,
   hour: ChineseHour,
@@ -63,16 +63,16 @@ export function computeLesson(
 
   const dayStep = buildStep(
     'day',
-    '第二步：再数日',
-    `农历${lunar.dayLabel} → 从${getSixGodByIndex(monthStep.landingIndex).name}起，再顺数 ${lunar.day} 位`,
+    '第二步：从日起',
+    `农历${lunar.dayLabel} → 从上一步落点「${getSixGodByIndex(monthStep.landingIndex).name}」继续，再顺数 ${lunar.day} 位（不重回大安）`,
     monthStep.landingIndex,
     lunar.day,
   );
 
   const hourStep = buildStep(
     'hour',
-    '第三步：再数时辰',
-    `${hour.label}（第 ${hour.order} 个时辰）→ 再顺数 ${hour.order} 位`,
+    '第三步：从时起',
+    `${hour.label}（第 ${hour.order} 个时辰）→ 从「${getSixGodByIndex(dayStep.landingIndex).name}」继续，再顺数 ${hour.order} 位`,
     dayStep.landingIndex,
     hour.order,
   );

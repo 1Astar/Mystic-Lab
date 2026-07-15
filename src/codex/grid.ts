@@ -113,7 +113,7 @@ export function mountCodexGroupedGrid(
     `;
 
     section.querySelector('.codex-grid-journey-link')?.addEventListener('click', () => {
-      navigate('/codex/fool-journey');
+      navigate('/tarot/tujian/fool-journey');
     });
 
     const cells = section.querySelector('.codex-grid-section-cells')!;

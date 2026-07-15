@@ -8,28 +8,28 @@ const MINOR_SUIT_HUBS = [
     icon: '🔥',
     label: '权杖',
     theme: '行动与创造',
-    path: '/codex/suit-numbers',
+    path: '/tarot/tujian/suit-numbers',
   },
   {
     id: 'cups',
     icon: '💧',
     label: '圣杯',
     theme: '情感与关系',
-    path: '/codex/suit-numbers',
+    path: '/tarot/tujian/suit-numbers',
   },
   {
     id: 'swords',
     icon: '🌪',
     label: '宝剑',
     theme: '思想与挑战',
-    path: '/codex/suit-numbers',
+    path: '/tarot/tujian/suit-numbers',
   },
   {
     id: 'pentacles',
     icon: '🌱',
     label: '星币',
     theme: '现实与积累',
-    path: '/codex/suit-numbers',
+    path: '/tarot/tujian/suit-numbers',
   },
 ] as const;
 
@@ -78,7 +78,7 @@ export function mountCodexAllView(
   `;
 
   container.querySelector('.codex-hub-journey')?.addEventListener('click', () => {
-    navigate('/codex/fool-journey');
+    navigate('/tarot/tujian/fool-journey');
   });
 
   const suitsHost = container.querySelector('.codex-hub-suits')!;

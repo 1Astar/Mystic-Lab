@@ -1,7 +1,7 @@
 import type { LessonResult } from './engine.ts';
 import type { LunarDate } from './lunar.ts';
 import type { ChineseHour } from './chinese-hour.ts';
-import type { SixGodId } from './six-gods.ts';
+import { sixGodOneLiner, type SixGodId } from './six-gods.ts';
 
 export type XiaoliurenJournalEntry = {
   id: string;
@@ -59,7 +59,7 @@ export function saveXiaoliurenJournalEntry(input: {
     },
     resultId: input.lesson.result.id,
     resultName: input.lesson.result.name,
-    summary: input.lesson.result.summary,
+    summary: sixGodOneLiner(input.lesson.result),
     reflection: '',
   };
 

@@ -22,7 +22,7 @@ export function renderTarotHome(root: HTMLElement): () => void {
         emblem: 'heart',
       },
       {
-        path: '/codex',
+        path: '/tarot/tujian',
         title: '随心图鉴',
         desc: '78 张牌 / 愚人之旅 / 牌组×数字',
         stat: () => `${getCollectedCount()} 张已收集`,

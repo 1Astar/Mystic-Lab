@@ -1,5 +1,5 @@
 import { navigate } from '../router.ts';
-import { CHINESE_HOURS, getChineseHour, sectorPointerAngle, formatClockTime } from '../xiaoliuren/chinese-hour.ts';
+import { CHINESE_HOURS, formatHourMemory, getChineseHour, sectorPointerAngle, formatClockTime } from '../xiaoliuren/chinese-hour.ts';
 import { solarToLunar } from '../xiaoliuren/lunar.ts';
 import { renderHourTimeline } from '../ui/xiaoliuren/hand-plate.ts';
 import {
@@ -28,7 +28,7 @@ export function renderXiaoliurenHourGuide(root: HTMLElement): void {
   const header = document.createElement('header');
   header.innerHTML = `
     <h1 class="page-title">时辰入门</h1>
-    <p class="page-subtitle">${formatClockTime(now)} 属${hour.label} · 快速看懂十二时辰</p>
+    <p class="page-subtitle">${formatClockTime(now)} 属${hour.label}（${hour.alias}） · 快速看懂十二时辰</p>
   `;
   page.append(header);
 
@@ -53,9 +53,9 @@ export function renderXiaoliurenHourGuide(root: HTMLElement): void {
     const row = document.createElement('article');
     row.className = `xlr-hour-guide-row${h.index === hour.index ? ' is-active' : ''}`;
     row.innerHTML = `
-      <h2>${h.label}</h2>
+      <h2>${h.label}<span class="xlr-hour-guide-alias">${h.alias}</span></h2>
       <p>${h.rangeLabel}</p>
-      <p class="xlr-hour-guide-memory">${h.memoryHint}</p>
+      <p class="xlr-hour-guide-memory">${formatHourMemory(h)}</p>
     `;
     list.appendChild(row);
   }

@@ -14,14 +14,14 @@ const LEARN_CARDS: {
     icon: '🌙',
     title: '愚人之旅',
     desc: '大阿卡那 22 张牌串成一段成长故事',
-    path: '/codex/fool-journey',
+    path: '/tarot/tujian/fool-journey',
   },
   {
     id: 'suit-numbers',
     icon: '🧩',
     title: '牌组 × 数字',
     desc: '用四组牌和数字规律看懂小阿卡那',
-    path: '/codex/suit-numbers',
+    path: '/tarot/tujian/suit-numbers',
   },
 ];
 
