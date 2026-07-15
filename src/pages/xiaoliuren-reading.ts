@@ -73,6 +73,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   let huangliOpen = false;
   let lunarFlipped = false;
   let learnSubPhase: LearnSubPhase = 'ready';
+  let autoPlayToken = 0;
 
   const page = document.createElement('div');
   page.className = 'page xlr-reading-page xlr-xuan-page';
@@ -122,6 +123,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   }
 
   function resetSessionData(): void {
+    autoPlayToken += 1;
     at = new Date();
     hour = getChineseHour(at);
     lunar = solarToLunar(at);
@@ -181,28 +183,97 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     renderCountActions();
   }
 
-  function advanceOneHop(): void {
-    if (!lesson) return;
+  function showAutoPlayTip(text: string): void {
+    actions.innerHTML = '';
+    const tip = document.createElement('p');
+    tip.className = 'xlr-step-foot';
+    tip.textContent = text;
+    actions.appendChild(tip);
+  }
+
+  /** 新手模式：当前步亮点自动顺数，播完停在本步落位 */
+  async function runLearnStepSpin(): Promise<void> {
+    if (!lesson || !isLearn() || state !== 'count') return;
+    const token = ++autoPlayToken;
     const step = lesson.steps[countStepIndex];
-    if (hopCursor >= step.hops.length) {
-      completeCurrentStep();
-      return;
-    }
+    if (!step) return;
 
-    const prev = activeHop;
-    activeHop = step.hops[hopCursor];
-    hopCursor += 1;
-    if (!litIndices.includes(activeHop)) {
-      litIndices = [...litIndices, activeHop];
-    }
     learnSubPhase = 'hopping';
-    countHopPrev = prev;
+    showAutoPlayTip('亮点顺数中…');
     renderCountStage();
-    renderCountActions();
 
-    if (hopCursor >= step.hops.length) {
-      window.setTimeout(() => completeCurrentStep(), hopMs() + 200);
+    while (hopCursor < step.hops.length) {
+      await wait(hopMs());
+      if (token !== autoPlayToken || state !== 'count') return;
+      const prev = activeHop;
+      activeHop = step.hops[hopCursor];
+      hopCursor += 1;
+      if (!litIndices.includes(activeHop)) {
+        litIndices = [...litIndices, activeHop];
+      }
+      countHopPrev = prev;
+      learnSubPhase = 'hopping';
+      renderCountStage();
     }
+
+    await wait(hopMs() + 200);
+    if (token !== autoPlayToken || state !== 'count') return;
+    completeCurrentStep();
+  }
+
+  /** 快速模式：亮点沿六宫自动旋转掐算 */
+  async function runQuickSpin(): Promise<void> {
+    if (!lesson || isLearn()) return;
+    const token = ++autoPlayToken;
+    showAutoPlayTip('亮点旋转掐算中…');
+
+    for (let si = 0; si < lesson.steps.length; si++) {
+      if (token !== autoPlayToken || state !== 'count') return;
+      countStepIndex = si;
+      const step = lesson.steps[si];
+      activeHop = step.hops[0] ?? step.fromIndex;
+      hopCursor = Math.min(1, step.hops.length);
+      litIndices = activeHop >= 0 ? [...new Set([...litIndices, activeHop])] : [...litIndices];
+      countHopPrev = activeHop;
+      learnSubPhase = 'hopping';
+      renderCountStage();
+
+      for (let hi = 1; hi < step.hops.length; hi++) {
+        await wait(hopMs());
+        if (token !== autoPlayToken || state !== 'count') return;
+        const prev = activeHop;
+        activeHop = step.hops[hi];
+        hopCursor = hi + 1;
+        if (!litIndices.includes(activeHop)) litIndices = [...litIndices, activeHop];
+        countHopPrev = prev;
+        learnSubPhase = 'hopping';
+        renderCountStage();
+      }
+
+      await wait(hopMs() + 180);
+      if (token !== autoPlayToken || state !== 'count') return;
+      const label = tallyLabelForStep(si);
+      completedTally = [
+        ...completedTally.filter((t) => t.label !== label),
+        { label, landingIndex: step.landingIndex },
+      ];
+      activeHop = step.landingIndex;
+      learnSubPhase = 'step-done';
+      renderCountStage();
+      await wait(prefersReducedMotion() ? 200 : 650);
+    }
+
+    if (token !== autoPlayToken || state !== 'count') return;
+    state = 'reveal';
+    render();
+  }
+
+  function armOriginAndReady(): void {
+    litIndices = [0];
+    activeHop = 0;
+    hopCursor = 1;
+    countHopPrev = 0;
+    void runLearnStepSpin();
   }
 
   function renderCountStage(): void {
@@ -236,7 +307,17 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           <p class="xlr-step-detail">${step.detail}</p>
           ${palmHtml}
           ${completedTally.length > 0 ? renderStepTally(completedTally) : ''}
-          <p class="xlr-step-foot">${isLearn() ? '点击按钮顺数，每一步都会停在当前宫位' : '由你控制节奏，点击顺数一格'}</p>
+          <p class="xlr-step-foot">${isLearn()
+            ? (learnSubPhase === 'await-origin'
+              ? '可先点食指下节「1 大安」，或直接点下方开始顺数'
+              : learnSubPhase === 'hopping'
+                ? '亮点沿掌顺时针自动顺数中'
+                : learnSubPhase === 'step-done'
+                  ? (countStepIndex < (lesson?.steps.length ?? 0) - 1
+                    ? `本步落到「${getSixGodByIndex(step.landingIndex).name}」· 下一步从这里继续数，不重回大安`
+                    : '三步落定，可查看结果')
+                  : '亮点将沿 1→2→3→4→5→6 顺时针顺数')
+            : '亮点自动旋转掐算中'}</p>
         `,
         'xlr-flow-count',
       )}
@@ -245,32 +326,40 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     countHopPrev = activeHop;
 
     if (isLearn() && learnSubPhase === 'await-origin') {
-      mountLearnPalmInteractions(stage, () => {
-        learnSubPhase = 'ready';
-        litIndices = [0];
-        renderCountStage();
-        renderCountActions();
-      });
+      mountLearnPalmInteractions(stage, () => armOriginAndReady());
     }
   }
 
   function renderCountActions(): void {
     if (state !== 'count' || !lesson) return;
+    // 快速模式自动旋转时不渲染手动按钮
+    if (!isLearn() && autoPlayToken > 0) {
+      return;
+    }
     actions.innerHTML = '';
 
-    if (isLearn() && learnSubPhase === 'await-origin') return;
+    if (isLearn() && learnSubPhase === 'await-origin') {
+      appendBtn('开始顺数', () => armOriginAndReady());
+      return;
+    }
 
     const step = lesson.steps[countStepIndex];
 
     if (learnSubPhase === 'step-done') {
       if (countStepIndex < lesson.steps.length - 1) {
-        appendBtn('进入下一步', () => {
+        const next = lesson.steps[countStepIndex + 1];
+        const fromName = getSixGodByIndex(step.landingIndex).name;
+        const nextLabel = next.phase === 'day' ? '数日' : '数时辰';
+        appendBtn(`从「${fromName}」继续${nextLabel}`, () => {
           countStepIndex += 1;
-          hopCursor = 0;
-          activeHop = -1;
-          learnSubPhase = 'ready';
-          renderCountStage();
-          renderCountActions();
+          const cur = lesson!.steps[countStepIndex];
+          hopCursor = cur.hops.length > 0 ? 1 : 0;
+          activeHop = cur.hops[0] ?? cur.fromIndex;
+          countHopPrev = activeHop;
+          if (activeHop >= 0 && !litIndices.includes(activeHop)) {
+            litIndices = [...litIndices, activeHop];
+          }
+          void runLearnStepSpin();
         });
       } else {
         appendBtn('查看落课结果', () => {
@@ -281,8 +370,13 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
       return;
     }
 
+    // 自动顺数进行中不展示手动按钮
+    if (learnSubPhase === 'hopping') return;
+
     if (hopCursor < step.hops.length) {
-      appendBtn(hopCursor === 0 ? '开始顺数' : '顺数一格', () => advanceOneHop());
+      appendBtn(hopCursor <= 1 && activeHop === step.fromIndex ? '开始顺数' : '顺数一格', () => {
+        void runLearnStepSpin();
+      });
     }
   }
 
@@ -349,7 +443,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           renderLunarFlipScroll(
             getLunarConvertView(at, hour.label),
             getHuangliCalendarLayout(at, hour.label, hour.name),
-            { flipped: lunarFlipped },
+            { flipped: lunarFlipped, hourRangeLabel: hour.rangeLabel },
           ),
           'xlr-flow-lunar',
         );
@@ -389,16 +483,25 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           'xlr-flow-hour',
         );
         mountHuangliInteractions(stage, setHuangliOpen);
-        appendBtn(isLearn() ? '开始掌上演算' : '开始起课掐算', () => {
+        appendBtn(isLearn() ? '开始掌上演算' : '开始旋转掐算', () => {
           state = 'count';
           countStepIndex = 0;
-          hopCursor = 0;
-          activeHop = -1;
-          litIndices = [];
           completedTally = [];
-          learnSubPhase = isLearn() ? 'await-origin' : 'ready';
-          renderCountStage();
-          renderCountActions();
+          litIndices = [];
+          if (isLearn()) {
+            hopCursor = 0;
+            activeHop = -1;
+            learnSubPhase = 'await-origin';
+            renderCountStage();
+            renderCountActions();
+          } else {
+            hopCursor = 0;
+            activeHop = -1;
+            countHopPrev = -1;
+            learnSubPhase = 'ready';
+            renderCountStage();
+            void runQuickSpin();
+          }
         });
         break;
 

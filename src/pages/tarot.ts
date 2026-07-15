@@ -714,7 +714,7 @@ export function renderTarot(root: HTMLElement): () => void {
     codexBtn.type = 'button';
     codexBtn.className = 'btn btn-secondary';
     codexBtn.textContent = '查看图鉴';
-    codexBtn.addEventListener('click', () => navigate('/codex'));
+    codexBtn.addEventListener('click', () => navigate('/tarot/tujian'));
 
     const journalBtn = document.createElement('button');
     journalBtn.type = 'button';

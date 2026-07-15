@@ -76,7 +76,7 @@ export function renderXiaoliurenHero(): string {
 
           <div class="xlr-home-palm-viewport">
 
-            <img class="xlr-home-palm-img" src="${XLR_ASSETS.palmChart}" alt="掌诀示意" loading="lazy" />
+            <img class="xlr-home-palm-img" src="${XLR_ASSETS.palmChartHome}" alt="掌诀示意" loading="lazy" />
 
           </div>
 

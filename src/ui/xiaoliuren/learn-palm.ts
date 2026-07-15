@@ -14,12 +14,12 @@ export type LearnPalmOptions = {
 };
 
 const PHASE_LABELS: Record<string, string> = {
-  month: '第一步：从「月」起，顺数定位',
-  day: '第二步：从上一落点继续顺数',
-  hour: '第三步：时辰落点即为结果',
+  month: '第一步：从大安起数月',
+  day: '第二步：从上一步落点继续数日（不重回 1）',
+  hour: '第三步：再从落点继续数时辰',
 };
 
-const ORIGIN_HINT = '大安为起点，象征稳定与开始。';
+const ORIGIN_HINT = '大安在食指下节，是顺数的起点。';
 
 export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
   const {
@@ -36,7 +36,7 @@ export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
   const intro = awaitOrigin
     ? `
       <p class="xlr-learn-intro">六个宫位像星点分布在掌上。</p>
-      <p class="xlr-learn-ask">为什么从这里开始？<span>点无名指第三节</span></p>
+      <p class="xlr-learn-ask">为什么从这里开始？<span>点食指下节 · 大安</span></p>
     `
     : '';
 
@@ -68,11 +68,10 @@ export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
         litIndices,
         landingIndex,
         stepIndex,
-        showOrderPath: !awaitOrigin,
-        showGodIcons: awaitOrigin,
-        showOrigin: !awaitOrigin,
+        showOrderPath: true,
+        showGodIcons: false,
         interactive: awaitOrigin,
-        starPoints: awaitOrigin,
+        starPoints: false,
       })}
     </div>
   `;

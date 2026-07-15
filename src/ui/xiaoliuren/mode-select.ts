@@ -10,26 +10,26 @@ export type ModeOption = {
 
 export const MODE_OPTIONS: ModeOption[] = [
   {
-    id: 'beginner',
-    emoji: '🌱',
+    id: 'learn',
+    emoji: '🖐',
     title: '新手模式',
-    desc: '系统自动完成起课，你只需跟着看过程。',
-    steps: ['当前时间', '农历转换', '月日时起课', '自动掐算', '结果'],
+    desc: '手掌教学：按掌诀一步步顺数，看懂为什么落在这个宫位。',
+    steps: ['认识掌诀落点', '从月起顺数', '再数日', '数时辰', '理解结果'],
   },
   {
-    id: 'learn',
-    emoji: '📖',
-    title: '学习模式',
-    desc: '展开手掌模型，一步步理解为什么落在这个宫位。',
-    steps: ['手掌起课点', '月份顺数', '日期顺数', '时辰落点', '理解结果'],
+    id: 'beginner',
+    emoji: '◎',
+    title: '快速模式',
+    desc: '六神轮盘：点击开始后亮点自动旋转掐算，直达结果。',
+    steps: ['认识时间', '确认时辰', '亮点旋转', '六神落位'],
   },
 ];
 
 export function renderModeSelect(selected: LessonMode | null): string {
   return `
     <div class="xlr-mode-select">
-      <h2 class="xlr-step-title">选择你的起课方式</h2>
-      <p class="xlr-step-hint">两种模式结果相同，差别在于过程展示的深度。</p>
+      <h2 class="xlr-step-title">开始起课</h2>
+      <p class="xlr-step-hint">先选方式，再点开始。两种结果相同，差别在过程。</p>
       <div class="xlr-mode-cards">
         ${MODE_OPTIONS.map((opt) => `
           <button type="button" class="xlr-mode-card${selected === opt.id ? ' is-selected' : ''}" data-mode="${opt.id}">

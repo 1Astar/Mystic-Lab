@@ -39,6 +39,10 @@ export type HuangliBrief = {
   wuxingShort: string;
   wuxingNayin: string;
   chongsha: string;
+  /** 纸页简写：冲属生肖，如「羊」 */
+  chongShort: string;
+  caiShen: string;
+  xiShen: string;
   mood: string;
 };
 
@@ -56,7 +60,7 @@ export type HuangliCalendarLayout = HuangliBrief & {
   shichenRow: ShichenLuck[];
 };
 
-function columnActivities(items: string[], max = 4): string[] {
+function columnActivities(items: string[], max = 2): string[] {
   const cleaned = cleanActivities(items);
   return cleaned.length > 0 ? cleaned.slice(0, max) : ['—'];
 }
@@ -153,6 +157,9 @@ export function getHuangliBrief(date: Date, hourLabel: string, hourBranch: strin
     wuxingShort: wuxing ?? nayin.slice(-1),
     wuxingNayin: nayin,
     chongsha: buildChongsha(lunar.getDayChongShengXiao(), lunar.getDaySha()),
+    chongShort: lunar.getDayChongShengXiao() || '—',
+    caiShen: lunar.getDayPositionCaiDesc() || '—',
+    xiShen: lunar.getDayPositionXiDesc() || '—',
     mood: buildMood(wuxing, hourBranch),
   };
 }

@@ -24,9 +24,9 @@ import { mountAppVersion } from './ui/app-version.ts';
 registerRoute('/', renderLabHome);
 registerRoute('/tarot', renderTarotHome);
 registerRoute('/tarot/reading', renderTarot);
-registerRoute('/codex', renderCodex);
-registerRoute('/codex/fool-journey', renderCodexFoolJourney);
-registerRoute('/codex/suit-numbers', renderCodexSuitNumbers);
+registerRoute('/tarot/tujian', renderCodex);
+registerRoute('/tarot/tujian/fool-journey', renderCodexFoolJourney);
+registerRoute('/tarot/tujian/suit-numbers', renderCodexSuitNumbers);
 registerRoute('/journal', renderJournal);
 registerRoute('/xiaoliuren', renderXiaoliurenHome);
 registerRoute('/xiaoliuren/reading', renderXiaoliurenReading);
@@ -42,6 +42,15 @@ registerRoute('/knowledge', (root) =>
 );
 
 // 旧路径兼容
+registerRoute('/codex', () => {
+  navigate('/tarot/tujian');
+});
+registerRoute('/codex/fool-journey', () => {
+  navigate('/tarot/tujian/fool-journey');
+});
+registerRoute('/codex/suit-numbers', () => {
+  navigate('/tarot/tujian/suit-numbers');
+});
 registerRoute('/divination', () => {
   navigate('/tarot/reading');
 });

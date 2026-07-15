@@ -16,7 +16,7 @@ export function renderCodexFoolJourney(root: HTMLElement): void {
   back.type = 'button';
   back.className = 'back-link';
   back.textContent = '← 返回图鉴';
-  back.addEventListener('click', () => navigate('/codex'));
+  back.addEventListener('click', () => navigate('/tarot/tujian'));
   page.append(back);
 
   function closeDetail(): void {

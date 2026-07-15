@@ -24,7 +24,6 @@ export function renderOrbitPlate(opts: OrbitPlateOptions = {}): string {
     stepIndex: opts.stepIndex ?? null,
     showOrderPath: opts.showArrows !== false,
     showGodIcons: false,
-    showOrigin: true,
     caption: opts.title ? `${opts.title} · 掌上起课` : undefined,
   });
 }

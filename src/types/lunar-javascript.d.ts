@@ -24,6 +24,8 @@ declare module 'lunar-javascript' {
     getDaySha(): string;
     getDayChongDesc(): string;
     getDayTianShenLuck(): string;
+    getDayPositionCaiDesc(): string;
+    getDayPositionXiDesc(): string;
     getTimes(): Array<{
       getZhi: () => string;
       getTianShenLuck: () => string;

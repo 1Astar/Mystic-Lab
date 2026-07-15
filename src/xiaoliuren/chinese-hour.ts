@@ -49,7 +49,7 @@ export function clockAngle(date: Date = new Date()): number {
   return ((h % 12) + m / 60) * 30;
 }
 
-/** 时辰盘指针：子时在顶部，顺时针每时辰 30°，盘内按当前时刻插值 */
+/** 时辰盘指针：子在 12 点，顺时针每格 30°；在当前时辰扇区内按时刻从起点插到终点 */
 export function sectorPointerAngle(date: Date = new Date()): number {
   const hour = getChineseHour(date);
   const h = date.getHours();
@@ -65,5 +65,6 @@ export function sectorPointerAngle(date: Date = new Date()): number {
     elapsed = h - hour.startHour + m / 60;
   }
   const fraction = Math.min(1, Math.max(0, elapsed / 2));
-  return hour.index * 30 + fraction * 30;
+  // 与扇区高亮一致：扇区中心为 index*30，半宽 ±15°
+  return hour.index * 30 - 15 + fraction * 30;
 }

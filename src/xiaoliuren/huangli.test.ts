@@ -12,6 +12,9 @@ describe('getHuangliBrief', () => {
     expect(brief.yiPreview.length).toBeGreaterThan(0);
     expect(brief.wuxingNayin.length).toBeGreaterThan(0);
     expect(brief.chongsha).toMatch(/冲|煞|—/);
+    expect(brief.chongShort.length).toBeGreaterThan(0);
+    expect(brief.caiShen.length).toBeGreaterThan(0);
+    expect(brief.xiShen.length).toBeGreaterThan(0);
     expect(brief.mood.length).toBeGreaterThan(4);
   });
 });
