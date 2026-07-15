@@ -119,7 +119,7 @@ export function buildVisualQuestionBridge(
     knowledge.visualOverview?.trim() ||
     knowledge.oneSentence.trim();
 
-  const topicHint = topicBridgeHint(context.topic, knowledge.nameCn, reversed);
+  const topicHint = topicBridgeHint(context, knowledge, reversed);
 
   return [
     `你问的是「${q}」。`,
@@ -130,27 +130,57 @@ export function buildVisualQuestionBridge(
     .join('');
 }
 
+function isTimingQuestion(q: string): boolean {
+  return /什么时候|何时|哪天|多久|还要等多久|日期|几点/i.test(q);
+}
+
 function topicBridgeHint(
-  topic: ReadingContext['topic'],
-  nameCn: string,
+  context: ReadingContext,
+  knowledge: CardKnowledge,
   reversed: boolean,
 ): string {
+  const q = context.question.trim();
+  const topic = context.topic;
+  const anchors = knowledge.keywords.slice(0, 2).join('、') || knowledge.nameCn;
+  const gist = knowledge.oneSentence.trim().replace(/[。！？.!?]+$/, '');
+  const timingNote = isTimingQuestion(q)
+    ? '塔罗很少给出准确日历日期，更值得看的是当下局面与可改的一步。'
+    : '';
+
   if (topic === 'work') {
-    return reversed
-      ? `放到求职/工作语境里：这更像提醒你检视策略是否在绕弯路、透支信用，或该换更直的路径，而不是坐等「哪一天一定发生」。`
-      : `放到求职/工作语境里：${nameCn}更像在问「你正在用什么策略靠近机会、又放下了什么」——看清取舍与窗口，比盯着准确日期更有用。`;
+    if (reversed) {
+      return [
+        `放到求职/工作语境里：这张${knowledge.nameCn}逆位更贴「${anchors}」——`,
+        gist ? `核心提醒偏「${gist}」。` : '',
+        '先检视方法与节奏是否在绕弯或透支，再决定下一步。',
+        timingNote,
+      ]
+        .filter(Boolean)
+        .join('');
+    }
+    return [
+      `放到求职/工作语境里：这张${knowledge.nameCn}正位带着「${anchors}」——`,
+      gist ? `牌义落点是「${gist}」。` : '',
+      '对照你的提问，更该问自己：眼前局面缺的是什么、你能动的那一寸在哪。',
+      timingNote,
+    ]
+      .filter(Boolean)
+      .join('');
   }
+
   if (topic === 'love') {
     return reversed
-      ? `放到感情语境里：留意关系里是否有回避、隐瞒或迂回——真诚比「赢一招」更重要。`
-      : `放到感情语境里：留意对方（或你）接近与保留的部分——意图与时机往往藏在画面细节里。`;
+      ? `放到感情语境里：结合「${anchors}」，留意回避、隐瞒或迂回——真诚比「赢一招」更重要。`
+      : `放到感情语境里：结合「${anchors}」，留意接近与保留的部分——意图与时机往往藏在画面细节里。`;
   }
+
   if (topic === 'study') {
     return reversed
-      ? `放到学业语境里：方法或节奏可能需要调整，别只靠走捷径。`
-      : `放到学业语境里：看清你带走的是真正有用的准备，还是只在搬走焦虑。`;
+      ? `放到学业语境里：围绕「${anchors}」看方法与节奏是否需要调整，别只靠走捷径。`
+      : `放到学业语境里：围绕「${anchors}」辨认你带走的是真正有用的准备，还是只在搬走焦虑。`;
   }
+
   return reversed
-    ? `整幅热点合起来读：阻滞往往出在策略与自洽上，先辨认你在回避什么。`
-    : `整幅热点合起来读：它们共同指向一个主题——你正在选择什么路径、留下什么。`;
+    ? `整幅热点合起来读：阻滞往往落在「${anchors}」——先辨认你在回避什么。`
+    : `整幅热点合起来读：它们共同指向「${anchors}」——你正在选择什么路径、留下什么。`;
 }

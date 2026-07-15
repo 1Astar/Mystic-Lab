@@ -62,13 +62,21 @@ function updateDeckIndices(
   });
 }
 
+export type DeckFanHandle = {
+  destroy: () => void;
+  /** 左滑下一张 / 右滑上一张（与触控一致） */
+  shiftSelection: (delta: -1 | 1) => void;
+};
+
 export function bindDeckFanInteraction(
   root: HTMLElement,
   callbacks: DeckFanCallbacks,
-): () => void {
+): DeckFanHandle {
   const fan = root.querySelector('#tarot-fan') as HTMLElement | null;
   const cards = root.querySelectorAll<HTMLElement>('.fan-card');
-  if (!fan || !cards.length) return () => {};
+  if (!fan || !cards.length) {
+    return { destroy: () => {}, shiftSelection: () => {} };
+  }
 
   let windowStart = Math.max(0, Math.floor((DECK_FAN_TOTAL - DECK_FAN_VISIBLE) / 2));
   let selectedInWindow = DECK_FAN_CENTER;
@@ -196,10 +204,13 @@ export function bindDeckFanInteraction(
   on(fan, 'pointerup', onUp as EventListener);
   on(fan, 'pointercancel', clearPress);
 
-  return () => {
-    fan.classList.remove('is-interactive', 'is-edge-bounce');
-    clearPress();
-    cards.forEach((c) => c.classList.remove('is-charging', 'is-glowing', 'is-selected'));
-    cleanups.forEach((fn) => fn());
+  return {
+    destroy: () => {
+      fan.classList.remove('is-interactive', 'is-edge-bounce');
+      clearPress();
+      cards.forEach((c) => c.classList.remove('is-charging', 'is-glowing', 'is-selected'));
+      cleanups.forEach((fn) => fn());
+    },
+    shiftSelection,
   };
 }

@@ -4,6 +4,12 @@ import type {
   RewriteFeedbackReason,
   RewriteFeedbackSource,
 } from '../ai/question-feedback.ts';
+import {
+  findRewriteCache,
+  invalidateRewriteCache,
+  normalizeRewriteQuestion,
+  saveRewriteCache,
+} from '../ai/question-rewrite-cache.ts';
 import { rewriteQuestionOpen } from '../ai/question-rewrite.ts';
 import { isAiConfigured, loadAiSettings } from '../ai/settings.ts';
 import { openAiSettingsModal } from './ai-settings-panel.ts';
@@ -54,6 +60,8 @@ export function mountQuestionRewritePanel(
   let selectedReasons = new Set<RewriteFeedbackReason>();
   let feedbackNote = '';
   let expanded = false;
+  /** 当前 candidates 对应的规范化原问 */
+  let boundQuestionKey = '';
 
   function escapeHtml(text: string): string {
     return text
@@ -160,7 +168,7 @@ export function mountQuestionRewritePanel(
     overlay.querySelector('.question-rewrite-modal-backdrop')?.addEventListener('click', closeModal);
 
     overlay.querySelector('.rewrite-regen')?.addEventListener('click', () => {
-      void runGenerate();
+      void runGenerate({ force: true });
     });
 
     overlay.querySelectorAll<HTMLButtonElement>('.rewrite-candidate').forEach((btn) => {
@@ -233,13 +241,30 @@ export function mountQuestionRewritePanel(
     });
   }
 
-  async function runGenerate(): Promise<void> {
+  async function runGenerate(opts?: { force?: boolean }): Promise<void> {
+    const force = opts?.force === true;
     const q = options.getQuestion().trim();
     if (q.length < 2) {
       error = '请先填写问题';
       render();
       return;
     }
+
+    if (!force) {
+      const hit = findRewriteCache(q);
+      if (hit) {
+        candidates = hit.candidates;
+        selectedIndex = 0;
+        boundQuestionKey = normalizeRewriteQuestion(q);
+        error = '';
+        statusMsg = '沿用上次推荐（未调用 AI）';
+        feedbackOpen = false;
+        loading = false;
+        render();
+        return;
+      }
+    }
+
     if (!isAiConfigured(loadAiSettings())) {
       error = '尚未配置 AI。请先打开「AI 解读」启用并填写 Key。';
       statusMsg = '';
@@ -261,11 +286,13 @@ export function mountQuestionRewritePanel(
 
     try {
       const result = await rewriteQuestionOpen(q, {
-        previous: candidates.length ? candidates : undefined,
+        previous: force && candidates.length ? candidates : undefined,
       });
       candidates = result.candidates;
       selectedIndex = 0;
-      statusMsg = '已生成 3 条开放式问法';
+      boundQuestionKey = normalizeRewriteQuestion(q);
+      saveRewriteCache(q, candidates);
+      statusMsg = force ? '已重新生成 3 条开放式问法' : '已生成 3 条开放式问法';
     } catch (err) {
       error = err instanceof Error ? err.message : '生成失败';
     } finally {
@@ -283,16 +310,19 @@ export function mountQuestionRewritePanel(
     loading = true;
     error = '';
     render();
+    const original = options.getQuestion().trim();
     try {
       const result = await submitRewriteFeedback({
         source: options.source,
-        originalQuestion: options.getQuestion().trim(),
+        originalQuestion: original,
         candidates,
         reasons: [...selectedReasons],
         note: feedbackNote,
       });
+      invalidateRewriteCache(original);
+      boundQuestionKey = '';
       statusMsg = result.starPm.ok
-        ? '感谢反馈，已本机记录并同步 Star PM'
+        ? '感谢反馈，已本机记录并同步 Star PM（下次将重新生成）'
         : result.starPm.message;
       feedbackOpen = false;
       selectedReasons = new Set();
@@ -308,12 +338,32 @@ export function mountQuestionRewritePanel(
   return {
     el: overlay,
     open: () => {
+      const q = options.getQuestion().trim();
+      const key = normalizeRewriteQuestion(q);
       expanded = true;
       error = '';
       statusMsg = '';
+      feedbackOpen = false;
       document.addEventListener('keydown', onKeydown);
+
+      const hit = key.length >= 2 ? findRewriteCache(q) : null;
+      if (hit) {
+        candidates = hit.candidates;
+        selectedIndex = 0;
+        boundQuestionKey = key;
+        statusMsg = '沿用上次推荐（未调用 AI）';
+        render();
+        return;
+      }
+
+      if (key !== boundQuestionKey) {
+        candidates = [];
+        selectedIndex = 0;
+        boundQuestionKey = '';
+      }
+
       render();
-      if (candidates.length === 0) void runGenerate();
+      if (candidates.length === 0) void runGenerate({ force: false });
     },
     destroy: () => {
       document.removeEventListener('keydown', onKeydown);

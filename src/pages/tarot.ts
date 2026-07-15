@@ -18,7 +18,7 @@ import { saveJournalEntry, updateJournalReflection, upsertJournalProgress } from
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
-import { renderDeckFanHTML } from '../ui/tarot-deck-fan.ts';
+import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
 import {
   defaultDrawMode,
   detectInputCapabilities,
@@ -92,6 +92,7 @@ export function renderTarot(root: HTMLElement): () => void {
   const swipeDetector = new SwipeDetector();
   const joinedPalms = new JoinedPalmsDetector();
   const heldPalm = new HeldGestureDetector();
+  let deckFan: DeckFanHandle | null = null;
 
   const unbindCamera = camera.bindLifecycle();
   const hintBar = createGestureHintBar();
@@ -173,8 +174,8 @@ export function renderTarot(root: HTMLElement): () => void {
       gestureStatus.el.hidden = true;
     }
     hintBar.setStep(step, drawMode);
-    const showAssist =
-      step !== null && drawMode === 'gesture' && (gestureFallback || !cameraOn);
+    // 手势仪式全程提供辅助按钮（与提示文案一致）；勿仅在失败时显示
+    const showAssist = step !== null && drawMode === 'gesture';
     fallback.setStep(showAssist ? step : null);
     fallback.setVisible(showAssist);
     if (gestureFallback && cameraOn) {
@@ -253,6 +254,9 @@ export function renderTarot(root: HTMLElement): () => void {
       onZoomOut: () => {},
       onConfirm: () => {},
       onProgress: (text: string) => hintBar.setProgress(text),
+      onDeckFanReady: (fan: DeckFanHandle | null) => {
+        deckFan = fan;
+      },
     };
   }
 
@@ -313,7 +317,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const gesture: Record<string, string> = {
       shuffle: '<strong>手掌收起</strong>并轻晃',
       cut: '<strong>左右挥手</strong>切牌',
-      draw: '<strong>拇指食指捏合</strong>，保持 0.3 秒 · 也可点击/上滑牌堆',
+      draw: '<strong>左右挥手</strong>浏览牌堆 · <strong>拇指食指捏合</strong>抽牌（也可点/上滑牌堆）',
       flip: '<strong>手掌上翻</strong>，翻开牌面',
     };
     const free: Record<string, string> = {
@@ -557,7 +561,11 @@ export function renderTarot(root: HTMLElement): () => void {
         ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
         <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${posLabel}</strong></p>
         <p class="tarot-hint">${stepHintHtml('draw')}</p>
-        <p class="teach-hint teach-hint-soft">在底部牌堆左右滑动浏览，点击选中牌或上滑/长按抽出。</p>
+        <p class="teach-hint teach-hint-soft">${
+          drawMode === 'gesture'
+            ? '摄像头前左右挥手浏览底部牌堆；捏合抽出。也可手指在牌堆上左右滑或点击抽取。'
+            : '在底部牌堆左右滑动浏览，点击选中牌或上滑/长按抽出。'
+        }</p>
       `;
     }
     syncCameraPlacement();
@@ -956,8 +964,24 @@ export function renderTarot(root: HTMLElement): () => void {
 
     if (state === 'draw' && hand) {
       const pinch = pinchDetector.update(hand);
-      if (pinch === 'pinching') hintBar.setProgress('捏合中…保持稳定');
-      if (pinch === 'confirmed') void onDraw();
+      if (pinch === 'pinching') {
+        hintBar.setProgress('捏合中…保持稳定');
+        swipeDetector.reset();
+        return;
+      }
+      if (pinch === 'confirmed') {
+        void onDraw();
+        return;
+      }
+      // 摄像头画面镜像：手腕右移 ≈ 屏幕上左滑 → 下一张
+      const dir = swipeDetector.update(wrist);
+      if (dir === 'left') {
+        deckFan?.shiftSelection(1);
+        hintBar.setProgress('继续挥手浏览牌堆');
+      } else if (dir === 'right') {
+        deckFan?.shiftSelection(-1);
+        hintBar.setProgress('继续挥手浏览牌堆');
+      }
       return;
     }
   }

@@ -17,7 +17,7 @@ const GESTURE_HINTS: Record<RitualStep, Hint> = {
   ritual: { icon: '🙏', label: '进入仪式', desc: '星尘聚拢后轻触继续，或张掌保持 1 秒' },
   shuffle: { icon: '✊', label: '手掌收起', desc: '轻晃洗牌' },
   cut: { icon: '👋', label: '左右挥手', desc: '切牌' },
-  draw: { icon: '🤏', label: '拇指食指捏合', desc: '抽牌（保持 0.3 秒）' },
+  draw: { icon: '🤏', label: '挥手浏览 · 捏合抽牌', desc: '左右挥手选牌 · 捏合保持 0.3 秒抽出' },
   flip: { icon: '🖐️', label: '手掌上翻', desc: '翻开牌面' },
   review: { icon: '📖', label: '细读此牌', desc: '切换 Tab 查看解读 · 下方收下继续' },
   reading: { icon: '⬆️', label: '上滑查看牌面细节', desc: '向下滑回 · 切换 Tab 细读' },
