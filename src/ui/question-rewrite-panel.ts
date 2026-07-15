@@ -35,13 +35,15 @@ const REASON_OPTIONS: RewriteFeedbackReason[] = [
 ];
 
 export function mountQuestionRewritePanel(
-  container: HTMLElement,
   options: QuestionRewritePanelOptions,
 ): QuestionRewritePanelHandle {
-  const root = document.createElement('div');
-  root.className = 'question-rewrite-panel';
-  root.hidden = true;
-  container.appendChild(root);
+  const overlay = document.createElement('div');
+  overlay.className = 'question-rewrite-modal';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'question-rewrite-modal-title');
+  overlay.hidden = true;
+  document.body.appendChild(overlay);
 
   let candidates: RewriteCandidate[] = [];
   let selectedIndex = 0;
@@ -65,13 +67,24 @@ export function mountQuestionRewritePanel(
     return candidates[selectedIndex]?.question ?? '';
   }
 
+  function closeModal(): void {
+    expanded = false;
+    overlay.classList.remove('is-visible');
+    overlay.hidden = true;
+    document.removeEventListener('keydown', onKeydown);
+  }
+
+  function onKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape') closeModal();
+  }
+
   function render(): void {
     if (!expanded) {
-      root.hidden = true;
-      root.innerHTML = '';
+      overlay.classList.remove('is-visible');
+      overlay.hidden = true;
       return;
     }
-    root.hidden = false;
+    overlay.hidden = false;
 
     const list =
       candidates.length > 0
@@ -113,54 +126,58 @@ export function mountQuestionRewritePanel(
           : `<button type="button" class="btn btn-sm rewrite-apply">采用此问法</button>`
         : '';
 
-    root.innerHTML = `
-      <div class="rewrite-panel-head">
-        <p class="rewrite-panel-title">AI 帮你改成更开放的问法</p>
-        <button type="button" class="rewrite-panel-close" aria-label="收起">×</button>
+    overlay.innerHTML = `
+      <div class="question-rewrite-modal-backdrop"></div>
+      <div class="question-rewrite-modal-card">
+        <div class="rewrite-panel-head">
+          <p id="question-rewrite-modal-title" class="rewrite-panel-title">AI 帮你改成更开放的问法</p>
+          <button type="button" class="rewrite-panel-close" aria-label="关闭">×</button>
+        </div>
+        ${error ? `<p class="rewrite-error">${escapeHtml(error)}</p>` : ''}
+        ${statusMsg ? `<p class="rewrite-status">${escapeHtml(statusMsg)}</p>` : ''}
+        ${loading ? '<p class="rewrite-loading">正在生成…</p>' : ''}
+        ${list}
+        <div class="rewrite-toolbar">
+          <button type="button" class="btn btn-ghost btn-sm rewrite-regen" ${loading ? 'disabled' : ''}>
+            ${candidates.length ? '重新生成' : '生成开放式问法'}
+          </button>
+          ${
+            candidates.length
+              ? `<button type="button" class="btn btn-ghost btn-sm rewrite-dislike" ${loading ? 'disabled' : ''}>不满意并反馈</button>`
+              : ''
+          }
+          ${applyActions}
+        </div>
+        ${feedbackBlock}
       </div>
-      ${error ? `<p class="rewrite-error">${escapeHtml(error)}</p>` : ''}
-      ${statusMsg ? `<p class="rewrite-status">${escapeHtml(statusMsg)}</p>` : ''}
-      ${loading ? '<p class="rewrite-loading">正在生成…</p>' : ''}
-      ${list}
-      <div class="rewrite-toolbar">
-        <button type="button" class="btn btn-ghost btn-sm rewrite-regen" ${loading ? 'disabled' : ''}>
-          ${candidates.length ? '重新生成' : '生成开放式问法'}
-        </button>
-        ${
-          candidates.length
-            ? `<button type="button" class="btn btn-ghost btn-sm rewrite-dislike" ${loading ? 'disabled' : ''}>不满意并反馈</button>`
-            : ''
-        }
-        ${applyActions}
-      </div>
-      ${feedbackBlock}
     `;
 
-    root.querySelector('.rewrite-panel-close')?.addEventListener('click', () => {
-      expanded = false;
-      render();
-    });
+    if (!overlay.classList.contains('is-visible')) {
+      requestAnimationFrame(() => overlay.classList.add('is-visible'));
+    }
 
-    root.querySelector('.rewrite-regen')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-panel-close')?.addEventListener('click', closeModal);
+    overlay.querySelector('.question-rewrite-modal-backdrop')?.addEventListener('click', closeModal);
+
+    overlay.querySelector('.rewrite-regen')?.addEventListener('click', () => {
       void runGenerate();
     });
 
-    root.querySelectorAll<HTMLButtonElement>('.rewrite-candidate').forEach((btn) => {
+    overlay.querySelectorAll<HTMLButtonElement>('.rewrite-candidate').forEach((btn) => {
       btn.addEventListener('click', () => {
         selectedIndex = Number(btn.dataset.idx ?? 0);
         render();
       });
     });
 
-    root.querySelector('.rewrite-apply')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-apply')?.addEventListener('click', () => {
       const q = selectedQuestion();
       if (!q) return;
       options.onApply(q);
-      statusMsg = '已写入提问框';
-      render();
+      closeModal();
     });
 
-    root.querySelector('.rewrite-apply-ref')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-apply-ref')?.addEventListener('click', () => {
       const q = selectedQuestion();
       if (!q) return;
       try {
@@ -179,24 +196,25 @@ export function mountQuestionRewritePanel(
       render();
     });
 
-    root.querySelector('.rewrite-apply-restart')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-apply-restart')?.addEventListener('click', () => {
       const q = selectedQuestion();
       if (!q || !options.onRestartWithQuestion) return;
+      closeModal();
       options.onRestartWithQuestion(q);
     });
 
-    root.querySelector('.rewrite-dislike')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-dislike')?.addEventListener('click', () => {
       feedbackOpen = true;
       statusMsg = '';
       render();
     });
 
-    root.querySelector('.rewrite-feedback-cancel')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-feedback-cancel')?.addEventListener('click', () => {
       feedbackOpen = false;
       render();
     });
 
-    root.querySelectorAll<HTMLButtonElement>('.rewrite-reason-chip').forEach((btn) => {
+    overlay.querySelectorAll<HTMLButtonElement>('.rewrite-reason-chip').forEach((btn) => {
       btn.addEventListener('click', () => {
         const r = btn.dataset.reason as RewriteFeedbackReason;
         if (selectedReasons.has(r)) selectedReasons.delete(r);
@@ -205,12 +223,12 @@ export function mountQuestionRewritePanel(
       });
     });
 
-    const noteEl = root.querySelector<HTMLTextAreaElement>('.rewrite-feedback-note');
+    const noteEl = overlay.querySelector<HTMLTextAreaElement>('.rewrite-feedback-note');
     noteEl?.addEventListener('input', () => {
       feedbackNote = noteEl.value.slice(0, 200);
     });
 
-    root.querySelector('.rewrite-feedback-submit')?.addEventListener('click', () => {
+    overlay.querySelector('.rewrite-feedback-submit')?.addEventListener('click', () => {
       void submitFeedback();
     });
   }
@@ -231,7 +249,7 @@ export function mountQuestionRewritePanel(
       btn.className = 'btn btn-secondary btn-sm';
       btn.textContent = '去配置 AI';
       btn.addEventListener('click', () => openAiSettingsModal());
-      root.querySelector('.rewrite-toolbar')?.prepend(btn);
+      overlay.querySelector('.rewrite-toolbar')?.prepend(btn);
       return;
     }
 
@@ -288,16 +306,18 @@ export function mountQuestionRewritePanel(
   }
 
   return {
-    el: root,
+    el: overlay,
     open: () => {
       expanded = true;
       error = '';
       statusMsg = '';
+      document.addEventListener('keydown', onKeydown);
       render();
       if (candidates.length === 0) void runGenerate();
     },
     destroy: () => {
-      root.remove();
+      document.removeEventListener('keydown', onKeydown);
+      overlay.remove();
     },
   };
 }

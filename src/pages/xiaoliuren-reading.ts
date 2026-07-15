@@ -1,11 +1,12 @@
 import { navigate } from '../router.ts';
 import { wait, prefersReducedMotion } from '../tarot/animations.ts';
 import { computeLesson, type LessonResult } from '../xiaoliuren/engine.ts';
-import { getChineseHour, sectorPointerAngle, formatClockTime } from '../xiaoliuren/chinese-hour.ts';
+import { getChineseHour, sectorPointerAngle, formatClockTime, formatHourMemory } from '../xiaoliuren/chinese-hour.ts';
 import { formatSolarDateTime, solarToLunar, type LunarDate } from '../xiaoliuren/lunar.ts';
-import { buildProcessExplanation, buildQuestionReading } from '../xiaoliuren/interpret.ts';
+import { buildPhaseTeach, renderPhaseTeachCard } from '../xiaoliuren/lesson-copy.ts';
+import { buildAiReading, buildProcessExplanation } from '../xiaoliuren/interpret.ts';
 import { saveXiaoliurenJournalEntry, updateXiaoliurenReflection } from '../xiaoliuren/journal.ts';
-import { renderSixGodIcon, getSixGodByIndex } from '../xiaoliuren/six-gods.ts';
+import { renderSixGodIcon, getSixGodByIndex, sixGodOneLiner } from '../xiaoliuren/six-gods.ts';
 import {
   renderOrbitPlate,
   renderSixGodsReveal,
@@ -281,6 +282,11 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     const step = lesson.steps[countStepIndex];
     if (!step) return;
 
+    const teach =
+      isLearn()
+        ? buildPhaseTeach(step.phase, lunar, hour, lesson.steps)
+        : null;
+
     const palmHtml = isLearn()
       ? renderLearnPalm({
           dotIndex: activeHop >= 0 ? activeHop : null,
@@ -298,24 +304,38 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           showArrows: true,
         });
 
+    const showTeachCard =
+      isLearn() &&
+      teach &&
+      (learnSubPhase === 'await-origin' ||
+        learnSubPhase === 'ready' ||
+        learnSubPhase === 'step-done' ||
+        (learnSubPhase === 'hopping' && hopCursor <= 1));
+
     stage.innerHTML = `
       ${renderFlowPanel(
-        { section: isLearn() ? '掌上起课' : '掌上起课', title: isLearn() ? '学习规则' : '自动掐算' },
+        {
+          section: '掌上起课',
+          title: isLearn() ? teach?.title ?? '学习规则' : '自动掐算',
+        },
         `
           ${renderCountSteps(countStepIndex)}
           <h2 class="xlr-step-title">${step.title}</h2>
           <p class="xlr-step-detail">${step.detail}</p>
+          ${showTeachCard ? renderPhaseTeachCard(teach!, { showMoon: step.phase === 'month' }) : ''}
           ${palmHtml}
           ${completedTally.length > 0 ? renderStepTally(completedTally) : ''}
           <p class="xlr-step-foot">${isLearn()
             ? (learnSubPhase === 'await-origin'
               ? '可先点食指下节「1 大安」，或直接点下方开始顺数'
               : learnSubPhase === 'hopping'
-                ? '亮点沿掌顺时针自动顺数中'
+                ? (step.phase === 'month'
+                  ? '光点正从大安顺时针移动，寻找本月落位'
+                  : '亮点从上一步落点继续顺数')
                 : learnSubPhase === 'step-done'
                   ? (countStepIndex < (lesson?.steps.length ?? 0) - 1
                     ? `本步落到「${getSixGodByIndex(step.landingIndex).name}」· 下一步从这里继续数，不重回大安`
-                    : '三步落定，可查看结果')
+                    : '月→日→时三步落定，可查看最终六神')
                   : '亮点将沿 1→2→3→4→5→6 顺时针顺数')
             : '亮点自动旋转掐算中'}</p>
         `,
@@ -349,8 +369,8 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
       if (countStepIndex < lesson.steps.length - 1) {
         const next = lesson.steps[countStepIndex + 1];
         const fromName = getSixGodByIndex(step.landingIndex).name;
-        const nextLabel = next.phase === 'day' ? '数日' : '数时辰';
-        appendBtn(`从「${fromName}」继续${nextLabel}`, () => {
+        const nextLabel = next.phase === 'day' ? '从日起' : '从时起';
+        appendBtn(`从「${fromName}」继续 · ${nextLabel}`, () => {
           countStepIndex += 1;
           const cur = lesson!.steps[countStepIndex];
           hopCursor = cur.hops.length > 0 ? 1 : 0;
@@ -476,7 +496,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
               animateEnter: true,
               size: 'flow',
             })}
-            <p class="xlr-hour-memory-lead xlr-stagger-item" style="--si:4">快速记忆：${hour.memoryHint}</p>
+            <p class="xlr-hour-memory-lead xlr-stagger-item" style="--si:4">快速记忆：${formatHourMemory(hour)}</p>
             ${renderXlrDivider('xlr-hour-divider')}
             <div class="xlr-stagger-item" style="--si:5">${renderShichenTable(hour.index)}</div>
           `,
@@ -518,7 +538,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
             <div class="xlr-result-hero">
               ${renderSixGodIcon(lesson.result, 'xlr-result-icon')}
               <h2 class="xlr-result-name">${lesson.result.name}</h2>
-              <p class="xlr-result-summary">${lesson.result.summary}</p>
+              <p class="xlr-result-summary">${sixGodOneLiner(lesson.result)}</p>
             </div>
             <p class="xlr-reveal-tally">农历${lunar?.monthLabel} → 落${getSixGodByIndex(lesson.steps[0].landingIndex).name} · 农历${lunar?.dayLabel} → 落${getSixGodByIndex(lesson.steps[1].landingIndex).name} · ${hour.label} → 落${lesson.result.name}</p>
             ${isLearn()
@@ -553,30 +573,43 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           lesson,
         }).id;
 
-        stage.innerHTML = renderFlowPanel(
-          { section: '结果解释', title: '理解' },
-          `
-            <div class="xlr-result-hero">
-              ${renderSixGodIcon(lesson.result, 'xlr-result-icon')}
-              <h2 class="xlr-result-name">${lesson.result.name}</h2>
-              <p class="xlr-result-summary">${lesson.result.summary}</p>
-            </div>
-            <section class="xlr-result-block">
-              <h3>为什么会是这个结果</h3>
-              <p>${buildProcessExplanation(lesson.basisLabel, lesson.result.name)}</p>
-            </section>
-            <section class="xlr-result-block">
-              <h3>结合你的问题</h3>
-              <p>${question ? buildQuestionReading(question, lesson.result) : '本次未记录具体问题，以下按六神本义解读。'}</p>
-            </section>
-            <section class="xlr-result-block">
-              <h3>行动建议</h3>
-              <p>${lesson.result.advice}</p>
-            </section>
-            <textarea id="xlr-reflection" class="question-input xlr-reflection-input" rows="2" placeholder="写下此刻的感悟（可选）"></textarea>
-          `,
-          'xlr-flow-result',
-        );
+        {
+          const reading = buildAiReading(question, lesson.result);
+          stage.innerHTML = renderFlowPanel(
+            { section: '结果解释', title: '五段理解' },
+            `
+              <div class="xlr-result-hero">
+                ${renderSixGodIcon(lesson.result, 'xlr-result-icon')}
+                <h2 class="xlr-result-name">${lesson.result.name}</h2>
+                <p class="xlr-result-summary">${sixGodOneLiner(lesson.result)}</p>
+              </div>
+              <p class="xlr-result-process">${buildProcessExplanation(lesson.basisLabel, lesson.result.name)}</p>
+              ${
+                question
+                  ? `<p class="xlr-result-q"><span>你的问题</span>${reading.question}<em>· ${reading.typeLabel}</em></p>`
+                  : ''
+              }
+              <section class="xlr-result-block xlr-result-layer" data-layer="1">
+                <h3><span class="xlr-result-layer-no">一</span>传统含义</h3>
+                <p>${reading.meaning}</p>
+              </section>
+              <section class="xlr-result-block xlr-result-layer" data-layer="2">
+                <h3><span class="xlr-result-layer-no">二</span>结合你的问题</h3>
+                <p>${reading.analysis}</p>
+              </section>
+              <section class="xlr-result-block xlr-result-layer" data-layer="3">
+                <h3><span class="xlr-result-layer-no">三</span>现在更适合</h3>
+                <p>${reading.suggestion}</p>
+              </section>
+              <section class="xlr-result-block xlr-result-layer" data-layer="4">
+                <h3><span class="xlr-result-layer-no">四</span>给你的一个提醒</h3>
+                <p>${reading.reflection}</p>
+              </section>
+              <textarea id="xlr-reflection" class="question-input xlr-reflection-input" rows="2" placeholder="写下此刻的感悟（可选）"></textarea>
+            `,
+            'xlr-flow-result',
+          );
+        }
 
         stage.querySelector('#xlr-reflection')?.addEventListener('input', (e) => {
           if (!journalId) return;

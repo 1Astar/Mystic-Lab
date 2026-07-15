@@ -8,6 +8,7 @@ export function renderShichenTable(activeIndex: number): string {
     return `
       <div class="xlr-shichen-row${active}">
         <span class="xlr-shichen-row-name">${h.name}时</span>
+        <span class="xlr-shichen-row-alias">${h.alias}</span>
         <span class="xlr-shichen-row-range">${range}</span>
       </div>`;
   }).join('');

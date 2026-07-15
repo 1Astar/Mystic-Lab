@@ -353,7 +353,6 @@ export function renderTarot(root: HTMLElement): () => void {
                 </div>
               </div>
               <textarea id="tarot-question" class="question-input" rows="3" placeholder="例如：找工作的阻碍和机会分别是什么？"></textarea>
-              <div id="question-rewrite-host"></div>
               <div id="question-coach-host"></div>
             </div>
           </div>
@@ -375,8 +374,7 @@ export function renderTarot(root: HTMLElement): () => void {
           questionCoach.bindInput(input);
           if (question) input.value = question;
 
-          const rewriteHost = document.getElementById('question-rewrite-host')!;
-          questionRewrite = mountQuestionRewritePanel(rewriteHost, {
+          questionRewrite = mountQuestionRewritePanel({
             source: 'question',
             getQuestion: () => input.value.trim() || question,
             onApply: (q) => {
@@ -669,7 +667,6 @@ export function renderTarot(root: HTMLElement): () => void {
           <button type="button" class="result-rewrite-trigger">
             对结果有疑问？可能是问法不对 — 让 AI 帮你改问
           </button>
-          <div id="result-rewrite-host"></div>
         </div>
       </div>
     `;
@@ -689,20 +686,17 @@ export function renderTarot(root: HTMLElement): () => void {
       });
     }
 
-    const rewriteHost = document.getElementById('result-rewrite-host');
-    if (rewriteHost) {
-      questionRewrite = mountQuestionRewritePanel(rewriteHost, {
-        source: 'result',
-        getQuestion: () => question,
-        onApply: (q) => {
-          question = q;
-        },
-        onRestartWithQuestion: (q) => restartWithQuestion(q),
-      });
-      stage.querySelector('.result-rewrite-trigger')?.addEventListener('click', () => {
-        questionRewrite?.open();
-      });
-    }
+    questionRewrite = mountQuestionRewritePanel({
+      source: 'result',
+      getQuestion: () => question,
+      onApply: (q) => {
+        question = q;
+      },
+      onRestartWithQuestion: (q) => restartWithQuestion(q),
+    });
+    stage.querySelector('.result-rewrite-trigger')?.addEventListener('click', () => {
+      questionRewrite?.open();
+    });
 
     const shareBtn = document.createElement('button');
     shareBtn.type = 'button';

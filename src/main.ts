@@ -17,6 +17,7 @@ import { renderXiaoliurenCodex } from './pages/xiaoliuren-codex.ts';
 import { renderXiaoliurenHourGuide } from './pages/xiaoliuren-hour-guide.ts';
 import { renderXiaoliurenJournal } from './pages/xiaoliuren-journal.ts';
 import { renderXiaoliurenReading } from './pages/xiaoliuren-reading.ts';
+import { renderXiaoliurenPalmJourney } from './pages/xiaoliuren-palm-journey.ts';
 import { renderXiaoliurenHome } from './pages/xiaoliuren-home.ts';
 import { initRouter, navigate, registerRoute } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
@@ -33,6 +34,7 @@ registerRoute('/xiaoliuren/reading', renderXiaoliurenReading);
 registerRoute('/xiaoliuren/codex', renderXiaoliurenCodex);
 registerRoute('/xiaoliuren/journal', renderXiaoliurenJournal);
 registerRoute('/xiaoliuren/hour-guide', renderXiaoliurenHourGuide);
+registerRoute('/xiaoliuren/palm-journey', renderXiaoliurenPalmJourney);
 registerRoute('/meihua', renderMeihuaHome);
 registerRoute('/records', (root) =>
   renderGlobalPlaceholder(root, '我的手札', '查看所有占问记录'),

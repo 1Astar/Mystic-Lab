@@ -156,8 +156,10 @@ export function renderPalmStepExplain(
   const active = dotIndex !== null ? getSixGodByIndex(dotIndex).name : '起数中';
   const cont =
     stepIndex === 0
-      ? '从大安起顺数'
-      : '不重回大安，从上一步落点继续';
+      ? '从大安起顺数（正月起大安）'
+      : stepIndex === 1
+        ? '从月落点继续数日，不重回大安'
+        : '从日落点继续数时辰';
   return `
     <p class="xlr-palm-explain xlr-stagger-item" style="--si:4">
       数<strong>${phase}</strong> · 当前在 <strong>${active}</strong>

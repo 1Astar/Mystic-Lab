@@ -63,7 +63,7 @@ export function computeLesson(
 
   const dayStep = buildStep(
     'day',
-    '第二步：再数日',
+    '第二步：从日起',
     `农历${lunar.dayLabel} → 从上一步落点「${getSixGodByIndex(monthStep.landingIndex).name}」继续，再顺数 ${lunar.day} 位（不重回大安）`,
     monthStep.landingIndex,
     lunar.day,
@@ -71,7 +71,7 @@ export function computeLesson(
 
   const hourStep = buildStep(
     'hour',
-    '第三步：再数时辰',
+    '第三步：从时起',
     `${hour.label}（第 ${hour.order} 个时辰）→ 从「${getSixGodByIndex(dayStep.landingIndex).name}」继续，再顺数 ${hour.order} 位`,
     dayStep.landingIndex,
     hour.order,

@@ -1,20 +1,70 @@
 import type { SixGod } from './six-gods.ts';
+import { sixGodKeywordsLine } from './six-gods.ts';
+import {
+  detectQuestionType,
+  type QuestionType,
+  type QuestionTypeId,
+} from './question-types.ts';
 
-export function buildQuestionReading(question: string, god: SixGod): string {
-  const q = question.trim();
-  if (!q) {
-    return `落在「${god.name}」，${god.summary} 你可以把它当作眼前这一步的提醒。`;
+/** AI 解读五段模板（结果页 / 未来 LLM 共用结构） */
+export type AiReading = {
+  question: string;
+  god: string;
+  meaning: string;
+  analysis: string;
+  suggestion: string;
+  reflection: string;
+  typeId: QuestionTypeId;
+  typeLabel: string;
+};
+
+function domainLine(god: SixGod, typeId: QuestionTypeId): string {
+  switch (typeId) {
+    case 'emotion':
+      return god.emotion;
+    case 'career':
+      return god.career;
+    case 'wealth':
+      return god.wealth;
+    case 'self':
+      return god.self;
+    default:
+      return god.symbolism;
+  }
+}
+
+function buildAnalysis(question: string, god: SixGod, type: QuestionType): string {
+  if (!question.trim()) {
+    return `${god.name}落课。${god.symbolism}${god.positive.join('、')}。`;
   }
 
-  const hints: { keys: RegExp; text: string }[] = [
-    { keys: /工作|事业|项目|面试|offer/i, text: '如果问的是工作相关，' },
-    { keys: /感情|关系|喜欢|分手|复合/i, text: '如果问的是关系相关，' },
-    { keys: /今天|明天|这周|最近|短期/i, text: '你问的是短期趋势，' },
-    { keys: /要不要|该不该|能不能|是否/i, text: '你在做一个选择，' },
-  ];
+  const domain = domainLine(god, type.id);
+  return `${god.name}落课。就你的问题「${question.trim()}」来看：${domain}`;
+}
 
-  const prefix = hints.find((h) => h.keys.test(q))?.text ?? '结合你的问题，';
-  return `${prefix}「${god.name}」提示：${god.summary} ${god.advice}`;
+function buildSuggestion(god: SixGod, type: QuestionType): string {
+  if (type.id === 'general') return god.action;
+  return `${god.action}（侧重：${type.focus}）`;
+}
+
+export function buildAiReading(question: string, god: SixGod): AiReading {
+  const type = detectQuestionType(question);
+  const q = question.trim();
+
+  return {
+    question: q || '（未填写具体问题）',
+    god: god.name,
+    meaning: `${god.name}代表${sixGodKeywordsLine(god)}。${god.symbolism}`,
+    analysis: buildAnalysis(q, god, type),
+    suggestion: buildSuggestion(god, type),
+    reflection: god.warning[0] ?? god.misread,
+    typeId: type.id,
+    typeLabel: type.label,
+  };
+}
+
+export function buildTraditionalMeaning(god: SixGod): string {
+  return buildAiReading('', god).meaning;
 }
 
 export function buildProcessExplanation(basisLabel: string, godName: string): string {

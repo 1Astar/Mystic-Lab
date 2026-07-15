@@ -1,10 +1,23 @@
 import { navigate } from '../router.ts';
 import { loadXiaoliurenJournal } from '../xiaoliuren/journal.ts';
+import {
+  getPalmJourneyDoneCount,
+  formatPalmJourneyLevel,
+  getPalmJourneyLevel,
+  isPalmJourneyComplete,
+  PALM_JOURNEY_CHAPTERS,
+} from '../xiaoliuren/palm-journey.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { renderXiaoliurenHero, mountXiaoliurenHero } from '../ui/xiaoliuren-hero.ts';
 
 export function renderXiaoliurenHome(root: HTMLElement): () => void {
   const journalCount = loadXiaoliurenJournal().length;
+  const journeyDone = getPalmJourneyDoneCount();
+  const journeyLevel = getPalmJourneyLevel();
+  const journeyComplete = isPalmJourneyComplete();
+  const journeyLabel = journeyComplete
+    ? `掌上演算之旅 · ${formatPalmJourneyLevel(6)} 已完成`
+    : `掌上演算之旅 · ${formatPalmJourneyLevel(journeyLevel)} · ${journeyDone}/${PALM_JOURNEY_CHAPTERS.length}`;
 
   const page = document.createElement('div');
   page.className = 'page xlr-home-page xlr-xuan-page';
@@ -26,13 +39,14 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
 
       <div class="xlr-home-cta">
         <button type="button" class="xlr-home-primary" data-path="/xiaoliuren/reading">开始起课</button>
-        <button type="button" class="xlr-home-secondary" data-path="/xiaoliuren/reading">看看怎么算出来 ›</button>
+        <button type="button" class="xlr-home-secondary" data-path="/xiaoliuren/palm-journey">${journeyLabel} ›</button>
       </div>
 
       <nav class="xlr-home-links" aria-label="模块入口">
         <a href="/xiaoliuren/codex" data-path="/xiaoliuren/codex">六神图鉴</a>
         <a href="/xiaoliuren/journal" data-path="/xiaoliuren/journal">手札${journalCount > 0 ? ` · ${journalCount}` : ''}</a>
         <a href="/xiaoliuren/hour-guide" data-path="/xiaoliuren/hour-guide">时辰入门</a>
+        <a href="/xiaoliuren/palm-journey" data-path="/xiaoliuren/palm-journey">演算之旅</a>
       </nav>
     </main>
   `;
