@@ -1,3 +1,4 @@
+import { stashCrossAskQuestion, takeCrossAskQuestion } from '../journal/cross-ask.ts';
 import { navigate } from '../router.ts';
 import { wait, prefersReducedMotion } from '../tarot/animations.ts';
 import { computeLesson, type LessonResult } from '../xiaoliuren/engine.ts';
@@ -60,7 +61,7 @@ const HOP_MS_BEGINNER = 1100;
 export function renderXiaoliurenReading(root: HTMLElement): () => void {
   let state: FlowState = 'question';
   let lessonMode: LessonMode | null = null;
-  let question = '';
+  let question = takeCrossAskQuestion().slice(0, 80);
   let at = new Date();
   let lunar: LunarDate | null = null;
   let hour = getChineseHour(at);
@@ -617,6 +618,10 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
         });
 
         appendBtn('手札记录 · 完成', () => navigate('/xiaoliuren/journal'));
+        appendBtn('也用塔罗看一眼', () => {
+          stashCrossAskQuestion(question);
+          navigate('/tarot/reading');
+        }, true);
         appendBtn('再占一次', () => {
           state = 'question';
           lessonMode = null;

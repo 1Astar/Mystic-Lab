@@ -8,6 +8,7 @@ import { renderCodexFoolJourney } from './pages/codex-fool-journey.ts';
 import { renderCodexSuitNumbers } from './pages/codex-suit-numbers.ts';
 import { renderGlobalPlaceholder } from './pages/global-placeholder.ts';
 import { renderJournal } from './pages/journal.ts';
+import { renderJourney } from './pages/journey.ts';
 import { renderLabHome } from './pages/lab-home.ts';
 import { renderMeihuaHome } from './pages/meihua-home.ts';
 import { renderTarot } from './pages/tarot.ts';
@@ -36,9 +37,7 @@ registerRoute('/xiaoliuren/journal', renderXiaoliurenJournal);
 registerRoute('/xiaoliuren/hour-guide', renderXiaoliurenHourGuide);
 registerRoute('/xiaoliuren/palm-journey', renderXiaoliurenPalmJourney);
 registerRoute('/meihua', renderMeihuaHome);
-registerRoute('/records', (root) =>
-  renderGlobalPlaceholder(root, '我的手札', '查看所有占问记录'),
-);
+registerRoute('/records', renderJourney);
 registerRoute('/knowledge', (root) =>
   renderGlobalPlaceholder(root, '知识库', '学习不同占问体系'),
 );
