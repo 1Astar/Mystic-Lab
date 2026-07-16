@@ -9,6 +9,8 @@ import {
 } from '../xiaoliuren/palm-journey.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { renderXiaoliurenHero, mountXiaoliurenHero } from '../ui/xiaoliuren-hero.ts';
+import { mountNotifyTryControl } from '../ui/xiaoliuren/notify-try.ts';
+import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
 
 export function renderXiaoliurenHome(root: HTMLElement): () => void {
   const journalCount = loadXiaoliurenJournal().length;
@@ -26,6 +28,9 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
 
   page.innerHTML = `
     <button type="button" class="back-link xlr-home-back">← 返回 Mystic Lab</button>
+
+    <div class="xlr-home-review-host"></div>
+    <div class="xlr-home-notify-host"></div>
 
     <header class="xlr-home-header">
       <p class="xlr-home-eyebrow">MYSTIC LAB</p>
@@ -50,6 +55,10 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
       </nav>
     </main>
   `;
+
+  const reviewHost = page.querySelector<HTMLElement>('.xlr-home-review-host')!;
+  mountXiaoliurenReviewBanner(reviewHost);
+  mountNotifyTryControl(page.querySelector<HTMLElement>('.xlr-home-notify-host')!);
 
   const slot = page.querySelector('.xlr-home-hero-slot')!;
   slot.innerHTML = renderXiaoliurenHero();

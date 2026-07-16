@@ -100,6 +100,21 @@ body {
   color: var(--ink-muted);
 }
 
+.entry-card .entry-note {
+  font-size: 0.78em;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+.lab-system-hint {
+  margin-top: 10px;
+  max-width: 36em;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  opacity: 0.85;
+}
+
 .entry-card .tag {
   display: inline-block;
   margin-top: 10px;
@@ -506,6 +521,218 @@ body {
   color: var(--warn);
   border-color: rgba(192, 0, 0, 0.25);
   background: rgba(192, 0, 0, 0.08);
+}
+
+/* 我的旅程 */
+.journey-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.journey-tab {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.journey-tab.is-active {
+  color: var(--gold);
+  border-color: rgba(201, 162, 39, 0.45);
+  background: var(--gold-soft);
+}
+
+.journey-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journey-item {
+  padding: 14px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.journey-item:hover {
+  border-color: rgba(255, 214, 166, 0.35);
+  background: rgba(255, 214, 166, 0.04);
+}
+
+.journey-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+.journey-system {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  border: 1px solid var(--line);
+}
+
+.journey-system-tarot {
+  color: #d4b4ff;
+  border-color: rgba(180, 140, 255, 0.35);
+}
+
+.journey-system-xiaoliuren {
+  color: #9ec9ff;
+  border-color: rgba(120, 170, 255, 0.35);
+}
+
+.journey-question {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.journey-summary {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--gold);
+  line-height: 1.5;
+}
+
+.journey-badge {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--warn);
+}
+
+.journey-note-preview {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.journey-open-hint {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  opacity: 0.8;
+}
+
+.journey-empty-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.journey-progress-hint {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.journey-xlr-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow-y: auto;
+  padding: 20px 18px 40px;
+  background: rgba(11, 11, 20, 0.96);
+}
+
+.journey-xlr-reflect-label {
+  display: block;
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.journey-xlr-reflect {
+  margin-top: 8px;
+}
+
+.journey-sibling-hint {
+  margin-top: 8px;
+  font-size: 0.74rem;
+  color: #9ec9ff;
+}
+
+.journey-sibling {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.journey-sibling-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.journey-sibling-empty {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.journey-sibling .btn {
+  width: auto;
+  margin-top: 10px;
+}
+
+.journey-sibling-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.journey-sibling-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.journey-sibling-card:hover {
+  border-color: rgba(255, 214, 166, 0.35);
+}
+
+.journey-sibling-summary {
+  font-size: 0.82rem;
+  color: var(--gold);
+  line-height: 1.45;
+}
+
+.journey-sibling-date {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -39,6 +39,7 @@ import { mountEnvBanner } from '../ui/banner.ts';
 import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
+import { stashCrossAskQuestion, takeCrossAskQuestion } from '../journal/cross-ask.ts';
 import { mountQuestionCoach, type QuestionCoachHandle } from '../ui/question-coach.ts';
 import {
   createAiOptimizeTrigger,
@@ -68,8 +69,9 @@ export function renderTarot(root: HTMLElement): () => void {
   const camera = new CameraService();
   let gestureBridge: GestureBridge | null = null;
 
-  let state: TarotState = 'landing';
-  let question = '';
+  const prefilledQuestion = takeCrossAskQuestion();
+  let state: TarotState = prefilledQuestion ? 'question' : 'landing';
+  let question = prefilledQuestion;
   let spreadType: SpreadType = 'past-present-future';
   let drawMode: DrawMode = defaultDrawMode(inputCaps);
   let motionEnabled = false;
@@ -724,6 +726,15 @@ export function renderTarot(root: HTMLElement): () => void {
     journalBtn.textContent = '查看手札';
     journalBtn.addEventListener('click', () => navigate('/journal'));
 
+    const crossBtn = document.createElement('button');
+    crossBtn.type = 'button';
+    crossBtn.className = 'btn btn-secondary';
+    crossBtn.textContent = '也用小六壬看一眼';
+    crossBtn.addEventListener('click', () => {
+      stashCrossAskQuestion(question);
+      navigate('/xiaoliuren/reading');
+    });
+
     const retryBtn = document.createElement('button');
     retryBtn.type = 'button';
     retryBtn.className = 'btn btn-ghost';
@@ -732,7 +743,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
     const resultActions = document.createElement('div');
     resultActions.className = 'result-actions';
-    resultActions.append(shareBtn, codexBtn, journalBtn, retryBtn);
+    resultActions.append(shareBtn, codexBtn, journalBtn, crossBtn, retryBtn);
     actions.appendChild(resultActions);
 
     hintBar.setStep(null);

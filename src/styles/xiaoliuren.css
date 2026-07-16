@@ -765,6 +765,75 @@
   margin-top: 20px;
 }
 
+/* 待对照置顶 */
+.xlr-review-banner {
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(230, 180, 34, 0.1);
+  border: 1px solid rgba(230, 180, 34, 0.35);
+}
+
+.xlr-home-review-host .xlr-review-banner,
+.journey-review-host .xlr-review-banner,
+.xlr-journal-review-host .xlr-review-banner {
+  margin-top: 8px;
+}
+
+.xlr-review-banner-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.xlr-review-banner-body {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.xlr-review-banner-cta {
+  width: auto;
+  margin-top: 10px;
+}
+
+.xlr-notify-try {
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(255, 214, 166, 0.22);
+  background: rgba(26, 18, 48, 0.45);
+}
+
+.xlr-notify-try-btn {
+  width: auto;
+}
+
+.xlr-notify-try-note {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(191, 163, 255, 0.55);
+}
+
+.xlr-journal-due {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--warn);
+}
+
+.xlr-journal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.xlr-journal-actions .btn {
+  width: auto;
+  flex: 1;
+}
+
 /* 手札 */
 .xlr-journal-list {
   display: flex;
