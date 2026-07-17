@@ -79,7 +79,13 @@ export function renderCodexCell(
   cell.innerHTML = `
     <div class="codex-cell-face">
       ${cardFaceImageHtml(card.id, nameCn, 'codex-cell-img')}
-      ${col ? '' : '<span class="codex-cell-lock" aria-hidden="true">未遇</span>'}
+      ${
+        col
+          ? ''
+          : `<span class="codex-cell-seal" aria-hidden="true"></span>
+      <span class="codex-cell-lock" aria-hidden="true">未遇</span>
+      <span class="codex-cell-tease">你尚未踏足这趟旅程</span>`
+      }
     </div>
     <span class="codex-name">${nameCn}</span>
     ${role ? `<span class="codex-cell-role" title="${role.formula.replace(/"/g, '&quot;')}">${role.badge}</span>` : ''}

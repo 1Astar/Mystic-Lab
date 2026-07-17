@@ -1,5 +1,6 @@
 import type { ReadingResult } from '../interpretation/types.ts';
 import type { JournalEntry } from '../journal/records.ts';
+import { updateJournalReadingSnapshot } from '../journal/records.ts';
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountCardResultTabs } from './card-result-tabs.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
@@ -20,7 +21,8 @@ export type JournalDetailOptions = {
 };
 
 export function mountJournalDetail(container: HTMLElement, options: JournalDetailOptions): void {
-  const { entry, reading, regenerated, onClose } = options;
+  const { entry, regenerated, onClose } = options;
+  let reading = options.reading;
   const date = new Date(entry.createdAt).toLocaleString('zh-CN');
   const spreadLabel = SPREADS[entry.spreadType]?.name ?? entry.spreadType;
   const isPartial = entry.status === 'partial';
@@ -43,15 +45,24 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
 
   const cardsHost = container.querySelector('#journal-detail-cards');
   if (cardsHost) {
-    for (const cardReading of reading.cards) {
+    reading.cards.forEach((cardReading, i) => {
       const item = document.createElement('div');
       item.className = 'journal-detail-card-item';
       const host = document.createElement('div');
       host.className = 'result-tabs-host';
       item.appendChild(host);
       cardsHost.appendChild(item);
-      mountCardResultTabs(host, cardReading);
-    }
+      mountCardResultTabs(host, cardReading, 'reading', {
+        onCardReadingChange: (updated) => {
+          reading = {
+            ...reading,
+            cards: reading.cards.map((c, idx) => (idx === i ? updated : c)),
+            provider: updated.interpretationProvider === 'llm' ? 'llm' : reading.provider,
+          };
+          updateJournalReadingSnapshot(entry.id, reading);
+        },
+      });
+    });
   }
 
   const feedbackHost = container.querySelector('#journal-detail-feedback');

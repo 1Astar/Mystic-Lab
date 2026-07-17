@@ -49,6 +49,7 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
 
       <nav class="xlr-home-links" aria-label="模块入口">
         <a href="/xiaoliuren/codex" data-path="/xiaoliuren/codex">六神图鉴</a>
+        <a href="/xiaoliuren/depth" data-path="/xiaoliuren/depth">深度理解</a>
         <a href="/xiaoliuren/journal" data-path="/xiaoliuren/journal">手札${journalCount > 0 ? ` · ${journalCount}` : ''}</a>
         <a href="/xiaoliuren/hour-guide" data-path="/xiaoliuren/hour-guide">时辰入门</a>
         <a href="/xiaoliuren/palm-journey" data-path="/xiaoliuren/palm-journey">演算之旅</a>

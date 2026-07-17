@@ -11,14 +11,25 @@ import { renderJournal } from './pages/journal.ts';
 import { renderJourney } from './pages/journey.ts';
 import { renderLabHome } from './pages/lab-home.ts';
 import { renderMeihuaHome } from './pages/meihua-home.ts';
+import { renderLiuyaoHome } from './pages/liuyao-home.ts';
+import { renderLiuyaoReading } from './pages/liuyao-reading.ts';
+import { renderLiuyaoLearn } from './pages/liuyao-learn.ts';
+import { renderLiuyaoBagua } from './pages/liuyao-bagua.ts';
+import { renderLiuyaoHexagrams } from './pages/liuyao-hexagrams.ts';
+import { renderLiuyaoConcepts } from './pages/liuyao-concepts.ts';
+import { renderLiuyaoLearnBoard } from './pages/liuyao-learn-board.ts';
+import { renderLiuyaoClassic } from './pages/liuyao-classic.ts';
+import { renderLiuyaoJournal } from './pages/liuyao-journal.ts';
 import { renderTarot } from './pages/tarot.ts';
 import { renderTarotHome } from './pages/tarot-home.ts';
 import './styles/xiaoliuren.css';
+import './styles/liuyao.css';
 import { renderXiaoliurenCodex } from './pages/xiaoliuren-codex.ts';
 import { renderXiaoliurenHourGuide } from './pages/xiaoliuren-hour-guide.ts';
 import { renderXiaoliurenJournal } from './pages/xiaoliuren-journal.ts';
 import { renderXiaoliurenReading } from './pages/xiaoliuren-reading.ts';
 import { renderXiaoliurenPalmJourney } from './pages/xiaoliuren-palm-journey.ts';
+import { renderXiaoliurenDepth } from './pages/xiaoliuren-depth.ts';
 import { renderXiaoliurenHome } from './pages/xiaoliuren-home.ts';
 import { initRouter, navigate, registerRoute } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
@@ -36,7 +47,17 @@ registerRoute('/xiaoliuren/codex', renderXiaoliurenCodex);
 registerRoute('/xiaoliuren/journal', renderXiaoliurenJournal);
 registerRoute('/xiaoliuren/hour-guide', renderXiaoliurenHourGuide);
 registerRoute('/xiaoliuren/palm-journey', renderXiaoliurenPalmJourney);
+registerRoute('/xiaoliuren/depth', renderXiaoliurenDepth);
 registerRoute('/meihua', renderMeihuaHome);
+registerRoute('/liuyao', renderLiuyaoHome);
+registerRoute('/liuyao/reading', renderLiuyaoReading);
+registerRoute('/liuyao/learn', renderLiuyaoLearn);
+registerRoute('/liuyao/learn/board', renderLiuyaoLearnBoard);
+registerRoute('/liuyao/classic', renderLiuyaoClassic);
+registerRoute('/liuyao/bagua', renderLiuyaoBagua);
+registerRoute('/liuyao/hexagrams', renderLiuyaoHexagrams);
+registerRoute('/liuyao/concepts', renderLiuyaoConcepts);
+registerRoute('/liuyao/journal', renderLiuyaoJournal);
 registerRoute('/records', renderJourney);
 registerRoute('/knowledge', (root) =>
   renderGlobalPlaceholder(root, '知识库', '学习不同占问体系'),
@@ -60,6 +81,9 @@ registerRoute('/xiao-liu-ren', () => {
 });
 registerRoute('/mei-hua', () => {
   navigate('/meihua');
+});
+registerRoute('/liu-yao', () => {
+  navigate('/liuyao');
 });
 
 initRouter();

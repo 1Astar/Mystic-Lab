@@ -23,6 +23,7 @@ import {
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
+import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
 
 type JourneyTab = 'all' | 'tarot' | 'xiaoliuren' | 'favorites' | 'progress' | 'notes';
 
@@ -265,6 +266,15 @@ export function renderJourney(root: HTMLElement): void {
         renderBody();
         const match = loadJourneyItems().find((i) => i.xiaoliuren?.id === entry.id);
         if (match) openXiaoliurenDetail(match);
+      },
+    });
+    mountTarotReviewBanner(reviewHost, {
+      onOpenEntry: (entry) => {
+        active = 'tarot';
+        renderTabs();
+        renderBody();
+        const match = loadJourneyItems().find((i) => i.tarot?.id === entry.id);
+        if (match) openTarotDetail(match);
       },
     });
 

@@ -20,7 +20,7 @@ const LEARN_CARDS: {
     id: 'suit-numbers',
     icon: '🧩',
     title: '牌组 × 数字',
-    desc: '用四组牌和数字规律看懂小阿卡那',
+    desc: '牌组×数字规律 +「我来试试」猜谜',
     path: '/tarot/tujian/suit-numbers',
   },
 ];

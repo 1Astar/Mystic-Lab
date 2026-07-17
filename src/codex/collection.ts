@@ -14,6 +14,34 @@ export type CodexProgress = {
   topThemeLabel: string | null;
 };
 
+export type CodexSuitProgress = {
+  id: string;
+  label: string;
+  collected: number;
+  total: number;
+};
+
+/** 按大阿卡纳 / 四组统计已收集张数（唯一牌，非相遇次数） */
+export function getCodexSuitBreakdown(): CodexSuitProgress[] {
+  const collected = new Set(getAllEntries().map((e) => e.cardId));
+  const groups: { id: string; label: string; match: (c: CardDefinition) => boolean }[] = [
+    { id: 'major', label: '大阿卡纳', match: (c) => c.arcana === 'major' },
+    { id: 'wands', label: '权杖组', match: (c) => c.suit === 'wands' },
+    { id: 'cups', label: '圣杯组', match: (c) => c.suit === 'cups' },
+    { id: 'swords', label: '宝剑组', match: (c) => c.suit === 'swords' },
+    { id: 'pentacles', label: '星币组', match: (c) => c.suit === 'pentacles' },
+  ];
+  return groups.map((g) => {
+    const cards = TAROT_DECK.filter(g.match);
+    return {
+      id: g.id,
+      label: g.label,
+      collected: cards.filter((c) => collected.has(c.id)).length,
+      total: cards.length,
+    };
+  });
+}
+
 const SUIT_LABELS: Record<string, string> = {
   major: '大阿卡纳',
   wands: '权杖组',

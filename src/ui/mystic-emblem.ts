@@ -1,4 +1,4 @@
-export type MysticEmblemKind = 'heart' | 'tarot' | 'star' | 'plum';
+export type MysticEmblemKind = 'heart' | 'tarot' | 'star' | 'plum' | 'hex';
 
 const HEART_SVG = (uid: string) => `
   <svg class="mystic-emblem-svg mystic-heart-shape" viewBox="0 0 100 100" aria-hidden="true">
@@ -37,6 +37,15 @@ const TAROT_INNER = `
     <div class="mystic-tarot-shimmer"></div>
   </div>`;
 
+const HEX_SVG = `
+  <svg class="mystic-emblem-svg mystic-hex-lines" viewBox="0 0 48 56" aria-hidden="true">
+    <line x1="8" y1="6" x2="40" y2="6"/>
+    <line x1="8" y1="16" x2="22" y2="16"/><line x1="26" y1="16" x2="40" y2="16"/>
+    <line x1="8" y1="26" x2="40" y2="26"/>
+    <line x1="8" y1="36" x2="22" y2="36"/><line x1="26" y1="36" x2="40" y2="36"/>
+    <line x1="8" y1="46" x2="40" y2="46"/>
+  </svg>`;
+
 let emblemUid = 0;
 
 function nextUid(): string {
@@ -50,6 +59,7 @@ function innerFor(kind: MysticEmblemKind): string {
     case 'star': return STAR_SVG;
     case 'plum': return PLUM_SVG;
     case 'tarot': return TAROT_INNER;
+    case 'hex': return HEX_SVG;
   }
 }
 

@@ -8,6 +8,7 @@ import {
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
 import { formatCardNameZh } from '../tarot/card-names.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
+import { mountSuitNumberQuiz } from './codex-suit-quiz.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -32,6 +33,9 @@ export function mountSuitNumbersGuide(
       <p class="suit-numbers-subtitle">${escapeHtml(SUIT_NUMBER_INTRO.subtitle)}</p>
       <p class="suit-numbers-lead">${escapeHtml(SUIT_NUMBER_INTRO.lead)}</p>
     </section>
+    <section class="suit-numbers-block suit-numbers-quiz-block">
+      <div class="suit-numbers-quiz-host"></div>
+    </section>
     <section class="suit-numbers-block">
       <h3>先看牌组：它在讲哪个领域</h3>
       <div class="suit-numbers-suits"></div>
@@ -47,6 +51,9 @@ export function mountSuitNumbersGuide(
     </section>
     <p class="suit-numbers-court">${escapeHtml(COURT_NOTE)}</p>
   `;
+
+  const quizHost = container.querySelector('.suit-numbers-quiz-host') as HTMLElement;
+  mountSuitNumberQuiz(quizHost);
 
   const suitsHost = container.querySelector('.suit-numbers-suits')!;
   for (const suit of SUIT_GROUPS) {

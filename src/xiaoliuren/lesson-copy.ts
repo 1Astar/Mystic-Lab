@@ -76,14 +76,20 @@ export function renderPhaseTeachCard(teach: PhaseTeach, opts?: { showMoon?: bool
     : '';
 
   return `
-    <aside class="xlr-phase-teach" aria-label="${teach.title}">
-      ${moon}
-      <p class="xlr-phase-teach-lead">${teach.lead}</p>
-      <ul class="xlr-phase-teach-rules">
-        ${teach.rules.map((r) => `<li>${r}</li>`).join('')}
-      </ul>
-      <p class="xlr-phase-teach-example">${teach.example}</p>
-      <p class="xlr-phase-teach-conclusion"><strong>所以：</strong>${teach.conclusion}</p>
-    </aside>
+    <details class="xlr-phase-teach">
+      <summary class="xlr-phase-teach-summary">
+        <span class="xlr-phase-teach-summary-label">本步规则说明</span>
+        <span class="xlr-phase-teach-summary-hint">默认收起 · 点开查看</span>
+      </summary>
+      <div class="xlr-phase-teach-body">
+        ${moon}
+        <p class="xlr-phase-teach-lead">${teach.lead}</p>
+        <ul class="xlr-phase-teach-rules">
+          ${teach.rules.map((r) => `<li>${r}</li>`).join('')}
+        </ul>
+        <p class="xlr-phase-teach-example">${teach.example}</p>
+        <p class="xlr-phase-teach-conclusion"><strong>所以：</strong>${teach.conclusion}</p>
+      </div>
+    </details>
   `;
 }

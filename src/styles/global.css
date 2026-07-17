@@ -6,6 +6,11 @@
   padding: 0;
 }
 
+/* display:flex 等会盖掉 UA 的 hidden，必须强制隐藏，否则透明层挡点击 */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   min-height: 100%;
@@ -113,6 +118,206 @@ body {
   line-height: 1.55;
   color: var(--ink-muted);
   opacity: 0.85;
+}
+
+.lab-guide {
+  list-style: none;
+  margin: 0;
+  padding: 12px 14px;
+  display: grid;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 214, 166, 0.12);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.lab-guide-trigger {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gold);
+  font-size: 0.84rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.lab-guide-trigger:hover {
+  opacity: 1;
+}
+
+.lab-guide-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.lab-guide-modal.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lab-guide-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 14, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.lab-guide-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  padding: 18px 16px 16px;
+  background: linear-gradient(165deg, rgba(28, 22, 38, 0.98), rgba(12, 10, 18, 0.99));
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lab-guide-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lab-guide-modal-title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--ink);
+  font-family: var(--font-serif);
+}
+
+.lab-guide-modal-desc {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.lab-guide-modal-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lab-guide-modal-close:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lab-guide-in-modal {
+  margin: 0;
+  max-width: none;
+}
+
+.lab-guide li {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.lab-guide-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lab-guide-q {
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.lab-guide-a {
+  flex-shrink: 0;
+  color: rgba(191, 163, 255, 0.85);
+  font-weight: 500;
+}
+
+.lab-guide-why {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  opacity: 0.92;
+}
+
+.lab-home-page .lab-section {
+  margin-top: 18px;
+}
+
+.lab-home-page .home-header {
+  padding-bottom: 4px;
+}
+
+.lab-systems {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lab-systems .entry-card {
+  margin-top: 0;
+  width: auto;
+  min-width: 0;
+}
+
+.lab-systems .entry-card-compact {
+  padding: 12px 8px 10px;
+  text-align: center;
+}
+
+.lab-systems .entry-card-compact .entry-emblem-wrap {
+  margin-bottom: 6px;
+}
+
+.lab-systems .entry-card-compact h2 {
+  font-size: 0.92rem;
+}
+
+.lab-systems .entry-card-compact p {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.lab-systems .entry-pill {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  border-radius: 999px;
+  background: rgba(201, 162, 39, 0.12);
+  color: var(--gold);
+}
+
+.lab-global .entry-card {
+  margin-top: 10px;
 }
 
 .entry-card .tag {
@@ -320,11 +525,13 @@ body {
   justify-content: center;
   padding: 24px;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.28s ease;
 }
 
 .ai-settings-modal.is-visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .ai-settings-modal-backdrop {

@@ -26,6 +26,8 @@ function domainLine(god: SixGod, typeId: QuestionTypeId): string {
       return god.career;
     case 'wealth':
       return god.wealth;
+    case 'travel':
+      return god.travel;
     case 'self':
       return god.self;
     default:

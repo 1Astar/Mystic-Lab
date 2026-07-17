@@ -20,6 +20,19 @@ import {
 } from '../ui/xiaoliuren/learn-palm.ts';
 import { renderModeSelect, type LessonMode } from '../ui/xiaoliuren/mode-select.ts';
 import {
+  mountPracticePalmInteractions,
+  practiceExpectedLabel,
+  renderPracticePalm,
+} from '../ui/xiaoliuren/practice-palm.ts';
+import {
+  getSkillGateStatus,
+  isCorrectPracticeTap,
+  isModeUnlocked,
+  markLearnClear,
+  markPracticeClear,
+  practiceWrongHint,
+} from '../xiaoliuren/skill-gates.ts';
+import {
   formatWeekday,
   mountShichenDialAnimation,
   renderShichenDial,
@@ -41,7 +54,8 @@ import {
   mountStaggerEntrance,
 } from '../ui/xiaoliuren/motion.ts';
 import { renderTimeBadge } from '../ui/xiaoliuren/time-badge.ts';
-import { renderShichenTable } from '../ui/xiaoliuren/shichen-table.ts';
+import { mountShichenTableLore, renderShichenTable } from '../ui/xiaoliuren/shichen-table.ts';
+import { buildGodHuangliBridge } from '../xiaoliuren/god-huangli-bridge.ts';
 import { renderCountSteps } from '../ui/xiaoliuren/count-steps.ts';
 import { renderXlrDivider } from '../ui/xiaoliuren/assets.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
@@ -76,6 +90,9 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   let lunarFlipped = false;
   let learnSubPhase: LearnSubPhase = 'ready';
   let autoPlayToken = 0;
+  let practiceFeedback: string | null = null;
+  let countHopPrev = -1;
+  let skillGateMarked = false;
 
   const page = document.createElement('div');
   page.className = 'page xlr-reading-page xlr-xuan-page';
@@ -98,6 +115,8 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   root.appendChild(page);
 
   const isLearn = () => lessonMode === 'learn';
+  const isPractice = () => lessonMode === 'practice';
+  const isQuick = () => lessonMode === 'beginner';
   const hopMs = () => (prefersReducedMotion() ? 120 : isLearn() ? HOP_MS_LEARN : HOP_MS_BEGINNER);
 
   function getHuangli() {
@@ -137,10 +156,10 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     completedTally = [];
     journalId = null;
     lunarFlipped = false;
+    practiceFeedback = null;
+    skillGateMarked = false;
     learnSubPhase = isLearn() ? 'await-origin' : 'ready';
   }
-
-  let countHopPrev = -1;
 
   function mountStageMotion(opts?: { prevHop?: number }): void {
     mountStaggerEntrance(stage);
@@ -225,7 +244,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
 
   /** 快速模式：亮点沿六宫自动旋转掐算 */
   async function runQuickSpin(): Promise<void> {
-    if (!lesson || isLearn()) return;
+    if (!lesson || !isQuick()) return;
     const token = ++autoPlayToken;
     showAutoPlayTip('亮点旋转掐算中…');
 
@@ -278,6 +297,38 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     void runLearnStepSpin();
   }
 
+  function handlePracticeTap(index: number): void {
+    if (!lesson || !isPractice() || state !== 'count') return;
+    if (learnSubPhase === 'step-done') return;
+    const step = lesson.steps[countStepIndex];
+    if (!step || hopCursor >= step.hops.length) return;
+
+    if (!isCorrectPracticeTap(step.hops, hopCursor, index)) {
+      practiceFeedback = practiceWrongHint(practiceExpectedLabel(step.hops, hopCursor));
+      renderCountStage();
+      renderCountActions();
+      return;
+    }
+
+    const prev = activeHop;
+    activeHop = index;
+    hopCursor += 1;
+    if (!litIndices.includes(index)) litIndices = [...litIndices, index];
+    countHopPrev = prev;
+    learnSubPhase = 'hopping';
+    practiceFeedback =
+      hopCursor >= step.hops.length
+        ? `点对了 · 本步落「${getSixGodByIndex(step.landingIndex).name}」`
+        : '点对了，继续顺时针下一格';
+
+    if (hopCursor >= step.hops.length) {
+      completeCurrentStep();
+      return;
+    }
+    renderCountStage();
+    renderCountActions();
+  }
+
   function renderCountStage(): void {
     if (!lesson || !lunar) return;
     const step = lesson.steps[countStepIndex];
@@ -297,13 +348,24 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           phase: step.phase,
           learnSubPhase,
         })
-      : renderOrbitPlate({
-          dotIndex: activeHop >= 0 ? activeHop : null,
-          litIndices,
-          landingIndex: step.landingIndex,
-          stepIndex: countStepIndex,
-          showArrows: true,
-        });
+      : isPractice()
+        ? renderPracticePalm({
+            dotIndex: activeHop >= 0 ? activeHop : null,
+            litIndices,
+            landingIndex: step.landingIndex,
+            stepIndex: countStepIndex,
+            phase: step.phase,
+            count: step.count,
+            hopCursor,
+            feedback: practiceFeedback,
+          })
+        : renderOrbitPlate({
+            dotIndex: activeHop >= 0 ? activeHop : null,
+            litIndices,
+            landingIndex: step.landingIndex,
+            stepIndex: countStepIndex,
+            showArrows: true,
+          });
 
     const showTeachCard =
       isLearn() &&
@@ -313,11 +375,35 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
         learnSubPhase === 'step-done' ||
         (learnSubPhase === 'hopping' && hopCursor <= 1));
 
+    const foot = isLearn()
+      ? learnSubPhase === 'await-origin'
+        ? '可先点食指下节「1 大安」，或直接点下方开始顺数'
+        : learnSubPhase === 'hopping'
+          ? step.phase === 'month'
+            ? '光点正从大安顺时针移动，寻找本月落位'
+            : '亮点从上一步落点继续顺数'
+          : learnSubPhase === 'step-done'
+            ? countStepIndex < (lesson?.steps.length ?? 0) - 1
+              ? `本步落到「${getSixGodByIndex(step.landingIndex).name}」· 下一步从这里继续数，不重回大安`
+              : '月→日→时三步落定，可查看最终六神'
+            : '亮点将沿 1→2→3→4→5→6 顺时针顺数'
+      : isPractice()
+        ? learnSubPhase === 'step-done'
+          ? countStepIndex < (lesson?.steps.length ?? 0) - 1
+            ? `本步落到「${getSixGodByIndex(step.landingIndex).name}」· 点下方继续下一步`
+            : '三步全对，可查看最终六神'
+          : '编号已隐藏 · 在掌上自己顺数'
+        : '亮点自动旋转掐算中';
+
     stage.innerHTML = `
       ${renderFlowPanel(
         {
           section: '掌上起课',
-          title: isLearn() ? teach?.title ?? '学习规则' : '自动掐算',
+          title: isLearn()
+            ? teach?.title ?? '学习规则'
+            : isPractice()
+              ? '空白掌操练'
+              : '自动掐算',
         },
         `
           ${renderCountSteps(countStepIndex)}
@@ -326,19 +412,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           ${showTeachCard ? renderPhaseTeachCard(teach!, { showMoon: step.phase === 'month' }) : ''}
           ${palmHtml}
           ${completedTally.length > 0 ? renderStepTally(completedTally) : ''}
-          <p class="xlr-step-foot">${isLearn()
-            ? (learnSubPhase === 'await-origin'
-              ? '可先点食指下节「1 大安」，或直接点下方开始顺数'
-              : learnSubPhase === 'hopping'
-                ? (step.phase === 'month'
-                  ? '光点正从大安顺时针移动，寻找本月落位'
-                  : '亮点从上一步落点继续顺数')
-                : learnSubPhase === 'step-done'
-                  ? (countStepIndex < (lesson?.steps.length ?? 0) - 1
-                    ? `本步落到「${getSixGodByIndex(step.landingIndex).name}」· 下一步从这里继续数，不重回大安`
-                    : '月→日→时三步落定，可查看最终六神')
-                  : '亮点将沿 1→2→3→4→5→6 顺时针顺数')
-            : '亮点自动旋转掐算中'}</p>
+          <p class="xlr-step-foot">${foot}</p>
         `,
         'xlr-flow-count',
       )}
@@ -349,18 +423,29 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     if (isLearn() && learnSubPhase === 'await-origin') {
       mountLearnPalmInteractions(stage, () => armOriginAndReady());
     }
+    if (isPractice() && learnSubPhase !== 'step-done') {
+      mountPracticePalmInteractions(stage, handlePracticeTap);
+    }
   }
 
   function renderCountActions(): void {
     if (state !== 'count' || !lesson) return;
     // 快速模式自动旋转时不渲染手动按钮
-    if (!isLearn() && autoPlayToken > 0) {
+    if (isQuick() && autoPlayToken > 0) {
       return;
     }
     actions.innerHTML = '';
 
     if (isLearn() && learnSubPhase === 'await-origin') {
       appendBtn('开始顺数', () => armOriginAndReady());
+      return;
+    }
+
+    if (isPractice() && learnSubPhase !== 'step-done') {
+      const tip = document.createElement('p');
+      tip.className = 'xlr-step-foot';
+      tip.textContent = '在掌图上点宫位；点对才前进。';
+      actions.appendChild(tip);
       return;
     }
 
@@ -374,6 +459,15 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
         appendBtn(`从「${fromName}」继续 · ${nextLabel}`, () => {
           countStepIndex += 1;
           const cur = lesson!.steps[countStepIndex];
+          if (isPractice()) {
+            hopCursor = 0;
+            activeHop = step.landingIndex;
+            practiceFeedback = null;
+            learnSubPhase = 'ready';
+            renderCountStage();
+            renderCountActions();
+            return;
+          }
           hopCursor = cur.hops.length > 0 ? 1 : 0;
           activeHop = cur.hops[0] ?? cur.fromIndex;
           countHopPrev = activeHop;
@@ -394,7 +488,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     // 自动顺数进行中不展示手动按钮
     if (learnSubPhase === 'hopping') return;
 
-    if (hopCursor < step.hops.length) {
+    if (isLearn() && hopCursor < step.hops.length) {
       appendBtn(hopCursor <= 1 && activeHop === step.fromIndex ? '开始顺数' : '顺数一格', () => {
         void runLearnStepSpin();
       });
@@ -433,11 +527,12 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
 
       case 'modeSelect':
         stage.innerHTML = renderFlowPanel(
-          { section: '起课', title: '选择方式' },
-          renderModeSelect(lessonMode),
+          { section: '起课', title: '通关学技能' },
+          renderModeSelect(lessonMode, getSkillGateStatus()),
         );
         stage.querySelectorAll<HTMLButtonElement>('.xlr-mode-card').forEach((card) => {
           card.addEventListener('click', () => {
+            if (card.dataset.unlocked !== '1') return;
             lessonMode = card.dataset.mode as LessonMode;
             render();
           });
@@ -447,9 +542,9 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           startBtn.type = 'button';
           startBtn.className = 'btn';
           startBtn.textContent = '开始起课';
-          startBtn.disabled = !lessonMode;
+          startBtn.disabled = !lessonMode || !isModeUnlocked(lessonMode);
           startBtn.addEventListener('click', () => {
-            if (!lessonMode) return;
+            if (!lessonMode || !isModeUnlocked(lessonMode)) return;
             resetSessionData();
             state = 'lunar';
             render();
@@ -504,26 +599,38 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           'xlr-flow-hour',
         );
         mountHuangliInteractions(stage, setHuangliOpen);
-        appendBtn(isLearn() ? '开始掌上演算' : '开始旋转掐算', () => {
-          state = 'count';
-          countStepIndex = 0;
-          completedTally = [];
-          litIndices = [];
-          if (isLearn()) {
-            hopCursor = 0;
-            activeHop = -1;
-            learnSubPhase = 'await-origin';
-            renderCountStage();
-            renderCountActions();
-          } else {
-            hopCursor = 0;
-            activeHop = -1;
-            countHopPrev = -1;
-            learnSubPhase = 'ready';
-            renderCountStage();
-            void runQuickSpin();
-          }
-        });
+        mountShichenTableLore(stage);
+        appendBtn(
+          isLearn() ? '开始掌上演算' : isPractice() ? '开始空白掌操练' : '开始旋转掐算',
+          () => {
+            state = 'count';
+            countStepIndex = 0;
+            completedTally = [];
+            litIndices = [];
+            practiceFeedback = null;
+            if (isLearn()) {
+              hopCursor = 0;
+              activeHop = -1;
+              learnSubPhase = 'await-origin';
+              renderCountStage();
+              renderCountActions();
+            } else if (isPractice()) {
+              hopCursor = 0;
+              activeHop = -1;
+              countHopPrev = -1;
+              learnSubPhase = 'ready';
+              renderCountStage();
+              renderCountActions();
+            } else {
+              hopCursor = 0;
+              activeHop = -1;
+              countHopPrev = -1;
+              learnSubPhase = 'ready';
+              renderCountStage();
+              void runQuickSpin();
+            }
+          },
+        );
         break;
 
       case 'count':
@@ -542,7 +649,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
               <p class="xlr-result-summary">${sixGodOneLiner(lesson.result)}</p>
             </div>
             <p class="xlr-reveal-tally">农历${lunar?.monthLabel} → 落${getSixGodByIndex(lesson.steps[0].landingIndex).name} · 农历${lunar?.dayLabel} → 落${getSixGodByIndex(lesson.steps[1].landingIndex).name} · ${hour.label} → 落${lesson.result.name}</p>
-            ${isLearn()
+            ${isLearn() || isPractice()
               ? renderLearnPalm({
                   dotIndex: lesson.resultIndex,
                   litIndices: [0, 1, 2, 3, 4, 5],
@@ -554,6 +661,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
                   litIndices: [0, 1, 2, 3, 4, 5],
                   landingIndex: lesson.resultIndex,
                 })}
+            ${isPractice() ? '<p class="xlr-practice-clear-note">空白掌三步全对 · 计入通关进度</p>' : ''}
             ${renderSixGodsReveal(lesson.resultIndex)}
           `,
           'xlr-flow-reveal',
@@ -574,8 +682,16 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           lesson,
         }).id;
 
+        if (!skillGateMarked) {
+          skillGateMarked = true;
+          if (isLearn()) markLearnClear();
+          if (isPractice()) markPracticeClear();
+        }
+
         {
           const reading = buildAiReading(question, lesson.result);
+          const bridge = buildGodHuangliBridge(lesson.result, getHuangli());
+          const reflectPrompt = `推演结果：【${lesson.result.name}】。结合上面的提醒，你觉得今天最好怎么做？`;
           stage.innerHTML = renderFlowPanel(
             { section: '结果解释', title: '五段理解' },
             `
@@ -585,6 +701,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
                 <p class="xlr-result-summary">${sixGodOneLiner(lesson.result)}</p>
               </div>
               <p class="xlr-result-process">${buildProcessExplanation(lesson.basisLabel, lesson.result.name)}</p>
+              <p class="xlr-result-huangli-bridge">${bridge}</p>
               ${
                 question
                   ? `<p class="xlr-result-q"><span>你的问题</span>${reading.question}<em>· ${reading.typeLabel}</em></p>`
@@ -606,18 +723,43 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
                 <h3><span class="xlr-result-layer-no">四</span>给你的一个提醒</h3>
                 <p>${reading.reflection}</p>
               </section>
-              <textarea id="xlr-reflection" class="question-input xlr-reflection-input" rows="2" placeholder="写下此刻的感悟（可选）"></textarea>
+              <section class="xlr-result-reflect" data-layer="5">
+                <h3><span class="xlr-result-layer-no">五</span>轻反思（写入手札）</h3>
+                <p class="xlr-result-reflect-lead">${reflectPrompt}</p>
+                <textarea id="xlr-reflection" class="question-input xlr-reflection-input" rows="3" placeholder="写一句就好，例如：先不催、先确认一件事…" required></textarea>
+                <p class="xlr-result-reflect-hint" hidden>写完这句，才能完成手札。</p>
+              </section>
             `,
             'xlr-flow-result',
           );
+
+          const reflectEl = stage.querySelector<HTMLTextAreaElement>('#xlr-reflection');
+          const reflectHint = stage.querySelector<HTMLElement>('.xlr-result-reflect-hint');
+          const journalBtn = document.createElement('button');
+          journalBtn.type = 'button';
+          journalBtn.className = 'btn';
+          journalBtn.textContent = '手札记录 · 完成';
+          journalBtn.disabled = true;
+          journalBtn.setAttribute('aria-disabled', 'true');
+
+          const syncReflectGate = (): void => {
+            const text = reflectEl?.value.trim() ?? '';
+            const ready = text.length > 0;
+            journalBtn.disabled = !ready;
+            journalBtn.setAttribute('aria-disabled', ready ? 'false' : 'true');
+            if (reflectHint) reflectHint.hidden = ready;
+            if (journalId && reflectEl) updateXiaoliurenReflection(journalId, text);
+          };
+
+          reflectEl?.addEventListener('input', syncReflectGate);
+          syncReflectGate();
+          journalBtn.addEventListener('click', () => {
+            if (journalBtn.disabled) return;
+            navigate('/xiaoliuren/journal');
+          });
+          actions.appendChild(journalBtn);
         }
 
-        stage.querySelector('#xlr-reflection')?.addEventListener('input', (e) => {
-          if (!journalId) return;
-          updateXiaoliurenReflection(journalId, (e.target as HTMLTextAreaElement).value);
-        });
-
-        appendBtn('手札记录 · 完成', () => navigate('/xiaoliuren/journal'));
         appendBtn('也用塔罗看一眼', () => {
           stashCrossAskQuestion(question);
           navigate('/tarot/reading');

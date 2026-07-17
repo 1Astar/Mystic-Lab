@@ -773,11 +773,13 @@
   justify-content: center;
   padding: 20px;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.28s ease;
 }
 
 .question-guide-modal.is-visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .question-guide-modal-backdrop {
@@ -1558,11 +1560,13 @@
   justify-content: center;
   padding: 20px;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.28s ease;
 }
 
 .question-rewrite-modal.is-visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .question-rewrite-modal-backdrop {
@@ -2239,11 +2243,147 @@
   background: rgba(201, 168, 76, 0.08);
 }
 
+.hero-kw-tag.is-action {
+  border-color: rgba(191, 163, 255, 0.45);
+  color: #d4c4ff;
+  background: rgba(191, 163, 255, 0.12);
+}
+
+.context-step-label {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(201, 168, 76, 0.85);
+}
+
+.element-mapping-block {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.element-mapping-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.element-mapping-title {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.element-mapping-label {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 0.72rem;
+  color: rgba(201, 168, 76, 0.8);
+  letter-spacing: 0.04em;
+}
+
+.element-mapping-original {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.element-mapping-scene {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.followup-chip-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.followup-chip {
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(201, 168, 76, 0.4);
+  background: rgba(201, 168, 76, 0.06);
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.followup-chip:hover:not(:disabled) {
+  background: var(--gold-soft);
+  border-style: solid;
+}
+
+.followup-chip:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.followup-status {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.reading-layer-followup {
+  border-color: rgba(191, 163, 255, 0.35);
+}
+
+.context-background-echo {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.pre-reading-stage,
+.card-intuition-stage {
+  width: min(100%, 420px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.pre-reading-label {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.intuition-card-meta {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+.intuition-status {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.supplement-guide-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
 .reading-layer-card {
   margin-bottom: 16px;
   padding: 14px;
-  background: rgba(46, 27, 75, 0.45);
-  border: 1px solid var(--line);
+  background: rgba(46, 27, 75, 0.78);
+  border: 1px solid rgba(191, 163, 255, 0.32);
   border-radius: var(--radius-sm);
 }
 
@@ -2252,8 +2392,84 @@
 }
 
 .reading-layer-answer {
-  border-color: rgba(201, 168, 76, 0.45);
-  background: rgba(201, 168, 76, 0.06);
+  border-color: rgba(201, 168, 76, 0.5);
+  background: rgba(201, 168, 76, 0.1);
+}
+
+.reading-layer-intuition {
+  border-color: rgba(191, 163, 255, 0.4);
+  background: rgba(191, 163, 255, 0.1);
+}
+
+.intuition-echo {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.intuition-compare {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(191, 163, 255, 0.22);
+}
+
+.intuition-compare-label {
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+}
+
+.intuition-compare-body {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.reading-accordion {
+  margin: 10px 0 0;
+  border: 1px solid rgba(191, 163, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(12, 8, 22, 0.35);
+  overflow: hidden;
+}
+
+.reading-accordion + .reading-accordion {
+  margin-top: 8px;
+}
+
+.reading-accordion-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.reading-accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.reading-accordion-hint::after {
+  content: '展开';
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.reading-accordion[open] > .reading-accordion-summary .reading-accordion-hint::after {
+  content: '收起';
+}
+
+.reading-accordion-body {
+  padding: 0 12px 12px;
 }
 
 .answer-tendency-grid {
@@ -2395,6 +2611,9 @@
 }
 
 .tarot-page .tarot-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   padding-bottom: 20px;
 }
 
@@ -2454,6 +2673,9 @@
   font-size: 0.88rem;
   color: var(--gold);
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .layer-badge {
@@ -2466,9 +2688,35 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-.layer-badge-ai {
-  color: var(--ink-muted);
-  background: rgba(255, 255, 255, 0.06);
+.source-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: help;
+  opacity: 0.85;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.source-dot:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.source-dot-ai {
+  background: rgba(201, 168, 76, 0.95);
+  box-shadow: 0 0 0 1px rgba(201, 168, 76, 0.35), 0 0 8px rgba(201, 168, 76, 0.35);
+}
+
+.source-dot-builtin {
+  background: rgba(191, 163, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(191, 163, 255, 0.3);
+}
+
+.source-dot-fallback {
+  background: rgba(160, 160, 170, 0.9);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .reflect-list {
@@ -2754,3 +3002,51 @@
   width: 100%;
 }
 
+
+/* ── 塔罗手札跟进提醒 ── */
+.tarot-review-banner {
+  margin: 12px 0 16px;
+  padding: 14px 14px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+}
+
+.tarot-review-banner-title {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.tarot-review-card {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(12, 8, 22, 0.35);
+  border: 1px solid rgba(191, 163, 255, 0.18);
+}
+
+.tarot-review-card-meta {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+.tarot-review-card-q {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.tarot-review-card-sum {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.tarot-review-banner-cta {
+  width: 100%;
+}

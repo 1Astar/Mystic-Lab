@@ -8,6 +8,7 @@ import {
 } from '../journal/records.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
+import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
 
 export function renderJournal(root: HTMLElement): void {
   const page = document.createElement('div');
@@ -27,6 +28,10 @@ export function renderJournal(root: HTMLElement): void {
     <p class="page-subtitle">抽牌记录 / 当时的问题 / 后来的感悟</p>
   `;
   page.appendChild(header);
+
+  const reviewHost = document.createElement('div');
+  reviewHost.className = 'tarot-journal-review-host';
+  page.appendChild(reviewHost);
 
   function closeDetail(): void {
     page.querySelector('.journal-detail')?.remove();
@@ -51,7 +56,11 @@ export function renderJournal(root: HTMLElement): void {
 
   function renderList(): void {
     page.querySelector('.journal-list')?.remove();
+    page.querySelector('.meditate-box')?.remove();
     backfillJournalFromCodex();
+    mountTarotReviewBanner(reviewHost, {
+      onOpenEntry: (entry) => openDetail(entry),
+    });
     const entries = loadJournalEntries();
 
     if (entries.length === 0) {

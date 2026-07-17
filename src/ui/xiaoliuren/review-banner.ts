@@ -13,12 +13,25 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function formatReviewWhen(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const md = `${d.getMonth() + 1}/${d.getDate()}`;
+  const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${md} ${hm}`;
+}
+
+function daysSince(iso: string): number {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return 0;
+  return Math.max(1, Math.floor((Date.now() - t) / (24 * 60 * 60 * 1000)));
+}
+
 export type ReviewBannerOptions = {
-  /** 点击某条待对照时；缺省则跳转小六壬手札 */
   onOpenEntry?: (entry: XiaoliurenJournalEntry) => void;
 };
 
-/** 满 3 天未标对照时置顶提示；无待办则不渲染 */
+/** 满 3 天未标对照时置顶提示；卡片展示时间、落位、问题 */
 export function mountXiaoliurenReviewBanner(
   host: HTMLElement,
   options: ReviewBannerOptions = {},
@@ -33,16 +46,31 @@ export function mountXiaoliurenReviewBanner(
     else navigate('/xiaoliuren/journal');
   };
 
+  const when = formatReviewWhen(first.createdAt);
+  const age = daysSince(first.createdAt);
+  const hasQ = Boolean(first.question.trim());
+  const questionLine = hasQ
+    ? first.question
+    : '当时未填写问题 · 打开后可对照落位与解读，也可补写感悟';
+
   const banner = document.createElement('aside');
   banner.className = 'xlr-review-banner';
   banner.setAttribute('role', 'status');
   const more = due.length > 1 ? `（另有 ${due.length - 1} 条）` : '';
   banner.innerHTML = `
     <p class="xlr-review-banner-title">有课该对照了${more}</p>
-    <p class="xlr-review-banner-body">
-      「${escapeHtml(first.question || '未填写问题')}」· ${escapeHtml(first.resultName)} · 起课已满 3 天
-    </p>
-    <button type="button" class="btn btn-secondary btn-sm xlr-review-banner-cta">去对照</button>
+    <div class="xlr-review-card">
+      <div class="xlr-review-card-meta">
+        <span>${escapeHtml(when || first.solarLabel)}</span>
+        <span>·</span>
+        <strong>落${escapeHtml(first.resultName)}</strong>
+        <span>·</span>
+        <span>已 ${age} 天</span>
+      </div>
+      <p class="xlr-review-card-q${hasQ ? '' : ' is-empty'}">${escapeHtml(questionLine)}</p>
+      <p class="xlr-review-card-sum">${escapeHtml(first.summary)}</p>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm xlr-review-banner-cta">${hasQ ? '去对照' : '打开这课 · 对照落位'}</button>
   `;
   banner.querySelector('button')?.addEventListener('click', openFirst);
   host.prepend(banner);

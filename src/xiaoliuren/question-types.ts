@@ -1,7 +1,7 @@
 /**
  * 问题类型库：决定 AI 解读侧重点，不做绝对预测。
  */
-export type QuestionTypeId = 'emotion' | 'career' | 'wealth' | 'self' | 'general';
+export type QuestionTypeId = 'emotion' | 'career' | 'wealth' | 'travel' | 'self' | 'general';
 
 export type QuestionType = {
   id: QuestionTypeId;
@@ -34,6 +34,13 @@ export const QUESTION_TYPES: QuestionType[] = [
     keywords: /钱|赚钱|投资|收入|财务|理财|消费|回款|报价/i,
     focus: '趋势与行动节奏，不做绝对预测。',
     aiHint: '只谈趋势与可执行动作，禁止「会发财/会亏光」式断语。',
+  },
+  {
+    id: 'travel',
+    label: '旅行',
+    keywords: /旅行|出行|出门|路程|航班|高铁|出差|旅游|去哪|行程/i,
+    focus: '行程顺滞、改期风险与可执行的出行安排。',
+    aiHint: '谈行程节奏与核对项，不做「必平安/必出事」断语。',
   },
   {
     id: 'self',

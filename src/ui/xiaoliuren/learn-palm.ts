@@ -19,7 +19,8 @@ const PHASE_LABELS: Record<string, string> = {
   hour: '第三步：从时起 · 十二时辰顺数',
 };
 
-const ORIGIN_HINT = `${formatPalmAnchor(LIUREN_ORIGIN)}是顺数的起点。正月从此起。`;
+const ORIGIN_HINT =
+  `${formatPalmAnchor(LIUREN_ORIGIN)}是顺数的起点。正月从此起——对应立春前后、万物安好之象，所以第一宫叫「大安」。`;
 
 export function renderLearnPalm(opts: LearnPalmOptions = {}): string {
   const {

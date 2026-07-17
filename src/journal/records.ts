@@ -272,6 +272,22 @@ export function updateJournalFeedback(id: string, feedback: JournalReadingFeedba
   persist(list);
 }
 
+/** 追问等场景：更新已保存手札里的解读快照 */
+export function updateJournalReadingSnapshot(id: string, reading: ReadingResult): void {
+  if (id.startsWith('j-synthetic-')) return;
+  const list = loadJournalEntries();
+  const idx = list.findIndex((e) => e.id === id);
+  if (idx < 0) return;
+  const entry = list[idx];
+  if (!entry) return;
+  list[idx] = {
+    ...entry,
+    readingSnapshot: reading,
+    summary: reading.summary || entry.summary,
+  };
+  persist(list);
+}
+
 export function getJournalEntryById(id: string): JournalEntry | undefined {
   return loadJournalEntries().find((e) => e.id === id);
 }

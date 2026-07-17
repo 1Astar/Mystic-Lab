@@ -18,6 +18,10 @@ export type PalmPlateOptions = {
   caption?: string;
   interactive?: boolean;
   starPoints?: boolean;
+  /** 隐藏编号与宫名，用于自主操练 */
+  blank?: boolean;
+  /** 六个点都可点（操练模式） */
+  allPointsInteractive?: boolean;
 };
 
 function orderPathD(): string {
@@ -41,6 +45,8 @@ function renderPointHtmlLayer(opts: {
   showGodIcons: boolean;
   interactive: boolean;
   starPoints: boolean;
+  blank: boolean;
+  allPointsInteractive: boolean;
 }): string {
   const litSet = new Set(opts.litIndices);
   return LIUREN_POINTS.map((p) => {
@@ -49,15 +55,24 @@ function renderPointHtmlLayer(opts: {
     const active = opts.dotIndex === p.index ? ' is-active' : '';
     const star = opts.starPoints ? ' is-star' : '';
     const isOrigin = p.index === 0;
-    const originAttr = opts.interactive && isOrigin ? ' data-origin-point tabindex="0" role="button"' : '';
-    const icon = opts.showGodIcons
-      ? `<img class="xlr-palm-god-chip" src="${getSixGodIconUrl(p.godId)}" alt="" width="22" height="22" loading="lazy" />`
-      : '';
+    const practiceTap = opts.allPointsInteractive;
+    const originAttr =
+      opts.interactive && isOrigin && !practiceTap
+        ? ' data-origin-point tabindex="0" role="button"'
+        : practiceTap
+          ? ' data-practice-point tabindex="0" role="button"'
+          : '';
+    const icon =
+      opts.showGodIcons && !opts.blank
+        ? `<img class="xlr-palm-god-chip" src="${getSixGodIconUrl(p.godId)}" alt="" width="22" height="22" loading="lazy" />`
+        : '';
+    const num = opts.blank ? '' : `<span class="xlr-palm-point-num">${p.id}</span>`;
+    const label = opts.blank ? '' : `<span class="xlr-palm-point-label">${p.name}</span>`;
     return `
-      <div class="xlr-palm-point-html is-marked${lit}${land}${active}${star}${isOrigin && opts.interactive ? ' is-origin-tap' : ''}" data-index="${p.index}" style="--px:${p.x}%;--py:${p.y}%;--lx:${p.lx}px;--ly:${p.ly}px"${originAttr}>
-        <span class="xlr-palm-point-num">${p.id}</span>
+      <div class="xlr-palm-point-html is-marked${opts.blank ? ' is-blank' : ''}${lit}${land}${active}${star}${isOrigin && opts.interactive && !practiceTap ? ' is-origin-tap' : ''}${practiceTap ? ' is-practice-tap' : ''}" data-index="${p.index}" style="--px:${p.x}%;--py:${p.y}%;--lx:${p.lx}px;--ly:${p.ly}px"${originAttr}>
+        ${num}
         ${icon}
-        <span class="xlr-palm-point-label">${p.name}</span>
+        ${label}
       </div>`;
   }).join('');
 }
@@ -101,6 +116,8 @@ export function renderPalmPlate(opts: PalmPlateOptions = {}): string {
     caption,
     interactive = false,
     starPoints = false,
+    blank = false,
+    allPointsInteractive = false,
   } = opts;
 
   const hopIndices = (() => {
@@ -124,7 +141,7 @@ export function renderPalmPlate(opts: PalmPlateOptions = {}): string {
       : '掌上六壬 · 顺时针顺数');
 
   return `
-    <div class="xlr-palm-plate xlr-palm-plate--${mode}${starPoints ? ' is-star-intro' : ''}">
+    <div class="xlr-palm-plate xlr-palm-plate--${mode}${starPoints ? ' is-star-intro' : ''}${blank ? ' is-blank-practice' : ''}">
       <div class="xlr-palm-plate-head${useStagger ? ' xlr-stagger-item' : ''}" style="--si:2">
         ${stepBadge}
         <p class="xlr-palm-plate-caption">${cap}</p>
@@ -132,11 +149,24 @@ export function renderPalmPlate(opts: PalmPlateOptions = {}): string {
       <div class="xlr-palm-stage${useStagger ? ' xlr-stagger-item' : ''}" style="--si:3">
         <div class="xlr-palm-map">
           <img class="xlr-palm-hand-img" src="${XLR_ASSETS.palmChart}" alt="掌诀示意" loading="lazy" />
-          <div class="xlr-palm-points-html"${interactive ? '' : ' aria-hidden="true"'}>
-            ${renderPointHtmlLayer({ litIndices, landingIndex, dotIndex, showGodIcons, interactive, starPoints })}
+          <div class="xlr-palm-points-html"${interactive || allPointsInteractive ? '' : ' aria-hidden="true"'}>
+            ${renderPointHtmlLayer({
+              litIndices,
+              landingIndex,
+              dotIndex,
+              showGodIcons,
+              interactive,
+              starPoints,
+              blank,
+              allPointsInteractive,
+            })}
           </div>
           <svg class="xlr-palm-overlay" viewBox="0 0 100 100" aria-hidden="true">
-            ${renderSvgInteractionLayer({ showOrderPath, hopIndices, dotIndex })}
+            ${renderSvgInteractionLayer({
+              showOrderPath: blank ? false : showOrderPath,
+              hopIndices: blank ? [] : hopIndices,
+              dotIndex,
+            })}
           </svg>
         </div>
       </div>

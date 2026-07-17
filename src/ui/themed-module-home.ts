@@ -16,8 +16,10 @@ export interface ThemedModuleConfig {
   backLabel?: string;
   heroTitle: string;
   moduleName: string;
-  slogan: string;
+  slogan?: string;
   hint?: string;
+  /** 体系定位说明（问什么 / 重什么） */
+  focusNote?: string;
   sideInscription: string;
   heroHtml: string;
   primaryCta: { label: string; comingSoon?: boolean; path?: string };
@@ -65,8 +67,9 @@ export function renderThemedModuleHome(root: HTMLElement, config: ThemedModuleCo
         <p class="home-eyebrow">MYSTIC LAB</p>
         <h1 class="theme-hero-title">${config.heroTitle}</h1>
         <p class="theme-module-name">${diamond()}<span>${config.moduleName}</span>${diamond()}</p>
-        <p class="theme-slogan">${config.slogan}</p>
+        ${config.slogan ? `<p class="theme-slogan">${config.slogan}</p>` : ''}
         ${config.hint ? `<p class="theme-hint">${config.hint}</p>` : ''}
+        ${config.focusNote ? `<aside class="theme-focus-note">${config.focusNote}</aside>` : ''}
       </header>
       <span class="theme-scroll-roll theme-scroll-roll-right" aria-hidden="true"></span>
     </div>

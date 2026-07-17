@@ -36,6 +36,15 @@ export type CardReading = {
   hasVisualHotspots: boolean;
   /** mock=规则模板，llm=已调用大模型 */
   interpretationProvider: 'mock' | 'llm';
+  /** 翻牌后、看解读前用户写下的第一直觉；跳过则为空 */
+  userIntuition?: string;
+  /** 直觉与解读的对照短文（有直觉时生成） */
+  intuitionCompare?: string;
+};
+
+export type InterpretOptions = {
+  /** 用户补充的情境背景 */
+  background?: string;
 };
 
 export type ReadingResult = {
@@ -43,6 +52,8 @@ export type ReadingResult = {
   summary: string;
   learningNote?: string;
   reflection?: string;
+  /** 本轮解读使用的补充背景（随快照保存） */
+  questionBackground?: string;
   provider: 'static' | 'llm' | 'mock';
 };
 
@@ -51,5 +62,6 @@ export interface InterpretationProvider {
     cards: DrawnCard[],
     question?: string,
     spreadType?: SpreadType,
+    options?: InterpretOptions,
   ): Promise<ReadingResult>;
 }

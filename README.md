@@ -35,22 +35,26 @@
 
 微信内置浏览器对摄像头/手势支持有限，建议使用 Safari 或 Chrome 打开。不可用时可切换触控模式。
 
-## 本地运行（HTTPS）
+## 本地运行
 
-摄像头 API **必须用 HTTPS**，或用本机 `localhost` 访问。用手机测时，不要用 `http://192.168.x.x`，请用下面方式：
+电脑浏览器用 **HTTP**（避免自签证书导致白屏）：
 
 ```bash
 npm install
 npm run dev
 ```
 
-终端会显示 **`https://localhost:5173`** 和 **`https://你的电脑IP:5173`**。
+打开终端里的 **`http://localhost:5173`**（`localhost` 下摄像头仍可用）。
 
-1. **电脑浏览器**：打开 `https://localhost:5173`，首次会提示证书不受信任，点「高级」→「继续访问」即可
-2. **手机同网段**：打开 `https://电脑IP:5173`（如 `https://192.168.1.5:5173`），同样需信任自签名证书一次
-3. **上线部署**：把 `dist/` 部署到 Vercel / Cloudflare Pages 等，自动有正式 HTTPS
+手机同网段测摄像头时再用 HTTPS：
 
-若暂时无法 HTTPS，页面会提示「触控模式」，仍可完整体验抽牌流程。
+```bash
+npm run dev:https
+```
+
+打开 `https://电脑IP:5173`，首次需「高级 → 继续访问」信任自签名证书。
+
+上线部署到 Vercel 等会自带正式 HTTPS。
 
 
 ## 构建

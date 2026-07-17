@@ -22,7 +22,7 @@ export function renderXiaoliurenCodex(root: HTMLElement): void {
   const header = document.createElement('header');
   header.innerHTML = `
     <h1 class="page-title">六神图鉴</h1>
-    <p class="page-subtitle">关键词 · 象征 · 领域解释 · 行动</p>
+    <p class="page-subtitle">会用 · 为什么 · 多场景案例</p>
   `;
   page.append(header);
 
@@ -38,12 +38,15 @@ export function renderXiaoliurenCodex(root: HTMLElement): void {
       <p class="xlr-codex-keywords">${god.keywords.map((k) => `<span>${k}</span>`).join('')}</p>
       <p class="xlr-codex-oneliner">${god.oneLiner}</p>
       <dl class="xlr-codex-fields">
+        <div><dt>为什么叫</dt><dd>${god.whyName}</dd></div>
+        <div><dt>为什么代表</dt><dd>${god.whyMeaning}</dd></div>
         <div><dt>故事象征</dt><dd>${god.story}</dd></div>
         <div><dt>象征</dt><dd>${god.symbolism}</dd></div>
         <div><dt>适合</dt><dd>${listLine(god.positive)}</dd></div>
         <div><dt>提醒</dt><dd>${listLine(god.warning)}</dd></div>
         <div><dt>感情</dt><dd>${god.emotion}</dd></div>
         <div><dt>工作</dt><dd>${god.career}</dd></div>
+        <div><dt>旅行</dt><dd>${god.travel}</dd></div>
         <div><dt>财富</dt><dd>${god.wealth}</dd></div>
         <div><dt>自我</dt><dd>${god.self}</dd></div>
         <div><dt>容易误读</dt><dd>${god.misread}</dd></div>
@@ -56,10 +59,12 @@ export function renderXiaoliurenCodex(root: HTMLElement): void {
   const links = document.createElement('div');
   links.className = 'xlr-codex-links';
   links.innerHTML = `
+    <button type="button" class="theme-entry-card" data-go="depth">深度理解 · 五层从会用到案例</button>
     <button type="button" class="theme-entry-card" data-go="hour">时辰入门 · 十二时辰对照</button>
     <button type="button" class="theme-entry-card" data-go="method">起课方法 · 月 → 日 → 时</button>
     <button type="button" class="theme-entry-card" data-go="journey">掌上演算之旅 · 六章通关</button>
   `;
+  links.querySelector('[data-go="depth"]')?.addEventListener('click', () => navigate('/xiaoliuren/depth'));
   links.querySelector('[data-go="hour"]')?.addEventListener('click', () => navigate('/xiaoliuren/hour-guide'));
   links.querySelector('[data-go="method"]')?.addEventListener('click', () => navigate('/xiaoliuren/reading'));
   links.querySelector('[data-go="journey"]')?.addEventListener('click', () => navigate('/xiaoliuren/palm-journey'));

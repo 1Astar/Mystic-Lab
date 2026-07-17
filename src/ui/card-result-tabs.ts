@@ -82,8 +82,12 @@ export function renderCardHero(r: CardReading): string {
   const cardColor = deckCard?.color ?? 'var(--purple)';
   const orient = r.orientation === 'reversed' ? '逆位' : '正位';
   const alt = `${r.selectedCard.nameCn} · ${r.selectedCard.nameEn}`;
-  const kwTags = r.keywords
-    .map((k) => `<span class="hero-kw-tag">${escapeHtml(k)}</span>`)
+  const tags =
+    r.interpretationLayers.actionTags?.length
+      ? r.interpretationLayers.actionTags
+      : r.keywords;
+  const kwTags = tags
+    .map((k) => `<span class="hero-kw-tag${r.interpretationLayers.actionTags?.length ? ' is-action' : ''}">${escapeHtml(k)}</span>`)
     .join('');
 
   return `
@@ -111,14 +115,26 @@ export function renderCardHero(r: CardReading): string {
 
 
 
-function contextualBadge(r: CardReading): string {
+function contextualSourceDot(r: CardReading): string {
+  let tip: string;
+  let kind: 'ai' | 'builtin' | 'fallback';
   if (r.interpretationProvider === 'llm') {
-    return '<p class="layer-badge layer-badge-ai">AI 解读</p>';
+    tip = 'AI 解读 · 已结合你的问题';
+    kind = 'ai';
+  } else if (isAiConfigured()) {
+    tip = '内置解读 · AI 暂不可用，已用规则结合问题作答';
+    kind = 'fallback';
+  } else {
+    tip = '内置解读 · 已结合你的问题（无需配置 AI）';
+    kind = 'builtin';
   }
-  if (isAiConfigured()) {
-    return '<p class="layer-badge layer-badge-ai">规则解读 · AI 调用失败，已回退</p>';
-  }
-  return '<p class="layer-badge layer-badge-ai">规则解读 · 未配置 AI</p>';
+  return `<span class="source-dot source-dot-${kind}" title="${escapeHtml(tip)}" aria-label="${escapeHtml(tip)}"></span>`;
+}
+
+function followUpSourceDot(provider: 'llm' | 'mock'): string {
+  const tip = provider === 'llm' ? 'AI 追问解读' : '内置追问解读';
+  const kind = provider === 'llm' ? 'ai' : 'builtin';
+  return `<span class="source-dot source-dot-${kind}" title="${escapeHtml(tip)}" aria-label="${escapeHtml(tip)}"></span>`;
 }
 
 function renderAnswerTendency(r: CardReading): string {
@@ -128,24 +144,73 @@ function renderAnswerTendency(r: CardReading): string {
   return `
       <section class="reading-layer-card reading-layer-answer">
         <h4 class="layer-tag">你的答案倾向</h4>
-        <div class="answer-tendency-grid">
-          <p class="answer-tendency-field"><span class="answer-tendency-label">整体判断</span><span class="answer-tendency-value">${escapeHtml(t.overall)}</span></p>
-          <p class="answer-tendency-field"><span class="answer-tendency-label">结果倾向</span><span class="answer-tendency-value">${escapeHtml(t.tendency)}</span></p>
-        </div>
         <p class="answer-tendency-oneliner"><span class="answer-tendency-label">一句话答案</span>${formatParagraph(t.oneLiner)}</p>
         <p class="answer-tendency-action"><span class="answer-tendency-label">关键提醒</span>${formatParagraph(t.actionTip)}</p>
       </section>`;
 }
 
-function renderReadingTab(r: CardReading): string {
-  const { standard, contextualReading, contextualSections, selfReflection } = r.interpretationLayers;
-  const reminderLabel = r.orientation === 'reversed' ? '逆位提醒' : '正位提醒';
-  const questions = selfReflection
-    .map((q) => `<li>${formatParagraph(q)}</li>`)
-    .join('');
+function renderUserIntuition(r: CardReading): string {
+  const tip = r.userIntuition?.trim();
+  if (!tip) return '';
+  const compare = r.intuitionCompare?.trim();
+  return `
+      <section class="reading-layer-card reading-layer-intuition">
+        <h4 class="layer-tag">你的第一直觉</h4>
+        <p class="intuition-echo">${formatParagraph(tip)}</p>
+        ${
+          compare
+            ? `<div class="intuition-compare">
+          <p class="intuition-compare-label">直觉 × 解读</p>
+          <p class="intuition-compare-body">${formatParagraph(compare)}</p>
+        </div>`
+            : ''
+        }
+      </section>`;
+}
 
-  const contextBody = contextualSections?.length
-    ? contextualSections
+function accordionBlock(title: string, body: string, open: boolean): string {
+  if (!body.trim()) return '';
+  return `
+    <details class="reading-accordion"${open ? ' open' : ''}>
+      <summary class="reading-accordion-summary">
+        <span class="reading-accordion-title">${escapeHtml(title)}</span>
+        <span class="reading-accordion-hint" aria-hidden="true"></span>
+      </summary>
+      <div class="reading-accordion-body">${body}</div>
+    </details>`;
+}
+
+function renderElementMappings(
+  mappings: NonNullable<CardReading['interpretationLayers']['elementMappings']>,
+): string {
+  if (!mappings.length) return '';
+  return mappings
+    .map(
+      (m) => `
+        <div class="element-mapping-item">
+          <h6 class="element-mapping-title">${escapeHtml(m.title)}</h6>
+          ${
+            m.originalMeaning
+              ? `<p class="element-mapping-original"><span class="element-mapping-label">牌面原意</span>${escapeHtml(m.originalMeaning)}</p>`
+              : ''
+          }
+          <p class="element-mapping-scene"><span class="element-mapping-label">场景映射</span>${formatParagraph(m.body)}</p>
+        </div>`,
+    )
+    .join('');
+}
+
+function renderFollowUpAnswers(
+  answers: NonNullable<CardReading['interpretationLayers']['followUpAnswers']>,
+): string {
+  if (!answers.length) return '';
+  return answers
+    .map(
+      (a) => `
+    <section class="reading-layer-card reading-layer-followup">
+      <h4 class="layer-tag">追问解读 ${followUpSourceDot(a.provider)}</h4>
+      <p class="context-question-echo">追问：${escapeHtml(a.question)}</p>
+      ${a.sections
         .map(
           (s) => `
         <div class="context-section">
@@ -153,12 +218,108 @@ function renderReadingTab(r: CardReading): string {
           <p class="reading-block-text">${formatParagraph(s.body)}</p>
         </div>`,
         )
+        .join('')}
+      ${a.elementMappings?.length ? `<div class="element-mapping-block">${renderElementMappings(a.elementMappings)}</div>` : ''}
+    </section>`,
+    )
+    .join('');
+}
+
+const BRIDGE_ACTION_FOLLOWUP = '我该付出什么样的行动来弥合？';
+
+function renderFollowUpChips(followUps: string[] | undefined): string {
+  if (!followUps?.length) return '';
+  return `
+    <div class="followup-chip-row">
+      ${followUps
+        .map(
+          (q) =>
+            `<button type="button" class="followup-chip" data-followup-q="${escapeHtml(q)}">🔍 ${escapeHtml(q)}</button>`,
+        )
+        .join('')}
+    </div>
+    <p class="followup-status" hidden></p>`;
+}
+
+function renderReadingTab(r: CardReading): string {
+  const {
+    standard,
+    contextualReading,
+    contextualSections,
+    selfReflection,
+    elementMappings,
+    followUps,
+    followUpAnswers,
+    answerTendency,
+  } = r.interpretationLayers;
+  const reminderLabel = r.orientation === 'reversed' ? '逆位提醒' : '正位提醒';
+  const questions = selfReflection
+    .map((q) => `<li>${formatParagraph(q)}</li>`)
+    .join('');
+
+  const overviewSection = contextualSections?.find(
+    (s) => s.title.includes('热点') || s.title.includes('核心') || s.title.includes('整体'),
+  );
+  const otherSections = (contextualSections ?? []).filter((s) => s !== overviewSection);
+  const adviceSections = otherSections.filter(
+    (s) => s.title.includes('建议') || s.title.includes('疏导') || s.title.includes('行动'),
+  );
+  const restSections = otherSections.filter((s) => !adviceSections.includes(s));
+
+  const step1Body = overviewSection
+    ? `
+        <h5 class="context-section-title">${escapeHtml(overviewSection.title)}</h5>
+        <p class="reading-block-text">${formatParagraph(overviewSection.body)}</p>`
+    : !elementMappings?.length && !adviceSections.length && !restSections.length
+      ? `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`
+      : '';
+
+  const step2Body = elementMappings?.length
+    ? `<div class="element-mapping-block">${renderElementMappings(elementMappings)}</div>`
+    : restSections
+        .map(
+          (s) => `
+        <div class="context-section">
+          <h5 class="context-section-title">${escapeHtml(s.title)}</h5>
+          <p class="reading-block-text">${formatParagraph(s.body)}</p>
+        </div>`,
+        )
+        .join('');
+
+  const step3Body = adviceSections.length
+    ? adviceSections
+        .map(
+          (s) => `
+          <h5 class="context-section-title">${escapeHtml(s.title)}</h5>
+          <p class="reading-block-text">${formatParagraph(s.body)}</p>`,
+        )
         .join('')
-    : `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`;
+    : '';
+
+  const chipList = [...(followUps ?? [])];
+  if (
+    answerTendency?.actionTip?.trim() &&
+    !chipList.includes(BRIDGE_ACTION_FOLLOWUP)
+  ) {
+    chipList.unshift(BRIDGE_ACTION_FOLLOWUP);
+  }
+
+  const followUpBody = `
+      ${renderFollowUpAnswers(followUpAnswers ?? [])}
+      ${
+        chipList.length
+          ? `<p class="layer-badge">同牌深化 · 点选后重新解读</p>${renderFollowUpChips(chipList)}`
+          : ''
+      }`;
 
   const questionEcho = r.question
     ? `<p class="context-question-echo">你正在问：${escapeHtml(r.question)}</p>`
     : '';
+  const bgEcho = r.readingContext.background?.trim()
+    ? `<p class="context-background-echo">补充背景：${escapeHtml(r.readingContext.background.trim())}</p>`
+    : '';
+
+  const contextBody = `${accordionBlock('① 热点整体解读', step1Body, true)}${accordionBlock('② 现实状况', step2Body, false)}${accordionBlock('③ 行动指南', step3Body, false)}`;
 
   return `
     <div class="result-tab-panel" data-panel="reading">
@@ -170,18 +331,31 @@ function renderReadingTab(r: CardReading): string {
           <p class="std-field"><span class="std-label">${reminderLabel}</span><span class="std-value">${formatParagraph(stripReminderPrefix(standard.reminder))}</span></p>
         </div>
       </section>
+      ${renderUserIntuition(r)}
       ${renderAnswerTendency(r)}
       <section class="reading-layer-card reading-layer-context">
-        <h4 class="layer-tag">结合你的问题</h4>
-        ${contextualBadge(r)}
+        <h4 class="layer-tag">结合你的问题 ${contextualSourceDot(r)}</h4>
         ${questionEcho}
+        ${bgEcho}
         ${contextBody}
       </section>
+      ${
+        followUpBody.trim()
+          ? `<section class="reading-layer-card reading-layer-followup-wrap">${accordionBlock(
+              '继续追问',
+              `<div class="reading-layer-followup-chips">${followUpBody}</div>`,
+              false,
+            )}</section>`
+          : ''
+      }
       <section class="reading-layer-card reading-layer-reflect">
         <h4 class="layer-tag">给你的一个提问</h4>
         <p class="layer-badge">回到心里</p>
         <ul class="reflect-list">${questions}</ul>
       </section>
+      <button type="button" class="codex-story-cta" data-codex-sheet="${escapeHtml(r.cardId)}">
+        这张牌有什么故事？前往【图鉴】查看它的愚人之旅 →
+      </button>
     </div>`;
 }
 
@@ -431,94 +605,115 @@ const PANEL_RENDERERS: Record<ResultTabId, (r: CardReading) => string> = {
 
 
 
+export type CardResultTabsOptions = {
+  /** 追问后更新牌解读（写入 reading / 手札快照） */
+  onCardReadingChange?: (reading: CardReading) => void;
+};
+
 export function mountCardResultTabs(
-
   container: HTMLElement,
-
   reading: CardReading,
-
   activeTab: ResultTabId = 'reading',
-
+  options?: CardResultTabsOptions,
 ): void {
+  let current = reading;
 
-  const tabs = (Object.keys(TAB_LABELS) as ResultTabId[]).map(
-
-    (id) => {
-
-      const hotspotDot = id === 'visual' && reading.hasVisualHotspots
-        ? '<span class="tab-hotspot-dot" aria-hidden="true"></span>'
-        : '';
-
-      return `
-
-    <button type="button" class="result-tab-btn ${id === activeTab ? 'is-active' : ''}" data-tab="${id}" role="tab" aria-selected="${id === activeTab}">
-
+  const renderShell = (tab: ResultTabId): void => {
+    const tabs = (Object.keys(TAB_LABELS) as ResultTabId[])
+      .map((id) => {
+        const hotspotDot =
+          id === 'visual' && current.hasVisualHotspots
+            ? '<span class="tab-hotspot-dot" aria-hidden="true"></span>'
+            : '';
+        return `
+    <button type="button" class="result-tab-btn ${id === tab ? 'is-active' : ''}" data-tab="${id}" role="tab" aria-selected="${id === tab}">
       ${TAB_LABELS[id]}${hotspotDot}
-
     </button>`;
+      })
+      .join('');
 
-    },
-
-  ).join('');
-
-
-
-  container.innerHTML = `
-
-    <div class="card-result-tabs" data-card-id="${escapeHtml(reading.cardId)}">
-
-      ${renderCardHero(reading)}
-
+    container.innerHTML = `
+    <div class="card-result-tabs" data-card-id="${escapeHtml(current.cardId)}">
+      ${renderCardHero(current)}
       <div class="result-tab-bar" role="tablist">${tabs}</div>
-
       <div class="result-tab-panels">
-
-        ${PANEL_RENDERERS[activeTab](reading)}
-
+        ${PANEL_RENDERERS[tab](current)}
       </div>
-
     </div>
-
   `;
 
+    const root = container.querySelector('.card-result-tabs')!;
+    const panelHost = container.querySelector('.result-tab-panels')!;
 
-
-  const root = container.querySelector('.card-result-tabs')!;
-
-  const panelHost = container.querySelector('.result-tab-panels')!;
-
-
-
-  root.querySelectorAll<HTMLButtonElement>('.result-tab-btn').forEach((btn) => {
-
-    btn.addEventListener('click', () => {
-
-      const tab = btn.dataset.tab as ResultTabId;
-
-      root.querySelectorAll('.result-tab-btn').forEach((b) => {
-
-        b.classList.remove('is-active');
-
-        b.setAttribute('aria-selected', 'false');
-
+    root.querySelectorAll<HTMLButtonElement>('.result-tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.tab as ResultTabId;
+        root.querySelectorAll('.result-tab-btn').forEach((b) => {
+          b.classList.remove('is-active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-selected', 'true');
+        panelHost.innerHTML = PANEL_RENDERERS[next](current);
+        wireHotspotClicks(panelHost, current.cardId);
+        wireFollowUpChips(panelHost);
+        wireCodexStoryCta(panelHost);
       });
-
-      btn.classList.add('is-active');
-
-      btn.setAttribute('aria-selected', 'true');
-
-      panelHost.innerHTML = PANEL_RENDERERS[tab](reading);
-
-      wireHotspotClicks(panelHost, reading.cardId);
-
     });
 
-  });
+    wireHotspotClicks(panelHost, current.cardId);
+    wireFollowUpChips(panelHost);
+    wireCodexStoryCta(panelHost);
+  };
 
+  const wireCodexStoryCta = (panelHost: Element): void => {
+    panelHost.querySelectorAll<HTMLButtonElement>('[data-codex-sheet]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.codexSheet?.trim();
+        if (!id) return;
+        void import('./codex-quick-sheet.ts').then(({ openCodexQuickSheet }) => {
+          openCodexQuickSheet(id);
+        });
+      });
+    });
+  };
 
+  const wireFollowUpChips = (panelHost: Element): void => {
+    const chips = panelHost.querySelectorAll<HTMLButtonElement>('.followup-chip');
+    const status = panelHost.querySelector<HTMLElement>('.followup-status');
+    chips.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        void (async () => {
+          const q = btn.dataset.followupQ?.trim();
+          if (!q) return;
+          chips.forEach((c) => {
+            c.disabled = true;
+          });
+          if (status) {
+            status.hidden = false;
+            status.textContent = '正在结合同牌元素深化追问…';
+          }
+          try {
+            const { interpretCardFollowUp } = await import(
+              '../interpretation/llm-provider.ts'
+            );
+            current = await interpretCardFollowUp(current, q);
+            options?.onCardReadingChange?.(current);
+            renderShell('reading');
+          } catch {
+            if (status) {
+              status.textContent = '追问失败，请稍后再试';
+            }
+            chips.forEach((c) => {
+              c.disabled = false;
+            });
+          }
+        })();
+      });
+    });
+  };
 
-  wireHotspotClicks(panelHost, reading.cardId);
-
+  renderShell(activeTab);
 }
 
 
