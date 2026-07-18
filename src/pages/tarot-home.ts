@@ -1,8 +1,17 @@
 import { getCollectedCount } from '../codex/collection.ts';
+import {
+  listTarotDueForReview,
+  notifyTarotDueReviewsIfAllowed,
+} from '../journal/review-remind.ts';
 import { loadJournalEntries } from '../journal/records.ts';
+import { navigate } from '../router.ts';
 import { renderModuleHome } from '../ui/module-home.ts';
 
 export function renderTarotHome(root: HTMLElement): () => void {
+  void notifyTarotDueReviewsIfAllowed(listTarotDueForReview(), () => {
+    navigate('/journal');
+  });
+
   return renderModuleHome(root, {
     backPath: '/',
     backLabel: '← 返回 Mystic Lab',

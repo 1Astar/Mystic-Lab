@@ -71,17 +71,64 @@
 
 .xlr-phase-teach {
   margin: 12px 0 4px;
-  padding: 12px 14px;
+  padding: 0;
   border-radius: 12px;
   background: rgba(16, 14, 28, 0.72);
   border: 1px solid rgba(201, 168, 108, 0.16);
+  overflow: hidden;
+}
+
+.xlr-phase-teach-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.xlr-phase-teach-summary::-webkit-details-marker {
+  display: none;
+}
+
+.xlr-phase-teach-summary::after {
+  content: '›';
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  color: rgba(201, 168, 108, 0.55);
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+
+.xlr-phase-teach[open] .xlr-phase-teach-summary::after {
+  transform: rotate(-90deg);
+}
+
+.xlr-phase-teach-summary-label {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: #f5efe6;
+}
+
+.xlr-phase-teach-summary-hint {
+  margin-left: auto;
+  font-size: 0.66rem;
+  color: rgba(201, 168, 108, 0.55);
+  white-space: nowrap;
+}
+
+.xlr-phase-teach-body {
+  padding: 0 14px 12px;
+  border-top: 1px solid rgba(201, 168, 108, 0.1);
 }
 
 .xlr-phase-moon {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin: 12px 0 10px;
 }
 
 .xlr-phase-moon-disc {
@@ -601,6 +648,52 @@
   color: rgba(232, 224, 212, 0.42);
 }
 
+.xlr-result-huangli-bridge {
+  margin: 12px 2px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #f5efe6;
+  background: rgba(201, 168, 108, 0.1);
+  border: 1px solid rgba(201, 168, 108, 0.22);
+}
+
+.xlr-result-reflect {
+  margin-top: 18px;
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: rgba(255, 248, 236, 0.04);
+  border: 1px solid rgba(201, 168, 108, 0.18);
+}
+
+.xlr-result-reflect h3 {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.xlr-result-reflect-lead {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.xlr-result-reflect .xlr-reflection-input {
+  margin-top: 10px;
+}
+
+.xlr-result-reflect-hint {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: rgba(230, 180, 34, 0.85);
+}
+
+.xlr-reading-actions .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .xlr-result-q {
   margin: 12px 2px 0;
   font-size: 0.82rem;
@@ -798,6 +891,47 @@
   margin-top: 10px;
 }
 
+.xlr-review-card {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(230, 180, 34, 0.2);
+}
+
+.xlr-review-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-size: 0.72rem;
+  color: rgba(255, 214, 166, 0.72);
+}
+
+.xlr-review-card-meta strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.xlr-review-card-q {
+  margin: 8px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #f5efe6;
+}
+
+.xlr-review-card-q.is-empty {
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}
+
+.xlr-review-card-sum {
+  margin: 6px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
 .xlr-notify-try {
   margin: 8px 0 4px;
   padding: 10px 12px;
@@ -898,6 +1032,17 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 16px;
+}
+
+.xlr-hour-guide-now-memory {
+  margin: 0 2px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(255, 214, 166, 0.72);
+}
+
+.xlr-hour-guide-list .xlr-shichen-table {
+  margin-top: 0;
 }
 
 .xlr-hour-guide-row {
@@ -1283,12 +1428,21 @@
   grid-template-columns: 2.2em 2.4em 1fr;
   gap: 6px;
   align-items: center;
+  width: 100%;
   padding: 7px 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid transparent;
+  font: inherit;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.5);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.xlr-shichen-row:hover {
+  background: rgba(255, 255, 255, 0.055);
 }
 
 .xlr-shichen-row.is-active {
@@ -1296,6 +1450,11 @@
   border-color: rgba(255, 214, 166, 0.32);
   color: var(--gold);
   font-weight: 600;
+}
+
+.xlr-shichen-row.is-tapped {
+  border-color: rgba(201, 168, 108, 0.55);
+  background: rgba(201, 168, 108, 0.14);
 }
 
 .xlr-shichen-row-name {
@@ -1311,6 +1470,17 @@
   text-align: right;
   font-size: 0.66rem;
   opacity: 0.85;
+}
+
+.xlr-shichen-lore {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #f5efe6;
+  background: rgba(201, 168, 108, 0.1);
+  border: 1px solid rgba(201, 168, 108, 0.22);
 }
 
 /* 05 掌上演算 · 三步进度 */
@@ -1754,6 +1924,35 @@
 
 .xlr-mode-card.is-selected {
   background: rgba(255, 214, 166, 0.08);
+}
+
+.xlr-mode-card.is-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.xlr-mode-card.is-locked:hover {
+  border-color: rgba(255, 214, 166, 0.16);
+  transform: none;
+}
+
+.xlr-mode-gate {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 214, 166, 0.78);
+  border: 1px solid rgba(255, 214, 166, 0.28);
+}
+
+.xlr-mode-lock {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(230, 180, 34, 0.9);
 }
 
 .xlr-mode-emoji {
@@ -3256,6 +3455,78 @@ body.xlr-huangli-lock {
   animation: xlr-star-pulse 2s ease-in-out infinite;
 }
 
+.xlr-palm-point-html.is-practice-tap {
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.xlr-palm-point-html.is-practice-tap::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 214, 166, 0.35);
+}
+
+.xlr-palm-point-html.is-practice-tap.is-lit,
+.xlr-palm-point-html.is-practice-tap.is-active,
+.xlr-palm-point-html.is-practice-tap.is-landing {
+  opacity: 1;
+}
+
+.xlr-palm-plate.is-blank-practice .xlr-palm-point-html.is-practice-tap.is-active::before {
+  border-style: solid;
+  border-color: rgba(255, 214, 166, 0.75);
+  box-shadow: 0 0 12px rgba(255, 214, 166, 0.45);
+}
+
+.xlr-practice-palm-wrap {
+  margin-top: 8px;
+}
+
+.xlr-practice-ask {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  color: #f5efe6;
+}
+
+.xlr-practice-ask span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.74rem;
+  color: var(--xlr-gold, var(--gold));
+}
+
+.xlr-practice-hint {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.xlr-practice-feedback {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #f5efe6;
+  background: rgba(201, 168, 108, 0.12);
+  border: 1px solid rgba(201, 168, 108, 0.28);
+}
+
+.xlr-practice-clear-note {
+  margin: 10px 2px 0;
+  font-size: 0.78rem;
+  color: rgba(255, 214, 166, 0.75);
+  text-align: center;
+}
+
 .xlr-palm-point-html.is-origin-tap::before {
   content: '';
   position: absolute;
@@ -3677,4 +3948,450 @@ body.xlr-huangli-lock {
   .xlr-journey-progress-bar span {
     transition: none;
   }
+}
+
+/* ── 深度理解五层 ── */
+.xlr-depth-page {
+  max-width: 390px;
+  margin: 0 auto;
+}
+
+.xlr-depth-header {
+  text-align: center;
+  padding: 0 4px 8px;
+}
+
+.xlr-depth-layers {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.xlr-depth-layers > li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(16, 14, 28, 0.78);
+  border: 1px solid rgba(201, 168, 108, 0.14);
+}
+
+.xlr-depth-layer-no {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1a1208;
+  background: linear-gradient(165deg, #f0e0c0, #c9a86c);
+}
+
+.xlr-depth-layers strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #f5efe6;
+}
+
+.xlr-depth-layers em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.72rem;
+  color: rgba(201, 168, 108, 0.75);
+}
+
+.xlr-depth-layers p {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: rgba(232, 224, 212, 0.55);
+}
+
+.xlr-depth-section {
+  margin-top: 20px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: rgba(16, 14, 28, 0.72);
+  border: 1px solid rgba(201, 168, 108, 0.12);
+}
+
+.xlr-depth-kicker {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 108, 0.62);
+}
+
+.xlr-depth-h2 {
+  margin: 8px 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: #f5efe6;
+}
+
+.xlr-depth-lead {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: rgba(232, 224, 212, 0.62);
+}
+
+.xlr-depth-god-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-depth-god-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(201, 168, 108, 0.1);
+  text-align: center;
+}
+
+.xlr-depth-god-icon {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.xlr-depth-god-card h3 {
+  margin: 8px 0 0;
+  font-size: 1rem;
+}
+
+.xlr-depth-god-use,
+.xlr-depth-god-why {
+  margin: 8px 0 0;
+  text-align: left;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: rgba(232, 224, 212, 0.68);
+}
+
+.xlr-depth-god-use span,
+.xlr-depth-god-why span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 108, 0.7);
+}
+
+.xlr-depth-palm-topics {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-depth-palm-topics article {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.xlr-depth-palm-topics h3 {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #f5efe6;
+}
+
+.xlr-depth-palm-topics ul {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: rgba(232, 224, 212, 0.62);
+}
+
+.xlr-depth-cast-flow {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.xlr-depth-cast-flow li {
+  position: relative;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(201, 168, 108, 0.08);
+  border: 1px solid rgba(201, 168, 108, 0.14);
+}
+
+.xlr-depth-cast-flow span {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--xlr-gold, #c9a86c);
+}
+
+.xlr-depth-cast-flow p {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  color: rgba(232, 224, 212, 0.58);
+}
+
+.xlr-depth-cast-flow em {
+  display: block;
+  margin-top: 4px;
+  font-style: normal;
+  text-align: center;
+  color: rgba(201, 168, 108, 0.45);
+}
+
+.xlr-depth-case-god {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.xlr-depth-case-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.xlr-depth-case-god p {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  color: rgba(201, 168, 108, 0.7);
+}
+
+.xlr-depth-case-grid {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-depth-case-grid > div {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.xlr-depth-case-grid dt {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 108, 0.7);
+}
+
+.xlr-depth-case-grid dd {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: rgba(232, 224, 212, 0.72);
+}
+
+.xlr-depth-section .btn {
+  margin-top: 14px;
+  width: 100%;
+}
+
+
+/* 掌上功夫统计 */
+.xlr-kungfu-body {
+  padding-bottom: 32px;
+}
+
+.xlr-kungfu-header .page-title {
+  margin-top: 4px;
+}
+
+.xlr-kungfu-next {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #f5efe6;
+  background: rgba(201, 168, 108, 0.1);
+  border: 1px solid rgba(201, 168, 108, 0.22);
+}
+
+.xlr-kungfu-section {
+  margin-top: 22px;
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 214, 166, 0.1);
+}
+
+.xlr-kungfu-h2 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+.xlr-kungfu-lead {
+  margin: 0 0 12px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.xlr-kungfu-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.xlr-kungfu-metric {
+  padding: 12px 10px;
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 214, 166, 0.08);
+}
+
+.xlr-kungfu-metric strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: #f5efe6;
+}
+
+.xlr-kungfu-metric span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: rgba(255, 214, 166, 0.65);
+}
+
+.xlr-kungfu-note {
+  margin: 10px 2px 0;
+  font-size: 0.74rem;
+  color: rgba(230, 180, 34, 0.85);
+}
+
+.xlr-kungfu-gates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.xlr-kungfu-gates li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 214, 166, 0.1);
+}
+
+.xlr-kungfu-gates li.is-done {
+  border-color: rgba(201, 168, 108, 0.35);
+}
+
+.xlr-kungfu-gates li.is-locked {
+  opacity: 0.65;
+}
+
+.xlr-kungfu-gates em {
+  font-style: normal;
+  color: rgba(255, 214, 166, 0.72);
+}
+
+.xlr-kungfu-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-kungfu-bar-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 2.4rem;
+  gap: 8px;
+  align-items: center;
+}
+
+.xlr-kungfu-bar-label {
+  font-size: 0.78rem;
+  color: rgba(232, 224, 212, 0.85);
+}
+
+.xlr-kungfu-bar-label em {
+  margin-left: 4px;
+  font-style: normal;
+  color: rgba(255, 214, 166, 0.55);
+}
+
+.xlr-kungfu-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.xlr-kungfu-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(201, 168, 108, 0.55), rgba(255, 214, 166, 0.85));
+}
+
+.xlr-kungfu-bar-pct {
+  font-size: 0.7rem;
+  text-align: right;
+  color: rgba(255, 214, 166, 0.65);
+}
+
+.xlr-kungfu-gods {
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-kungfu-god {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  grid-template-rows: auto auto;
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.xlr-kungfu-god-icon {
+  grid-row: 1 / span 2;
+  width: 36px;
+  height: 36px;
+}
+
+.xlr-kungfu-god-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.xlr-kungfu-god-meta span {
+  color: rgba(255, 214, 166, 0.6);
+  font-size: 0.72rem;
+}
+
+.xlr-kungfu-god .xlr-kungfu-bar-track {
+  grid-column: 2;
+}
+
+.xlr-kungfu-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.xlr-kungfu-cta {
+  margin-top: 24px;
+  display: grid;
+  gap: 10px;
 }

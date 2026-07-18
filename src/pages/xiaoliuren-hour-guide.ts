@@ -1,5 +1,5 @@
 import { navigate } from '../router.ts';
-import { CHINESE_HOURS, formatHourMemory, getChineseHour, sectorPointerAngle, formatClockTime } from '../xiaoliuren/chinese-hour.ts';
+import { formatHourMemory, getChineseHour, sectorPointerAngle, formatClockTime } from '../xiaoliuren/chinese-hour.ts';
 import { solarToLunar } from '../xiaoliuren/lunar.ts';
 import { renderHourTimeline } from '../ui/xiaoliuren/hand-plate.ts';
 import {
@@ -7,6 +7,7 @@ import {
   mountShichenDialAnimation,
   renderShichenDial,
 } from '../ui/xiaoliuren/shichen-dial.ts';
+import { mountShichenTableLore, renderShichenTable } from '../ui/xiaoliuren/shichen-table.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 
 export function renderXiaoliurenHourGuide(root: HTMLElement): void {
@@ -49,17 +50,12 @@ export function renderXiaoliurenHourGuide(root: HTMLElement): void {
 
   const list = document.createElement('div');
   list.className = 'xlr-hour-guide-list';
-  for (const h of CHINESE_HOURS) {
-    const row = document.createElement('article');
-    row.className = `xlr-hour-guide-row${h.index === hour.index ? ' is-active' : ''}`;
-    row.innerHTML = `
-      <h2>${h.label}<span class="xlr-hour-guide-alias">${h.alias}</span></h2>
-      <p>${h.rangeLabel}</p>
-      <p class="xlr-hour-guide-memory">${formatHourMemory(h)}</p>
-    `;
-    list.appendChild(row);
-  }
+  list.innerHTML = `
+    <p class="xlr-hour-guide-now-memory">${formatHourMemory(hour)}</p>
+    ${renderShichenTable(hour.index)}
+  `;
   page.append(list);
+  mountShichenTableLore(list);
 
   const btn = document.createElement('button');
   btn.type = 'button';

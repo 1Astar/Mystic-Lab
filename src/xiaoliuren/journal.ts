@@ -3,6 +3,9 @@ import type { LunarDate } from './lunar.ts';
 import type { ChineseHour } from './chinese-hour.ts';
 import { sixGodOneLiner, type SixGodId } from './six-gods.ts';
 
+/** 与起课三关对齐；旧手札可能缺失 */
+export type XiaoliurenLessonMode = 'learn' | 'practice' | 'beginner';
+
 export type XiaoliurenJournalEntry = {
   id: string;
   createdAt: string;
@@ -16,6 +19,8 @@ export type XiaoliurenJournalEntry = {
   reflection: string;
   /** true 应验 / false 未应验 / null 未标 */
   fulfilled?: boolean | null;
+  /** 起课模式；旧记录可能没有 */
+  lessonMode?: XiaoliurenLessonMode | null;
 };
 
 /** 起课后满此时长且未标对照 → 待对照 */
@@ -31,6 +36,7 @@ function normalizeEntry(entry: XiaoliurenJournalEntry): XiaoliurenJournalEntry {
   return {
     ...entry,
     fulfilled: entry.fulfilled ?? null,
+    lessonMode: entry.lessonMode ?? null,
   };
 }
 
@@ -71,6 +77,7 @@ export function saveXiaoliurenJournalEntry(input: {
   lunar: LunarDate;
   hour: ChineseHour;
   lesson: LessonResult;
+  lessonMode?: XiaoliurenLessonMode | null;
 }): XiaoliurenJournalEntry {
   const entry: XiaoliurenJournalEntry = {
     id: crypto.randomUUID(),
@@ -94,6 +101,7 @@ export function saveXiaoliurenJournalEntry(input: {
     summary: sixGodOneLiner(input.lesson.result),
     reflection: '',
     fulfilled: null,
+    lessonMode: input.lessonMode ?? null,
   };
 
   const list = loadXiaoliurenJournal();

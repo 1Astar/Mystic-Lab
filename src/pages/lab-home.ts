@@ -2,12 +2,14 @@ import { navigate } from '../router.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { mysticEmblemHtml, type MysticEmblemKind } from '../ui/mystic-emblem.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { showLabGuideModal } from '../ui/lab-guide-modal.ts';
 
 interface LabEntry {
   path: string;
   title: string;
+  /** 卡片上的一句话用途 */
   desc: string;
-  /** 短定位备注，以小字括号附在描述旁 */
+  /** 短定位标签 */
   note?: string;
   emblem: MysticEmblemKind;
   comingSoon?: boolean;
@@ -16,23 +18,30 @@ interface LabEntry {
 const SYSTEMS: LabEntry[] = [
   {
     path: '/tarot',
-    title: '塔罗 Tarot',
-    desc: '适合关系、内心、选择、长期状态',
+    title: '塔罗',
+    desc: '关系、内心、选择',
     note: '心理探索',
     emblem: 'tarot',
   },
   {
     path: '/xiaoliuren',
     title: '小六壬',
-    desc: '适合短期趋势、今天明天、事情顺不顺',
+    desc: '今天明天顺不顺',
     note: '时间趋势',
     emblem: 'star',
   },
   {
+    path: '/liuyao',
+    title: '六爻',
+    desc: '六爻叠合、动爻、世应',
+    note: '变化结构',
+    emblem: 'hex',
+  },
+  {
     path: '/meihua',
     title: '梅花易数',
-    desc: '适合动念起卦、变化判断、事象推演',
-    note: '象与变化',
+    desc: '一念一事，八卦取象',
+    note: '象与动念',
     emblem: 'plum',
   },
 ];
@@ -41,7 +50,7 @@ const GLOBAL_ENTRIES: LabEntry[] = [
   {
     path: '/records',
     title: '我的旅程',
-    desc: '塔罗 · 小六壬 · 收藏 · 进度 · 笔记',
+    desc: '塔罗 · 小六壬 · 六爻 · 收藏 · 笔记',
     emblem: 'heart',
   },
   {
@@ -59,7 +68,7 @@ function appendEntryCard(
   primary = false,
 ): void {
   const card = document.createElement(entry.comingSoon ? 'button' : 'a');
-  card.className = `entry-card ${primary ? 'entry-card-primary' : ''}`;
+  card.className = `entry-card ${primary ? 'entry-card-primary entry-card-compact' : ''}`;
   if (entry.comingSoon) {
     (card as HTMLButtonElement).type = 'button';
     card.classList.add('entry-card-soon');
@@ -68,13 +77,14 @@ function appendEntryCard(
   }
 
   const noteHtml = entry.note
-    ? ` <span class="entry-note">（${entry.note}）</span>`
+    ? `<span class="entry-pill">${entry.note}</span>`
     : '';
 
   card.innerHTML = `
-    <div class="entry-emblem-wrap">${mysticEmblemHtml(entry.emblem, primary ? 'md' : 'sm')}</div>
+    <div class="entry-emblem-wrap">${mysticEmblemHtml(entry.emblem, primary ? 'sm' : 'sm')}</div>
     <h2>${entry.title}</h2>
-    <p>${entry.desc}${noteHtml}</p>
+    ${noteHtml}
+    <p>${entry.desc}</p>
     ${entry.comingSoon ? '<span class="tag">即将开放</span>' : ''}
   `;
 
@@ -91,7 +101,7 @@ export function renderLabHome(root: HTMLElement): () => void {
   document.body.appendChild(stars);
 
   const page = document.createElement('div');
-  page.className = 'page';
+  page.className = 'page lab-home-page';
   mountEnvBanner(page);
 
   page.innerHTML = `
@@ -99,7 +109,7 @@ export function renderLabHome(root: HTMLElement): () => void {
       <p class="home-eyebrow">MYSTIC LAB</p>
       <h1 class="page-title">Mystic Lab</h1>
       <p class="page-subtitle">选择一种方式，开始一次占问</p>
-      <p class="lab-system-hint">问内心与关系 → 塔罗（心理探索）· 问这几天顺不顺 → 小六壬（时间趋势）· 问象与变化 → 梅花（未开放）</p>
+      <button type="button" class="lab-guide-trigger">不知道从哪里开始？</button>
     </header>
     <section class="lab-section" aria-label="占问体系">
       <h2 class="lab-section-label">占问体系</h2>
@@ -110,6 +120,10 @@ export function renderLabHome(root: HTMLElement): () => void {
       <div class="lab-global"></div>
     </section>
   `;
+
+  page.querySelector('.lab-guide-trigger')?.addEventListener('click', () => {
+    showLabGuideModal();
+  });
 
   const systems = page.querySelector<HTMLElement>('.lab-systems')!;
   for (const entry of SYSTEMS) {
@@ -123,5 +137,8 @@ export function renderLabHome(root: HTMLElement): () => void {
 
   root.appendChild(page);
 
-  return () => stars.remove();
+  return () => {
+    stars.remove();
+    document.querySelector('.lab-guide-modal')?.remove();
+  };
 }

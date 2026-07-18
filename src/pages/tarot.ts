@@ -8,9 +8,10 @@ import {
 } from '../core/gesture-detector.ts';
 import { GestureBridge } from '../core/gesture-bridge.ts';
 import { createFallbackInput, type FallbackAction } from '../core/fallback-input.ts';
-import { createInterpretationProvider } from '../interpretation/llm-provider.ts';
+import { createInterpretationProvider, readingCoversDrawn } from '../interpretation/llm-provider.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
-import { unlockSingleCard } from '../codex/collection.ts';
+import { detectQuestionTheme, unlockSingleCard } from '../codex/collection.ts';
+import { buildIntuitionCompare } from '../knowledge/intuition-compare.ts';
 import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
@@ -60,6 +61,8 @@ type TarotState =
   | 'cut'
   | 'draw'
   | 'flip'
+  | 'preReading'
+  | 'cardIntuition'
   | 'cardReview'
   | 'result';
 
@@ -85,10 +88,14 @@ export function renderTarot(root: HTMLElement): () => void {
   let currentIndex = 0;
   let reading: ReadingResult | null = null;
   let learningNote = '';
+  let questionBackground = '';
+  let backgroundPromptDone = false;
   let gestureFallback = !env.canUseGesture;
   let cameraOn = false;
   let supplementCount = 0;
   const MAX_SUPPLEMENT = 2;
+  /** 当前牌解读的后台 Promise（直觉页期间预跑） */
+  let pendingInterpret: Promise<void> | null = null;
 
   const pinchDetector = new PinchDetector();
   const swipeDetector = new SwipeDetector();
@@ -132,24 +139,17 @@ export function renderTarot(root: HTMLElement): () => void {
   document.body.appendChild(hintBar.el);
 
   function ritualStep(): RitualStep | null {
-    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip', 'cardReview'] as const;
+    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip'] as const;
     if (!ritualStates.includes(state as (typeof ritualStates)[number])) {
       return null;
     }
-    if (state === 'cardReview') return 'review';
     return state as RitualStep;
   }
 
   function pauseCameraForReview(): void {
     cameraWrap.hidden = true;
     gestureStatus.el.hidden = true;
-  }
-
-  function stopCameraSession(): void {
-    cameraWrap.hidden = true;
-    gestureStatus.el.hidden = true;
     gestureBridge?.stop();
-    gestureBridge = null;
     if (cameraOn) {
       camera.stop();
       cameraOn = false;
@@ -157,7 +157,7 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   function syncHintBar(): void {
-    if (state === 'result') {
+    if (state === 'cardReview' || state === 'result' || state === 'preReading' || state === 'cardIntuition') {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
@@ -223,10 +223,8 @@ export function renderTarot(root: HTMLElement): () => void {
     if (next === 'draw') drawLock = false;
     resetDetectors();
     debug?.setStatus(next);
-    if (next === 'cardReview') {
+    if (next === 'cardReview' || next === 'result' || next === 'preReading' || next === 'cardIntuition') {
       pauseCameraForReview();
-    } else if (next === 'result') {
-      stopCameraSession();
     }
     syncHintBar();
     renderStage();
@@ -453,6 +451,7 @@ export function renderTarot(root: HTMLElement): () => void {
             list.appendChild(card);
           }
         }
+        appendBtn('← 返回修改问题', () => setState('question'), 'btn btn-ghost');
         appendBtn('下一步 · 选择抽牌方式', () => setState('modeSelect'));
         break;
 
@@ -540,6 +539,14 @@ export function renderTarot(root: HTMLElement): () => void {
         renderFlipStage(false);
         break;
 
+      case 'preReading':
+        renderPreReadingStage();
+        break;
+
+      case 'cardIntuition':
+        renderCardIntuitionStage();
+        break;
+
       case 'cardReview':
         renderCardReviewStage();
         break;
@@ -587,6 +594,96 @@ export function renderTarot(root: HTMLElement): () => void {
     syncCameraPlacement();
   }
 
+  function renderPreReadingStage(): void {
+    actions.innerHTML = '';
+    stage.innerHTML = `
+      <div class="pre-reading-stage">
+        <h2 class="section-title">开始解读之前</h2>
+        <p class="tarot-hint">问题：<strong>${escapePreReading(question || '（未填写）')}</strong></p>
+        <p class="teach-hint teach-hint-soft">补充一句当下情况（可选），解读会更贴你的处境；也可直接跳过。</p>
+        <label class="pre-reading-label" for="pre-reading-bg">例如：刚离职 / 已面了 3 家 / 有 offer 在等</label>
+        <textarea id="pre-reading-bg" class="question-input" rows="3" placeholder="可选：一句话背景…">${escapePreReading(questionBackground)}</textarea>
+      </div>
+    `;
+    const skipBtn = document.createElement('button');
+    skipBtn.type = 'button';
+    skipBtn.className = 'btn btn-ghost';
+    skipBtn.textContent = '跳过，直接解读';
+    skipBtn.addEventListener('click', () => {
+      questionBackground = '';
+      backgroundPromptDone = true;
+      void finishFlipInterpret();
+    });
+    const goBtn = document.createElement('button');
+    goBtn.type = 'button';
+    goBtn.className = 'btn';
+    goBtn.textContent = '开始解读';
+    goBtn.addEventListener('click', () => {
+      const el = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
+      questionBackground = el?.value.trim() ?? '';
+      backgroundPromptDone = true;
+      void finishFlipInterpret();
+    });
+    actions.append(skipBtn, goBtn);
+  }
+
+  function escapePreReading(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function supplementThemeLabel(q: string): string {
+    if (/面试|应聘|offer|求职|复试/i.test(q)) return '面试求职';
+    const labels = {
+      work: '工作方向',
+      love: '感情关系',
+      study: '学业成长',
+      self: '自我状态',
+    } as const;
+    return labels[detectQuestionTheme(q)];
+  }
+
+  function renderCardIntuitionStage(): void {
+    const card = currentCard();
+    if (!card) return;
+    const orient = card.reversed ? '逆位' : '正位';
+    actions.innerHTML = '';
+    stage.innerHTML = `
+      <div class="card-intuition-stage">
+        <h2 class="section-title">你的第一直觉</h2>
+        <p class="tarot-hint">牌已翻开 · 先听自己，再听解读</p>
+        <p class="intuition-card-meta"><strong>${escapePreReading(card.card.nameZh)}</strong> · ${orient}</p>
+        <label class="pre-reading-label" for="card-intuition-input">看到这张牌，你心里第一个念头是什么？</label>
+        <textarea id="card-intuition-input" class="question-input" rows="4" placeholder="例如：有点紧、像在防守、不太敢亮出自己…"></textarea>
+        <p class="intuition-status" hidden>正在生成解读…</p>
+      </div>
+    `;
+
+    const finish = (text: string) => {
+      void goToReviewAfterIntuition(text);
+    };
+
+    const skipBtn = document.createElement('button');
+    skipBtn.type = 'button';
+    skipBtn.className = 'btn btn-ghost';
+    skipBtn.textContent = '跳过，直接看解读';
+    skipBtn.addEventListener('click', () => finish(''));
+
+    const goBtn = document.createElement('button');
+    goBtn.type = 'button';
+    goBtn.className = 'btn';
+    goBtn.textContent = '写下后看解读';
+    goBtn.addEventListener('click', () => {
+      const el = document.getElementById('card-intuition-input') as HTMLTextAreaElement | null;
+      finish(el?.value ?? '');
+    });
+
+    actions.append(skipBtn, goBtn);
+  }
+
   function renderCardReviewStage(): void {
     const cardReading = reading?.cards[currentIndex];
     if (!cardReading) return;
@@ -612,17 +709,31 @@ export function renderTarot(root: HTMLElement): () => void {
     const canSupplement =
       supplementCount < MAX_SUPPLEMENT && currentIndex === cardPool.length - 1;
     if (canSupplement) {
+      const theme = supplementThemeLabel(question);
       const supplementBtn = document.createElement('button');
       supplementBtn.type = 'button';
       supplementBtn.className = 'btn btn-ghost card-review-supplement';
-      supplementBtn.textContent = '还想补一张？';
+      supplementBtn.textContent = '补一张建议/行动牌';
       supplementBtn.addEventListener('click', () => void onRequestSupplement());
       actions.appendChild(supplementBtn);
+      const hint = document.createElement('p');
+      hint.className = 'supplement-guide-hint';
+      hint.textContent = `如果这轮还不够清晰，可针对【${theme}】再补一张建议牌或行动牌`;
+      actions.appendChild(hint);
     }
 
     const host = document.getElementById('card-review-tabs');
     if (host) {
-      mountCardResultTabs(host, cardReading);
+      mountCardResultTabs(host, cardReading, 'reading', {
+        onCardReadingChange: (updated) => {
+          if (!reading) return;
+          reading.cards[currentIndex] = updated;
+          if (updated.interpretationProvider === 'llm') {
+            reading.provider = 'llm';
+          }
+          savePartialProgress();
+        },
+      });
     }
   }
 
@@ -694,7 +805,16 @@ export function renderTarot(root: HTMLElement): () => void {
       const host = item.querySelector('.result-tabs-host') as HTMLElement;
       const cardReading = reading!.cards[i];
       if (host && cardReading) {
-        mountCardResultTabs(host, cardReading);
+        mountCardResultTabs(host, cardReading, 'reading', {
+          onCardReadingChange: (updated) => {
+            if (!reading) return;
+            reading.cards[i] = updated;
+            if (updated.interpretationProvider === 'llm') {
+              reading.provider = 'llm';
+            }
+            ensureJournalSaved();
+          },
+        });
       }
     });
 
@@ -761,10 +881,10 @@ export function renderTarot(root: HTMLElement): () => void {
     gestureStatus.el.hidden = true;
   }
 
-  function appendBtn(label: string, onClick: () => void): void {
+  function appendBtn(label: string, onClick: () => void, className = 'btn'): void {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn';
+    btn.className = className;
     btn.textContent = label;
     btn.addEventListener('click', onClick);
     actions.appendChild(btn);
@@ -778,6 +898,8 @@ export function renderTarot(root: HTMLElement): () => void {
     supplementCount = 0;
     reading = null;
     learningNote = '';
+    questionBackground = '';
+    backgroundPromptDone = false;
     currentJournalId = null;
     questionRewrite?.destroy();
     questionRewrite = null;
@@ -800,6 +922,8 @@ export function renderTarot(root: HTMLElement): () => void {
     supplementCount = 0;
     reading = null;
     learningNote = '';
+    questionBackground = '';
+    backgroundPromptDone = false;
     currentJournalId = null;
     questionRewrite?.destroy();
     questionRewrite = null;
@@ -1073,15 +1197,81 @@ export function renderTarot(root: HTMLElement): () => void {
       reading = { cards: [], summary: '', provider: 'static' };
     }
 
-    const card = currentCard();
-    if (card) {
-      const provider = createInterpretationProvider();
-      const single = await provider.interpret([card], question, spreadType);
-      reading.cards[currentIndex] = single.cards[0];
+    if (!backgroundPromptDone) {
+      setState('preReading');
+      return;
     }
 
-    setState('cardReview');
-    savePartialProgress();
+    await finishFlipInterpret();
+  }
+
+  async function startInterpretForCurrentCard(): Promise<void> {
+    const card = currentCard();
+    if (!card) return;
+    const provider = createInterpretationProvider();
+    const single = await provider.interpret([card], question, spreadType, {
+      background: questionBackground,
+    });
+    if (!reading) {
+      reading = { cards: [], summary: '', provider: single.provider };
+    }
+    const prev = reading.cards[currentIndex];
+    reading.cards[currentIndex] = {
+      ...single.cards[0],
+      userIntuition: prev?.userIntuition,
+      intuitionCompare: prev?.intuitionCompare,
+    };
+    reading.provider = single.provider;
+    reading.questionBackground = questionBackground || undefined;
+  }
+
+  /** 翻牌后：后台跑解读，先进直觉页 */
+  async function finishFlipInterpret(): Promise<void> {
+    pendingInterpret = startInterpretForCurrentCard().catch((err) => {
+      console.warn('[tarot] interpret failed', err);
+    });
+    setState('cardIntuition');
+    void pendingInterpret.then(() => savePartialProgress());
+  }
+
+  async function goToReviewAfterIntuition(raw: string): Promise<void> {
+    const status = document.querySelector<HTMLElement>('.intuition-status');
+    const buttons = actions.querySelectorAll<HTMLButtonElement>('button');
+    buttons.forEach((b) => {
+      b.disabled = true;
+    });
+    if (status) {
+      status.hidden = false;
+      status.textContent = '正在生成解读…';
+    }
+    try {
+      if (pendingInterpret) {
+        await pendingInterpret;
+        pendingInterpret = null;
+      }
+      if (!reading?.cards[currentIndex]) {
+        await startInterpretForCurrentCard();
+      }
+      const tip = raw.trim();
+      if (reading?.cards[currentIndex]) {
+        const base = reading.cards[currentIndex];
+        reading.cards[currentIndex] = {
+          ...base,
+          userIntuition: tip || undefined,
+          intuitionCompare: tip ? buildIntuitionCompare(base, tip) : undefined,
+        };
+      }
+      setState('cardReview');
+      savePartialProgress();
+    } catch (err) {
+      console.warn('[tarot] intuition → review failed', err);
+      buttons.forEach((b) => {
+        b.disabled = false;
+      });
+      if (status) {
+        status.textContent = '解读生成失败，请再试一次或跳过';
+      }
+    }
   }
 
   async function onRequestSupplement(): Promise<void> {
@@ -1107,9 +1297,31 @@ export function renderTarot(root: HTMLElement): () => void {
     }
 
     learningNote = buildLearningNote(spreadType, question);
-    const provider = createInterpretationProvider();
-    reading = await provider.interpret(drawnCards, question, spreadType);
-    reading.learningNote = learningNote;
+    const cardIds = drawnCards.map((d) => d.card.id);
+    if (readingCoversDrawn(reading, cardIds) && reading) {
+      reading = {
+        ...reading,
+        learningNote,
+        questionBackground: questionBackground || reading.questionBackground,
+        summary:
+          reading.summary ||
+          (drawnCards.length === 1
+            ? `「${reading.cards[0]?.cardName ?? ''}」已加入你的图鉴。答案不在牌里，在你心里。`
+            : `「${reading.cards.map((c) => c.cardName).join('、')}」共同描绘这次占问的脉络。新牌已解锁图鉴，可随时回看。`),
+      };
+    } else {
+      const prevCards = reading?.cards ?? [];
+      const provider = createInterpretationProvider();
+      reading = await provider.interpret(drawnCards, question, spreadType, {
+        background: questionBackground,
+      });
+      reading.cards = reading.cards.map((c, i) => ({
+        ...c,
+        userIntuition: prevCards[i]?.userIntuition ?? c.userIntuition,
+        intuitionCompare: prevCards[i]?.intuitionCompare ?? c.intuitionCompare,
+      }));
+      reading.learningNote = learningNote;
+    }
     currentJournalId = ensureJournalSaved();
 
     showRitualCompleteModal(reading, () => setState('result'));
@@ -1126,7 +1338,8 @@ export function renderTarot(root: HTMLElement): () => void {
     questionCoach?.destroy();
     questionRewrite?.destroy();
     ritualInputUnbind?.();
-    stopCameraSession();
+    gestureBridge?.stop();
+    camera.stop();
     unbindCamera();
     debug?.el.remove();
     hintBar.el.remove();

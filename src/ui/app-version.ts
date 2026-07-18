@@ -7,7 +7,7 @@ export function mountAppVersion(): void {
   footer.className = 'app-version';
   footer.setAttribute('aria-label', '应用版本');
   footer.innerHTML = `
-    <span class="app-version-copy">© 刘星雨 Starry Product Lab</span>
+    <span class="app-version-copy">© Starry Product Lab</span>
     <span class="app-version-sep">·</span>
     <span>${APP_NAME}</span>
     <span class="app-version-num">v${APP_VERSION}</span>`;

@@ -30,4 +30,11 @@ describe('chinese hour aliases', () => {
     expect(getChineseHour(new Date('2026-07-15T00:30:00')).alias).toBe('夜半');
     expect(getChineseHour(new Date('2026-07-15T12:00:00')).alias).toBe('日中');
   });
+
+  it('exposes lore tip for 未时 日昳', () => {
+    const wei = CHINESE_HOURS.find((h) => h.name === '未')!;
+    expect(wei.alias).toBe('日昳');
+    expect(wei.lore).toContain('日昳');
+    expect(wei.lore).toContain('13:00');
+  });
 });

@@ -72,6 +72,28 @@ export type ContextualSection = {
   body: string;
 };
 
+/** 牌面元素 → 用户问题场景的映射 */
+export type ElementMapping = {
+  /** 热点原名，如「偷走的剑」 */
+  label: string;
+  /** 小标题，如 现实状况：「偷走的剑」意味着什么？ */
+  title: string;
+  /** 元素在牌面上的原意（保留） */
+  originalMeaning: string;
+  /** 映射到用户问题场景的具体说法 */
+  body: string;
+};
+
+/** 一次追问的完整回答 */
+export type FollowUpAnswer = {
+  question: string;
+  sections: ContextualSection[];
+  elementMappings?: ElementMapping[];
+  plainText: string;
+  provider: 'mock' | 'llm';
+  at: string;
+};
+
 export type ReadingContext = {
   question: string;
   spreadType: SpreadType;
@@ -81,6 +103,8 @@ export type ReadingContext = {
   selectedCardId: string;
   questionPattern?: QuestionPattern;
   personName?: string;
+  /** 用户可选补充的情境背景（喂给规则/AI） */
+  background?: string;
 };
 
 export type EncounterRecord = {
@@ -111,8 +135,16 @@ export type InterpretationLayers = {
   answerTendency?: AnswerTendency;
   /** 第二层：结合问题的解读（P3 接 LLM，P1 用 mock） */
   contextualReading: string;
-  /** 结构化解读段落（感情喜欢类等） */
+  /** 结构化解读段落（核心结论/情境/建议/疏导 或感情专段） */
   contextualSections?: ContextualSection[];
+  /** 行动指令标签（优先于抽象关键词展示） */
+  actionTags?: string[];
+  /** 牌面元素 → 问题场景映射（痛点拆解） */
+  elementMappings?: ElementMapping[];
+  /** 可点击追问建议 */
+  followUps?: string[];
+  /** 用户已点过的追问回答（叠在主解读下） */
+  followUpAnswers?: FollowUpAnswer[];
   /** 看懂牌面：回到你的问题 */
   visualQuestionBridge?: string;
   /** 第三层：引导用户自己判断 */

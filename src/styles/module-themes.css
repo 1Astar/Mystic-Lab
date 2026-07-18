@@ -208,6 +208,50 @@
   color: rgba(232, 160, 200, 0.45);
 }
 
+.theme-focus-note {
+  margin: 12px auto 0;
+  max-width: 22em;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid rgba(232, 160, 200, 0.22);
+  background: rgba(20, 12, 24, 0.45);
+}
+
+.theme-xiaoliuren .theme-focus-note {
+  border-color: rgba(191, 163, 255, 0.22);
+  background: rgba(16, 14, 28, 0.45);
+}
+
+.theme-focus-note .theme-focus-tag {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: rgba(232, 160, 200, 0.85);
+}
+
+.theme-xiaoliuren .theme-focus-note .theme-focus-tag {
+  color: rgba(191, 163, 255, 0.85);
+}
+
+.theme-focus-note .theme-focus-ask {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.theme-focus-note p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.theme-focus-note strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
 .theme-hero-slot {
   position: relative;
   z-index: 1;

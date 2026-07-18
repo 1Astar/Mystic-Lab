@@ -3,6 +3,7 @@ import { TAROT_DECK } from '../tarot/deck.ts';
 import {
   getAllEntries,
   getCodexProgress,
+  getCodexSuitBreakdown,
 } from '../codex/collection.ts';
 import { mountCodexAllView } from '../ui/codex-all-view.ts';
 import { mountCodexJourneyPanel } from '../ui/codex-journey-panel.ts';
@@ -59,6 +60,7 @@ export function renderCodex(root: HTMLElement): void {
     const collectedIds = new Set(collected.map((e) => e.cardId));
     const favoriteIds = new Set(collected.filter((e) => e.favorite).map((e) => e.cardId));
     const progress = getCodexProgress(TAROT_DECK.length);
+    const suitBreakdown = getCodexSuitBreakdown();
 
     body.innerHTML = `
       <header>
@@ -69,6 +71,20 @@ export function renderCodex(root: HTMLElement): void {
         <h2 class="codex-section-label">已收集概览</h2>
         <div class="codex-progress">
           <p class="codex-progress-main">已收集 <strong>${progress.collected}</strong> / ${progress.total} 张塔罗牌</p>
+          <ul class="codex-progress-suits">
+            ${suitBreakdown
+              .map(
+                (s) => `
+              <li class="codex-progress-suit">
+                <span class="codex-progress-suit-label">${s.label}</span>
+                <span class="codex-progress-suit-count"><strong>${s.collected}</strong>/${s.total}</span>
+                <span class="codex-progress-suit-bar" aria-hidden="true"><i style="width:${
+                  s.total ? Math.round((s.collected / s.total) * 100) : 0
+                }%"></i></span>
+              </li>`,
+              )
+              .join('')}
+          </ul>
           ${progress.topSuitLabel ? `<p class="codex-progress-sub">最近遇见最多的是：<strong>${progress.topSuitLabel}</strong></p>` : ''}
           ${progress.topThemeLabel ? `<p class="codex-progress-sub">你最近最常问的是：<strong>${progress.topThemeLabel}</strong></p>` : ''}
         </div>

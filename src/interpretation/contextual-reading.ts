@@ -11,9 +11,13 @@ import {
   resolveCardKnowledge,
 } from '../knowledge/registry.ts';
 import type { ReadingContext, StandardMeaningLayer } from '../knowledge/types.ts';
-import type { CardReading, ReadingResult } from './types.ts';
+import type { CardReading, InterpretOptions, ReadingResult } from './types.ts';
 import { getPositionMeta } from '../tarot/spreads.ts';
 import { analyzeQuestion } from '../tarot/question-coach.ts';
+import {
+  buildStructuredMockReading,
+  sectionsToPlainText,
+} from './structured-reading.ts';
 
 function buildStandardLayer(
   knowledge: ReturnType<typeof resolveCardKnowledge>,
@@ -34,6 +38,7 @@ function buildReadingContext(
   drawn: DrawnCard,
   question: string,
   spreadType: SpreadType,
+  background?: string,
 ): ReadingContext {
   const topic = detectQuestionTheme(question);
   const coach = analyzeQuestion(question);
@@ -47,6 +52,7 @@ function buildReadingContext(
     selectedCardId: drawn.card.id,
     questionPattern: coach?.pattern,
     personName: coach?.personName,
+    background: background?.trim() || undefined,
   };
 }
 
@@ -54,16 +60,34 @@ function buildCardReading(
   drawn: DrawnCard,
   question: string,
   spreadType: SpreadType,
+  background?: string,
 ): CardReading {
   const reversed = drawn.reversed;
   const knowledge = resolveCardKnowledge(drawn.card);
-  const readingContext = buildReadingContext(drawn, question, spreadType);
+  const readingContext = buildReadingContext(drawn, question, spreadType, background);
   const meta =
     drawn.positionKey ? getPositionMeta(spreadType, drawn.positionKey) : undefined;
   const positionText = meta?.meaning ?? '';
 
   const standard = buildStandardLayer(knowledge, reversed);
+  const structured = buildStructuredMockReading(readingContext, knowledge, reversed);
   const mockResult = mockAIInterpretation(readingContext, knowledge, reversed);
+
+  // 有提问时：以内置「结合问题」结构为主（无需外接 AI）
+  // 感情喜欢等专属分段作为补充标题保留，但仍挂上元素映射与追问
+  const hasQuestion = Boolean(readingContext.question.trim());
+  const contextualSections =
+    hasQuestion || !mockResult.sections?.length
+      ? structured.sections
+      : mockResult.sections;
+  const contextualReading =
+    hasQuestion || !mockResult.sections?.length
+      ? structured.plainText
+      : mockResult.text;
+  const actionTags = structured.actionTags;
+  const elementMappings = structured.elementMappings;
+  const followUps = structured.followUps;
+
   const selfReflection = buildSelfReflectionQuestions(readingContext, knowledge);
   const answerTendency = buildAnswerTendency(readingContext, knowledge, reversed);
   const visualQuestionBridge = buildVisualQuestionBridge(
@@ -76,8 +100,11 @@ function buildCardReading(
   const interpretationLayers = {
     standard,
     answerTendency: answerTendency ?? undefined,
-    contextualReading: mockResult.text,
-    contextualSections: mockResult.sections,
+    contextualReading,
+    contextualSections,
+    actionTags,
+    elementMappings,
+    followUps,
     visualQuestionBridge,
     selfReflection,
   };
@@ -95,7 +122,7 @@ function buildCardReading(
     positionMeaning: positionText,
     text: cardText,
     baseMeaning: standard.oneSentence,
-    inContext: mockResult.text,
+    inContext: contextualReading,
     learnTip,
     combined: positionText
       ? `【${drawn.position}】${positionText}\n\n【牌义】${cardText}`
@@ -118,8 +145,10 @@ export function buildReadingResult(
   cards: DrawnCard[],
   question = '',
   spreadType: SpreadType = 'past-present-future',
+  options?: InterpretOptions,
 ): ReadingResult {
-  const readings = cards.map((c) => buildCardReading(c, question, spreadType));
+  const background = options?.background?.trim() || undefined;
+  const readings = cards.map((c) => buildCardReading(c, question, spreadType, background));
   const names = readings.map((c) => c.cardName).join('、');
 
   const summary =
@@ -127,8 +156,13 @@ export function buildReadingResult(
       ? `「${names}」已加入你的图鉴。答案不在牌里，在你心里。`
       : `「${names}」共同描绘这次占问的脉络。新牌已解锁图鉴，可随时回看。`;
 
-  return { cards: readings, summary, provider: 'mock' };
+  return {
+    cards: readings,
+    summary,
+    provider: 'mock',
+    questionBackground: background,
+  };
 }
 
-export { detectQuestionTheme };
+export { detectQuestionTheme, sectionsToPlainText };
 export type { QuestionTheme } from '../codex/collection.ts';

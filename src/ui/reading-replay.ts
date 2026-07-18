@@ -1,6 +1,7 @@
 import type { CodexEncounter } from '../codex/collection.ts';
 import { resolveEncounterReplay, resolveJournalReading } from '../journal/replay.ts';
 import type { JournalEntry } from '../journal/records.ts';
+import { updateJournalReadingSnapshot } from '../journal/records.ts';
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountCardResultTabs } from './card-result-tabs.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
@@ -52,7 +53,8 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
 
   const cardsHost = container.querySelector('#reading-replay-cards');
   if (cardsHost) {
-    for (const cardReading of reading.cards) {
+    let liveReading = reading;
+    liveReading.cards.forEach((cardReading, i) => {
       const item = document.createElement('div');
       item.className = 'reading-replay-card-item';
       if (focusCardId && cardReading.cardId === focusCardId) {
@@ -62,8 +64,17 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
       host.className = 'result-tabs-host';
       item.appendChild(host);
       cardsHost.appendChild(item);
-      mountCardResultTabs(host, cardReading);
-    }
+      mountCardResultTabs(host, cardReading, 'reading', {
+        onCardReadingChange: (updated) => {
+          liveReading = {
+            ...liveReading,
+            cards: liveReading.cards.map((c, idx) => (idx === i ? updated : c)),
+            provider: updated.interpretationProvider === 'llm' ? 'llm' : liveReading.provider,
+          };
+          updateJournalReadingSnapshot(entry.id, liveReading);
+        },
+      });
+    });
   }
 
   const feedbackHost = container.querySelector('#reading-replay-feedback');
