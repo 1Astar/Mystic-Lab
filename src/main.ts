@@ -88,3 +88,31 @@ registerRoute('/liu-yao', () => {
 
 initRouter();
 mountAppVersion();
+
+function paintBootError(err: unknown): void {
+  const root = document.querySelector<HTMLElement>('#app');
+  if (!root) return;
+  const msg = err instanceof Error ? err.message : String(err);
+  const stack = err instanceof Error && err.stack ? err.stack : '';
+  root.innerHTML = `
+    <div class="page" style="padding:24px;color:#e8e2d5;background:#08090d;min-height:100vh;font-family:system-ui,sans-serif">
+      <h1 style="font-size:1.1rem;margin:0 0 12px">页面加载失败</h1>
+      <p style="opacity:0.8;font-size:0.9rem;word-break:break-word;margin:0 0 8px">${msg.replace(/</g, '&lt;')}</p>
+      ${stack ? `<pre style="opacity:0.45;font-size:0.7rem;overflow:auto;max-height:40vh;white-space:pre-wrap">${stack.replace(/</g, '&lt;')}</pre>` : ''}
+      <p style="margin-top:16px;opacity:0.55;font-size:0.8rem">若刚改过代码：硬刷新一次（Ctrl+Shift+R）。本地请用 <strong>https://</strong> 打开，或运行 <code>npm run dev:http</code>。</p>
+      <button type="button" id="boot-reload" style="margin-top:16px;padding:10px 16px;border-radius:999px;border:1px solid #c7a45b;background:#c7a45b;color:#111;cursor:pointer">刷新重试</button>
+    </div>
+  `;
+  root.querySelector('#boot-reload')?.addEventListener('click', () => location.reload());
+}
+
+window.addEventListener('error', (e) => {
+  paintBootError(e.error ?? e.message);
+});
+window.addEventListener('unhandledrejection', (e) => {
+  paintBootError(e.reason);
+});
+
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}

@@ -6,6 +6,7 @@ import {
   type SceneDomain,
 } from './scene-map.ts';
 import { buildStrategyPack } from './strategy.ts';
+import { formatClauseHtml } from './format-clause.ts';
 import {
   lineApproxWuXing,
   shiYingRelation,
@@ -273,7 +274,7 @@ function renderStepPanel(cast: CastResult, step: number, question: string, domai
       <p class="ly-guide-talk">最后一步：把卦连回你的生活——给策略，不只给一句总结。</p>
       <h4 class="ly-strategy-title">${pack.sceneTitle}</h4>
       <ul class="ly-strategy-list">
-        ${pack.items.map((it) => `<li><strong>${it.label}</strong><span>${it.text}</span></li>`).join('')}
+        ${pack.items.map((it) => `<li><strong>${it.label}</strong><span>${formatClauseHtml(it.text)}</span></li>`).join('')}
       </ul>
       <p class="ly-guide-label">陪读一下</p>
       <div class="ly-companion">

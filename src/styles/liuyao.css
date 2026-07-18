@@ -73,6 +73,42 @@
   font-weight: 600;
   color: var(--ly-mist);
   margin: 8px 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ly-home-info-r {
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.45);
+  background: transparent;
+  color: var(--ly-gold);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ly-home-info-r.is-on,
+.ly-home-info-r:hover {
+  background: rgba(199, 164, 91, 0.18);
+  border-color: rgba(199, 164, 91, 0.7);
+}
+
+.ly-home-focus-pop {
+  max-width: 22em;
+  margin: 0 auto 12px;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.25);
+  background: rgba(20, 22, 28, 0.85);
 }
 
 .ly-home-module {
@@ -83,11 +119,27 @@
 }
 
 .ly-home-slogan {
-  font-size: 0.88rem;
-  color: var(--ly-muted);
-  line-height: 1.55;
-  max-width: 20em;
   margin: 0 auto 12px;
+  max-width: 18em;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--ly-muted);
+}
+
+.ly-inline-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(199, 164, 91, 0.08);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+  text-align: left;
+}
+
+.ly-reading-page.is-learn-mode .ly-step-kicker {
+  color: var(--ly-gold);
 }
 
 .ly-home-focus {
@@ -182,16 +234,25 @@
   padding-bottom: 20px;
 }
 
-/* Hero */
+/* Hero — 完整竖图，少裁切；不再叠第二张盘图 */
 
 .ly-hero-scene {
   position: relative;
-  height: 260px;
-  margin: 0 auto;
-  max-width: 320px;
+  width: min(100%, 360px);
+  margin: 0 auto 8px;
+  aspect-ratio: 3 / 4;
+  max-height: min(52vh, 420px);
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(12, 14, 18, 0.6);
+}
+
+.ly-hero-scene--learn {
+  /* 学习主视觉为竖图（约 1055×1491），勿用横版裁切 */
+  aspect-ratio: 1055 / 1491;
+  max-height: min(56vh, 480px);
+  width: min(100%, 340px);
 }
 
 .ly-hero-bg {
@@ -200,28 +261,61 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 35%;
+  object-position: center center;
+}
+
+.ly-hero-scene--learn .ly-hero-bg {
+  object-fit: contain;
+  object-position: center center;
+  background: #0a0b0e;
 }
 
 .ly-hero-veil {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(8, 9, 13, 0.15), rgba(8, 9, 13, 0.72)),
-    radial-gradient(circle at 50% 70%, transparent 30%, rgba(8, 9, 13, 0.5) 100%);
+    linear-gradient(180deg, rgba(8, 9, 13, 0.05), rgba(8, 9, 13, 0.35) 55%, rgba(8, 9, 13, 0.7)),
+    radial-gradient(circle at 50% 45%, transparent 40%, rgba(8, 9, 13, 0.3) 100%);
   pointer-events: none;
 }
 
-.ly-hero-board-img {
-  position: absolute;
-  left: 50%;
-  bottom: 8%;
-  transform: translateX(-50%);
-  width: 42%;
-  max-width: 140px;
-  filter: drop-shadow(0 8px 24px rgba(199, 164, 91, 0.35));
-  animation: ly-orbit-pulse 4s ease-in-out infinite;
-  mix-blend-mode: screen;
+.ly-hero-scene--learn .ly-hero-veil {
+  background: linear-gradient(180deg, transparent 60%, rgba(8, 9, 13, 0.45));
+}
+
+.ly-home-page {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.ly-home-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-color: #08090d;
+  background-image: var(--ly-page-bg, none);
+  background-size: cover;
+  background-position: center 42%;
+  background-repeat: no-repeat;
+  opacity: 0.32;
+  filter: saturate(0.95) brightness(0.5);
+  pointer-events: none;
+}
+
+.ly-home-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 9, 13, 0.5) 0%,
+    rgba(8, 9, 13, 0.68) 40%,
+    rgba(8, 9, 13, 0.92) 100%
+  );
+  pointer-events: none;
 }
 
 @keyframes ly-orbit-pulse {
@@ -236,8 +330,12 @@
 }
 
 .ly-reading-stage {
-  padding: 0 16px 12px;
+  padding: 0 12px 12px;
   min-height: 50vh;
+}
+
+.ly-step-casting .ly-step-title {
+  margin-bottom: 4px;
 }
 
 .ly-reading-actions {
@@ -295,77 +393,106 @@
   text-align: left;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(20, 22, 28, 0.8);
-  color: var(--ly-mist);
+  border: 1px solid rgba(214, 184, 118, 0.42);
+  background: linear-gradient(160deg, rgba(48, 44, 36, 0.95), rgba(32, 30, 26, 0.92));
+  color: #e8e2d4;
   cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  align-items: center;
+  box-shadow: inset 0 1px 0 rgba(255, 236, 190, 0.08);
 }
 
 .ly-method-card strong {
   display: block;
-  color: var(--ly-gold);
+  color: #efd59a;
   margin-bottom: 4px;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .ly-method-card span:not(.ly-method-icon):not(.tag) {
   font-size: 0.82rem;
-  color: var(--ly-muted);
+  color: #b8b0a0;
+  grid-column: 2;
+  grid-row: 2;
 }
 
 .ly-method-card.is-active {
-  border-color: var(--ly-gold);
-  box-shadow: 0 0 20px rgba(199, 164, 91, 0.15);
+  border-color: #e8c878;
+  background: linear-gradient(160deg, rgba(72, 60, 38, 0.98), rgba(42, 36, 28, 0.96));
+  box-shadow:
+    0 0 0 1px rgba(232, 200, 120, 0.25),
+    0 0 28px rgba(199, 164, 91, 0.28),
+    inset 0 1px 0 rgba(255, 236, 190, 0.14);
 }
 
 .ly-method-card.is-soon {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
+  filter: saturate(0.7);
 }
 
 .ly-method-icon {
-  font-size: 1.2rem;
-  margin-right: 8px;
+  font-size: 1.35rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  color: var(--ly-gold);
 }
 
 .ly-method-coin {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
-  mix-blend-mode: multiply;
-  float: left;
-  margin: 0 10px 0 0;
+  grid-column: 1;
+  grid-row: 1 / span 2;
   border-radius: 50%;
 }
 
-/* 棋盘 */
+/* 棋盘 — 无外框，天地铺开 */
 
 .ly-board {
   position: relative;
-  margin: 20px auto;
-  max-width: 300px;
-  padding: 24px 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(199, 164, 91, 0.25);
-  background: radial-gradient(ellipse at 50% 30%, #1a1c24, #08090d);
-  overflow: hidden;
+  margin: 4px auto 12px;
+  width: min(100%, 440px);
+  max-width: none;
+  min-height: min(72vw, 420px);
+  padding: 12px 8px 8px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .ly-board-bg {
   position: absolute;
   left: 50%;
-  top: 42%;
+  top: 52%;
   transform: translate(-50%, -50%);
-  width: 88%;
-  opacity: 0.35;
+  width: 118%;
+  height: auto;
+  max-width: none;
+  opacity: 0.88;
   pointer-events: none;
   mix-blend-mode: screen;
+  object-fit: contain;
 }
 
 .ly-board-glow {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at 50% 80%, rgba(199, 164, 91, 0.1), transparent 55%);
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(199, 164, 91, 0.12), transparent 62%);
   pointer-events: none;
 }
 
@@ -374,9 +501,10 @@
   z-index: 2;
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  min-height: 64px;
+  gap: 16px;
+  margin-bottom: 4px;
+  min-height: 92px;
+  flex-shrink: 0;
 }
 
 .ly-coins-tappable {
@@ -402,6 +530,92 @@
   color: var(--ly-muted);
   margin: 0;
   padding: 4px 8px 8px;
+}
+
+.ly-cast-hint-top {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #a0a0a0;
+}
+
+.ly-cast-hint-sub {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #a0a0a0;
+}
+
+.ly-cast-order-note {
+  margin: 8px 2px 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+  text-align: left;
+}
+
+/* ── 规则注解折叠（默认收起） ── */
+
+.ly-teach-fold {
+  margin: 10px 0 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(28, 26, 22, 0.72);
+  overflow: hidden;
+}
+
+.ly-teach-fold-sum {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: #f5efe6;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ly-teach-fold-sum::-webkit-details-marker {
+  display: none;
+}
+
+.ly-teach-fold-sum::before {
+  content: '›';
+  display: inline-block;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: transform 0.18s ease;
+  opacity: 0.85;
+}
+
+.ly-teach-fold[open] > .ly-teach-fold-sum::before {
+  transform: rotate(90deg);
+}
+
+.ly-teach-fold-body {
+  padding: 0 10px 10px;
+  border-top: 1px solid rgba(199, 164, 91, 0.14);
+}
+
+.ly-teach-fold .ly-flip-bar,
+.ly-teach-fold .ly-flip-module {
+  margin: 8px 0 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 4px 2px 0;
+}
+
+.ly-teach-fold .ly-inline-note.is-plain,
+.ly-teach-fold .ly-cast-legend.is-plain {
+  margin: 8px 2px 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
 }
 
 /* ── 翻牌解谜 ── */
@@ -471,7 +685,7 @@
   margin: 0 0 12px;
   font-size: 0.78rem;
   line-height: 1.5;
-  color: var(--ly-muted);
+  color: #a0a0a0;
 }
 
 .ly-flip-chips {
@@ -505,8 +719,14 @@
 .ly-flip-chip-txt {
   font-size: 0.68rem;
   line-height: 1.35;
-  color: var(--ly-mist);
+  color: #f5efe6;
   text-align: center;
+}
+
+.ly-flip-chip-txt em {
+  font-style: normal;
+  color: #a0a0a0;
+  font-size: 0.64rem;
 }
 
 .ly-flip-modal {
@@ -582,6 +802,177 @@
   cursor: pointer;
 }
 
+/* 爻旁教学浮层：贴着爻，柔和淡入（不弹） */
+.ly-yao-pop {
+  position: fixed;
+  z-index: 340;
+  width: min(320px, calc(100vw - 24px));
+  max-height: min(72vh, 520px);
+  overflow: auto;
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 239, 230, 0.22);
+  background: rgba(22, 20, 18, 0.94);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translate(10px, 0);
+  transition:
+    opacity 0.42s ease-out,
+    transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: auto;
+  will-change: opacity, transform;
+}
+
+.ly-yao-pop[data-from='left'] {
+  transform: translate(-10px, 0);
+}
+
+.ly-yao-pop[data-from='up'] {
+  transform: translate(0, 12px);
+}
+
+.ly-yao-pop.is-visible {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.ly-yao-pop.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ly-yao-pop.is-leaving[data-from='right'],
+.ly-yao-pop:not([data-from]) {
+  transform: translate(6px, 0);
+}
+
+.ly-yao-pop.is-leaving[data-from='left'] {
+  transform: translate(-6px, 0);
+}
+
+.ly-yao-pop.is-leaving[data-from='up'] {
+  transform: translate(0, 8px);
+}
+
+.ly-yao-pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ly-yao-pop-head strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #f5efe6;
+}
+
+.ly-yao-pop-close {
+  border: none;
+  background: transparent;
+  color: #a0a0a0;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  padding: 4px 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.ly-yao-pop-close:hover {
+  color: #f5efe6;
+}
+
+.ly-yao-pop-visual {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 10px;
+  transform: scale(1.15);
+}
+
+.ly-yao-pop-flow {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #f5efe6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ly-yao-pop-faces {
+  color: #a0a0a0;
+  letter-spacing: 0.04em;
+}
+
+.ly-yao-pop-arrow {
+  color: #a0a0a0;
+}
+
+.ly-yao-pop-block {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 239, 230, 0.12);
+  background: rgba(8, 8, 8, 0.28);
+}
+
+.ly-yao-pop-block em {
+  display: block;
+  font-style: normal;
+  font-size: 0.68rem;
+  color: #a0a0a0;
+  margin-bottom: 4px;
+}
+
+.ly-yao-pop-block p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #f5efe6;
+}
+
+.ly-yao-pop-contrast {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 239, 230, 0.18);
+  background: rgba(8, 8, 8, 0.35);
+}
+
+.ly-yao-pop-contrast em {
+  display: block;
+  font-style: normal;
+  font-size: 0.68rem;
+  color: #a0a0a0;
+  margin-bottom: 6px;
+}
+
+.ly-yao-pop-contrast-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  color: #a0a0a0;
+  font-size: 0.72rem;
+}
+
+.ly-yao-pop-contrast p {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: #f5efe6;
+}
+
+.ly-yao-pop-contrast-hint {
+  margin-top: 6px !important;
+  font-size: 0.7rem !important;
+  color: #a0a0a0 !important;
+}
+
 .ly-flip-modal-visual {
   display: flex;
   justify-content: center;
@@ -636,25 +1027,30 @@
 .ly-board-hex {
   position: relative;
   z-index: 2;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
 }
 
 .ly-coins {
   display: flex;
-  gap: 12px;
+  gap: 18px;
   justify-content: center;
   pointer-events: none;
 }
 
 .ly-coin {
-  width: 56px;
-  height: 56px;
+  width: 86px;
+  height: 86px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
   background: transparent;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
   transform-style: preserve-3d;
 }
 
@@ -662,8 +1058,6 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* 白底 PNG：在深色底上用 multiply 压掉白边 */
-  mix-blend-mode: multiply;
 }
 
 .ly-coins-shaking .ly-coin {
@@ -715,6 +1109,50 @@
   display: block;
 }
 
+.ly-board .ly-hexagram-svg {
+  max-width: min(88%, 320px);
+  width: 100%;
+}
+
+.ly-hexagram-kinds {
+  max-width: min(92%, 340px);
+}
+
+.ly-yao-kind-label {
+  fill: #f5efe6;
+  font-size: 10px;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+.ly-yao-coin-note {
+  fill: #a0a0a0;
+  font-size: 7px;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+.ly-yao-kind-label.is-changing {
+  fill: #e8b4a8;
+}
+
+.ly-yao-hit {
+  cursor: pointer;
+}
+
+.ly-yao-row.is-teachable .ly-yao-yang,
+.ly-yao-row.is-teachable .ly-yao-yin {
+  transition: filter 0.18s ease, stroke 0.18s ease;
+}
+
+.ly-yao-row.is-teachable:hover .ly-yao-yang,
+.ly-yao-row.is-teachable:hover .ly-yao-yin,
+.ly-yao-row.is-teachable:focus-within .ly-yao-yang,
+.ly-yao-row.is-teachable:focus-within .ly-yao-yin {
+  stroke: #f5efe6;
+  filter: drop-shadow(0 0 5px rgba(245, 239, 230, 0.55));
+}
+
 .ly-yao-yang {
   stroke: var(--ly-gold);
   stroke-width: 3;
@@ -752,13 +1190,57 @@
   opacity: 0;
 }
 
-.ly-yao-visible {
-  animation: ly-yao-in 0.45s ease-out forwards;
+.ly-yao-settled {
+  opacity: 1;
 }
 
-@keyframes ly-yao-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+/** 新爻从下往上「长出」：呼应初爻为根基 */
+.ly-yao-growing {
+  animation: ly-yao-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-box: fill-box;
+  transform-origin: center center;
+}
+
+.ly-yao-growing .ly-yao-kind-label,
+.ly-yao-growing .ly-yao-coin-note {
+  animation: ly-yao-label-in 0.45s ease-out 0.25s both;
+}
+
+@keyframes ly-yao-grow {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scaleX(0.12);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-2px) scaleX(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleX(1);
+  }
+}
+
+@keyframes ly-yao-label-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ly-yao-growing {
+    animation: none;
+    opacity: 1;
+  }
+  .ly-yao-growing .ly-yao-kind-label,
+  .ly-yao-growing .ly-yao-coin-note {
+    animation: none;
+  }
+  .ly-yao-pop,
+  .ly-yao-pop[data-from='left'],
+  .ly-yao-pop[data-from='up'] {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
 }
 
 .ly-yao-tag {
@@ -1337,9 +1819,10 @@ button.ly-step-card:hover {
 }
 
 .ly-strategy-list span {
+  display: block;
   font-size: 0.8rem;
-  line-height: 1.5;
-  color: var(--ly-mist);
+  line-height: 1.55;
+  color: #f5efe6;
 }
 
 .ly-companion {
@@ -1439,11 +1922,48 @@ button.ly-step-card:hover {
 }
 
 .ly-mode-switch {
+  position: relative;
   display: inline-flex;
   padding: 3px;
   border-radius: 999px;
   border: 1px solid rgba(199, 164, 91, 0.28);
   background: rgba(12, 14, 18, 0.85);
+}
+
+.ly-mode-switch::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%) translateY(2px);
+  width: max-content;
+  max-width: min(280px, 82vw);
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 164, 91, 0.35);
+  background: rgba(18, 18, 22, 0.96);
+  color: var(--ly-mist);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 20;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ly-mode-switch:hover::after,
+.ly-mode-switch:focus-within::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (hover: none) {
+  .ly-mode-switch::after {
+    display: none;
+  }
 }
 
 .ly-mode-btn {
@@ -1481,17 +2001,34 @@ button.ly-step-card:hover {
 }
 
 .ly-learn-hub-card {
-  display: block;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto auto;
+  column-gap: 12px;
+  align-items: start;
   text-align: left;
   text-decoration: none;
   padding: 14px 16px;
   border-radius: 12px;
   border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(20, 22, 28, 0.7);
+  background: rgba(20, 22, 28, 0.72);
   color: inherit;
+  backdrop-filter: blur(6px);
+}
+
+.ly-learn-hub-thumb {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: radial-gradient(circle, #2a2418, #12141a);
 }
 
 .ly-learn-hub-kicker {
+  grid-column: 2;
   display: block;
   font-size: 0.68rem;
   letter-spacing: 0.14em;
@@ -1500,6 +2037,7 @@ button.ly-step-card:hover {
 }
 
 .ly-learn-hub-card strong {
+  grid-column: 2;
   display: block;
   font-family: var(--font-serif);
   font-size: 1.05rem;
@@ -1507,10 +2045,23 @@ button.ly-step-card:hover {
   margin-bottom: 6px;
 }
 
+.ly-learn-hub-card p {
+  grid-column: 2;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ly-muted);
+  line-height: 1.45;
+}
+
 .ly-learn-hub-featured {
   grid-column: 1 / -1;
   border-color: rgba(199, 164, 91, 0.45);
   background: linear-gradient(160deg, rgba(199, 164, 91, 0.12), rgba(20, 22, 28, 0.75));
+}
+
+.ly-learn-hub-featured .ly-learn-hub-thumb {
+  width: 72px;
+  height: 72px;
 }
 
 /* ── 四象图解 ── */
@@ -1627,6 +2178,147 @@ button.ly-yao-kind-card:hover {
 
 .ly-yao-demo-mark-empty {
   min-width: 1em;
+}
+
+/* ── 字背与爻画可视化速查 ── */
+
+.ly-coin-yao-ref {
+  margin-top: 8px;
+}
+
+.ly-coin-face-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ly-coin-face-card {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(8, 9, 13, 0.4);
+}
+
+.ly-coin-face-card img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(232, 200, 120, 0.35);
+}
+
+.ly-coin-face-card figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ly-coin-face-card strong {
+  font-size: 0.9rem;
+  color: var(--ly-gold);
+}
+
+.ly-coin-face-card span {
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+}
+
+.ly-coin-yao-lead {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #a0a0a0;
+}
+
+.ly-coin-yao-swipe-hint {
+  display: none;
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  color: #a0a0a0;
+}
+
+.ly-coin-yao-map {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ly-coin-yao-row {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 1fr) auto auto minmax(3.5rem, auto);
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid rgba(199, 164, 91, 0.12);
+}
+
+.ly-coin-yao-combo {
+  font-size: 0.78rem;
+  color: #f5efe6;
+}
+
+.ly-coin-yao-combo em {
+  margin-left: 4px;
+  font-style: normal;
+  color: #a0a0a0;
+}
+
+.ly-coin-yao-arrow {
+  color: #a0a0a0;
+  font-size: 0.75rem;
+}
+
+.ly-coin-yao-name {
+  font-size: 0.78rem;
+  color: #f5efe6;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .ly-coin-yao-swipe-hint {
+    display: block;
+  }
+
+  .ly-coin-yao-map {
+    flex-direction: row;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    gap: 8px;
+    padding: 2px 2px 10px;
+    margin: 0 -2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ly-coin-yao-row {
+    flex: 0 0 min(78vw, 240px);
+    width: min(78vw, 240px);
+    scroll-snap-align: start;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px 8px;
+    grid-template-columns: none;
+  }
+
+  .ly-coin-yao-name {
+    text-align: left;
+    margin-left: auto;
+  }
+}
+
+.ly-teach-fold .ly-coin-yao-ref {
+  margin-top: 8px;
 }
 
 /* ── 对照读卦盘 ── */
@@ -1987,8 +2679,8 @@ button.ly-yao-kind-card:hover {
   padding-top: 12px;
   border-top: 1px solid rgba(199, 164, 91, 0.14);
   font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--ly-mist);
+  line-height: 1.65;
+  color: #f5efe6;
 }
 
 /* ── 核心概念 ── */
@@ -2226,6 +2918,381 @@ button.ly-yao-kind-card:hover {
   background: rgba(199, 164, 91, 0.14);
   color: var(--ly-gold);
   font-weight: 600;
+}
+
+/* 结果页：卦象主视觉 + Tab（仿塔罗） */
+
+.ly-hex-hero {
+  margin: 0 0 14px;
+  padding: 14px 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: linear-gradient(165deg, rgba(42, 38, 30, 0.92), rgba(18, 18, 22, 0.88));
+}
+
+.ly-hex-hero-meta {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-hex-hero-col {
+  text-align: center;
+}
+
+.ly-hex-hero-gist {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #f5efe6;
+}
+
+.ly-change-how {
+  margin: 0;
+  padding: 4px 2px 2px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.ly-hex-hero > .ly-teach-fold {
+  margin: 12px 0 4px;
+}
+
+.ly-change-how-title {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #f5efe6;
+}
+
+.ly-change-how-rule {
+  margin: 0 0 10px;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: #a0a0a0;
+}
+
+.ly-change-how-rule strong {
+  color: #f5efe6;
+  font-weight: 600;
+}
+
+.ly-change-how-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-change-how-card {
+  padding: 10px 10px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(232, 180, 168, 0.22);
+  background: rgba(8, 8, 8, 0.35);
+}
+
+.ly-change-how-card-head {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: #f5efe6;
+}
+
+.ly-change-how-card-head strong {
+  color: #e8b4a8;
+}
+
+.ly-change-how-viz {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  min-height: 22px;
+}
+
+.ly-change-how-bar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 4px;
+}
+
+.ly-change-how-bar.is-yang {
+  background: #e8b4a8;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(232, 180, 168, 0.35);
+}
+
+.ly-change-how-bar.is-yin {
+  background: transparent;
+  gap: 8px;
+  height: auto;
+}
+
+.ly-change-how-bar.is-yin i {
+  display: block;
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: #c8c0b4;
+}
+
+.ly-change-how-arrow {
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}
+
+.ly-change-how-card-body {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: #a0a0a0;
+}
+
+.ly-change-how-card-body strong {
+  color: #f5efe6;
+  font-weight: 600;
+}
+
+.ly-change-how-trigram {
+  margin: 10px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: #a0a0a0;
+}
+
+.ly-change-how-trigram strong {
+  color: #f5efe6;
+}
+
+.ly-change-how.is-static .ly-change-how-rule {
+  margin-bottom: 0;
+}
+
+.ly-change-how .ly-teach-fold {
+  margin: 10px 0 0;
+}
+
+.ly-bian-explainer p {
+  margin: 0 0 10px;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: #a0a0a0;
+}
+
+.ly-bian-explainer p:last-child {
+  margin-bottom: 0;
+}
+
+.ly-bian-explainer em {
+  display: block;
+  font-style: normal;
+  font-size: 0.72rem;
+  color: #f5efe6;
+  margin-bottom: 4px;
+}
+
+.ly-bian-explainer strong {
+  color: #f5efe6;
+  font-weight: 600;
+}
+
+.ly-bian-explainer-eg {
+  padding-top: 8px;
+  border-top: 1px solid rgba(245, 239, 230, 0.12);
+}
+
+.ly-result-tabs {
+  margin-bottom: 12px;
+}
+
+.ly-result-tab-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ly-result-tab {
+  flex-shrink: 0;
+  border: 1px solid rgba(199, 164, 91, 0.25);
+  background: transparent;
+  color: var(--ly-muted);
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ly-result-tab.is-active {
+  border-color: rgba(199, 164, 91, 0.55);
+  background: rgba(199, 164, 91, 0.14);
+  color: var(--ly-gold);
+  font-weight: 600;
+}
+
+.ly-result-tab-panel {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(20, 22, 28, 0.7);
+}
+
+.ly-result-tab-panel[hidden] {
+  display: none !important;
+}
+
+.ly-reading-summary {
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.ly-reading-acc {
+  margin: 0 0 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 239, 230, 0.22);
+  background: rgba(28, 26, 22, 0.72);
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.ly-reading-acc:not([open]):hover {
+  border-color: rgba(245, 239, 230, 0.38);
+  background: rgba(36, 32, 28, 0.85);
+}
+
+.ly-reading-acc[open] {
+  border-color: rgba(199, 164, 91, 0.35);
+}
+
+.ly-reading-acc-sum {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 14px;
+  font-size: 0.84rem;
+  color: #f5efe6;
+  font-weight: 600;
+  user-select: none;
+}
+
+.ly-reading-acc-sum::-webkit-details-marker {
+  display: none;
+}
+
+.ly-reading-acc-title {
+  min-width: 0;
+}
+
+.ly-reading-acc-hint {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #a0a0a0;
+}
+
+.ly-reading-acc-hint::before {
+  content: '点开查看';
+}
+
+.ly-reading-acc-hint::after {
+  content: '›';
+  display: inline-block;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+
+.ly-reading-acc[open] > .ly-reading-acc-sum .ly-reading-acc-hint::before {
+  content: '收起';
+}
+
+.ly-reading-acc[open] > .ly-reading-acc-sum .ly-reading-acc-hint::after {
+  transform: rotate(90deg);
+}
+
+.ly-reading-acc-body {
+  padding: 0 14px 12px;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: #f5efe6;
+  border-top: 1px solid rgba(245, 239, 230, 0.1);
+}
+
+.ly-reading-acc[open] > .ly-reading-acc-sum {
+  padding-bottom: 10px;
+}
+
+.ly-peer-note-fold {
+  margin: 12px 0 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(28, 26, 22, 0.72);
+  overflow: hidden;
+}
+
+.ly-peer-note-sum {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  font-size: 0.86rem;
+  color: var(--ly-gold);
+  user-select: none;
+}
+
+.ly-peer-note-sum::-webkit-details-marker {
+  display: none;
+}
+
+.ly-peer-note-fold > .ly-peer-note {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid rgba(199, 164, 91, 0.14);
+}
+
+.ly-note-tag-add {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.ly-note-tag-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(8, 9, 13, 0.5);
+  color: var(--ly-mist);
+  font-size: 0.8rem;
+}
+
+.ly-note-tag-add-btn {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 164, 91, 0.4);
+  background: rgba(199, 164, 91, 0.12);
+  color: var(--ly-gold);
+  font-size: 0.78rem;
+  cursor: pointer;
 }
 
 .ly-layer-panel {
@@ -2681,63 +3748,118 @@ button.ly-yao-kind-card:hover {
 
 .ly-classic-modern {
   margin: 0 0 8px;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--ly-mist);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #f5efe6;
 }
 
-.ly-classic-scroll summary {
-  cursor: pointer;
-  color: var(--ly-gold);
-  font-size: 0.8rem;
+.ly-classic-lead {
+  margin: 0 0 12px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: #a0a0a0;
+}
+
+.ly-classic-block {
+  margin: 0 0 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 239, 230, 0.12);
+  background: rgba(8, 8, 8, 0.28);
+}
+
+.ly-classic-tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #a0a0a0;
+  background: rgba(255, 255, 255, 0.06);
+  vertical-align: 1px;
+}
+
+.ly-classic-tag.is-bai {
+  color: #f5efe6;
+  background: rgba(199, 164, 91, 0.22);
+}
+
+.ly-classic-tag.is-muted {
+  opacity: 0.85;
 }
 
 .ly-classic-body {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .ly-classic-zh {
   margin: 0 0 6px;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   line-height: 1.55;
-  color: var(--ly-mist);
+  color: #c8c0b4;
   font-family: "Noto Serif SC", "Songti SC", serif;
 }
 
+.ly-classic-bai {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #f5efe6;
+}
+
 .ly-classic-note {
-  margin: 8px 0 0;
-  font-size: 0.75rem;
-  color: var(--ly-muted);
-  line-height: 1.5;
+  margin: 0;
+  font-size: 0.72rem;
+  color: #a0a0a0;
+  line-height: 1.45;
+}
+
+.ly-classic-note em {
+  font-style: normal;
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+.ly-classic-line {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(8, 9, 13, 0.35);
 }
 
 .ly-classic-line.is-focus {
-  border-left: 2px solid rgba(199, 164, 91, 0.55);
-  padding-left: 8px;
+  border: 1px solid rgba(232, 180, 168, 0.28);
+  border-left: 2px solid rgba(232, 180, 168, 0.55);
+}
+
+.ly-classic-line strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  color: #e8b4a8;
 }
 
 .ly-classic-zengshan {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  background: rgba(199, 164, 91, 0.08);
-  border: 1px solid rgba(199, 164, 91, 0.16);
-}
-
-.ly-classic-zengshan b {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--ly-gold);
-  font-size: 0.78rem;
+  margin-top: 0;
+  padding: 4px 2px;
+  border: none;
+  background: transparent;
 }
 
 .ly-classic-zengshan p {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 0.78rem;
   line-height: 1.55;
-  color: var(--ly-mist);
+  color: #f5efe6;
+}
+
+.ly-classic-folder .ly-teach-fold,
+.ly-classic-lib-card .ly-teach-fold {
+  margin-top: 8px;
 }
 
 .ly-classic-all-yao {

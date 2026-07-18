@@ -9,6 +9,7 @@ import { mountLiuyaoModeSwitch, setLiuyaoMode } from '../liuyao/mode.ts';
 import { hexagramNameWhy, TRIGRAM_ORDER, TRIGRAMS, type TrigramId } from '../liuyao/trigrams.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
+import { formatClauseHtml } from '../liuyao/format-clause.ts';
 
 function trigramLabel(id: TrigramId): string {
   const t = TRIGRAMS[id];
@@ -57,7 +58,7 @@ function detailHtml(h: Hexagram): string {
         <p><em>为什么叫「${h.name}」？</em>${nameWhy}</p>
         <p class="ly-teach-shi">世爻默认在第 ${h.shiLine} 爻（八宫定位；实占以起卦结果为准）</p>
       </div>
-      <p class="ly-hex-gist">${h.gist}</p>
+      <p class="ly-hex-gist">${formatClauseHtml(h.gist)}</p>
     </article>
   `;
 }

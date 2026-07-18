@@ -4,13 +4,13 @@
 
 | 文件 | 用途 | 状态 |
 |------|------|------|
-| `hero-scene.png` | 模块首页主视觉 | ✅ 已接入 |
-| `hero-cast.png` | 起卦氛围备用 | 已命名，暂未挂页 |
-| `bagua-board.png` | 八卦盘（首页角标 + 起卦台） | ✅ 已接入 |
-| `emblem-coin-ring.png` | 铜钱+卦环 emblem | 已命名，可作 Lab 图标 |
-| `bagua-jade.png` | 玉石八卦挂坠 | 备用 |
-| `coin-obverse.png` | 铜钱正面（乾隆通宝·字） | ✅ 起卦动画 |
-| `coin-reverse.png` | 铜钱背面（云纹） | ✅ 起卦动画 |
+| `hero-scene.png` | 模块首页主视觉 | ✅ 已接入（运行时用 `.webp`） |
+| `hero-cast.png` | 起卦氛围备用 | ✅ 学习模式背景用 `.webp` |
+| `bagua-board.png` | 八卦盘（首页角标 + 起卦台） | ✅ `.webp` |
+| `emblem-coin-ring.png` | 铜钱+卦环 emblem | ✅ `.webp` |
+| `bagua-jade.png` | 玉石八卦挂坠 | ✅ 学习主视觉 `.webp` |
+| `coin-obverse.png` | 铜钱正面（乾隆通宝·字） | ✅ 起卦动画 `.webp` |
+| `coin-reverse.png` | 铜钱背面（云纹） | ✅ 起卦动画 `.webp` |
 | `ref-ui-mock.png` | UI 参考稿 | 仅参考，不进产品 |
 
 原始 UUID 文件仍保留，可随时删。

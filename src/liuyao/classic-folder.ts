@@ -1,7 +1,10 @@
 import type { CastResult } from './engine.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
+import { formatClauseHtml } from './format-clause.ts';
+import { glossDaXiang, glossLine } from './classic-gloss.ts';
 import { HEXAGRAMS, LINE_LABELS, type Hexagram } from './hexagrams.ts';
 import { navigate } from '../router.ts';
+import { teachFold } from './flip-teach.ts';
 
 export type ClassicLine = {
   classic: string;
@@ -118,14 +121,74 @@ function renderLineBlocks(
       const line = d.lines[i];
       const label = LINE_LABELS[i]!;
       const focus = focusIndexes.includes(i) ? ' is-focus' : '';
+      const bai = glossLine(d.name, i);
       if (line) {
-        return `<div class="ly-classic-line${focus}"><strong>${label}</strong><p class="ly-classic-zh">${line.classic}</p>${
-          line.note ? `<p class="ly-guide-tip">${line.note}</p>` : ''
-        }</div>`;
+        return `<div class="ly-classic-line${focus}">
+          <strong>${label}</strong>
+          <p class="ly-classic-zh"><span class="ly-classic-tag">原文</span>${line.classic}</p>
+          ${bai ? `<p class="ly-classic-bai"><span class="ly-classic-tag is-bai">白话</span>${bai}</p>` : ''}
+          ${
+            line.note
+              ? `<p class="ly-classic-note"><span class="ly-classic-tag is-muted">小象</span>${line.note}<em>（仍是文言旁注）</em></p>`
+              : ''
+          }
+        </div>`;
       }
       return `<div class="ly-classic-line${focus}"><strong>${label}</strong><p class="ly-guide-tip">该爻古文待补录。</p></div>`;
     })
     .join('');
+}
+
+function renderClassicBody(d: ClassicDossier, focusIndexes: number[]): string {
+  const daBai = glossDaXiang(d.name);
+  const showFocus = focusIndexes.length > 0;
+  return `
+    <div class="ly-classic-body">
+      <p class="ly-classic-lead">这是《周易》<strong>原文存档</strong>，用来对照查证；日常解读请先看上面的白话象意。</p>
+      ${
+        d.judgment
+          ? `<div class="ly-classic-block">
+              <p class="ly-classic-zh"><span class="ly-classic-tag">卦辞 · 原文</span>${d.judgment}</p>
+              <p class="ly-classic-bai"><span class="ly-classic-tag is-bai">白话象意</span>${formatClauseHtml(d.modern)}</p>
+            </div>`
+          : '<p class="ly-guide-tip">卦辞暂缺</p>'
+      }
+      ${
+        d.daXiang
+          ? `<div class="ly-classic-block">
+              <p class="ly-classic-zh"><span class="ly-classic-tag">大象 · 原文</span>${d.daXiang}</p>
+              ${
+                daBai
+                  ? `<p class="ly-classic-bai"><span class="ly-classic-tag is-bai">白话</span>${daBai}</p>`
+                  : ''
+              }
+            </div>`
+          : ''
+      }
+      <p class="ly-guide-tip">六爻爻辞也是原文；有白话对照的会标在下面。</p>
+      ${renderLineBlocks(d, showFocus ? focusIndexes : [0, 1, 2, 3, 4, 5], showFocus ? 'focus' : 'all')}
+      ${
+        showFocus
+          ? `<details class="ly-classic-all-yao">
+              <summary>六爻全文</summary>
+              ${renderLineBlocks(d, focusIndexes, 'all')}
+            </details>`
+          : ''
+      }
+      ${
+        d.zengshan
+          ? teachFold(
+              '增删卜易 · 白话读法摘录',
+              `<div class="ly-classic-zengshan"><p>${d.zengshan.replace(
+                /^《增删卜易》义理摘录（教学整理）：/,
+                '',
+              )}</p><p class="ly-guide-tip">教学整理，非全书影印；先定用神，再看世应、动变。</p></div>`,
+            )
+          : ''
+      }
+      <p class="ly-guide-tip">周易原文为通行本开源校对；不必一次啃完。</p>
+    </div>
+  `;
 }
 
 export function renderClassicFolderHtml(cast: CastResult): string {
@@ -143,30 +206,8 @@ export function renderClassicFolderHtml(cast: CastResult): string {
           fav ? '★ 已收藏' : '☆ 收藏'
         }</button>
       </header>
-      <p class="ly-classic-modern">${d.modern}</p>
-      <details class="ly-classic-scroll">
-        <summary>展开古文（卦辞 · 六爻 · 大象）</summary>
-        <div class="ly-classic-body">
-          ${
-            d.judgment
-              ? `<p class="ly-classic-zh"><b>卦辞</b> ${d.judgment}</p>`
-              : '<p class="ly-guide-tip">卦辞暂缺</p>'
-          }
-          ${d.daXiang ? `<p class="ly-classic-zh"><b>大象</b> ${d.daXiang}</p>` : ''}
-          <p class="ly-guide-tip">动爻/世爻优先标出；下方可展开六爻全文。</p>
-          ${renderLineBlocks(d, focusIndexes, 'focus')}
-          <details class="ly-classic-all-yao">
-            <summary>六爻全文</summary>
-            ${renderLineBlocks(d, focusIndexes, 'all')}
-          </details>
-          ${
-            d.zengshan
-              ? `<div class="ly-classic-zengshan"><b>增删卜易 · 相关</b><p>${d.zengshan}</p></div>`
-              : ''
-          }
-          <p class="ly-guide-tip">周易原文为通行本开源校对；增删卜易为教学义理摘录，非全书影印。</p>
-        </div>
-      </details>
+      <p class="ly-classic-modern">${formatClauseHtml(d.modern)}</p>
+      ${teachFold('原文对照（卦辞 · 大象 · 六爻）', renderClassicBody(d, focusIndexes))}
       <p class="ly-guide-tip"><a href="/liuyao/classic" data-path="/liuyao/classic">打开学习页 · 古文资料夹 →</a></p>
     </section>
   `;
@@ -193,26 +234,14 @@ export function renderClassicLibraryPageHtml(filter: 'seen' | 'fav' | 'all' = 's
             starred ? '★' : '☆'
           }</button>
         </header>
-        <p>${d.modern}</p>
-        <details>
-          <summary>古文 · 增删卜易</summary>
-          <div class="ly-classic-body">
-            ${d.judgment ? `<p class="ly-classic-zh"><b>卦辞</b> ${d.judgment}</p>` : ''}
-            ${d.daXiang ? `<p class="ly-classic-zh"><b>大象</b> ${d.daXiang}</p>` : ''}
-            ${renderLineBlocks(d, [], 'all')}
-            ${
-              d.zengshan
-                ? `<div class="ly-classic-zengshan"><b>增删卜易 · 相关</b><p>${d.zengshan}</p></div>`
-                : ''
-            }
-          </div>
-        </details>
+        <p class="ly-classic-modern">${formatClauseHtml(d.modern)}</p>
+        ${teachFold('原文对照（卦辞 · 大象 · 六爻）', renderClassicBody(d, []))}
       </article>`;
     })
     .join('');
 
   return `
-    <p class="ly-guide-tip">已收录周易 64 卦卦辞/爻辞校对稿；每卦附《增删卜易》教学摘录。</p>
+    <p class="ly-guide-tip">每卦先看白话象意；点开「原文对照」才是《周易》经文存档，并尽量附白话。</p>
     <div class="ly-classic-filters" role="tablist">
       <button type="button" class="ly-note-tag${filter === 'seen' ? ' is-on' : ''}" data-classic-filter="seen">见过的</button>
       <button type="button" class="ly-note-tag${filter === 'fav' ? ' is-on' : ''}" data-classic-filter="fav">收藏</button>

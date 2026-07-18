@@ -16,6 +16,12 @@ export interface HexagramViewOptions {
   emphasizeShiYing?: boolean;
   /** 动爻闪烁强调 */
   pulseChanging?: boolean;
+  /** 爻旁标注四象名，如少阳 / 老阴；按下标，未成爻可省略 */
+  kindLabels?: (string | null | undefined)[];
+  /** 爻旁小字字背组合，如 字字背；与 kindLabels 对齐 */
+  coinLabels?: (string | null | undefined)[];
+  /** 整爻可点（教学入口） */
+  teachable?: boolean;
 }
 
 function lineSvg(bit: LineBit, y: number, cx: number, pending = false): string {
@@ -43,13 +49,20 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
     showTrigramLabels,
     emphasizeShiYing,
     pulseChanging,
+    kindLabels,
+    coinLabels,
+    teachable,
   } = opts;
   const leftPad = emphasizeShiYing ? 28 : 0;
+  const hasKindLabels = Boolean(kindLabels?.some((k) => k));
+  const hasCoinNotes = Boolean(coinLabels?.some((c) => c));
+  const kindW = hasKindLabels ? 48 : 0;
   const labelW = showTrigramLabels && !compact ? 56 : 0;
   const cx = 60 + leftPad;
-  const w = 120 + labelW + leftPad;
-  const h = compact ? 100 : 130;
-  const gap = compact ? 14 : 18;
+  const w = 120 + labelW + leftPad + kindW;
+  /** 字背在爻线下方时，行距略加大，避免叠字 */
+  const gap = compact ? (hasCoinNotes ? 22 : 14) : 18;
+  const h = compact ? (hasCoinNotes ? 148 : 100) : 130;
   const startY = compact ? 12 : 14;
   const filled = revealedCount ?? lines.length;
   const braceX = 118 + leftPad;
@@ -62,6 +75,13 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
       const isYing = !pending && yingLine === i + 1;
       const changing = !pending && changingIndexes.includes(i);
       const visible = pending || animateIndex === undefined || i <= animateIndex;
+      const kind = !pending ? kindLabels?.[i] : null;
+      const faces = !pending ? coinLabels?.[i] : null;
+      const canTeach = Boolean(teachable && !pending && kind);
+      /** 仅最新落下的一爻做「生长」动画，已成爻保持静止 */
+      const isGrowing = Boolean(
+        !pending && animateIndex !== undefined && i === animateIndex && i < filled,
+      );
       const cls = [
         'ly-yao-row',
         pending ? 'ly-yao-pending-row' : '',
@@ -69,7 +89,8 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         pulseChanging && changing ? 'ly-yao-pulse' : '',
         isShi ? 'ly-yao-shi' : '',
         isYing ? 'ly-yao-ying' : '',
-        visible ? 'ly-yao-visible' : 'ly-yao-hidden',
+        !visible ? 'ly-yao-hidden' : isGrowing ? 'ly-yao-growing' : 'ly-yao-settled',
+        canTeach ? 'is-teachable' : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -85,10 +106,33 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         decor = `<text class="ly-yao-tag" x="${8 + leftPad}" y="${y + 4}">${tags}</text>`;
       }
 
+      const labelX = cx + 52;
+      /** 主文在爻旁；字背小灰字在爻线正下方 */
+      const kindAnno =
+        kind || faces
+          ? `${
+              kind
+                ? `<text class="ly-yao-kind-label${changing ? ' is-changing' : ''}" x="${labelX}" y="${y + 4}">${kind}</text>`
+                : ''
+            }${
+              faces
+                ? `<text class="ly-yao-coin-note" text-anchor="middle" x="${cx}" y="${y + 12}">${faces}</text>`
+                : ''
+            }`
+          : '';
+
+      const hit = canTeach
+        ? `<rect class="ly-yao-hit" data-flip-index="${i}" x="${cx - 52}" y="${y - 9}" width="${
+            52 + 56
+          }" height="${hasCoinNotes ? 24 : 18}" fill="transparent" role="button" tabindex="0" aria-label="第${i + 1}爻 ${kind}" />`
+        : '';
+
       return `<g class="${cls}" data-line="${i}">
         ${decor}
         ${lineSvg(pending ? 0 : bit, y, cx, pending)}
-        ${!compact && !showTrigramLabels ? `<text class="ly-yao-label" x="${108 + leftPad}" y="${y + 4}">${LINE_LABELS[i]}</text>` : ''}
+        ${kindAnno}
+        ${hit}
+        ${!compact && !showTrigramLabels && !hasKindLabels ? `<text class="ly-yao-label" x="${108 + leftPad}" y="${y + 4}">${LINE_LABELS[i]}</text>` : ''}
       </g>`;
     })
     .join('');
@@ -107,7 +151,7 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
       </g>`;
   }
 
-  return `<svg class="ly-hexagram-svg${compact ? ' ly-hexagram-compact' : ''}${showTrigramLabels ? ' ly-hexagram-annotated' : ''}${emphasizeShiYing ? ' ly-hexagram-roles' : ''}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${inner}${trigramAnno}</svg>`;
+  return `<svg class="ly-hexagram-svg${compact ? ' ly-hexagram-compact' : ''}${showTrigramLabels ? ' ly-hexagram-annotated' : ''}${emphasizeShiYing ? ' ly-hexagram-roles' : ''}${hasKindLabels ? ' ly-hexagram-kinds' : ''}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${inner}${trigramAnno}</svg>`;
 }
 
 export function renderCoinFace(face: 'obverse' | 'reverse', index: number): string {

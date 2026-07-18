@@ -21,7 +21,12 @@ export function setLiuyaoMode(mode: LiuyaoMode): void {
   }
 }
 
-/** 顶部模式切换：起卦 ↔ 学习 */
+const MODE_TIPS: Record<LiuyaoMode, string> = {
+  cast: '起卦模式 · 干净仪式，少教学打断',
+  learn: '学习模式 · 过程中会出现「这是什么」小标注',
+};
+
+/** 顶部模式切换：起卦 ↔ 学习（备注在 hover / 长按 title 里） */
 export function mountLiuyaoModeSwitch(
   host: HTMLElement,
   opts?: { onChange?: (mode: LiuyaoMode) => void },
@@ -38,10 +43,12 @@ export function mountLiuyaoModeSwitch(
 
   function paint(): void {
     const current = getLiuyaoMode();
+    wrap.dataset.tip = MODE_TIPS[current];
+    wrap.setAttribute('title', MODE_TIPS[current]);
     wrap.innerHTML = modes
       .map(
         (m) => `
-      <button type="button" class="ly-mode-btn${m.id === current ? ' is-active' : ''}" data-mode="${m.id}">
+      <button type="button" class="ly-mode-btn${m.id === current ? ' is-active' : ''}" data-mode="${m.id}" title="${MODE_TIPS[m.id]}">
         ${m.label}
       </button>
     `,
