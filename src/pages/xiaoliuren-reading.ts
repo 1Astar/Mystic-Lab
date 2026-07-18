@@ -680,6 +680,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           lunar,
           hour,
           lesson,
+          lessonMode,
         }).id;
 
         if (!skillGateMarked) {

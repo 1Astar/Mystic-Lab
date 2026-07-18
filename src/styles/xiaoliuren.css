@@ -4198,3 +4198,200 @@ body.xlr-huangli-lock {
   width: 100%;
 }
 
+
+/* 掌上功夫统计 */
+.xlr-kungfu-body {
+  padding-bottom: 32px;
+}
+
+.xlr-kungfu-header .page-title {
+  margin-top: 4px;
+}
+
+.xlr-kungfu-next {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #f5efe6;
+  background: rgba(201, 168, 108, 0.1);
+  border: 1px solid rgba(201, 168, 108, 0.22);
+}
+
+.xlr-kungfu-section {
+  margin-top: 22px;
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 214, 166, 0.1);
+}
+
+.xlr-kungfu-h2 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+.xlr-kungfu-lead {
+  margin: 0 0 12px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.xlr-kungfu-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.xlr-kungfu-metric {
+  padding: 12px 10px;
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 214, 166, 0.08);
+}
+
+.xlr-kungfu-metric strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: #f5efe6;
+}
+
+.xlr-kungfu-metric span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: rgba(255, 214, 166, 0.65);
+}
+
+.xlr-kungfu-note {
+  margin: 10px 2px 0;
+  font-size: 0.74rem;
+  color: rgba(230, 180, 34, 0.85);
+}
+
+.xlr-kungfu-gates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.xlr-kungfu-gates li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 214, 166, 0.1);
+}
+
+.xlr-kungfu-gates li.is-done {
+  border-color: rgba(201, 168, 108, 0.35);
+}
+
+.xlr-kungfu-gates li.is-locked {
+  opacity: 0.65;
+}
+
+.xlr-kungfu-gates em {
+  font-style: normal;
+  color: rgba(255, 214, 166, 0.72);
+}
+
+.xlr-kungfu-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-kungfu-bar-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 2.4rem;
+  gap: 8px;
+  align-items: center;
+}
+
+.xlr-kungfu-bar-label {
+  font-size: 0.78rem;
+  color: rgba(232, 224, 212, 0.85);
+}
+
+.xlr-kungfu-bar-label em {
+  margin-left: 4px;
+  font-style: normal;
+  color: rgba(255, 214, 166, 0.55);
+}
+
+.xlr-kungfu-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.xlr-kungfu-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(201, 168, 108, 0.55), rgba(255, 214, 166, 0.85));
+}
+
+.xlr-kungfu-bar-pct {
+  font-size: 0.7rem;
+  text-align: right;
+  color: rgba(255, 214, 166, 0.65);
+}
+
+.xlr-kungfu-gods {
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-kungfu-god {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  grid-template-rows: auto auto;
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.xlr-kungfu-god-icon {
+  grid-row: 1 / span 2;
+  width: 36px;
+  height: 36px;
+}
+
+.xlr-kungfu-god-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.xlr-kungfu-god-meta span {
+  color: rgba(255, 214, 166, 0.6);
+  font-size: 0.72rem;
+}
+
+.xlr-kungfu-god .xlr-kungfu-bar-track {
+  grid-column: 2;
+}
+
+.xlr-kungfu-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.xlr-kungfu-cta {
+  margin-top: 24px;
+  display: grid;
+  gap: 10px;
+}
