@@ -14,6 +14,12 @@ import {
   renderFaqPanel,
   renderHexHero,
 } from '../../liuyao/result-layers.ts';
+import { renderLearnReadingTab } from '../../liuyao/narrative-learn.ts';
+import {
+  QUICK_TAB_DEFS,
+  renderQuickBoard,
+  renderQuickTabsHtml,
+} from '../../liuyao/narrative-quick.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -35,6 +41,7 @@ function readingAccordion(title: string, body: string, open = false): string {
   `;
 }
 
+/** @deprecated 保留兼容；学习模式改用 renderLearnReadingTab */
 function renderReadingTab(reading: FourLayerReading): string {
   return `
     <section class="ly-result-panel ly-reading-summary">
@@ -52,7 +59,7 @@ function renderReadingTab(reading: FourLayerReading): string {
     )}
     ${readingAccordion(
       '四 · 行动建议',
-      `<p>${escapeHtml(reading.action)}</p>`,
+      `<p class="ly-reading-multiline">${escapeHtml(reading.action).replace(/\n/g, '<br>')}</p>`,
       true,
     )}
   `;
@@ -125,51 +132,62 @@ export function mountLiuyaoResultTabs(
   let noteTags: string[] = [];
   let noteDraft = '';
 
-  const tabs = [
-    { id: 'reading', label: '此刻解读' },
-    { id: 'core', label: '核心要素' },
-    ...(learn
-      ? [
-          { id: 'guide', label: '怎么读卦' },
-          { id: 'deep', label: '深度推演' },
-        ]
-      : []),
-  ];
-
-  host.innerHTML = `
-    ${renderHexHero(cast)}
-    <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
-      <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
-        ${tabs
-          .map(
+  if (!learn) {
+    host.innerHTML = `
+      ${renderQuickBoard(cast, castAt)}
+      <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
+        <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
+          ${QUICK_TAB_DEFS.map(
             (t, i) => `
-          <button type="button" class="ly-result-tab${i === 0 ? ' is-active' : ''}" data-tab="${t.id}" role="tab" aria-selected="${i === 0}">
-            ${t.label}
-          </button>`,
-          )
-          .join('')}
-      </div>
-      <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-        ${renderReadingTab(reading)}
-      </div>
-      <div class="ly-result-tab-panel" data-panel="core" role="tabpanel" hidden>
-        ${renderCorePanel(cast, question)}
-      </div>
-      ${
-        learn
-          ? `
-      <div class="ly-result-tab-panel" data-panel="guide" role="tabpanel" hidden>
-        ${renderComposeTeach({ cast, question })}
-      </div>
-      <div class="ly-result-tab-panel" data-panel="deep" role="tabpanel" hidden>
-        <div data-deep-panel>${renderDeepPanel(cast, castAt, question)}</div>
-        ${renderFaqPanel(cast, question)}
-      </div>`
-          : ''
-      }
-    </section>
-    ${renderPeerNoteFold({ cast, learn, selectedTags: noteTags })}
-  `;
+            <button type="button" class="ly-result-tab${i === 0 ? ' is-active' : ''}" data-tab="${t.id}" role="tab" aria-selected="${i === 0}">
+              ${t.label}
+            </button>`,
+          ).join('')}
+        </div>
+        ${renderQuickTabsHtml(cast, question, castAt)}
+      </section>
+      ${renderPeerNoteFold({ cast, learn, selectedTags: noteTags })}
+    `;
+  } else {
+    const tabs = [
+      { id: 'reading', label: '此刻解读' },
+      { id: 'core', label: '核心要素' },
+      { id: 'guide', label: '怎么读卦' },
+      { id: 'deep', label: '深度推演' },
+    ];
+
+    host.innerHTML = `
+      ${renderHexHero(cast)}
+      <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
+        <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
+          ${tabs
+            .map(
+              (t, i) => `
+            <button type="button" class="ly-result-tab${i === 0 ? ' is-active' : ''}" data-tab="${t.id}" role="tab" aria-selected="${i === 0}">
+              ${t.label}
+            </button>`,
+            )
+            .join('')}
+        </div>
+        <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
+          ${renderLearnReadingTab(cast, question)}
+        </div>
+        <div class="ly-result-tab-panel" data-panel="core" role="tabpanel" hidden>
+          ${renderCorePanel(cast, question)}
+        </div>
+        <div class="ly-result-tab-panel" data-panel="guide" role="tabpanel" hidden>
+          ${renderComposeTeach({ cast, question })}
+        </div>
+        <div class="ly-result-tab-panel" data-panel="deep" role="tabpanel" hidden>
+          <div data-deep-panel>${renderDeepPanel(cast, castAt, question)}</div>
+          ${renderFaqPanel(cast, question)}
+        </div>
+      </section>
+      ${renderPeerNoteFold({ cast, learn, selectedTags: noteTags })}
+    `;
+    void reading;
+    void renderReadingTab;
+  }
 
   const layersApi = bindResultLayers(host, cast, question);
 

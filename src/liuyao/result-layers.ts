@@ -6,24 +6,21 @@ import {
   type SiZhu,
 } from './ganzhi.ts';
 import { LINE_LABELS, upperLowerFromLines, yingLineOf } from './hexagrams.ts';
-import { bindClassicFolder, renderClassicFolderHtml } from './classic-folder.ts';
+import { bindClassicFolder, renderClassicFolderHtml, resolveClassicDossier } from './classic-folder.ts';
 import { dressHexagram, type DressedHexagram, type YaoDress } from './najia.ts';
 import { buildShengKeGraph, renderShengKeGraphHtml } from './sheng-ke-graph.ts';
-import { composeScene, detectSceneDomain } from './scene-map.ts';
-import { resolveYongShen } from './yong-shen.ts';
 import { renderYaoCard } from './yao-card.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
 import { formatClauseHtml } from './format-clause.ts';
 import { teachFold } from './flip-teach.ts';
-
-const LINE_ROLE = [
-  '基础 / 开端 / 基层',
-  '内部 / 宅内 / 助手',
-  '关口 / 过渡 / 门口',
-  '外部 / 门庭 / 近外',
-  '核心 / 君位 / 决策',
-  '收束 / 结果 / 终结',
-] as const;
+import { LINE_ROLE } from './reading-facts.ts';
+import {
+  buildLearnFaq,
+  classicModernScene,
+  renderLearnCorePanel,
+} from './narrative-learn.ts';
+import { buildReadingFacts } from './reading-facts.ts';
+import { glossDaXiang } from './classic-gloss.ts';
 
 function modernLineGloss(cast: CastResult, i: number): { modern: string; classicHint: string } {
   const role = LINE_ROLE[i]!;
@@ -41,50 +38,7 @@ function modernLineGloss(cast: CastResult, i: number): { modern: string; classic
 }
 
 function buildFaq(cast: CastResult, question: string) {
-  const { upper, lower } = upperLowerFromLines(cast.primaryLines);
-  const scene = composeScene(upper, lower, cast.primary);
-  const yong = resolveYongShen(question);
-  const moving =
-    cast.changingIndexes.length === 0
-      ? '无明显动爻'
-      : cast.changingIndexes.map((i) => LINE_LABELS[i]!).join('、');
-
-  return [
-    {
-      q: `为什么叫「${cast.primary.fullName}」？`,
-      a: [
-        `上卦为${upper.nature}（${upper.id}），下卦为${lower.nature}（${lower.id}）。`,
-        scene.bridge,
-        detectSceneDomain(question) === 'love' ? scene.love : scene.career,
-      ],
-    },
-    {
-      q: `动爻在哪？对我问的事有什么影响？`,
-      a: [
-        moving === '无明显动爻'
-          ? '本卦无动爻：格局相对稳，先把世应与本卦场景看清。'
-          : `动爻在${moving}——这些位置正在「变心」，是当下最该盯的具体层面。`,
-        cast.changed
-          ? `变化指向变卦「${cast.changed.fullName}」：${cast.changed.gist}`
-          : '无变卦时，不必硬找未来，先稳住当下。',
-      ],
-    },
-    {
-      q: `用神是什么？我该看哪一类爻？`,
-      a: [yong.why, `本题用神倾向：${yong.name}。`, yong.tip],
-    },
-    {
-      q: question.trim()
-        ? `如果「${question.trim()}」不顺利，我还能做什么？`
-        : '如果结果不理想，我还能做什么？',
-      a: [
-        '先对齐世应：哪些是我能改的，哪些是环境。',
-        cast.changed
-          ? `可朝变卦关键词「${cast.changed.keywords[0]}」做一小步验证，而不是一次梭哈。`
-          : '无动则宜整理与等待窗口：把「下一步」写成一周可验证动作。',
-      ],
-    },
-  ];
+  return buildLearnFaq(buildReadingFacts(cast, question));
 }
 
 function renderSiZhuBar(sz: SiZhu): string {
@@ -138,6 +92,19 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
   const sz = siZhuFromDate(castAt);
   const dressed = dressHexagram(cast, sz.dayStem);
   const graph = buildShengKeGraph(dressed.rows, question);
+  const facts = buildReadingFacts(cast, question, castAt);
+  const dossier = resolveClassicDossier(cast.primary.name);
+  const daBai = glossDaXiang(cast.primary.name) ?? dossier.modern;
+  const modernMap = classicModernScene(facts, daBai);
+  const whyBits = [
+    facts.shengKe.whyYuan
+      ? `<p class="ly-sk-why"><strong>为什么是原神？</strong>${facts.shengKe.whyYuan}</p>`
+      : '',
+    facts.shengKe.whyJi
+      ? `<p class="ly-sk-why"><strong>为什么是忌神？</strong>${facts.shengKe.whyJi}</p>`
+      : '',
+  ].join('');
+
   const lineCards = [0, 1, 2, 3, 4, 5]
     .map((i) => {
       const g = modernLineGloss(cast, i);
@@ -163,7 +130,21 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
     ${renderSiZhuBar(sz)}
     ${renderDressTable(dressed)}
     ${renderShengKeGraphHtml(graph)}
+    ${whyBits ? `<div class="ly-sk-why-box">${whyBits}<p class="ly-guide-tip">${facts.shengKe.tip}</p></div>` : ''}
     ${renderClassicFolderHtml(cast)}
+    <div class="ly-classic-modern-map">
+      <p class="ly-guide-label">现代场景映射</p>
+      <p>${formatClauseHtml(modernMap)}</p>
+      ${
+        dossier.judgment
+          ? `<div class="ly-classic-triple">
+        <p><span class="ly-classic-tag">原文</span>${dossier.judgment}</p>
+        <p><span class="ly-classic-tag is-bai">白话</span>${formatClauseHtml(daBai)}</p>
+        <p><span class="ly-classic-tag is-map">现代</span>${formatClauseHtml(modernMap)}</p>
+      </div>`
+          : ''
+      }
+    </div>
     <details class="ly-deep-more">
       <summary>白话爻位速览</summary>
       <div class="ly-line-cards">${lineCards}</div>
@@ -296,29 +277,9 @@ export function renderHexHero(cast: CastResult): string {
   `;
 }
 
-/** 世 / 应 / 用神 */
+/** 世 / 应 / 用神（定义锚 + 生活映射） */
 export function renderCorePanel(cast: CastResult, question: string): string {
-  const yong = resolveYongShen(question);
-  return `
-    <p class="ly-layer-guide">世＝你，应＝对方或环境；用神＝你问的事在卦里的代表。</p>
-    <div class="ly-guide-hex">${renderHexagramSvg({
-      lines: cast.primaryLines,
-      shiLine: cast.shiLine,
-      yingLine: cast.yingLine,
-      changingIndexes: cast.changingIndexes,
-      emphasizeShiYing: true,
-      showTrigramLabels: true,
-    })}</div>
-    <div class="ly-core-cards">
-      <article><h4>世 · 我</h4><p>在${LINE_LABELS[cast.shiLine - 1]}。你的立场与能动部分。</p></article>
-      <article><h4>应 · 外界</h4><p>在${LINE_LABELS[cast.yingLine - 1]}。对方 / 岗位 / 环境。</p></article>
-      <article class="ly-core-yong">
-        <h4>用神 · ${yong.name}</h4>
-        <p>${yong.why}</p>
-        <p class="ly-guide-tip">${yong.tip}</p>
-      </article>
-    </div>
-  `;
+  return renderLearnCorePanel(cast, question);
 }
 
 export function renderFaqPanel(cast: CastResult, question: string): string {
