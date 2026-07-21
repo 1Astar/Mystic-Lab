@@ -16,12 +16,12 @@ import {
 } from '../../liuyao/result-layers.ts';
 import { renderLearnReadingTab, bindYaoAskButtons } from '../../liuyao/narrative-learn.ts';
 import { buildReadingFacts } from '../../liuyao/reading-facts.ts';
+import { renderClassicPlateIntroHtml } from '../../liuyao/energy-lens.ts';
 import {
   QUICK_TAB_DEFS,
   renderQuickBoard,
   renderQuickTabsHtml,
 } from '../../liuyao/narrative-quick.ts';
-import { formatLiuqinShort } from '../../liuyao/energy-lens.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -184,7 +184,7 @@ export function mountLiuyaoResultTabs(
           ${renderComposeTeach({ cast, question })}
         </div>
         <div class="ly-result-tab-panel" data-panel="deep" role="tabpanel" hidden>
-          <p class="ly-layer-guide">📜 传统专业排盘 · 原始档案（表内仍用官鬼/妻财等代号；解读区写作「${formatLiuqinShort('妻财')}」这类能量名）</p>
+          ${renderClassicPlateIntroHtml()}
           <div data-deep-panel>${renderDeepPanel(cast, castAt, question)}</div>
           ${renderFaqPanel(cast, question)}
         </div>

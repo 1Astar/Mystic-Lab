@@ -7,9 +7,11 @@ import {
   type ReadingFacts,
 } from './reading-facts.ts';
 import {
+  buildCoreParseBlocks,
   buildEnergyFocus,
   buildYaoAskCard,
   formatLiuqinShort,
+  renderCoreParseHtml,
   renderEnergyFocusHtml,
   renderYongShenTeachHtml,
   renderYaoAskCardHtml,
@@ -83,34 +85,6 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function mapShiLife(facts: ReadingFacts): string {
-  const role = facts.shi.role;
-  if (facts.shi.line >= 5) {
-    return `上爻/五爻一带偏「${role}」——这段时间你容易触顶、遇到瓶颈，或心里很想停下来喘口气。`;
-  }
-  if (facts.shi.line === 1) {
-    return `初爻偏「${role}」——你更像站在事情的起点，能动的是地基与第一步。`;
-  }
-  if (facts.shi.line === 3) {
-    return `三爻偏「${role}」——你正好卡在不上不下的关口，进退都需要额外用力。`;
-  }
-  return `这一爻偏「${role}」——你的立场与能动部分，主要落在这一层。`;
-}
-
-function mapYingLife(facts: ReadingFacts): string {
-  const role = facts.ying.role;
-  if (facts.ying.line === 3) {
-    return `三爻是下卦的顶，偏「${role}」——你面对的局势/对方，刚好卡在尴尬的过渡位。`;
-  }
-  if (facts.ying.line >= 5) {
-    return `偏「${role}」——外界的压力或结果感更强，像站在收束端等你回应。`;
-  }
-  if (facts.ying.line === 1) {
-    return `偏「${role}」——外界还在基层酝酿，未必已经定局。`;
-  }
-  return `偏「${role}」——对方/岗位/环境的主要作用点在这一层。`;
 }
 
 function mapYongBite(facts: ReadingFacts): string {
@@ -197,11 +171,16 @@ export function renderCausalReadingHtml(
 export function renderCoreMappedHtml(
   facts: ReadingFacts,
   cast: CastResult,
-  _castAt = new Date(),
+  castAt = new Date(),
 ): string {
   const hi = highlightIndexes(facts);
+  const rows = dressedRows(cast, castAt);
+  const blocks = buildCoreParseBlocks(rows, {
+    domain: facts.domain,
+    shiYingTip: facts.shiYingRel.tip,
+  });
   return `
-    <p class="ly-layer-guide">先记住锚：<strong>世＝你</strong>，<strong>应＝对方或环境</strong>；用神＝你问的事在卦里的代表。点爻旁 <strong>?</strong> 可看「跟你有什么关系」。六亲按能量模块书写，如「${formatLiuqinShort('妻财')}」。</p>
+    <p class="ly-layer-guide">生活翻译在前；括号里的「注」是传统标记，方便你对照进阶排盘。点爻旁 <strong>?</strong> 可看单爻能量解析。</p>
     <div class="ly-guide-hex" data-ask-hex>
       ${renderHexagramSvg({
         lines: cast.primaryLines,
@@ -215,26 +194,12 @@ export function renderCoreMappedHtml(
       })}
       <div class="ly-yao-ask-slot" data-ask-slot hidden></div>
     </div>
-    <div class="ly-core-cards ly-core-mapped">
-      <article>
-        <h4>世 · 你</h4>
-        <p class="ly-core-def">世＝你。世在${escapeHtml(facts.shi.label)}（${escapeHtml(facts.shi.role)}）。</p>
-        <p>${escapeHtml(mapShiLife(facts))}</p>
-      </article>
-      <article>
-        <h4>应 · 外部世界</h4>
-        <p class="ly-core-def">应＝外部。应在${escapeHtml(facts.ying.label)}（${escapeHtml(facts.ying.role)}）。</p>
-        <p>${escapeHtml(mapYingLife(facts))}</p>
-        <p class="ly-guide-tip">${escapeHtml(facts.shiYingRel.tip)}</p>
-      </article>
-      <article class="ly-core-yong">
-        <h4>用神 · ${escapeHtml(facts.yong.name)}</h4>
-        <p class="ly-core-def">${escapeHtml(facts.yong.why)}</p>
-        <p>${escapeHtml(mapYongBite(facts))}</p>
-        <p class="ly-guide-tip">${escapeHtml(facts.yong.tip)}</p>
-      </article>
-    </div>
-    <p class="ly-guide-tip">注：排盘表里的「官鬼 / 妻财」等只是代号；解读里一律写成能量模块名（括号保留传统词）。</p>
+    ${renderCoreParseHtml(blocks)}
+    <article class="ly-core-yong ly-core-yong-inline">
+      <h4>用神 · ${escapeHtml(facts.yong.name)}</h4>
+      <p>${escapeHtml(mapYongBite(facts))}</p>
+      <p class="ly-guide-tip">${escapeHtml(facts.yong.tip)}</p>
+    </article>
   `;
 }
 

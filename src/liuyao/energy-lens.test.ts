@@ -3,9 +3,24 @@ import {
   formatLiuqinShort,
   buildEnergyFocus,
   buildYaoAskCard,
+  buildCoreParseBlocks,
   formatYongLabel,
 } from './energy-lens.ts';
 import type { YaoDress } from './najia.ts';
+
+function row(partial: Partial<YaoDress> & Pick<YaoDress, 'index' | 'liuqin'>): YaoDress {
+  return {
+    label: ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'][partial.index]!,
+    bit: 1,
+    changing: false,
+    branch: '子',
+    wuxing: '水',
+    liushen: '青龙',
+    isShi: false,
+    isYing: false,
+    ...partial,
+  };
+}
 
 describe('energy-lens', () => {
   it('formats 妻财 as modern（classic）', () => {
@@ -24,23 +39,41 @@ describe('energy-lens', () => {
     expect(items[0]!.body).toMatch(/外部目标|体感/);
   });
 
-  it('yao ask card mentions line role and energy', () => {
-    const row: YaoDress = {
-      index: 0,
-      label: '初爻',
-      bit: 0,
-      changing: true,
-      branch: '子',
-      wuxing: '水',
-      liuqin: '父母',
-      liushen: '白虎',
-      isShi: true,
-      isYing: false,
-    };
-    const card = buildYaoAskCard(row);
-    expect(card.headline).toMatch(/初爻/);
-    expect(card.headline).toMatch(/安全基地/);
-    expect(card.relate).toMatch(/世/);
-    expect(card.aux).toMatch(/动/);
+  it('yao ask card uses energy-parse template', () => {
+    const card = buildYaoAskCard(
+      row({
+        index: 4,
+        liuqin: '官鬼',
+        changing: true,
+        isShi: false,
+        liushen: '青龙',
+        changedBranch: '亥',
+        changedWuxing: '水',
+      }),
+      { domain: 'career' },
+    );
+    expect(card.title).toMatch(/能量解析/);
+    expect(card.position).toMatch(/顶部/);
+    expect(card.state).toMatch(/改变欲望|扩张/);
+    expect(card.relate).toMatch(/求职/);
+    expect(card.classicNote).toMatch(/官鬼/);
+  });
+
+  it('core parse has 世应动 with classic notes', () => {
+    const blocks = buildCoreParseBlocks(
+      [
+        row({ index: 5, liuqin: '兄弟', isShi: true, liushen: '青龙' }),
+        row({ index: 1, liuqin: '妻财', isYing: true, liushen: '玄武' }),
+        row({ index: 2, liuqin: '父母', changing: true, changedBranch: '亥', changedWuxing: '水' }),
+      ],
+      { domain: 'career' },
+    );
+    expect(blocks).toHaveLength(3);
+    expect(blocks[0]!.kicker).toMatch(/世爻/);
+    expect(blocks[0]!.body).toMatch(/向外探索/);
+    expect(blocks[0]!.classicNote).toMatch(/兄弟/);
+    expect(blocks[1]!.body).toMatch(/资源|利益/);
+    expect(blocks[1]!.classicNote).toMatch(/玄武/);
+    expect(blocks[2]!.kicker).toMatch(/动爻/);
   });
 });

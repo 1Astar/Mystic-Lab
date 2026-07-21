@@ -139,65 +139,245 @@ export function buildEnergyFocus(opts: {
 }
 
 export type YaoAskCard = {
-  headline: string;
-  roleLine: string;
+  title: string;
+  position: string;
+  state: string;
   relate: string;
-  aux?: string;
+  classicNote: string;
 };
 
-export function buildYaoAskCard(row: YaoDress, opts?: { domain?: SceneDomain }): YaoAskCard {
-  const role = LINE_ROLE[row.index]!;
+function positionPower(index: number): string {
+  if (index <= 1) return '属于底部的力量（代表根基 / 情绪与开端）';
+  if (index <= 3) return '属于中段的力量（代表过渡 / 门户与拉扯）';
+  return '属于顶部的力量（代表结果 / 目标与收束）';
+}
+
+function domainTopic(domain?: SceneDomain): string {
+  if (domain === 'career') return '求职 / 工作';
+  if (domain === 'love') return '感情 / 关系';
+  if (domain === 'life') return '资源 / 钱财';
+  return '你当下关心的事';
+}
+
+function stateLine(row: YaoDress): string {
   const energy = LIUQIN_ENERGY[row.liuqin];
-  const flags = [
-    row.isShi ? '世＝你' : '',
-    row.isYing ? '应＝外部' : '',
-    row.changing ? '动爻' : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  const headline = `${row.label} · ${row.branch}${row.wuxing} · ${formatLiuqinShort(row.liuqin)} · ${row.liushen}${
-    flags ? `（${flags}）` : ''
-  }`;
-
-  const roleLine = `爻位理解：这是「${role}」一层。`;
-
-  let relate = `与你相关：${energy.blurb}`;
-  if (row.isShi) {
-    relate = `与你相关：这一爻是世（你）——你的内部能量落在「${role}」。${energy.blurb}`;
-  } else if (row.isYing) {
-    relate = `与你相关：这一爻是应（外部）——环境/对方对你的作用点在「${role}」。${energy.blurb}`;
-  }
-
-  const auxParts: string[] = [];
   if (row.changing) {
-    auxParts.push(
-      row.changedBranch
-        ? `辅助：此爻动了，从${row.branch}${row.wuxing}走向${row.changedBranch}${row.changedWuxing ?? ''}——这一层的起点已有变数。`
-        : '辅助：此爻动了，代表这一层正在变心，是当下最该盯的具体点。',
-    );
+    return `这里有强烈的改变欲望，正在向外扩张——「${energy.modern}」这一层正在变心${
+      row.changedBranch ? `，走向 ${row.changedBranch}${row.changedWuxing ?? ''}` : ''
+    }。`;
   }
-  auxParts.push(`六神气色：${row.liushen}——${LIUSHEN_PLAIN[row.liushen]}`);
-  if (opts?.domain === 'career' && row.liuqin === '官鬼') {
-    auxParts.push('对照本题：求职/考核时，这一层常对应岗位、规则与外部评价。');
+  if (row.isShi) {
+    return `这一层相对稳，是你当前站立的能量位置——主调是「${energy.modern}」。`;
   }
+  if (row.isYing) {
+    return `外部环境在这一层对你作用，主调是「${energy.modern}」。`;
+  }
+  return `这一层暂作背景参照，主调是「${energy.modern}」。`;
+}
 
+function relateLine(row: YaoDress, domain?: SceneDomain): string {
+  const energy = LIUQIN_ENERGY[row.liuqin];
+  const topic = domainTopic(domain);
+  if (domain === 'career' && row.liuqin === '官鬼') {
+    return `结合你的问题（${topic}）：放在这里，意味着你很想把内心想法付诸行动，在外部规则中找到突破口。${energy.blurb}`;
+  }
+  if (domain === 'career' && row.liuqin === '妻财') {
+    return `结合你的问题（${topic}）：这一层指向实际回报与自我价值确认（薪资、项目落地、可掌控资源）。`;
+  }
+  if (domain === 'career' && row.liuqin === '兄弟') {
+    return `结合你的问题（${topic}）：你正处在向外探索、想打破现状的阶段，同侪与竞争会激活你，也可能带走节奏。`;
+  }
+  if (row.isShi) {
+    return `结合你的问题（${topic}）：这是你的内部状态落点——${energy.blurb}`;
+  }
+  if (row.isYing) {
+    return `结合你的问题（${topic}）：这是外部环境对你的作用点——${energy.blurb}`;
+  }
+  return `结合你的问题（${topic}）：${energy.blurb}`;
+}
+
+function classicAttr(row: YaoDress): string {
+  const bits = [
+    `${row.liuqin}爻`,
+    row.liushen,
+    row.changing
+      ? row.changedBranch
+        ? `动化 ${row.changedBranch}${row.changedWuxing ?? ''}`
+        : '动爻'
+      : '',
+  ].filter(Boolean);
+  return `传统属性：${bits.join('，')}`;
+}
+
+export function buildYaoAskCard(row: YaoDress, opts?: { domain?: SceneDomain }): YaoAskCard {
   return {
-    headline,
-    roleLine,
-    relate,
-    aux: auxParts.join(' '),
+    title: `第 ${row.index + 1} 爻 · 能量解析（${row.label}）`,
+    position: `🧭 它的位置：${positionPower(row.index)}。`,
+    state: `💪 它的状态：${stateLine(row)}`,
+    relate: `📌 ${relateLine(row, opts?.domain)}`,
+    classicNote: classicAttr(row),
   };
 }
 
 export function renderYaoAskCardHtml(card: YaoAskCard): string {
   return `
     <article class="ly-yao-ask-card" data-yao-ask-card>
-      <p class="ly-yao-ask-head">${card.headline}</p>
-      <p>${card.roleLine}</p>
+      <p class="ly-yao-ask-head">${card.title}</p>
+      <p>${card.position}</p>
+      <p>${card.state}</p>
       <p>${card.relate}</p>
-      ${card.aux ? `<p class="ly-guide-tip">${card.aux}</p>` : ''}
+      <p class="ly-classic-note">（${card.classicNote}）</p>
     </article>
+  `;
+}
+
+export type CoreParseBlock = {
+  kicker: string;
+  body: string;
+  classicNote: string;
+};
+
+/** 核心要素解析：世 / 应 / 动（生活翻译在前，传统注在后） */
+export function buildCoreParseBlocks(
+  rows: YaoDress[],
+  opts?: { domain?: SceneDomain; shiYingTip?: string },
+): CoreParseBlock[] {
+  const shi = rows.find((r) => r.isShi);
+  const ying = rows.find((r) => r.isYing);
+  const moving = rows.filter((r) => r.changing);
+  const blocks: CoreParseBlock[] = [];
+  const domain = opts?.domain;
+
+  if (shi) {
+    const e = LIUQIN_ENERGY[shi.liuqin];
+    let body = relateLine(shi, domain);
+    if (shi.liuqin === '兄弟') {
+      body =
+        '你目前正处于一个【向外探索的阶段】，凭借过往的经验和底牌，有强烈的意愿去打破现状。' +
+        (domain === 'career' ? '结合求职：同侪场会推你行动，也别被别人的节奏带走。' : '');
+    } else if (shi.liuqin === '官鬼') {
+      body = `你目前的能量高度集中在【外部目标 / 规则】上——${e.blurb}`;
+    } else if (shi.liuqin === '妻财') {
+      body = `你当下更站在【物质根基与自我价值】一侧——${e.blurb}`;
+    } else if (shi.liuqin === '子孙') {
+      body = `你当下更适合【打破旧框架、信任直觉】——${e.blurb}`;
+    } else {
+      body = `你当下站在【安全基地 / 信息网】一侧——${e.blurb}`;
+    }
+    blocks.push({
+      kicker: '🔹 你的状态（世爻）',
+      body,
+      classicNote: `传统卦象标记为 ${shi.liuqin}爻 · ${shi.liushen} · ${shi.label}`,
+    });
+  }
+
+  if (ying) {
+    const e = LIUQIN_ENERGY[ying.liuqin];
+    let body = `你现在所处的环境，主调是「${e.modern}」。${e.blurb}`;
+    if (ying.liuqin === '妻财') {
+      body =
+        '你现在所处的环境，正在向你释放实际资源和利益的机会。但要注意，这种利益可能带有隐藏条件。';
+    } else if (ying.liuqin === '官鬼') {
+      body =
+        '外部环境正以【目标 / 规则 / 压力】的方式与你互动。机会与考核往往绑在一起，先分清哪些是你的边界。';
+    } else if (ying.liuqin === '兄弟') {
+      body =
+        '外部环境偏【同侪与竞争】。有人激活你，也可能拉扯你的节奏——善用盟友，别被带跑。';
+    }
+    if (ying.liushen === '玄武') {
+      body += ' 六神偏玄武：信息或机会可能不那么明面，留心暗流与隐藏条件。';
+    } else if (ying.liushen === '朱雀') {
+      body += ' 六神偏朱雀：言论、面试表达、信息交换会更显眼。';
+    }
+    if (opts?.shiYingTip) {
+      body += ` ${opts.shiYingTip}`;
+    }
+    blocks.push({
+      kicker: '🔹 外部环境（应爻）',
+      body,
+      classicNote: `传统卦象标记为 ${ying.liushen}+${ying.liuqin}爻 · ${ying.label}`,
+    });
+  }
+
+  if (moving.length === 0) {
+    blocks.push({
+      kicker: '🔹 变化的焦点（动爻）',
+      body: '本卦没有动爻：格局相对稳，关键不在「突变」，而在把世应看清、把下一步写成可验证的小动作。',
+      classicNote: '传统：无动则无变',
+    });
+  } else {
+    const m = moving[0]!;
+    const e = LIUQIN_ENERGY[m.liuqin];
+    let body = `事情的关键变化点落在「${e.modern}」这一层。`;
+    if (m.liuqin === '妻财' || (m.changedBranch && m.liuqin === '父母')) {
+      body =
+        '事情的关键变化点，在于你即将获得（或重新谈判）实际的物质回报 / 认可（如薪资提升、项目落地、技能变现）。';
+    } else if (m.liuqin === '官鬼') {
+      body =
+        '事情的关键变化点，在于外部目标 / 规则正在松动或重组——岗位、考核、评价框架可能出现新窗口。';
+    } else if (m.liuqin === '子孙') {
+      body =
+        '事情的关键变化点，在于破局与创造力被激活——适合试非常规路径，而不是只堆标准动作。';
+    } else if (m.liuqin === '兄弟') {
+      body =
+        '事情的关键变化点，在于同侪圈层或竞争关系正在变——可能出现新盟友，也可能被别人的节奏推着走。';
+    } else {
+      body =
+        '事情的关键变化点，在于信息网 / 安全基地正在变——文书、内推、隐藏考核或基础盘需要你主动补齐。';
+    }
+    if (moving.length > 1) {
+      body += `（另有 ${moving.length - 1} 处动爻，变化面更大，宜拆开一件件看。）`;
+    }
+    const classic =
+      moving.length === 1
+        ? `传统卦象标记为 ${m.label}${m.liuqin}动${
+            m.changedBranch ? `化 ${m.changedBranch}${m.changedWuxing ?? ''}` : ''
+          }`
+        : `传统：动爻 ${moving.map((r) => r.label + r.liuqin).join('、')}`;
+    blocks.push({
+      kicker: '🔹 变化的焦点（动爻）',
+      body,
+      classicNote: classic,
+    });
+  }
+
+  return blocks;
+}
+
+export function renderCoreParseHtml(blocks: CoreParseBlock[]): string {
+  return `
+    <section class="ly-core-parse">
+      <h3>核心要素解析</h3>
+      ${blocks
+        .map(
+          (b) => `
+        <article class="ly-core-parse-item">
+          <h4>${b.kicker}</h4>
+          <p>${b.body}</p>
+          <p class="ly-classic-note">（注：${b.classicNote}）</p>
+        </article>`,
+        )
+        .join('')}
+    </section>
+  `;
+}
+
+/** 传统排盘导语（进阶参考，非主解读） */
+export function renderClassicPlateIntroHtml(): string {
+  return `
+    <section class="ly-classic-plate-intro">
+      <h3>📖 传统易学专业排盘（进阶参考）</h3>
+      <p>上面你已经看懂了生活层面的翻译。下面这份表格，是易学研究者用来断卦的原始源代码。</p>
+      <p>你会发现，这和我们平时说的「情绪、资源、目标」是一一对应的：</p>
+      <ul class="ly-qin-map">
+        <li><strong>官鬼</strong> = 外部目标与压力</li>
+        <li><strong>妻财</strong> = 物质基础与自我价值</li>
+        <li><strong>父母</strong> = 知识、信息与安全感</li>
+        <li><strong>子孙</strong> = 创造力与内在本源</li>
+        <li><strong>兄弟</strong> = 同侪环境与盟友圈</li>
+      </ul>
+      <p class="ly-guide-tip">跟着『六爻学习地图』走，不久之后你就能看懂这份表格，享受自己去推理的乐趣。</p>
+    </section>
   `;
 }
 

@@ -4301,4 +4301,81 @@ button.ly-yao-kind-card:hover {
   line-height: 1.45;
 }
 
+.ly-core-parse {
+  margin: 12px 0;
+}
+
+.ly-core-parse > h3 {
+  margin: 0 0 10px;
+  color: var(--ly-gold);
+  font-size: 1rem;
+}
+
+.ly-core-parse-item {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ly-core-parse-item h4 {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  color: var(--ly-gold);
+}
+
+.ly-core-parse-item p {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-classic-note {
+  font-size: 0.75rem !important;
+  color: var(--ly-muted) !important;
+}
+
+.ly-core-yong-inline {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(199, 164, 91, 0.25);
+}
+
+.ly-classic-plate-intro {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background:
+    linear-gradient(180deg, rgba(58, 48, 32, 0.35), rgba(28, 24, 18, 0.55));
+}
+
+.ly-classic-plate-intro h3 {
+  margin: 0 0 8px;
+  color: var(--ly-gold);
+  font-size: 0.95rem;
+}
+
+.ly-classic-plate-intro p {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-qin-map {
+  margin: 0 0 10px;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--ly-mist);
+  line-height: 1.55;
+}
+
+.ly-qin-map strong {
+  color: var(--ly-gold);
+}
+
 
