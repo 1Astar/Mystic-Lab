@@ -4478,4 +4478,88 @@ button.ly-yao-kind-card:hover {
   color: var(--ly-gold);
 }
 
+.ly-infer-fold,
+.ly-qin-dict {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(18, 16, 12, 0.55);
+}
+
+.ly-infer-fold summary {
+  cursor: pointer;
+  color: var(--ly-gold);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.ly-infer-body {
+  margin-top: 10px;
+}
+
+.ly-infer-line {
+  margin-bottom: 10px;
+}
+
+.ly-infer-line p {
+  margin: 0 0 4px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-infer-confluence {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(199, 164, 91, 0.2);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-qin-dict h4 {
+  margin: 0 0 8px;
+  color: var(--ly-gold);
+  font-size: 0.88rem;
+}
+
+.ly-qin-dict-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ly-qin-dict-tag {
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(12, 10, 8, 0.4);
+  color: var(--ly-mist);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.ly-qin-dict-tag[aria-pressed='true'] {
+  border-color: rgba(199, 164, 91, 0.65);
+  background: rgba(199, 164, 91, 0.14);
+  color: var(--ly-gold);
+}
+
+.ly-qin-dict-panel {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-qin-dict-title {
+  margin: 0 0 6px;
+  color: var(--ly-gold);
+}
+
 

@@ -16,7 +16,7 @@ import {
 } from '../../liuyao/result-layers.ts';
 import { renderLearnReadingTab, bindYaoAskButtons } from '../../liuyao/narrative-learn.ts';
 import { buildReadingFacts } from '../../liuyao/reading-facts.ts';
-import { renderClassicPlateIntroHtml } from '../../liuyao/energy-lens.ts';
+import { renderClassicPlateIntroHtml, bindQinDict } from '../../liuyao/energy-lens.ts';
 import {
   QUICK_TAB_DEFS,
   renderQuickBoard,
@@ -196,7 +196,10 @@ export function mountLiuyaoResultTabs(
   }
 
   const layersApi = bindResultLayers(host, cast, question);
-  if (learn) bindYaoAskButtons(host, cast, question, castAt);
+  if (learn) {
+    bindYaoAskButtons(host, cast, question, castAt);
+    bindQinDict(host);
+  }
 
   const guideRoot = host.querySelector<HTMLElement>('[data-guide-root]');
   if (guideRoot) bindGuideInteractions(guideRoot, cast, question);

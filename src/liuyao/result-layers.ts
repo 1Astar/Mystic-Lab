@@ -21,6 +21,14 @@ import {
   renderLearnCorePanel,
 } from './narrative-learn.ts';
 import { buildReadingFacts } from './reading-facts.ts';
+import {
+  buildInternalInference,
+  bindQinDict,
+  renderInternalInferenceHtml,
+  renderQinDictHtml,
+} from './energy-lens.ts';
+import { buildShengKeMap } from './shengke-map.ts';
+import { detectSceneDomain } from './scene-map.ts';
 import { glossDaXiang } from './classic-gloss.ts';
 
 function modernLineGloss(cast: CastResult, i: number): { modern: string; classicHint: string } {
@@ -94,6 +102,18 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
   const sz = siZhuFromDate(castAt);
   const dressed = dressHexagram(cast, sz.dayStem);
   const graph = buildShengKeGraph(dressed.rows, question);
+  const skMap = buildShengKeMap(cast, dressed, question);
+  const domain = detectSceneDomain(question);
+  const yongNode = skMap.nodes.find((n) => n.role === '用神');
+  const yuanNode = skMap.nodes.find((n) => n.role === '原神');
+  const jiNode = skMap.nodes.find((n) => n.role === '忌神');
+  const inference = buildInternalInference({
+    domain,
+    yongRow: yongNode?.row,
+    yongQin: skMap.yongQin,
+    yuanRow: yuanNode?.row,
+    jiRow: jiNode?.row,
+  });
   const facts = buildReadingFacts(cast, question, castAt);
   const dossier = resolveClassicDossier(cast.primary.name);
   const daBai = glossDaXiang(cast.primary.name) ?? dossier.modern;
@@ -130,6 +150,8 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
     </label>
     <p class="ly-layer-guide">默认此刻，可改。改时间会重算四柱与六神（历法：lunar-javascript）。</p>
     ${renderSiZhuBar(sz, castAt)}
+    ${renderInternalInferenceHtml(inference)}
+    ${renderQinDictHtml()}
     ${renderDressTable(dressed)}
     ${renderShengKeGraphHtml(graph)}
     ${whyBits ? `<div class="ly-sk-why-box">${whyBits}<p class="ly-guide-tip">${facts.shengKe.tip}</p></div>` : ''}
@@ -412,6 +434,7 @@ export function bindDeepPanel(
   });
 
   bindClassicFolder(deep);
+  bindQinDict(deep);
 
   deep.querySelectorAll<HTMLButtonElement>('[data-classic-line]').forEach((btn) => {
     btn.addEventListener('click', () => {

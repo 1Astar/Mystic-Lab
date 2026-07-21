@@ -455,3 +455,216 @@ export function renderEnergyFocusHtml(items: EnergyFocusItem[]): string {
     </section>
   `;
 }
+
+export type QinDictEntry = {
+  qin: LiuQin;
+  tag: string;
+  modernTitle: string;
+  modern: string;
+  classic: string;
+};
+
+export const LIUQIN_DICT: Record<LiuQin, QinDictEntry> = {
+  父母: {
+    qin: '父母',
+    tag: '父·母·爻',
+    modernTitle: '知识 / 安全网',
+    modern: '代表你的知识储备、学历、合同、信任的人、老东家、家人支持。',
+    classic: '传统释：父母、师长、文书、房屋',
+  },
+  官鬼: {
+    qin: '官鬼',
+    tag: '官·鬼·爻',
+    modernTitle: '目标 / 外部压力',
+    modern: '代表你的职业目标、想要拿下的大客户、需要克服的困难、外部规则、领导。',
+    classic: '传统释：丈夫、长官、功名、官司',
+  },
+  妻财: {
+    qin: '妻财',
+    tag: '妻·财·爻',
+    modernTitle: '自我价值 / 资源',
+    modern: '代表你的实际薪资、可支配资产、你在这个社会里的底气、以及情绪上的安全感。',
+    classic: '传统释：妻子、仆人、财富',
+  },
+  子孙: {
+    qin: '子孙',
+    tag: '子·孙·爻',
+    modernTitle: '创造力 / 破局点',
+    modern: '代表灵感、打破常规的能力、身体与放松愉悦的源泉，以及能帮你解压破局的那股力。',
+    classic: '传统释：儿女、下属、技艺、喜悦',
+  },
+  兄弟: {
+    qin: '兄弟',
+    tag: '兄·弟·爻',
+    modernTitle: '同侪 / 盟友圈',
+    modern: '代表同代人、社交圈层、竞争与合作、群体中的拉扯——别人如何激活或带走你的节奏。',
+    classic: '传统释：兄弟、朋友、竞争、耗财',
+  },
+};
+
+export type InferenceLine = {
+  title: string;
+  body: string;
+  classicNote?: string;
+};
+
+export type InternalInference = {
+  lines: InferenceLine[];
+  confluence: string;
+};
+
+function domainMatter(domain: SceneDomain): string {
+  if (domain === 'career') return '求职 / 工作';
+  if (domain === 'love') return '感情 / 关系';
+  if (domain === 'life') return '资源 / 钱财';
+  return '你当前关注的事情';
+}
+
+export function buildInternalInference(opts: {
+  domain: SceneDomain;
+  yongRow?: YaoDress | null;
+  yongQin?: LiuQin | null;
+  yuanRow?: YaoDress | null;
+  jiRow?: YaoDress | null;
+}): InternalInference {
+  const matter = domainMatter(opts.domain);
+  const lines: InferenceLine[] = [];
+
+  if (opts.yongRow && opts.yongQin) {
+    const e = LIUQIN_ENERGY[opts.yongQin];
+    lines.push({
+      title: '目标节点（用神）',
+      body: `代表你当前关注的事情（比如${matter}），在这个卦里落在 ${opts.yongRow.label}（${formatLiuqinShort(opts.yongQin)}）。${e.blurb}`,
+      classicNote: `用神在${opts.yongRow.label}${opts.yongQin}爻${opts.yongRow.branch}${opts.yongRow.wuxing}`,
+    });
+  } else {
+    lines.push({
+      title: '目标节点（用神）',
+      body: `本题关注「${matter}」，但用神尚未直接落到具体爻。先把问题写具体，或结合世应与动爻看。`,
+    });
+  }
+
+  if (opts.yuanRow) {
+    const q = opts.yuanRow.liuqin;
+    const moving = opts.yuanRow.changing;
+    lines.push({
+      title: '助力来源（元神）',
+      body: moving
+        ? `目前有一股强烈的「${LIUQIN_ENERGY[q].modern}」能量正在转化为你的动力，生扶你问的事。`
+        : `场上有「${LIUQIN_ENERGY[q].modern}」可作为助力来源，虽未大动，仍值得借力。`,
+      classicNote: `元神在${opts.yuanRow.label}${q}${moving ? '发动' : ''}，生助用神`,
+    });
+  } else {
+    lines.push({
+      title: '助力来源（元神）',
+      body: '本卦未见明显元神生助。动力更多要靠你自己对齐世应、做小步验证。',
+      classicNote: '元神未现',
+    });
+  }
+
+  if (opts.jiRow) {
+    const q = opts.jiRow.liuqin;
+    const moving = opts.jiRow.changing;
+    lines.push({
+      title: '潜在阻力（忌神）',
+      body: moving
+        ? `要注意：「${LIUQIN_ENERGY[q].modern}」这一层正在动，可能分心或拖慢你问的事。`
+        : `但要注意，在事情的相关层（${opts.jiRow.label}），有「${LIUQIN_ENERGY[q].modern}」在静静拉扯你，可能会让你分心。`,
+      classicNote: `忌神在${opts.jiRow.label}${q}${moving ? '发动' : '（静/暗处牵制）'}`,
+    });
+  } else {
+    lines.push({
+      title: '潜在阻力（忌神）',
+      body: '本卦忌神不明显，干扰项相对少，可更专注目标节点本身。',
+      classicNote: '忌神未现',
+    });
+  }
+
+  const yuanOn = Boolean(opts.yuanRow?.changing);
+  const jiOn = Boolean(opts.jiRow?.changing);
+  let confluence: string;
+  if (yuanOn && !jiOn) {
+    confluence =
+      '因为源动力偏强，直接盖过了潜在的静阻力，所以尽管有点小拉扯，事情仍更可能朝你有利的方向松动——记得把助力用在可验证的一小步上。';
+  } else if (!yuanOn && jiOn) {
+    confluence =
+      '阻力侧更活跃，助力不够明朗。建议先减干扰（忌神那一层），再谈大推进，避免硬冲内耗。';
+  } else if (yuanOn && jiOn) {
+    confluence =
+      '助力与阻力同时在动。先保目标节点不被拖垮，再借元神之助推进——有生有克时，顺序比速度重要。';
+  } else if (opts.yongRow) {
+    confluence =
+      '生克都不喧哗。少做复杂推演，先用世应与动爻定下一步，把注意力放在用神所在层。';
+  } else {
+    confluence = '先回到核心要素，把用神锚定后再看助力与阻力。';
+  }
+
+  return { lines, confluence };
+}
+
+export function renderInternalInferenceHtml(inf: InternalInference): string {
+  const body = inf.lines
+    .map(
+      (l) => `
+      <div class="ly-infer-line">
+        <p><strong>${l.title}：</strong>${l.body}</p>
+        ${l.classicNote ? `<p class="ly-classic-note">（注：传统断语为：${l.classicNote}）</p>` : ''}
+      </div>`,
+    )
+    .join('');
+  return `
+    <details class="ly-infer-fold">
+      <summary>🔍 内部推演过程（点击展开查看）</summary>
+      <div class="ly-infer-body">
+        ${body}
+        <p class="ly-infer-confluence"><strong>最终交汇：</strong>${inf.confluence}</p>
+      </div>
+    </details>
+  `;
+}
+
+export function renderQinDictHtml(): string {
+  const order: LiuQin[] = ['父母', '官鬼', '妻财', '子孙', '兄弟'];
+  const tags = order
+    .map((q) => {
+      const d = LIUQIN_DICT[q];
+      return `<button type="button" class="ly-qin-dict-tag" data-qin-dict="${q}" aria-pressed="false">${d.tag}（${d.modernTitle}）</button>`;
+    })
+    .join('');
+  return `
+    <section class="ly-qin-dict" data-qin-dict-root>
+      <h4>📖 名词翻译词典（点击标签即可查看）</h4>
+      <div class="ly-qin-dict-tags">${tags}</div>
+      <div class="ly-qin-dict-panel" data-qin-dict-panel hidden></div>
+    </section>
+  `;
+}
+
+export function bindQinDict(root: HTMLElement): void {
+  root.querySelectorAll<HTMLElement>('[data-qin-dict-root]').forEach((host) => {
+    const panel = host.querySelector<HTMLElement>('[data-qin-dict-panel]');
+    host.querySelectorAll<HTMLButtonElement>('[data-qin-dict]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const q = btn.dataset.qinDict as LiuQin;
+        const d = LIUQIN_DICT[q];
+        const on = btn.getAttribute('aria-pressed') === 'true';
+        host.querySelectorAll('[data-qin-dict]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+        if (on) {
+          if (panel) {
+            panel.hidden = true;
+            panel.innerHTML = '';
+          }
+          return;
+        }
+        btn.setAttribute('aria-pressed', 'true');
+        if (panel) {
+          panel.hidden = false;
+          panel.innerHTML = `
+          <p class="ly-qin-dict-title"><strong>${d.tag}</strong>（${d.modernTitle}）</p>
+          <p>${d.modern}</p>
+          <p class="ly-classic-note">${d.classic}</p>`;
+        }
+      });
+    });
+  });
+}

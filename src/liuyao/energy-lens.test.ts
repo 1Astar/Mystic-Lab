@@ -4,6 +4,7 @@ import {
   buildEnergyFocus,
   buildYaoAskCard,
   buildCoreParseBlocks,
+  buildInternalInference,
   formatYongLabel,
 } from './energy-lens.ts';
 import type { YaoDress } from './najia.ts';
@@ -75,5 +76,19 @@ describe('energy-lens', () => {
     expect(blocks[1]!.body).toMatch(/资源|利益/);
     expect(blocks[1]!.classicNote).toMatch(/玄武/);
     expect(blocks[2]!.kicker).toMatch(/动爻/);
+  });
+
+  it('internal inference has yong yuan ji and confluence', () => {
+    const inf = buildInternalInference({
+      domain: 'career',
+      yongQin: '父母',
+      yongRow: row({ index: 2, liuqin: '父母' }),
+      yuanRow: row({ index: 3, liuqin: '官鬼', changing: true }),
+      jiRow: row({ index: 0, liuqin: '妻财' }),
+    });
+    expect(inf.lines[0]!.title).toMatch(/用神/);
+    expect(inf.lines[1]!.body).toMatch(/动力/);
+    expect(inf.lines[2]!.classicNote).toMatch(/忌神/);
+    expect(inf.confluence).toMatch(/有利|松动|助力/);
   });
 });

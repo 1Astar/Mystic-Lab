@@ -10,14 +10,18 @@ import {
   buildCoreParseBlocks,
   buildEnergyFocus,
   buildYaoAskCard,
+  buildInternalInference,
   formatLiuqinShort,
   renderCoreParseHtml,
   renderEnergyFocusHtml,
+  renderInternalInferenceHtml,
+  renderQinDictHtml,
   renderYongShenTeachHtml,
   renderYaoAskCardHtml,
 } from './energy-lens.ts';
 import { dressHexagram, type YaoDress } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
+import { buildShengKeMap } from './shengke-map.ts';
 
 export type CausalReading = {
   anchor: string;
@@ -118,6 +122,21 @@ function energyFocusFromCast(cast: CastResult, castAt = new Date()): string {
   return renderEnergyFocusHtml(items);
 }
 
+function inferenceFromCast(cast: CastResult, question: string, castAt = new Date()): string {
+  const sz = siZhuFromDate(castAt);
+  const dressed = dressHexagram(cast, sz.dayStem);
+  const map = buildShengKeMap(cast, dressed, question);
+  const domain = buildReadingFacts(cast, question, castAt).domain;
+  const inf = buildInternalInference({
+    domain,
+    yongRow: map.nodes.find((n) => n.role === '用神')?.row,
+    yongQin: map.yongQin,
+    yuanRow: map.nodes.find((n) => n.role === '原神')?.row,
+    jiRow: map.nodes.find((n) => n.role === '忌神')?.row,
+  });
+  return `${renderInternalInferenceHtml(inf)}${renderQinDictHtml()}`;
+}
+
 export function renderCausalReadingHtml(
   facts: ReadingFacts,
   cast: CastResult,
@@ -156,6 +175,7 @@ export function renderCausalReadingHtml(
       <h3>推导过程</h3>
       ${becauseHtml}
       ${energyFocusFromCast(cast, castAt)}
+      ${inferenceFromCast(cast, facts.question, castAt)}
     </section>
     <section class="ly-result-panel ly-causal-chain">
       <span class="ly-layer-num">三</span>
