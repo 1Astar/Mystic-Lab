@@ -10,6 +10,7 @@ import {
 import { buildShengKeMap } from './shengke-map.ts';
 import { lineApproxWuXing, shiYingRelation, type ShiYingRel } from './wuxing.ts';
 import { resolveYongShen } from './yong-shen.ts';
+import { formatLiuqinShort } from './energy-lens.ts';
 
 /** 爻位角色（初→上） */
 export const LINE_ROLE = [
@@ -94,15 +95,15 @@ function buildShengKeFacts(
   const jiNode = map.nodes.find((n) => n.role === '忌神');
 
   const whyYuan = yuanNode
-    ? `因为「${yuanNode.row.liuqin}」在${yuanNode.row.label}${
+    ? `因为「${formatLiuqinShort(yuanNode.row.liuqin)}」在${yuanNode.row.label}${
         yuanNode.row.changing ? '（动）' : ''
-      }五行生用神，所以它是帮你的原神——可借这一层的资源/信息推进。`
+      }在能量上生扶用神，所以它是帮你的那一层——可借这一层的资源/信息推进。`
     : undefined;
 
   const whyJi = jiNode
-    ? `因为「${jiNode.row.liuqin}」在${jiNode.row.label}${
+    ? `因为「${formatLiuqinShort(jiNode.row.liuqin)}」在${jiNode.row.label}${
         jiNode.row.changing ? '（动）' : ''
-      }克制用神，所以它是忌神——这一层的急躁或干扰会拖累你问的事。`
+      }与用神的能量场相冲，所以这一层的急躁或干扰会拖累你问的事——建议把注意力从这里挪开一点。`
     : undefined;
 
   return {

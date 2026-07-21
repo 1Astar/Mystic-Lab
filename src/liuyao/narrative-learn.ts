@@ -6,6 +6,16 @@ import {
   buildReadingFacts,
   type ReadingFacts,
 } from './reading-facts.ts';
+import {
+  buildEnergyFocus,
+  buildYaoAskCard,
+  formatLiuqinShort,
+  renderEnergyFocusHtml,
+  renderYongShenTeachHtml,
+  renderYaoAskCardHtml,
+} from './energy-lens.ts';
+import { dressHexagram, type YaoDress } from './najia.ts';
+import { siZhuFromDate } from './ganzhi.ts';
 
 export type CausalReading = {
   anchor: string;
@@ -105,20 +115,39 @@ function mapYingLife(facts: ReadingFacts): string {
 
 function mapYongBite(facts: ReadingFacts): string {
   if (!facts.question.trim()) {
-    return '你还没有写具体问题。若这是问工作，用神常看「官鬼爻」；问感情常看「妻财/官鬼」。写下问题后，映射会更准。';
+    return `你还没有写具体问题。若这是问工作，用神常看「${formatLiuqinShort('官鬼')}」；问感情常看「${formatLiuqinShort('妻财')} / ${formatLiuqinShort('官鬼')}」。写下问题后，映射会更准。`;
   }
   if (facts.yong.matchedLabel) {
     const moving = facts.changing.labels.includes(facts.yong.matchedLabel);
     return moving
       ? `用神落在${facts.yong.matchedLabel}，且这一爻在动——你问的事正在「变心」，优先盯这一层。`
-      : `用神倾向落在${facts.yong.matchedLabel}；目前动爻没有直接咬在用神上，说明眼前未必有直接突破口，先借原神/减忌神，或只做小验证。`;
+      : `用神倾向落在${facts.yong.matchedLabel}；目前动爻没有直接咬在用神上，说明眼前未必有直接突破口，先调整注意力（减干扰、借助力），或只做小验证。`;
   }
-  return `本题用神倾向「${facts.yong.name}」，本卦尚未直接落到对应六亲爻——先把问题写具体，或结合世应与动爻看。`;
+  return `本题用神倾向「${facts.yong.name}」，本卦尚未直接落到对应模块——先把问题写具体，或结合世应与动爻看。`;
+}
+
+function dressedRows(cast: CastResult, castAt = new Date()): YaoDress[] {
+  return dressHexagram(cast, siZhuFromDate(castAt).dayStem).rows;
+}
+
+function highlightIndexes(facts: ReadingFacts): number[] {
+  return facts.yong.matchedLine !== undefined ? [facts.yong.matchedLine] : [];
+}
+
+function energyFocusFromCast(cast: CastResult, castAt = new Date()): string {
+  const rows = dressedRows(cast, castAt);
+  const changingQin = rows.filter((r) => r.changing).map((r) => r.liuqin);
+  const items = buildEnergyFocus({
+    changingQin,
+    changedQin: changingQin[0] ?? null,
+  });
+  return renderEnergyFocusHtml(items);
 }
 
 export function renderCausalReadingHtml(
   facts: ReadingFacts,
   cast: CastResult,
+  castAt = new Date(),
 ): string {
   const causal = buildCausalReading(facts);
   const pack = buildStrategyPack(cast, facts.domain, facts.question);
@@ -131,17 +160,28 @@ export function renderCausalReadingHtml(
         `<li><strong>${escapeHtml(it.label)}</strong><span>${formatClauseHtml(it.text)}</span></li>`,
     )
     .join('');
+  const rows = dressedRows(cast, castAt);
+  const hi = highlightIndexes(facts);
+  const yongRow = hi.length ? rows.find((r) => r.index === hi[0]) : undefined;
 
   return `
     <section class="ly-result-panel ly-causal-chain">
       <span class="ly-layer-num">一</span>
       <h3>核心锚点</h3>
       <p class="ly-causal-anchor">${escapeHtml(causal.anchor)}</p>
+      ${renderYongShenTeachHtml({
+        domain: facts.domain,
+        yongLabel: facts.yong.name,
+        yongWhy: facts.yong.why,
+        row: yongRow,
+        highlightIndexes: hi,
+      })}
     </section>
     <section class="ly-result-panel ly-causal-chain">
       <span class="ly-layer-num">二</span>
       <h3>推导过程</h3>
       ${becauseHtml}
+      ${energyFocusFromCast(cast, castAt)}
     </section>
     <section class="ly-result-panel ly-causal-chain">
       <span class="ly-layer-num">三</span>
@@ -154,17 +194,27 @@ export function renderCausalReadingHtml(
   `;
 }
 
-export function renderCoreMappedHtml(facts: ReadingFacts, cast: CastResult): string {
+export function renderCoreMappedHtml(
+  facts: ReadingFacts,
+  cast: CastResult,
+  _castAt = new Date(),
+): string {
+  const hi = highlightIndexes(facts);
   return `
-    <p class="ly-layer-guide">先记住锚：<strong>世＝你</strong>，<strong>应＝对方或环境</strong>；用神＝你问的事在卦里的代表。下面把它们映射到这一卦。</p>
-    <div class="ly-guide-hex">${renderHexagramSvg({
-      lines: cast.primaryLines,
-      shiLine: cast.shiLine,
-      yingLine: cast.yingLine,
-      changingIndexes: cast.changingIndexes,
-      emphasizeShiYing: true,
-      showTrigramLabels: true,
-    })}</div>
+    <p class="ly-layer-guide">先记住锚：<strong>世＝你</strong>，<strong>应＝对方或环境</strong>；用神＝你问的事在卦里的代表。点爻旁 <strong>?</strong> 可看「跟你有什么关系」。六亲按能量模块书写，如「${formatLiuqinShort('妻财')}」。</p>
+    <div class="ly-guide-hex" data-ask-hex>
+      ${renderHexagramSvg({
+        lines: cast.primaryLines,
+        shiLine: cast.shiLine,
+        yingLine: cast.yingLine,
+        changingIndexes: cast.changingIndexes,
+        emphasizeShiYing: true,
+        showTrigramLabels: true,
+        showAskButtons: true,
+        highlightIndexes: hi,
+      })}
+      <div class="ly-yao-ask-slot" data-ask-slot hidden></div>
+    </div>
     <div class="ly-core-cards ly-core-mapped">
       <article>
         <h4>世 · 你</h4>
@@ -172,9 +222,10 @@ export function renderCoreMappedHtml(facts: ReadingFacts, cast: CastResult): str
         <p>${escapeHtml(mapShiLife(facts))}</p>
       </article>
       <article>
-        <h4>应 · 对方 / 环境</h4>
-        <p class="ly-core-def">应＝对方或环境。应在${escapeHtml(facts.ying.label)}（${escapeHtml(facts.ying.role)}）。</p>
+        <h4>应 · 外部世界</h4>
+        <p class="ly-core-def">应＝外部。应在${escapeHtml(facts.ying.label)}（${escapeHtml(facts.ying.role)}）。</p>
         <p>${escapeHtml(mapYingLife(facts))}</p>
+        <p class="ly-guide-tip">${escapeHtml(facts.shiYingRel.tip)}</p>
       </article>
       <article class="ly-core-yong">
         <h4>用神 · ${escapeHtml(facts.yong.name)}</h4>
@@ -183,7 +234,52 @@ export function renderCoreMappedHtml(facts: ReadingFacts, cast: CastResult): str
         <p class="ly-guide-tip">${escapeHtml(facts.yong.tip)}</p>
       </article>
     </div>
+    <p class="ly-guide-tip">注：排盘表里的「官鬼 / 妻财」等只是代号；解读里一律写成能量模块名（括号保留传统词）。</p>
   `;
+}
+
+/** 绑定学习模式点爻问号 */
+export function bindYaoAskButtons(
+  root: HTMLElement,
+  cast: CastResult,
+  question: string,
+  castAt = new Date(),
+): void {
+  const rows = dressedRows(cast, castAt);
+  const domain = buildReadingFacts(cast, question, castAt).domain;
+  root.querySelectorAll<SVGGElement>('[data-ask-line]').forEach((g) => {
+    const open = () => {
+      const idx = Number(g.getAttribute('data-ask-line'));
+      const row = rows.find((r) => r.index === idx);
+      if (!row) return;
+      const host =
+        g.closest<HTMLElement>('[data-ask-hex]') ??
+        root.querySelector<HTMLElement>('[data-ask-hex]') ??
+        root;
+      let slot = host.querySelector<HTMLElement>('[data-ask-slot]');
+      if (!slot) {
+        slot = document.createElement('div');
+        slot.className = 'ly-yao-ask-slot';
+        slot.dataset.askSlot = '';
+        host.appendChild(slot);
+      }
+      const card = buildYaoAskCard(row, { domain });
+      slot.hidden = false;
+      slot.innerHTML = renderYaoAskCardHtml(card);
+      slot.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', (e) => {
+      e.stopPropagation();
+      open();
+    });
+    g.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
 }
 
 export function buildLearnFaq(
@@ -255,12 +351,20 @@ export function classicModernScene(facts: ReadingFacts, classicGloss: string): s
 }
 
 /** 便捷：从 cast 直接渲染学习解读 Tab */
-export function renderLearnReadingTab(cast: CastResult, question: string): string {
-  const facts = buildReadingFacts(cast, question);
-  return renderCausalReadingHtml(facts, cast);
+export function renderLearnReadingTab(
+  cast: CastResult,
+  question: string,
+  castAt = new Date(),
+): string {
+  const facts = buildReadingFacts(cast, question, castAt);
+  return renderCausalReadingHtml(facts, cast, castAt);
 }
 
-export function renderLearnCorePanel(cast: CastResult, question: string): string {
-  const facts = buildReadingFacts(cast, question);
-  return renderCoreMappedHtml(facts, cast);
+export function renderLearnCorePanel(
+  cast: CastResult,
+  question: string,
+  castAt = new Date(),
+): string {
+  const facts = buildReadingFacts(cast, question, castAt);
+  return renderCoreMappedHtml(facts, cast, castAt);
 }

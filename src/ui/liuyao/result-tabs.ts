@@ -14,12 +14,14 @@ import {
   renderFaqPanel,
   renderHexHero,
 } from '../../liuyao/result-layers.ts';
-import { renderLearnReadingTab } from '../../liuyao/narrative-learn.ts';
+import { renderLearnReadingTab, bindYaoAskButtons } from '../../liuyao/narrative-learn.ts';
+import { buildReadingFacts } from '../../liuyao/reading-facts.ts';
 import {
   QUICK_TAB_DEFS,
   renderQuickBoard,
   renderQuickTabsHtml,
 } from '../../liuyao/narrative-quick.ts';
+import { formatLiuqinShort } from '../../liuyao/energy-lens.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -155,9 +157,12 @@ export function mountLiuyaoResultTabs(
       { id: 'guide', label: '怎么读卦' },
       { id: 'deep', label: '深度推演' },
     ];
+    const facts = buildReadingFacts(cast, question, castAt);
+    const hi =
+      facts.yong.matchedLine !== undefined ? [facts.yong.matchedLine] : [];
 
     host.innerHTML = `
-      ${renderHexHero(cast)}
+      ${renderHexHero(cast, { askable: true, highlightIndexes: hi })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
           ${tabs
@@ -170,7 +175,7 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          ${renderLearnReadingTab(cast, question)}
+          ${renderLearnReadingTab(cast, question, castAt)}
         </div>
         <div class="ly-result-tab-panel" data-panel="core" role="tabpanel" hidden>
           ${renderCorePanel(cast, question)}
@@ -179,6 +184,7 @@ export function mountLiuyaoResultTabs(
           ${renderComposeTeach({ cast, question })}
         </div>
         <div class="ly-result-tab-panel" data-panel="deep" role="tabpanel" hidden>
+          <p class="ly-layer-guide">📜 传统专业排盘 · 原始档案（表内仍用官鬼/妻财等代号；解读区写作「${formatLiuqinShort('妻财')}」这类能量名）</p>
           <div data-deep-panel>${renderDeepPanel(cast, castAt, question)}</div>
           ${renderFaqPanel(cast, question)}
         </div>
@@ -190,6 +196,7 @@ export function mountLiuyaoResultTabs(
   }
 
   const layersApi = bindResultLayers(host, cast, question);
+  if (learn) bindYaoAskButtons(host, cast, question, castAt);
 
   const guideRoot = host.querySelector<HTMLElement>('[data-guide-root]');
   if (guideRoot) bindGuideInteractions(guideRoot, cast, question);

@@ -4194,3 +4194,111 @@ button.ly-yao-kind-card:hover {
   color: #7cb8a0;
 }
 
+/* —— 点爻问号 / 能量聚焦 / 用神授课 —— */
+
+.ly-yao-ask-bg {
+  fill: rgba(20, 22, 28, 0.9);
+  stroke: rgba(199, 164, 91, 0.55);
+  stroke-width: 1.2;
+}
+
+.ly-yao-ask-q {
+  fill: var(--ly-gold, #c7a45b);
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.ly-yao-ask:hover .ly-yao-ask-bg,
+.ly-yao-ask:focus .ly-yao-ask-bg {
+  stroke: rgba(199, 164, 91, 0.95);
+  fill: rgba(199, 164, 91, 0.15);
+}
+
+.ly-yong-glow {
+  fill: none;
+  stroke: rgba(199, 164, 91, 0.55);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 4px rgba(199, 164, 91, 0.45));
+}
+
+.ly-yao-highlight .ly-yao-yang,
+.ly-yao-highlight .ly-yao-yin {
+  stroke: #e0c070;
+}
+
+.ly-yao-ask-slot {
+  margin-top: 10px;
+  grid-column: 1 / -1;
+}
+
+.ly-yao-ask-card {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(28, 24, 18, 0.92);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-yao-ask-head {
+  font-weight: 600;
+  color: var(--ly-gold);
+  margin: 0 0 6px;
+}
+
+.ly-yong-teach {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(199, 164, 91, 0.06);
+  font-size: 0.84rem;
+  color: var(--ly-mist);
+  line-height: 1.5;
+}
+
+.ly-yong-teach-body {
+  margin-top: 8px;
+}
+
+.ly-energy-focus {
+  margin: 12px 0 4px;
+}
+
+.ly-energy-focus h4 {
+  margin: 0 0 4px;
+  color: var(--ly-gold);
+  font-size: 0.9rem;
+}
+
+.ly-energy-focus-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ly-energy-focus-list li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ly-energy-focus-list strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ly-gold);
+  font-size: 0.8rem;
+}
+
+.ly-energy-focus-list span {
+  font-size: 0.8rem;
+  color: var(--ly-mist);
+  line-height: 1.45;
+}
+
+

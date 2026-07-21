@@ -230,18 +230,25 @@ export function renderChangeHowHtml(cast: CastResult): string {
 }
 
 /** 本卦 + 变卦主视觉（进入结果页先见爻象） */
-export function renderHexHero(cast: CastResult): string {
+export function renderHexHero(
+  cast: CastResult,
+  opts: { askable?: boolean; highlightIndexes?: number[] } = {},
+): string {
   const movingLabels =
     cast.changingIndexes.length === 0
       ? '无动爻'
       : `动爻 ${cast.changingIndexes.map((i) => LINE_LABELS[i]!).join('、')}`;
   const changedShi = cast.changed?.shiLine;
   const changedYing = changedShi ? yingLineOf(changedShi) : undefined;
+  const askable = opts.askable ?? false;
+  const highlightIndexes = opts.highlightIndexes ?? [];
 
   return `
     <header class="ly-hex-hero">
-      <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}</p>
-      <div class="ly-layer-pair ly-hex-hero-pair">
+      <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}${
+        askable ? ' · 点 ? 学爻' : ''
+      }</p>
+      <div class="ly-layer-pair ly-hex-hero-pair" data-ask-hex>
         <div class="ly-hex-hero-col">
           <p class="ly-guide-label">本卦 · ${cast.primary.fullName}</p>
           ${renderHexagramSvg({
@@ -251,6 +258,8 @@ export function renderHexHero(cast: CastResult): string {
             changingIndexes: cast.changingIndexes,
             pulseChanging: true,
             showTrigramLabels: true,
+            showAskButtons: askable,
+            highlightIndexes,
           })}
           <p class="ly-hex-hero-gist">${formatClauseHtml(cast.primary.gist)}</p>
         </div>
@@ -268,6 +277,7 @@ export function renderHexHero(cast: CastResult): string {
               : '<p class="ly-guide-tip">无动则无变，时间轴停在本卦。</p>'
           }
         </div>
+        ${askable ? '<div class="ly-yao-ask-slot" data-ask-slot hidden></div>' : ''}
       </div>
       ${renderChangeHowHtml(cast)}
       <p class="ly-keywords">${cast.primary.keywords.join(' · ')}${

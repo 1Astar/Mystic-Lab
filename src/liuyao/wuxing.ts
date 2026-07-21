@@ -72,22 +72,22 @@ export function shiYingRelation(shiWx: WuXing, yingWx: WuXing): {
   if (WX_SHENG[shiWx] === yingWx) {
     return {
       rel: '相生',
-      verdict: '偏好事',
-      tip: '世生应：你在输出/成就外界，关系偏顺，注意别耗尽自己。',
+      verdict: '内外较有默契',
+      tip: '世（你）与应（外部）相生：内部能量与外部世界较顺，可顺水推舟，也留意别把力气全交给外界。',
     };
   }
   if (WX_SHENG[yingWx] === shiWx) {
     return {
       rel: '相生',
-      verdict: '偏好事',
-      tip: '应生世：外界在滋养你，宜承接机会，也别被动等靠。',
+      verdict: '外界在滋养你',
+      tip: '应生世：外部世界在滋养你的内部能量，宜承接机会，也别被动等靠。',
     };
   }
   if (WX_KE[shiWx] === yingWx || WX_KE[yingWx] === shiWx) {
     return {
       rel: '相克',
-      verdict: '有摩擦、易变动',
-      tip: '世应相克：内外较劲。先分清是你压对方，还是环境压你，再决定进退。',
+      verdict: '需求与现实有冲突',
+      tip: '世（你）与应（外部）相克：内心需求与外部现实有冲突。冲突不是你的错，而是价值观与环境暂不匹配——停下来审视真实需求，不必为了顺应环境而内耗自己。',
     };
   }
   return {

@@ -7,6 +7,7 @@ import { buildReadingFacts, type ReadingFacts } from './reading-facts.ts';
 import { buildQuickSummary } from './interpret.ts';
 import { dressHexagram } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
+import { formatLiuqinShort } from './energy-lens.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -38,7 +39,7 @@ export function renderQuickBoard(cast: CastResult, castAt: Date = new Date()): s
       return `<tr>
         <td class="ly-qb-yao">${yao}</td>
         <td>${r.label}</td>
-        <td>${r.liuqin}</td>
+        <td>${formatLiuqinShort(r.liuqin)}</td>
         <td class="ly-qb-mark">${mark || '—'}</td>
       </tr>`;
     })
