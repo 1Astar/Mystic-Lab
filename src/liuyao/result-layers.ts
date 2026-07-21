@@ -3,6 +3,7 @@ import {
   fromDatetimeLocalValue,
   siZhuFromDate,
   toDatetimeLocalValue,
+  renderCastTimePlaque,
   type SiZhu,
 } from './ganzhi.ts';
 import { LINE_LABELS, upperLowerFromLines, yingLineOf } from './hexagrams.ts';
@@ -41,7 +42,8 @@ function buildFaq(cast: CastResult, question: string) {
   return buildLearnFaq(buildReadingFacts(cast, question));
 }
 
-function renderSiZhuBar(sz: SiZhu): string {
+function renderSiZhuBar(sz: SiZhu, castAt?: Date): string {
+  if (castAt) return renderCastTimePlaque(castAt, { compact: true });
   return `
     <div class="ly-sizhu" data-sizhu>
       <span>年 ${sz.year}</span>
@@ -127,7 +129,7 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
       <input type="datetime-local" data-cast-at value="${toDatetimeLocalValue(castAt)}" />
     </label>
     <p class="ly-layer-guide">默认此刻，可改。改时间会重算四柱与六神（历法：lunar-javascript）。</p>
-    ${renderSiZhuBar(sz)}
+    ${renderSiZhuBar(sz, castAt)}
     ${renderDressTable(dressed)}
     ${renderShengKeGraphHtml(graph)}
     ${whyBits ? `<div class="ly-sk-why-box">${whyBits}<p class="ly-guide-tip">${facts.shengKe.tip}</p></div>` : ''}
@@ -232,7 +234,7 @@ export function renderChangeHowHtml(cast: CastResult): string {
 /** 本卦 + 变卦主视觉（进入结果页先见爻象） */
 export function renderHexHero(
   cast: CastResult,
-  opts: { askable?: boolean; highlightIndexes?: number[] } = {},
+  opts: { askable?: boolean; highlightIndexes?: number[]; castAt?: Date } = {},
 ): string {
   const movingLabels =
     cast.changingIndexes.length === 0
@@ -242,9 +244,11 @@ export function renderHexHero(
   const changedYing = changedShi ? yingLineOf(changedShi) : undefined;
   const askable = opts.askable ?? false;
   const highlightIndexes = opts.highlightIndexes ?? [];
+  const castAt = opts.castAt ?? new Date();
 
   return `
     <header class="ly-hex-hero">
+      ${renderCastTimePlaque(castAt)}
       <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}${
         askable ? ' · 点 ? 学爻' : ''
       }</p>

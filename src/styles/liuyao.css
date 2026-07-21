@@ -3550,6 +3550,106 @@ button.ly-yao-kind-card:hover {
   color: var(--ly-muted);
 }
 
+/* —— 问卦时间 · 干支能量刻度牌匾 —— */
+
+.ly-time-plaque {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background:
+    linear-gradient(135deg, rgba(62, 48, 28, 0.55), rgba(22, 20, 16, 0.72)),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 6px,
+      rgba(199, 164, 91, 0.03) 6px,
+      rgba(199, 164, 91, 0.03) 7px
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 230, 180, 0.06);
+}
+
+.ly-time-plaque.is-compact {
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.ly-time-plaque-ask {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  color: var(--ly-mist);
+  letter-spacing: 0.02em;
+}
+
+.ly-time-plaque-label {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  color: var(--ly-gold);
+  letter-spacing: 0.12em;
+  text-transform: none;
+  opacity: 0.9;
+}
+
+.ly-time-scale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 4px;
+}
+
+.ly-time-token {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 164, 91, 0.32);
+  background: rgba(12, 10, 8, 0.45);
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.ly-time-stem {
+  font-style: normal;
+  color: #e8e0d0;
+  font-weight: 600;
+}
+
+.ly-time-branch {
+  font-weight: 700;
+  color: #c45c48;
+}
+
+.ly-time-unit {
+  font-style: normal;
+  margin-left: 2px;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+}
+
+.ly-time-sep {
+  color: rgba(199, 164, 91, 0.45);
+  font-size: 0.85rem;
+  padding: 0 2px;
+}
+
+.ly-time-plaque-meta {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+}
+
+@media (max-width: 480px) {
+  .ly-time-token {
+    font-size: 0.82rem;
+    padding: 4px 8px;
+  }
+
+  .ly-time-sep {
+    display: none;
+  }
+}
+
 .ly-dress-wrap {
   overflow-x: auto;
   margin-bottom: 10px;

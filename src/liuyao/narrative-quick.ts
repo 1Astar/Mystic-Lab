@@ -6,7 +6,7 @@ import { formatClauseHtml } from './format-clause.ts';
 import { buildReadingFacts, type ReadingFacts } from './reading-facts.ts';
 import { buildQuickSummary } from './interpret.ts';
 import { dressHexagram } from './najia.ts';
-import { siZhuFromDate } from './ganzhi.ts';
+import { siZhuFromDate, renderCastTimePlaque } from './ganzhi.ts';
 import { formatLiuqinShort } from './energy-lens.ts';
 
 function escapeHtml(s: string): string {
@@ -68,6 +68,7 @@ export function renderQuickBoard(cast: CastResult, castAt: Date = new Date()): s
 
   return `
     <header class="ly-quick-board">
+      ${renderCastTimePlaque(castAt)}
       <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${
         cast.changingIndexes.length
           ? `动爻 ${cast.changingIndexes.map((i) => LINE_LABELS[i]).join('、')}`

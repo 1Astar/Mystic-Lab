@@ -162,7 +162,7 @@ export function mountLiuyaoResultTabs(
       facts.yong.matchedLine !== undefined ? [facts.yong.matchedLine] : [];
 
     host.innerHTML = `
-      ${renderHexHero(cast, { askable: true, highlightIndexes: hi })}
+      ${renderHexHero(cast, { askable: true, highlightIndexes: hi, castAt })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
           ${tabs
