@@ -22,6 +22,14 @@ export interface HexagramViewOptions {
   coinLabels?: (string | null | undefined)[];
   /** 整爻可点（教学入口） */
   teachable?: boolean;
+  /** 爻旁问号（学习模式：点哪里学哪里） */
+  showAskButtons?: boolean;
+  /** 高亮的爻下标（用神等） */
+  highlightIndexes?: number[];
+  /** 仅这些爻保持清晰；其余变暗（教学聚焦） */
+  focusIndexes?: number[];
+  /** 与 focusIndexes 联用：未聚焦爻加 dim */
+  dimOthers?: boolean;
 }
 
 function lineSvg(bit: LineBit, y: number, cx: number, pending = false): string {
@@ -52,14 +60,19 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
     kindLabels,
     coinLabels,
     teachable,
+    showAskButtons,
+    highlightIndexes = [],
+    focusIndexes,
+    dimOthers,
   } = opts;
   const leftPad = emphasizeShiYing ? 28 : 0;
+  const askW = showAskButtons ? 22 : 0;
   const hasKindLabels = Boolean(kindLabels?.some((k) => k));
   const hasCoinNotes = Boolean(coinLabels?.some((c) => c));
   const kindW = hasKindLabels ? 48 : 0;
   const labelW = showTrigramLabels && !compact ? 56 : 0;
   const cx = 60 + leftPad;
-  const w = 120 + labelW + leftPad + kindW;
+  const w = 120 + labelW + leftPad + kindW + askW;
   /** 字背在爻线下方时，行距略加大，避免叠字 */
   const gap = compact ? (hasCoinNotes ? 22 : 14) : 18;
   const h = compact ? (hasCoinNotes ? 148 : 100) : 130;
@@ -82,6 +95,10 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
       const isGrowing = Boolean(
         !pending && animateIndex !== undefined && i === animateIndex && i < filled,
       );
+      const focused =
+        !dimOthers ||
+        focusIndexes === undefined ||
+        focusIndexes.includes(i);
       const cls = [
         'ly-yao-row',
         pending ? 'ly-yao-pending-row' : '',
@@ -89,6 +106,9 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         pulseChanging && changing ? 'ly-yao-pulse' : '',
         isShi ? 'ly-yao-shi' : '',
         isYing ? 'ly-yao-ying' : '',
+        highlightIndexes.includes(i) ? 'ly-yao-highlight' : '',
+        dimOthers && !focused && !pending ? 'ly-yao-dim' : '',
+        dimOthers && focused && !pending ? 'ly-yao-focus' : '',
         !visible ? 'ly-yao-hidden' : isGrowing ? 'ly-yao-growing' : 'ly-yao-settled',
         canTeach ? 'is-teachable' : '',
       ]
@@ -104,6 +124,10 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
       } else if (isShi || isYing) {
         const tags = [isShi ? '世' : '', isYing ? '应' : ''].filter(Boolean).join('/');
         decor = `<text class="ly-yao-tag" x="${8 + leftPad}" y="${y + 4}">${tags}</text>`;
+      }
+
+      if (highlightIndexes.includes(i) && !pending) {
+        decor += `<circle class="ly-yong-glow" cx="${cx}" cy="${y}" r="20"/>`;
       }
 
       const labelX = cx + 52;
@@ -127,11 +151,20 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
           }" height="${hasCoinNotes ? 24 : 18}" fill="transparent" role="button" tabindex="0" aria-label="第${i + 1}爻 ${kind}" />`
         : '';
 
+      const askBtn =
+        showAskButtons && !pending
+          ? `<g class="ly-yao-ask" data-ask-line="${i}" role="button" tabindex="0" aria-label="问：${LINE_LABELS[i]}跟我有什么关系">
+              <circle class="ly-yao-ask-bg" cx="${cx + 58 + kindW * 0.15}" cy="${y}" r="8"/>
+              <text class="ly-yao-ask-q" text-anchor="middle" x="${cx + 58 + kindW * 0.15}" y="${y + 4}">?</text>
+            </g>`
+          : '';
+
       return `<g class="${cls}" data-line="${i}">
         ${decor}
         ${lineSvg(pending ? 0 : bit, y, cx, pending)}
         ${kindAnno}
         ${hit}
+        ${askBtn}
         ${!compact && !showTrigramLabels && !hasKindLabels ? `<text class="ly-yao-label" x="${108 + leftPad}" y="${y + 4}">${LINE_LABELS[i]}</text>` : ''}
       </g>`;
     })

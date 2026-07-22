@@ -13,6 +13,12 @@ import {
 } from './wuxing.ts';
 import { renderXiangVisual } from './xiang-visual.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
+import { buildReadingFacts } from './reading-facts.ts';
+import {
+  bindBianQuiz,
+  buildBianQuiz,
+  renderBianQuizHtml,
+} from './bian-quiz.ts';
 
 export interface FiveStepItem {
   step: 1 | 2 | 3 | 4 | 5;
@@ -42,32 +48,32 @@ export function buildFiveSteps(
   return [
     {
       step: 1,
-      title: '查灵魂 · 世应',
+      title: '先找「你」和「外界」的位置',
       lookAt: `世（我）在${shiLabel} · 应（外界）在${yingLabel}`,
       body: [
-        '找一找卦里的「我」和「外界」。金色圈＝世爻（你），红色圈＝应爻（对方/环境）。',
-        `极简结论：世应${rel.rel} → ${rel.verdict}。${rel.tip}`,
+        '世＝你，应＝对方或环境。金色圈＝世，红色圈＝应。',
+        `因为世在${shiLabel}、应在${yingLabel}，所以这一卦先看你们谁在哪一层：世应${rel.rel} → ${rel.verdict}。${rel.tip}`,
       ],
     },
     {
       step: 2,
-      title: '抓重点 · 动爻',
+      title: '看看哪些地方「动」了？（找转机）',
       lookAt: moving ? `${moveCount} 个动爻：${moving}` : '无动爻',
       body: moving
         ? [
-            `卦里有 ${moveCount} 个「变心」的爻，在${moving}——这就是你当下最该盯的具体事。`,
+            `因为动爻在${moving}，所以这些位置正在「变心」——是你当下最该盯的具体事。`,
             moveCount >= 3
               ? '动爻偏多：事情更复杂，先拆一件一件看。'
               : '动爻少：方向更明确，抓住这几处就够。',
           ]
         : [
-            '没有「变心」的爻：格局相对稳，先把世应与本卦场景看清，不必硬找变。',
+            '因为没有「变心」的爻，所以格局相对稳——先把世应与本卦场景看清，不必硬找变。',
             '动爻越多越复杂；动爻越少方向越明确。',
           ],
     },
     {
       step: 3,
-      title: '看根基 · 取象翻译',
+      title: '把上下两个卦翻译成生活场景',
       lookAt: `上${upper.nature}（环境）· 下${lower.nature}（自己）`,
       body: [
         '把上卦想成天/环境，下卦想成地/自己，连起来想。',
@@ -77,7 +83,7 @@ export function buildFiveSteps(
     },
     {
       step: 4,
-      title: '看过程 · 本→变',
+      title: '看过程：本卦 → 变卦',
       lookAt: cast.changed
         ? `${cast.primary.name} → ${cast.changed.name}`
         : `${cast.primary.name}（无变）`,
@@ -90,7 +96,7 @@ export function buildFiveSteps(
     },
     {
       step: 5,
-      title: '连生活 · 策略',
+      title: '连回生活：给出可执行策略',
       lookAt: question.trim() || '对照你真正在意的事',
       body: [
         '最后一步才落到生活：不要只拿一句总结交差，要有可执行的策略清单。',
@@ -126,8 +132,8 @@ export function renderFiveStepsHtml(
 
   return `
     <section class="ly-five-steps" aria-label="读卦五步走">
-      <h3 class="ly-five-title">读卦五步走</h3>
-      <p class="ly-five-lead">查灵魂（世应）→ 抓重点（动爻）→ 看根基（取象）→ 看过程（本→变）→ 连生活（策略）</p>
+      <h3 class="ly-five-title">怎么读这一卦</h3>
+      <p class="ly-five-lead">找你与外界 → 找转机（动爻）→ 翻译场景 → 看本变 → 连生活</p>
       <div class="ly-five-grid">${items}</div>
     </section>
   `;
@@ -244,12 +250,17 @@ function renderStepPanel(cast: CastResult, step: number, question: string, domai
         : domain === 'career'
           ? scene.career
           : `${scene.career} ${scene.love}`;
+    const facts = buildReadingFacts(cast, question);
+    const primaryDrill = `【本卦实战】上下「${facts.lowerNature}+${facts.upperNature}」→ ${facts.themeWord}。行动指令：先停半步，把边界说清，再决定冲不冲。`;
+    const quiz = buildBianQuiz(facts);
     return `
       <div class="ly-guide-panel" data-panel="3">
         <p class="ly-guide-talk">把上卦（天/环境）和下卦（地/自己）连起来想——不要停在符号名。</p>
         ${renderXiangVisual(upper, lower)}
         <p class="ly-guide-verdict">${scene.formula}</p>
         <p class="ly-guide-tip">${human}</p>
+        <p class="ly-drill-primary">${primaryDrill}</p>
+        ${quiz ? renderBianQuizHtml(quiz) : '<p class="ly-guide-tip">无变卦：本卦实战足够，先把当下看清。</p>'}
       </div>
     `;
   }
@@ -329,6 +340,7 @@ export function bindGuideInteractions(
     chips.forEach((c) => {
       c.classList.toggle('is-active', Number(c.dataset.guideStep) === step);
     });
+    bindBianQuiz(body);
     body.querySelectorAll<HTMLButtonElement>('[data-companion]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const reply = decodeURIComponent(btn.dataset.reply ?? '');

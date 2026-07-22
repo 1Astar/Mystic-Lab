@@ -417,25 +417,12 @@ function renderVisualTab(r: CardReading): string {
     .join('');
 
   const bridgeBlock = questionBridge
-    ? `<section class="visual-bridge-block"><h4 class="visual-section-title">热点整体解读 · 回到你的问题</h4><p class="visual-bridge-text">${formatParagraph(questionBridge)}</p></section>`
+    ? `<p class="visual-bridge-text">${formatParagraph(questionBridge)}</p>`
     : '';
 
   return `
 
     <div class="result-tab-panel" data-panel="visual">
-
-      <section class="visual-overview-block">
-        <h4 class="visual-section-title">整牌总览</h4>
-        <p class="visual-overview-text">${formatParagraph(overview)}</p>
-      </section>
-
-      ${bridgeBlock}
-
-      <section class="visual-elements-block">
-        <h4 class="visual-section-title">牌面元素</h4>
-        <p class="visual-hint">点击牌面光点查看；也可直接看下方列表</p>
-        <ul class="visual-elements-list">${elementList}</ul>
-      </section>
 
       <div class="visual-card-stage">
         <div class="visual-card-face ${r.orientation === 'reversed' ? 'is-reversed' : ''}" style="--card-color: ${cardColor}">
@@ -444,7 +431,19 @@ function renderVisualTab(r: CardReading): string {
         </div>
       </div>
 
-      <p class="hotspot-detail" id="hotspot-detail-${r.cardId}">点选上方元素查看含义</p>
+      <p class="hotspot-detail" id="hotspot-detail-${r.cardId}">点选牌面光点查看含义</p>
+
+      <section class="visual-overview-block${questionBridge ? ' has-bridge' : ''}">
+        <h4 class="visual-section-title">整牌总览${questionBridge ? ' · 回到你的问题' : ''}</h4>
+        <p class="visual-overview-text">${formatParagraph(overview)}</p>
+        ${bridgeBlock}
+      </section>
+
+      <section class="visual-elements-block">
+        <h4 class="visual-section-title">牌面元素</h4>
+        <p class="visual-hint">也可直接看下方列表；点列表或牌面光点都会更新说明</p>
+        <ul class="visual-elements-list">${elementList}</ul>
+      </section>
 
     </div>`;
 

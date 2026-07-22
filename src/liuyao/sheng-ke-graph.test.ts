@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildCastFromThrows, facesToThrow, type YaoThrow } from './engine.ts';
 import { dressHexagram } from './najia.ts';
-import { buildShengKeGraph } from './sheng-ke-graph.ts';
+import { buildShengKeGraph, buildCourseShengKeDialogue, renderCourseShengKeHtml } from './sheng-ke-graph.ts';
 import { whatGenerates, whatOvercomes } from './wuxing.ts';
 
 function castYu() {
@@ -31,5 +31,16 @@ describe('sheng-ke-graph', () => {
     expect(graph.nodes.some((n) => n.roles.includes('世'))).toBe(true);
     expect(graph.lines[0].length).toBeGreaterThan(8);
     expect(graph.lines[1].length).toBeGreaterThan(8);
+  });
+
+  it('course dialogue uses plain language', () => {
+    const cast = castYu();
+    const dressed = dressHexagram(cast, '壬');
+    const graph = buildShengKeGraph(dressed.rows, '明天考试能不能成功');
+    const talk = buildCourseShengKeDialogue(graph);
+    expect(talk.tease).toMatch(/你猜谁赢了/);
+    expect(talk.dialogue).not.toMatch(/先保用神不被拖垮/);
+    const html = renderCourseShengKeHtml(graph);
+    expect(html).toMatch(/生（帮助）|克（阻碍）|有的救|暗中扶持|拖后腿/);
   });
 });

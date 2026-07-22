@@ -3,91 +3,36 @@ import {
   fromDatetimeLocalValue,
   siZhuFromDate,
   toDatetimeLocalValue,
+  renderCastTimePlaque,
   type SiZhu,
 } from './ganzhi.ts';
 import { LINE_LABELS, upperLowerFromLines, yingLineOf } from './hexagrams.ts';
 import { bindClassicFolder, renderClassicFolderHtml } from './classic-folder.ts';
 import { dressHexagram, type DressedHexagram, type YaoDress } from './najia.ts';
 import { buildShengKeGraph, renderShengKeGraphHtml } from './sheng-ke-graph.ts';
-import { composeScene, detectSceneDomain } from './scene-map.ts';
-import { resolveYongShen } from './yong-shen.ts';
 import { renderYaoCard } from './yao-card.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
 import { formatClauseHtml } from './format-clause.ts';
 import { teachFold } from './flip-teach.ts';
-
-const LINE_ROLE = [
-  '基础 / 开端 / 基层',
-  '内部 / 宅内 / 助手',
-  '关口 / 过渡 / 门口',
-  '外部 / 门庭 / 近外',
-  '核心 / 君位 / 决策',
-  '收束 / 结果 / 终结',
-] as const;
-
-function modernLineGloss(cast: CastResult, i: number): { modern: string; classicHint: string } {
-  const role = LINE_ROLE[i]!;
-  const moving = cast.changingIndexes.includes(i);
-  const isShi = cast.shiLine === i + 1;
-  const isYing = cast.yingLine === i + 1;
-  const who = isShi ? '这一爻是「世」（你）' : isYing ? '这一爻是「应」（外界）' : '这一爻是闲爻';
-  const move = moving
-    ? '它还在动——这一层正在发生转折，值得优先关注。'
-    : '它是静爻——这一层相对稳定。';
-  return {
-    modern: `${LINE_LABELS[i]}提示：位置偏「${role}」。${who}。${move}`,
-    classicHint: `《易经》对该卦${LINE_LABELS[i]}另有爻辞；点 📖 可看古文入口（进阶资料，不必一次啃完）。`,
-  };
-}
+import {
+  buildLearnFaq,
+  renderLearnCorePanel,
+} from './narrative-learn.ts';
+import { buildReadingFacts } from './reading-facts.ts';
+import { bindQinDict, renderClassicPlateIntroHtml } from './energy-lens.ts';
+import {
+  bindDeepCourse,
+  bindDeepNotesBlock,
+  renderDeepCourseHtml,
+  renderDeepNotesBlockHtml,
+} from './deep-course.ts';
 
 function buildFaq(cast: CastResult, question: string) {
-  const { upper, lower } = upperLowerFromLines(cast.primaryLines);
-  const scene = composeScene(upper, lower, cast.primary);
-  const yong = resolveYongShen(question);
-  const moving =
-    cast.changingIndexes.length === 0
-      ? '无明显动爻'
-      : cast.changingIndexes.map((i) => LINE_LABELS[i]!).join('、');
-
-  return [
-    {
-      q: `为什么叫「${cast.primary.fullName}」？`,
-      a: [
-        `上卦为${upper.nature}（${upper.id}），下卦为${lower.nature}（${lower.id}）。`,
-        scene.bridge,
-        detectSceneDomain(question) === 'love' ? scene.love : scene.career,
-      ],
-    },
-    {
-      q: `动爻在哪？对我问的事有什么影响？`,
-      a: [
-        moving === '无明显动爻'
-          ? '本卦无动爻：格局相对稳，先把世应与本卦场景看清。'
-          : `动爻在${moving}——这些位置正在「变心」，是当下最该盯的具体层面。`,
-        cast.changed
-          ? `变化指向变卦「${cast.changed.fullName}」：${cast.changed.gist}`
-          : '无变卦时，不必硬找未来，先稳住当下。',
-      ],
-    },
-    {
-      q: `用神是什么？我该看哪一类爻？`,
-      a: [yong.why, `本题用神倾向：${yong.name}。`, yong.tip],
-    },
-    {
-      q: question.trim()
-        ? `如果「${question.trim()}」不顺利，我还能做什么？`
-        : '如果结果不理想，我还能做什么？',
-      a: [
-        '先对齐世应：哪些是我能改的，哪些是环境。',
-        cast.changed
-          ? `可朝变卦关键词「${cast.changed.keywords[0]}」做一小步验证，而不是一次梭哈。`
-          : '无动则宜整理与等待窗口：把「下一步」写成一周可验证动作。',
-      ],
-    },
-  ];
+  return buildLearnFaq(buildReadingFacts(cast, question));
 }
 
-function renderSiZhuBar(sz: SiZhu): string {
+function renderSiZhuBar(sz: SiZhu, castAt?: Date): string {
+  if (castAt) return renderCastTimePlaque(castAt, { compact: true });
   return `
     <div class="ly-sizhu" data-sizhu>
       <span>年 ${sz.year}</span>
@@ -107,8 +52,10 @@ function renderDressTable(dressed: DressedHexagram): string {
       const mark = [r.isShi ? '世' : '', r.isYing ? '应' : '', r.changing ? '动' : '']
         .filter(Boolean)
         .join('/');
+      const xiang = r.bit === 1 ? '━━━' : '━ ━';
       return `
       <tr class="ly-dress-row" data-dress-line="${r.index}" tabindex="0" role="button">
+        <td class="ly-dress-xiang">${xiang}</td>
         <td>${r.liushen}</td>
         <td>${r.liuqin}</td>
         <td>${r.branch}${r.wuxing}${
@@ -125,7 +72,7 @@ function renderDressTable(dressed: DressedHexagram): string {
     <div class="ly-dress-wrap">
       <table class="ly-dress-table">
         <thead>
-          <tr><th>六神</th><th>六亲</th><th>地支</th><th>爻</th><th>标记</th></tr>
+          <tr><th>爻相</th><th>六神</th><th>六亲</th><th>地支</th><th>爻</th><th>标记</th></tr>
         </thead>
         <tbody>${body}</tbody>
       </table>
@@ -138,21 +85,15 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
   const sz = siZhuFromDate(castAt);
   const dressed = dressHexagram(cast, sz.dayStem);
   const graph = buildShengKeGraph(dressed.rows, question);
-  const lineCards = [0, 1, 2, 3, 4, 5]
-    .map((i) => {
-      const g = modernLineGloss(cast, i);
-      return `
-      <article class="ly-line-card">
-        <header>
-          <strong>${LINE_LABELS[i]}</strong>
-          <button type="button" class="ly-line-classic-btn" data-classic-line="${i}" title="古文与典故">📖</button>
-        </header>
-        <p>${g.modern}</p>
-        <p class="ly-line-classic-hint" data-classic-hint="${i}" hidden>${g.classicHint}</p>
-      </article>
-    `;
-    })
-    .join('');
+  const facts = buildReadingFacts(cast, question, castAt);
+  const whyBits = [
+    facts.shengKe.whyYuan
+      ? `<p class="ly-sk-why"><strong>为什么是原神？</strong>${facts.shengKe.whyYuan}</p>`
+      : '',
+    facts.shengKe.whyJi
+      ? `<p class="ly-sk-why"><strong>为什么是忌神？</strong>${facts.shengKe.whyJi}</p>`
+      : '',
+  ].join('');
 
   return `
     <label class="ly-cast-at">
@@ -160,13 +101,16 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
       <input type="datetime-local" data-cast-at value="${toDatetimeLocalValue(castAt)}" />
     </label>
     <p class="ly-layer-guide">默认此刻，可改。改时间会重算四柱与六神（历法：lunar-javascript）。</p>
-    ${renderSiZhuBar(sz)}
-    ${renderDressTable(dressed)}
-    ${renderShengKeGraphHtml(graph)}
-    ${renderClassicFolderHtml(cast)}
+    ${renderSiZhuBar(sz, castAt)}
+    ${renderDeepCourseHtml(cast, question, castAt)}
+    ${renderDeepNotesBlockHtml(cast, castAt)}
     <details class="ly-deep-more">
-      <summary>白话爻位速览</summary>
-      <div class="ly-line-cards">${lineCards}</div>
+      <summary>传统排盘进阶（点行看卡 · 生克图）</summary>
+      ${renderClassicPlateIntroHtml()}
+      ${renderDressTable(dressed)}
+      ${renderShengKeGraphHtml(graph)}
+      ${whyBits ? `<div class="ly-sk-why-box">${whyBits}<p class="ly-guide-tip">${facts.shengKe.tip}</p></div>` : ''}
+      ${renderClassicFolderHtml(cast)}
     </details>
   `;
 }
@@ -249,18 +193,27 @@ export function renderChangeHowHtml(cast: CastResult): string {
 }
 
 /** 本卦 + 变卦主视觉（进入结果页先见爻象） */
-export function renderHexHero(cast: CastResult): string {
+export function renderHexHero(
+  cast: CastResult,
+  opts: { askable?: boolean; highlightIndexes?: number[]; castAt?: Date } = {},
+): string {
   const movingLabels =
     cast.changingIndexes.length === 0
       ? '无动爻'
       : `动爻 ${cast.changingIndexes.map((i) => LINE_LABELS[i]!).join('、')}`;
   const changedShi = cast.changed?.shiLine;
   const changedYing = changedShi ? yingLineOf(changedShi) : undefined;
+  const askable = opts.askable ?? false;
+  const highlightIndexes = opts.highlightIndexes ?? [];
+  const castAt = opts.castAt ?? new Date();
 
   return `
     <header class="ly-hex-hero">
-      <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}</p>
-      <div class="ly-layer-pair ly-hex-hero-pair">
+      ${renderCastTimePlaque(castAt)}
+      <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}${
+        askable ? ' · 点 ? 学爻' : ''
+      }</p>
+      <div class="ly-layer-pair ly-hex-hero-pair" data-ask-hex>
         <div class="ly-hex-hero-col">
           <p class="ly-guide-label">本卦 · ${cast.primary.fullName}</p>
           ${renderHexagramSvg({
@@ -270,6 +223,8 @@ export function renderHexHero(cast: CastResult): string {
             changingIndexes: cast.changingIndexes,
             pulseChanging: true,
             showTrigramLabels: true,
+            showAskButtons: askable,
+            highlightIndexes,
           })}
           <p class="ly-hex-hero-gist">${formatClauseHtml(cast.primary.gist)}</p>
         </div>
@@ -287,38 +242,19 @@ export function renderHexHero(cast: CastResult): string {
               : '<p class="ly-guide-tip">无动则无变，时间轴停在本卦。</p>'
           }
         </div>
+        ${askable ? '<div class="ly-yao-ask-slot" data-ask-slot hidden></div>' : ''}
       </div>
-      ${renderChangeHowHtml(cast)}
-      <p class="ly-keywords">${cast.primary.keywords.join(' · ')}${
+      <p class="ly-keywords ly-hex-hero-keywords">${cast.primary.keywords.join(' · ')}${
         cast.changed ? ` → ${cast.changed.keywords.join(' · ')}` : ''
       }</p>
+      ${renderChangeHowHtml(cast)}
     </header>
   `;
 }
 
-/** 世 / 应 / 用神 */
+/** 世 / 应 / 用神（定义锚 + 生活映射） */
 export function renderCorePanel(cast: CastResult, question: string): string {
-  const yong = resolveYongShen(question);
-  return `
-    <p class="ly-layer-guide">世＝你，应＝对方或环境；用神＝你问的事在卦里的代表。</p>
-    <div class="ly-guide-hex">${renderHexagramSvg({
-      lines: cast.primaryLines,
-      shiLine: cast.shiLine,
-      yingLine: cast.yingLine,
-      changingIndexes: cast.changingIndexes,
-      emphasizeShiYing: true,
-      showTrigramLabels: true,
-    })}</div>
-    <div class="ly-core-cards">
-      <article><h4>世 · 我</h4><p>在${LINE_LABELS[cast.shiLine - 1]}。你的立场与能动部分。</p></article>
-      <article><h4>应 · 外界</h4><p>在${LINE_LABELS[cast.yingLine - 1]}。对方 / 岗位 / 环境。</p></article>
-      <article class="ly-core-yong">
-        <h4>用神 · ${yong.name}</h4>
-        <p>${yong.why}</p>
-        <p class="ly-guide-tip">${yong.tip}</p>
-      </article>
-    </div>
-  `;
+  return renderLearnCorePanel(cast, question);
 }
 
 export function renderFaqPanel(cast: CastResult, question: string): string {
@@ -437,6 +373,9 @@ export function bindDeepPanel(
   });
 
   bindClassicFolder(deep);
+  bindQinDict(deep);
+  bindDeepCourse(deep, cast, question, castAt);
+  bindDeepNotesBlock(deep);
 
   deep.querySelectorAll<HTMLButtonElement>('[data-classic-line]').forEach((btn) => {
     btn.addEventListener('click', () => {

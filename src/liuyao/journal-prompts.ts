@@ -1,8 +1,8 @@
 /** 结果页同人笔记填空 */
 export const JOURNAL_PROMPT_FIELDS = [
-  { key: 'dong', label: '动爻让我想到', placeholder: '某个具体场景 / 人 / 选择…' },
-  { key: 'shi', label: '用神或世应让我感觉', placeholder: '稳 / 慌 / 被推着走…' },
-  { key: 'verify', label: '事后想验证的一点', placeholder: '考完再回来对一下…' },
+  { key: 'feel', label: '我的直觉感受', placeholder: '第一眼的感觉…' },
+  { key: 'touch', label: '卦象中最触动我的一句话', placeholder: '哪一句戳到你…' },
+  { key: 'reflect', label: '几天后/几周后回看，我的反思是', placeholder: '预留回看空位…' },
 ] as const;
 
 export type JournalPromptKey = (typeof JOURNAL_PROMPT_FIELDS)[number]['key'];
