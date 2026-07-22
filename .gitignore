@@ -34,3 +34,6 @@ public/mediapipe/gesture_recognizer.task
 # 本地审计截图与设计原稿（不入库）
 audit-2026-07-09/
 assets/
+
+.vercel
+.env*.local

@@ -9,7 +9,6 @@ import {
   type CourseStep,
   loadCourseNote,
   renderLearnCourseHtml,
-  saveCourseNote,
 } from './learn-course.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
 import { glossLine } from './classic-gloss.ts';

@@ -42,12 +42,6 @@ function sceneLine(facts: ReadingFacts): string {
   return `${facts.sceneCareer} ${facts.sceneLove}`;
 }
 
-function questionHint(facts: ReadingFacts): string {
-  const q = facts.question.trim();
-  if (q) return `因为你问的是「${q}」`;
-  return '因为你还没写下具体问题，先按卦象本身来看';
-}
-
 function mapYongBite(facts: ReadingFacts): string {
   if (!facts.question.trim()) {
     return `先写下具体问题。工作常盯「${formatLiuqinShort('官鬼')}」；感情常盯「${formatLiuqinShort('妻财')}」。`;
@@ -231,8 +225,8 @@ export function bindYaoAskButtons(
   const rows = dressedRows(cast, castAt);
   const domain = buildReadingFacts(cast, question, castAt).domain;
   root.querySelectorAll<SVGElement>('[data-ask-line]').forEach((g) => {
-    if ((g as HTMLElement & { dataset: DOMStringMap }).dataset.askBound === '1') return;
-    (g as HTMLElement).dataset.askBound = '1';
+    if (g.dataset.askBound === '1') return;
+    g.dataset.askBound = '1';
     const open = () => {
       const idx = Number(g.getAttribute('data-ask-line'));
       const row = rows.find((r) => r.index === idx);
