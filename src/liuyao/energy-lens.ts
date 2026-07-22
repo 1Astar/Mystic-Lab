@@ -636,13 +636,13 @@ export function buildInternalInference(opts: {
   if (opts.yongRow && opts.yongQin) {
     const e = LIUQIN_ENERGY[opts.yongQin];
     lines.push({
-      title: '目标节点（用神）',
+      title: '核心聚焦（用神）',
       body: `代表你当前关注的事情（比如${matter}），在这个卦里落在 ${opts.yongRow.label}（${formatLiuqinShort(opts.yongQin)}）。${e.blurb}`,
       classicNote: `用神在${opts.yongRow.label}${opts.yongQin}爻${opts.yongRow.branch}${opts.yongRow.wuxing}`,
     });
   } else {
     lines.push({
-      title: '目标节点（用神）',
+      title: '核心聚焦（用神）',
       body: `本题关注「${matter}」，但用神尚未直接落到具体爻。先把问题写具体，或结合世应与动爻看。`,
     });
   }
@@ -669,7 +669,7 @@ export function buildInternalInference(opts: {
     const q = opts.jiRow.liuqin;
     const moving = opts.jiRow.changing;
     lines.push({
-      title: '潜在阻力（忌神）',
+      title: '耗散系统（忌神）',
       body: moving
         ? `要注意：「${LIUQIN_ENERGY[q].modern}」这一层正在动，可能分心或拖慢你问的事。`
         : `但要注意，在事情的相关层（${opts.jiRow.label}），有「${LIUQIN_ENERGY[q].modern}」在静静拉扯你，可能会让你分心。`,
@@ -677,8 +677,8 @@ export function buildInternalInference(opts: {
     });
   } else {
     lines.push({
-      title: '潜在阻力（忌神）',
-      body: '本卦忌神不明显，干扰项相对少，可更专注目标节点本身。',
+      title: '耗散系统（忌神）',
+      body: '本卦耗散系统不明显，干扰项相对少，可更专注核心聚焦本身。',
       classicNote: '忌神未现',
     });
   }
@@ -688,18 +688,18 @@ export function buildInternalInference(opts: {
   let confluence: string;
   if (yuanOn && !jiOn) {
     confluence =
-      '因为源动力偏强，直接盖过了潜在的静阻力，所以尽管有点小拉扯，事情仍更可能朝你有利的方向松动——记得把助力用在可验证的一小步上。';
+      '补给偏强，盖过了潜在的静耗散，事情仍更可能朝有利方向松动——把助力用在可验证的一小步上。';
   } else if (!yuanOn && jiOn) {
     confluence =
-      '阻力侧更活跃，助力不够明朗。建议先减干扰（忌神那一层），再谈大推进，避免硬冲内耗。';
+      '耗散侧更活跃，补给不够明朗。建议先减干扰，再谈大推进，避免硬冲内耗。';
   } else if (yuanOn && jiOn) {
     confluence =
-      '助力与阻力同时在动。先保目标节点不被拖垮，再借元神之助推进——有生有克时，顺序比速度重要。';
+      '补给与耗散同时在动。先保核心聚焦不被拖垮，再借补给推进——顺序比速度重要。';
   } else if (opts.yongRow) {
     confluence =
-      '生克都不喧哗。少做复杂推演，先用世应与动爻定下一步，把注意力放在用神所在层。';
+      '生克都不喧哗。少做复杂推演，先用世应与动爻定下一步，把注意力放在核心聚焦所在层。';
   } else {
-    confluence = '先回到核心要素，把用神锚定后再看助力与阻力。';
+    confluence = '先回到核心聚焦，把用神锚定后再看补给与耗散。';
   }
 
   return { lines, confluence };

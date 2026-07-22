@@ -72,7 +72,7 @@ function escapeHtml(s: string): string {
 }
 
 /** 已有氛围图的文王卦序；其余走 CSS 程序化底 */
-const ATMOSPHERE_MAX = 40;
+const ATMOSPHERE_MAX = 48;
 
 export function atmosphereSrcFor(kingWen: number): string | null {
   if (kingWen < 1 || kingWen > ATMOSPHERE_MAX) return null;
@@ -201,6 +201,14 @@ const ATMOSPHERE_LINES: Record<number, string> = {
   38: '火泽相背——所见不合，宜求同存异。',
   39: '水困于山——前路艰，宜止而后进。',
   40: '雷解于水——紧张松开，困局可解。',
+  41: '山下有泽——有减有益，取舍成损。',
+  42: '风雷相益——增益流通，彼此成全。',
+  43: '泽决于天——决断当断，勿再拖泥。',
+  44: '天遇柔风——不期而遇，宜察来意。',
+  45: '泽聚于地——众流来萃，会合之象。',
+  46: '地中有风——积小而上，渐进可升。',
+  47: '泽困于水——资源受困，先求出路。',
+  48: '水风为井——源在深处，养人长久。',
 };
 
 function atmosphereOneLiner(hex: Hexagram): string {

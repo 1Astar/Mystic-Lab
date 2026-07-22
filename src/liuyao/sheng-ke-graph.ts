@@ -280,9 +280,9 @@ export function buildCourseShengKeDialogue(graph: ShengKeGraph): {
 }
 
 const ROLE_PLAIN: Record<GraphRole, string> = {
-  用神: '核心目标',
-  原神: '暗中扶持',
-  忌神: '拖后腿',
+  用神: '核心聚焦',
+  原神: '补给',
+  忌神: '耗散',
   世: '你',
 };
 
