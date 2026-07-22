@@ -1,7 +1,7 @@
 import type { YaoDress } from './najia.ts';
 import { LIUSHEN_PLAIN } from './najia.ts';
 import { resolveYongShen } from './yong-shen.ts';
-import { formatLiuqinShort, formatYongLabel } from './energy-lens.ts';
+import { formatLiuqinShort, formatYongLabel, LIUQIN_DICT, renderQinFacetsHtml } from './energy-lens.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -27,6 +27,7 @@ export function renderYaoCard(row: YaoDress, question: string): string {
     .filter(Boolean)
     .join(' · ');
   const qinLabel = formatLiuqinShort(row.liuqin);
+  const dict = LIUQIN_DICT[row.liuqin];
 
   return `
     <article class="ly-yao-card" data-yao-card="${row.index}">
@@ -39,8 +40,14 @@ export function renderYaoCard(row: YaoDress, question: string): string {
           ? ` → 变 ${row.changedBranch}${row.changedWuxing ?? ''}`
           : ''
       }</p>
-      <p><b>能量模块</b> ${qinLabel}</p>
+      <p>
+        <b>能量模块</b>
+        <button type="button" class="ly-qin-chip" data-open-qin-dict="${escapeHtml(
+          row.liuqin,
+        )}" title="打开六亲词典">${escapeHtml(qinLabel)}</button>
+      </p>
       <p><b>六神</b> ${row.liushen} — ${LIUSHEN_PLAIN[row.liushen]}</p>
+      ${dict ? renderQinFacetsHtml(dict) : ''}
       ${
         hit
           ? `<p class="ly-yao-card-yong">本题用神倾向「${escapeHtml(formatYongLabel(yong.name))}」，此爻相符，优先盯它。</p>`

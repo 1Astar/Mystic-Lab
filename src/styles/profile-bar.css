@@ -1,0 +1,121 @@
+/* Lab 全局档案 · 占问页选用条 */
+
+.lab-profile-bar {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background: rgba(20, 16, 36, 0.45);
+  text-align: left;
+}
+
+.lab-profile-bar.is-empty {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.lab-profile-bar-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: rgba(255, 245, 230, 0.92);
+  cursor: pointer;
+}
+
+.lab-profile-bar-check input {
+  margin-top: 3px;
+}
+
+.lab-profile-bar-brief {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.7);
+  line-height: 1.4;
+}
+
+.lab-profile-bar-text {
+  margin: 0;
+  flex: 1;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.75);
+}
+
+.lab-profile-bar-link {
+  border: none;
+  background: transparent;
+  color: #ffd6a6;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lab-profile-bar-link:hover {
+  color: #ffe6c8;
+}
+
+.journey-profile-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.25);
+  background:
+    linear-gradient(135deg, rgba(40, 28, 64, 0.45), rgba(12, 10, 24, 0.6));
+}
+
+.journey-profile-card h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.journey-profile-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.72);
+}
+
+.journey-backup-bar {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: rgba(16, 12, 28, 0.5);
+}
+
+.journey-backup-copy h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.journey-backup-copy p {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(255, 230, 200, 0.7);
+}
+
+.journey-backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journey-backup-status {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: #ffd6a6;
+}
+
+.journey-backup-status[data-kind='err'] {
+  color: #ffb4a8;
+}

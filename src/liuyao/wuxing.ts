@@ -73,7 +73,7 @@ export function shiYingRelation(shiWx: WuXing, yingWx: WuXing): {
     return {
       rel: '相生',
       verdict: '内外较有默契',
-      tip: '世（你）与应（外部）相生：内部能量与外部世界较顺，可顺水推舟，也留意别把力气全交给外界。',
+      tip: '世爻（你）和应爻（外部）相生：你现在和周围环境较有默契，顺水推舟即可；也留意别把力气全交给外界。',
     };
   }
   if (WX_SHENG[yingWx] === shiWx) {
@@ -87,7 +87,7 @@ export function shiYingRelation(shiWx: WuXing, yingWx: WuXing): {
     return {
       rel: '相克',
       verdict: '需求与现实有冲突',
-      tip: '世（你）与应（外部）相克：内心需求与外部现实有冲突。冲突不是你的错，而是价值观与环境暂不匹配——停下来审视真实需求，不必为了顺应环境而内耗自己。',
+      tip: '世爻（你）和应爻（外部）相克：内心需求与外部现实有冲突。冲突不是你的错，而是价值观与环境暂不匹配——这不是要你去妥协的信号，而是停下来审视真实需求的信号。不要为了顺应外部环境而内耗自己。',
     };
   }
   return {

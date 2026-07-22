@@ -8,14 +8,15 @@ import {
 } from './reading-facts.ts';
 import {
   buildCoreParseBlocks,
-  buildYaoAskCard,
   formatLiuqinShort,
   renderCoreParseHtml,
-  renderYaoAskCardHtml,
 } from './energy-lens.ts';
 import { dressHexagram, type YaoDress } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
 import { renderLearnChaptersBody } from './learn-story.ts';
+import { composeScene, renderSceneXiangHtml } from './scene-map.ts';
+import { upperLowerFromLines } from './hexagrams.ts';
+import { showYaoInlineTip } from './yao-inline-tip.ts';
 
 export type CausalStep = {
   /** 步骤标签，如「卦象」 */
@@ -67,7 +68,7 @@ export function buildCausalReading(facts: ReadingFacts): CausalReading {
   because.push({
     step: '卦象',
     short: `下${facts.lowerNature}上${facts.upperNature} · ${facts.primary.name}`,
-    detail: `${questionHint(facts)}。${facts.sceneBridge} ${sceneLine(facts)}`,
+    detail: facts.sceneBridge,
   });
 
   if (facts.changing.labels.length === 0) {
@@ -129,8 +130,10 @@ export function renderCausalReadingHtml(
   facts: ReadingFacts,
   cast: CastResult,
   _castAt = new Date(),
+  opts?: { oneLiner?: string },
 ): string {
   const causal = buildCausalReading(facts);
+  const oneLiner = opts?.oneLiner?.trim() || causal.anchor;
   const pack = buildStrategyPack(cast, facts.domain, facts.question);
   const first = pack.items[0];
   const rest = pack.items.slice(1);
@@ -164,7 +167,7 @@ export function renderCausalReadingHtml(
   return `
     <section class="ly-lesson ly-result-panel">
       <p class="ly-lesson-kicker">一句话</p>
-      <h3 class="ly-lesson-theme">${escapeHtml(causal.anchor)}</h3>
+      <h3 class="ly-lesson-theme">${escapeHtml(oneLiner)}</h3>
       <p class="ly-lesson-yong">${escapeHtml(causal.yongBite)}</p>
     </section>
     <section class="ly-lesson ly-result-panel">
@@ -202,7 +205,7 @@ export function renderCoreMappedHtml(
   });
   return `
     <p class="ly-layer-guide">点爻旁 <strong>?</strong> 看单爻；下面三块各一句主旨，传统注折叠。</p>
-    <div class="ly-guide-hex" data-ask-hex>
+    <div class="ly-guide-hex ly-hex-inline-host" data-ask-hex>
       ${renderHexagramSvg({
         lines: cast.primaryLines,
         shiLine: cast.shiLine,
@@ -213,13 +216,12 @@ export function renderCoreMappedHtml(
         showAskButtons: true,
         highlightIndexes: hi,
       })}
-      <div class="ly-yao-ask-slot" data-ask-slot hidden></div>
     </div>
     ${renderCoreParseHtml(blocks)}
   `;
 }
 
-/** 绑定学习模式点爻问号 */
+/** 绑定学习模式点爻：注解悬浮在该爻旁，并联动笔记侧栏 */
 export function bindYaoAskButtons(
   root: HTMLElement,
   cast: CastResult,
@@ -228,26 +230,20 @@ export function bindYaoAskButtons(
 ): void {
   const rows = dressedRows(cast, castAt);
   const domain = buildReadingFacts(cast, question, castAt).domain;
-  root.querySelectorAll<SVGGElement>('[data-ask-line]').forEach((g) => {
+  root.querySelectorAll<SVGElement>('[data-ask-line]').forEach((g) => {
+    if ((g as HTMLElement & { dataset: DOMStringMap }).dataset.askBound === '1') return;
+    (g as HTMLElement).dataset.askBound = '1';
     const open = () => {
       const idx = Number(g.getAttribute('data-ask-line'));
       const row = rows.find((r) => r.index === idx);
       if (!row) return;
       const host =
         g.closest<HTMLElement>('[data-ask-hex]') ??
+        g.closest<HTMLElement>('.ly-hex-inline-host') ??
         root.querySelector<HTMLElement>('[data-ask-hex]') ??
         root;
-      let slot = host.querySelector<HTMLElement>('[data-ask-slot]');
-      if (!slot) {
-        slot = document.createElement('div');
-        slot.className = 'ly-yao-ask-slot';
-        slot.dataset.askSlot = '';
-        host.appendChild(slot);
-      }
-      const card = buildYaoAskCard(row, { domain });
-      slot.hidden = false;
-      slot.innerHTML = renderYaoAskCardHtml(card);
-      slot.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      const compact = Boolean(g.closest('.ly-hexagram-compact'));
+      showYaoInlineTip(host, row, { compact, domain });
     };
     g.style.cursor = 'pointer';
     g.addEventListener('click', (e) => {
@@ -263,9 +259,13 @@ export function bindYaoAskButtons(
   });
 }
 
-export function buildLearnFaq(
-  facts: ReadingFacts,
-): { q: string; a: string[] }[] {
+export type LearnFaqItem = {
+  q: string;
+  a: string[];
+  bodyHtml?: string;
+};
+
+export function buildLearnFaq(facts: ReadingFacts): LearnFaqItem[] {
   const moveHint =
     facts.changing.labels.length === 0
       ? '本卦无动爻：格局相对稳，先把世应与本卦场景看清。'
@@ -323,6 +323,56 @@ export function buildLearnFaq(
       ],
     },
   ];
+}
+
+function escapeFaq(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderFaqNameAnswerHtml(cast: CastResult, facts: ReadingFacts): string {
+  const { upper, lower } = upperLowerFromLines(cast.primaryLines);
+  const scene = composeScene(upper, lower, cast.primary);
+  return renderSceneXiangHtml(scene, {
+    domain: facts.domain,
+    showFormula: false,
+  });
+}
+
+/** 边看边问：放在笔记 / 书籍注解区 */
+export function renderLearnFaqHtml(
+  cast: CastResult,
+  question: string,
+  castAt = new Date(),
+): string {
+  const facts = buildReadingFacts(cast, question, castAt);
+  const faq = buildLearnFaq(facts).map((item, i) => {
+    const isNameQ = item.q.startsWith('为什么叫');
+    const body = isNameQ
+      ? renderFaqNameAnswerHtml(cast, facts)
+      : item.a
+          .map((p) =>
+            p.includes('\n')
+              ? `<div class="ly-faq-pre">${escapeFaq(p).replace(/\n/g, '<br>')}</div>`
+              : `<p>${escapeFaq(p)}</p>`,
+          )
+          .join('');
+    return `
+    <details class="ly-faq-item"${i === 0 ? ' open' : ''}>
+      <summary>${escapeFaq(item.q)}</summary>
+      <div class="ly-faq-body">${body}</div>
+    </details>`;
+  }).join('');
+  return `
+    <section class="ly-deep-faq ly-faq-panel" data-learn-faq>
+      <h4>边看边问</h4>
+      <p class="ly-layer-guide">点开你此刻卡住的问题。</p>
+      ${faq}
+    </section>
+  `;
 }
 
 export function classicModernScene(facts: ReadingFacts, classicGloss: string): string {

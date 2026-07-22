@@ -3,6 +3,7 @@ import { buildCastFromThrows, facesToThrow, type YaoThrow } from './engine.ts';
 import {
   branchesFromLines,
   dressHexagram,
+  dressChangedHexagram,
   liuqinOf,
   liushenForDayStem,
 } from './najia.ts';
@@ -57,5 +58,29 @@ describe('najia', () => {
     expect(dressed.rows[0]!.liuqin).toBe('妻财'); // 木克土
     expect(dressed.rows[0]!.liushen).toBe('玄武');
     expect(dressed.rows.some((r) => r.isShi)).toBe(true);
+  });
+
+  it('dressChangedHexagram returns null when no move', () => {
+    expect(dressChangedHexagram(castYu(), '壬')).toBeNull();
+  });
+
+  it('dressChangedHexagram dresses 变卦 with own shi/ying', () => {
+    // 初爻老阳 → 会翻转
+    const throws: YaoThrow[] = [
+      facesToThrow(['reverse', 'reverse', 'reverse']), // 9 老阳
+      facesToThrow(['obverse', 'reverse', 'reverse']),
+      facesToThrow(['obverse', 'reverse', 'reverse']),
+      facesToThrow(['obverse', 'reverse', 'reverse']),
+      facesToThrow(['obverse', 'reverse', 'reverse']),
+      facesToThrow(['obverse', 'reverse', 'reverse']),
+    ];
+    const cast = buildCastFromThrows(throws, 'random');
+    expect(cast.changed).not.toBeNull();
+    const changed = dressChangedHexagram(cast, '壬');
+    expect(changed).not.toBeNull();
+    expect(changed!.rows).toHaveLength(6);
+    expect(changed!.rows.some((r) => r.isShi)).toBe(true);
+    expect(changed!.rows.some((r) => r.isYing)).toBe(true);
+    expect(changed!.rows.every((r) => !r.changing)).toBe(true);
   });
 });

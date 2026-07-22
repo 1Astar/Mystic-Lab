@@ -11,6 +11,7 @@ import { LINE_LABELS } from '../liuyao/hexagrams.ts';
 import { buildFourLayerReading } from '../liuyao/interpret.ts';
 import { mergeReflection } from '../liuyao/journal-prompts.ts';
 import { saveLiuyaoJournalEntry } from '../liuyao/journal.ts';
+import { meetCountFor, meetLineFor, buildVaultSnapshot } from '../liuyao/vault.ts';
 import { playLiuyaoSfx, preloadLiuyaoSfx } from '../liuyao/sfx.ts';
 import { LIUYAO_ASSETS, preloadLiuyaoCoins } from '../liuyao/assets.ts';
 import {
@@ -21,9 +22,15 @@ import {
 } from '../liuyao/flip-teach.ts';
 import { renderCoinYaoQuickRef } from '../liuyao/yao-kind-guide.ts';
 import { getLiuyaoMode, mountLiuyaoModeSwitch } from '../liuyao/mode.ts';
+import { mergeReadingBackground } from '../life/profile-context.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountLiuyaoResultTabs } from '../ui/liuyao/result-tabs.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
+import {
+  bindProfileContextBar,
+  renderProfileContextBarHtml,
+  type ProfileContextBarHandle,
+} from '../ui/profile-context-bar.ts';
 import {
   renderHexagramSvg,
   renderThreeCoins,
@@ -33,6 +40,8 @@ type Phase = 'question' | 'method' | 'casting' | 'result';
 
 export function renderLiuyaoReading(root: HTMLElement): () => void {
   let question = '';
+  let profileBar: ProfileContextBarHandle | null = null;
+  let profileContext = '';
   let method: 'coin' | 'random' = 'coin';
   const throws: YaoThrow[] = [];
   let cast: CastResult | null = null;
@@ -159,14 +168,19 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
         }
         <p class="ly-step-hint">可写可不写。写下问题，解释会更贴你的情境；也可以先起卦再想。</p>
         <textarea class="question-input ly-question-input" rows="3" maxlength="120" placeholder="例如：我要不要接受这个 offer？（可选）">${question}</textarea>
+        ${renderProfileContextBarHtml('ly-profile')}
       </div>
     `;
     const input = stage.querySelector('textarea')!;
+    profileBar = bindProfileContextBar(stage, { idPrefix: 'ly-profile' });
     input.addEventListener('input', () => {
       question = input.value.slice(0, 120);
     });
     appendBtn('下一步 · 选择起卦方式', () => {
       question = input.value.trim();
+      profileContext = profileBar?.getUseProfile()
+        ? mergeReadingBackground('', true)
+        : '';
       renderMethod();
     });
   }
@@ -180,14 +194,6 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
         <p class="ly-step-kicker">Step 2${isLearn() ? ' · 学习' : ''}</p>
         <h2 class="ly-step-title">选择起卦方式</h2>
         ${question ? `<p class="ly-question-recap">「${escapeHtml(question)}」</p>` : '<p class="ly-question-recap">未写下问题 · 可先起卦</p>'}
-        ${
-          isLearn()
-            ? teachFold(
-                '铜钱计分规则',
-                `<p class="ly-inline-note is-plain">字=2（阴）、背=3（阳）。三钱相加得 6–9，对应少阴少阳老阴老阳。</p>`,
-              )
-            : ''
-        }
         <div class="ly-method-grid">
           <button type="button" class="ly-method-card is-active" data-m="coin">
             <img class="ly-method-coin" src="${LIUYAO_ASSETS.coinObverse}" alt="" width="40" height="40" decoding="async" fetchpriority="high" />
@@ -287,7 +293,8 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
         <h2 class="ly-step-title">${title}</h2>
         ${
           showYaoHints
-            ? `<p class="ly-cast-hint-sub">点爻线可看字背怎么变成这一画</p>`
+            ? `<p class="ly-cast-hint-sub">点爻线可看字背怎么变成这一画</p>
+        <p class="ly-cast-score-note">计分：字=2（阴）、背=3（阳）。三钱相加得 6–9，对应少阴少阳老阴老阳。</p>`
             : ''
         }
         <div class="ly-board">
@@ -409,6 +416,13 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     stage.innerHTML = `
       <div class="ly-step ly-step-result">
         <p class="ly-question-recap">${question ? `你的问题 · ${escapeHtml(question)}` : '未写下具体问题 · 以下按卦象结构推演'}</p>
+        ${
+          profileContext
+            ? `<p class="ly-question-recap ly-profile-recap">我的档案 · ${escapeHtml(
+                profileContext.replace(/\n/g, ' · '),
+              )}</p>`
+            : ''
+        }
         <div class="ly-result-shell" data-result-shell></div>
       </div>
     `;
@@ -433,6 +447,20 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
           castAt: tabsApi.getCastAt().toISOString(),
         });
         journalSaved = true;
+        // 沉浸感：第 N 次遇见
+        const count = meetCountFor(result.primary.name);
+        const stat = buildVaultSnapshot().meets.find((m) => m.name === result.primary.name) ?? null;
+        const line = meetLineFor(stat) || `这是你第 ${count} 次遇见「${result.primary.fullName}」。`;
+        const toast = document.createElement('div');
+        toast.className = 'ly-meet-toast';
+        toast.setAttribute('role', 'status');
+        toast.textContent = line;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('is-on'));
+        setTimeout(() => {
+          toast.classList.remove('is-on');
+          setTimeout(() => toast.remove(), 320);
+        }, 2800);
       }
       navigate('/liuyao/journal');
     });

@@ -13,21 +13,24 @@ import {
 } from '../../liuyao/result-layers.ts';
 import {
   bindYaoAskButtons,
-  renderCausalReadingHtml,
 } from '../../liuyao/narrative-learn.ts';
-import { buildReadingFacts } from '../../liuyao/reading-facts.ts';
 import { bindQinDict } from '../../liuyao/energy-lens.ts';
 import { collectStudyNotes } from '../../liuyao/learn-studio.ts';
 import {
   bindLearnTeachPage,
   renderLearnTeachPageHtml,
 } from '../../liuyao/learn-shell.ts';
-import { collectCourseNotes } from '../../liuyao/learn-course.ts';
+import { collectCourseNotes, renderLearnNotesShellHtml } from '../../liuyao/learn-course.ts';
 import {
   QUICK_TAB_DEFS,
   renderQuickBoard,
   renderQuickTabsHtml,
 } from '../../liuyao/narrative-quick.ts';
+import { buildFinalLoop, renderFinalLoopHtml } from '../../liuyao/final-loop.ts';
+import {
+  buildPatternSummary,
+  renderPatternSummaryHtml,
+} from '../../liuyao/pattern-summary.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -72,7 +75,7 @@ export function renderPeerNoteFold(opts: {
         </div>
         ${
           learn
-            ? `<p class="ly-layer-guide">详细笔记请写在「五步学习 → 笔记与对照」或右侧抽屉；这里可自由补充标签与一句结语。</p>`
+            ? `<p class="ly-layer-guide">详细解读请点右侧「解读笔记」；这里可自由补充标签与一句结语。</p>`
             : renderJournalPromptsHtml()
         }
         <textarea class="question-input ly-note-draft" rows="3" placeholder="${
@@ -129,10 +132,12 @@ export function mountLiuyaoResultTabs(
       { id: 'reading', label: '此刻解读' },
       { id: 'teach', label: '五步学习' },
     ];
-    const facts = buildReadingFacts(cast, question, castAt);
+    const loop = buildFinalLoop(cast, question, castAt);
+    const pattern = buildPatternSummary(cast, question, castAt);
 
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: loop.oneLiner })}
+      ${renderPatternSummaryHtml(pattern)}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
           ${tabs
@@ -145,12 +150,15 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          ${renderCausalReadingHtml(facts, cast, castAt)}
+          <p class="ly-guide-tip">结果：这一卦此刻对你说什么。</p>
+          <p class="ly-drawer-reading-one">${escapeHtml(loop.oneLiner)}</p>
+          ${renderFinalLoopHtml(loop)}
         </div>
         <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
           ${renderLearnTeachPageHtml(cast, question, castAt)}
         </div>
       </section>
+      ${renderLearnNotesShellHtml(cast, question, castAt)}
       ${renderPeerNoteFold({ cast, learn, selectedTags: noteTags })}
     `;
   }

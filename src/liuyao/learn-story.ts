@@ -103,8 +103,8 @@ export function renderLearnChapter1(
   return `
     <header class="ly-ch ly-ch-1" data-learn-ch="1">
       ${renderCastTimePlaque(castAt)}
-      <div class="ly-layer-pair ly-hex-hero-pair" data-ask-hex>
-        <div class="ly-hex-hero-col">
+      <div class="ly-layer-pair ly-hex-hero-pair">
+        <div class="ly-hex-hero-col ly-hex-inline-host" data-ask-hex>
           <p class="ly-guide-label">本卦 · ${escapeHtml(cast.primary.fullName)}</p>
           ${renderHexagramSvg({
             lines: cast.primaryLines,
@@ -130,7 +130,6 @@ export function renderLearnChapter1(
               : '<p class="ly-guide-tip">无动则无变</p>'
           }
         </div>
-        <div class="ly-yao-ask-slot" data-ask-slot hidden></div>
       </div>
       <article class="ly-q-card">
         <p class="ly-q-card-label">你问的是</p>

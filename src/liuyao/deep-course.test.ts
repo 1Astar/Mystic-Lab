@@ -19,10 +19,10 @@ function castSample() {
 }
 
 describe('deep-course', () => {
-  it('builds 4 deep lessons', () => {
+  it('builds 3 deep lessons', () => {
     const cast = castSample();
     const lessons = buildDeepLessons(cast, '节制还是推进？', new Date('2026-07-21'));
-    expect(lessons).toHaveLength(4);
+    expect(lessons).toHaveLength(3);
     expect(lessons[0]!.shortName).toMatch(/卦象/);
     expect(lessons[1]!.shortName).toMatch(/能量/);
     expect(lessons[1]!.bodyHtml).toMatch(/ly-sk-course|能量现状/);
@@ -31,13 +31,30 @@ describe('deep-course', () => {
   it('renders course nav and notes tabs', () => {
     const cast = castSample();
     const at = new Date('2026-07-21');
-    expect(renderDeepCourseHtml(cast, '问财运', at)).toMatch(/四步精读/);
+    expect(renderDeepCourseHtml(cast, '问财运', at)).toMatch(/三步精读/);
     expect(renderDeepCourseHtml(cast, '问财运', at)).toMatch(/下一步/);
-    const notes = renderDeepNotesBlockHtml(cast);
-    expect(notes).toMatch(/我的笔记/);
-    expect(notes).toMatch(/典故古籍/);
+    const notes = renderDeepNotesBlockHtml(cast, at, '问财运');
+    expect(notes).not.toMatch(/>此刻解读</);
+    expect(notes).not.toMatch(/data-note-tab="reading"/);
+    expect(notes).toMatch(/卦象解析/);
+    expect(notes).toMatch(/古籍解析/);
+    expect(notes).toMatch(/本卦辞 · 六爻/);
+    expect(notes).toMatch(/data-gua-switch/);
+    expect(notes).toMatch(/传统解卦全书/);
+    expect(notes).toMatch(/ly-guide-snippet|图鉴 ·/);
+    expect(notes).toMatch(/个人沉淀/);
     expect(notes).toMatch(/专业排盘/);
-    expect(notes).toMatch(/黑话词典/);
+    expect(notes).toMatch(/实际落点|工作上|感情上/);
+    expect(notes).not.toMatch(/为什么形成这个卦/);
+    expect(notes).toMatch(/核心聚焦（用神）|核心目标（用神）/);
+    expect(notes).toMatch(/当下能量聚焦表|data-energy-focus/);
+    expect(notes).toMatch(/卦象核心释义/);
+    expect(notes).toMatch(/用神/);
+    expect(notes).not.toMatch(/data-note-tab="dict"/);
+    expect(notes).toMatch(/易学黑话翻译对照表/);
+    expect(notes).toMatch(/ly-qin-dict/);
+    expect(notes).toMatch(/边看边问/);
+    expect(notes).toMatch(/data-learn-faq/);
     expect(notes).toMatch(/爻相/);
   });
 });

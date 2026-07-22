@@ -1,18 +1,22 @@
 import type { CastResult } from './engine.ts';
-import { detectSceneDomain } from './scene-map.ts';
-import { buildLearnFaq } from './narrative-learn.ts';
-import { buildReadingFacts } from './reading-facts.ts';
+import {
+  composeScene,
+  detectSceneDomain,
+  renderSceneXiangHtml,
+} from './scene-map.ts';
+import { upperLowerFromLines } from './hexagrams.ts';
+import { renderLearnFaqHtml } from './narrative-learn.ts';
 import {
   renderGuaXiangCard,
   renderEnergyChainHtml,
   renderMovingYaoCards,
   bindLearnStudio,
+  renderDictFooter,
 } from './learn-studio.ts';
+import { renderSpiritNarrativeForCast } from './spirit-narrative.ts';
 import { resolveClassicDossier } from './classic-folder.ts';
-import { glossDaXiang } from './classic-gloss.ts';
-import { formatClauseHtml } from './format-clause.ts';
 import { teachFold } from './flip-teach.ts';
-import { bindQinDict, renderQinDictHtml } from './energy-lens.ts';
+import { bindQinDict } from './energy-lens.ts';
 import {
   buildShengKeGraph,
   renderCourseShengKeHtml,
@@ -20,9 +24,24 @@ import {
 } from './sheng-ke-graph.ts';
 import { dressHexagram } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
-import { renderDressArchiveHtml } from './dress-archive.ts';
+import { renderDressArchiveHtml, bindDressArchive } from './dress-archive.ts';
+import {
+  buildHexExpandPack,
+  renderHexExpandHtml,
+  renderClassicDomainOraclesHtml,
+} from './hex-expand.ts';
+import {
+  renderClassicGuaSwitchHtml,
+  bindClassicGuaSwitch,
+} from './classic-gua-switch.ts';
+import { renderClassicCompendiumForCast } from './classic-compendium.ts';
+import {
+  buildHexGuidePack,
+  renderGuideXiangSnippetHtml,
+  bindGuideDomainTabs,
+} from './hex-guide.ts';
 
-export type DeepStep = 1 | 2 | 3 | 4;
+export type DeepStep = 1 | 2 | 3;
 
 type DeepLesson = {
   step: DeepStep;
@@ -37,23 +56,6 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function renderFaqStep(cast: CastResult, question: string): string {
-  const faq = buildLearnFaq(buildReadingFacts(cast, question))
-    .map(
-      (item, i) => `
-    <details class="ly-faq-item"${i === 0 ? ' open' : ''}>
-      <summary>${escapeHtml(item.q)}</summary>
-      <div class="ly-faq-body">${item.a.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}</div>
-    </details>`,
-    )
-    .join('');
-  return `
-    <section class="ly-deep-faq">
-      <p class="ly-layer-guide">边看边问：点开你此刻卡住的问题。</p>
-      ${faq}
-    </section>`;
 }
 
 export function buildDeepLessons(
@@ -79,6 +81,7 @@ export function buildDeepLessons(
       title: '② 能量现状：谁在帮你，谁在拖你？',
       bodyHtml: `
         ${renderEnergyChainHtml(cast, question, castAt)}
+        ${renderSpiritNarrativeForCast(cast, question, castAt)}
         <p class="ly-deep-step-bridge">${escapeHtml(talk.tease)}</p>
         ${renderCourseShengKeHtml(sk, { compact: true })}
         <p class="ly-sk-course-dialogue">${escapeHtml(talk.dialogue)}</p>
@@ -89,12 +92,6 @@ export function buildDeepLessons(
       shortName: '动爻拆解',
       title: '③ 卦爻辞拆解：哪一支在动？',
       bodyHtml: renderMovingYaoCards(cast, domain),
-    },
-    {
-      step: 4,
-      shortName: '边看边问',
-      title: '④ 边看边问：把疑惑点开',
-      bodyHtml: renderFaqStep(cast, question),
     },
   ];
 }
@@ -119,7 +116,7 @@ export function renderDeepCourseHtml(
   const first = lessons[0]!;
   return `
     <section class="ly-course ly-deep-course" data-deep-course data-deep-index="0">
-      <p class="ly-teach-main-kicker">深度推演 · 四步精读</p>
+      <p class="ly-teach-main-kicker">深度推演 · 三步精读</p>
       <div class="ly-course-body" data-deep-body>
         ${renderDeepStepPanel(first)}
       </div>
@@ -169,19 +166,14 @@ export function bindDeepCourse(
   paint();
 }
 
-function renderClassicPane(cast: CastResult): string {
+function renderClassicPane(cast: CastResult, question: string): string {
   const d = resolveClassicDossier(cast.primary.name);
-  const daBai = glossDaXiang(cast.primary.name) ?? d.modern;
+  const pack = buildHexExpandPack(cast);
   return `
-    <p class="ly-guide-tip">典故与古籍原话。字眼生僻可先看白话，或回「五步学习」的现代翻译。</p>
-    ${
-      d.judgment
-        ? `<div class="ly-classic-block">
-      <p class="ly-classic-zh"><span class="ly-classic-tag">《易经》卦辞</span>${escapeHtml(d.judgment)}</p>
-      <p class="ly-classic-bai"><span class="ly-classic-tag is-bai">白话</span>${formatClauseHtml(daBai)}</p>
-    </div>`
-        : '<p class="ly-guide-tip">本库暂无该卦卦辞。</p>'
-    }
+    <p class="ly-guide-tip">古人怎么说：本卦辞 / 变卦辞切换对照。字眼生僻可先看白话；现代分域见「卦象解析」。</p>
+    ${renderClassicGuaSwitchHtml(cast)}
+    ${renderClassicCompendiumForCast(cast, question)}
+    ${renderClassicDomainOraclesHtml(pack)}
     ${
       d.zengshan
         ? teachFold(
@@ -192,23 +184,66 @@ function renderClassicPane(cast: CastResult): string {
           )
         : ''
     }
+    ${renderLearnFaqHtml(cast, question)}
   `;
 }
 
-/** 独立笔记板块：我的笔记 / 典故古籍 / 专业排盘 / 黑话词典 */
-export function renderDeepNotesBlockHtml(cast: CastResult, castAt = new Date()): string {
+/** 独立笔记：结果→为什么→怎么算→古人→个人沉淀 */
+export function renderDeepNotesBlockHtml(
+  cast: CastResult,
+  castAt = new Date(),
+  question = '',
+): string {
   return `
     <section class="ly-deep-notes ly-result-panel" data-deep-notes data-note-tabs>
-      <h3 class="ly-ch-title">📝 笔记与对照</h3>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="笔记分区">
-        <button type="button" class="ly-note-mini-tab is-active" data-note-tab="write" role="tab" aria-selected="true">我的笔记</button>
-        <button type="button" class="ly-note-mini-tab" data-note-tab="classic" role="tab" aria-selected="false">典故古籍</button>
+      <h3 class="ly-ch-title">📝 解读笔记</h3>
+      <div class="ly-note-mini-tabs" role="tablist" aria-label="解读笔记分区">
+        <button type="button" class="ly-note-mini-tab is-active" data-note-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
         <button type="button" class="ly-note-mini-tab" data-note-tab="dress" role="tab" aria-selected="false">专业排盘</button>
-        <button type="button" class="ly-note-mini-tab" data-note-tab="dict" role="tab" aria-selected="false">黑话词典</button>
+        <button type="button" class="ly-note-mini-tab" data-note-tab="classic" role="tab" aria-selected="false">古籍解析</button>
+        <button type="button" class="ly-note-mini-tab" data-note-tab="journal" role="tab" aria-selected="false">个人沉淀</button>
       </div>
       <div class="ly-note-mini-body">
-        <div class="ly-note-tab-panel is-active" data-note-pane="write">
-          <p class="ly-layer-guide">写下来，才真正变成你的六爻日记。</p>
+        <div class="ly-note-tab-panel is-active" data-note-pane="xiang">
+          <p class="ly-guide-tip">笔记侧：图鉴意象、工作/感情分行、能量链。成卦结构见主屏第一步，此处不重复。</p>
+          ${renderGuideXiangSnippetHtml(buildHexGuidePack(cast.primary), {
+            linkToGuide: true,
+          })}
+          <p class="ly-layer-guide">实际落点 · 工作 / 感情</p>
+          ${renderSceneXiangHtml(
+            composeScene(
+              upperLowerFromLines(cast.primaryLines).upper,
+              upperLowerFromLines(cast.primaryLines).lower,
+              cast.primary,
+            ),
+            { domain: detectSceneDomain(question), showFormula: false },
+          )}
+          <div class="ly-xiang-extra" data-xiang-extra-host>
+            <div class="ly-note-mini-tabs" role="tablist" aria-label="卦象解析续">
+              <button type="button" class="ly-note-mini-tab is-active" data-xiang-extra="energy" role="tab" aria-selected="true">能量链</button>
+              <button type="button" class="ly-note-mini-tab" data-xiang-extra="spirit" role="tab" aria-selected="false">六神</button>
+              <button type="button" class="ly-note-mini-tab" data-xiang-extra="expand" role="tab" aria-selected="false">分域拓展</button>
+            </div>
+            <div class="ly-xiang-extra-pane is-active" data-xiang-extra-pane="energy">
+              ${renderEnergyChainHtml(cast, question, castAt)}
+            </div>
+            <div class="ly-xiang-extra-pane" data-xiang-extra-pane="spirit" hidden>
+              ${renderSpiritNarrativeForCast(cast, question, castAt)}
+            </div>
+            <div class="ly-xiang-extra-pane" data-xiang-extra-pane="expand" hidden>
+              ${renderHexExpandHtml(buildHexExpandPack(cast))}
+            </div>
+          </div>
+        </div>
+        <div class="ly-note-tab-panel" data-note-pane="dress" hidden>
+          <p class="ly-guide-tip">怎么算：六亲六神装卦与点爻注解。</p>
+          ${renderDressArchiveHtml(cast, castAt, question)}
+        </div>
+        <div class="ly-note-tab-panel" data-note-pane="classic" hidden>
+          ${renderClassicPane(cast, question)}
+        </div>
+        <div class="ly-note-tab-panel" data-note-pane="journal" hidden>
+          <p class="ly-layer-guide">个人沉淀 · 写下来，才真正变成你的六爻日记。</p>
           <label class="ly-study-note-field">
             <span>我的直觉感受：</span>
             <textarea class="question-input" rows="2" data-study-note="feel" placeholder="第一眼的感觉…"></textarea>
@@ -221,30 +256,19 @@ export function renderDeepNotesBlockHtml(cast: CastResult, castAt = new Date()):
             <span>我的疑惑 / 几天后回看：</span>
             <textarea class="question-input" rows="2" data-study-note="reflect" placeholder="预留回看空位…"></textarea>
           </label>
-        </div>
-        <div class="ly-note-tab-panel" data-note-pane="classic" hidden>
-          ${renderClassicPane(cast)}
-        </div>
-        <div class="ly-note-tab-panel" data-note-pane="dress" hidden>
-          ${renderDressArchiveHtml(cast, castAt)}
-        </div>
-        <div class="ly-note-tab-panel" data-note-pane="dict" hidden>
-          <ul class="ly-dict-footer-list">
-            <li><strong>父母爻</strong> = 学历、知识、合同、长辈支持、安全基地。</li>
-            <li><strong>官鬼爻</strong> = 事业目标、外部竞争、压力、社会规则。</li>
-            <li><strong>妻财爻</strong> = 财务回报、资源、你自身的价值底气。</li>
-            <li><strong>子孙爻</strong> = 创造力、破局、身体与放松的源泉。</li>
-            <li><strong>兄弟爻</strong> = 同侪环境、盟友与竞争拉扯。</li>
-          </ul>
-          <p class="ly-guide-tip">点标签展开详解。</p>
-          ${renderQinDictHtml()}
+          ${renderDictFooter()}
         </div>
       </div>
     </section>
   `;
 }
 
-export function bindDeepNotesBlock(root: HTMLElement): void {
+export function bindDeepNotesBlock(
+  root: HTMLElement,
+  cast?: CastResult,
+  question = '',
+  castAt = new Date(),
+): void {
   const host = root.querySelector<HTMLElement>('[data-deep-notes]');
   if (!host) return;
   const tabs = host.querySelectorAll<HTMLButtonElement>('[data-note-tab]');
@@ -267,4 +291,7 @@ export function bindDeepNotesBlock(root: HTMLElement): void {
   });
 
   bindQinDict(host);
+  bindClassicGuaSwitch(host);
+  bindGuideDomainTabs(host);
+  if (cast) bindDressArchive(host, cast, question, castAt);
 }

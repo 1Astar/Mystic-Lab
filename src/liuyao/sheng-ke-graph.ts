@@ -214,7 +214,6 @@ export function renderShengKeGraphHtml(graph: ShengKeGraph): string {
   return `
     <section class="ly-sk-panel">
       <h4>生克星图</h4>
-      <p class="ly-layer-guide">本题用神倾向「${graph.yongName}」。绿=生，红=克；点节点会联动装卦表并打开实盘卡。</p>
       <svg class="ly-sk-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="用神原神忌神生克图">
         <defs>
           <marker id="ly-sk-arrow-生" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -370,7 +369,6 @@ export function renderCourseShengKeHtml(
         ${nodeSvg}
       </svg>
       ${compact ? '' : `<p class="ly-sk-course-dialogue">${dialogue}</p>`}
-      <p class="ly-guide-tip">绿线＝帮助（生），红线＝阻碍（克）。括号里是传统叫法。</p>
     </section>
   `;
 }

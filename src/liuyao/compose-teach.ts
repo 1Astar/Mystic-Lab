@@ -48,7 +48,7 @@ export function buildFiveSteps(
   return [
     {
       step: 1,
-      title: '先找「你」和「外界」的位置',
+      title: '查灵魂 · 世应',
       lookAt: `世（我）在${shiLabel} · 应（外界）在${yingLabel}`,
       body: [
         '世＝你，应＝对方或环境。金色圈＝世，红色圈＝应。',
@@ -57,7 +57,7 @@ export function buildFiveSteps(
     },
     {
       step: 2,
-      title: '看看哪些地方「动」了？（找转机）',
+      title: '抓重点 · 动爻',
       lookAt: moving ? `${moveCount} 个动爻：${moving}` : '无动爻',
       body: moving
         ? [
@@ -73,7 +73,7 @@ export function buildFiveSteps(
     },
     {
       step: 3,
-      title: '把上下两个卦翻译成生活场景',
+      title: '看根基 · 取象翻译',
       lookAt: `上${upper.nature}（环境）· 下${lower.nature}（自己）`,
       body: [
         '把上卦想成天/环境，下卦想成地/自己，连起来想。',
@@ -83,7 +83,7 @@ export function buildFiveSteps(
     },
     {
       step: 4,
-      title: '看过程：本卦 → 变卦',
+      title: '看过程 · 本 → 变',
       lookAt: cast.changed
         ? `${cast.primary.name} → ${cast.changed.name}`
         : `${cast.primary.name}（无变）`,
@@ -96,11 +96,12 @@ export function buildFiveSteps(
     },
     {
       step: 5,
-      title: '连回生活：给出可执行策略',
+      title: '连生活 · 策略',
       lookAt: question.trim() || '对照你真正在意的事',
       body: [
-        '最后一步才落到生活：不要只拿一句总结交差，要有可执行的策略清单。',
-        '下面可点「陪读」问题，帮你把卦象说成人话。',
+        question.trim()
+          ? `对照「${question.trim()}」，把前面的结构收成可验证的下一步。`
+          : '把前面的结构收成可验证的下一步。',
       ],
     },
   ];
@@ -282,7 +283,7 @@ function renderStepPanel(cast: CastResult, step: number, question: string, domai
   const pack = buildStrategyPack(cast, domain, question);
   return `
     <div class="ly-guide-panel" data-panel="5">
-      <p class="ly-guide-talk">最后一步：把卦连回你的生活——给策略，不只给一句总结。</p>
+      <p class="ly-guide-talk">把卦连回你的生活——对照问题，选一个可验证的下一步。</p>
       <h4 class="ly-strategy-title">${pack.sceneTitle}</h4>
       <ul class="ly-strategy-list">
         ${pack.items.map((it) => `<li><strong>${it.label}</strong><span>${formatClauseHtml(it.text)}</span></li>`).join('')}

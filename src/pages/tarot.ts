@@ -16,10 +16,15 @@ import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
 import { saveJournalEntry, updateJournalReflection, upsertJournalProgress } from '../journal/records.ts';
+import { mergeReadingBackground } from '../life/profile-context.ts';
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
 import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
+import {
+  bindProfileContextBar,
+  renderProfileContextBarHtml,
+} from '../ui/profile-context-bar.ts';
 import {
   defaultDrawMode,
   detectInputCapabilities,
@@ -601,16 +606,35 @@ export function renderTarot(root: HTMLElement): () => void {
         <h2 class="section-title">开始解读之前</h2>
         <p class="tarot-hint">问题：<strong>${escapePreReading(question || '（未填写）')}</strong></p>
         <p class="teach-hint teach-hint-soft">补充一句当下情况（可选），解读会更贴你的处境；也可直接跳过。</p>
+        ${renderProfileContextBarHtml('tarot-profile')}
         <label class="pre-reading-label" for="pre-reading-bg">例如：刚离职 / 已面了 3 家 / 有 offer 在等</label>
         <textarea id="pre-reading-bg" class="question-input" rows="3" placeholder="可选：一句话背景…">${escapePreReading(questionBackground)}</textarea>
       </div>
     `;
+    const profileBar = bindProfileContextBar(stage, {
+      idPrefix: 'tarot-profile',
+      onChange: (use) => {
+        const el = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
+        if (!el) return;
+        if (use) {
+          el.value = mergeReadingBackground(el.value, true);
+        }
+      },
+    });
+    // 首次进入：若偏好开启且框为空，预填档案
+    const bgEl = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
+    if (bgEl && profileBar.getUseProfile() && !bgEl.value.trim()) {
+      bgEl.value = profileBar.getContextText();
+    }
+
     const skipBtn = document.createElement('button');
     skipBtn.type = 'button';
     skipBtn.className = 'btn btn-ghost';
     skipBtn.textContent = '跳过，直接解读';
     skipBtn.addEventListener('click', () => {
-      questionBackground = '';
+      questionBackground = profileBar.getUseProfile()
+        ? mergeReadingBackground('', true)
+        : '';
       backgroundPromptDone = true;
       void finishFlipInterpret();
     });
@@ -620,7 +644,10 @@ export function renderTarot(root: HTMLElement): () => void {
     goBtn.textContent = '开始解读';
     goBtn.addEventListener('click', () => {
       const el = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
-      questionBackground = el?.value.trim() ?? '';
+      questionBackground = mergeReadingBackground(
+        el?.value.trim() ?? '',
+        profileBar.getUseProfile(),
+      );
       backgroundPromptDone = true;
       void finishFlipInterpret();
     });

@@ -42,5 +42,7 @@ describe('sheng-ke-graph', () => {
     expect(talk.dialogue).not.toMatch(/先保用神不被拖垮/);
     const html = renderCourseShengKeHtml(graph);
     expect(html).toMatch(/生（帮助）|克（阻碍）|有的救|暗中扶持|拖后腿/);
+    expect(html).toMatch(/data-sk-line/);
+    expect(html).not.toMatch(/绿线＝帮助/);
   });
 });

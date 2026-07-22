@@ -37,17 +37,69 @@ const PALACES: PalaceRow[] = [
 
 const SHI_BY_NAME = new Map<string, 1 | 2 | 3 | 4 | 5 | 6>();
 const PALACE_BY_NAME = new Map<string, TrigramId>();
+const PALACE_STAGE_BY_NAME = new Map<string, number>();
+const PALACE_STAGE_LABELS = ['本宫', '一世', '二世', '三世', '四世', '五世', '游魂', '归魂'] as const;
+
 for (const palace of PALACES) {
   const palaceId = palace[0] as TrigramId;
   palace.forEach((name, i) => {
     SHI_BY_NAME.set(name, PALACE_SHI[i]!);
     PALACE_BY_NAME.set(name, palaceId);
+    PALACE_STAGE_BY_NAME.set(name, i);
   });
 }
 
 /** 八宫本宫（纳甲六亲用） */
 export function palaceOfHexagram(name: string): TrigramId | undefined {
   return PALACE_BY_NAME.get(name);
+}
+
+/** 八宫列表：每宫 8 卦（本宫→归魂） */
+export function listPalaces(): { palace: TrigramId; names: string[] }[] {
+  return PALACES.map((row) => ({
+    palace: row[0] as TrigramId,
+    names: [...row],
+  }));
+}
+
+/** 卦在八宫中的阶位：本宫 / 一世… / 游魂 / 归魂 */
+export function palaceStageOfHexagram(name: string): {
+  palace: TrigramId;
+  stageIndex: number;
+  stageLabel: string;
+  shiLine: 1 | 2 | 3 | 4 | 5 | 6;
+} | undefined {
+  const palace = PALACE_BY_NAME.get(name);
+  const stageIndex = PALACE_STAGE_BY_NAME.get(name);
+  const shiLine = SHI_BY_NAME.get(name);
+  if (!palace || stageIndex === undefined || !shiLine) return undefined;
+  return {
+    palace,
+    stageIndex,
+    stageLabel: PALACE_STAGE_LABELS[stageIndex]!,
+    shiLine,
+  };
+}
+
+/** 白话：为什么本卦的世/应落在这两爻 */
+export function explainShiYingWhy(
+  name: string,
+  shiLine: 1 | 2 | 3 | 4 | 5 | 6,
+  yingLine: 1 | 2 | 3 | 4 | 5 | 6,
+): { shiWhy: string; yingWhy: string } {
+  const stage = palaceStageOfHexagram(name);
+  const shiLabel = LINE_LABELS[shiLine - 1]!;
+  const yingLabel = LINE_LABELS[yingLine - 1]!;
+  if (!stage) {
+    return {
+      shiWhy: `世爻代表「我」。本卦把世标在${shiLabel}——金色圈就是你这边。`,
+      yingWhy: `应爻代表「外界 / 对方」。它与世爻隔三位相对：世在${shiLabel}，应就在${yingLabel}。`,
+    };
+  }
+  return {
+    shiWhy: `「${name}」属${stage.palace}宫${stage.stageLabel}卦。八宫里，${stage.stageLabel}卦的世爻固定在${shiLabel}——所以金色圈落在这里，代表「我」，不是随便挑的。`,
+    yingWhy: `应爻与世爻隔三位相对（世应对冲）。世既在${shiLabel}，应就落在${yingLabel}——红色圈是「外界 / 对方」。`,
+  };
 }
 
 /** 文王序：卦名 → 序号；上下卦用二进制键 */

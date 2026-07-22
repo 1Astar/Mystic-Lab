@@ -1,7 +1,7 @@
 import type { LiuQin, YaoDress } from './najia.ts';
-import { LIUSHEN_PLAIN } from './najia.ts';
+import { LIUSHEN_PLAIN, liuqinOf } from './najia.ts';
 import { LINE_ROLE } from './reading-facts.ts';
-import type { ShiYingRel } from './wuxing.ts';
+import type { ShiYingRel, WuXing } from './wuxing.ts';
 import type { SceneDomain } from './scene-map.ts';
 
 /** 六亲 → 能量 / 资源场（解读区统一「现代名（传统）」） */
@@ -70,12 +70,12 @@ export function formatYongLabel(yongName: string): string {
 
 export function shiYingEnergyTip(rel: ShiYingRel): string {
   if (rel === '相生') {
-    return '世（你）与应（外部）相生：内部能量与外部世界较有默契，可顺水推舟，也留意别把力气全交给外界。';
+    return '世爻（你）和应爻（外部）相生：你现在和周围环境较有默契，顺水推舟即可；也留意别把力气全交给外界。';
   }
   if (rel === '相克') {
-    return '世（你）与应（外部）相克：内心需求与外部现实有冲突。冲突不是你的错，而是价值观与环境暂不匹配——这是停下来审视真实需求的信号，不必为了顺应环境而内耗自己。';
+    return '世爻（你）和应爻（外部）相克：内心需求与外部现实有冲突。冲突不是你的错，而是价值观与环境暂不匹配——这不是要你去妥协的信号，而是停下来审视真实需求的信号。不要为了顺应外部环境而内耗自己。';
   }
-  return '世（你）与应（外部）比和：内外节奏接近。适合协同，也防一起原地打转——先对齐「我真正要什么」。';
+  return '世爻（你）和应爻（外部）比和：内外节奏接近。适合协同，也防一起原地打转——先对齐「我真正要什么」。';
 }
 
 export type EnergyFocusItem = {
@@ -100,27 +100,27 @@ export function buildEnergyFocus(opts: {
     if (qin === '官鬼') {
       items.push({
         title: `能量聚焦 · ${lab}`,
-        body: `${via}你目前的注意力高度集中在【外部目标的达成】上。很好，也要小心：过于专注目标可能忽视体感。建议：冲刺的同时，记得察觉内心的疲惫，划清工作与休息边界。`,
+        body: `${via}你目前的能量高度集中在【外部目标的达成】上。这很好，也要小心：过于专注目标可能忽视体感。建议：冲刺的同时，记得察觉内心的疲惫。`,
       });
     } else if (qin === '子孙') {
       items.push({
         title: `能量聚焦 · ${lab}`,
-        body: `${via}你现在的状态适合【打破旧框架】。若在求职或转型，灵感往往比标准简历更关键。建议：相信直觉，去试那些看似不常规、但让你有生命力的路。`,
+        body: `${via}你现在的状态非常适合【打破旧框架】。若在找工作或转型，灵感往往比标准简历更重要。建议：相信直觉，去尝试那些看似不常规的路。`,
       });
     } else if (qin === '兄弟') {
       items.push({
         title: `能量聚焦 · ${lab}`,
-        body: `${via}你身处一个充满竞争与拉扯的同侪场。这不一定不好——它能激活状态。建议：善用盟友，但不要被他人的节奏带跑。`,
+        body: `${via}你身处一个充满竞争和拉扯的圈子。这不一定不好——它代表有很多人在帮你激活状态。建议：善用盟友，但不要被他人的节奏带跑。`,
       });
     } else if (qin === '妻财') {
       items.push({
         title: `能量聚焦 · ${lab}`,
-        body: `${via}能量落在【物质根基与自我价值回报】上。经过这件事，你更可能摸到实实在在的安全感来源（薪资、技能变现、可掌控资源）。建议：把「回报是否对等」写清楚，而不是只谈情怀。`,
+        body: `${via}本卦动变指向【${lab}】。意味着经过这件事，你更可能摸到实实在在的自我价值回报（薪资提升 / 技能变现），这是安全感的来源。建议：把「回报是否对等」写清楚。`,
       });
     } else {
       items.push({
         title: `能量聚焦 · ${lab}`,
-        body: `${via}注意力在【安全基地与信息网】——文书、信息、经验盘、支持系统。建议：先把信息与基础盘补齐，再谈冒进；暗渠（内推、非公开渠道）往往比明面更关键。`,
+        body: `${via}注意力在【安全基地与信息网】——文书、信息、经验盘、支持系统。建议：先把信息与基础盘补齐；暗渠（内推、非公开渠道）往往比明面更关键。`,
       });
     }
   };
@@ -132,10 +132,60 @@ export function buildEnergyFocus(opts: {
   if (items.length === 0) {
     items.push({
       title: '能量聚焦 · 先看世应',
-      body: '本卦无明显动爻六亲信号。先看世（你）与应（外部）的互动模式，把注意力放在「我能动的一层」上。',
+      body: '本卦无明显动爻六亲信号。先看世爻（你）与应爻（外部）的互动模式——反映的是内部能量与外部世界如何相处，不是谁压过谁。',
     });
   }
   return items;
+}
+
+/** 从装卦结果生成「你的当下能量聚焦表」 */
+export function buildEnergyFocusFromDress(
+  rows: YaoDress[],
+  changingIndexes: number[],
+  palaceWx?: WuXing,
+): EnergyFocusItem[] {
+  const changingQin = changingIndexes
+    .map((i) => rows[i]?.liuqin)
+    .filter((q): q is LiuQin => Boolean(q));
+
+  let changedQin: LiuQin | null = null;
+  if (palaceWx) {
+    for (const i of changingIndexes) {
+      const r = rows[i];
+      if (r?.changing && r.changedWuxing) {
+        changedQin = liuqinOf(palaceWx, r.changedWuxing);
+        break;
+      }
+    }
+  }
+
+  const counts = new Map<LiuQin, number>();
+  for (const r of rows) counts.set(r.liuqin, (counts.get(r.liuqin) ?? 0) + 1);
+  const strongQin = [...counts.entries()]
+    .filter(([, n]) => n >= 3)
+    .map(([q]) => q);
+
+  return buildEnergyFocus({ changingQin, changedQin, strongQin });
+}
+
+export function renderEnergyFocusHtml(items: EnergyFocusItem[]): string {
+  return `
+    <section class="ly-energy-focus" data-energy-focus>
+      <h4>你的当下能量聚焦表</h4>
+      <p class="ly-layer-guide">不谈谁克死谁，只谈：注意力与能量，现在该放在哪个系统上。</p>
+      <ul class="ly-energy-focus-list">
+        ${items
+          .map(
+            (it) => `
+          <li>
+            <strong>${it.title}</strong>
+            <span>${it.body}</span>
+          </li>`,
+          )
+          .join('')}
+      </ul>
+    </section>
+  `;
 }
 
 export type YaoAskCard = {
@@ -436,71 +486,124 @@ export function renderYongShenTeachHtml(opts: {
   `;
 }
 
-export function renderEnergyFocusHtml(items: EnergyFocusItem[]): string {
-  return `
-    <section class="ly-energy-focus">
-      <h4>你的当下能量聚焦</h4>
-      <p class="ly-layer-guide">不谈谁克死谁，只谈：注意力与能量，现在该放在哪个系统上。</p>
-      <ul class="ly-energy-focus-list">
-        ${items
-          .map(
-            (it) => `
-          <li>
-            <strong>${it.title}</strong>
-            <span>${it.body}</span>
-          </li>`,
-          )
-          .join('')}
-      </ul>
-    </section>
-  `;
-}
-
 export type QinDictEntry = {
   qin: LiuQin;
+  /** 短标签：父母 / 官鬼 */
   tag: string;
   modernTitle: string;
   modern: string;
   classic: string;
+  /** 取象四门 */
+  people: string;
+  place: string;
+  affair: string;
+  mindset: string;
 };
 
 export const LIUQIN_DICT: Record<LiuQin, QinDictEntry> = {
   父母: {
     qin: '父母',
-    tag: '父·母·爻',
-    modernTitle: '知识 / 安全网',
-    modern: '代表你的知识储备、学历、合同、信任的人、老东家、家人支持。',
-    classic: '传统释：父母、师长、文书、房屋',
+    tag: '父母',
+    modernTitle: '安全基地 / 信息网',
+    modern:
+      '代表你的知识储备、学习能力、过往经验、基础盘（家庭支持、社保、合同文书、考题信息）。',
+    classic: '传统释：父母、师长、房屋、文书',
+    people: '父母、师长、长辈、文书主管、房东、信任的靠山',
+    place: '家、学校、办公室、档案馆、房产、照顾长辈的场域',
+    affair: '文书、合同、学业考试、房产事务、资讯与照顾',
+    mindset: '求安稳、依赖支持、责任感、文书焦虑',
   },
   官鬼: {
     qin: '官鬼',
-    tag: '官·鬼·爻',
-    modernTitle: '目标 / 外部压力',
-    modern: '代表你的职业目标、想要拿下的大客户、需要克服的困难、外部规则、领导。',
-    classic: '传统释：丈夫、长官、功名、官司',
+    tag: '官鬼',
+    modernTitle: '目标系统 / 外部规则',
+    modern:
+      '代表你追求的目标（职位、项目）、外部施加的压力（KPI、行业环境），以及社会评价体系的框架。',
+    classic: '传统释：丈夫、领导、官非、灾祸',
+    people: '领导、考官、对手、约束你的人、关键客户',
+    place: '公司、考场、医院、评审场、高压场合',
+    affair: '考核升迁、项目交付、官司诉讼、疾病压力、KPI',
+    mindset: '被审视、进取心、压力感、较劲与边界',
   },
   妻财: {
     qin: '妻财',
-    tag: '妻·财·爻',
-    modernTitle: '自我价值 / 资源',
-    modern: '代表你的实际薪资、可支配资产、你在这个社会里的底气、以及情绪上的安全感。',
-    classic: '传统释：妻子、仆人、财富',
+    tag: '妻财',
+    modernTitle: '物质根基 / 自我价值',
+    modern:
+      '代表你能掌控的实际资源（金钱、技能）、自我价值的回报，以及让你感到稳定和安全的生活基础。',
+    classic: '传统释：妻子、仆人、财富、欲望',
+    people: '财务相关人、付钱的客户、你所养之人、物质交换对象',
+    place: '市场、交易场、家庭财务角落、资源池',
+    affair: '薪资报酬、买卖投资、资产配置、技能变现',
+    mindset: '安全感、价值感、占有欲、怕失去的底气',
   },
   子孙: {
     qin: '子孙',
-    tag: '子·孙·爻',
-    modernTitle: '创造力 / 破局点',
-    modern: '代表灵感、打破常规的能力、身体与放松愉悦的源泉，以及能帮你解压破局的那股力。',
-    classic: '传统释：儿女、下属、技艺、喜悦',
+    tag: '子孙',
+    modernTitle: '内在创造力 / 破局点',
+    modern:
+      '代表你的创造力、灵感、打破常规的能力、健康的身体，以及能让你放松和愉悦的源泉。',
+    classic: '传统释：儿女、下属、晚辈',
+    people: '子女、下属、晚辈、医生、技艺导师、解压搭子',
+    place: '工作室、诊室、工作室、放松空间、技艺练习场',
+    affair: '技艺创作、享乐休息、破局解压、疗愈照顾',
+    mindset: '轻松、创造力、喜悦、想卸压的冲动',
   },
   兄弟: {
     qin: '兄弟',
-    tag: '兄·弟·爻',
-    modernTitle: '同侪 / 盟友圈',
-    modern: '代表同代人、社交圈层、竞争与合作、群体中的拉扯——别人如何激活或带走你的节奏。',
-    classic: '传统释：兄弟、朋友、竞争、耗财',
+    tag: '兄弟',
+    modernTitle: '同侪环境 / 盟友圈',
+    modern:
+      '代表你的同代人、所处社交圈层的状态、竞争关系，以及你在群体中的合作与拉扯。',
+    classic: '传统释：兄弟、朋友、竞争者',
+    people: '朋友、同侪、合伙人、竞争者',
+    place: '社交圈、同辈场合、合伙场域、群体拉扯的场',
+    affair: '合伙协作、竞争分杯、争抢资源、耗财往来',
+    mindset: '比较心、同盟感、消耗感、怕被分走',
   },
 };
+
+function escapeQinHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** 人物 / 场所 / 事务 / 心态 四门取象 */
+export function renderQinFacetsHtml(d: QinDictEntry): string {
+  const rows: [string, string][] = [
+    ['人物', d.people],
+    ['场所', d.place],
+    ['事务', d.affair],
+    ['心态', d.mindset],
+  ];
+  return `
+    <dl class="ly-qin-facets">
+      ${rows
+        .map(
+          ([k, v]) => `
+        <div class="ly-qin-facet">
+          <dt>${escapeQinHtml(k)}</dt>
+          <dd>${escapeQinHtml(v)}</dd>
+        </div>`,
+        )
+        .join('')}
+    </dl>
+  `;
+}
+
+export function renderQinDictPanelHtml(d: QinDictEntry): string {
+  return `
+    <p class="ly-qin-dict-title"><strong>${escapeQinHtml(d.tag)}</strong>（${escapeQinHtml(
+      d.modernTitle,
+    )}）</p>
+    <p class="ly-qin-dict-blurb">${escapeQinHtml(d.modern)}</p>
+    ${renderQinFacetsHtml(d)}
+    <p class="ly-classic-note">${escapeQinHtml(d.classic)}</p>
+  `;
+}
 
 export type InferenceLine = {
   title: string;
@@ -548,16 +651,16 @@ export function buildInternalInference(opts: {
     const q = opts.yuanRow.liuqin;
     const moving = opts.yuanRow.changing;
     lines.push({
-      title: '助力来源（元神）',
+      title: '补给系统（元神）',
       body: moving
-        ? `目前有一股强烈的「${LIUQIN_ENERGY[q].modern}」能量正在转化为你的动力，生扶你问的事。`
-        : `场上有「${LIUQIN_ENERGY[q].modern}」可作为助力来源，虽未大动，仍值得借力。`,
+        ? `目前有一股强烈的「${LIUQIN_ENERGY[q].modern}」能量正在转化为你的动力，滋养你的核心聚焦。`
+        : `场上有「${LIUQIN_ENERGY[q].modern}」可作为补给，虽未大动，仍值得借力。`,
       classicNote: `元神在${opts.yuanRow.label}${q}${moving ? '发动' : ''}，生助用神`,
     });
   } else {
     lines.push({
-      title: '助力来源（元神）',
-      body: '本卦未见明显元神生助。动力更多要靠你自己对齐世应、做小步验证。',
+      title: '补给系统（元神）',
+      body: '本卦未见明显补给。动力更多要靠你自己对齐世应、做小步验证。',
       classicNote: '元神未现',
     });
   }
@@ -628,43 +731,76 @@ export function renderQinDictHtml(): string {
   const tags = order
     .map((q) => {
       const d = LIUQIN_DICT[q];
-      return `<button type="button" class="ly-qin-dict-tag" data-qin-dict="${q}" aria-pressed="false">${d.tag}（${d.modernTitle}）</button>`;
+      return `<button type="button" class="ly-qin-dict-tag" data-qin-dict="${q}" aria-pressed="false" title="${escapeQinHtml(
+        d.modernTitle,
+      )}">${escapeQinHtml(d.tag)}</button>`;
     })
     .join('');
   return `
     <section class="ly-qin-dict" data-qin-dict-root>
-      <h4>📖 名词翻译词典（点击标签即可查看）</h4>
+      <h4>六亲词典</h4>
+      <p class="ly-guide-tip">点「父母 / 官鬼…」立刻看人物 · 场所 · 事务 · 心态。</p>
       <div class="ly-qin-dict-tags">${tags}</div>
       <div class="ly-qin-dict-panel" data-qin-dict-panel hidden></div>
     </section>
   `;
 }
 
+/** 打开指定六亲的四门取象面板（笔记侧栏 / 点爻联动） */
+export function openQinDict(root: HTMLElement, qin: LiuQin): boolean {
+  const host = root.querySelector<HTMLElement>('[data-qin-dict-root]');
+  const panel = host?.querySelector<HTMLElement>('[data-qin-dict-panel]');
+  const d = LIUQIN_DICT[qin];
+  if (!host || !panel || !d) return false;
+
+  host.querySelectorAll('[data-qin-dict]').forEach((b) => {
+    const on = (b as HTMLElement).dataset.qinDict === qin;
+    b.setAttribute('aria-pressed', String(on));
+  });
+  panel.hidden = false;
+  panel.innerHTML = renderQinDictPanelHtml(d);
+  host.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  return true;
+}
+
 export function bindQinDict(root: HTMLElement): void {
   root.querySelectorAll<HTMLElement>('[data-qin-dict-root]').forEach((host) => {
+    if (host.dataset.bound === '1') return;
+    host.dataset.bound = '1';
     const panel = host.querySelector<HTMLElement>('[data-qin-dict-panel]');
-    host.querySelectorAll<HTMLButtonElement>('[data-qin-dict]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const q = btn.dataset.qinDict as LiuQin;
-        const d = LIUQIN_DICT[q];
-        const on = btn.getAttribute('aria-pressed') === 'true';
-        host.querySelectorAll('[data-qin-dict]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-        if (on) {
-          if (panel) {
-            panel.hidden = true;
-            panel.innerHTML = '';
-          }
-          return;
-        }
-        btn.setAttribute('aria-pressed', 'true');
+    host.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-qin-dict]');
+      if (!btn || !host.contains(btn)) return;
+      const q = btn.dataset.qinDict as LiuQin;
+      const d = LIUQIN_DICT[q];
+      if (!d) return;
+      const on = btn.getAttribute('aria-pressed') === 'true';
+      host.querySelectorAll('[data-qin-dict]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+      if (on) {
         if (panel) {
-          panel.hidden = false;
-          panel.innerHTML = `
-          <p class="ly-qin-dict-title"><strong>${d.tag}</strong>（${d.modernTitle}）</p>
-          <p>${d.modern}</p>
-          <p class="ly-classic-note">${d.classic}</p>`;
+          panel.hidden = true;
+          panel.innerHTML = '';
         }
-      });
+        return;
+      }
+      btn.setAttribute('aria-pressed', 'true');
+      if (panel) {
+        panel.hidden = false;
+        panel.innerHTML = renderQinDictPanelHtml(d);
+      }
     });
+  });
+
+  if (root.dataset.qinDictDelegated === '1') return;
+  root.dataset.qinDictDelegated = '1';
+  root.addEventListener('click', (e) => {
+    const chip = (e.target as HTMLElement).closest<HTMLElement>('[data-open-qin-dict]');
+    if (!chip || !root.contains(chip)) return;
+    if (chip.hasAttribute('data-qin-dict')) return;
+    const q = chip.dataset.openQinDict as LiuQin;
+    if (!LIUQIN_DICT[q]) return;
+    e.preventDefault();
+    openQinDict(root, q);
   });
 }

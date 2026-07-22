@@ -44,6 +44,27 @@ const SYSTEMS: LabEntry[] = [
     note: '象与动念',
     emblem: 'plum',
   },
+  {
+    path: '/bazi',
+    title: '八字',
+    desc: '四柱排盘 · 日主十神',
+    note: '命理结构',
+    emblem: 'bazi',
+  },
+  {
+    path: '/profile',
+    title: '我的档案',
+    desc: '现状底座 · 各体系可选用',
+    note: '个人底座',
+    emblem: 'heart',
+  },
+  {
+    path: '/life',
+    title: '人生宇宙',
+    desc: '平行 · 选择模拟 · 预测打卡',
+    note: '人生推演',
+    emblem: 'cosmos',
+  },
 ];
 
 const GLOBAL_ENTRIES: LabEntry[] = [

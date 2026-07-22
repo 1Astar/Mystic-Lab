@@ -41,6 +41,8 @@ export function renderLiuyaoLearn(root: HTMLElement): void {
       <a href="/liuyao/concepts#liu-qin" data-path="/liuyao/concepts#liu-qin">六亲</a>
       <a href="/liuyao/concepts#dong-yao" data-path="/liuyao/concepts#dong-yao">动爻</a>
       <a href="/liuyao/concepts#bian-gua" data-path="/liuyao/concepts#bian-gua">变卦</a>
+      <a href="/liuyao/concepts#hu-gua" data-path="/liuyao/concepts#hu-gua">互卦</a>
+      <a href="/liuyao/concepts#cuo-zong" data-path="/liuyao/concepts#cuo-zong">错综</a>
     </nav>
   `;
   page.append(header);

@@ -18,10 +18,46 @@ declare module 'lunar-javascript' {
     toYmd(): string;
   }
 
+  export class EightChar {
+    getYear(): string;
+    getMonth(): string;
+    getDay(): string;
+    getTime(): string;
+    getDayGan(): string;
+    getDayZhi(): string;
+    getYearZhi(): string;
+    getYearShiShenGan(): string;
+    getMonthShiShenGan(): string;
+    getDayShiShenGan(): string;
+    getTimeShiShenGan(): string;
+    getYearHideGan(): string[];
+    getMonthHideGan(): string[];
+    getDayHideGan(): string[];
+    getTimeHideGan(): string[];
+    getYearShiShenZhi(): string[];
+    getMonthShiShenZhi(): string[];
+    getDayShiShenZhi(): string[];
+    getTimeShiShenZhi(): string[];
+    getYearNaYin(): string;
+    getMonthNaYin(): string;
+    getDayNaYin(): string;
+    getTimeNaYin(): string;
+    getYearXunKong(): string;
+    getMonthXunKong(): string;
+    getDayXunKong(): string;
+    getTimeXunKong(): string;
+    getYearDiShi(): string;
+    getMonthDiShi(): string;
+    getDayDiShi(): string;
+    getTimeDiShi(): string;
+    setSect(sect: number): void;
+  }
+
   export class Lunar {
     getMonthInChinese(): string;
     getDayInChinese(): string;
     getYearInGanZhi(): string;
+    getYearInGanZhiExact(): string;
     getMonthInGanZhi(): string;
     getDayInGanZhi(): string;
     getTimeInGanZhi(): string;
@@ -35,10 +71,19 @@ declare module 'lunar-javascript' {
     getDayTianShenLuck(): string;
     getDayPositionCaiDesc(): string;
     getDayPositionXiDesc(): string;
+    getEightChar(): EightChar;
     getTimes(): Array<{
       getZhi: () => string;
       getTianShenLuck: () => string;
     }>;
     toString(): string;
   }
+
+  export const LunarUtil: {
+    SHI_SHEN: Record<string, string>;
+    ZHI_HIDE_GAN: Record<string, string[]>;
+    NAYIN: Record<string, string>;
+    CHANG_SHENG_OFFSET: Record<string, number>;
+    getXunKong: (ganzhi: string) => string;
+  };
 }

@@ -13,6 +13,7 @@ import {
   type JourneyItem,
 } from '../journal/journey.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
+import { getLabProfileSnapshot } from '../life/profile-context.ts';
 import {
   fulfilledLabel,
   getXiaoliurenJournalEntry,
@@ -21,6 +22,7 @@ import {
   updateXiaoliurenReflection,
 } from '../xiaoliuren/journal.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountJourneyBackupBar } from '../ui/journey-backup-bar.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
@@ -65,6 +67,34 @@ export function renderJourney(root: HTMLElement): void {
     <p class="page-subtitle">各体系占问记录 · 收藏 · 进度 · 笔记</p>
   `;
 
+  const profileSnap = getLabProfileSnapshot();
+  const profileCard = document.createElement('section');
+  profileCard.className = 'journey-profile-card';
+  profileCard.innerHTML = profileSnap.ready
+    ? `
+      <div>
+        <h2>我的档案 · Lab 通用</h2>
+        <p>${escapeHtml(profileSnap.brief)}${
+          profileSnap.portrait?.stageTitle
+            ? ` · ${escapeHtml(profileSnap.portrait.stageTitle)}`
+            : ''
+        }</p>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" data-go-profile>查看 / 编辑</button>`
+    : `
+      <div>
+        <h2>我的档案 · Lab 通用</h2>
+        <p>建一份现状档案，塔罗 / 小六壬 / 六爻 / 人生宇宙解读都可选用。</p>
+      </div>
+      <button type="button" class="btn btn-sm" data-go-profile>去建立</button>`;
+  profileCard.querySelector('[data-go-profile]')?.addEventListener('click', () => {
+    navigate('/profile');
+  });
+
+  const backupHost = document.createElement('div');
+  backupHost.className = 'journey-backup-host';
+  mountJourneyBackupBar(backupHost);
+
   const reviewHost = document.createElement('div');
   reviewHost.className = 'journey-review-host';
 
@@ -75,7 +105,7 @@ export function renderJourney(root: HTMLElement): void {
   const listHost = document.createElement('div');
   listHost.className = 'journey-list';
 
-  page.append(back, header, reviewHost, tabs, listHost);
+  page.append(back, header, profileCard, backupHost, reviewHost, tabs, listHost);
   root.appendChild(page);
 
   let active: JourneyTab = 'all';

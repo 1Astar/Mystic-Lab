@@ -1,0 +1,824 @@
+/* 人生宇宙 · 东方夜空轻量主题 */
+
+.life-page {
+  position: relative;
+  padding-bottom: 40px;
+}
+
+.life-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 214, 166, 0.1), transparent 32%),
+    radial-gradient(circle at 82% 20%, rgba(120, 180, 255, 0.08), transparent 36%),
+    radial-gradient(ellipse 100% 40% at 50% 0%, rgba(155, 127, 212, 0.12), transparent 55%);
+}
+
+.life-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.life-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.life-header-emblem {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.life-ai-hint {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.72);
+}
+
+.life-focus-note {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  border-radius: 12px;
+  background: rgba(20, 16, 36, 0.45);
+}
+
+.life-profile-gate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 214, 166, 0.35);
+  background: rgba(20, 16, 36, 0.45);
+}
+
+.life-profile-gate.is-ready {
+  border-style: solid;
+  border-color: rgba(201, 162, 39, 0.4);
+}
+
+.life-gate-brief {
+  margin: 4px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(255, 230, 200, 0.78);
+}
+
+.life-focus-tag {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: #ffd6a6;
+}
+
+.life-focus-note p:last-child {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(255, 245, 230, 0.88);
+}
+
+.life-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+/* ── 探索路线 ── */
+
+.life-route {
+  margin: 0 0 22px;
+  padding: 16px 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background: rgba(14, 12, 28, 0.5);
+}
+
+.life-route-head {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.life-route-title {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-family: var(--font-serif, Georgia, 'Songti SC', serif);
+  color: #fff5e6;
+}
+
+.life-route-tip {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(255, 230, 200, 0.72);
+}
+
+.life-route-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.life-route-step {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.life-route-connector {
+  display: block;
+  width: 2px;
+  height: 14px;
+  margin: 0 auto;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 214, 166, 0.55),
+    rgba(155, 127, 212, 0.35)
+  );
+}
+
+.life-route-step.is-locked .life-route-connector {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.life-route-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.life-route-step.is-current .life-route-card {
+  border-color: transparent;
+  background: linear-gradient(135deg, #c9a227, #e8b4d0 55%, #9b7fd4);
+  color: #1a1228;
+}
+
+.life-route-step.is-current .life-route-desc,
+.life-route-step.is-current .life-route-badge {
+  color: rgba(26, 18, 40, 0.72);
+}
+
+.life-route-step.is-done .life-route-card {
+  border-color: rgba(201, 162, 39, 0.4);
+}
+
+.life-route-step.is-locked .life-route-card {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.life-route-step.is-open:not(.is-current) .life-route-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 214, 166, 0.45);
+}
+
+.life-route-n {
+  font-size: 1.05rem;
+  font-weight: 700;
+  min-width: 1.6em;
+}
+
+.life-route-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.life-route-body strong {
+  font-size: 0.95rem;
+}
+
+.life-route-desc {
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.65);
+  line-height: 1.4;
+}
+
+.life-route-lock {
+  font-size: 0.74rem;
+  color: rgba(255, 180, 160, 0.9);
+}
+
+.life-route-badge {
+  font-size: 0.72rem;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 230, 200, 0.8);
+}
+
+.life-route-step.is-current .life-route-badge {
+  background: rgba(26, 18, 40, 0.18);
+}
+
+.life-route-status {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.84rem;
+  color: #ffd6a6;
+}
+
+.life-route-status.is-flash {
+  animation: life-route-flash 0.55s ease;
+}
+
+@keyframes life-route-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.35;
+  }
+}
+
+.life-route-cta {
+  display: block;
+  width: fit-content;
+  margin: 14px auto 0;
+}
+
+.life-btn-primary,
+.life-btn-secondary,
+.life-btn-ghost {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  border-radius: 999px;
+  padding: 12px 20px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.life-btn-primary {
+  background: linear-gradient(135deg, #c9a227, #e8b4d0 55%, #9b7fd4);
+  color: #1a1228;
+  font-weight: 600;
+}
+
+.life-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffe6c8;
+  border: 1px solid rgba(255, 214, 166, 0.35);
+}
+
+.life-btn-ghost {
+  background: transparent;
+  color: rgba(255, 230, 200, 0.85);
+  border: 1px dashed rgba(255, 214, 166, 0.35);
+}
+
+.life-btn-primary:disabled,
+.life-btn-secondary:disabled,
+.life-entry:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.life-btn-primary:not(:disabled):hover,
+.life-btn-secondary:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.life-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.life-entry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  background: rgba(18, 14, 32, 0.55);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.life-entry.is-soon {
+  opacity: 0.7;
+}
+
+.life-entry-icon {
+  font-size: 1.25rem;
+}
+
+.life-entry-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.life-entry-text strong {
+  font-size: 0.98rem;
+}
+
+.life-entry-text span {
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.65);
+}
+
+.life-entry-chevron {
+  color: rgba(255, 214, 166, 0.7);
+  font-size: 1.2rem;
+}
+
+.life-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.life-fieldset {
+  margin: 0;
+  padding: 14px 16px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: rgba(16, 12, 28, 0.5);
+}
+
+.life-fieldset legend {
+  padding: 0 6px;
+  color: #ffd6a6;
+  font-size: 0.85rem;
+}
+
+.life-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.75);
+}
+
+.life-field input,
+.life-field textarea,
+.life-fork-input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.25);
+  background: rgba(8, 6, 18, 0.55);
+  color: #fff5e6;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.life-field textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.life-birth-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .life-birth-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.life-footnote {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.life-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.life-status {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 214, 166, 0.9);
+}
+
+.life-card {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background:
+    linear-gradient(160deg, rgba(40, 28, 64, 0.55), rgba(12, 10, 24, 0.72));
+}
+
+.life-card-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: #ffd6a6;
+}
+
+.life-card h2,
+.life-card h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-serif, Georgia, 'Songti SC', serif);
+}
+
+.life-card-body {
+  margin: 0 0 12px;
+  line-height: 1.6;
+  color: rgba(255, 245, 230, 0.9);
+}
+
+.life-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.life-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: rgba(155, 127, 212, 0.25);
+  border: 1px solid rgba(255, 214, 166, 0.2);
+}
+
+.life-meta {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: rgba(255, 230, 200, 0.7);
+}
+
+.life-hint-list {
+  margin: 10px 0 0;
+  padding-left: 1.1em;
+  color: rgba(255, 245, 230, 0.85);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.life-now-card {
+  margin-bottom: 8px;
+}
+
+.life-forks-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.life-forks-head p {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.65);
+}
+
+.life-fork-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.life-fork-item {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(14, 12, 26, 0.5);
+  cursor: pointer;
+}
+
+.life-fork-item.is-on {
+  border-color: rgba(201, 162, 39, 0.45);
+  background: rgba(40, 32, 18, 0.35);
+}
+
+.life-fork-label {
+  font-size: 0.82rem;
+  color: #ffd6a6;
+  white-space: nowrap;
+}
+
+.life-archives-title {
+  margin: 22px 0 12px;
+  font-size: 1.05rem;
+}
+
+.life-archive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 720px) {
+  .life-archive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.life-archive-card {
+  margin-top: 0;
+}
+
+.life-tone {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: #e8b4d0;
+}
+
+.life-archive-title {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: #ffe6c8;
+}
+
+.life-dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.life-dl div {
+  display: grid;
+  grid-template-columns: 3em 1fr;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+
+.life-dl dt {
+  margin: 0;
+  color: #ffd6a6;
+}
+
+.life-dl dd {
+  margin: 0;
+  color: rgba(255, 245, 230, 0.88);
+  line-height: 1.45;
+}
+
+.life-empty {
+  text-align: center;
+  padding: 40px 16px;
+}
+
+.life-empty p {
+  margin: 12px 0 20px;
+  color: rgba(255, 230, 200, 0.75);
+}
+
+/* ── 选择模拟 ── */
+
+.life-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.life-preset-chip {
+  border: 1px solid rgba(255, 214, 166, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 230, 200, 0.88);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.life-preset-chip:hover {
+  border-color: rgba(201, 162, 39, 0.5);
+  background: rgba(201, 162, 39, 0.12);
+}
+
+.life-horizon {
+  margin: 18px 0 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 214, 166, 0.28);
+  background:
+    linear-gradient(135deg, rgba(60, 40, 20, 0.4), rgba(20, 16, 36, 0.65));
+  text-align: center;
+}
+
+.life-horizon-label {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #ffd6a6;
+}
+
+.life-horizon-value {
+  margin: 6px 0 8px;
+  font-family: var(--font-serif, Georgia, 'Songti SC', serif);
+  font-size: 1.55rem;
+  color: #fff5e6;
+}
+
+.life-horizon-q {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 230, 200, 0.85);
+}
+
+.life-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .life-branch-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.life-branch-card {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.life-branch-card.is-picked {
+  border-color: rgba(201, 162, 39, 0.55);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.25);
+}
+
+.life-branch-card h3 {
+  font-size: 1.05rem;
+}
+
+.life-timeline {
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.life-timeline li {
+  position: relative;
+  padding: 0 0 14px 18px;
+  font-size: 0.88rem;
+  color: rgba(255, 245, 230, 0.9);
+  line-height: 1.4;
+}
+
+.life-timeline li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffd6a6;
+  box-shadow: 0 0 0 3px rgba(255, 214, 166, 0.15);
+}
+
+.life-timeline li::after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 14px;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 214, 166, 0.28);
+}
+
+.life-timeline li:last-child {
+  padding-bottom: 0;
+}
+
+.life-timeline li:last-child::after {
+  display: none;
+}
+
+.life-branch-note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(255, 230, 200, 0.7);
+  flex: 1;
+}
+
+.life-pick-btn {
+  align-self: stretch;
+  margin-top: 4px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+
+.life-sim-foot {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 0.84rem;
+  color: rgba(255, 214, 166, 0.85);
+}
+
+/* ── 预测打卡 ── */
+
+.life-forecast-stats {
+  margin-bottom: 14px;
+}
+
+.life-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: rgba(16, 12, 28, 0.45);
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.85);
+}
+
+.life-forecast-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.life-forecast-card h3 {
+  font-size: 1rem;
+}
+
+.life-forecast-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.life-forecast-pred {
+  margin: 0 0 8px;
+  line-height: 1.55;
+  color: rgba(255, 245, 230, 0.92);
+}
+
+.life-forecast-why {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: rgba(255, 230, 200, 0.75);
+}
+
+.life-forecast-why strong {
+  color: #ffd6a6;
+  font-weight: 600;
+}
+
+.life-forecast-reflect {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  color: #e8b4d0;
+}
+
+.life-forecast-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}

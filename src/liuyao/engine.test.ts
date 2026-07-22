@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { castSixYao, facesToThrow, buildCastFromThrows, type YaoThrow } from './engine.ts';
-import { HEXAGRAMS, hexagramFromLines, linesFromHexagram, yingLineOf } from './hexagrams.ts';
+import { HEXAGRAMS, hexagramFromLines, linesFromHexagram, yingLineOf, explainShiYingWhy, palaceStageOfHexagram } from './hexagrams.ts';
 import { buildFourLayerReading } from './interpret.ts';
 
 describe('liuyao engine', () => {
@@ -69,6 +69,16 @@ describe('liuyao engine', () => {
   it('ying is opposite of shi', () => {
     expect(yingLineOf(1)).toBe(4);
     expect(yingLineOf(6)).toBe(3);
+  });
+
+  it('explains shi/ying from palace stage', () => {
+    const stage = palaceStageOfHexagram('晋');
+    expect(stage?.palace).toBe('乾');
+    expect(stage?.stageLabel).toBe('游魂');
+    expect(stage?.shiLine).toBe(4);
+    const why = explainShiYingWhy('晋', 4, 1);
+    expect(why.shiWhy).toMatch(/乾宫游魂|四爻/);
+    expect(why.yingWhy).toMatch(/初爻|隔三/);
   });
 
   it('castSixYao returns six throws', () => {

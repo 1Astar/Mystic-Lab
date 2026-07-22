@@ -55,26 +55,158 @@ export function trigramScene(id: TrigramId) {
 }
 
 /** 上卦+下卦 → 组合场景（用户真正要的翻译） */
+export type ComposedScene = {
+  formula: string;
+  meaning: string;
+  upperNature: string;
+  lowerNature: string;
+  upperId: TrigramId;
+  lowerId: TrigramId;
+  themeWords: string;
+  bridgeLead: string;
+  bridgeCue: string;
+  careerLower: string;
+  careerUpper: string;
+  careerAsk: string;
+  loveLower: string;
+  loveUpper: string;
+  loveAsk: string;
+  /** 兼容旧调用：整段文案 */
+  career: string;
+  love: string;
+  bridge: string;
+};
+
 export function composeScene(
   upper: Trigram,
   lower: Trigram,
   hex: Hexagram,
-): {
-  formula: string;
-  meaning: string;
-  career: string;
-  love: string;
-  bridge: string;
-} {
+): ComposedScene {
   const u = TRIGRAM_SCENE[upper.id];
   const l = TRIGRAM_SCENE[lower.id];
+  const themeWords = hex.keywords.slice(0, 2).join('、');
+  const bridgeCue = `「${upper.nature}+${lower.nature}」译成：这件事里，谁在动、谁该停、场子是顺还是险。`;
+  const careerAsk = '我是在硬推，还是该先停/先谈？';
+  const loveAsk = '该推进、该止步，还是先说清楚？';
+
   return {
     formula: `上${upper.nature}（${upper.id}）+ 下${lower.nature}（${lower.id}）→ ${hex.fullName}`,
     meaning: `${hex.gist}`,
-    career: `工作上：下面是「${l.career}」，上面是「${u.career}」。合在一起看——${hex.keywords.slice(0, 2).join('、')}正在成为主旋律。问自己：我是在硬推，还是该先停/先谈？`,
-    love: `感情上：下卦像你这边的底色（${l.love}），上卦像关系场/对方侧（${u.love}）。合在一起——${hex.keywords.slice(0, 2).join('、')}。问自己：该推进、该止步，还是先说清楚？`,
-    bridge: `别停在「为什么叫${upper.nature}/${lower.nature}」。要把「${upper.nature}+${lower.nature}」译成：这件事里，谁在动、谁该停、场子是顺还是险。`,
+    upperNature: upper.nature,
+    lowerNature: lower.nature,
+    upperId: upper.id,
+    lowerId: lower.id,
+    themeWords,
+    bridgeLead: '',
+    bridgeCue,
+    careerLower: l.career,
+    careerUpper: u.career,
+    careerAsk,
+    loveLower: l.love,
+    loveUpper: u.love,
+    loveAsk,
+    career: [
+      `工作上`,
+      `下卦：${l.career}`,
+      `上卦：${u.career}`,
+      `合看：${themeWords}正在成为主旋律`,
+      `自问：${careerAsk}`,
+    ].join('\n'),
+    love: [
+      `感情上`,
+      `下卦（你这边）：${l.love}`,
+      `上卦（关系场/对方）：${u.love}`,
+      `合看：${themeWords}`,
+      `自问：${loveAsk}`,
+    ].join('\n'),
+    bridge: bridgeCue,
   };
+}
+
+function escapeScene(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** 取象注解：分行 + 分块排版（FAQ / 笔记用）；工作上 / 感情上始终同屏 */
+export function renderSceneXiangHtml(
+  scene: ComposedScene,
+  opts?: {
+    domain?: SceneDomain;
+    hint?: string;
+    showFormula?: boolean;
+  },
+): string {
+  const domain = opts?.domain ?? 'general';
+  const hint = opts?.hint?.trim();
+
+  const careerBlock = `
+    <div class="ly-scene-block">
+      <p class="ly-scene-block-title">工作上</p>
+      <ul class="ly-scene-list">
+        <li><span class="ly-scene-k">下卦：</span>${escapeScene(scene.careerLower)}</li>
+        <li><span class="ly-scene-k">上卦：</span>${escapeScene(scene.careerUpper)}</li>
+        <li><span class="ly-scene-k">合看：</span>${escapeScene(scene.themeWords)}正在成为主旋律</li>
+        <li><span class="ly-scene-k">自问：</span>${escapeScene(scene.careerAsk)}</li>
+      </ul>
+    </div>`;
+
+  const loveBlock = `
+    <div class="ly-scene-block">
+      <p class="ly-scene-block-title">感情上</p>
+      <ul class="ly-scene-list">
+        <li><span class="ly-scene-k">下卦（你这边）：</span>${escapeScene(scene.loveLower)}</li>
+        <li><span class="ly-scene-k">上卦（关系场/对方）：</span>${escapeScene(scene.loveUpper)}</li>
+        <li><span class="ly-scene-k">合看：</span>${escapeScene(scene.themeWords)}</li>
+        <li><span class="ly-scene-k">自问：</span>${escapeScene(scene.loveAsk)}</li>
+      </ul>
+    </div>`;
+
+  // 问题偏感情时，感情块放前；其余默认工作在前
+  const blocks = domain === 'love' ? `${loveBlock}${careerBlock}` : `${careerBlock}${loveBlock}`;
+
+  return `
+    <div class="ly-scene-xiang">
+      <p class="ly-scene-cue">${escapeScene(scene.bridgeCue)}</p>
+      ${hint ? `<p class="ly-scene-hint">${escapeScene(hint)}</p>` : ''}
+      ${blocks}
+    </div>
+  `;
+}
+
+/**
+ * 主屏「看根基」用：结构义 × 实际一问的合一短释义（不重复工作/感情长表）
+ */
+export function renderFoundationBridgeHtml(
+  scene: ComposedScene,
+  domain: SceneDomain = 'general',
+): string {
+  const ask =
+    domain === 'love'
+      ? scene.loveAsk
+      : domain === 'career'
+        ? scene.careerAsk
+        : '我这边（下卦）在承什么？外面（上卦）在逼什么？';
+  const lowerHint =
+    domain === 'love' ? scene.loveLower : domain === 'career' ? scene.careerLower : scene.careerLower;
+  const upperHint =
+    domain === 'love' ? scene.loveUpper : domain === 'career' ? scene.careerUpper : scene.careerUpper;
+
+  return `
+    <div class="ly-foundation-bridge" data-foundation-bridge>
+      <p class="ly-layer-guide">根基 × 实际</p>
+      <p class="ly-foundation-bridge-lead">
+        结构上：下${escapeScene(scene.lowerNature)}是你这边的底色（${escapeScene(lowerHint)}），
+        上${escapeScene(scene.upperNature)}是外面的场（${escapeScene(upperHint)}）。
+        合在一起，主调偏「${escapeScene(scene.themeWords)}」——${escapeScene(scene.meaning)}
+      </p>
+      <p class="ly-foundation-bridge-ask"><em>此刻可自问：</em>${escapeScene(ask)}</p>
+      <p class="ly-guide-tip">工作 / 感情分行细译，请开右侧「解读笔记 · 卦象解析」。</p>
+    </div>
+  `;
 }
 
 export function pickSceneLine(
@@ -83,7 +215,7 @@ export function pickSceneLine(
 ): string {
   if (domain === 'career') return scene.career;
   if (domain === 'love') return scene.love;
-  return `${scene.meaning} ${scene.career.replace('工作上：', '若偏事务：')}；${scene.love.replace('感情上：', '若偏关系：')}`;
+  return `${scene.meaning}\n\n${scene.career}\n\n${scene.love}`;
 }
 
 export function detectSceneDomain(question: string): SceneDomain {

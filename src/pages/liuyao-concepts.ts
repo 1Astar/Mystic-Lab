@@ -38,7 +38,7 @@ export function renderLiuyaoConcepts(root: HTMLElement): void {
   header.className = 'ly-codex-header';
   header.innerHTML = `
     <h1 class="page-title">核心概念</h1>
-    <p class="page-subtitle">世应 · 六亲 · 动爻 · 变卦——读卦时反复用到的四块积木</p>
+    <p class="page-subtitle">世应 · 六亲 · 动爻 · 变卦 · 互卦 · 错综——读卦时反复用到的积木</p>
     <nav class="ly-concept-chips" aria-label="概念切换">
       ${LIUYAO_CONCEPTS.map(
         (c) => `
