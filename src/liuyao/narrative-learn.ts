@@ -8,24 +8,29 @@ import {
 } from './reading-facts.ts';
 import {
   buildCoreParseBlocks,
-  buildEnergyFocus,
   buildYaoAskCard,
-  buildInternalInference,
   formatLiuqinShort,
   renderCoreParseHtml,
-  renderEnergyFocusHtml,
-  renderInternalInferenceHtml,
-  renderQinDictHtml,
-  renderYongShenTeachHtml,
   renderYaoAskCardHtml,
 } from './energy-lens.ts';
 import { dressHexagram, type YaoDress } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
-import { buildShengKeMap } from './shengke-map.ts';
+import { renderLearnChaptersBody } from './learn-story.ts';
+
+export type CausalStep = {
+  /** 步骤标签，如「卦象」 */
+  step: string;
+  /** 一行能读完的结论 */
+  short: string;
+  /** 点开才看的补充 */
+  detail: string;
+};
 
 export type CausalReading = {
   anchor: string;
-  because: string[];
+  /** 用神一行提示 */
+  yongBite: string;
+  because: CausalStep[];
   conclusion: string;
   actionLead: string;
 };
@@ -42,41 +47,61 @@ function questionHint(facts: ReadingFacts): string {
   return '因为你还没写下具体问题，先按卦象本身来看';
 }
 
-/** 学习模式：锚点 → 因为… → 所以… */
-export function buildCausalReading(facts: ReadingFacts): CausalReading {
-  const because: string[] = [];
+function mapYongBite(facts: ReadingFacts): string {
+  if (!facts.question.trim()) {
+    return `先写下具体问题。工作常盯「${formatLiuqinShort('官鬼')}」；感情常盯「${formatLiuqinShort('妻财')}」。`;
+  }
+  if (facts.yong.matchedLabel) {
+    const moving = facts.changing.labels.includes(facts.yong.matchedLabel);
+    return moving
+      ? `盯${facts.yong.matchedLabel}（${facts.yong.name}）——它在动，优先看这一层。`
+      : `盯${facts.yong.matchedLabel}（${facts.yong.name}）；动爻没直接咬上，先减干扰、做小验证。`;
+  }
+  return `本题用神倾向「${facts.yong.name}」，尚未落到具体爻——先写清问题，或看世应与动爻。`;
+}
 
-  because.push(
-    `${questionHint(facts)}，卦象上下是「${facts.lowerNature}」与「${facts.upperNature}」（${facts.primary.fullName}）。${sceneLine(facts)}`,
-  );
+/** 学习模式：锚点 → 三步短卡 → 所以… */
+export function buildCausalReading(facts: ReadingFacts): CausalReading {
+  const because: CausalStep[] = [];
+
+  because.push({
+    step: '卦象',
+    short: `下${facts.lowerNature}上${facts.upperNature} · ${facts.primary.name}`,
+    detail: `${questionHint(facts)}。${facts.sceneBridge} ${sceneLine(facts)}`,
+  });
 
   if (facts.changing.labels.length === 0) {
-    because.push(
-      `因为本卦没有动爻，格局先停在「${facts.primary.fullName}」——先把当下结构看清，比空想结局更有用。`,
-    );
+    because.push({
+      step: '动爻',
+      short: '无动爻 · 先稳住当下结构',
+      detail: `格局停在「${facts.primary.fullName}」——先把结构看清，比空想结局更有用。`,
+    });
   } else {
-    const next = facts.changed
-      ? `把「${facts.primary.fullName}」推成「${facts.changed.fullName}」`
-      : '推动变化';
-    because.push(
-      `因为第${facts.changing.labels.join('、第')}动了（${facts.changing.labels.length} 个动爻），${next}。这代表僵局或旧节奏正在松动，事情从「${facts.primary.keywords[0]}」滑向「${facts.changed?.keywords[0] ?? '新方向'}」。`,
-    );
+    const toName = facts.changed?.name ?? '新方向';
+    because.push({
+      step: '动爻',
+      short: `${facts.changing.labels.join('、')}动 → ${toName}`,
+      detail: `从「${facts.primary.keywords[0]}」滑向「${facts.changed?.keywords[0] ?? '新方向'}」。僵局或旧节奏正在松动。`,
+    });
   }
 
-  because.push(
-    `因为世在${facts.shi.label}、应在${facts.ying.label}，世应${facts.shiYingRel.rel}（${facts.shiYingRel.verdict}）——${facts.shiYingRel.tip}`,
-  );
+  because.push({
+    step: '世应',
+    short: `世${facts.shi.label} · 应${facts.ying.label} · ${facts.shiYingRel.rel}`,
+    detail: `${facts.shiYingRel.verdict}——${facts.shiYingRel.tip}`,
+  });
 
   const conclusion = facts.changed
-    ? `所以你的策略不是硬冲到底，也不是直接放弃，而是顺着「${facts.changed.keywords[0]}」做可验证的一小步，同时守住「${facts.themeWord}」这条主线。`
-    : `所以你的策略是先按兵不动、把「${facts.themeWord}」相关边界对齐，等结构更清楚再推。`;
+    ? `顺着「${facts.changed.keywords[0]}」做可验证的一小步，同时守住「${facts.themeWord}」。`
+    : `先按兵不动，把「${facts.themeWord}」相关边界对齐，等结构更清楚再推。`;
 
   const actionLead = facts.changed
-    ? `朝「${facts.changed.keywords[0]}」选一个最小动作验证外界是否配合。`
-    : `围绕「${facts.themeWord}」列出本周可验证的下一步与边界。`;
+    ? `朝「${facts.changed.keywords[0]}」选一个最小动作验证。`
+    : `围绕「${facts.themeWord}」列出本周可验证的下一步。`;
 
   return {
-    anchor: `你今天的问题核心在于「${facts.themeWord}」。`,
+    anchor: facts.themeWord,
+    yongBite: mapYongBite(facts),
     because,
     conclusion,
     actionLead,
@@ -91,19 +116,6 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function mapYongBite(facts: ReadingFacts): string {
-  if (!facts.question.trim()) {
-    return `你还没有写具体问题。若这是问工作，用神常看「${formatLiuqinShort('官鬼')}」；问感情常看「${formatLiuqinShort('妻财')} / ${formatLiuqinShort('官鬼')}」。写下问题后，映射会更准。`;
-  }
-  if (facts.yong.matchedLabel) {
-    const moving = facts.changing.labels.includes(facts.yong.matchedLabel);
-    return moving
-      ? `用神落在${facts.yong.matchedLabel}，且这一爻在动——你问的事正在「变心」，优先盯这一层。`
-      : `用神倾向落在${facts.yong.matchedLabel}；目前动爻没有直接咬在用神上，说明眼前未必有直接突破口，先调整注意力（减干扰、借助力），或只做小验证。`;
-  }
-  return `本题用神倾向「${facts.yong.name}」，本卦尚未直接落到对应模块——先把问题写具体，或结合世应与动爻看。`;
-}
-
 function dressedRows(cast: CastResult, castAt = new Date()): YaoDress[] {
   return dressHexagram(cast, siZhuFromDate(castAt).dayStem).rows;
 }
@@ -112,78 +124,67 @@ function highlightIndexes(facts: ReadingFacts): number[] {
   return facts.yong.matchedLine !== undefined ? [facts.yong.matchedLine] : [];
 }
 
-function energyFocusFromCast(cast: CastResult, castAt = new Date()): string {
-  const rows = dressedRows(cast, castAt);
-  const changingQin = rows.filter((r) => r.changing).map((r) => r.liuqin);
-  const items = buildEnergyFocus({
-    changingQin,
-    changedQin: changingQin[0] ?? null,
-  });
-  return renderEnergyFocusHtml(items);
-}
-
-function inferenceFromCast(cast: CastResult, question: string, castAt = new Date()): string {
-  const sz = siZhuFromDate(castAt);
-  const dressed = dressHexagram(cast, sz.dayStem);
-  const map = buildShengKeMap(cast, dressed, question);
-  const domain = buildReadingFacts(cast, question, castAt).domain;
-  const inf = buildInternalInference({
-    domain,
-    yongRow: map.nodes.find((n) => n.role === '用神')?.row,
-    yongQin: map.yongQin,
-    yuanRow: map.nodes.find((n) => n.role === '原神')?.row,
-    jiRow: map.nodes.find((n) => n.role === '忌神')?.row,
-  });
-  return `${renderInternalInferenceHtml(inf)}${renderQinDictHtml()}`;
-}
-
+/** 此刻解读：短卡教学，细节点开，深度推演另放 */
 export function renderCausalReadingHtml(
   facts: ReadingFacts,
   cast: CastResult,
-  castAt = new Date(),
+  _castAt = new Date(),
 ): string {
   const causal = buildCausalReading(facts);
   const pack = buildStrategyPack(cast, facts.domain, facts.question);
-  const becauseHtml = causal.because
-    .map((b) => `<p class="ly-causal-because">${formatClauseHtml(b)}</p>`)
-    .join('');
-  const actions = pack.items
+  const first = pack.items[0];
+  const rest = pack.items.slice(1);
+
+  const stepsHtml = causal.because
     .map(
-      (it) =>
-        `<li><strong>${escapeHtml(it.label)}</strong><span>${formatClauseHtml(it.text)}</span></li>`,
+      (s, i) => `
+      <details class="ly-lesson-step">
+        <summary>
+          <span class="ly-lesson-step-n">${i + 1}</span>
+          <span class="ly-lesson-step-label">${escapeHtml(s.step)}</span>
+          <span class="ly-lesson-step-short">${escapeHtml(s.short)}</span>
+        </summary>
+        <p class="ly-lesson-step-detail">${formatClauseHtml(s.detail)}</p>
+      </details>`,
     )
     .join('');
-  const rows = dressedRows(cast, castAt);
-  const hi = highlightIndexes(facts);
-  const yongRow = hi.length ? rows.find((r) => r.index === hi[0]) : undefined;
+
+  const restHtml = rest.length
+    ? `<details class="ly-lesson-more">
+        <summary>还有 ${rest.length} 条建议</summary>
+        <ul class="ly-strategy-list">${rest
+          .map(
+            (it) =>
+              `<li><strong>${escapeHtml(it.label)}</strong><span>${formatClauseHtml(it.text)}</span></li>`,
+          )
+          .join('')}</ul>
+      </details>`
+    : '';
 
   return `
-    <section class="ly-result-panel ly-causal-chain">
-      <span class="ly-layer-num">一</span>
-      <h3>核心锚点</h3>
-      <p class="ly-causal-anchor">${escapeHtml(causal.anchor)}</p>
-      ${renderYongShenTeachHtml({
-        domain: facts.domain,
-        yongLabel: facts.yong.name,
-        yongWhy: facts.yong.why,
-        row: yongRow,
-        highlightIndexes: hi,
-      })}
+    <section class="ly-lesson ly-result-panel">
+      <p class="ly-lesson-kicker">一句话</p>
+      <h3 class="ly-lesson-theme">${escapeHtml(causal.anchor)}</h3>
+      <p class="ly-lesson-yong">${escapeHtml(causal.yongBite)}</p>
     </section>
-    <section class="ly-result-panel ly-causal-chain">
-      <span class="ly-layer-num">二</span>
-      <h3>推导过程</h3>
-      ${becauseHtml}
-      ${energyFocusFromCast(cast, castAt)}
-      ${inferenceFromCast(cast, facts.question, castAt)}
+    <section class="ly-lesson ly-result-panel">
+      <p class="ly-lesson-kicker">三步看懂 · 点开看详解</p>
+      <div class="ly-lesson-steps">${stepsHtml}</div>
     </section>
-    <section class="ly-result-panel ly-causal-chain">
-      <span class="ly-layer-num">三</span>
-      <h3>推导结论</h3>
-      <p class="ly-causal-so">${formatClauseHtml(causal.conclusion)}</p>
-      <p class="ly-guide-tip">${escapeHtml(causal.actionLead)}</p>
-      <h4 class="ly-strategy-title">行动建议</h4>
-      <ul class="ly-strategy-list">${actions}</ul>
+    <section class="ly-lesson ly-result-panel ly-lesson-so">
+      <p class="ly-lesson-kicker">所以</p>
+      <p class="ly-lesson-conclusion">${escapeHtml(causal.conclusion)}</p>
+      ${
+        first
+          ? `<div class="ly-lesson-action">
+        <span class="ly-lesson-action-label">${escapeHtml(first.label)}</span>
+        <p>${formatClauseHtml(first.text)}</p>
+        <p class="ly-guide-tip">${escapeHtml(causal.actionLead)}</p>
+      </div>`
+          : `<p class="ly-guide-tip">${escapeHtml(causal.actionLead)}</p>`
+      }
+      ${restHtml}
+      <p class="ly-lesson-deep-hint">想边学边推演用神/元忌、点爻与笔记 → 切到「五步学习」。</p>
     </section>
   `;
 }
@@ -200,7 +201,7 @@ export function renderCoreMappedHtml(
     shiYingTip: facts.shiYingRel.tip,
   });
   return `
-    <p class="ly-layer-guide">生活翻译在前；括号里的「注」是传统标记，方便你对照进阶排盘。点爻旁 <strong>?</strong> 可看单爻能量解析。</p>
+    <p class="ly-layer-guide">点爻旁 <strong>?</strong> 看单爻；下面三块各一句主旨，传统注折叠。</p>
     <div class="ly-guide-hex" data-ask-hex>
       ${renderHexagramSvg({
         lines: cast.primaryLines,
@@ -215,11 +216,6 @@ export function renderCoreMappedHtml(
       <div class="ly-yao-ask-slot" data-ask-slot hidden></div>
     </div>
     ${renderCoreParseHtml(blocks)}
-    <article class="ly-core-yong ly-core-yong-inline">
-      <h4>用神 · ${escapeHtml(facts.yong.name)}</h4>
-      <p>${escapeHtml(mapYongBite(facts))}</p>
-      <p class="ly-guide-tip">${escapeHtml(facts.yong.tip)}</p>
-    </article>
   `;
 }
 
@@ -335,14 +331,13 @@ export function classicModernScene(facts: ReadingFacts, classicGloss: string): s
   return `你现在感觉「${topic}」就在那里，却又像被「${facts.themeWord}」挡住。白话里说：${classicGloss} 这种时候先别急着硬推，越急越乱；可先按「${facts.changed?.keywords[0] ?? facts.themeWord}」的方向观察一小步。`;
 }
 
-/** 便捷：从 cast 直接渲染学习解读 Tab */
+/** 便捷：学习主 Tab = 章2–4（章1在页顶仪式区） */
 export function renderLearnReadingTab(
   cast: CastResult,
   question: string,
   castAt = new Date(),
 ): string {
-  const facts = buildReadingFacts(cast, question, castAt);
-  return renderCausalReadingHtml(facts, cast, castAt);
+  return renderLearnChaptersBody(cast, question, castAt);
 }
 
 export function renderLearnCorePanel(

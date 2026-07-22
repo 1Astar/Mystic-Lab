@@ -19,13 +19,15 @@ export function buildFourLayerReading(
   const causal = buildCausalReading(facts);
   const pack = buildStrategyPack(cast, facts.domain, question);
 
-  const summary = causal.anchor;
-  const basis = causal.because.join('\n');
+  const summary = `核心在于「${causal.anchor}」`;
+  const basis = causal.because
+    .map((s) => `【${s.step}】${s.short}\n${s.detail}`)
+    .join('\n\n');
   const context = [
     question.trim()
       ? `你问的是「${question.trim()}」。`
       : '尚未写下具体问题——先用卦象回想真正卡点。',
-    causal.conclusion,
+    `所以：${causal.conclusion}`,
   ].join('\n');
   const action = [causal.actionLead, ...pack.items.map((i) => `${i.label}：${i.text}`)].join(
     '\n',

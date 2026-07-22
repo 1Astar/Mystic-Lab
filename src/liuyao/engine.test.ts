@@ -81,7 +81,7 @@ describe('liuyao engine', () => {
     const cast = castSixYao('random', () => 0.2);
     const reading = buildFourLayerReading(cast, '我要不要接受这个offer？');
     expect(reading.summary).toBeTruthy();
-    expect(reading.basis).toMatch(/因为/);
+    expect(reading.basis).toMatch(/卦象|动爻|世应/);
     expect(reading.context).toMatch(/所以|offer|工作/);
     expect(reading.action).toBeTruthy();
     expect(reading.summary).not.toMatch(/大吉|大凶/);

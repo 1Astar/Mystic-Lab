@@ -2949,6 +2949,15 @@ button.ly-yao-kind-card:hover {
   color: #f5efe6;
 }
 
+.ly-hex-hero-keywords {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(8, 9, 13, 0.35);
+}
+
 .ly-change-how {
   margin: 0;
   padding: 4px 2px 2px;
@@ -2959,7 +2968,7 @@ button.ly-yao-kind-card:hover {
 }
 
 .ly-hex-hero > .ly-teach-fold {
-  margin: 12px 0 4px;
+  margin: 12px 0 0;
 }
 
 .ly-change-how-title {
@@ -3409,6 +3418,981 @@ button.ly-yao-kind-card:hover {
   color: var(--ly-gold);
 }
 
+/* —— 学习工作室：左推演 / 右笔记 —— */
+.ly-studio {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 14px 0 8px;
+}
+
+@media (min-width: 900px) {
+  .ly-studio {
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: start;
+  }
+}
+
+.ly-studio-col-label {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+  opacity: 0.85;
+}
+
+.ly-studio-left,
+.ly-studio-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ly-gua-card,
+.ly-energy-chain,
+.ly-move-cards,
+.ly-study-notes,
+.ly-dict-footer,
+.ly-classic-lib-fold {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(20, 22, 28, 0.72);
+}
+
+.ly-gua-card h4,
+.ly-energy-chain h4,
+.ly-move-cards h4,
+.ly-study-notes h4,
+.ly-dict-footer h4 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--ly-gold);
+}
+
+.ly-gua-card-symbols {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ly-gua-sym {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ly-gua-sym strong {
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--ly-mist);
+}
+
+.ly-gua-sym em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+}
+
+.ly-gua-sym-plus {
+  color: var(--ly-gold);
+  opacity: 0.7;
+}
+
+.ly-gua-card-body {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: var(--ly-mist);
+}
+
+.ly-energy-chain-item {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(199, 164, 91, 0.1);
+}
+
+.ly-energy-chain-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.ly-energy-chain-item p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--ly-mist);
+}
+
+.ly-classic-note {
+  margin-top: 4px !important;
+  font-size: 0.74rem !important;
+  color: var(--ly-muted) !important;
+}
+
+.ly-move-cards-hex {
+  margin-bottom: 12px;
+}
+
+.ly-move-card {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(8, 9, 13, 0.4);
+}
+
+.ly-move-card-head {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
+  color: var(--ly-gold);
+}
+
+.ly-move-card p {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-classic-lib-fold > summary {
+  cursor: pointer;
+  color: var(--ly-gold);
+  font-size: 0.86rem;
+  margin-bottom: 8px;
+}
+
+.ly-classic-lib-body {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ly-muted);
+}
+
+.ly-study-note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ly-study-note-field span {
+  font-size: 0.78rem;
+  color: var(--ly-gold);
+}
+
+.ly-study-note-field textarea {
+  font-family: "Literata", "Noto Serif SC", "Songti SC", serif;
+  line-height: 1.6;
+  background: rgba(8, 9, 13, 0.35);
+  border-color: rgba(199, 164, 91, 0.22);
+}
+
+.ly-dict-footer-list {
+  margin: 0 0 10px;
+  padding-left: 1.1em;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--ly-mist);
+}
+
+.ly-dict-footer-list li {
+  margin-bottom: 6px;
+}
+
+/* —— 学习四章叙事 —— */
+.ly-ch {
+  margin: 0 0 14px;
+}
+
+.ly-ch-1 {
+  margin-bottom: 8px;
+}
+
+.ly-deep-course {
+  margin-bottom: 8px;
+}
+
+.ly-deep-step-bridge {
+  margin: 10px 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-gold);
+}
+
+.ly-deep-notes {
+  margin-top: 8px;
+}
+
+.ly-note-mini-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.ly-note-mini-tab {
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(8, 9, 13, 0.35);
+  color: var(--ly-muted);
+  font-size: 0.78rem;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.ly-note-mini-tab.is-active {
+  border-color: rgba(199, 164, 91, 0.5);
+  color: var(--ly-gold);
+  background: rgba(199, 164, 91, 0.1);
+}
+
+.ly-note-tab-panel[hidden] {
+  display: none !important;
+}
+
+.ly-deep-faq .ly-faq-item {
+  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  padding: 8px 0;
+}
+
+.ly-deep-faq .ly-faq-item summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: var(--ly-mist);
+}
+
+.ly-ch-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: var(--ly-gold);
+  letter-spacing: 0.02em;
+}
+
+.ly-ch-sub {
+  margin: -6px 0 12px;
+  font-size: 0.78rem;
+  color: var(--ly-muted);
+}
+
+.ly-yao-dim {
+  opacity: 0.22;
+}
+
+.ly-yao-focus {
+  opacity: 1;
+}
+
+/* —— 边算边学：五步交互课程 —— */
+.ly-course {
+  position: relative;
+  padding-bottom: 72px;
+}
+
+.ly-course-progress {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+}
+
+.ly-course-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: var(--ly-mist);
+  line-height: 1.35;
+}
+
+.ly-course-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(8, 9, 13, 0.4);
+}
+
+.ly-course-visual-pair {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.ly-course-arrow {
+  font-size: 1.4rem;
+  color: var(--ly-gold);
+  animation: ly-course-arrow 1.4s ease-in-out infinite;
+}
+
+@keyframes ly-course-arrow {
+  0%, 100% { transform: translateX(0); opacity: 0.7; }
+  50% { transform: translateX(4px); opacity: 1; }
+}
+
+.ly-course-visual-hint {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--ly-muted);
+}
+
+.ly-course-gold {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  font-weight: 560;
+  color: var(--ly-gold);
+  text-align: center;
+  line-height: 1.45;
+}
+
+.ly-course-teach {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-course-basics,
+.ly-course-vernacular {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-course-basics,
+.ly-course-method {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid rgba(199, 164, 91, 0.14);
+}
+
+.ly-course-method-head {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 560;
+  color: var(--ly-gold);
+}
+
+.ly-course-method-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-course-method-list li {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-course-method-list strong {
+  color: var(--ly-gold);
+  font-weight: 600;
+}
+
+.ly-course-bookmark {
+  position: fixed;
+  right: 0;
+  top: 38%;
+  z-index: 45;
+  width: 34px;
+  padding: 12px 5px;
+  border: 1px solid rgba(199, 164, 91, 0.35);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  background: linear-gradient(180deg, rgba(36, 30, 18, 0.96), rgba(20, 22, 28, 0.96));
+  color: var(--ly-gold);
+  font-size: 0.62rem;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.35);
+}
+
+.ly-course-bookmark[hidden],
+.ly-course.is-drawer-open .ly-course-bookmark {
+  display: none !important;
+}
+
+.ly-course-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 0 4px;
+  background: linear-gradient(180deg, transparent, rgba(10, 11, 14, 0.95) 28%);
+}
+
+.ly-course-nav-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(20, 22, 28, 0.92);
+  color: var(--ly-mist);
+  font-size: 0.78rem;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.ly-course-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ly-course-nav-note {
+  position: relative;
+  color: var(--ly-gold);
+  white-space: nowrap;
+}
+
+.ly-course-note-dot {
+  display: none;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: #e8b86d;
+  box-shadow: 0 0 0 0 rgba(232, 184, 109, 0.55);
+  vertical-align: middle;
+}
+
+.ly-course-nav-note.is-note-pending .ly-course-note-dot,
+.ly-course-bookmark.is-note-pending::after {
+  display: inline-block;
+  animation: ly-note-pulse 1.4s ease-in-out infinite;
+}
+
+.ly-course-bookmark.is-note-pending::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e8b86d;
+}
+
+@keyframes ly-note-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 0 rgba(232, 184, 109, 0.45);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 6px rgba(232, 184, 109, 0);
+  }
+}
+
+.ly-course-nav-next {
+  justify-self: end;
+  border-color: rgba(199, 164, 91, 0.45);
+  color: var(--ly-gold);
+}
+
+.ly-course-drawer[hidden] {
+  display: none !important;
+}
+
+.ly-course-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.ly-course-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.ly-course-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(92vw, 400px);
+  padding: 16px 16px 24px;
+  overflow: auto;
+  border-left: 1px solid rgba(199, 164, 91, 0.22);
+  background: #14161c;
+  transform: translateX(0);
+  animation: ly-drawer-in 0.22s ease-out;
+}
+
+.ly-course-drawer-panel .ly-note-mini-tabs {
+  margin-top: 4px;
+}
+
+.ly-course-drawer-panel .ly-dress-table-compact {
+  font-size: 0.68rem;
+}
+
+.ly-drawer-books .ly-classic-block {
+  margin-bottom: 10px;
+}
+
+@keyframes ly-drawer-in {
+  from { transform: translateX(18px); opacity: 0.6; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.ly-course-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ly-course-drawer-head h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ly-gold);
+}
+
+.ly-course-drawer-x {
+  border: none;
+  background: transparent;
+  color: var(--ly-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.ly-course-classic {
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(8, 9, 13, 0.4);
+}
+
+.ly-course-classic p {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ly-muted);
+}
+
+.ly-classic-tag.is-bai {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  color: var(--ly-gold);
+  font-size: 0.68rem;
+}
+
+.ly-course-note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ly-course-note-field > span:first-child {
+  font-size: 0.78rem;
+  color: var(--ly-gold);
+}
+
+.ly-course-note-hint {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ly-muted);
+}
+
+.ly-course-note-field textarea {
+  font-family: "Literata", "Noto Serif SC", "Songti SC", serif;
+  line-height: 1.55;
+  background: rgba(8, 9, 13, 0.35);
+  border-color: rgba(199, 164, 91, 0.22);
+}
+
+.ly-ch-bridge {
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ly-muted);
+  font-style: italic;
+}
+
+.ly-teach-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ly-teach-top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ly-info-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(20, 22, 28, 0.72);
+}
+
+.ly-info-card > summary {
+  cursor: pointer;
+  color: var(--ly-gold);
+  font-size: 0.86rem;
+  margin-bottom: 8px;
+}
+
+.ly-dress-table-compact {
+  font-size: 0.72rem;
+}
+
+.ly-dress-xiang {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--ly-mist);
+}
+
+.ly-teach-main-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+
+.ly-teach-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(199, 164, 91, 0.12);
+}
+
+.ly-teach-ask h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  color: var(--ly-gold);
+}
+
+.ly-teach-classic-fold {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(20, 22, 28, 0.65);
+}
+
+.ly-teach-classic-fold > summary {
+  cursor: pointer;
+  color: var(--ly-gold);
+  font-size: 0.88rem;
+  margin-bottom: 10px;
+}
+
+.ly-step-yao-card {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(8, 9, 13, 0.4);
+}
+
+.ly-step-yao-card h5 {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  color: var(--ly-gold);
+}
+
+.ly-step-yao-card p {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-q-card {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background:
+    linear-gradient(145deg, rgba(199, 164, 91, 0.1), rgba(20, 22, 28, 0.55));
+}
+
+.ly-q-card-label {
+  margin: 0 0 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+
+.ly-q-card-text {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 560;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-power-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-power-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(8, 9, 13, 0.35);
+}
+
+.ly-power-icon {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.ly-power-item strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+  color: var(--ly-gold);
+}
+
+.ly-power-item p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-power-note {
+  display: inline;
+  margin-left: 4px;
+  font-size: 0.74rem;
+  color: var(--ly-muted);
+}
+
+.ly-story-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .ly-story-layout {
+    grid-template-columns: 1.35fr 0.65fr;
+    align-items: start;
+  }
+}
+
+.ly-story-gua {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ly-story-gua-name {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  color: var(--ly-gold);
+}
+
+.ly-story-gua-line {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-story-tri {
+  margin: 14px 0 0;
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-story-tri li {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-story-classic {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(20, 22, 28, 0.55);
+  font-size: 0.8rem;
+  color: var(--ly-muted);
+}
+
+.ly-story-classic > summary {
+  cursor: pointer;
+  color: var(--ly-gold);
+  font-size: 0.84rem;
+}
+
+.ly-story-classic p {
+  margin: 8px 0 0;
+  line-height: 1.55;
+}
+
+.ly-action-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-action-card {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(8, 9, 13, 0.4);
+}
+
+.ly-action-card-label {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+}
+
+.ly-action-card-body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-help-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 22px;
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(199, 164, 91, 0.45);
+  background: rgba(20, 22, 28, 0.92);
+  color: var(--ly-gold);
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.ly-help-sheet[hidden] {
+  display: none !important;
+}
+
+.ly-help-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.ly-help-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.ly-help-sheet-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 72vh;
+  overflow: auto;
+  padding: 16px 16px 28px;
+  border-radius: 18px 18px 0 0;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: #14161c;
+}
+
+.ly-help-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.ly-help-sheet-head h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ly-gold);
+}
+
+.ly-help-sheet-x {
+  border: none;
+  background: transparent;
+  color: var(--ly-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.ly-help-sheet-lead {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: var(--ly-muted);
+}
+
+.ly-help-steps {
+  margin: 0;
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ly-help-steps li {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-help-steps strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ly-gold);
+  font-size: 0.86rem;
+}
+
+.ly-help-steps span {
+  color: var(--ly-muted);
+  font-size: 0.78rem;
+}
+
 .ly-faq-panel {
   margin: 16px 0;
   padding: 14px;
@@ -3802,6 +4786,113 @@ button.ly-yao-kind-card:hover {
   font-weight: 600;
 }
 
+/* —— 边算边学 Step4：生克星图动画 —— */
+.ly-sk-course {
+  margin: 12px 0 4px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(8, 9, 13, 0.45);
+}
+
+.ly-sk-course-tease {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-gold);
+}
+
+.ly-sk-course-dialogue {
+  margin: 10px 0 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(199, 164, 91, 0.07);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-sk-classic-tag {
+  font-size: 9px !important;
+  opacity: 0.65;
+}
+
+.ly-sk-course-node.is-shi circle {
+  animation: ly-sk-shi-pulse 1.4s ease-in-out infinite;
+  stroke: #c7a45b;
+  stroke-width: 2.2;
+}
+
+@keyframes ly-sk-shi-pulse {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(199, 164, 91, 0)); }
+  50% { filter: drop-shadow(0 0 8px rgba(199, 164, 91, 0.85)); }
+}
+
+.ly-sk-course-svg .ly-sk-edge {
+  stroke-width: 2.2;
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: ly-sk-draw 0.9s ease forwards;
+}
+
+.ly-sk-course-svg .ly-sk-anim-ke {
+  stroke: #c45c4a;
+  animation-delay: 0.35s;
+}
+
+.ly-sk-course-svg .ly-sk-anim-sheng {
+  stroke: #6aab73;
+  animation-delay: 0.85s;
+}
+
+@keyframes ly-sk-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.ly-sk-pop {
+  opacity: 0;
+  animation: ly-sk-pop-in 0.45s ease forwards;
+}
+
+.ly-sk-pop.ly-sk-anim-ke {
+  animation-delay: 0.7s;
+}
+
+.ly-sk-pop.ly-sk-anim-sheng {
+  animation-delay: 1.2s;
+}
+
+@keyframes ly-sk-pop-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ly-sk-pop-bg.is-sheng {
+  fill: rgba(106, 171, 115, 0.2);
+  stroke: #6aab73;
+  stroke-width: 1;
+}
+
+.ly-sk-pop-bg.is-ke {
+  fill: rgba(196, 92, 74, 0.2);
+  stroke: #c45c4a;
+  stroke-width: 1;
+}
+
+.ly-sk-course-svg .ly-sk-edge-label {
+  fill: currentColor;
+  font-size: 10px;
+}
+
+.ly-sk-pop.ly-sk-anim-sheng .ly-sk-edge-label {
+  fill: #8fd19a;
+}
+
+.ly-sk-pop.ly-sk-anim-ke .ly-sk-edge-label {
+  fill: #e08a7c;
+}
+
 .ly-sk-lines p {
   margin: 0 0 6px;
   font-size: 0.8rem;
@@ -4184,6 +5275,144 @@ button.ly-yao-kind-card:hover {
   margin: 0 0 8px;
 }
 
+/* —— 此刻解读：短卡教学 —— */
+.ly-lesson {
+  padding: 16px 14px;
+}
+
+.ly-lesson-kicker {
+  margin: 0 0 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+  opacity: 0.8;
+}
+
+.ly-lesson-theme {
+  margin: 0 0 10px;
+  font-size: 1.65rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-lesson-yong {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-lesson-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-lesson-step {
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(8, 9, 13, 0.35);
+  overflow: hidden;
+}
+
+.ly-lesson-step > summary {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ly-lesson-step > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ly-lesson-step-n {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1a1208;
+  background: var(--ly-gold);
+}
+
+.ly-lesson-step-label {
+  font-size: 0.72rem;
+  color: var(--ly-gold);
+  opacity: 0.85;
+}
+
+.ly-lesson-step-short {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ly-mist);
+  line-height: 1.35;
+}
+
+.ly-lesson-step-detail {
+  margin: 0;
+  padding: 0 12px 12px 2.6rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ly-muted);
+}
+
+.ly-lesson-conclusion {
+  margin: 0 0 12px;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-lesson-action {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(199, 164, 91, 0.06);
+}
+
+.ly-lesson-action-label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+}
+
+.ly-lesson-action p {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-lesson-more {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--ly-muted);
+}
+
+.ly-lesson-more > summary {
+  cursor: pointer;
+  color: var(--ly-gold);
+}
+
+.ly-lesson-deep-hint {
+  margin: 12px 0 0;
+  font-size: 0.74rem;
+  color: var(--ly-muted);
+  opacity: 0.9;
+}
+
 .ly-core-def {
   font-size: 0.78rem;
   color: var(--ly-muted);
@@ -4412,11 +5641,25 @@ button.ly-yao-kind-card:hover {
 }
 
 .ly-core-parse-item {
-  margin: 0 0 12px;
-  padding: 10px 12px;
+  margin: 0 0 8px;
+  padding: 0;
   border-radius: 10px;
   border: 1px solid rgba(199, 164, 91, 0.16);
   background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.ly-core-parse-item > summary {
+  cursor: pointer;
+  padding: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ly-gold);
+  list-style: none;
+}
+
+.ly-core-parse-item > summary::-webkit-details-marker {
+  display: none;
 }
 
 .ly-core-parse-item h4 {
@@ -4427,6 +5670,7 @@ button.ly-yao-kind-card:hover {
 
 .ly-core-parse-item p {
   margin: 0 0 6px;
+  padding: 0 12px 10px;
   font-size: 0.84rem;
   line-height: 1.5;
   color: var(--ly-mist);

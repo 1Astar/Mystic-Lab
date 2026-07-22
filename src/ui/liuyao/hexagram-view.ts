@@ -26,6 +26,10 @@ export interface HexagramViewOptions {
   showAskButtons?: boolean;
   /** 高亮的爻下标（用神等） */
   highlightIndexes?: number[];
+  /** 仅这些爻保持清晰；其余变暗（教学聚焦） */
+  focusIndexes?: number[];
+  /** 与 focusIndexes 联用：未聚焦爻加 dim */
+  dimOthers?: boolean;
 }
 
 function lineSvg(bit: LineBit, y: number, cx: number, pending = false): string {
@@ -58,6 +62,8 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
     teachable,
     showAskButtons,
     highlightIndexes = [],
+    focusIndexes,
+    dimOthers,
   } = opts;
   const leftPad = emphasizeShiYing ? 28 : 0;
   const askW = showAskButtons ? 22 : 0;
@@ -89,6 +95,10 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
       const isGrowing = Boolean(
         !pending && animateIndex !== undefined && i === animateIndex && i < filled,
       );
+      const focused =
+        !dimOthers ||
+        focusIndexes === undefined ||
+        focusIndexes.includes(i);
       const cls = [
         'ly-yao-row',
         pending ? 'ly-yao-pending-row' : '',
@@ -97,6 +107,8 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         isShi ? 'ly-yao-shi' : '',
         isYing ? 'ly-yao-ying' : '',
         highlightIndexes.includes(i) ? 'ly-yao-highlight' : '',
+        dimOthers && !focused && !pending ? 'ly-yao-dim' : '',
+        dimOthers && focused && !pending ? 'ly-yao-focus' : '',
         !visible ? 'ly-yao-hidden' : isGrowing ? 'ly-yao-growing' : 'ly-yao-settled',
         canTeach ? 'is-teachable' : '',
       ]

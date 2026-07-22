@@ -48,14 +48,15 @@ describe('buildReadingFacts', () => {
 });
 
 describe('buildCausalReading', () => {
-  it('uses because/so narrative', () => {
+  it('uses short step cards + so narrative', () => {
     const throws = [oldYang, youngYin, youngYin, youngYin, youngYin, youngYin];
     const cast = buildCastFromThrows(throws);
     const facts = buildReadingFacts(cast, '停止还是前进？');
     const causal = buildCausalReading(facts);
-    expect(causal.anchor).toMatch(/核心在于/);
-    expect(causal.because.some((b) => b.includes('因为'))).toBe(true);
-    expect(causal.conclusion).toMatch(/^所以/);
+    expect(causal.anchor).toBeTruthy();
+    expect(causal.because).toHaveLength(3);
+    expect(causal.because.every((s) => s.short && s.detail)).toBe(true);
+    expect(causal.conclusion.length).toBeLessThan(80);
   });
 });
 

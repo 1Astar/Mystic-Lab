@@ -2527,9 +2527,15 @@
 }
 
 .visual-overview-block,
-.visual-elements-block,
-.visual-bridge-block {
+.visual-elements-block {
   margin-bottom: 14px;
+}
+
+.visual-overview-block.has-bridge {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--gold-soft);
+  border: 1px solid rgba(201, 168, 76, 0.3);
 }
 
 .visual-overview-text,
@@ -2537,6 +2543,12 @@
   font-size: 0.84rem;
   line-height: 1.65;
   color: var(--ink);
+}
+
+.visual-overview-block.has-bridge .visual-bridge-text {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(201, 168, 76, 0.25);
 }
 
 .visual-elements-list {
@@ -2550,13 +2562,6 @@
 .visual-elements-list strong {
   color: var(--gold);
   font-weight: 600;
-}
-
-.visual-bridge-block {
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--gold-soft);
-  border: 1px solid rgba(201, 168, 76, 0.3);
 }
 
 @media (max-width: 400px) {

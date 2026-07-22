@@ -15,9 +15,12 @@ function getAudio(src: string): HTMLAudioElement {
 
 export function isLiuyaoSfxMuted(): boolean {
   try {
-    return localStorage.getItem(MUTE_KEY) === '1';
+    const v = localStorage.getItem(MUTE_KEY);
+    // 未设置过偏好时默认关声
+    if (v === null) return true;
+    return v === '1';
   } catch {
-    return false;
+    return true;
   }
 }
 

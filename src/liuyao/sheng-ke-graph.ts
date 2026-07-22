@@ -234,3 +234,143 @@ export function renderShengKeGraphHtml(graph: ShengKeGraph): string {
     </section>
   `;
 }
+
+/** 教学用白话对白（边算边学 Step 4） */
+export function buildCourseShengKeDialogue(graph: ShengKeGraph): {
+  tease: string;
+  dialogue: string;
+} {
+  const yong = graph.nodes.find((n) => n.roles.includes('用神') || n.role === '用神');
+  const yuan = graph.nodes.find((n) => n.roles.includes('原神') || n.role === '原神');
+  const ji = graph.nodes.find((n) => n.roles.includes('忌神') || n.role === '忌神');
+  const hasSheng = graph.edges.some((e) => e.kind === '生' && e.toRole === '用神');
+  const hasKe = graph.edges.some((e) => e.kind === '克' && e.toRole === '用神');
+
+  const tease =
+    '刚才我们找到了代表你的世爻，和代表事情的用神。它们现在「打架」了，你猜谁赢了？往下看因果图。';
+
+  if (!yong) {
+    return {
+      tease,
+      dialogue:
+        '这张图里，用神还没落到具体爻上。先把问题写具体，或回到上一步把世应看清，再来猜输赢。',
+    };
+  }
+
+  let dialogue: string;
+  if (hasSheng && hasKe) {
+    dialogue = `虽然当前环境有个因素在拉你后腿${
+      ji ? `（红线·${ji.row.label}）` : '（红线的克）'
+    }，但好在有个隐藏力量在暗中扶持你${
+      yuan ? `（绿线·${yuan.row.label}）` : '（绿线的生）'
+    }。最终结果是：扶持的力量压过了拖后腿的，所以事情有的救——先减干扰，再借力推进。`;
+  } else if (hasSheng && !hasKe) {
+    dialogue = `好消息：有隐藏力量在暗中扶持你${
+      yuan ? `（绿线·${yuan.row.label}）` : ''
+    }，拖后腿的不明显。可以顺着这股助力，做一小步验证。`;
+  } else if (hasKe && !hasSheng) {
+    dialogue = `眼下拖后腿的力更明显${
+      ji ? `（红线·${ji.row.label}）` : ''
+    }，暗中扶持还不够亮。先别硬冲：把干扰层降下来，再谈推进。`;
+  } else {
+    dialogue =
+      '这局里生克都不显眼。少盯复杂拉扯，先用世应与动爻定下一步，比硬猜输赢更管用。';
+  }
+
+  return { tease, dialogue };
+}
+
+const ROLE_PLAIN: Record<GraphRole, string> = {
+  用神: '核心目标',
+  原神: '暗中扶持',
+  忌神: '拖后腿',
+  世: '你',
+};
+
+/** 边算边学：带动画的生克星图 + 白话对白 */
+export function renderCourseShengKeHtml(
+  graph: ShengKeGraph,
+  opts?: { compact?: boolean },
+): string {
+  const { tease, dialogue } = buildCourseShengKeDialogue(graph);
+  const compact = opts?.compact ?? false;
+  const w = 320;
+  const h = 220;
+  const drawn = new Set<number>();
+
+  const nodeSvg = graph.nodes
+    .map((n) => {
+      if (drawn.has(n.row.index)) return '';
+      drawn.add(n.row.index);
+      const primary =
+        (['用神', '原神', '忌神', '世'] as GraphRole[]).find((r) => n.roles.includes(r)) ??
+        n.role;
+      const p = POS[primary];
+      const plain = ROLE_PLAIN[primary];
+      const classic = primary;
+      const cls =
+        primary === '用神'
+          ? 'is-yong'
+          : primary === '忌神'
+            ? 'is-ji'
+            : primary === '原神'
+              ? 'is-yuan'
+              : 'is-shi';
+      return `
+        <g class="ly-sk-node ly-sk-course-node ${cls}" data-sk-line="${n.row.index}">
+          <circle cx="${p.x}" cy="${p.y}" r="30"/>
+          <text class="ly-sk-role" x="${p.x}" y="${p.y - 8}" text-anchor="middle">${plain}</text>
+          <text class="ly-sk-meta" x="${p.x}" y="${p.y + 6}" text-anchor="middle">${n.row.label}</text>
+          <text class="ly-sk-meta ly-sk-classic-tag" x="${p.x}" y="${p.y + 18}" text-anchor="middle">${classic}</text>
+        </g>`;
+    })
+    .join('');
+
+  const edgeSvg = graph.edges
+    .map((e, i) => {
+      const a = nodeAt(graph.nodes, e.fromRole);
+      const b = nodeAt(graph.nodes, e.toRole);
+      if (!a || !b) return '';
+      const pa =
+        POS[
+          (['用神', '原神', '忌神', '世'] as GraphRole[]).find((r) => a.roles.includes(r)) ??
+            a.role
+        ];
+      const pb =
+        POS[
+          (['用神', '原神', '忌神', '世'] as GraphRole[]).find((r) => b.roles.includes(r)) ??
+            b.role
+        ];
+      const mx = (pa.x + pb.x) / 2;
+      const my = (pa.y + pb.y) / 2;
+      const tip = e.kind === '生' ? '生（帮助）' : '克（阻碍）';
+      const delay = e.kind === '克' ? 'ly-sk-anim-ke' : 'ly-sk-anim-sheng';
+      return `
+        <line class="ly-sk-edge ${delay}" style="--sk-i:${i}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" marker-end="url(#ly-sk-course-arrow-${e.kind})" />
+        <g class="ly-sk-pop ${delay}">
+          <rect class="ly-sk-pop-bg is-${e.kind === '生' ? 'sheng' : 'ke'}" x="${mx - 36}" y="${my - 22}" width="72" height="20" rx="6"/>
+          <text class="ly-sk-edge-label" x="${mx}" y="${my - 8}" text-anchor="middle">${tip}</text>
+        </g>`;
+    })
+    .join('');
+
+  return `
+    <section class="ly-sk-course" data-course-shengke>
+      ${compact ? '' : `<p class="ly-sk-course-tease">${tease}</p>`}
+      <svg class="ly-sk-svg ly-sk-course-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="因果生克星图">
+        <defs>
+          <marker id="ly-sk-course-arrow-生" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#6aab73"/>
+          </marker>
+          <marker id="ly-sk-course-arrow-克" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#c45c4a"/>
+          </marker>
+        </defs>
+        ${edgeSvg}
+        ${nodeSvg}
+      </svg>
+      ${compact ? '' : `<p class="ly-sk-course-dialogue">${dialogue}</p>`}
+      <p class="ly-guide-tip">绿线＝帮助（生），红线＝阻碍（克）。括号里是传统叫法。</p>
+    </section>
+  `;
+}

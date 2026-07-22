@@ -1,22 +1,28 @@
 import type { CastResult } from '../../liuyao/engine.ts';
 import type { FourLayerReading } from '../../liuyao/interpret.ts';
-import { bindGuideInteractions, renderComposeTeach } from '../../liuyao/compose-teach.ts';
 import {
   collectJournalPrompts,
+  mergeReflection,
   renderJournalPromptsHtml,
 } from '../../liuyao/journal-prompts.ts';
 import { LINE_LABELS } from '../../liuyao/hexagrams.ts';
 import {
   NOTE_TAG_OPTIONS,
   bindResultLayers,
-  renderCorePanel,
-  renderDeepPanel,
-  renderFaqPanel,
   renderHexHero,
 } from '../../liuyao/result-layers.ts';
-import { renderLearnReadingTab, bindYaoAskButtons } from '../../liuyao/narrative-learn.ts';
+import {
+  bindYaoAskButtons,
+  renderCausalReadingHtml,
+} from '../../liuyao/narrative-learn.ts';
 import { buildReadingFacts } from '../../liuyao/reading-facts.ts';
-import { renderClassicPlateIntroHtml, bindQinDict } from '../../liuyao/energy-lens.ts';
+import { bindQinDict } from '../../liuyao/energy-lens.ts';
+import { collectStudyNotes } from '../../liuyao/learn-studio.ts';
+import {
+  bindLearnTeachPage,
+  renderLearnTeachPageHtml,
+} from '../../liuyao/learn-shell.ts';
+import { collectCourseNotes } from '../../liuyao/learn-course.ts';
 import {
   QUICK_TAB_DEFS,
   renderQuickBoard,
@@ -29,42 +35,6 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function readingAccordion(title: string, body: string, open = false): string {
-  return `
-    <details class="ly-reading-acc"${open ? ' open' : ''}>
-      <summary class="ly-reading-acc-sum">
-        <span class="ly-reading-acc-title">${title}</span>
-        <span class="ly-reading-acc-hint" aria-hidden="true"></span>
-      </summary>
-      <div class="ly-reading-acc-body">${body}</div>
-    </details>
-  `;
-}
-
-/** @deprecated 保留兼容；学习模式改用 renderLearnReadingTab */
-function renderReadingTab(reading: FourLayerReading): string {
-  return `
-    <section class="ly-result-panel ly-reading-summary">
-      <span class="ly-layer-num">一</span>
-      <h3>一句话总结</h3>
-      <p>${escapeHtml(reading.summary)}</p>
-    </section>
-    ${readingAccordion(
-      '二 · 卦象依据',
-      `<p class="ly-reading-multiline">${escapeHtml(reading.basis).replace(/\n/g, '<br>')}</p>`,
-    )}
-    ${readingAccordion(
-      '三 · 结合你的问题',
-      `<p class="ly-reading-multiline">${escapeHtml(reading.context).replace(/\n/g, '<br>')}</p>`,
-    )}
-    ${readingAccordion(
-      '四 · 行动建议',
-      `<p class="ly-reading-multiline">${escapeHtml(reading.action).replace(/\n/g, '<br>')}</p>`,
-      true,
-    )}
-  `;
 }
 
 function renderTagChips(selected: string[]): string {
@@ -100,7 +70,11 @@ export function renderPeerNoteFold(opts: {
           <input type="text" class="ly-note-tag-input" maxlength="10" placeholder="自定义标签，如「搬家」" data-tag-input />
           <button type="button" class="ly-note-tag-add-btn" data-tag-add>添加</button>
         </div>
-        ${learn ? renderJournalPromptsHtml() : ''}
+        ${
+          learn
+            ? `<p class="ly-layer-guide">详细笔记请写在「五步学习 → 笔记与对照」或右侧抽屉；这里可自由补充标签与一句结语。</p>`
+            : renderJournalPromptsHtml()
+        }
         <textarea class="question-input ly-note-draft" rows="3" placeholder="${
           learn ? '自由补充：还可以写别的感受…' : '可选：记下此刻的感受'
         }"></textarea>
@@ -129,7 +103,7 @@ export function mountLiuyaoResultTabs(
     learn: boolean;
   },
 ): LiuyaoResultTabsApi {
-  const { cast, reading, question, learn } = opts;
+  const { cast, question, learn } = opts;
   const castAt = new Date();
   let noteTags: string[] = [];
   let noteDraft = '';
@@ -153,16 +127,12 @@ export function mountLiuyaoResultTabs(
   } else {
     const tabs = [
       { id: 'reading', label: '此刻解读' },
-      { id: 'core', label: '核心要素' },
-      { id: 'guide', label: '怎么读卦' },
-      { id: 'deep', label: '深度推演' },
+      { id: 'teach', label: '五步学习' },
     ];
     const facts = buildReadingFacts(cast, question, castAt);
-    const hi =
-      facts.yong.matchedLine !== undefined ? [facts.yong.matchedLine] : [];
 
     host.innerHTML = `
-      ${renderHexHero(cast, { askable: true, highlightIndexes: hi, castAt })}
+      ${renderHexHero(cast, { castAt, askable: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
           ${tabs
@@ -175,34 +145,22 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          ${renderLearnReadingTab(cast, question, castAt)}
+          ${renderCausalReadingHtml(facts, cast, castAt)}
         </div>
-        <div class="ly-result-tab-panel" data-panel="core" role="tabpanel" hidden>
-          ${renderCorePanel(cast, question)}
-        </div>
-        <div class="ly-result-tab-panel" data-panel="guide" role="tabpanel" hidden>
-          ${renderComposeTeach({ cast, question })}
-        </div>
-        <div class="ly-result-tab-panel" data-panel="deep" role="tabpanel" hidden>
-          ${renderClassicPlateIntroHtml()}
-          <div data-deep-panel>${renderDeepPanel(cast, castAt, question)}</div>
-          ${renderFaqPanel(cast, question)}
+        <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
+          ${renderLearnTeachPageHtml(cast, question, castAt)}
         </div>
       </section>
       ${renderPeerNoteFold({ cast, learn, selectedTags: noteTags })}
     `;
-    void reading;
-    void renderReadingTab;
   }
 
   const layersApi = bindResultLayers(host, cast, question);
   if (learn) {
     bindYaoAskButtons(host, cast, question, castAt);
     bindQinDict(host);
+    bindLearnTeachPage(host, cast, question, castAt);
   }
-
-  const guideRoot = host.querySelector<HTMLElement>('[data-guide-root]');
-  if (guideRoot) bindGuideInteractions(guideRoot, cast, question);
 
   const tagsHost = host.querySelector<HTMLElement>('[data-note-tags]');
   const paintTags = () => {
@@ -227,6 +185,7 @@ export function mountLiuyaoResultTabs(
     if (input) input.value = '';
     paintTags();
   };
+
   host.querySelector('[data-tag-add]')?.addEventListener('click', addCustomTag);
   host.querySelector('[data-tag-input]')?.addEventListener('keydown', (e) => {
     if ((e as KeyboardEvent).key === 'Enter') {
@@ -243,6 +202,12 @@ export function mountLiuyaoResultTabs(
     getCastAt: layersApi.getCastAt,
     getNoteTags: () => noteTags,
     getNoteDraft: () => noteDraft,
-    collectPrompts: () => (learn ? collectJournalPrompts(host) : ''),
+    collectPrompts: () => {
+      if (!learn) return collectJournalPrompts(host);
+      return mergeReflection(
+        mergeReflection(collectStudyNotes(host), collectCourseNotes(cast)),
+        collectJournalPrompts(host),
+      );
+    },
   };
 }

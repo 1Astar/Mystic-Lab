@@ -347,15 +347,15 @@ export function buildCoreParseBlocks(
 export function renderCoreParseHtml(blocks: CoreParseBlock[]): string {
   return `
     <section class="ly-core-parse">
-      <h3>核心要素解析</h3>
+      <h3>核心要素 · 点开看</h3>
       ${blocks
         .map(
           (b) => `
-        <article class="ly-core-parse-item">
-          <h4>${b.kicker}</h4>
+        <details class="ly-core-parse-item">
+          <summary>${b.kicker}</summary>
           <p>${b.body}</p>
           <p class="ly-classic-note">（注：${b.classicNote}）</p>
-        </article>`,
+        </details>`,
         )
         .join('')}
     </section>
