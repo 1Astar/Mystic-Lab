@@ -1,10 +1,14 @@
 import type { DrawnCard } from '../tarot/engine.ts';
-import type { SpreadType } from '../tarot/spreads.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { getAllEntries, linkEncountersToJournal } from '../codex/collection.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
-import { buildLearningNote, SPREADS } from '../tarot/spreads.ts';
-
+import {
+  buildLearningNote,
+  resolveActiveSpread,
+  type SpreadType,
+} from '../tarot/spreads.ts';
+import { ensureSceneTags, normalizeSceneTags } from '../life/scene-tags.ts';
+import { currentReadingSubject } from '../life/reading-subject.ts';
 export type ReadingFeedbackVerdict = 'echo' | 'miss';
 
 export type ReadingFeedbackReason = '解读不准' | '问法问题' | '牌感不对' | '其他';
@@ -35,6 +39,11 @@ export type JournalEntry = {
   readingSnapshot?: ReadingResult;
   /** 对这次占问结果的反馈 */
   feedback?: JournalReadingFeedback;
+  /** 场景标签（必打；旧记录可能缺） */
+  sceneTags?: string[];
+  /** 这次问谁 */
+  subjectId?: string;
+  subjectName?: string;
 };
 
 const STORAGE_KEY = 'mystic-lab-journal';
@@ -46,6 +55,7 @@ function persist(list: JournalEntry[]): void {
 
 function inferSpreadType(cardCount: number): SpreadType {
   if (cardCount === 1) return 'single';
+  if (cardCount === 5) return 'five-lens';
   if (cardCount === 3) return 'past-present-future';
   return 'past-present-future';
 }
@@ -189,6 +199,9 @@ export function upsertJournalProgress(
       ? reading?.learningNote ?? buildLearningNote(spreadType, question)
       : prev?.learningNote || buildLearningNote(spreadType, question);
 
+  const subject = currentReadingSubject();
+  const sceneTags = ensureSceneTags(question, prev?.sceneTags);
+
   const entry: JournalEntry = {
     id,
     createdAt: prev?.createdAt ?? new Date().toISOString(),
@@ -209,6 +222,9 @@ export function upsertJournalProgress(
       reading && cards.length > 0
         ? reading
         : prev?.readingSnapshot,
+    sceneTags,
+    subjectId: prev?.subjectId ?? subject.subjectId,
+    subjectName: prev?.subjectName ?? subject.subjectName,
   };
 
   const idx = list.findIndex((e) => e.id === id);
@@ -242,7 +258,7 @@ export function saveJournalEntry(
     cards,
     reading,
     'complete',
-    SPREADS[spreadType].positions.length,
+    resolveActiveSpread(spreadType).positions.length,
     reflection,
   );
 }
@@ -271,6 +287,18 @@ export function updateJournalFeedback(id: string, feedback: JournalReadingFeedba
   item.fulfilled = feedback.verdict === 'echo';
   persist(list);
 }
+
+export function updateJournalSceneTags(id: string, tags: string[]): void {
+  const list = loadJournalEntries();
+  const item = list.find((e) => e.id === id);
+  if (!item) return;
+  item.sceneTags = normalizeSceneTags(tags);
+  if (item.sceneTags.length === 0) {
+    item.sceneTags = ensureSceneTags(item.question, []);
+  }
+  persist(list);
+}
+
 
 /** 追问等场景：更新已保存手札里的解读快照 */
 export function updateJournalReadingSnapshot(id: string, reading: ReadingResult): void {

@@ -1,17 +1,22 @@
 import {
+  getActivePerson,
   hasUsableProfile,
   loadLifeStore,
 } from './storage.ts';
-import type { LifePortrait, LifeProfileInput } from './types.ts';
+import type { LifePortrait, LifeProfileInput, PersonProfile } from './types.ts';
+import { PERSON_RELATION_LABELS } from './types.ts';
 
 const PREF_KEY = 'mystic-lab-use-profile-in-readings';
 
 export type LabProfileSnapshot = {
   profile: LifeProfileInput;
+  person: PersonProfile;
   portrait?: LifePortrait;
   ready: boolean;
   brief: string;
   readingContext: string;
+  /** 顶栏显示名 */
+  displayName: string;
 };
 
 /** 一行摘要：29岁 · 产品经理 · 上海 */
@@ -28,8 +33,16 @@ export function formatProfileBrief(profile: LifeProfileInput): string {
 export function formatProfileReadingContext(
   profile: LifeProfileInput,
   portrait?: LifePortrait,
+  person?: PersonProfile,
 ): string {
   const lines: string[] = [];
+  if (person) {
+    const rel = PERSON_RELATION_LABELS[person.relation] ?? person.relation;
+    lines.push(`所问对象：${person.nickname}（${rel}）`);
+    if (person.lifeTags.length) {
+      lines.push(`长期标签：${person.lifeTags.map((t) => `#${t}`).join(' ')}`);
+    }
+  }
   const brief = formatProfileBrief(profile);
   if (brief) lines.push(`现状：${brief}`);
   if (profile.confusion.trim()) lines.push(`当前困惑：${profile.confusion.trim()}`);
@@ -44,15 +57,19 @@ export function formatProfileReadingContext(
 
 export function getLabProfileSnapshot(): LabProfileSnapshot {
   const store = loadLifeStore();
-  const ready = hasUsableProfile(store.profile);
+  const person = getActivePerson();
+  const profile = store.profile;
+  const ready = hasUsableProfile(profile);
   return {
-    profile: store.profile,
+    profile,
+    person,
     portrait: store.portrait,
     ready,
-    brief: ready ? formatProfileBrief(store.profile) : '',
+    brief: ready ? formatProfileBrief(profile) : '',
     readingContext: ready
-      ? formatProfileReadingContext(store.profile, store.portrait)
+      ? formatProfileReadingContext(profile, store.portrait, person)
       : '',
+    displayName: person.nickname || '自己',
   };
 }
 
@@ -87,5 +104,5 @@ export function mergeReadingBackground(
   if (!block) return hand;
   if (!hand) return block;
   if (hand.includes(block) || hand.includes(snapshot.brief)) return hand;
-  return `${hand}\n\n——\n（我的档案）\n${block}`;
+  return `${hand}\n\n——\n（档案 · ${snapshot.displayName}）\n${block}`;
 }

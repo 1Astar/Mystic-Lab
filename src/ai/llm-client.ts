@@ -3,6 +3,7 @@ import {
   formatHotspotsForPrompt,
   topicSceneKeywords,
 } from '../interpretation/structured-reading.ts';
+import { splitUserQuestions } from '../interpretation/question-parts.ts';
 import { loadAiSettings, type AiSettings } from './settings.ts';
 
 export type LlmContextualRequest = {
@@ -14,59 +15,82 @@ export type LlmContextualRequest = {
   isFollowUp?: boolean;
 };
 
+function topicLockLines(topic: CardReading['topic']): string[] {
+  if (topic === 'work') {
+    return [
+      '【主题锁定·职场】用户在问工作/离职/面试/收入。禁止展开恋爱、旧情人、原生家庭、他人是否喜欢我等无关牌意。',
+      '只谈：精力状态、去留路径、风险、可执行行动、市场核实。',
+    ];
+  }
+  if (topic === 'love') {
+    return [
+      '【主题锁定·感情】围绕关系信号与边界；不要硬扯升职加薪流程。',
+    ];
+  }
+  return ['紧扣用户原问题主题，禁止跑题套话。'];
+}
+
 function buildPrompt(req: LlmContextualRequest): string {
   const { question, card, background, originalQuestion, isFollowUp } = req;
   const orient = card.orientation === 'reversed' ? '逆位' : '正位';
   const sceneKw = topicSceneKeywords(card.selectedCard, card.topic);
   const bg = background?.trim() || card.readingContext.background?.trim();
   const hotspots = formatHotspotsForPrompt(card.selectedCard.deckId);
+  const parts = splitUserQuestions(question);
+  const partsBlock =
+    parts.length > 1
+      ? [
+          '用户把问题拆成了多条，你必须按下列顺序逐条作答（questionAnswers 条数=下列条数）：',
+          ...parts.map((p, i) => `${i + 1}. ${p}`),
+        ].join('\n')
+      : `用户问题：${question || '（未填写）'}`;
 
   return [
-    '你是一位有 10 年经验的塔罗占卜师。',
-    `用户当前抽到的牌是【${card.cardName}】（${orient}）。请结合下方牌面元素拆解，针对用户问题进行解答。`,
-    '要求：将牌面元素（如资源有限、需取舍）翻译成用户问题场景中的具体现实问题，不要照抄牌意。',
+    '你是精通心理学与职场经验的塔罗师。解读是帮用户理清头绪的心理模型，不是空洞预测。',
+    `用户当前这张牌是【${card.cardName}】（${orient}），牌阵位置：${card.position || '未知'}（${card.positionMeaning || '—'}）。`,
+    '开场可用一句共情（点出疲惫/纠结），但立刻进入逐条作答。',
+    ...topicLockLines(card.topic),
     '',
     '必须严格按 JSON 输出（不要 markdown 代码围栏），格式：',
     JSON.stringify({
-      overview: '热点整体解读·总结论',
-      elementMappings: [
+      overview: '2–4句总结论：结合本张牌与问题的整体判断（禁止恋爱套话）',
+      questionAnswers: [
         {
-          label: '偷走的剑',
-          title: '现实状况：「偷走的剑」意味着什么？',
-          originalMeaning: '只拿走得动的那几把——资源有限，需取舍。',
-          body: '映射到求职等场景的具体说法',
+          question: '用户原问题原文',
+          insight: '牌面洞察：这张牌如何回答这一条（3–6句，具体）',
+          action: '1–2条可执行行动',
         },
       ],
-      advice: '可操作建议',
-      comfort: '心理疏导',
-      actionTags: ['广撒网多面试', '挖内推'],
-      followUps: ['追问1？', '追问2？', '追问3？'],
+      elementMappings: [
+        {
+          label: '牌面元素名',
+          title: '现实状况：「元素」意味着什么？',
+          originalMeaning: '牌面原意',
+          body: '映射到用户职场/所问场景',
+        },
+      ],
+      advice: '总行动建议（短）',
+      comfort: '一句安抚',
+      actionTags: ['强制休整', '核实条款'],
+      followUps: ['追问1？', '追问2？'],
     }),
     '',
-    '结构说明：',
-    '1. overview：第一步·热点整体解读（先给总结论，结合问题）',
-    '2. elementMappings：第二步·元素拆解；必须同时给 originalMeaning（牌面原意，保留热点库原话或忠实复述）与 body（映射到用户问题场景的现实说法）；title 用「现实状况：「元素名」意味着什么？」；禁止只写场景、丢掉原意，也禁止只抄原意不映射',
-    '3. advice：第三步·结合答案的具体行动建议',
-    '4. comfort：一句安抚与鼓励',
-    '5. actionTags：3–4 个短行动指令（不要「风」「流动」这类抽象词）',
-    '6. followUps：2–3 个用户可能想继续追问的短问题（带问号）',
+    '优先级：questionAnswers > overview > elementMappings。',
+    'questionAnswers：按用户子问题顺序；每条 insight 必须点名本张牌如何回答该条；禁止复读牌义百科。',
+    'actionTags：3–4个短指令，必须贴合本张牌与本题（不要永远「广撒网多面试」）。',
+    'elementMappings：可选；每条须 originalMeaning + body；body 必须落在用户主题场景。',
     '',
     '硬性约束：',
     '- 用「你」称呼；先结论后原因再建议',
-    '- 不问准日期定数；问「什么时候」就谈窗口与可做之事',
-    '- 用户未提供的公司名、薪资数字、私密情节不要虚构',
-    '- elementMappings 每条都必须包含 originalMeaning + body 两段',
-    isFollowUp
-      ? '- 这是追问：在同一张牌与同一套元素拆解上深化，不要重复第一段空话'
-      : '',
+    '- 不问准日期定数',
+    '- 不虚构用户未提供的公司名/薪资数字',
+    '- 禁止输出与主题无关的恋爱/旧情人/原生家庭段落',
+    isFollowUp ? '- 这是追问：深化，不要重复空话' : '',
     '',
-    isFollowUp && originalQuestion
-      ? `用户原问题：${originalQuestion}`
-      : '',
-    `用户${isFollowUp ? '追问' : '问题'}：${question || '（未填写）'}`,
+    isFollowUp && originalQuestion ? `用户原问题：${originalQuestion}` : '',
+    partsBlock,
     bg ? `用户补充背景：${bg}` : '用户补充背景：（无）',
-    `牌阵位置：${card.position || '未知'}（${card.positionMeaning || '—'}）`,
-    `场景关键词提炼：${sceneKw}`,
+    `场景关键词：${sceneKw}`,
     `标准一句话：${card.selectedCard.oneSentence}`,
     '',
     hotspots,
@@ -88,12 +112,12 @@ export async function fetchContextualReading(
     },
     body: JSON.stringify({
       model: settings.model,
-      temperature: 0.65,
+      temperature: 0.55,
       messages: [
         {
           role: 'system',
           content:
-            '你是资深塔罗师。只输出合法 JSON：overview/elementMappings/advice/comfort/actionTags/followUps。elementMappings 每条必须含 originalMeaning（牌面原意）与 body（场景映射）。禁止丢掉原意、禁止编造未提供细节。',
+            '你是精通心理学与职场的塔罗师。只输出合法 JSON：overview/questionAnswers/elementMappings/advice/comfort/actionTags/followUps。必须按用户子问题逐条回答；主题锁定时禁止恋爱套话；指哪打哪，行动导向。',
         },
         {
           role: 'user',

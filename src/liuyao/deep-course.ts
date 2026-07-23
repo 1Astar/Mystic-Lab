@@ -24,7 +24,7 @@ import {
 } from './sheng-ke-graph.ts';
 import { dressHexagram } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
-import { renderDressArchiveHtml, bindDressArchive } from './dress-archive.ts';
+import { renderDressArchiveHtml, bindDressArchive, showDressYaoCard } from './dress-archive.ts';
 import {
   buildHexExpandPack,
   renderHexExpandHtml,
@@ -66,7 +66,7 @@ export function buildDeepLessons(
   const domain = detectSceneDomain(question);
   const dressed = dressHexagram(cast, siZhuFromDate(castAt).dayStem);
   const sk = buildShengKeGraph(dressed.rows, question);
-  const talk = buildCourseShengKeDialogue(sk);
+  const talk = buildCourseShengKeDialogue(sk, question);
 
   return [
     {
@@ -83,7 +83,7 @@ export function buildDeepLessons(
         ${renderEnergyChainHtml(cast, question, castAt)}
         ${renderSpiritNarrativeForCast(cast, question, castAt)}
         <p class="ly-deep-step-bridge">${escapeHtml(talk.tease)}</p>
-        ${renderCourseShengKeHtml(sk, { compact: true })}
+        ${renderCourseShengKeHtml(sk, { compact: true, question })}
         <p class="ly-sk-course-dialogue">${escapeHtml(talk.dialogue)}</p>
       `,
     },
@@ -151,7 +151,35 @@ export function bindDeepCourse(
       nextBtn.textContent = index >= lessons.length - 1 ? '完成 ✓' : '下一步 →';
     }
     bindLearnStudio(course);
+    course.querySelectorAll<SVGGElement>('.ly-sk-node').forEach((g) => {
+      g.style.cursor = 'pointer';
+    });
   };
+
+  const openSkInNotes = (idx: number) => {
+    const notes = root.querySelector<HTMLElement>('[data-deep-notes]');
+    if (!notes) return;
+    notes.querySelectorAll<HTMLButtonElement>('[data-note-tab]').forEach((tab) => {
+      const on = tab.dataset.noteTab === 'dress';
+      tab.classList.toggle('is-active', on);
+      tab.setAttribute('aria-selected', String(on));
+    });
+    notes.querySelectorAll<HTMLElement>('[data-note-pane]').forEach((pane) => {
+      const on = pane.dataset.notePane === 'dress';
+      pane.classList.toggle('is-active', on);
+      pane.hidden = !on;
+    });
+    showDressYaoCard(notes, cast, question, idx, castAt);
+    notes.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+
+  course.addEventListener('click', (e) => {
+    const sk = (e.target as Element).closest<SVGGElement>('.ly-sk-node');
+    if (!sk || !course.contains(sk)) return;
+    e.stopPropagation();
+    const idx = Number(sk.getAttribute('data-sk-line'));
+    if (Number.isFinite(idx)) openSkInNotes(idx);
+  });
 
   prevBtn?.addEventListener('click', () => {
     if (index <= 0) return;

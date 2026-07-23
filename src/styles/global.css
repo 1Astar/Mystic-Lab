@@ -807,6 +807,18 @@ body {
   border-color: rgba(120, 170, 255, 0.35);
 }
 
+.journey-system-liuyao {
+  color: #e8d4a0;
+  border-color: rgba(199, 164, 91, 0.4);
+}
+
+.journey-sibling-cross-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .journey-question {
   margin-top: 8px;
   font-size: 0.9rem;

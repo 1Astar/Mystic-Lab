@@ -9,6 +9,7 @@ import {
 import { mountEnvBanner } from '../ui/banner.ts';
 import { liuyaoPageBgStyle, renderLiuyaoHero } from '../ui/liuyao-hero.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
+import { mountPersonSwitcher } from '../ui/person-switcher.ts';
 
 export function renderLiuyaoHome(root: HTMLElement): () => void {
   const journalCount = loadLiuyaoJournal().length;
@@ -32,6 +33,7 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
   const modeBar = page.querySelector<HTMLElement>('.ly-mode-bar')!;
   const actions = page.querySelector<HTMLElement>('.ly-topbar-actions')!;
 
+  mountPersonSwitcher(actions);
   mountLiuyaoSfxToggle(actions);
   mountLiuyaoModeSwitch(modeBar, {
     onChange: (mode) => paint(mode),

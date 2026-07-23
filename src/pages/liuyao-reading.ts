@@ -1,4 +1,5 @@
 import { navigate } from '../router.ts';
+import { takeCrossAskQuestion } from '../journal/cross-ask.ts';
 import { wait, prefersReducedMotion } from '../tarot/animations.ts';
 import {
   buildCastFromThrows,
@@ -26,6 +27,7 @@ import { mergeReadingBackground } from '../life/profile-context.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountLiuyaoResultTabs } from '../ui/liuyao/result-tabs.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
+import { mountPersonSwitcher } from '../ui/person-switcher.ts';
 import {
   bindProfileContextBar,
   renderProfileContextBarHtml,
@@ -39,7 +41,7 @@ import {
 type Phase = 'question' | 'method' | 'casting' | 'result';
 
 export function renderLiuyaoReading(root: HTMLElement): () => void {
-  let question = '';
+  let question = takeCrossAskQuestion().slice(0, 120);
   let profileBar: ProfileContextBarHandle | null = null;
   let profileContext = '';
   let method: 'coin' | 'random' = 'coin';
@@ -64,6 +66,7 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   const actionsHost = document.createElement('div');
   actionsHost.className = 'ly-topbar-actions';
   topbar.append(back, actionsHost);
+  mountPersonSwitcher(actionsHost);
   mountLiuyaoSfxToggle(actionsHost);
 
   const modeBar = document.createElement('div');
@@ -418,7 +421,7 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
         <p class="ly-question-recap">${question ? `你的问题 · ${escapeHtml(question)}` : '未写下具体问题 · 以下按卦象结构推演'}</p>
         ${
           profileContext
-            ? `<p class="ly-question-recap ly-profile-recap">我的档案 · ${escapeHtml(
+            ? `<p class="ly-question-recap ly-profile-recap">我的我的档案 · ${escapeHtml(
                 profileContext.replace(/\n/g, ' · '),
               )}</p>`
             : ''
@@ -445,6 +448,7 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
           tags: tabsApi.getNoteTags(),
           reflection: mergeReflection(tabsApi.getNoteDraft(), tabsApi.collectPrompts()),
           castAt: tabsApi.getCastAt().toISOString(),
+          learnMode: learn,
         });
         journalSaved = true;
         // 沉浸感：第 N 次遇见

@@ -149,6 +149,32 @@ function renderAnswerTendency(r: CardReading): string {
       </section>`;
 }
 
+function renderQuestionAnswers(r: CardReading): string {
+  const answers = r.interpretationLayers.questionAnswers;
+  if (!answers?.length) return '';
+  const cards = answers
+    .map(
+      (a, i) => `
+      <article class="qa-answer-card">
+        <h5 class="qa-answer-q"><span class="qa-answer-n">${i + 1}</span>${escapeHtml(a.question)}</h5>
+        <p class="qa-answer-insight"><span class="qa-answer-label">牌面洞察</span>${formatParagraph(a.insight)}</p>
+        ${
+          a.action
+            ? `<p class="qa-answer-action"><span class="qa-answer-label">行动</span>${formatParagraph(a.action)}</p>`
+            : ''
+        }
+      </article>`,
+    )
+    .join('');
+  return `
+      <section class="reading-layer-card reading-layer-qa">
+        <h4 class="layer-tag">针对你的问题逐条回答 ${contextualSourceDot(r)}</h4>
+        <p class="layer-badge">指哪打哪 · 先看结论再看行动</p>
+        ${cards}
+        <p class="qa-codex-hint">想了解牌面更详细的背景故事？可切到「牌义图鉴」。</p>
+      </section>`;
+}
+
 function renderUserIntuition(r: CardReading): string {
   const tip = r.userIntuition?.trim();
   if (!tip) return '';
@@ -266,14 +292,6 @@ function renderReadingTab(r: CardReading): string {
   );
   const restSections = otherSections.filter((s) => !adviceSections.includes(s));
 
-  const step1Body = overviewSection
-    ? `
-        <h5 class="context-section-title">${escapeHtml(overviewSection.title)}</h5>
-        <p class="reading-block-text">${formatParagraph(overviewSection.body)}</p>`
-    : !elementMappings?.length && !adviceSections.length && !restSections.length
-      ? `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`
-      : '';
-
   const step2Body = elementMappings?.length
     ? `<div class="element-mapping-block">${renderElementMappings(elementMappings)}</div>`
     : restSections
@@ -284,7 +302,10 @@ function renderReadingTab(r: CardReading): string {
           <p class="reading-block-text">${formatParagraph(s.body)}</p>
         </div>`,
         )
-        .join('');
+        .join('') ||
+      (!overviewSection && contextualReading
+        ? `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`
+        : '');
 
   const step3Body = adviceSections.length
     ? adviceSections
@@ -319,7 +340,11 @@ function renderReadingTab(r: CardReading): string {
     ? `<p class="context-background-echo">补充背景：${escapeHtml(r.readingContext.background.trim())}</p>`
     : '';
 
-  const contextBody = `${accordionBlock('① 热点整体解读', step1Body, true)}${accordionBlock('② 现实状况', step2Body, false)}${accordionBlock('③ 行动指南', step3Body, false)}`;
+  // 热点整体解读迁到「看懂牌面」；此刻解读直接摊开现实状况与行动
+  const contextBody = `${accordionBlock('① 现实状况 · 结合你的问题', step2Body, true)}${accordionBlock('② 行动指南', step3Body, true)}`;
+  const hotspotHint = overviewSection
+    ? `<p class="layer-badge reading-hotspot-jump">结合问题的「热点整体解读」已放到 Tab「看懂牌面」</p>`
+    : '';
 
   return `
     <div class="result-tab-panel" data-panel="reading">
@@ -332,11 +357,13 @@ function renderReadingTab(r: CardReading): string {
         </div>
       </section>
       ${renderUserIntuition(r)}
+      ${renderQuestionAnswers(r)}
       ${renderAnswerTendency(r)}
       <section class="reading-layer-card reading-layer-context">
-        <h4 class="layer-tag">结合你的问题 ${contextualSourceDot(r)}</h4>
+        <h4 class="layer-tag">结合你的问题 · 补充拆解 ${contextualSourceDot(r)}</h4>
         ${questionEcho}
         ${bgEcho}
+        ${hotspotHint}
         ${contextBody}
       </section>
       ${
@@ -359,97 +386,81 @@ function renderReadingTab(r: CardReading): string {
     </div>`;
 }
 
-
-
 function renderVisualTab(r: CardReading): string {
-
   const visual = getVisualHotspots(r.cardId);
-
   const deckCard = getCardById(r.cardId);
-
   const cardColor = deckCard?.color ?? 'var(--purple)';
-
   const overview = getVisualOverview(r.cardId) ?? r.selectedCard.oneSentence;
   const questionBridge = r.interpretationLayers.visualQuestionBridge;
+  const overviewSection = r.interpretationLayers.contextualSections?.find(
+    (s) => s.title.includes('热点') || s.title.includes('核心') || s.title.includes('整体'),
+  );
+  const questionEcho = r.question
+    ? `<p class="context-question-echo">你正在问：${escapeHtml(r.question)}</p>`
+    : '';
+  const bgEcho = r.readingContext.background?.trim()
+    ? `<p class="context-background-echo">补充背景：${escapeHtml(r.readingContext.background.trim())}</p>`
+    : '';
+
+  const hotspotAnswer = overviewSection
+    ? `
+      <section class="visual-hotspot-answer reading-layer-card">
+        <h4 class="layer-tag">热点整体解读 · 结合你的问题 ${contextualSourceDot(r)}</h4>
+        ${questionEcho}
+        ${bgEcho}
+        <p class="reading-block-text">${formatParagraph(overviewSection.body)}</p>
+      </section>`
+    : questionBridge
+      ? `
+      <section class="visual-hotspot-answer reading-layer-card">
+        <h4 class="layer-tag">热点整体解读 · 结合你的问题</h4>
+        ${questionEcho}
+        <p class="reading-block-text">${formatParagraph(questionBridge)}</p>
+      </section>`
+      : '';
 
   if (!visual?.hotspots.length) {
-
     return `
-
       <div class="result-tab-panel" data-panel="visual">
-
-        <div class="result-empty">
-
-          <p>这张牌的牌面热点还在整理中。</p>
-
-          <p class="result-empty-sub">78 张牌热点已全部上线，若仍看到此提示请刷新页面。</p>
-
-        </div>
-
+        ${hotspotAnswer || `<div class="result-empty"><p>这张牌的牌面热点还在整理中。</p></div>`}
       </div>`;
-
   }
 
-
-
   const markers = visual.hotspots
-
     .map(
-
       (h, i) => `
-
       <button type="button" class="hotspot-marker${i === 0 ? ' is-hint' : ''}" style="left:${h.x}%;top:${h.y}%;" data-meaning="${escapeHtml(h.meaning)}" data-label="${escapeHtml(h.label)}" aria-label="${escapeHtml(h.label)}">
-
         <span class="hotspot-dot"></span>
-
         <span class="hotspot-label">${escapeHtml(h.label)}</span>
-
       </button>`,
-
     )
-
     .join('');
-
-
 
   const elementList = visual.hotspots
     .map((h) => `<li><strong>${escapeHtml(h.label)}</strong>：${escapeHtml(h.meaning)}</li>`)
     .join('');
 
-  const bridgeBlock = questionBridge
-    ? `<p class="visual-bridge-text">${formatParagraph(questionBridge)}</p>`
-    : '';
-
   return `
-
     <div class="result-tab-panel" data-panel="visual">
-
+      ${hotspotAnswer}
       <div class="visual-card-stage">
         <div class="visual-card-face ${r.orientation === 'reversed' ? 'is-reversed' : ''}" style="--card-color: ${cardColor}">
           ${cardFaceImageHtml(r.cardId, `${r.selectedCard.nameCn} · ${r.selectedCard.nameEn}`, 'card-face-img card-face-img-visual')}
           <div class="hotspot-layer">${markers}</div>
         </div>
       </div>
-
       <p class="hotspot-detail" id="hotspot-detail-${r.cardId}">点选牌面光点查看含义</p>
-
-      <section class="visual-overview-block${questionBridge ? ' has-bridge' : ''}">
-        <h4 class="visual-section-title">整牌总览${questionBridge ? ' · 回到你的问题' : ''}</h4>
+      <section class="visual-overview-block">
+        <h4 class="visual-section-title">整牌画面</h4>
         <p class="visual-overview-text">${formatParagraph(overview)}</p>
-        ${bridgeBlock}
       </section>
-
       <section class="visual-elements-block">
         <h4 class="visual-section-title">牌面元素</h4>
         <p class="visual-hint">也可直接看下方列表；点列表或牌面光点都会更新说明</p>
         <ul class="visual-elements-list">${elementList}</ul>
       </section>
-
     </div>`;
-
 }
-
-
 
 function renderCodexTab(r: CardReading): string {
 

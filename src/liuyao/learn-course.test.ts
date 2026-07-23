@@ -62,7 +62,9 @@ describe('learn-course', () => {
     expect(lessons[4]!.toolHtml).toMatch(/生克星图|ly-sk-panel/);
     expect(lessons[4]!.toolHtml).toMatch(/进阶|用\/元\/忌|变卦实战|无变卦/);
     expect(lessons[5]!.title).toMatch(/连生活 · 策略/);
-    expect(lessons[5]!.toolHtml).toMatch(/格局摘要|ly-pattern-summary|卦象依据|ly-final-loop|结合问题|行动建议/);
+    expect(lessons[5]!.toolHtml).toMatch(
+      /ly-question-briefing|格局摘要|ly-pattern-summary|卦象依据|ly-final-loop|结合问题|行动建议/,
+    );
     expect(lessons[5]!.basics).toMatch(/推演闭环|此刻解读/);
     expect(lessons[5]!.vernacular).toBe('');
     expect(lessons[5]!.classicBai).toMatch(/一句话/);

@@ -181,26 +181,32 @@ export function bindRitualInput(
   }
 
   if (step === 'flip') {
-    const cardSlot = container.querySelector('.tarot-slot-single') as HTMLElement | null;
+    const cardSlot =
+      (container.querySelector(
+        '.spread-board-slot.is-active .tarot-slot-single',
+      ) as HTMLElement | null) ??
+      (container.querySelector('.tarot-slot-single') as HTMLElement | null);
     if (!cardSlot) return () => {};
 
+    let startX = 0;
     let startY = 0;
 
     const onDown = (e: PointerEvent): void => {
+      startX = e.clientX;
       startY = e.clientY;
       cardSlot.setPointerCapture(e.pointerId);
     };
 
     const onUp = (e: PointerEvent): void => {
-      if (startY - e.clientY >= SWIPE_FLIP_PX) {
-        once(callbacks.onFlip);
-      }
+      const moved = Math.hypot(e.clientX - startX, e.clientY - startY);
+      // 仅点击翻开，不再上滑翻牌
+      if (moved < 28) once(callbacks.onFlip);
     };
 
     cardSlot.classList.add('is-interactive');
     on(cardSlot, 'pointerdown', onDown as EventListener);
     on(cardSlot, 'pointerup', onUp as EventListener);
-    on(cardSlot, 'dblclick', () => once(callbacks.onFlip));
+    on(cardSlot, 'click', () => once(callbacks.onFlip));
     return () => {
       cardSlot.classList.remove('is-interactive');
       cleanups.forEach((fn) => fn());

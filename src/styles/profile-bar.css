@@ -119,3 +119,253 @@
 .journey-backup-status[data-kind='err'] {
   color: #ffb4a8;
 }
+
+/* 模块顶栏 + 人物切换 */
+.module-topbar,
+.ly-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.module-topbar-actions,
+.ly-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.person-switcher {
+  display: flex;
+  align-items: center;
+}
+
+.person-switch-trigger {
+  border: 1px solid rgba(255, 214, 166, 0.28);
+  background: rgba(20, 16, 36, 0.55);
+  color: #ffe6c8;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.person-switch-trigger:hover {
+  border-color: rgba(255, 214, 166, 0.5);
+}
+
+.person-switch-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.person-switch-sheet.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.person-switch-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 5, 12, 0.7);
+}
+
+.person-switch-panel {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  max-height: 78vh;
+  overflow: auto;
+  padding: 16px 16px 24px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(165deg, rgba(28, 20, 42, 0.98), rgba(10, 10, 16, 0.98));
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  border-bottom: none;
+  transform: translateY(12px);
+  transition: transform 0.22s ease;
+}
+
+.person-switch-sheet.is-open .person-switch-panel {
+  transform: translateY(0);
+}
+
+.person-switch-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.person-switch-kicker {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #ffd6a6;
+}
+
+.person-switch-head h3 {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+}
+
+.person-switch-x {
+  border: none;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.7);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.person-switch-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.person-switch-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(16, 12, 28, 0.55);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.person-switch-item.is-on {
+  border-color: rgba(255, 214, 166, 0.45);
+  background: rgba(40, 28, 64, 0.55);
+}
+
+.person-switch-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 214, 166, 0.18);
+  color: #ffd6a6;
+  font-weight: 600;
+}
+
+.person-switch-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.person-switch-meta strong {
+  font-size: 0.95rem;
+}
+
+.person-switch-meta em {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: rgba(255, 230, 200, 0.65);
+}
+
+.person-switch-check {
+  color: #ffd6a6;
+}
+
+.person-switch-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.profile-people-strip {
+  margin: 0 0 16px;
+}
+
+.profile-people-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.profile-people-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.profile-people-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-people-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(16, 12, 28, 0.4);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-people-item.is-on {
+  border-color: rgba(255, 214, 166, 0.4);
+}
+
+.profile-people-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 214, 166, 0.16);
+}
+
+.profile-people-item em {
+  display: block;
+  font-style: normal;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.profile-life-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.profile-life-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}

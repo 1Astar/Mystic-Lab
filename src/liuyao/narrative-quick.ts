@@ -23,11 +23,16 @@ function clip(s: string, n: number): string {
 }
 
 /** 表格式本卦∥变卦（速断盘面） */
-export function renderQuickBoard(cast: CastResult, castAt: Date = new Date()): string {
+export function renderQuickBoard(
+  cast: CastResult,
+  castAt: Date = new Date(),
+  opts?: { omitHeader?: boolean },
+): string {
   const sz = siZhuFromDate(castAt);
   const dressed = dressHexagram(cast, sz.dayStem);
   const changedShi = cast.changed?.shiLine;
   const changedYing = changedShi ? yingLineOf(changedShi) : undefined;
+  const omitHeader = opts?.omitHeader ?? false;
 
   const rowsTopFirst = [...dressed.rows].reverse();
   const primaryRows = rowsTopFirst
@@ -67,13 +72,17 @@ export function renderQuickBoard(cast: CastResult, castAt: Date = new Date()): s
     : `<tr><td colspan="4" class="ly-qb-empty">无动则无变</td></tr>`;
 
   return `
-    <header class="ly-quick-board">
-      ${renderCastTimePlaque(castAt)}
+    <header class="ly-quick-board${omitHeader ? ' is-tables-only' : ''}">
+      ${
+        omitHeader
+          ? ''
+          : `${renderCastTimePlaque(castAt)}
       <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${
-        cast.changingIndexes.length
-          ? `动爻 ${cast.changingIndexes.map((i) => LINE_LABELS[i]).join('、')}`
-          : '无动爻'
-      }</p>
+          cast.changingIndexes.length
+            ? `动爻 ${cast.changingIndexes.map((i) => LINE_LABELS[i]).join('、')}`
+            : '无动爻'
+        }</p>`
+      }
       <div class="ly-qb-pair">
         <div class="ly-qb-col">
           <p class="ly-guide-label">本卦 · ${escapeHtml(cast.primary.fullName)}</p>

@@ -1,6 +1,8 @@
 import type { CastResult } from './engine.ts';
 import type { FourLayerReading } from './interpret.ts';
 import { LINE_LABELS } from './hexagrams.ts';
+import { ensureSceneTags, normalizeSceneTags } from '../life/scene-tags.ts';
+import { currentReadingSubject } from '../life/reading-subject.ts';
 
 export type LiuyaoJournalEntry = {
   id: string;
@@ -20,6 +22,14 @@ export type LiuyaoJournalEntry = {
   reflection: string;
   tags: string[];
   fulfilled?: boolean | null;
+  /** 完整起卦快照；旧记录可能缺失，回放时按卦名+动爻重建 */
+  castSnapshot?: CastResult | null;
+  /** 当时是否学习模式；缺省按学习复原（信息更全） */
+  learnMode?: boolean | null;
+  /** 场景标签（必打） */
+  sceneTags?: string[];
+  subjectId?: string;
+  subjectName?: string;
 };
 
 const STORAGE_KEY = 'mystic-lab-liuyao-journal';
@@ -33,6 +43,11 @@ function normalize(entry: LiuyaoJournalEntry): LiuyaoJournalEntry {
     ...entry,
     tags: Array.isArray(entry.tags) ? entry.tags : [],
     reflection: entry.reflection ?? '',
+    castSnapshot: entry.castSnapshot ?? null,
+    learnMode: entry.learnMode ?? null,
+    sceneTags: normalizeSceneTags(entry.sceneTags),
+    subjectId: entry.subjectId,
+    subjectName: entry.subjectName,
   };
 }
 
@@ -55,7 +70,10 @@ export function saveLiuyaoJournalEntry(input: {
   tags?: string[];
   reflection?: string;
   castAt?: string;
+  learnMode?: boolean;
+  sceneTags?: string[];
 }): LiuyaoJournalEntry {
+  const subject = currentReadingSubject();
   const entry: LiuyaoJournalEntry = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
@@ -73,6 +91,11 @@ export function saveLiuyaoJournalEntry(input: {
     reflection: input.reflection?.trim() ?? '',
     tags: input.tags ?? [],
     fulfilled: null,
+    castSnapshot: input.cast,
+    learnMode: input.learnMode ?? null,
+    sceneTags: ensureSceneTags(input.question, input.sceneTags),
+    subjectId: subject.subjectId,
+    subjectName: subject.subjectName,
   };
   const list = loadLiuyaoJournal();
   list.unshift(entry);

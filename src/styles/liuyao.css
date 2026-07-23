@@ -499,12 +499,73 @@
 .ly-replay {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 320;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.ly-replay.is-visible {
+  opacity: 1;
 }
 .ly-replay-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.58);
+}
+.ly-replay--sheet {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.ly-replay-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(var(--page-width, 440px), 100%);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 20px 16px 32px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(165deg, rgba(22, 18, 14, 0.98), rgba(10, 10, 12, 0.98));
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  border-bottom: none;
+}
+.ly-replay-sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: var(--ink-muted, #9a958c);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.ly-replay-sheet-head {
+  padding-right: 28px;
+  margin-bottom: 12px;
+}
+.ly-replay-date {
+  font-size: 0.72rem;
+  color: var(--ly-gold, #c7a45b);
+}
+.ly-replay-question {
+  margin: 6px 0 4px;
+  font-size: 1.05rem;
+  color: var(--ink, #f2efe8);
+}
+.ly-replay-regen {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--ly-gold, #c7a45b);
+  opacity: 0.9;
+  line-height: 1.5;
+}
+.ly-replay-result-host {
+  margin-top: 8px;
+}
+.ly-replay-reflection {
+  margin: 14px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted, #9a958c);
+  line-height: 1.55;
 }
 .ly-replay-panel {
   position: absolute;
@@ -5407,12 +5468,56 @@ a.ly-derived-name:hover {
   color: rgba(232, 220, 190, 0.88);
 }
 
+.ly-compendium-panel {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.ly-compendium-panel:last-child {
+  margin-bottom: 0;
+}
+
+.ly-compendium-panel.is-primary {
+  border-color: rgba(139, 201, 154, 0.35);
+}
+
+.ly-compendium-panel.is-changed {
+  border-color: rgba(212, 160, 122, 0.4);
+}
+
+.ly-compendium-panel.is-bridge {
+  border-color: rgba(224, 192, 120, 0.45);
+  background: rgba(199, 164, 91, 0.08);
+}
+
+.ly-compendium-panel-title {
+  margin: 0 0 2px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: rgba(232, 220, 190, 0.96);
+}
+
+.ly-compendium-panel-hint {
+  margin: 0 0 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: rgba(199, 164, 91, 0.75);
+}
+
 .ly-compendium-block {
   margin: 0 0 10px;
   padding: 8px 10px 8px 12px;
   border-radius: 8px;
   border-left: 3px solid rgba(199, 164, 91, 0.35);
   background: rgba(0, 0, 0, 0.18);
+}
+
+.ly-compendium-panel .ly-compendium-block:last-child {
+  margin-bottom: 0;
 }
 
 .ly-compendium-block.is-xiang {
@@ -5445,12 +5550,6 @@ a.ly-derived-name:hover {
   font-size: 0.84rem;
   line-height: 1.55;
   color: rgba(232, 220, 190, 0.94);
-}
-
-.ly-compendium-changed {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(199, 164, 91, 0.25);
 }
 
 /* 进阶：伏神 / 旬空 / 神煞 */
@@ -6521,6 +6620,63 @@ a.ly-derived-name:hover {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* 结合所问 · 四层解答 */
+.ly-question-briefing {
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ly-briefing-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+
+.ly-briefing-layer {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background:
+    linear-gradient(165deg, rgba(32, 28, 22, 0.45), rgba(14, 12, 10, 0.35)),
+    rgba(199, 164, 91, 0.04);
+}
+
+.ly-briefing-layer.is-strategy {
+  border-color: rgba(224, 192, 120, 0.45);
+  background: rgba(199, 164, 91, 0.1);
+}
+
+.ly-briefing-title {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-briefing-body {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.62;
+  color: rgba(232, 220, 190, 0.94);
+}
+
+.ly-briefing-more {
+  margin: 10px 0 4px;
+  border-radius: 10px;
+  border: 1px dashed rgba(199, 164, 91, 0.28);
+  padding: 8px 12px;
+}
+
+.ly-briefing-more > summary {
+  cursor: pointer;
+  color: rgba(199, 164, 91, 0.85);
+  font-size: 0.8rem;
 }
 
 .ly-final-loop-title {
@@ -7672,6 +7828,18 @@ a.ly-derived-name:hover {
   color: var(--ly-muted);
 }
 
+.ly-yao-card-ask {
+  color: var(--ly-gold) !important;
+  font-size: 0.78rem !important;
+}
+
+.ly-yao-card-relate {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(199, 164, 91, 0.08);
+  border-left: 3px solid rgba(199, 164, 91, 0.4);
+}
+
 .ly-yao-card p {
   margin: 0 0 6px;
   font-size: 0.8rem;
@@ -7698,6 +7866,13 @@ a.ly-derived-name:hover {
   margin: 0 0 6px;
   font-size: 0.88rem;
   color: var(--ly-gold);
+}
+
+.ly-sk-ask {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(232, 220, 190, 0.92);
 }
 
 .ly-sk-svg {
@@ -8126,6 +8301,10 @@ a.ly-derived-name:hover {
   border-radius: 12px;
   border: 1px solid rgba(199, 164, 91, 0.2);
   background: rgba(18, 20, 26, 0.72);
+}
+
+.ly-quick-board.is-tables-only {
+  margin-top: 4px;
 }
 
 .ly-qb-pair {

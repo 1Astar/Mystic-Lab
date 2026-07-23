@@ -21,14 +21,14 @@ export type ProfileContextBarHandle = {
   ready: boolean;
 };
 
-/** 占问页可挂载的「选用我的档案」条 */
+/** 占问页可挂载的「选用档案」条 */
 export function renderProfileContextBarHtml(idPrefix = 'lab-profile'): string {
   const snap = getLabProfileSnapshot();
   if (!snap.ready) {
     return `
       <div class="lab-profile-bar is-empty" data-profile-bar>
-        <p class="lab-profile-bar-text">还没有 Lab 档案。建档后，各体系解读可选用你的现状。</p>
-        <button type="button" class="lab-profile-bar-link" data-go-profile>去建立档案 ›</button>
+        <p class="lab-profile-bar-text">还没有可用档案。为「${escapeHtml(snap.displayName)}」补全现状后，解读可带上对方信息。</p>
+        <button type="button" class="lab-profile-bar-link" data-go-profile>去完善档案 ›</button>
       </div>`;
   }
 
@@ -37,7 +37,7 @@ export function renderProfileContextBarHtml(idPrefix = 'lab-profile'): string {
     <div class="lab-profile-bar" data-profile-bar>
       <label class="lab-profile-bar-check">
         <input type="checkbox" id="${idPrefix}-use" ${prefer ? 'checked' : ''} />
-        <span>带上「我的档案」参与解读</span>
+        <span>带上「${escapeHtml(snap.displayName)}」的档案参与解读</span>
       </label>
       <p class="lab-profile-bar-brief">${escapeHtml(snap.brief)}${
         snap.portrait?.stageTitle

@@ -33,6 +33,7 @@ import {
   buildPatternSummary,
   renderPatternSummaryHtml,
 } from './pattern-summary.ts';
+import { renderQuestionBriefingForCast } from './question-briefing.ts';
 import {
   buildHexExpandPack,
   renderHexExpandHtml,
@@ -258,7 +259,7 @@ export function buildCourseLessons(
           .join('\n');
 
   const skGraph = buildShengKeGraph(rows, question);
-  const skTalk = buildCourseShengKeDialogue(skGraph);
+  const skTalk = buildCourseShengKeDialogue(skGraph, question);
 
   const shiPosHint =
     cast.shiLine <= 2 ? '根基与开端' : cast.shiLine <= 4 ? '过程与门户' : '收尾或高位';
@@ -440,7 +441,7 @@ export function buildCourseLessons(
       toolHtml: `
         ${bianQuiz ? renderBianQuizHtml(bianQuiz) : '<p class="ly-guide-tip">无变卦：本卦实战足够，先把当下看清。</p>'}
         <p class="ly-sk-course-tease">${escapeHtml(skTalk.tease)}</p>
-        ${renderShengKeGraphHtml(skGraph)}
+        ${renderShengKeGraphHtml(skGraph, { question })}
         <p class="ly-sk-course-dialogue">${escapeHtml(skTalk.dialogue)}</p>
         ${renderSpiritNarrativeForCast(cast, question, castAt)}
         ${energyFold}
@@ -463,6 +464,7 @@ export function buildCourseLessons(
         '先看用神与世应，再看动变——勿以一词断吉凶。',
       classicBai: `一句话：${loop.oneLiner}`,
       toolHtml: `
+        ${renderQuestionBriefingForCast(cast, question, castAt)}
         ${renderPatternSummaryHtml(buildPatternSummary(cast, question, castAt))}
         ${renderFinalLoopHtml(loop)}
       `,

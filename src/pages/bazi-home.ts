@@ -1,5 +1,6 @@
 import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
@@ -95,17 +96,17 @@ export function renderBaziHome(root: HTMLElement): () => void {
 
     <section class="life-focus-note" aria-label="定位">
       <p class="life-focus-tag">命理探索</p>
-      <p>八字是独立体系：用出生信息排四柱、看日主与十神结构。出生信息与「我的档案」共用；在此填写会同步过去。轻画像与现状字段仍在档案维护。</p>
+      <p>八字是独立体系：用出生信息排四柱、看日主与十神结构。出生信息与「档案」共用；在此填写会同步过去。轻画像与现状字段仍在档案维护。</p>
     </section>
 
     <form class="life-form" id="bazi-birth-form" aria-label="出生信息">
       <fieldset class="life-fieldset">
-        <legend>出生信息 · 同步我的档案</legend>
+        <legend>出生信息 · 同步档案</legend>
         <p class="life-footnote" id="bazi-birth-sync">
           ${
             hasBirthInfo(p)
               ? `当前：${escapeHtml(formatBirthBrief(p))} · 改完点保存即可同步`
-              : '点选出生时间（可滑动，弹层内切公历/农历），保存后同步到「我的档案」'
+              : '点选出生时间（可滑动，弹层内切公历/农历），保存后同步到「档案」'
           }
         </p>
         <div id="bazi-birth-dt-slot" class="life-birth-row"></div>
@@ -113,7 +114,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
       </fieldset>
       <div class="life-form-actions">
         <button type="submit" class="life-btn-primary" id="bazi-birth-save">保存并同步档案</button>
-        <button type="button" class="life-btn-ghost" data-path="/profile">打开我的档案 ›</button>
+        <button type="button" class="life-btn-ghost" data-path="/profile">打开档案 ›</button>
         <button type="button" class="life-btn-primary" id="bazi-to-chart" data-path="/bazi/chart" ${castReady ? '' : 'disabled'}>去排盘 ›</button>
       </div>
       <p class="life-status" id="bazi-birth-status" hidden></p>
@@ -176,15 +177,16 @@ export function renderBaziHome(root: HTMLElement): () => void {
       return;
     }
     store = updateBirthFields(birth);
-    syncHint.textContent = `当前：${formatBirthBrief(store.profile)} · 已同步到「我的档案」`;
+    syncHint.textContent = `当前：${formatBirthBrief(store.profile)} · 已同步到「档案」`;
     statusEl.hidden = false;
     statusEl.textContent = canCast(store.profile)
       ? '已保存并同步。可以去排盘了。'
-      : '已保存并同步到「我的档案」。排盘还需完整年月日。';
+      : '已保存并同步到「档案」。排盘还需完整年月日。';
     refreshCastGate();
   });
 
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
   return () => {
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();

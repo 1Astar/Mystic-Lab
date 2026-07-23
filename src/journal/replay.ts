@@ -2,7 +2,7 @@ import type { CodexEncounter } from '../codex/collection.ts';
 import type { DrawnCard } from '../tarot/engine.ts';
 import { buildReadingResult } from '../interpretation/contextual-reading.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
-import { SPREADS } from '../tarot/spreads.ts';
+import { SPREADS, isKnownSpreadType } from '../tarot/spreads.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
 import {
   getJournalEntryById,
@@ -19,7 +19,9 @@ export function reconstructDrawnCards(entry: JournalEntry): DrawnCard[] {
     if (!card) {
       throw new Error(`Unknown card: ${cardId ?? c.name}`);
     }
-    const spreadPos = SPREADS[entry.spreadType].positions[i];
+    const spreadPos = isKnownSpreadType(entry.spreadType)
+      ? SPREADS[entry.spreadType].positions[i]
+      : undefined;
     return {
       card,
       reversed: c.reversed,

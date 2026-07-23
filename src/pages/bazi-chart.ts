@@ -152,7 +152,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <section class="life-profile-gate">
           <div>
             <p class="life-card-kicker">还不能排盘</p>
-            <p class="life-gate-brief">回到八字首页填写出生信息（可同步到我的档案）。</p>
+            <p class="life-gate-brief">回到八字首页填写出生信息（可同步到档案）。</p>
           </div>
           <button type="button" class="life-btn-primary" data-path="/bazi">去填写</button>
         </section>
@@ -269,7 +269,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
     return `
       <section class="bazi-meta" aria-label="合盘说明">
-        <p>合盘：填写对方出生信息，对照双方日主十神与日支关系。对方信息仅保存在本机，不同步到「我的档案」。</p>
+        <p>合盘：填写对方出生信息，对照双方日主十神与日支关系。对方信息仅保存在本机，不同步到「档案」。</p>
       </section>
 
       <form class="life-form bazi-partner-form" id="bazi-partner-form">

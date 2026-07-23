@@ -25,8 +25,9 @@ describe('cross-ask', () => {
     const a = item({ id: 't1', system: 'tarot', question: '今天适合推进吗？' });
     const b = item({ id: 'x1', system: 'xiaoliuren', question: '今天适合推进吗？' });
     const c = item({ id: 't2', system: 'tarot', question: '别的问题' });
-    expect(findSiblingJourneyItems(a, [a, b, c]).map((i) => i.id)).toEqual(['x1']);
-    expect(findSiblingJourneyItems(b, [a, b, c]).map((i) => i.id)).toEqual(['t1']);
+    const d = item({ id: 'l1', system: 'liuyao', question: '今天适合推进吗？' });
+    expect(findSiblingJourneyItems(a, [a, b, c, d]).map((i) => i.id)).toEqual(['x1', 'l1']);
+    expect(findSiblingJourneyItems(b, [a, b, c, d]).map((i) => i.id)).toEqual(['t1', 'l1']);
   });
 
   it('ignores empty questions', () => {

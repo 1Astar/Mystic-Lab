@@ -177,21 +177,40 @@ function renderBlocksHtml(blocks: ClassicCompendiumBlock[]): string {
 }
 
 export function renderClassicCompendiumHtml(c: ClassicCompendium): string {
-  const changed = c.changed
+  const primaryBlocks = c.blocks.filter((b) => b.tag !== '决策');
+  const decision = c.blocks.find((b) => b.tag === '决策');
+
+  const primaryPanel = `
+    <div class="ly-compendium-panel is-primary" data-compendium-primary>
+      <p class="ly-compendium-panel-title">本卦 · ${escapeHtml(c.fullName)}</p>
+      <p class="ly-compendium-panel-hint">传统象辞 · 本卦</p>
+      ${renderBlocksHtml(primaryBlocks)}
+    </div>`;
+
+  const changedPanel = c.changed
     ? `
-      <div class="ly-compendium-changed">
-        <p class="ly-layer-guide">变卦 · ${escapeHtml(c.changed.fullName)}</p>
-        ${renderBlocksHtml(c.changed.blocks)}
-      </div>`
+    <div class="ly-compendium-panel is-changed" data-compendium-changed>
+      <p class="ly-compendium-panel-title">变卦 · ${escapeHtml(c.changed.fullName)}</p>
+      <p class="ly-compendium-panel-hint">传统象辞 · 变卦</p>
+      ${renderBlocksHtml(c.changed.blocks)}
+    </div>`
+    : '';
+
+  const decisionPanel = decision
+    ? `
+    <div class="ly-compendium-panel is-bridge" data-compendium-decision>
+      <p class="ly-compendium-panel-hint">本变对照</p>
+      ${renderBlocksHtml([decision])}
+    </div>`
     : '';
 
   return `
     <section class="ly-compendium" data-classic-compendium>
       <h4 class="ly-compendium-title">${escapeHtml(c.title)}</h4>
-      <p class="ly-compendium-gua">${escapeHtml(c.fullName)}</p>
-      <p class="ly-guide-tip">象曰取大象／动爻小象；诗曰为教学对照诗；断曰与决策供参照，不作定论。</p>
-      ${renderBlocksHtml(c.blocks)}
-      ${changed}
+      <p class="ly-guide-tip">本卦传统归本卦，变卦传统归变卦；象曰取大象／动爻小象，诗曰为教学对照诗，不作定论。</p>
+      ${primaryPanel}
+      ${changedPanel}
+      ${decisionPanel}
     </section>
   `;
 }

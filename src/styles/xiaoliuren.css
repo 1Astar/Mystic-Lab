@@ -1027,6 +1027,76 @@
   color: var(--ink-muted);
 }
 
+.xlr-replay {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.xlr-replay.is-visible {
+  opacity: 1;
+}
+.xlr-replay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 14, 0.72);
+}
+.xlr-replay-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(var(--page-width, 440px), 100%);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 20px 16px 32px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(165deg, rgba(28, 18, 42, 0.98), rgba(12, 10, 18, 0.98));
+  border: 1px solid var(--line, rgba(201, 168, 76, 0.25));
+  border-bottom: none;
+}
+.xlr-replay-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.xlr-replay-kicker {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  color: var(--gold, #c9a84c);
+  letter-spacing: 0.06em;
+}
+.xlr-replay-date {
+  font-size: 0.72rem;
+  color: var(--gold, #c9a84c);
+}
+.xlr-replay-question {
+  margin: 6px 0 4px;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.xlr-replay-meta,
+.xlr-replay-regen {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+.xlr-replay-regen {
+  color: var(--gold, #c9a84c);
+  opacity: 0.85;
+}
+.xlr-replay-head {
+  padding-right: 28px;
+  margin-bottom: 12px;
+}
+
 .xlr-hour-guide-list {
   display: flex;
   flex-direction: column;

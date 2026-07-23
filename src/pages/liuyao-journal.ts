@@ -8,6 +8,7 @@ import {
   updateLiuyaoTags,
 } from '../liuyao/journal.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { openLiuyaoEncounterReplay } from '../ui/liuyao-encounter-replay.ts';
 
 export function renderLiuyaoJournal(root: HTMLElement): void {
   const page = document.createElement('div');
@@ -25,7 +26,7 @@ export function renderLiuyaoJournal(root: HTMLElement): void {
   const header = document.createElement('header');
   header.innerHTML = `
     <h1 class="page-title">我的卦象</h1>
-    <p class="page-subtitle">历史起卦 · 标签笔记 · 事后回看</p>
+    <p class="page-subtitle">历史起卦 · 标签笔记 · 复原当时场景</p>
   `;
   page.append(header);
 
@@ -101,6 +102,7 @@ export function renderLiuyaoJournal(root: HTMLElement): void {
         <textarea class="question-input ly-journal-reflect" rows="3" placeholder="我的理解 / 事后反馈…">${entry.reflection}</textarea>
         <p class="ly-journal-ref-hint">可参考：《增删卜易》等对该卦的断语（进阶阅读，不必焦虑）。</p>
         <div class="ly-journal-actions">
+          <button type="button" class="btn ly-btn-gold btn-sm" data-replay>复原当时</button>
           <button type="button" class="btn btn-ghost btn-sm" data-yes>有呼应</button>
           <button type="button" class="btn btn-ghost btn-sm" data-no>不太准</button>
         </div>
@@ -117,6 +119,9 @@ export function renderLiuyaoJournal(root: HTMLElement): void {
           updateLiuyaoTags(entry.id, next);
           renderList();
         });
+      });
+      item.querySelector('[data-replay]')?.addEventListener('click', () => {
+        openLiuyaoEncounterReplay(page, entry);
       });
       item.querySelector('[data-yes]')?.addEventListener('click', () => {
         updateLiuyaoFulfilled(entry.id, true);

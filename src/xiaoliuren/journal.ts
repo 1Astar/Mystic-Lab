@@ -2,6 +2,8 @@ import type { LessonResult } from './engine.ts';
 import type { LunarDate } from './lunar.ts';
 import type { ChineseHour } from './chinese-hour.ts';
 import { sixGodOneLiner, type SixGodId } from './six-gods.ts';
+import { ensureSceneTags, normalizeSceneTags } from '../life/scene-tags.ts';
+import { currentReadingSubject } from '../life/reading-subject.ts';
 
 /** 与起课三关对齐；旧手札可能缺失 */
 export type XiaoliurenLessonMode = 'learn' | 'practice' | 'beginner';
@@ -21,6 +23,9 @@ export type XiaoliurenJournalEntry = {
   fulfilled?: boolean | null;
   /** 起课模式；旧记录可能没有 */
   lessonMode?: XiaoliurenLessonMode | null;
+  sceneTags?: string[];
+  subjectId?: string;
+  subjectName?: string;
 };
 
 /** 起课后满此时长且未标对照 → 待对照 */
@@ -37,6 +42,7 @@ function normalizeEntry(entry: XiaoliurenJournalEntry): XiaoliurenJournalEntry {
     ...entry,
     fulfilled: entry.fulfilled ?? null,
     lessonMode: entry.lessonMode ?? null,
+    sceneTags: normalizeSceneTags(entry.sceneTags),
   };
 }
 
@@ -79,6 +85,7 @@ export function saveXiaoliurenJournalEntry(input: {
   lesson: LessonResult;
   lessonMode?: XiaoliurenLessonMode | null;
 }): XiaoliurenJournalEntry {
+  const subject = currentReadingSubject();
   const entry: XiaoliurenJournalEntry = {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
@@ -102,6 +109,9 @@ export function saveXiaoliurenJournalEntry(input: {
     reflection: '',
     fulfilled: null,
     lessonMode: input.lessonMode ?? null,
+    sceneTags: ensureSceneTags(input.question),
+    subjectId: subject.subjectId,
+    subjectName: subject.subjectName,
   };
 
   const list = loadXiaoliurenJournal();

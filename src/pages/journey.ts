@@ -2,8 +2,10 @@ import { navigate } from '../router.ts';
 import {
   findSiblingJourneyItems,
   otherSystemLabel,
-  otherSystemReadingPath,
+  otherSystems,
+  readingPathFor,
   stashCrossAskQuestion,
+  systemDisplayLabel,
 } from '../journal/cross-ask.ts';
 import {
   countFavoriteCards,
@@ -21,13 +23,17 @@ import {
   updateXiaoliurenFulfilled,
   updateXiaoliurenReflection,
 } from '../xiaoliuren/journal.ts';
+import { getJournalEntryById } from '../liuyao/journey.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountJourneyBackupBar } from '../ui/journey-backup-bar.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
+import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
+import { openLiuyaoEncounterReplay } from '../ui/liuyao-encounter-replay.ts';
+import { openXiaoliurenJournalReplay } from '../ui/xiaoliuren-reading-replay.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
 
-type JourneyTab = 'all' | 'tarot' | 'xiaoliuren' | 'favorites' | 'progress' | 'notes';
+type JourneyTab = 'all' | 'tarot' | 'xiaoliuren' | 'liuyao' | 'favorites' | 'progress' | 'notes';
 
 function escapeHtml(text: string): string {
   return text
@@ -38,7 +44,7 @@ function escapeHtml(text: string): string {
 }
 
 function systemLabel(system: JourneyItem['system']): string {
-  return system === 'tarot' ? '塔罗' : '小六壬';
+  return systemDisplayLabel(system);
 }
 
 function formatDate(iso: string): string {
@@ -48,6 +54,19 @@ function formatDate(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function openJourneyItem(
+  item: JourneyItem,
+  openers: {
+    tarot: (i: JourneyItem) => void;
+    xiaoliuren: (i: JourneyItem) => void;
+    liuyao: (i: JourneyItem) => void;
+  },
+): void {
+  if (item.system === 'tarot') openers.tarot(item);
+  else if (item.system === 'xiaoliuren') openers.xiaoliuren(item);
+  else openers.liuyao(item);
 }
 
 export function renderJourney(root: HTMLElement): void {
@@ -73,7 +92,7 @@ export function renderJourney(root: HTMLElement): void {
   profileCard.innerHTML = profileSnap.ready
     ? `
       <div>
-        <h2>我的档案 · Lab 通用</h2>
+        <h2>档案 · ${escapeHtml(profileSnap.displayName)}</h2>
         <p>${escapeHtml(profileSnap.brief)}${
           profileSnap.portrait?.stageTitle
             ? ` · ${escapeHtml(profileSnap.portrait.stageTitle)}`
@@ -83,8 +102,8 @@ export function renderJourney(root: HTMLElement): void {
       <button type="button" class="btn btn-secondary btn-sm" data-go-profile>查看 / 编辑</button>`
     : `
       <div>
-        <h2>我的档案 · Lab 通用</h2>
-        <p>建一份现状档案，塔罗 / 小六壬 / 六爻 / 人生宇宙解读都可选用。</p>
+        <h2>档案</h2>
+        <p>为「这次问谁」建档：自己或他人。塔罗 / 小六壬 / 六爻 / 人生宇宙都可选用。</p>
       </div>
       <button type="button" class="btn btn-sm" data-go-profile>去建立</button>`;
   profileCard.querySelector('[data-go-profile]')?.addEventListener('click', () => {
@@ -107,6 +126,7 @@ export function renderJourney(root: HTMLElement): void {
 
   page.append(back, header, profileCard, backupHost, reviewHost, tabs, listHost);
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
 
   let active: JourneyTab = 'all';
 
@@ -115,6 +135,12 @@ export function renderJourney(root: HTMLElement): void {
     page.querySelector('.journey-xlr-detail')?.remove();
   }
 
+  const openers = {
+    tarot: (item: JourneyItem) => openTarotDetail(item),
+    xiaoliuren: (item: JourneyItem) => openXiaoliurenDetail(item),
+    liuyao: (item: JourneyItem) => openLiuyaoDetail(item),
+  };
+
   function mountSiblingSummary(host: HTMLElement, item: JourneyItem): void {
     const siblings = findSiblingJourneyItems(item, loadJourneyItems());
     const section = document.createElement('section');
@@ -122,15 +148,23 @@ export function renderJourney(root: HTMLElement): void {
 
     if (siblings.length === 0) {
       if (!item.question.trim()) return;
-      const other = otherSystemLabel(item.system);
+      const alts = otherSystems(item.system);
+      const buttons = alts
+        .map(
+          (sys) =>
+            `<button type="button" class="btn btn-secondary btn-sm" data-cross="${sys}">也用${systemDisplayLabel(sys)}看一眼</button>`,
+        )
+        .join('');
       section.innerHTML = `
         <h3 class="journey-sibling-title">同题对照</h3>
-        <p class="journey-sibling-empty">还没有${other}记录。可用同一问题再看一眼。</p>
-        <button type="button" class="btn btn-secondary btn-sm" data-cross>也用${other}看一眼</button>
+        <p class="journey-sibling-empty">还没有其他体系的同题记录。可用同一问题再看一眼。</p>
+        <div class="journey-sibling-cross-actions">${buttons}</div>
       `;
-      section.querySelector('[data-cross]')?.addEventListener('click', () => {
-        stashCrossAskQuestion(item.question);
-        navigate(otherSystemReadingPath(item.system));
+      section.querySelectorAll<HTMLButtonElement>('[data-cross]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          stashCrossAskQuestion(item.question);
+          navigate(readingPathFor(btn.dataset.cross as JourneyItem['system']));
+        });
       });
       host.appendChild(section);
       return;
@@ -155,8 +189,7 @@ export function renderJourney(root: HTMLElement): void {
       btn.addEventListener('click', () => {
         const sib = siblings.find((s) => s.id === btn.dataset.sib);
         if (!sib) return;
-        if (sib.system === 'tarot') openTarotDetail(sib);
-        else openXiaoliurenDetail(sib);
+        openJourneyItem(sib, openers);
       });
     });
     host.appendChild(section);
@@ -208,6 +241,7 @@ export function renderJourney(root: HTMLElement): void {
       <textarea class="question-input journey-xlr-reflect" rows="3" placeholder="写下对照后来发生了什么…">${escapeHtml(entry.reflection)}</textarea>
       <button type="button" class="btn btn-secondary" data-save-xlr style="margin-top:12px">保存感悟</button>
       <button type="button" class="btn btn-ghost" data-go-xlr-journal style="margin-top:8px">打开小六壬手札</button>
+      <button type="button" class="btn" data-replay-xlr style="margin-top:8px">复原当时场景</button>
     `;
     detail.querySelector('.journal-detail-close')?.addEventListener('click', closeDetail);
     detail.querySelector('[data-yes]')?.addEventListener('click', () => {
@@ -232,8 +266,18 @@ export function renderJourney(root: HTMLElement): void {
     detail.querySelector('[data-go-xlr-journal]')?.addEventListener('click', () => {
       navigate('/xiaoliuren/journal');
     });
+    detail.querySelector('[data-replay-xlr]')?.addEventListener('click', () => {
+      openXiaoliurenJournalReplay(page, entry);
+    });
     mountSiblingSummary(detail, item);
     page.appendChild(detail);
+  }
+
+  function openLiuyaoDetail(item: JourneyItem): void {
+    const entry = getJournalEntryById(item.liuyao?.id ?? '') ?? item.liuyao;
+    if (!entry) return;
+    closeDetail();
+    openLiuyaoEncounterReplay(page, entry);
   }
 
   function renderTabs(): void {
@@ -250,6 +294,11 @@ export function renderJourney(root: HTMLElement): void {
         id: 'xiaoliuren',
         label: '小六壬记录',
         count: items.filter((i) => i.system === 'xiaoliuren').length,
+      },
+      {
+        id: 'liuyao',
+        label: '六爻记录',
+        count: items.filter((i) => i.system === 'liuyao').length,
       },
       { id: 'favorites', label: '收藏牌面', count: favCount },
       { id: 'progress', label: '学习进度' },
@@ -317,9 +366,10 @@ export function renderJourney(root: HTMLElement): void {
       const empty = document.createElement('div');
       empty.className = 'meditate-box journey-empty';
       const hints = {
-        all: '还没有旅程记录。完成一次塔罗占问或小六壬起课后，会出现在这里。',
+        all: '还没有旅程记录。完成一次塔罗 / 小六壬 / 六爻占问后，会出现在这里。',
         tarot: '还没有塔罗记录。',
         xiaoliuren: '还没有小六壬记录。',
+        liuyao: '还没有六爻记录。去起卦并保存到「我的卦象」后会出现在这里。',
         notes: '还没有写下感悟的笔记。可在记录里补充「后来的感悟」。',
       } as const;
       empty.innerHTML = `<p>${hints[active]}</p>`;
@@ -339,6 +389,14 @@ export function renderJourney(root: HTMLElement): void {
         btn.className = 'btn btn-ghost';
         btn.textContent = '去小六壬起课';
         btn.addEventListener('click', () => navigate('/xiaoliuren/reading'));
+        actions.appendChild(btn);
+      }
+      if (active === 'all' || active === 'liuyao') {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-ghost';
+        btn.textContent = '去六爻起卦';
+        btn.addEventListener('click', () => navigate('/liuyao/reading'));
         actions.appendChild(btn);
       }
       empty.appendChild(actions);
@@ -362,6 +420,27 @@ export function renderJourney(root: HTMLElement): void {
           <time>${escapeHtml(formatDate(item.createdAt))}</time>
         </div>
         <p class="journey-question">${escapeHtml(item.question || '（未记录问题）')}</p>
+        ${
+          item.system === 'tarot' && item.tarot?.subjectName
+            ? `<p class="journey-badge">问 · ${escapeHtml(item.tarot.subjectName)}${
+                item.tarot.sceneTags?.length
+                  ? ` · ${item.tarot.sceneTags.map((t) => `#${t}`).join(' ')}`
+                  : ''
+              }</p>`
+            : item.system === 'liuyao' && item.liuyao?.subjectName
+              ? `<p class="journey-badge">问 · ${escapeHtml(item.liuyao.subjectName)}${
+                  item.liuyao.sceneTags?.length
+                    ? ` · ${item.liuyao.sceneTags.map((t) => `#${t}`).join(' ')}`
+                    : ''
+                }</p>`
+              : item.system === 'xiaoliuren' && item.xiaoliuren?.subjectName
+                ? `<p class="journey-badge">问 · ${escapeHtml(item.xiaoliuren.subjectName)}${
+                    item.xiaoliuren.sceneTags?.length
+                      ? ` · ${item.xiaoliuren.sceneTags.map((t) => `#${t}`).join(' ')}`
+                      : ''
+                  }</p>`
+                : ''
+        }
         <p class="journey-summary">${escapeHtml(item.summary)}</p>
         ${item.statusLabel ? `<p class="journey-badge">${escapeHtml(item.statusLabel)}</p>` : ''}
         ${
@@ -373,8 +452,7 @@ export function renderJourney(root: HTMLElement): void {
         <p class="journey-open-hint">点击查看详情 →</p>
       `;
       article.addEventListener('click', () => {
-        if (item.system === 'tarot') openTarotDetail(item);
-        else openXiaoliurenDetail(item);
+        openJourneyItem(item, openers);
       });
       listHost.appendChild(article);
     }

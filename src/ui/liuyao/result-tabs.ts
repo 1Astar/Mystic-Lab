@@ -31,6 +31,7 @@ import {
   buildPatternSummary,
   renderPatternSummaryHtml,
 } from '../../liuyao/pattern-summary.ts';
+import { renderQuestionBriefingForCast } from '../../liuyao/question-briefing.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -104,16 +105,21 @@ export function mountLiuyaoResultTabs(
     reading: FourLayerReading;
     question: string;
     learn: boolean;
+    /** 复原场景时用当时占卜时间 */
+    castAt?: Date;
+    initialTags?: string[];
+    initialNoteDraft?: string;
   },
 ): LiuyaoResultTabsApi {
   const { cast, question, learn } = opts;
-  const castAt = new Date();
-  let noteTags: string[] = [];
-  let noteDraft = '';
+  const castAt = opts.castAt ?? new Date();
+  let noteTags: string[] = [...(opts.initialTags ?? [])];
+  let noteDraft = opts.initialNoteDraft ?? '';
 
   if (!learn) {
     host.innerHTML = `
-      ${renderQuickBoard(cast, castAt)}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: cast.primary.gist })}
+      ${renderQuickBoard(cast, castAt, { omitHeader: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
           ${QUICK_TAB_DEFS.map(
@@ -150,9 +156,13 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">结果：这一卦此刻对你说什么。</p>
-          <p class="ly-drawer-reading-one">${escapeHtml(loop.oneLiner)}</p>
-          ${renderFinalLoopHtml(loop)}
+          <p class="ly-guide-tip">结果：结合你的问题，按四层读这一卦。</p>
+          ${renderQuestionBriefingForCast(cast, question, castAt)}
+          <details class="ly-briefing-more">
+            <summary>展开 · 卦象依据（教学明细）</summary>
+            <p class="ly-drawer-reading-one">${escapeHtml(loop.oneLiner)}</p>
+            ${renderFinalLoopHtml(loop)}
+          </details>
         </div>
         <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
           ${renderLearnTeachPageHtml(cast, question, castAt)}
@@ -164,8 +174,8 @@ export function mountLiuyaoResultTabs(
   }
 
   const layersApi = bindResultLayers(host, cast, question);
+  bindYaoAskButtons(host, cast, question, castAt);
   if (learn) {
-    bindYaoAskButtons(host, cast, question, castAt);
     bindQinDict(host);
     bindLearnTeachPage(host, cast, question, castAt);
   }
@@ -205,6 +215,8 @@ export function mountLiuyaoResultTabs(
   host.querySelector('.ly-note-draft')?.addEventListener('input', (e) => {
     noteDraft = (e.target as HTMLTextAreaElement).value;
   });
+  const draftEl = host.querySelector<HTMLTextAreaElement>('.ly-note-draft');
+  if (draftEl && noteDraft) draftEl.value = noteDraft;
 
   return {
     getCastAt: layersApi.getCastAt,

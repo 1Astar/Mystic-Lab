@@ -5,6 +5,7 @@ export type FallbackAction =
   | 'shuffle'
   | 'cut'
   | 'draw'
+  | 'place'
   | 'flip'
   | 'zoom_in'
   | 'zoom_out'
@@ -18,7 +19,8 @@ const STEP_BUTTONS: Record<RitualStep, { action: FallbackAction; label: string }
   shuffle: [{ action: 'shuffle', label: '✊ 手掌收起洗牌' }],
   cut: [{ action: 'cut', label: '👋 切牌' }],
   draw: [{ action: 'draw', label: '🤏 捏合抽牌' }],
-  flip: [{ action: 'flip', label: '🖐️ 手掌上翻' }],
+  place: [{ action: 'place', label: '✋ 放到阵位' }],
+  flip: [{ action: 'flip', label: '👆 翻开牌面' }],
   review: [],
   reading: [
     { action: 'zoom_in', label: '⬆️ 放大细读' },

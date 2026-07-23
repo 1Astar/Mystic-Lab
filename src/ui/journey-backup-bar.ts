@@ -26,7 +26,7 @@ export function mountJourneyBackupBar(host: HTMLElement): void {
   bar.innerHTML = `
     <div class="journey-backup-copy">
       <h2>备份与恢复</h2>
-      <p>导出图鉴 + 各体系占问/手札/进度/档案 + AI 设置（含 API Key）。导入会覆盖本机对应记录。请妥善保管备份文件。</p>
+      <p>导出图鉴 + 各体系占问/手札/进度/档案 + AI 设置（含 API Key）。导入按 id 合并：不同记录保留双方，同 id 保留较新；AI 设置以备份为准。请妥善保管备份文件。</p>
     </div>
     <div class="journey-backup-actions">
       <button type="button" class="btn btn-secondary btn-sm" data-export>导出 JSON</button>
@@ -65,7 +65,7 @@ export function mountJourneyBackupBar(host: HTMLElement): void {
     const file = fileInput.files?.[0];
     if (!file) return;
     const ok = window.confirm(
-      '导入将覆盖本机图鉴、各体系手札/进度、人生档案，以及 AI 设置（含 API Key）。确定继续？',
+      '导入将按 id 与本机合并（不同记录都保留，同 id 保留较新）。AI 设置以备份为准。确定继续？',
     );
     if (!ok) {
       fileInput.value = '';
@@ -74,9 +74,9 @@ export function mountJourneyBackupBar(host: HTMLElement): void {
     try {
       const text = await file.text();
       const backup = parseBackupJson(text);
-      const result = importBackupPayload(backup, localStorage);
+      const result = importBackupPayload(backup, localStorage, { mode: 'merge' });
       setStatus(
-        `已恢复：写入 ${result.written} 项（清理旧项 ${result.cleared}）。页面将刷新。`,
+        `已合并：写入 ${result.written} 项（本机独有记录已保留）。页面将刷新。`,
       );
       window.setTimeout(() => {
         window.location.reload();

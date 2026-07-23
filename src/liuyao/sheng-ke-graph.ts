@@ -31,6 +31,14 @@ export type ShengKeGraph = {
   lines: [string, string];
 };
 
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function pickBest(candidates: YaoDress[]): YaoDress | undefined {
   if (candidates.length === 0) return undefined;
   const moving = candidates.find((r) => r.changing);
@@ -156,10 +164,18 @@ function nodeAt(nodes: GraphNode[], role: GraphRole): GraphNode | undefined {
 }
 
 /** SVG 星图 + 两句结论 */
-export function renderShengKeGraphHtml(graph: ShengKeGraph): string {
+export function renderShengKeGraphHtml(
+  graph: ShengKeGraph,
+  opts?: { question?: string },
+): string {
   const w = 320;
   const h = 250;
   const drawn = new Set<number>();
+  const q = (opts?.question ?? '').trim();
+  const qShort = q.length > 28 ? `${q.slice(0, 28)}…` : q;
+  const askLine = qShort
+    ? `<p class="ly-sk-ask">结合所问「${escapeXml(qShort)}」· 用神看「${escapeXml(graph.yongName)}」</p>`
+    : `<p class="ly-sk-ask">用神看「${escapeXml(graph.yongName)}」· 写下问题后会更贴你的事</p>`;
 
   const nodeSvg = graph.nodes
     .map((n) => {
@@ -179,7 +195,7 @@ export function renderShengKeGraphHtml(graph: ShengKeGraph): string {
               ? 'is-yuan'
               : 'is-shi';
       return `
-        <g class="ly-sk-node ${cls}" data-sk-line="${n.row.index}">
+        <g class="ly-sk-node ${cls}" data-sk-line="${n.row.index}" role="button" tabindex="0">
           <circle cx="${p.x}" cy="${p.y}" r="28"/>
           <text class="ly-sk-role" x="${p.x}" y="${p.y - 6}" text-anchor="middle">${label}</text>
           <text class="ly-sk-meta" x="${p.x}" y="${p.y + 10}" text-anchor="middle">${n.row.label} ${n.row.branch}${n.row.wuxing}</text>
@@ -212,8 +228,10 @@ export function renderShengKeGraphHtml(graph: ShengKeGraph): string {
     .join('');
 
   return `
-    <section class="ly-sk-panel">
+    <section class="ly-sk-panel" data-shengke-graph>
       <h4>生克星图</h4>
+      ${askLine}
+      <p class="ly-guide-tip">点节点 → 笔记里看该爻原意（爻辞）与结合所问的映射</p>
       <svg class="ly-sk-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="用神原神忌神生克图">
         <defs>
           <marker id="ly-sk-arrow-生" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -227,15 +245,18 @@ export function renderShengKeGraphHtml(graph: ShengKeGraph): string {
         ${nodeSvg}
       </svg>
       <div class="ly-sk-lines">
-        <p>${graph.lines[0]}</p>
-        <p>${graph.lines[1]}</p>
+        <p>${escapeXml(graph.lines[0])}</p>
+        <p>${escapeXml(graph.lines[1])}</p>
       </div>
     </section>
   `;
 }
 
-/** 教学用白话对白（边算边学 Step 4） */
-export function buildCourseShengKeDialogue(graph: ShengKeGraph): {
+/** 教学用白话对白（边算边学） */
+export function buildCourseShengKeDialogue(
+  graph: ShengKeGraph,
+  question = '',
+): {
   tease: string;
   dialogue: string;
 } {
@@ -244,9 +265,12 @@ export function buildCourseShengKeDialogue(graph: ShengKeGraph): {
   const ji = graph.nodes.find((n) => n.roles.includes('忌神') || n.role === '忌神');
   const hasSheng = graph.edges.some((e) => e.kind === '生' && e.toRole === '用神');
   const hasKe = graph.edges.some((e) => e.kind === '克' && e.toRole === '用神');
+  const q = question.trim();
+  const qBit = q
+    ? `结合你问的「${q.length > 20 ? `${q.slice(0, 20)}…` : q}」`
+    : '结合你问的事';
 
-  const tease =
-    '刚才我们找到了代表你的世爻，和代表事情的用神。它们现在「打架」了，你猜谁赢了？往下看因果图。';
+  const tease = `${qBit}：刚才我们找到了代表你的世爻，和代表事情的用神。它们现在「打架」了，你猜谁赢了？点下方节点，笔记会弹出该爻原意。`;
 
   if (!yong) {
     return {
@@ -289,9 +313,9 @@ const ROLE_PLAIN: Record<GraphRole, string> = {
 /** 边算边学：带动画的生克星图 + 白话对白 */
 export function renderCourseShengKeHtml(
   graph: ShengKeGraph,
-  opts?: { compact?: boolean },
+  opts?: { compact?: boolean; question?: string },
 ): string {
-  const { tease, dialogue } = buildCourseShengKeDialogue(graph);
+  const { tease, dialogue } = buildCourseShengKeDialogue(graph, opts?.question ?? '');
   const compact = opts?.compact ?? false;
   const w = 320;
   const h = 220;

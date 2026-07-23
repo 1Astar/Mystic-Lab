@@ -33,6 +33,10 @@ function applyParsedToCard(
     parsed.followUps.length > 0
       ? parsed.followUps
       : card.interpretationLayers.followUps;
+  const questionAnswers =
+    parsed.questionAnswers.length > 0
+      ? parsed.questionAnswers
+      : card.interpretationLayers.questionAnswers;
 
   return {
     ...card,
@@ -45,6 +49,7 @@ function applyParsedToCard(
       ...card.interpretationLayers,
       contextualReading: parsed.plainText,
       contextualSections: parsed.sections,
+      questionAnswers,
       actionTags,
       elementMappings,
       followUps,

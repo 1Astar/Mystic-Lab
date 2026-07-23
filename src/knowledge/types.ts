@@ -72,6 +72,15 @@ export type ContextualSection = {
   body: string;
 };
 
+/** 按用户子问题逐条作答 */
+export type QuestionAnswer = {
+  question: string;
+  /** 牌面洞察 / 真相 */
+  insight: string;
+  /** 可执行建议（可选） */
+  action?: string;
+};
+
 /** 牌面元素 → 用户问题场景的映射 */
 export type ElementMapping = {
   /** 热点原名，如「偷走的剑」 */
@@ -133,6 +142,8 @@ export type InterpretationLayers = {
   standard: StandardMeaningLayer;
   /** 直接结论（有提问时优先展示） */
   answerTendency?: AnswerTendency;
+  /** 按子问题逐条作答（优先于套话段落） */
+  questionAnswers?: QuestionAnswer[];
   /** 第二层：结合问题的解读（P3 接 LLM，P1 用 mock） */
   contextualReading: string;
   /** 结构化解读段落（核心结论/情境/建议/疏导 或感情专段） */

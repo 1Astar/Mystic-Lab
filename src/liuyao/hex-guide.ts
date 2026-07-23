@@ -72,7 +72,7 @@ function escapeHtml(s: string): string {
 }
 
 /** 已有氛围图的文王卦序；其余走 CSS 程序化底 */
-const ATMOSPHERE_MAX = 48;
+const ATMOSPHERE_MAX = 64;
 
 export function atmosphereSrcFor(kingWen: number): string | null {
   if (kingWen < 1 || kingWen > ATMOSPHERE_MAX) return null;
@@ -209,6 +209,22 @@ const ATMOSPHERE_LINES: Record<number, string> = {
   46: '地中有风——积小而上，渐进可升。',
   47: '泽困于水——资源受困，先求出路。',
   48: '水风为井——源在深处，养人长久。',
+  49: '泽火相革——旧制当变，焕然更新。',
+  50: '火风成鼎——烹炼成器，新命可立。',
+  51: '重雷相叠——震动乍起，警醒觉知。',
+  52: '重山相止——宜止宜静，守住本位。',
+  53: '风行山上——渐进徐行，积步可至。',
+  54: '雷动泽面——婚配之象，节奏宜慎。',
+  55: '雷火盛大——丰盛已极，防过满。',
+  56: '火寄于山——旅途暂栖，勿恋一处。',
+  57: '重风相入——柔顺潜入，渐进渗透。',
+  58: '重泽相悦——开口交流，喜悦互通。',
+  59: '风行水上——涣散冰解，心结可开。',
+  60: '水在泽上——有节有度，过满则溢。',
+  61: '风感于泽——中心有孚，诚信可感。',
+  62: '雷过山顶——小有过越，宜慎分寸。',
+  63: '水火既济——事已成局，仍须守成。',
+  64: '火水未济——尚未完成，仍有可为。',
 };
 
 function atmosphereOneLiner(hex: Hexagram): string {

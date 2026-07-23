@@ -12,6 +12,13 @@ import { createInterpretationProvider, readingCoversDrawn } from '../interpretat
 import type { ReadingResult } from '../interpretation/types.ts';
 import { detectQuestionTheme, unlockSingleCard } from '../codex/collection.ts';
 import { buildIntuitionCompare } from '../knowledge/intuition-compare.ts';
+import {
+  backgroundChipGroups,
+  intuitionChipGroups,
+  textHasChip,
+  toggleChipInText,
+  type ChipGroup,
+} from '../knowledge/pre-reading-chips.ts';
 import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
@@ -21,6 +28,12 @@ import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
 import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
+import {
+  ensurePlacements,
+  paintSpreadBoard,
+  renderSpreadBoardShellHtml,
+} from '../ui/spread-board.ts';
+import { isFreeArrangeSpread, type SlotLayout } from '../tarot/spread-layout.ts';
 import {
   bindProfileContextBar,
   renderProfileContextBarHtml,
@@ -35,13 +48,21 @@ import { bindFreeDrawInput, requestMotionPermission } from '../tarot/free-draw-i
 import { bindRitualInput, type RitualInputStep } from '../tarot/ritual-input.ts';
 import { drawClarifierCard, type DrawnCard } from '../tarot/engine.ts';
 import {
+  CUSTOM_SPREAD_MAX,
+  CUSTOM_SPREAD_MIN,
+  SPREAD_ORDER,
   SPREADS,
+  buildCustomPositions,
   buildLearningNote,
+  defaultCustomLabels,
   drawSpread,
   getTeachHint,
+  resolveActiveSpread,
+  setSessionCustomPositions,
   type SpreadType,
 } from '../tarot/spreads.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
 import { createGestureStatusBar } from '../ui/gesture-status.ts';
@@ -65,8 +86,8 @@ type TarotState =
   | 'shuffle'
   | 'cut'
   | 'draw'
+  | 'place'
   | 'flip'
-  | 'preReading'
   | 'cardIntuition'
   | 'cardReview'
   | 'result';
@@ -81,6 +102,7 @@ export function renderTarot(root: HTMLElement): () => void {
   let state: TarotState = prefilledQuestion ? 'question' : 'landing';
   let question = prefilledQuestion;
   let spreadType: SpreadType = 'past-present-future';
+  let customLabels: string[] = defaultCustomLabels(3);
   let drawMode: DrawMode = defaultDrawMode(inputCaps);
   let motionEnabled = false;
   let questionCoach: QuestionCoachHandle | null = null;
@@ -107,6 +129,11 @@ export function renderTarot(root: HTMLElement): () => void {
   const joinedPalms = new JoinedPalmsDetector();
   const heldPalm = new HeldGestureDetector();
   let deckFan: DeckFanHandle | null = null;
+  let boardPlacements: SlotLayout[] = [];
+  let boardDragUnbind: (() => void) | null = null;
+  /** 手势摆阵：食指瞄准的空位下标 */
+  let placeAimSlot: number | null = null;
+  let placeGhost: { x: number; y: number } | null = null;
 
   const unbindCamera = camera.bindLifecycle();
   const hintBar = createGestureHintBar();
@@ -141,10 +168,11 @@ export function renderTarot(root: HTMLElement): () => void {
 
   page.append(back, stage, actions, gestureStatus.el, fallback.el, cameraWrap);
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
   document.body.appendChild(hintBar.el);
 
   function ritualStep(): RitualStep | null {
-    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'flip'] as const;
+    const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'place', 'flip'] as const;
     if (!ritualStates.includes(state as (typeof ritualStates)[number])) {
       return null;
     }
@@ -162,7 +190,7 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   function syncHintBar(): void {
-    if (state === 'cardReview' || state === 'result' || state === 'preReading' || state === 'cardIntuition') {
+    if (state === 'cardReview' || state === 'result' || state === 'cardIntuition') {
       hintBar.setStep(null);
       fallback.setVisible(false);
       gestureStatus.el.hidden = true;
@@ -228,7 +256,7 @@ export function renderTarot(root: HTMLElement): () => void {
     if (next === 'draw') drawLock = false;
     resetDetectors();
     debug?.setStatus(next);
-    if (next === 'cardReview' || next === 'result' || next === 'preReading' || next === 'cardIntuition') {
+    if (next === 'cardReview' || next === 'result' || next === 'cardIntuition') {
       pauseCameraForReview();
     }
     syncHintBar();
@@ -236,7 +264,7 @@ export function renderTarot(root: HTMLElement): () => void {
     bindRitualInputs();
     if (
       drawMode === 'gesture' &&
-      ['draw', 'flip', 'shuffle', 'cut'].includes(next) &&
+      ['draw', 'place', 'flip', 'shuffle', 'cut'].includes(next) &&
       !cameraOn
     ) {
       void resumeGestureRitual();
@@ -298,8 +326,29 @@ export function renderTarot(root: HTMLElement): () => void {
       ) {
         ritualInputUnbind = bindRitualInput(stage, step, callbacks);
       }
+      // place：手势瞄准，触屏可点空位放下
+      if (state === 'place') {
+        bindPlaceSlotTaps();
+      }
       return;
     }
+  }
+
+  function bindPlaceSlotTaps(): void {
+    const prev = ritualInputUnbind;
+    const slots = stage.querySelectorAll<HTMLElement>('.spread-board-slot.is-empty');
+    const onTap = (e: Event) => {
+      const slot = (e.currentTarget as HTMLElement).dataset.slotIndex;
+      const idx = Number(slot);
+      if (!Number.isFinite(idx)) return;
+      placeAimSlot = idx;
+      void onPlaceDrop();
+    };
+    slots.forEach((el) => el.addEventListener('click', onTap));
+    ritualInputUnbind = () => {
+      prev?.();
+      slots.forEach((el) => el.removeEventListener('click', onTap));
+    };
   }
 
   function ritualHintText(): string {
@@ -312,24 +361,27 @@ export function renderTarot(root: HTMLElement): () => void {
     return '星尘聚拢，牌堆浮起 · 轻触继续';
   }
 
-  function stepHintHtml(step: 'shuffle' | 'cut' | 'draw' | 'flip'): string {
+  function stepHintHtml(step: 'shuffle' | 'cut' | 'draw' | 'flip' | 'place'): string {
     const touch: Record<string, string> = {
       shuffle: '<strong>滑动或画圈</strong>洗牌',
       cut: '<strong>横划</strong>切牌',
       draw: '<strong>左右滑动</strong>选牌 · <strong>上滑或长按</strong>抽出',
-      flip: '<strong>上滑</strong>翻开牌面',
+      place: '<strong>点空位</strong>放下这张牌',
+      flip: '<strong>点击牌面</strong>翻开',
     };
     const gesture: Record<string, string> = {
       shuffle: '<strong>手掌收起</strong>并轻晃',
       cut: '<strong>左右挥手</strong>切牌',
-      draw: '<strong>左右挥手</strong>浏览牌堆 · <strong>拇指食指捏合</strong>抽牌（也可点/上滑牌堆）',
-      flip: '<strong>手掌上翻</strong>，翻开牌面',
+      draw: '<strong>左右挥手</strong>浏览牌堆 · <strong>拇指食指捏合</strong>抽起',
+      place: '<strong>食指指向</strong>阵位 · <strong>捏合或张掌</strong>放下（也可点空位）',
+      flip: '<strong>点击牌面</strong>翻开',
     };
     const free: Record<string, string> = {
       shuffle: '摇一摇，或<strong>画一个圈</strong>',
       cut: '再摇一次，或<strong>横划一条线</strong>',
       draw: '<strong>左右滑动</strong>选牌 · <strong>上滑或长按</strong>抽出',
-      flip: '<strong>上滑</strong>翻开牌面',
+      place: '<strong>点空位</strong>放下这张牌',
+      flip: '<strong>点击牌面</strong>翻开',
     };
     const map = drawMode === 'gesture' ? gesture : drawMode === 'free' ? free : touch;
     return map[step] ?? '';
@@ -421,7 +473,67 @@ export function renderTarot(root: HTMLElement): () => void {
         stage.innerHTML = `<h2 class="section-title">选择牌阵</h2><div class="spread-list" id="spread-list"></div>`;
         {
           const list = document.getElementById('spread-list')!;
-          for (const spread of Object.values(SPREADS)) {
+          const customEditorHost = document.createElement('div');
+          customEditorHost.className = 'custom-spread-editor';
+          customEditorHost.hidden = spreadType !== 'custom';
+
+          const renderCustomEditor = () => {
+            const count = customLabels.length;
+            customEditorHost.innerHTML = `
+              <p class="custom-spread-lead">选张数，并为每个位置起名（怎么摆由你定义）</p>
+              <div class="custom-spread-count" role="group" aria-label="抽牌张数">
+                <button type="button" class="btn btn-ghost btn-sm" data-count-dec aria-label="减少">−</button>
+                <span class="custom-spread-count-val">${count} 张</span>
+                <button type="button" class="btn btn-ghost btn-sm" data-count-inc aria-label="增加">+</button>
+              </div>
+              <ol class="custom-spread-positions">
+                ${customLabels
+                  .map(
+                    (label, i) => `
+                  <li>
+                    <label class="pre-reading-label" for="custom-pos-${i}">第 ${i + 1} 张</label>
+                    <input id="custom-pos-${i}" class="question-input custom-pos-input" type="text" maxlength="16" value="${escapePreReading(label)}" data-pos-index="${i}" />
+                  </li>`,
+                  )
+                  .join('')}
+              </ol>
+            `;
+            customEditorHost
+              .querySelector('[data-count-dec]')
+              ?.addEventListener('click', () => {
+                if (customLabels.length <= CUSTOM_SPREAD_MIN) return;
+                readCustomLabelsFromDom();
+                customLabels = customLabels.slice(0, -1);
+                renderCustomEditor();
+              });
+            customEditorHost
+              .querySelector('[data-count-inc]')
+              ?.addEventListener('click', () => {
+                if (customLabels.length >= CUSTOM_SPREAD_MAX) return;
+                readCustomLabelsFromDom();
+                customLabels = [...customLabels, `位置 ${customLabels.length + 1}`];
+                renderCustomEditor();
+              });
+          };
+
+          const readCustomLabelsFromDom = () => {
+            const inputs = customEditorHost.querySelectorAll<HTMLInputElement>('.custom-pos-input');
+            if (!inputs.length) return;
+            customLabels = [...inputs].map((el, i) => el.value.trim() || `位置 ${i + 1}`);
+          };
+
+          const selectSpread = (type: SpreadType, wrap: HTMLElement) => {
+            spreadType = type;
+            list.querySelectorAll('.spread-option-wrap').forEach((el) => {
+              el.classList.remove('is-selected');
+            });
+            wrap.classList.add('is-selected');
+            customEditorHost.hidden = type !== 'custom';
+            if (type === 'custom') renderCustomEditor();
+          };
+
+          for (const type of SPREAD_ORDER) {
+            const spread = SPREADS[type];
             const card = document.createElement('div');
             card.className = `spread-option-wrap ${spread.type === spreadType ? 'is-selected' : ''}`;
 
@@ -431,12 +543,9 @@ export function renderTarot(root: HTMLElement): () => void {
             btn.innerHTML = `
               <strong>${spread.name}</strong>
               <span class="spread-light">${spread.lightHint}</span>
+              <em>${spread.description}</em>
             `;
-            btn.addEventListener('click', () => {
-              spreadType = spread.type;
-              list.querySelectorAll('.spread-option-wrap').forEach((el) => el.classList.remove('is-selected'));
-              card.classList.add('is-selected');
-            });
+            btn.addEventListener('click', () => selectSpread(spread.type, card));
 
             const moreToggle = document.createElement('button');
             moreToggle.type = 'button';
@@ -453,11 +562,28 @@ export function renderTarot(root: HTMLElement): () => void {
             });
 
             card.append(btn, moreToggle, moreBox);
+            if (type === 'custom') {
+              card.appendChild(customEditorHost);
+              if (spreadType === 'custom') renderCustomEditor();
+            }
             list.appendChild(card);
           }
         }
         appendBtn('← 返回修改问题', () => setState('question'), 'btn btn-ghost');
-        appendBtn('下一步 · 选择抽牌方式', () => setState('modeSelect'));
+        appendBtn('下一步 · 选择抽牌方式', () => {
+          if (spreadType === 'custom') {
+            const inputs = stage.querySelectorAll<HTMLInputElement>('.custom-pos-input');
+            customLabels = [...inputs].map((el, i) => el.value.trim() || `位置 ${i + 1}`);
+            if (customLabels.length < CUSTOM_SPREAD_MIN) {
+              customLabels = defaultCustomLabels(3);
+            }
+            setSessionCustomPositions(buildCustomPositions(customLabels));
+          } else {
+            setSessionCustomPositions(null);
+          }
+          boardPlacements = ensurePlacements(resolveActiveSpread(spreadType), null);
+          setState('modeSelect');
+        });
         break;
 
       case 'modeSelect':
@@ -540,12 +666,12 @@ export function renderTarot(root: HTMLElement): () => void {
         renderDrawStage();
         break;
 
-      case 'flip':
-        renderFlipStage(false);
+      case 'place':
+        renderPlaceStage();
         break;
 
-      case 'preReading':
-        renderPreReadingStage();
+      case 'flip':
+        renderFlipStage(false);
         break;
 
       case 'cardIntuition':
@@ -563,95 +689,153 @@ export function renderTarot(root: HTMLElement): () => void {
   }
 
   function renderDrawStage(): void {
-    const teach = getTeachHint(spreadType, currentIndex);
-    const spreadPos = SPREADS[spreadType].positions[currentIndex];
-    const poolCard = cardPool[currentIndex];
-    const posLabel = poolCard?.position ?? spreadPos?.label ?? `第 ${currentIndex + 1} 张`;
-    stage.innerHTML = renderDeckFanHTML();
-    const main = stage.querySelector('#tarot-draw-main');
-    if (main) {
-      main.innerHTML = `
-        ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
-        ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
-        <p class="tarot-hint">第 ${currentIndex + 1} 张 · <strong>${posLabel}</strong></p>
-        <p class="tarot-hint">${stepHintHtml('draw')}</p>
-        <p class="teach-hint teach-hint-soft">${
-          drawMode === 'gesture'
-            ? '摄像头前左右挥手浏览底部牌堆；捏合抽出。也可手指在牌堆上左右滑或点击抽取。'
-            : '在底部牌堆左右滑动浏览，点击选中牌或上滑/长按抽出。'
-        }</p>
-      `;
-    }
-    syncCameraPlacement();
+    renderBoardStage('draw', false);
+  }
+
+  function renderPlaceStage(): void {
+    placeAimSlot = currentIndex;
+    placeGhost = boardPlacements[currentIndex]
+      ? { ...boardPlacements[currentIndex]! }
+      : { x: 50, y: 48 };
+    renderBoardStage('place', false);
+    syncPlaceAimUi();
   }
 
   function renderFlipStage(revealed: boolean): void {
-    const card = currentCard();
-    if (!card) return;
-    const slot = document.createElement('div');
-    slot.className = 'tarot-slot-single';
-    renderCardFace(slot, card, revealed);
-    stage.innerHTML = `
-      ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
-      <p class="tarot-hint">${stepHintHtml('flip')}</p>
-    `;
-    stage.appendChild(slot);
+    renderBoardStage('flip', revealed);
+  }
+
+  function renderBoardStage(phase: 'draw' | 'place' | 'flip', flipRevealed: boolean): void {
+    boardDragUnbind?.();
+    boardDragUnbind = null;
+
+    const base = resolveActiveSpread(spreadType);
+    const needSlots = Math.max(base.positions.length, cardPool.length, currentIndex + 1);
+    const positions =
+      needSlots <= base.positions.length
+        ? base.positions
+        : [
+            ...base.positions,
+            ...Array.from({ length: needSlots - base.positions.length }, (_, i) => ({
+              key: `clarifier-${i + 1}`,
+              label: cardPool[base.positions.length + i]?.position || '补牌',
+              labelEn: 'Clarifier',
+              meaning: '补充视角',
+              teachBefore: '补一张，看清还缺的那一角。',
+            })),
+          ];
+    const spread = { ...base, positions };
+    boardPlacements = ensurePlacements(spread, boardPlacements);
+    const teach = getTeachHint(spreadType, currentIndex);
+    const spreadPos = spread.positions[currentIndex];
+    const poolCard = cardPool[currentIndex];
+    const posLabel = poolCard?.position ?? spreadPos?.label ?? `第 ${currentIndex + 1} 张`;
+    const free = isFreeArrangeSpread(spreadType);
+
+    stage.innerHTML = renderDeckFanHTML();
+    const main = stage.querySelector('#tarot-draw-main');
+    if (main) {
+      const phaseHint =
+        phase === 'draw'
+          ? stepHintHtml('draw')
+          : phase === 'place'
+            ? stepHintHtml('place')
+            : stepHintHtml('flip');
+      const soft =
+        phase === 'draw'
+          ? free
+            ? '抽出后用手势或手指把牌摆到阵上。'
+            : '抽出后把牌放到对应阵位；落阵后仍可微调，松手会吸回格位。'
+          : phase === 'place'
+            ? free
+              ? '食指在阵上移动选位置，捏合或张掌放下；也可直接点空位。'
+              : '食指指向高亮空位，捏合或张掌放下；也可直接点空位。'
+            : '点击牌面翻开。';
+      const gestureSoft =
+        drawMode === 'gesture'
+          ? phase === 'draw'
+            ? '左右挥手浏览牌堆；捏合抽起这张牌。'
+            : phase === 'place'
+              ? '食指指向阵位，捏合或张掌放下。'
+              : '点击牌面翻开。'
+          : soft;
+
+      main.innerHTML = `
+        ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
+        ${teach ? `<p class="teach-hint">${teach}</p>` : ''}
+        <p class="tarot-hint">第 ${currentIndex + 1}/${spread.positions.length} 张 · <strong>${posLabel}</strong></p>
+        ${renderSpreadBoardShellHtml(spread, spreadType, boardPlacements, currentIndex, phase)}
+        ${phase === 'place' ? '<div class="spread-place-ghost" data-place-ghost hidden></div>' : ''}
+        <p class="tarot-hint">${phaseHint}</p>
+        <p class="teach-hint teach-hint-soft">${gestureSoft}</p>
+      `;
+    }
+
+    const fanWrap = stage.querySelector('.tarot-fan-wrap');
+    if (fanWrap) {
+      fanWrap.classList.toggle('is-dimmed', phase === 'flip' || phase === 'place');
+    }
+
+    boardDragUnbind = paintSpreadBoard(stage, {
+      spread,
+      spreadType,
+      drawn: drawnCards,
+      currentIndex,
+      phase,
+      flipRevealed,
+      placements: boardPlacements,
+      onPlacementChange: (index, pos) => {
+        boardPlacements = boardPlacements.map((p, i) => (i === index ? pos : p));
+      },
+    });
+
+    if (phase === 'place') {
+      const ghost = stage.querySelector<HTMLElement>('[data-place-ghost]');
+      const card = currentCard();
+      if (ghost && card) {
+        renderCardFace(ghost, card, false);
+        ghost.hidden = false;
+      }
+    }
+
     syncCameraPlacement();
   }
 
-  function renderPreReadingStage(): void {
-    actions.innerHTML = '';
-    stage.innerHTML = `
-      <div class="pre-reading-stage">
-        <h2 class="section-title">开始解读之前</h2>
-        <p class="tarot-hint">问题：<strong>${escapePreReading(question || '（未填写）')}</strong></p>
-        <p class="teach-hint teach-hint-soft">补充一句当下情况（可选），解读会更贴你的处境；也可直接跳过。</p>
-        ${renderProfileContextBarHtml('tarot-profile')}
-        <label class="pre-reading-label" for="pre-reading-bg">例如：刚离职 / 已面了 3 家 / 有 offer 在等</label>
-        <textarea id="pre-reading-bg" class="question-input" rows="3" placeholder="可选：一句话背景…">${escapePreReading(questionBackground)}</textarea>
-      </div>
-    `;
-    const profileBar = bindProfileContextBar(stage, {
-      idPrefix: 'tarot-profile',
-      onChange: (use) => {
-        const el = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
-        if (!el) return;
-        if (use) {
-          el.value = mergeReadingBackground(el.value, true);
-        }
-      },
-    });
-    // 首次进入：若偏好开启且框为空，预填档案
-    const bgEl = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
-    if (bgEl && profileBar.getUseProfile() && !bgEl.value.trim()) {
-      bgEl.value = profileBar.getContextText();
-    }
-
-    const skipBtn = document.createElement('button');
-    skipBtn.type = 'button';
-    skipBtn.className = 'btn btn-ghost';
-    skipBtn.textContent = '跳过，直接解读';
-    skipBtn.addEventListener('click', () => {
-      questionBackground = profileBar.getUseProfile()
-        ? mergeReadingBackground('', true)
-        : '';
-      backgroundPromptDone = true;
-      void finishFlipInterpret();
-    });
-    const goBtn = document.createElement('button');
-    goBtn.type = 'button';
-    goBtn.className = 'btn';
-    goBtn.textContent = '开始解读';
-    goBtn.addEventListener('click', () => {
-      const el = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
-      questionBackground = mergeReadingBackground(
-        el?.value.trim() ?? '',
-        profileBar.getUseProfile(),
+  function syncPlaceAimUi(): void {
+    const canvas = stage.querySelector('.spread-board-canvas') as HTMLElement | null;
+    const ghost = stage.querySelector<HTMLElement>('[data-place-ghost]');
+    stage.querySelectorAll('.spread-board-slot').forEach((el) => {
+      el.classList.toggle(
+        'is-aimed',
+        Number((el as HTMLElement).dataset.slotIndex) === placeAimSlot,
       );
-      backgroundPromptDone = true;
-      void finishFlipInterpret();
     });
-    actions.append(skipBtn, goBtn);
+    if (!ghost || !canvas || !placeGhost) return;
+    ghost.style.left = `${placeGhost.x}%`;
+    ghost.style.top = `${placeGhost.y}%`;
+    ghost.classList.toggle('is-ready', placeAimSlot === currentIndex || isFreeArrangeSpread(spreadType));
+  }
+
+  function nearestEmptySlot(xPct: number, yPct: number): number | null {
+    const spread = resolveActiveSpread(spreadType);
+    let best: number | null = null;
+    let bestDist = Infinity;
+    for (let i = 0; i < spread.positions.length; i += 1) {
+      if (i < currentIndex) continue; // already filled earlier
+      if (i > currentIndex && drawnCards[i]) continue;
+      // empty slots: i >= currentIndex without card shown; prefer any empty from currentIndex onward that isn't filled
+      const filled = i < currentIndex;
+      if (filled) continue;
+      // only allow current next for fixed; free can aim any remaining
+      if (!isFreeArrangeSpread(spreadType) && i !== currentIndex) continue;
+      const p = boardPlacements[i] ?? { x: 50, y: 50 };
+      const d = Math.hypot(p.x - xPct, p.y - yPct);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return bestDist <= 22 ? best : currentIndex;
   }
 
   function escapePreReading(text: string): string {
@@ -673,40 +857,158 @@ export function renderTarot(root: HTMLElement): () => void {
     return labels[detectQuestionTheme(q)];
   }
 
+  function renderChipGroupsHtml(
+    groups: ChipGroup[],
+    field: 'bg' | 'feel',
+  ): string {
+    return groups
+      .map(
+        (g) => `
+      <div class="pre-chip-group" data-chip-field="${field}">
+        <p class="pre-chip-group-label">${escapePreReading(g.label)}</p>
+        <div class="pre-chip-row" role="group" aria-label="${escapePreReading(g.label)}">
+          ${g.chips
+            .map(
+              (c) =>
+                `<button type="button" class="pre-chip" data-chip="${escapePreReading(c)}">${escapePreReading(c)}</button>`,
+            )
+            .join('')}
+        </div>
+      </div>`,
+      )
+      .join('');
+  }
+
+  function syncChipActiveState(
+    root: HTMLElement,
+    field: 'bg' | 'feel',
+    text: string,
+  ): void {
+    root.querySelectorAll<HTMLButtonElement>(`.pre-chip-group[data-chip-field="${field}"] .pre-chip`).forEach((btn) => {
+      const chip = btn.dataset.chip ?? '';
+      btn.classList.toggle('is-active', textHasChip(text, chip));
+    });
+  }
+
+  function bindChipGroups(
+    root: HTMLElement,
+    field: 'bg' | 'feel',
+    input: HTMLTextAreaElement,
+  ): void {
+    root.querySelectorAll<HTMLButtonElement>(`.pre-chip-group[data-chip-field="${field}"] .pre-chip`).forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const chip = btn.dataset.chip ?? '';
+        if (!chip) return;
+        input.value = toggleChipInText(input.value, chip);
+        syncChipActiveState(root, field, input.value);
+        input.focus();
+      });
+    });
+    input.addEventListener('input', () => {
+      syncChipActiveState(root, field, input.value);
+    });
+    syncChipActiveState(root, field, input.value);
+  }
+
+  /** 翻牌后合一页：牌面 +（首张）处境 + 第一直觉；均可 chip + 手输 */
   function renderCardIntuitionStage(): void {
     const card = currentCard();
     if (!card) return;
     const orient = card.reversed ? '逆位' : '正位';
+    const showBackground = !backgroundPromptDone;
+    const bgGroups = backgroundChipGroups(question);
+    const feelGroups = intuitionChipGroups(question);
+
     actions.innerHTML = '';
     stage.innerHTML = `
       <div class="card-intuition-stage">
-        <h2 class="section-title">你的第一直觉</h2>
-        <p class="tarot-hint">牌已翻开 · 先听自己，再听解读</p>
+        <h2 class="section-title">翻开之后 · 先听自己</h2>
+        <p class="tarot-hint">牌已翻开 · 先记下一两句，再看解读</p>
+        <div class="intuition-card-slot" data-intuition-card></div>
         <p class="intuition-card-meta"><strong>${escapePreReading(card.card.nameZh)}</strong> · ${orient}</p>
-        <label class="pre-reading-label" for="card-intuition-input">看到这张牌，你心里第一个念头是什么？</label>
-        <textarea id="card-intuition-input" class="question-input" rows="4" placeholder="例如：有点紧、像在防守、不太敢亮出自己…"></textarea>
+
+        ${
+          showBackground
+            ? `<section class="pre-block" data-pre-block="bg">
+          <h3 class="pre-block-title">当下情况 <span class="pre-optional">可选</span></h3>
+          <p class="teach-hint teach-hint-soft">补充一句处境，解读会更贴你；点选或手写都行。</p>
+          ${renderProfileContextBarHtml('tarot-profile')}
+          ${renderChipGroupsHtml(bgGroups, 'bg')}
+          <label class="pre-reading-label" for="pre-reading-bg">也可以自己写</label>
+          <textarea id="pre-reading-bg" class="question-input" rows="2" placeholder="例如：刚离职 / 已面了 3 家…">${escapePreReading(questionBackground)}</textarea>
+        </section>`
+            : ''
+        }
+
+        <section class="pre-block" data-pre-block="feel">
+          <h3 class="pre-block-title">你的第一直觉 <span class="pre-optional">可选</span></h3>
+          <p class="teach-hint teach-hint-soft">看到这张牌，心里第一个念头是什么？</p>
+          ${renderChipGroupsHtml(feelGroups, 'feel')}
+          <label class="pre-reading-label" for="card-intuition-input">也可以自己写</label>
+          <textarea id="card-intuition-input" class="question-input" rows="3" placeholder="例如：有点紧、像在防守…"></textarea>
+        </section>
+
         <p class="intuition-status" hidden>正在生成解读…</p>
       </div>
     `;
 
-    const finish = (text: string) => {
-      void goToReviewAfterIntuition(text);
+    const slot = stage.querySelector<HTMLElement>('[data-intuition-card]');
+    if (slot) renderCardFace(slot, card, true, 'hero');
+
+    let profileBar: ReturnType<typeof bindProfileContextBar> | null = null;
+    const bgEl = document.getElementById('pre-reading-bg') as HTMLTextAreaElement | null;
+    if (showBackground && bgEl) {
+      profileBar = bindProfileContextBar(stage, {
+        idPrefix: 'tarot-profile',
+        onChange: (use) => {
+          if (use) bgEl.value = mergeReadingBackground(bgEl.value, true);
+          syncChipActiveState(stage, 'bg', bgEl.value);
+        },
+      });
+      if (profileBar.getUseProfile() && !bgEl.value.trim()) {
+        bgEl.value = profileBar.getContextText();
+      }
+      bindChipGroups(stage, 'bg', bgEl);
+    }
+
+    const feelEl = document.getElementById(
+      'card-intuition-input',
+    ) as HTMLTextAreaElement | null;
+    if (feelEl) bindChipGroups(stage, 'feel', feelEl);
+
+    const commitBackground = (raw: string, useProfile: boolean) => {
+      questionBackground = mergeReadingBackground(raw.trim(), useProfile);
+      backgroundPromptDone = true;
+    };
+
+    const finish = (intuitionText: string, skipAll: boolean) => {
+      if (showBackground) {
+        if (skipAll) {
+          commitBackground(
+            '',
+            Boolean(profileBar?.getUseProfile()),
+          );
+        } else {
+          commitBackground(
+            bgEl?.value ?? '',
+            Boolean(profileBar?.getUseProfile()),
+          );
+        }
+      }
+      void goToReviewAfterIntuition(skipAll ? '' : intuitionText);
     };
 
     const skipBtn = document.createElement('button');
     skipBtn.type = 'button';
     skipBtn.className = 'btn btn-ghost';
     skipBtn.textContent = '跳过，直接看解读';
-    skipBtn.addEventListener('click', () => finish(''));
+    skipBtn.addEventListener('click', () => finish('', true));
 
     const goBtn = document.createElement('button');
     goBtn.type = 'button';
     goBtn.className = 'btn';
     goBtn.textContent = '写下后看解读';
-    goBtn.addEventListener('click', () => {
-      const el = document.getElementById('card-intuition-input') as HTMLTextAreaElement | null;
-      finish(el?.value ?? '');
-    });
+    goBtn.addEventListener('click', () => finish(feelEl?.value ?? '', false));
 
     actions.append(skipBtn, goBtn);
   }
@@ -928,6 +1230,10 @@ export function renderTarot(root: HTMLElement): () => void {
     questionBackground = '';
     backgroundPromptDone = false;
     currentJournalId = null;
+    setSessionCustomPositions(null);
+    boardPlacements = [];
+    boardDragUnbind?.();
+    boardDragUnbind = null;
     questionRewrite?.destroy();
     questionRewrite = null;
     drawMode = defaultDrawMode(inputCaps);
@@ -952,8 +1258,10 @@ export function renderTarot(root: HTMLElement): () => void {
     questionBackground = '';
     backgroundPromptDone = false;
     currentJournalId = null;
-    questionRewrite?.destroy();
-    questionRewrite = null;
+    setSessionCustomPositions(null);
+    boardPlacements = [];
+    boardDragUnbind?.();
+    boardDragUnbind = null;
     drawMode = defaultDrawMode(inputCaps);
     motionEnabled = false;
     gestureBridge?.stop();
@@ -1212,21 +1520,18 @@ export function renderTarot(root: HTMLElement): () => void {
 
   async function onFlip(): Promise<void> {
     if (state !== 'flip') return;
-    const slot = stage.querySelector('.tarot-slot-single');
+    const slot =
+      stage.querySelector<HTMLElement>('.spread-board-slot.is-active .tarot-slot-single') ??
+      stage.querySelector<HTMLElement>('.tarot-slot-single');
     if (slot) {
       slot.classList.add('is-flipping');
       await wait(500);
       const card = currentCard();
-      if (card) renderCardFace(slot as HTMLElement, card, true);
+      if (card) renderCardFace(slot, card, true);
     }
 
     if (!reading) {
       reading = { cards: [], summary: '', provider: 'static' };
-    }
-
-    if (!backgroundPromptDone) {
-      setState('preReading');
-      return;
     }
 
     await finishFlipInterpret();
@@ -1364,6 +1669,7 @@ export function renderTarot(root: HTMLElement): () => void {
     window.removeEventListener('pagehide', onPageHide);
     questionCoach?.destroy();
     questionRewrite?.destroy();
+    boardDragUnbind?.();
     ritualInputUnbind?.();
     gestureBridge?.stop();
     camera.stop();

@@ -73,7 +73,22 @@ describe('structured reading', () => {
       true,
     );
     expect(mock.followUps.length).toBe(3);
-    expect(mock.actionTags.join('')).toMatch(/广撒网|内推|谈薪/);
+    expect(mock.actionTags.join('')).toMatch(/休整|核实|边界|内耗|决策/);
+  });
+
+  it('builds per-question answers for multi-part work questions', () => {
+    const multi: ReadingContext = {
+      ...workCtx,
+      question: `1. 我现在真正想离开的原因
+2. 如果7月底离职，未来三个月走势
+3. 我最需要防范的风险
+4. 最终建议/行动策略`,
+    };
+    const mock = buildStructuredMockReading(multi, knowledge, false);
+    expect(mock.questionAnswers.length).toBeGreaterThanOrEqual(4);
+    expect(mock.questionAnswers[0]?.question).toMatch(/离开/);
+    expect(mock.questionAnswers[0]?.insight).toMatch(/宝剑七/);
+    expect(mock.plainText).toMatch(/【提问 1】/);
   });
 
   it('element mappings keep original meaning and add scene mapping', () => {

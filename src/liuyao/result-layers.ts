@@ -77,7 +77,7 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
       <summary>传统排盘进阶（点行看卡 · 生克图）</summary>
       ${renderClassicPlateIntroHtml()}
       ${renderDressTable(cast, castAt)}
-      ${renderShengKeGraphHtml(graph)}
+      ${renderShengKeGraphHtml(graph, { question })}
       ${whyBits ? `<div class="ly-sk-why-box">${whyBits}<p class="ly-guide-tip">${facts.shengKe.tip}</p></div>` : ''}
       ${renderClassicFolderHtml(cast)}
     </details>
@@ -282,6 +282,7 @@ function openYaoCard(
   index: number,
   question: string,
   tableRoot: HTMLElement,
+  hexName?: string,
 ): void {
   const row = rows.find((r) => r.index === index);
   if (!row) return;
@@ -291,7 +292,7 @@ function openYaoCard(
     syncDressAndSk(tableRoot, null);
     return;
   }
-  slot.innerHTML = renderYaoCard(row, question);
+  slot.innerHTML = renderYaoCard(row, question, { hexName });
   syncDressAndSk(tableRoot, index);
   tableRoot
     .querySelector<HTMLElement>(`.ly-dress-row[data-dress-side="primary"][data-dress-line="${index}"]`)
@@ -310,7 +311,7 @@ export function bindDeepPanel(
 
   const openLine = (idx: number) => {
     const slot = deep.querySelector<HTMLElement>('[data-yao-card-slot]');
-    if (slot) openYaoCard(slot, dressed.rows, idx, question, deep);
+    if (slot) openYaoCard(slot, dressed.rows, idx, question, deep, cast.primary.name);
   };
 
   deep.querySelectorAll<HTMLElement>('.ly-dress-row[data-dress-side="primary"]').forEach((tr) => {

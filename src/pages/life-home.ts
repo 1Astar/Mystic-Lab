@@ -75,14 +75,14 @@ export function renderLifeHome(root: HTMLElement): () => void {
 
     <section class="life-focus-note" aria-label="定位">
       <p class="life-focus-tag">人生推演</p>
-      <p>这里只做<strong>模拟玩法</strong>。现状底座在独立的「我的档案」模块；建档并生成轻画像后即可开玩。</p>
+      <p>这里只做<strong>模拟玩法</strong>。现状底座在独立的「档案」模块；建档并生成轻画像后即可开玩。</p>
     </section>
 
     <section class="life-profile-gate ${gateOpen ? 'is-ready' : ''}" aria-label="档案状态">
       ${
         gateOpen
           ? `<div>
-              <p class="life-card-kicker">已连接 · 我的档案</p>
+              <p class="life-card-kicker">已连接 · 档案</p>
               <p class="life-gate-brief">${escapeHtml(formatProfileBrief(store.profile))}${
                 store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''
               }</p>
@@ -90,9 +90,9 @@ export function renderLifeHome(root: HTMLElement): () => void {
             <button type="button" class="life-btn-ghost" data-path="/profile">编辑档案 ›</button>`
           : `<div>
               <p class="life-card-kicker">需要先建档案</p>
-              <p class="life-gate-brief">玩法会读取「我的档案」里的现状与轻画像。档案是 Lab 独立模块，各体系共用。</p>
+              <p class="life-gate-brief">玩法会读取「档案」里的现状与轻画像。档案是 Lab 独立模块，各体系共用。</p>
             </div>
-            <button type="button" class="life-btn-primary" data-path="/profile">去我的档案</button>`
+            <button type="button" class="life-btn-primary" data-path="/profile">去档案</button>`
       }
     </section>
 
@@ -126,12 +126,12 @@ export function renderLifeHome(root: HTMLElement): () => void {
             return `
             <li class="life-route-step ${state}">
               ${i > 0 ? '<span class="life-route-connector" aria-hidden="true"></span>' : ''}
-              <button type="button" class="life-route-card" data-path="${m.path}" data-open="${gateOpen ? '1' : '0'}" data-lock="请先在「我的档案」生成轻画像" ${gateOpen ? '' : 'aria-disabled="true"'}>
+              <button type="button" class="life-route-card" data-path="${m.path}" data-open="${gateOpen ? '1' : '0'}" data-lock="请先在「档案」生成轻画像" ${gateOpen ? '' : 'aria-disabled="true"'}>
                 <span class="life-route-n">${m.n}</span>
                 <span class="life-route-body">
                   <strong>${m.title}</strong>
                   <span class="life-route-desc">${m.desc}</span>
-                  ${!gateOpen ? '<span class="life-route-lock">需先完成我的档案</span>' : ''}
+                  ${!gateOpen ? '<span class="life-route-lock">需先完成档案</span>' : ''}
                 </span>
                 <span class="life-route-badge">${badge}</span>
               </button>
@@ -163,7 +163,7 @@ export function renderLifeHome(root: HTMLElement): () => void {
       if (!path) return;
       if (el.dataset.open === '0') {
         statusEl.hidden = false;
-        statusEl.textContent = el.dataset.lock || '请先去「我的档案」建立并生成轻画像';
+        statusEl.textContent = el.dataset.lock || '请先去「档案」建立并生成轻画像';
         statusEl.classList.add('is-flash');
         window.setTimeout(() => statusEl.classList.remove('is-flash'), 600);
         return;

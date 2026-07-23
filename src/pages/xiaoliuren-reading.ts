@@ -65,6 +65,7 @@ import { buildGodHuangliBridge } from '../xiaoliuren/god-huangli-bridge.ts';
 import { renderCountSteps } from '../ui/xiaoliuren/count-steps.ts';
 import { renderXlrDivider } from '../ui/xiaoliuren/assets.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 
 type FlowState =
   | 'question'
@@ -121,6 +122,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
 
   page.append(back, stage, drawerHost, actions);
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
 
   const isLearn = () => lessonMode === 'learn';
   const isPractice = () => lessonMode === 'practice';
@@ -723,7 +725,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
               }
               ${
                 profileContext
-                  ? `<p class="xlr-result-q"><span>我的档案</span>${profileContext
+                  ? `<p class="xlr-result-q"><span>档案</span>${profileContext
                       .replace(/&/g, '&amp;')
                       .replace(/</g, '&lt;')
                       .replace(/>/g, '&gt;')

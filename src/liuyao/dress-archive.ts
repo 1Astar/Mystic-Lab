@@ -202,6 +202,7 @@ export function openDressYaoCard(
   rows: YaoDress[],
   index: number,
   question: string,
+  hexName?: string,
 ): void {
   const archive = root.querySelector<HTMLElement>('[data-dress-archive]') ?? root;
   const slot = archive.querySelector<HTMLElement>('[data-yao-card-slot]');
@@ -216,7 +217,7 @@ export function openDressYaoCard(
     return;
   }
 
-  slot.innerHTML = renderYaoCard(row, question);
+  slot.innerHTML = renderYaoCard(row, question, { hexName });
   syncDressHighlight(root, index);
   archive
     .querySelector<HTMLElement>(
@@ -242,7 +243,7 @@ export function bindDressArchive(
   archive
     .querySelectorAll<HTMLElement>('.ly-dress-row[data-dress-side="primary"]')
     .forEach((tr) => {
-      const open = () => openDressYaoCard(root, rows, Number(tr.dataset.dressLine), question);
+      const open = () => openDressYaoCard(root, rows, Number(tr.dataset.dressLine), question, cast.primary.name);
       tr.addEventListener('click', open);
       tr.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -267,7 +268,7 @@ export function showDressYaoCard(
   if (!slot) return;
   const row = rows.find((r) => r.index === index);
   if (!row) return;
-  slot.innerHTML = renderYaoCard(row, question);
+  slot.innerHTML = renderYaoCard(row, question, { hexName: cast.primary.name });
   syncDressHighlight(root, index);
   archive
     .querySelector<HTMLElement>(

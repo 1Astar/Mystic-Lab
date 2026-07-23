@@ -53,9 +53,9 @@ const SYSTEMS: LabEntry[] = [
   },
   {
     path: '/profile',
-    title: '我的档案',
-    desc: '现状底座 · 各体系可选用',
-    note: '个人底座',
+    title: '档案',
+    desc: '自己与他人 · 各体系可切换所问对象',
+    note: '人物底座',
     emblem: 'heart',
   },
   {

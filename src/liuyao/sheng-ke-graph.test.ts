@@ -37,8 +37,9 @@ describe('sheng-ke-graph', () => {
     const cast = castYu();
     const dressed = dressHexagram(cast, '壬');
     const graph = buildShengKeGraph(dressed.rows, '明天考试能不能成功');
-    const talk = buildCourseShengKeDialogue(graph);
-    expect(talk.tease).toMatch(/你猜谁赢了/);
+    const talk = buildCourseShengKeDialogue(graph, '明天考试能不能成功');
+    expect(talk.tease).toMatch(/你猜谁赢了|点下方节点/);
+    expect(talk.tease).toMatch(/结合你问的/);
     expect(talk.dialogue).not.toMatch(/先保用神不被拖垮/);
     const html = renderCourseShengKeHtml(graph);
     expect(html).toMatch(/生（帮助）|克（阻碍）|有的救|暗中扶持|拖后腿/);
