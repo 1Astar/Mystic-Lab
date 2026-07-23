@@ -1174,6 +1174,185 @@
   color: var(--gold);
 }
 
+.custom-spread-editor {
+  margin: 0 8px 12px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(201, 168, 76, 0.45);
+  background: rgba(26, 16, 48, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-spread-lead {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.custom-spread-count {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-spread-count-val {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--gold);
+}
+
+.custom-spread-positions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-spread-positions li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tarot-fan-wrap.is-dimmed {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.spread-board {
+  width: 100%;
+  margin: 4px 0 2px;
+}
+
+.spread-board-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  max-height: min(42vh, 340px);
+  margin: 0 auto;
+  border-radius: 16px;
+  border: 1px solid rgba(191, 163, 255, 0.28);
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(201, 168, 76, 0.12), transparent 55%),
+    radial-gradient(ellipse at 50% 80%, rgba(90, 40, 140, 0.35), transparent 60%),
+    rgba(20, 12, 40, 0.55);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.spread-board-slot {
+  position: absolute;
+  width: min(22vw, 78px);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+}
+
+.spread-board-slot.is-next {
+  z-index: 3;
+}
+
+.spread-board-slot.is-active,
+.spread-board-slot.is-dragging {
+  z-index: 8;
+}
+
+.spread-board-slot.is-next .spread-board-label,
+.spread-board-slot.is-active .spread-board-label {
+  color: var(--gold);
+}
+
+.spread-board-slot.is-next .spread-board-card-host,
+.spread-board-slot.is-empty.is-next .spread-board-card-host {
+  outline: 1px dashed rgba(201, 168, 76, 0.65);
+  outline-offset: 3px;
+  border-radius: 8px;
+  min-height: calc(min(22vw, 78px) * 1.5);
+  min-width: min(22vw, 78px);
+  background: rgba(201, 168, 76, 0.06);
+}
+
+.spread-board-label {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: rgba(232, 220, 255, 0.78);
+  text-align: center;
+  max-width: 5.5em;
+  pointer-events: none;
+}
+
+.spread-board-card-host {
+  width: min(22vw, 78px);
+  aspect-ratio: 2 / 3;
+}
+
+.spread-board-card-host .tarot-card,
+.spread-board-card-host .tarot-card.is-board-card,
+.spread-board-card-host .tarot-card.has-art {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 2 / 3;
+}
+
+.spread-board-card-host .tarot-card-inner {
+  border-radius: 6px;
+}
+
+.spread-board.is-free-arrange .spread-board-slot.is-filled {
+  cursor: grab;
+}
+
+.spread-board.is-free-arrange .spread-board-slot.is-dragging {
+  cursor: grabbing;
+}
+
+.spread-board-slot.is-aimed .spread-board-label {
+  color: var(--gold);
+}
+
+.spread-board-slot.is-aimed .spread-board-card-host,
+.spread-board-slot.is-aimed.is-empty .spread-board-card-host {
+  outline: 2px solid rgba(201, 168, 76, 0.85);
+  outline-offset: 3px;
+  background: rgba(201, 168, 76, 0.14);
+  box-shadow: 0 0 18px rgba(201, 168, 76, 0.35);
+}
+
+.spread-place-ghost {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: min(22vw, 78px);
+  aspect-ratio: 2 / 3;
+  transform: translate(-50%, -50%);
+  z-index: 12;
+  pointer-events: none;
+  opacity: 0.92;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
+  transition: left 0.05s linear, top 0.05s linear;
+}
+
+.spread-place-ghost.is-ready {
+  outline: 2px solid rgba(201, 168, 76, 0.7);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.spread-place-ghost .tarot-card,
+.spread-place-ghost .tarot-card.has-art {
+  width: 100%;
+  height: 100%;
+}
+
 .teach-hint {
   padding: 12px 14px;
   margin-bottom: 12px;
@@ -2354,6 +2533,148 @@
   text-align: left;
 }
 
+.intuition-board-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.intuition-mini-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+}
+
+.intuition-mini-face {
+  width: 64px;
+}
+
+.intuition-mini-face .tarot-card {
+  width: 64px;
+  height: auto;
+  aspect-ratio: 2 / 3.5;
+}
+
+.intuition-mini-label {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.intuition-focus-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.reading-switcher {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 12px 0 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.reading-switch-btn {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink-muted);
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.reading-switch-btn.is-active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.reading-overall {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.overall-intuition {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gold);
+  background: rgba(201, 168, 76, 0.08);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.overall-intuition-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.overall-jumps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overall-card-jump {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px 10px;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.overall-card-jump:hover {
+  border-color: var(--gold);
+  background: rgba(201, 168, 76, 0.06);
+}
+
+.overall-pos {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 0.72rem;
+  color: var(--gold);
+  max-width: 4.5em;
+}
+
+.overall-name {
+  grid-column: 2;
+  font-size: 0.9rem;
+}
+
+.overall-line {
+  grid-column: 2;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .pre-reading-label {
   font-size: 0.78rem;
   color: var(--ink-muted);
@@ -2362,6 +2683,84 @@
 .intuition-card-meta {
   margin: 0;
   font-size: 0.95rem;
+  color: var(--gold);
+  text-align: center;
+}
+
+.intuition-card-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 6px auto 2px;
+  min-height: min(58vw, 220px);
+}
+
+.intuition-card-slot .tarot-card.is-hero {
+  width: min(52vw, 200px);
+  height: auto;
+  aspect-ratio: 2 / 3;
+}
+
+.pre-block {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(191, 163, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pre-block-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pre-optional {
+  margin-left: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.pre-chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pre-chip-group-label {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+.pre-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pre-chip {
+  appearance: none;
+  border: 1px solid rgba(191, 163, 255, 0.35);
+  background: rgba(46, 27, 75, 0.55);
+  color: var(--ink);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.pre-chip:hover {
+  border-color: rgba(201, 168, 76, 0.55);
+}
+
+.pre-chip.is-active {
+  border-color: rgba(201, 168, 76, 0.75);
+  background: rgba(201, 168, 76, 0.16);
   color: var(--gold);
 }
 
@@ -2394,6 +2793,76 @@
 .reading-layer-answer {
   border-color: rgba(201, 168, 76, 0.5);
   background: rgba(201, 168, 76, 0.1);
+}
+
+.reading-layer-qa {
+  border-color: rgba(201, 168, 76, 0.45);
+}
+
+.qa-answer-card {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.qa-answer-card:last-of-type {
+  margin-bottom: 8px;
+}
+
+.qa-answer-q {
+  margin: 0 0 8px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: rgba(232, 220, 190, 0.96);
+  line-height: 1.4;
+}
+
+.qa-answer-n {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  background: rgba(201, 168, 76, 0.28);
+  color: var(--gold, #c9a84c);
+}
+
+.qa-answer-label {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--gold, #c9a84c);
+  font-weight: 700;
+}
+
+.qa-answer-insight,
+.qa-answer-action {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(232, 220, 190, 0.92);
+}
+
+.qa-answer-action {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.12);
+  border-left: 3px solid rgba(201, 168, 76, 0.5);
+}
+
+.qa-codex-hint {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: rgba(201, 168, 76, 0.72);
 }
 
 .reading-layer-intuition {
@@ -2529,6 +2998,19 @@
 .visual-overview-block,
 .visual-elements-block {
   margin-bottom: 14px;
+}
+
+.visual-hotspot-answer {
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.visual-hotspot-answer .reading-block-text {
+  margin-top: 8px;
+}
+
+.reading-hotspot-jump {
+  margin: 0 0 10px !important;
 }
 
 .visual-overview-block.has-bridge {

@@ -3,6 +3,7 @@ import {
   LINE_LABELS,
   palaceOfHexagram,
   upperLowerFromLines,
+  yingLineOf,
   type LineBit,
 } from './hexagrams.ts';
 import type { TrigramId } from './trigrams.ts';
@@ -153,12 +154,45 @@ export function dressHexagram(cast: CastResult, dayStem: string): DressedHexagra
   return { palace, palaceWx, rows };
 }
 
+/** 变卦独立装卦（世应按变卦八宫重定；六神与日干同序） */
+export function dressChangedHexagram(
+  cast: CastResult,
+  dayStem: string,
+): DressedHexagram | null {
+  if (!cast.changed) return null;
+  const palace = palaceOfHexagram(cast.changed.name) ?? cast.changed.lower;
+  const palaceWx = trigramWuXing(palace);
+  const branches = branchesFromLines(cast.changedLines);
+  const gods = liushenForDayStem(dayStem);
+  const shi = cast.changed.shiLine;
+  const ying = yingLineOf(shi);
+
+  const rows: YaoDress[] = [0, 1, 2, 3, 4, 5].map((i) => {
+    const branch = branches[i]!;
+    const wuxing = branchWuXing(branch);
+    return {
+      index: i,
+      label: LINE_LABELS[i]!,
+      bit: cast.changedLines[i]!,
+      changing: false,
+      branch,
+      wuxing,
+      liuqin: liuqinOf(palaceWx, wuxing),
+      liushen: gods[i]!,
+      isShi: shi === i + 1,
+      isYing: ying === i + 1,
+    };
+  });
+
+  return { palace, palaceWx, rows };
+}
+
 export const LIUQIN_PLAIN: Record<LiuQin, string> = {
-  兄弟: '同辈、竞争、耗财、帮手——看问题场景取象。',
-  子孙: '喜悦、解忧、技艺、晚辈；官鬼的克星。',
-  妻财: '钱财、资源、妻子（男测）；被我克之物。',
-  官鬼: '压力、事业、丈夫（女测）、病灾；克我者。',
-  父母: '长辈、文书、房屋、学业考题；生我者。',
+  兄弟: '同侪环境 / 盟友圈——同代人、社交圈、竞争与合作中的拉扯。',
+  子孙: '内在创造力 / 破局点——灵感、破框、身体与放松愉悦的源泉。',
+  妻财: '物质根基 / 自我价值——可掌控资源、回报与安全感来源。',
+  官鬼: '目标系统 / 外部规则——职位项目、KPI、考核与社会评价框架。',
+  父母: '安全基地 / 信息网——知识经验、文书合同、支持系统与基础盘。',
 };
 
 export const LIUSHEN_PLAIN: Record<LiuShen, string> = {

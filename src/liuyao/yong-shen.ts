@@ -6,10 +6,10 @@ import { formatLiuqinShort } from './energy-lens.ts';
 /** 用神对应的六亲（可能多个，如感情） */
 export function yongLiuQinList(question: string): LiuQin[] {
   const q = question.trim();
-  if (/考试|考研|考证|题目|成绩|分数/.test(q)) return ['父母'];
-  if (/钱|财|投资|收入/.test(q)) return ['妻财'];
+  if (/考试|考研|考证|题目|成绩|分数|简历|文书/.test(q)) return ['父母'];
+  if (/薪|工资|资产|投资|收入|钱|财|回本/.test(q)) return ['妻财'];
   if (/感情|恋爱|分手|复合|对象|婚姻|喜欢/.test(q)) return ['妻财', '官鬼'];
-  if (/面试|升职|工作|offer|事业|老板|岗位/.test(q)) return ['官鬼'];
+  if (/面试|升职|工作|offer|事业|老板|岗位|求职/.test(q)) return ['官鬼'];
   const domain = detectSceneDomain(question);
   if (domain === 'career') return ['官鬼'];
   if (domain === 'love') return ['妻财', '官鬼'];

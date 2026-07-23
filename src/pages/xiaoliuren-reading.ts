@@ -9,6 +9,12 @@ import { buildAiReading, buildProcessExplanation } from '../xiaoliuren/interpret
 import { saveXiaoliurenJournalEntry, updateXiaoliurenReflection } from '../xiaoliuren/journal.ts';
 import { renderSixGodIcon, getSixGodByIndex, sixGodOneLiner } from '../xiaoliuren/six-gods.ts';
 import {
+  bindProfileContextBar,
+  renderProfileContextBarHtml,
+  type ProfileContextBarHandle,
+} from '../ui/profile-context-bar.ts';
+import { mergeReadingBackground } from '../life/profile-context.ts';
+import {
   renderOrbitPlate,
   renderSixGodsReveal,
 } from '../ui/xiaoliuren/hand-plate.ts';
@@ -59,6 +65,7 @@ import { buildGodHuangliBridge } from '../xiaoliuren/god-huangli-bridge.ts';
 import { renderCountSteps } from '../ui/xiaoliuren/count-steps.ts';
 import { renderXlrDivider } from '../ui/xiaoliuren/assets.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 
 type FlowState =
   | 'question'
@@ -93,6 +100,8 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   let practiceFeedback: string | null = null;
   let countHopPrev = -1;
   let skillGateMarked = false;
+  let profileBar: ProfileContextBarHandle | null = null;
+  let profileContext = '';
 
   const page = document.createElement('div');
   page.className = 'page xlr-reading-page xlr-xuan-page';
@@ -113,6 +122,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
 
   page.append(back, stage, drawerHost, actions);
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
 
   const isLearn = () => lessonMode === 'learn';
   const isPractice = () => lessonMode === 'practice';
@@ -508,6 +518,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
               <h2 class="xlr-flow-heading xlr-stagger-item" style="--si:2">你想问什么？</h2>
               <p class="xlr-flow-hint xlr-stagger-item" style="--si:3">小六壬适合问短期趋势：今天顺不顺，眼前这一步怎么走。</p>
               <textarea id="xlr-question" class="question-input xlr-question-input xlr-stagger-item" style="--si:4" rows="3" maxlength="80" placeholder="例如：今天适合主动推进这件事吗？"></textarea>
+              <div class="xlr-stagger-item" style="--si:4.5">${renderProfileContextBarHtml('xlr-profile')}</div>
               ${renderTimeBadge(hour.label, formatClockTime(at), formatSolarDateTime(at).slice(0, 10), lunarBrief.label)}
               ${renderHuangliMiniCard(getHuangli())}
             `,
@@ -516,10 +527,14 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
           mountHuangliInteractions(stage, setHuangliOpen);
           const input = stage.querySelector<HTMLTextAreaElement>('#xlr-question')!;
           if (question) input.value = question;
+          profileBar = bindProfileContextBar(stage, { idPrefix: 'xlr-profile' });
         }
         appendBtn('下一步 · 选择起课方式', () => {
           const input = stage.querySelector<HTMLTextAreaElement>('#xlr-question');
           question = input?.value.trim() ?? '';
+          profileContext = profileBar?.getUseProfile()
+            ? mergeReadingBackground('', true)
+            : '';
           state = 'modeSelect';
           render();
         });
@@ -706,6 +721,15 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
               ${
                 question
                   ? `<p class="xlr-result-q"><span>你的问题</span>${reading.question}<em>· ${reading.typeLabel}</em></p>`
+                  : ''
+              }
+              ${
+                profileContext
+                  ? `<p class="xlr-result-q"><span>档案</span>${profileContext
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/\n/g, ' · ')}</p>`
                   : ''
               }
               <section class="xlr-result-block xlr-result-layer" data-layer="1">

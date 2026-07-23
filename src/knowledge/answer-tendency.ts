@@ -1,5 +1,15 @@
 import type { AnswerTendency, CardKnowledge, ReadingContext } from './types.ts';
 
+function questionAnchor(q: string): string {
+  const lines = q
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (lines.length >= 3 || /^\s*\d+[.、]/.test(q)) return '你问的这几件事';
+  if (q.length > 36) return `「${q.slice(0, 36)}…」`;
+  return `「${q}」`;
+}
+
 function isInterviewQuestion(q: string): boolean {
   return /面试|应聘|offer|求职|复试/i.test(q);
 }
@@ -58,8 +68,8 @@ function buildGenericTendency(
     overall,
     tendency,
     oneLiner: reversed
-      ? `就「${context.question.trim()}」而言，${knowledge.nameCn}逆位提示：当前阻滞或失衡的部分值得正视，别急着要一个非黑即白的答案。`
-      : `就「${context.question.trim()}」而言，${knowledge.nameCn}指向${kw}——牌在帮你看清局面，而不是替你做绝对宣判。`,
+      ? `就${questionAnchor(context.question.trim())}而言，${knowledge.nameCn}逆位提示：当前阻滞或失衡的部分值得正视，别急着要一个非黑即白的答案。`
+      : `就${questionAnchor(context.question.trim())}而言，${knowledge.nameCn}指向${kw}——牌在帮你看清局面，而不是替你做绝对宣判。`,
     actionTip: reversed
       ? '先辨认：哪些是真实限制，哪些是放大的焦虑。把下一步缩到一个你能今天就开始的小行动。'
       : '把牌当作提醒而非判决。问自己：若只调整一件事，什么最能改变当下局面？',
@@ -84,8 +94,8 @@ export function buildAnswerTendency(
       overall: reversed ? '偏卡，表达需补强' : '偏稳，关键在表达',
       tendency: reversed ? '中性偏负' : '中性偏正',
       oneLiner: reversed
-        ? `就「${q}」而言，整体不像彻底失败，但表达、准备或亮点呈现上可能有明显卡点。`
-        : `就「${q}」而言，整体偏稳，不像大崩盘，但表现取决于你能不能把准备转化为清晰的表达。`,
+        ? `就${questionAnchor(q)}而言，整体不像彻底失败，但表达、准备或亮点呈现上可能有明显卡点。`
+        : `就${questionAnchor(q)}而言，整体偏稳，不像大崩盘，但表现取决于你能不能把准备转化为清晰的表达。`,
       actionTip:
         '准备 1 个最能代表你的案例，用「背景—你做了什么—结果」讲清楚；别只求不出错，要主动亮出亮点。',
     };
@@ -122,7 +132,7 @@ export function buildVisualQuestionBridge(
   const topicHint = topicBridgeHint(context, knowledge, reversed);
 
   return [
-    `你问的是「${q}」。`,
+    `你问的是${q.length > 40 || q.includes('\n') ? '这些事' : `「${q}」`}。`,
     `${knowledge.nameCn}${orient}的整体画面：${overview}`,
     topicHint,
   ]

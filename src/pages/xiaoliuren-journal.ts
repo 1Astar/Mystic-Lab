@@ -8,6 +8,7 @@ import {
 } from '../xiaoliuren/journal.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
+import { openXiaoliurenJournalReplay } from '../ui/xiaoliuren-reading-replay.ts';
 
 export function renderXiaoliurenJournal(root: HTMLElement): void {
   const page = document.createElement('div');
@@ -25,7 +26,7 @@ export function renderXiaoliurenJournal(root: HTMLElement): void {
   const header = document.createElement('header');
   header.innerHTML = `
     <h1 class="page-title">小六壬手札</h1>
-    <p class="page-subtitle">每次起课记录 / 问题 / 农历与时辰依据 / 三天后对照</p>
+    <p class="page-subtitle">每次起课记录 · 复原当时场景 · 三天后对照</p>
   `;
   page.append(header);
 
@@ -80,12 +81,16 @@ export function renderXiaoliurenJournal(root: HTMLElement): void {
         ${later ? `<p class="journal-fulfilled">${later}</p>` : ''}
         <textarea class="question-input xlr-journal-reflect" rows="2" placeholder="后来的感悟…">${entry.reflection}</textarea>
         <div class="xlr-journal-actions">
+          <button type="button" class="btn btn-sm" data-replay>复原当时</button>
           <button type="button" class="btn btn-ghost btn-sm" data-yes>应验</button>
           <button type="button" class="btn btn-ghost btn-sm" data-no>未应验</button>
         </div>
       `;
       item.querySelector('textarea')?.addEventListener('input', (e) => {
         updateXiaoliurenReflection(entry.id, (e.target as HTMLTextAreaElement).value);
+      });
+      item.querySelector('[data-replay]')?.addEventListener('click', () => {
+        openXiaoliurenJournalReplay(page, entry);
       });
       item.querySelector('[data-yes]')?.addEventListener('click', () => {
         updateXiaoliurenFulfilled(entry.id, true);

@@ -21,21 +21,32 @@ describe('learn-studio', () => {
     expect(chouOf('父母')).toBe('子孙'); // 忌=妻财，生妻财=子孙
   });
 
-  it('卦象解析卡含上下卦符号与自然翻译', () => {
-    const cast = castYu();
+  it('泽火革公式：外部环境变化推动内部改变', () => {
+    // 下离(101) + 上兑(110) → 泽火革；字=2 背=3
+    const yang = (): ReturnType<typeof facesToThrow> =>
+      facesToThrow(['obverse', 'obverse', 'reverse']); // 7 少阳
+    const yin = (): ReturnType<typeof facesToThrow> =>
+      facesToThrow(['obverse', 'reverse', 'reverse']); // 8 少阴
+    const throws = [yang(), yin(), yang(), yang(), yang(), yin()] as YaoThrow[];
+    const cast = buildCastFromThrows(throws, 'coin');
+    expect(cast.primary.name).toBe('革');
     const html = renderGuaXiangCard(cast);
-    expect(html).toMatch(/卦象解析卡/);
-    expect(html).toMatch(/上卦为/);
-    expect(html).toMatch(/下卦为/);
+    expect(html).toMatch(/泽 ☱|泽\s*☱/);
+    expect(html).toMatch(/火 ☲|火\s*☲/);
+    expect(html).toMatch(/交流、变化、喜悦/);
+    expect(html).toMatch(/文明、显现、行动/);
+    expect(html).toMatch(/外部环境变化推动内部改变/);
   });
 
   it('能量推演链含用元忌仇四段', () => {
     const cast = castYu();
     const html = renderEnergyChainHtml(cast, '这次面试能过吗', new Date('2026-07-21T10:00:00'));
-    expect(html).toMatch(/核心目标（用神）/);
-    expect(html).toMatch(/直接帮助（元神）/);
-    expect(html).toMatch(/潜在隐患（忌神）/);
-    expect(html).toMatch(/最终博弈（仇神）/);
+    expect(html).toMatch(/你的当下能量聚焦表|ly-energy-focus/);
+    expect(html).toMatch(/核心聚焦（用神）/);
+    expect(html).toMatch(/补给系统（元神）/);
+    expect(html).toMatch(/耗散系统（忌神）/);
+    expect(html).toMatch(/拉扯层（仇神）/);
+    expect(html).toMatch(/注意力放哪|谁克死谁/);
   });
 
   it('学习工作室含左右栏与笔记引导', () => {

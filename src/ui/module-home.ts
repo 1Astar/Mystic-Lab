@@ -3,6 +3,7 @@ import { createStarsLayer } from '../tarot/animations.ts';
 import { mysticEmblemHtml, type MysticEmblemKind } from './mystic-emblem.ts';
 import { mountEnvBanner } from './banner.ts';
 import { mountAiSettingsPanel } from './ai-settings-panel.ts';
+import { attachPersonSwitcherToPage } from './module-person-chrome.ts';
 
 export interface ModuleHomeEntry {
   title: string;
@@ -100,6 +101,7 @@ export function renderModuleHome(root: HTMLElement, config: ModuleHomeConfig): (
   }
 
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
 
   return () => stars?.remove();
 }

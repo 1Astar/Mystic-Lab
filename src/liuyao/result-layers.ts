@@ -8,15 +8,16 @@ import {
 } from './ganzhi.ts';
 import { LINE_LABELS, upperLowerFromLines, yingLineOf } from './hexagrams.ts';
 import { bindClassicFolder, renderClassicFolderHtml } from './classic-folder.ts';
-import { dressHexagram, type DressedHexagram, type YaoDress } from './najia.ts';
+import { dressHexagram, type YaoDress } from './najia.ts';
+import { renderDressDualPlatesHtml } from './dress-archive.ts';
 import { buildShengKeGraph, renderShengKeGraphHtml } from './sheng-ke-graph.ts';
 import { renderYaoCard } from './yao-card.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
 import { formatClauseHtml } from './format-clause.ts';
 import { teachFold } from './flip-teach.ts';
 import {
-  buildLearnFaq,
   renderLearnCorePanel,
+  renderLearnFaqHtml,
 } from './narrative-learn.ts';
 import { buildReadingFacts } from './reading-facts.ts';
 import { bindQinDict, renderClassicPlateIntroHtml } from './energy-lens.ts';
@@ -26,10 +27,6 @@ import {
   renderDeepCourseHtml,
   renderDeepNotesBlockHtml,
 } from './deep-course.ts';
-
-function buildFaq(cast: CastResult, question: string) {
-  return buildLearnFaq(buildReadingFacts(cast, question));
-}
 
 function renderSiZhuBar(sz: SiZhu, castAt?: Date): string {
   if (castAt) return renderCastTimePlaque(castAt, { compact: true });
@@ -45,38 +42,10 @@ function renderSiZhuBar(sz: SiZhu, castAt?: Date): string {
   `;
 }
 
-function renderDressTable(dressed: DressedHexagram): string {
-  const rowsTopFirst = [...dressed.rows].reverse();
-  const body = rowsTopFirst
-    .map((r) => {
-      const mark = [r.isShi ? '世' : '', r.isYing ? '应' : '', r.changing ? '动' : '']
-        .filter(Boolean)
-        .join('/');
-      const xiang = r.bit === 1 ? '━━━' : '━ ━';
-      return `
-      <tr class="ly-dress-row" data-dress-line="${r.index}" tabindex="0" role="button">
-        <td class="ly-dress-xiang">${xiang}</td>
-        <td>${r.liushen}</td>
-        <td>${r.liuqin}</td>
-        <td>${r.branch}${r.wuxing}${
-          r.changedBranch ? `→${r.changedBranch}${r.changedWuxing ?? ''}` : ''
-        }</td>
-        <td>${r.label}</td>
-        <td>${mark || '—'}</td>
-      </tr>`;
-    })
-    .join('');
-
+function renderDressTable(cast: CastResult, castAt: Date): string {
   return `
-    <p class="ly-guide-tip">本宫 ${dressed.palace}（${dressed.palaceWx}）· 点一行看实盘卡</p>
-    <div class="ly-dress-wrap">
-      <table class="ly-dress-table">
-        <thead>
-          <tr><th>爻相</th><th>六神</th><th>六亲</th><th>地支</th><th>爻</th><th>标记</th></tr>
-        </thead>
-        <tbody>${body}</tbody>
-      </table>
-    </div>
+    <p class="ly-guide-tip">本卦 ∥ 变卦对照 · 点本卦一行看实盘卡</p>
+    ${renderDressDualPlatesHtml(cast, castAt)}
     <div class="ly-yao-card-slot" data-yao-card-slot></div>
   `;
 }
@@ -103,12 +72,12 @@ export function renderDeepPanel(cast: CastResult, castAt: Date, question: string
     <p class="ly-layer-guide">默认此刻，可改。改时间会重算四柱与六神（历法：lunar-javascript）。</p>
     ${renderSiZhuBar(sz, castAt)}
     ${renderDeepCourseHtml(cast, question, castAt)}
-    ${renderDeepNotesBlockHtml(cast, castAt)}
+    ${renderDeepNotesBlockHtml(cast, castAt, question)}
     <details class="ly-deep-more">
       <summary>传统排盘进阶（点行看卡 · 生克图）</summary>
       ${renderClassicPlateIntroHtml()}
-      ${renderDressTable(dressed)}
-      ${renderShengKeGraphHtml(graph)}
+      ${renderDressTable(cast, castAt)}
+      ${renderShengKeGraphHtml(graph, { question })}
       ${whyBits ? `<div class="ly-sk-why-box">${whyBits}<p class="ly-guide-tip">${facts.shengKe.tip}</p></div>` : ''}
       ${renderClassicFolderHtml(cast)}
     </details>
@@ -195,7 +164,13 @@ export function renderChangeHowHtml(cast: CastResult): string {
 /** 本卦 + 变卦主视觉（进入结果页先见爻象） */
 export function renderHexHero(
   cast: CastResult,
-  opts: { askable?: boolean; highlightIndexes?: number[]; castAt?: Date } = {},
+  opts: {
+    askable?: boolean;
+    highlightIndexes?: number[];
+    castAt?: Date;
+    /** 学习模式：用最终闭环一句话替换本卦旁 gist */
+    primaryGist?: string;
+  } = {},
 ): string {
   const movingLabels =
     cast.changingIndexes.length === 0
@@ -206,15 +181,16 @@ export function renderHexHero(
   const askable = opts.askable ?? false;
   const highlightIndexes = opts.highlightIndexes ?? [];
   const castAt = opts.castAt ?? new Date();
+  const primaryGist = opts.primaryGist?.trim() || cast.primary.gist;
 
   return `
     <header class="ly-hex-hero">
       ${renderCastTimePlaque(castAt)}
       <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}${
-        askable ? ' · 点 ? 学爻' : ''
+        askable ? ' · 点爻看旁注' : ''
       }</p>
-      <div class="ly-layer-pair ly-hex-hero-pair" data-ask-hex>
-        <div class="ly-hex-hero-col">
+      <div class="ly-layer-pair ly-hex-hero-pair">
+        <div class="ly-hex-hero-col ly-hex-inline-host" data-ask-hex>
           <p class="ly-guide-label">本卦 · ${cast.primary.fullName}</p>
           ${renderHexagramSvg({
             lines: cast.primaryLines,
@@ -226,7 +202,7 @@ export function renderHexHero(
             showAskButtons: askable,
             highlightIndexes,
           })}
-          <p class="ly-hex-hero-gist">${formatClauseHtml(cast.primary.gist)}</p>
+          <p class="ly-hex-hero-gist">${formatClauseHtml(primaryGist)}</p>
         </div>
         <div class="ly-hex-hero-col">
           <p class="ly-guide-label">变卦${cast.changed ? ` · ${cast.changed.fullName}` : ''}</p>
@@ -242,7 +218,6 @@ export function renderHexHero(
               : '<p class="ly-guide-tip">无动则无变，时间轴停在本卦。</p>'
           }
         </div>
-        ${askable ? '<div class="ly-yao-ask-slot" data-ask-slot hidden></div>' : ''}
       </div>
       <p class="ly-keywords ly-hex-hero-keywords">${cast.primary.keywords.join(' · ')}${
         cast.changed ? ` → ${cast.changed.keywords.join(' · ')}` : ''
@@ -258,24 +233,7 @@ export function renderCorePanel(cast: CastResult, question: string): string {
 }
 
 export function renderFaqPanel(cast: CastResult, question: string): string {
-  const faq = buildFaq(cast, question)
-    .map(
-      (item, i) => `
-    <details class="ly-faq-item"${i === 0 ? ' open' : ''}>
-      <summary>${item.q}</summary>
-      <div class="ly-faq-body">${item.a.map((p) => `<p>${p}</p>`).join('')}</div>
-    </details>
-  `,
-    )
-    .join('');
-
-  return `
-    <section class="ly-faq-panel">
-      <h3>边看边问</h3>
-      <p class="ly-layer-guide">点开你此刻卡住的问题。</p>
-      ${faq}
-    </section>
-  `;
+  return renderLearnFaqHtml(cast, question);
 }
 
 export type ResultLayersOptions = {
@@ -308,7 +266,7 @@ export function renderResultLayers(
 }
 
 function syncDressAndSk(root: HTMLElement, index: number | null): void {
-  root.querySelectorAll('.ly-dress-row').forEach((el) => {
+  root.querySelectorAll('.ly-dress-row[data-dress-side="primary"]').forEach((el) => {
     const on = index !== null && el.getAttribute('data-dress-line') === String(index);
     el.classList.toggle('is-open', on);
   });
@@ -324,6 +282,7 @@ function openYaoCard(
   index: number,
   question: string,
   tableRoot: HTMLElement,
+  hexName?: string,
 ): void {
   const row = rows.find((r) => r.index === index);
   if (!row) return;
@@ -333,10 +292,10 @@ function openYaoCard(
     syncDressAndSk(tableRoot, null);
     return;
   }
-  slot.innerHTML = renderYaoCard(row, question);
+  slot.innerHTML = renderYaoCard(row, question, { hexName });
   syncDressAndSk(tableRoot, index);
   tableRoot
-    .querySelector<HTMLElement>(`.ly-dress-row[data-dress-line="${index}"]`)
+    .querySelector<HTMLElement>(`.ly-dress-row[data-dress-side="primary"][data-dress-line="${index}"]`)
     ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
@@ -352,10 +311,10 @@ export function bindDeepPanel(
 
   const openLine = (idx: number) => {
     const slot = deep.querySelector<HTMLElement>('[data-yao-card-slot]');
-    if (slot) openYaoCard(slot, dressed.rows, idx, question, deep);
+    if (slot) openYaoCard(slot, dressed.rows, idx, question, deep, cast.primary.name);
   };
 
-  deep.querySelectorAll<HTMLElement>('.ly-dress-row').forEach((tr) => {
+  deep.querySelectorAll<HTMLElement>('.ly-dress-row[data-dress-side="primary"]').forEach((tr) => {
     const open = () => openLine(Number(tr.dataset.dressLine));
     tr.addEventListener('click', open);
     tr.addEventListener('keydown', (e) => {
@@ -375,7 +334,7 @@ export function bindDeepPanel(
   bindClassicFolder(deep);
   bindQinDict(deep);
   bindDeepCourse(deep, cast, question, castAt);
-  bindDeepNotesBlock(deep);
+  bindDeepNotesBlock(deep, cast, question, castAt);
 
   deep.querySelectorAll<HTMLButtonElement>('[data-classic-line]').forEach((btn) => {
     btn.addEventListener('click', () => {

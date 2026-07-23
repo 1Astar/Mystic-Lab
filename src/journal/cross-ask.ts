@@ -2,6 +2,8 @@ import type { JourneyItem, JourneySystem } from './journey.ts';
 
 const STORAGE_KEY = 'mystic-lab-cross-ask-question';
 
+const ALL_SYSTEMS: JourneySystem[] = ['tarot', 'xiaoliuren', 'liuyao'];
+
 /** 规范化问题文本，用于同题匹配 */
 export function normalizeQuestionKey(question: string): string {
   return question.trim().replace(/\s+/g, ' ');
@@ -44,10 +46,32 @@ export function findSiblingJourneyItems(
   );
 }
 
-export function otherSystemLabel(system: JourneySystem): string {
-  return system === 'tarot' ? '小六壬' : '塔罗';
+export function systemDisplayLabel(system: JourneySystem): string {
+  if (system === 'tarot') return '塔罗';
+  if (system === 'xiaoliuren') return '小六壬';
+  return '六爻';
 }
 
+/** 除当前体系外的其它体系（用于同题互跳） */
+export function otherSystems(system: JourneySystem): JourneySystem[] {
+  return ALL_SYSTEMS.filter((s) => s !== system);
+}
+
+/** @deprecated 多体系时优先用 otherSystems；保留兼容：返回第一个其它体系名 */
+export function otherSystemLabel(system: JourneySystem): string {
+  const others = otherSystems(system);
+  if (others.length === 1) return systemDisplayLabel(others[0]!);
+  return '其他体系';
+}
+
+export function readingPathFor(system: JourneySystem): string {
+  if (system === 'tarot') return '/tarot/reading';
+  if (system === 'xiaoliuren') return '/xiaoliuren/reading';
+  return '/liuyao/reading';
+}
+
+/** @deprecated 多体系时优先用 readingPathFor(other) */
 export function otherSystemReadingPath(system: JourneySystem): string {
-  return system === 'tarot' ? '/xiaoliuren/reading' : '/tarot/reading';
+  const first = otherSystems(system)[0];
+  return first ? readingPathFor(first) : '/tarot/reading';
 }

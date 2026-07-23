@@ -3,12 +3,31 @@
 .ly-home-page,
 .ly-reading-page,
 .ly-learn-page,
-.ly-journal-page {
+.ly-journal-page,
+.ly-hexagrams-page,
+.ly-vault-page,
+.ly-growth-page,
+.ly-bagua-page,
+.ly-concepts-page,
+.ly-classic-page,
+.ly-learn-board-page,
+.ly-teach-page,
+.ly-replay {
   --ly-ink: #08090d;
   --ly-mist: #e8e2d5;
   --ly-gold: #c7a45b;
-  --ly-change: #9e4035;
+  --ly-change: #e85a45;
   --ly-muted: #8e877b;
+  /* 爻相三色（与图例一致：阳金 / 阴蓝灰 / 动红） */
+  --ly-yao-yang: #e8d5a3;
+  --ly-yao-yin: #a8b0bc;
+  --ly-yao-move: #e85a45;
+}
+
+.ly-home-page,
+.ly-reading-page,
+.ly-learn-page,
+.ly-journal-page {
   background: var(--ly-ink);
   color: var(--ly-mist);
   min-height: 100dvh;
@@ -188,6 +207,56 @@
   margin: 20px 0 18px;
 }
 
+.ly-home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0 8px;
+}
+
+.ly-home-action {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+}
+
+.ly-home-action.is-primary {
+  background: linear-gradient(180deg, #d4b06a 0%, #a8843f 100%);
+  color: #1a1208;
+  border: none;
+  font-weight: 650;
+  font-size: 1rem;
+}
+
+.ly-home-action.is-ghost {
+  background: rgba(12, 14, 18, 0.55);
+  border: 1px solid rgba(199, 164, 91, 0.32);
+  color: var(--ly-mist);
+}
+
+.ly-home-action-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ly-gold);
+}
+
+.ly-home-action.is-primary .ly-home-action-title {
+  color: inherit;
+}
+
+.ly-home-action-sub {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgba(180, 186, 198, 0.72);
+}
+
 .ly-home-primary,
 .ly-btn-gold {
   background: linear-gradient(180deg, #d4b06a 0%, #a8843f 100%);
@@ -209,6 +278,7 @@
   color: var(--ly-gold);
   font-size: 0.9rem;
   padding: 8px;
+  cursor: pointer;
 }
 
 .ly-home-links {
@@ -225,6 +295,495 @@
   padding: 8px 12px;
   border: 1px solid rgba(199, 164, 91, 0.2);
   border-radius: 999px;
+}
+
+.ly-vault-head {
+  padding: 8px 16px 12px;
+}
+
+.ly-vault-lead {
+  margin: 0 0 14px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-muted);
+}
+
+.ly-vault-progress {
+  margin-bottom: 10px;
+}
+
+.ly-vault-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.ly-vault-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a8843f, #e0c078);
+}
+
+.ly-vault-progress-meta {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--ly-mist);
+}
+
+.ly-vault-meet-tip {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ly-gold);
+}
+
+.ly-vault-panel {
+  margin: 0 16px 14px;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(12, 14, 18, 0.72);
+}
+.ly-vault-panel-title {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+.ly-vault-suits {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.ly-vault-suit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: center;
+}
+.ly-vault-suit-label {
+  font-size: 0.78rem;
+  color: #a8b4d0;
+}
+.ly-vault-suit-count {
+  font-size: 0.74rem;
+  color: var(--ly-mist);
+}
+.ly-vault-suit-bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.ly-vault-suit-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a8843f, #e0c078);
+}
+.ly-vault-sub {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  color: #a8b4d0;
+  line-height: 1.45;
+}
+.ly-vault-sub strong {
+  color: var(--ly-mist);
+  font-weight: 600;
+}
+.ly-vault-journey-meta {
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  color: var(--ly-muted);
+}
+.ly-vault-trends {
+  display: grid;
+  gap: 8px;
+}
+.ly-vault-trend {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(8, 10, 14, 0.55);
+}
+.ly-vault-trend-head {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--ly-gold);
+}
+.ly-vault-trend-insight {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #a8b4d0;
+}
+
+.ly-enc-banner {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(199, 164, 91, 0.08);
+  color: var(--ly-gold);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+.ly-enc-stats {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(8, 10, 14, 0.5);
+}
+.ly-enc-stats p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ly-mist);
+}
+.ly-enc-stat-k {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: #a8b4d0;
+  margin-bottom: 2px;
+}
+.ly-enc-list {
+  display: grid;
+  gap: 8px;
+}
+.ly-enc-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(12, 14, 18, 0.65);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ly-enc-item time {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--ly-muted);
+}
+.ly-enc-item p {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--ly-mist);
+  line-height: 1.4;
+}
+.ly-enc-state {
+  color: var(--ly-muted) !important;
+  font-size: 0.74rem !important;
+}
+.ly-enc-open {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--ly-gold);
+}
+.ly-enc-save {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.ly-replay {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  color: var(--ly-mist, #e8e2d5);
+}
+.ly-replay.is-visible {
+  opacity: 1;
+}
+.ly-replay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+}
+.ly-replay--sheet {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.ly-replay-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(var(--page-width, 440px), 100%);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 20px 16px 32px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(165deg, rgba(22, 18, 14, 0.98), rgba(10, 10, 12, 0.98));
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  border-bottom: none;
+}
+.ly-replay-sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: var(--ink-muted, #9a958c);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.ly-replay-sheet-head {
+  padding-right: 28px;
+  margin-bottom: 12px;
+}
+.ly-replay-date {
+  font-size: 0.72rem;
+  color: var(--ly-gold, #c7a45b);
+}
+.ly-replay-question {
+  margin: 6px 0 4px;
+  font-size: 1.05rem;
+  color: var(--ink, #f2efe8);
+}
+.ly-replay-regen {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--ly-gold, #c7a45b);
+  opacity: 0.9;
+  line-height: 1.5;
+}
+.ly-replay-result-host {
+  margin-top: 8px;
+}
+.ly-replay-reflection {
+  margin: 14px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted, #9a958c);
+  line-height: 1.55;
+}
+.ly-replay-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(100%, 440px);
+  background: rgba(12, 14, 18, 0.98);
+  border-left: 1px solid rgba(199, 164, 91, 0.22);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+}
+.ly-replay-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid rgba(199, 164, 91, 0.14);
+}
+.ly-replay-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--ly-gold);
+}
+.ly-replay-head h3 {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+  color: var(--ly-mist);
+}
+.ly-replay-meta {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+}
+.ly-replay-x {
+  border: 0;
+  background: transparent;
+  color: var(--ly-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.ly-replay-body {
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+}
+.ly-replay-q {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  color: var(--ly-mist);
+}
+.ly-replay-layer {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border-left: 2px solid rgba(199, 164, 91, 0.35);
+  background: rgba(255, 255, 255, 0.02);
+}
+.ly-replay-layer h4 {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+.ly-replay-layer p,
+.ly-replay-pre {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ly-muted);
+  white-space: pre-wrap;
+}
+
+.ly-meet-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 100;
+  transform: translateX(-50%) translateY(12px);
+  max-width: min(92vw, 420px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.35);
+  background: rgba(12, 14, 18, 0.96);
+  color: var(--ly-gold);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.ly-meet-toast.is-on {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ly-vault-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.ly-vault-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(16, 18, 24, 0.72);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ly-vault-card-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: rgba(199, 164, 91, 0.7);
+}
+
+.ly-vault-card strong {
+  font-size: 1rem;
+  color: var(--ly-gold);
+}
+
+.ly-vault-card p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ly-muted);
+}
+
+.ly-vault-foot-link {
+  text-align: center;
+  padding: 0 16px 24px;
+}
+
+.ly-growth-sec {
+  padding: 0 16px 18px;
+}
+
+.ly-growth-sec-title {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  color: var(--ly-gold);
+}
+
+.ly-growth-rank,
+.ly-growth-tl {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ly-growth-rank-item,
+.ly-growth-tl-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(199, 164, 91, 0.1);
+}
+
+.ly-growth-rank-name {
+  font-weight: 600;
+  color: var(--ly-mist);
+  margin-right: 8px;
+}
+
+.ly-growth-rank-count {
+  color: var(--ly-gold);
+  font-size: 0.85rem;
+}
+
+.ly-growth-rank-meta,
+.ly-growth-tl-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.74rem;
+  color: var(--ly-muted);
+}
+
+.ly-growth-tl-q {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
+  color: var(--ly-mist);
+}
+
+.ly-hex-card {
+  position: relative;
+}
+
+.ly-hex-card.is-locked {
+  opacity: 0.55;
+}
+
+.ly-hex-card.is-met {
+  border-color: rgba(199, 164, 91, 0.4);
+}
+
+.ly-hex-card-meet {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: var(--ly-gold);
+}
+
+.ly-hex-card-meet.is-dim {
+  color: var(--ly-muted);
+  opacity: 0.7;
 }
 
 .ly-home-footer {
@@ -546,6 +1105,18 @@
   font-size: 0.78rem;
   line-height: 1.4;
   color: #a0a0a0;
+}
+
+.ly-cast-score-note {
+  margin: -4px 0 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(199, 164, 91, 0.06);
+  text-align: left;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: rgba(200, 190, 170, 0.92);
 }
 
 .ly-cast-order-note {
@@ -1146,28 +1717,32 @@
 }
 
 .ly-yao-row.is-teachable:hover .ly-yao-yang,
+.ly-yao-row.is-teachable:focus-within .ly-yao-yang {
+  stroke: var(--ly-yao-yang, #e8d5a3);
+  filter: drop-shadow(0 0 5px rgba(232, 213, 163, 0.55));
+}
+
 .ly-yao-row.is-teachable:hover .ly-yao-yin,
-.ly-yao-row.is-teachable:focus-within .ly-yao-yang,
 .ly-yao-row.is-teachable:focus-within .ly-yao-yin {
-  stroke: #f5efe6;
-  filter: drop-shadow(0 0 5px rgba(245, 239, 230, 0.55));
+  stroke: var(--ly-yao-yin, #a8b0bc);
+  filter: drop-shadow(0 0 5px rgba(168, 176, 188, 0.45));
 }
 
 .ly-yao-yang {
-  stroke: var(--ly-gold);
+  stroke: var(--ly-yao-yang, #e8d5a3);
   stroke-width: 3;
   stroke-linecap: round;
 }
 
 .ly-yao-yin {
-  stroke: var(--ly-mist);
+  stroke: var(--ly-yao-yin, #a8b0bc);
   stroke-width: 3;
   stroke-linecap: round;
-  opacity: 0.85;
+  opacity: 1;
 }
 
 .ly-yao-pending {
-  stroke: rgba(142, 135, 123, 0.35);
+  stroke: rgba(168, 176, 188, 0.35);
   stroke-width: 2;
   stroke-linecap: round;
 }
@@ -1182,8 +1757,8 @@
 
 .ly-yao-changing .ly-yao-yang,
 .ly-yao-changing .ly-yao-yin {
-  stroke: var(--ly-change);
-  filter: drop-shadow(0 0 4px rgba(158, 64, 53, 0.6));
+  stroke: var(--ly-yao-move);
+  filter: drop-shadow(0 0 4px rgba(232, 90, 69, 0.55));
 }
 
 .ly-yao-hidden {
@@ -1244,7 +1819,7 @@
 }
 
 .ly-yao-tag {
-  fill: var(--ly-change);
+  fill: var(--ly-yao-move);
   font-size: 8px;
   font-family: var(--font-serif);
 }
@@ -1603,7 +2178,7 @@ button.ly-step-card:hover {
   color: var(--ly-muted);
 }
 
-/* 取象可视化 */
+/* 取象可视化：上下卦叠爻图 */
 
 .ly-xiang {
   margin: 0 0 12px;
@@ -1613,106 +2188,108 @@ button.ly-step-card:hover {
   background: rgba(12, 14, 18, 0.65);
 }
 
-.ly-xiang-stage {
-  position: relative;
-  height: 110px;
+.ly-xiang-stage-diagram {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 8px 10px;
+  align-items: end;
+  height: auto;
+  padding: 12px 10px;
   border-radius: 10px;
-  overflow: hidden;
-  background: linear-gradient(180deg, #12151c 0%, #1a1520 100%);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(199, 164, 91, 0.08), transparent 55%),
+    linear-gradient(180deg, #12151c 0%, #1a1520 100%);
   margin-bottom: 8px;
+  overflow: visible;
 }
 
-.ly-xiang-sky,
-.ly-xiang-ground {
-  position: absolute;
-  left: 0;
-  right: 0;
+.ly-xiang-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
-.ly-xiang-sky {
-  top: 0;
-  height: 48%;
-  opacity: 0.85;
+.ly-xiang-col-label {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--ly-gold);
 }
 
-.ly-xiang-ground {
-  bottom: 0;
-  height: 52%;
+.ly-xiang-stack-mark {
+  align-self: center;
+  font-size: 1rem;
+  color: rgba(199, 164, 91, 0.55);
+  padding-bottom: 18px;
 }
 
-.ly-xiang-山 {
-  background: linear-gradient(180deg, transparent 30%, #3a4558 31%, #2a3344 100%);
-  clip-path: polygon(0 100%, 18% 55%, 35% 78%, 52% 40%, 70% 70%, 88% 48%, 100% 100%);
+.ly-xiang-merged {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(199, 164, 91, 0.18);
 }
 
-.ly-xiang-sky.ly-xiang-山 {
-  clip-path: polygon(8% 100%, 30% 35%, 55% 70%, 78% 20%, 100% 100%, 100% 0, 0 0);
-  background: linear-gradient(180deg, #2c3548, #1a2030);
-  height: 58%;
-  top: 0;
+.ly-xiang-merged-label {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--ly-muted);
 }
 
-.ly-xiang-雷 {
-  background: radial-gradient(circle at 40% 60%, rgba(255, 220, 120, 0.55), transparent 42%);
+.ly-xiang-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 72px;
 }
 
-.ly-xiang-fx-雷-山::before {
-  content: '';
-  position: absolute;
-  left: 42%;
-  bottom: 28%;
-  width: 3px;
-  height: 36px;
-  background: #ffe08a;
-  box-shadow: 8px -10px 0 #ffd36a, -6px -16px 0 #fff3c4;
-  animation: ly-thunder 1.2s ease-in-out infinite;
-  opacity: 0.9;
+.ly-xiang-lines-full {
+  width: min(160px, 70%);
 }
 
-.ly-xiang-fx-火-山::before {
-  content: '';
-  position: absolute;
-  left: 35%;
-  bottom: 18%;
-  width: 30%;
-  height: 28%;
-  background: radial-gradient(ellipse at bottom, rgba(255, 140, 60, 0.75), transparent 70%);
-  animation: ly-fire 1.4s ease-in-out infinite;
+.ly-xiang-seam {
+  height: 1px;
+  margin: 2px 0;
+  background: linear-gradient(90deg, transparent, rgba(199, 164, 91, 0.45), transparent);
 }
 
-@keyframes ly-fire {
-  0%, 100% { transform: scaleY(0.85); opacity: 0.6; }
-  50% { transform: scaleY(1.1); opacity: 1; }
+.ly-xiang-line {
+  display: block;
+  height: 7px;
+  border-radius: 2px;
 }
 
-.ly-xiang-火 {
-  background: radial-gradient(ellipse at 50% 80%, rgba(255, 120, 60, 0.55), transparent 55%);
+.ly-xiang-line.is-yang {
+  background: var(--ly-yao-yang, #e8d5a3);
 }
 
-.ly-xiang-水 {
-  background: linear-gradient(180deg, transparent, rgba(80, 140, 200, 0.35));
+.ly-xiang-line.is-yin {
+  display: flex;
+  justify-content: space-between;
+  background: transparent;
 }
 
-.ly-xiang-地 {
-  background: linear-gradient(180deg, transparent 40%, #3a3428 41%, #2a241c);
+.ly-xiang-line.is-yin i {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ly-yao-yin, #a8b0bc);
 }
 
-.ly-xiang-天 {
-  background: linear-gradient(180deg, #3a4570, #1a2038);
+.ly-xiang-line.is-upper.is-yang,
+.ly-xiang-line.is-lower.is-yang {
+  background: var(--ly-yao-yang, #e8d5a3);
 }
 
-.ly-xiang-风 {
-  background: repeating-linear-gradient(100deg, transparent, transparent 8px, rgba(200, 200, 220, 0.08) 8px, rgba(200, 200, 220, 0.08) 10px);
-  animation: ly-wind 3s linear infinite;
-}
-
-@keyframes ly-wind {
-  from { background-position: 0 0; }
-  to { background-position: 40px 0; }
-}
-
-.ly-xiang-泽 {
-  background: linear-gradient(180deg, transparent 50%, rgba(90, 160, 180, 0.4));
+.ly-xiang-line.is-upper.is-yin i,
+.ly-xiang-line.is-lower.is-yin i {
+  background: var(--ly-yao-yin, #a8b0bc);
 }
 
 .ly-xiang-title {
@@ -2602,6 +3179,9 @@ button.ly-yao-kind-card:hover {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+.ly-hex-grid.is-visual {
+  gap: 10px;
+}
 
 .ly-hex-card {
   display: flex;
@@ -2615,6 +3195,97 @@ button.ly-yao-kind-card:hover {
   background: rgba(20, 22, 28, 0.7);
   color: inherit;
   cursor: pointer;
+}
+
+/* 列表：只显示氛围图 + 爻象 */
+.ly-hex-card.is-visual {
+  position: relative;
+  padding: 0;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: #0a0c12;
+}
+.ly-hex-card.is-visual.is-locked {
+  opacity: 0.72;
+  filter: saturate(0.75);
+}
+.ly-hex-card.is-visual.is-met {
+  box-shadow: 0 0 0 1px rgba(199, 164, 91, 0.28);
+}
+.ly-hex-card-art {
+  position: absolute;
+  inset: 0;
+}
+.ly-hex-card-art img,
+.ly-hex-card-art .ly-guide-art-empty {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  min-height: 0;
+}
+.ly-hex-card-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 9, 15, 0.15) 0%,
+    rgba(7, 9, 15, 0.05) 40%,
+    rgba(7, 9, 15, 0.55) 100%
+  );
+  pointer-events: none;
+}
+.ly-hex-card-yao {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ly-hex-card-yao .ly-guide-yao-stack {
+  width: 52px;
+  gap: 7px;
+  align-items: center;
+}
+.ly-hex-card-yao .ly-guide-yao-row {
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  opacity: 0.88;
+  animation: none;
+}
+.ly-hex-card-yao .ly-guide-yao-ln {
+  width: 52px;
+  height: 2.5px;
+  flex: 0 0 52px;
+}
+.ly-hex-card-yao .ly-guide-yao-row.is-yin .ly-guide-yao-ln::before,
+.ly-hex-card-yao .ly-guide-yao-row.is-yin .ly-guide-yao-ln::after {
+  width: 20px;
+}
+.ly-hex-card-yao .ly-guide-yao-seam {
+  left: 50%;
+  width: 52px;
+  margin-left: -26px;
+}
+.ly-hex-card-glyph {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 2;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  color: var(--ly-gold);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
 }
 
 .ly-hex-card-num {
@@ -2672,6 +3343,976 @@ button.ly-yao-kind-card:hover {
 
 .ly-hex-detail-svg {
   margin-bottom: 14px;
+}
+
+/* ── 图鉴详解：左右对照 · 上下卦热区 · CSS 动效 ── */
+
+.ly-guide-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ly-guide-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+.ly-guide-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ly-guide-tog {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+  cursor: pointer;
+}
+.ly-guide-tog input { accent-color: var(--ly-gold); }
+.ly-guide-note-btn {
+  border: 1px solid rgba(199, 164, 91, 0.35);
+  background: rgba(199, 164, 91, 0.14);
+  color: var(--ly-gold);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.ly-guide-solo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.ly-guide-solo .ly-guide-card {
+  width: min(100%, 420px);
+  max-height: min(78vh, 760px);
+  aspect-ratio: 9 / 16;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: #0a0c12;
+}
+
+.ly-guide-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.78;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 0.3s ease;
+}
+/* 无氛围图：按上下卦染色，仍铺满整卡 */
+.ly-guide-card-bg.is-empty {
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(199, 164, 91, 0.14), transparent 52%),
+    linear-gradient(180deg, #14182a 0%, #0a0c12 55%, #12151c 100%);
+}
+.ly-guide-card-bg.is-empty[data-upper="天"] {
+  background:
+    linear-gradient(180deg, rgba(120, 150, 200, 0.28) 0%, transparent 42%),
+    radial-gradient(ellipse at 50% 12%, rgba(232, 213, 163, 0.22), transparent 50%),
+    linear-gradient(180deg, #10141f, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="地"] {
+  background:
+    linear-gradient(180deg, rgba(120, 95, 60, 0.32) 0%, transparent 45%),
+    linear-gradient(180deg, #16120e, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="水"] {
+  background:
+    linear-gradient(180deg, rgba(50, 80, 130, 0.4) 0%, transparent 48%),
+    linear-gradient(180deg, #0c121c, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="火"] {
+  background:
+    linear-gradient(180deg, rgba(180, 90, 40, 0.35) 0%, transparent 45%),
+    linear-gradient(180deg, #1a100c, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="雷"] {
+  background:
+    linear-gradient(180deg, rgba(160, 120, 200, 0.22) 0%, transparent 40%),
+    radial-gradient(ellipse at 55% 20%, rgba(232, 213, 163, 0.2), transparent 45%),
+    linear-gradient(180deg, #12101a, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="风"] {
+  background:
+    linear-gradient(180deg, rgba(140, 170, 160, 0.22) 0%, transparent 48%),
+    linear-gradient(180deg, #101816, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="山"] {
+  background:
+    linear-gradient(180deg, rgba(90, 100, 110, 0.35) 0%, transparent 50%),
+    linear-gradient(180deg, #12151a, #0a0c12);
+}
+.ly-guide-card-bg.is-empty[data-upper="泽"] {
+  background:
+    linear-gradient(180deg, rgba(80, 130, 150, 0.28) 0%, transparent 48%),
+    linear-gradient(180deg, #0e1518, #0a0c12);
+}
+
+.ly-guide-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+@media (max-width: 640px) {
+  .ly-guide-dual { grid-template-columns: 1fr; }
+}
+.ly-guide-pane {
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(12, 14, 18, 0.7);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.ly-guide-pane-label {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  color: var(--ly-gold);
+  border-bottom: 1px solid rgba(199, 164, 91, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ly-guide-art {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  max-height: min(62vh, 640px);
+  background: #0a0c12;
+}
+.ly-guide-card {
+  position: relative;
+  background: #0a0c12;
+}
+.ly-guide-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ly-guide-art-empty {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(199, 164, 91, 0.14), transparent 52%),
+    linear-gradient(180deg, #14182a 0%, #0a0c12 55%, #12151c 100%);
+}
+/* 无 AI 底图时：按上下卦自然象染色分层 */
+.ly-guide-art-empty[data-upper="天"] {
+  background:
+    linear-gradient(180deg, rgba(120, 150, 200, 0.28) 0%, transparent 42%),
+    radial-gradient(ellipse at 50% 12%, rgba(232, 213, 163, 0.22), transparent 50%),
+    linear-gradient(180deg, #10141f, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="地"] {
+  background:
+    linear-gradient(180deg, rgba(120, 95, 60, 0.32) 0%, transparent 45%),
+    linear-gradient(180deg, #16120e, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="水"] {
+  background:
+    linear-gradient(180deg, rgba(50, 80, 130, 0.4) 0%, transparent 48%),
+    linear-gradient(180deg, #0c121c, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="火"] {
+  background:
+    linear-gradient(180deg, rgba(180, 90, 40, 0.35) 0%, transparent 45%),
+    linear-gradient(180deg, #1a100c, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="雷"] {
+  background:
+    linear-gradient(180deg, rgba(160, 120, 200, 0.22) 0%, transparent 40%),
+    radial-gradient(ellipse at 55% 20%, rgba(232, 213, 163, 0.2), transparent 45%),
+    linear-gradient(180deg, #12101a, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="风"] {
+  background:
+    linear-gradient(180deg, rgba(140, 170, 160, 0.22) 0%, transparent 48%),
+    linear-gradient(180deg, #101816, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="山"] {
+  background:
+    linear-gradient(180deg, rgba(90, 100, 110, 0.35) 0%, transparent 50%),
+    linear-gradient(180deg, #12151a, #0a0c12);
+}
+.ly-guide-art-empty[data-upper="泽"] {
+  background:
+    linear-gradient(180deg, rgba(80, 130, 150, 0.28) 0%, transparent 48%),
+    linear-gradient(180deg, #0e1518, #0a0c12);
+}
+.ly-guide-art-empty[data-lower="天"]::after,
+.ly-guide-art-empty[data-lower="地"]::after,
+.ly-guide-art-empty[data-lower="水"]::after,
+.ly-guide-art-empty[data-lower="火"]::after,
+.ly-guide-art-empty[data-lower="雷"]::after,
+.ly-guide-art-empty[data-lower="风"]::after,
+.ly-guide-art-empty[data-lower="山"]::after,
+.ly-guide-art-empty[data-lower="泽"]::after {
+  content: "";
+  position: absolute;
+  inset: 55% 0 0;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.ly-guide-art-empty[data-lower="天"]::after {
+  background: linear-gradient(0deg, rgba(232, 213, 163, 0.2), transparent);
+}
+.ly-guide-art-empty[data-lower="地"]::after {
+  background: linear-gradient(0deg, rgba(120, 95, 60, 0.35), transparent);
+}
+.ly-guide-art-empty[data-lower="水"]::after {
+  background: linear-gradient(0deg, rgba(50, 90, 140, 0.4), transparent);
+}
+.ly-guide-art-empty[data-lower="火"]::after {
+  background: linear-gradient(0deg, rgba(200, 100, 40, 0.32), transparent);
+}
+.ly-guide-art-empty[data-lower="雷"]::after {
+  background: linear-gradient(0deg, rgba(160, 120, 200, 0.25), transparent);
+}
+.ly-guide-art-empty[data-lower="风"]::after {
+  background: linear-gradient(0deg, rgba(140, 170, 160, 0.28), transparent);
+}
+.ly-guide-art-empty[data-lower="山"]::after {
+  background: linear-gradient(0deg, rgba(90, 100, 110, 0.38), transparent);
+}
+.ly-guide-art-empty[data-lower="泽"]::after {
+  background: linear-gradient(0deg, rgba(80, 140, 160, 0.32), transparent);
+}
+.ly-guide-card-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 9, 15, 0.55) 0%,
+    rgba(7, 9, 15, 0.08) 28%,
+    rgba(7, 9, 15, 0.06) 55%,
+    rgba(7, 9, 15, 0.58) 100%
+  );
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.ly-guide-detail.is-text-off .ly-guide-card-veil { opacity: 0.2; }
+.ly-guide-detail.is-text-off .text-layer {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ly-guide-card-motion {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(199, 164, 91, 0.1), transparent 42%),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 18px,
+      rgba(199, 164, 91, 0.03) 18px,
+      rgba(199, 164, 91, 0.03) 19px
+    );
+  animation: ly-guide-breathe 5.5s ease-in-out infinite;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+@keyframes ly-guide-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.02); }
+}
+
+.ly-guide-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ly-guide-dismiss {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: none;
+}
+.ly-guide-card.is-focus-upper .ly-guide-dismiss,
+.ly-guide-card.is-focus-lower .ly-guide-dismiss {
+  display: block;
+}
+.ly-guide-card.is-focus-upper .ly-guide-zone,
+.ly-guide-card.is-focus-lower .ly-guide-zone {
+  pointer-events: none;
+}
+.ly-guide-zone.is-upper { top: 0; height: 48%; }
+.ly-guide-zone.is-lower { bottom: 0; height: 48%; }
+.ly-guide-zone-hint {
+  position: absolute;
+  left: 12px;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: rgba(226, 196, 138, 0.55);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+.ly-guide-zone.is-upper .ly-guide-zone-hint { top: 12px; }
+.ly-guide-zone.is-lower .ly-guide-zone-hint { bottom: 12px; }
+.ly-guide-zone:hover .ly-guide-zone-hint,
+.ly-guide-card.is-focus-upper .ly-guide-zone.is-upper .ly-guide-zone-hint,
+.ly-guide-card.is-focus-lower .ly-guide-zone.is-lower .ly-guide-zone-hint {
+  opacity: 1;
+}
+.ly-guide-zone.is-upper:hover,
+.ly-guide-card.is-focus-upper .ly-guide-zone.is-upper {
+  background: linear-gradient(180deg, rgba(196, 92, 72, 0.18), transparent 70%);
+}
+.ly-guide-zone.is-lower:hover,
+.ly-guide-card.is-focus-lower .ly-guide-zone.is-lower {
+  background: linear-gradient(0deg, rgba(154, 122, 85, 0.2), transparent 70%);
+}
+
+.ly-guide-card-ui {
+  position: absolute;
+  left: 14px;
+  right: 56px;
+  top: 14px;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.ly-guide-card-ui .ly-guide-chips {
+  pointer-events: auto;
+}
+.ly-guide-brand {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: rgba(226, 196, 138, 0.7);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+.ly-guide-name {
+  margin: 4px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.55rem, 5vw, 2.1rem);
+  letter-spacing: 0.16em;
+  background: linear-gradient(180deg, #fceabb, #e2c48a 55%, #c9a045);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.65));
+}
+.ly-guide-sub {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+.ly-guide-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.ly-guide-chip {
+  font-size: 0.64rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(7, 9, 15, 0.28);
+  color: var(--ly-muted);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+.ly-guide-chip.is-ying { color: #e07060; }
+
+/* 中区：爻象细线条居中 */
+.ly-guide-mid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.ly-guide-yao-host {
+  display: flex;
+  justify-content: center;
+  min-width: 100px;
+  padding: 8px 4px;
+}
+
+/* 右侧竖条「笔记」：UI 控件，不画进氛围图；关「显示文字」时仍可点 */
+.ly-guide-mini-note {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  z-index: 9;
+  transform: translateY(-50%);
+  width: 36px;
+  padding: 10px 0;
+  border: 1px solid rgba(199, 164, 91, 0.35);
+  border-radius: 999px;
+  background: rgba(12, 14, 18, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ly-gold);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  cursor: pointer;
+  pointer-events: auto;
+  line-height: 1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.ly-guide-mini-note:hover {
+  background: rgba(226, 196, 138, 0.16);
+  border-color: rgba(226, 196, 138, 0.55);
+}
+
+/* 侧边透明遮罩简注：右侧、贴合文字、更透 */
+.ly-guide-side-mask {
+  position: absolute;
+  top: 40%;
+  right: 50px;
+  left: auto;
+  z-index: 8;
+  width: fit-content;
+  max-width: 132px;
+  height: auto;
+  padding: 8px 10px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  border-radius: 10px;
+  background: rgba(8, 10, 16, 0.14);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(8px) translateY(-50%);
+  transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+}
+.ly-guide-side-mask[hidden] {
+  display: block !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.ly-guide-side-mask.is-on {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(-50%);
+}
+.ly-guide-side-mask.is-upper {
+  border-color: rgba(196, 92, 72, 0.28);
+  top: 34%;
+}
+.ly-guide-side-mask.is-lower {
+  border-color: rgba(154, 122, 85, 0.32);
+  top: 54%;
+}
+.ly-guide-tri-k {
+  margin: 0;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: var(--ly-gold);
+}
+.ly-guide-tri-v {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ly-mist);
+  white-space: nowrap;
+}
+.ly-guide-tri-h {
+  margin: 3px 0 0;
+  font-size: 0.66rem;
+  color: var(--ly-muted);
+  line-height: 1.35;
+}
+.ly-guide-tri-why {
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: rgba(244, 239, 230, 0.88);
+}
+
+/* 细线条爻 */
+.ly-guide-yao-stack {
+  position: relative;
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 11px;
+  pointer-events: none;
+}
+.ly-guide-yao-host {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.ly-guide-mid .ly-guide-yao-stack {
+  /* 有标签时：爻线本身仍居中于卡片，标签向右伸出 */
+  width: auto;
+  margin-left: 0;
+}
+.ly-guide-mid .ly-guide-yao-row {
+  justify-content: flex-start;
+}
+.ly-guide-yao-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 3px;
+  opacity: 0.28;
+  transition: opacity 0.3s ease;
+}
+.ly-guide-yao-ln {
+  position: relative;
+  width: 72px;
+  height: 3px;
+  flex: 0 0 auto;
+  border-radius: 1px;
+}
+.ly-guide-yao-row.is-yang .ly-guide-yao-ln {
+  background: #e8d5a3;
+  box-shadow: 0 0 6px rgba(232, 213, 163, 0.35);
+}
+.ly-guide-yao-row.is-yin .ly-guide-yao-ln {
+  background: transparent;
+}
+.ly-guide-yao-row.is-yin .ly-guide-yao-ln::before,
+.ly-guide-yao-row.is-yin .ly-guide-yao-ln::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 30px;
+  background: #b8c0cc;
+  border-radius: 1px;
+}
+.ly-guide-yao-row.is-yin .ly-guide-yao-ln::before { left: 0; }
+.ly-guide-yao-row.is-yin .ly-guide-yao-ln::after { right: 0; }
+.ly-guide-yao-row.is-move.is-yang .ly-guide-yao-ln,
+.ly-guide-yao-row.is-move.is-yin .ly-guide-yao-ln::before,
+.ly-guide-yao-row.is-move.is-yin .ly-guide-yao-ln::after {
+  background: #e85a45;
+  box-shadow: 0 0 8px rgba(232, 90, 69, 0.5);
+}
+.ly-guide-yao-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: var(--ly-gold);
+  opacity: 0.45;
+  white-space: nowrap;
+}
+.ly-guide-yao-seam {
+  position: absolute;
+  left: 0;
+  width: 72px;
+  top: 50%;
+  height: 0;
+  margin-top: 0;
+  border-top: 1px dashed rgba(199, 164, 91, 0.35);
+  opacity: 0.4;
+  pointer-events: none;
+  background: none;
+}
+
+.ly-guide-card:not(.is-focus-upper):not(.is-focus-lower) .ly-guide-yao-row {
+  animation: ly-guide-yao-ghost 3.8s ease-in-out infinite;
+}
+@keyframes ly-guide-yao-ghost {
+  0%, 100% { opacity: 0.16; }
+  50% { opacity: 0.38; }
+}
+
+.ly-guide-card.is-focus-upper .ly-guide-yao-row.is-upper-tri {
+  opacity: 1;
+  animation: none;
+}
+.ly-guide-card.is-focus-upper .ly-guide-yao-row.is-lower-tri {
+  opacity: 0.18;
+  animation: none;
+}
+.ly-guide-card.is-focus-upper .ly-guide-yao-row.is-upper-tri .ly-guide-yao-tag {
+  opacity: 1;
+}
+.ly-guide-card.is-focus-lower .ly-guide-yao-row.is-lower-tri {
+  opacity: 1;
+  animation: none;
+}
+.ly-guide-card.is-focus-lower .ly-guide-yao-row.is-upper-tri {
+  opacity: 0.18;
+  animation: none;
+}
+.ly-guide-card.is-focus-lower .ly-guide-yao-row.is-lower-tri .ly-guide-yao-tag {
+  opacity: 1;
+}
+
+@keyframes ly-guide-yao-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.25); }
+}
+
+.ly-guide-card-foot {
+  position: absolute;
+  left: 14px;
+  right: 52px;
+  bottom: 14px;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.ly-guide-img-k {
+  margin: 0 0 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--ly-gold);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+.ly-guide-one-line {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+}
+.ly-guide-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 8px;
+  font-size: 0.64rem;
+  color: var(--ly-muted);
+}
+.ly-guide-legend span::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 1px;
+}
+.ly-guide-legend .is-yang::before {
+  background: #e8d5a3;
+}
+.ly-guide-legend .is-yin::before {
+  width: 5px;
+  background: #b8c0cc;
+  box-shadow: 9px 0 0 #b8c0cc;
+}
+.ly-guide-legend .is-move::before {
+  background: #e85a45;
+}
+
+.ly-guide-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(226, 196, 138, 0.22);
+  border-radius: 12px;
+  background: rgba(12, 16, 24, 0.92);
+}
+.ly-guide-sw-mid {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+.ly-guide-sw-num {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--ly-gold);
+}
+.ly-guide-sw-name {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--ly-mist);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ly-guide-sw-btn {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid rgba(226, 196, 138, 0.22);
+  background: transparent;
+  color: var(--ly-gold);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.ly-guide-sw-btn:hover {
+  background: rgba(226, 196, 138, 0.12);
+  border-color: rgba(226, 196, 138, 0.45);
+}
+
+.ly-derived-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(226, 196, 138, 0.18);
+  border-radius: 12px;
+  background: rgba(12, 16, 24, 0.72);
+}
+.ly-derived-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+.ly-derived-chip-name {
+  color: var(--ly-mist);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(226, 196, 138, 0.35);
+}
+.ly-derived-chip-name:hover {
+  color: var(--ly-gold);
+}
+
+.ly-term {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 100%;
+}
+.ly-term-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ly-gold);
+  font: inherit;
+  font-size: inherit;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border-bottom: 1px dotted rgba(226, 196, 138, 0.55);
+}
+.ly-term-btn:hover,
+.ly-term-btn[aria-expanded="true"] {
+  color: #f4efe6;
+  border-bottom-color: rgba(232, 213, 163, 0.85);
+}
+.ly-term-tip {
+  display: block;
+  margin-top: 2px;
+  padding: 8px 10px;
+  max-width: min(320px, 86vw);
+  border: 1px solid rgba(226, 196, 138, 0.22);
+  border-radius: 10px;
+  background: rgba(8, 10, 16, 0.92);
+  color: rgba(244, 239, 230, 0.88);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  z-index: 4;
+}
+.ly-term-tip[hidden] {
+  display: none !important;
+}
+.ly-term-tip-body {
+  display: block;
+}
+.ly-term-more {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--ly-gold);
+  font-size: 0.68rem;
+  text-decoration: none;
+}
+.ly-term-more:hover {
+  text-decoration: underline;
+}
+
+.ly-derived {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(226, 196, 138, 0.12);
+}
+.ly-derived-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.ly-derived-item {
+  padding: 10px 12px;
+  border: 1px solid rgba(226, 196, 138, 0.16);
+  border-radius: 12px;
+  background: rgba(12, 16, 24, 0.45);
+}
+.ly-derived-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 8px;
+}
+.ly-derived-arrow {
+  color: var(--ly-muted);
+  opacity: 0.7;
+}
+.ly-derived-name {
+  color: var(--ly-mist);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.ly-derived-name:hover {
+  color: var(--ly-gold);
+}
+.ly-derived-how,
+.ly-derived-read {
+  margin: 6px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ly-muted);
+}
+.ly-derived-read {
+  color: rgba(244, 239, 230, 0.82);
+}
+
+.ly-guide-open-tip {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+  line-height: 1.45;
+}
+
+.ly-guide-drawer[hidden] { display: none !important; }
+.ly-guide-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+.ly-guide-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.ly-guide-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(100%, 420px);
+  background: rgba(12, 14, 18, 0.98);
+  border-left: 1px solid rgba(199, 164, 91, 0.22);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+  animation: ly-guide-drawer-in 0.28s ease;
+}
+@keyframes ly-guide-drawer-in {
+  from { transform: translateX(24px); opacity: 0.6; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.ly-guide-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(199, 164, 91, 0.14);
+  flex: 0 0 auto;
+}
+.ly-guide-drawer-head h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+.ly-guide-drawer-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0 0 24px;
+  -webkit-overflow-scrolling: touch;
+}
+.ly-guide-drawer-body .ly-guide-notes {
+  padding: 0 12px;
+}
+.ly-guide-notes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.ly-guide-notes .ly-note-mini-tabs {
+  flex: 0 0 auto;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+}
+.ly-guide-notes .ly-note-mini-body {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 14px 24px;
+}
+.ly-guide-domain-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.ly-guide-domain-tab {
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: transparent;
+  color: var(--ly-muted);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.ly-guide-domain-tab.is-active {
+  background: rgba(199, 164, 91, 0.18);
+  color: var(--ly-gold);
+  border-color: rgba(199, 164, 91, 0.45);
+}
+.ly-guide-domain-body {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
 }
 
 .ly-hex-gist {
@@ -3503,6 +5144,64 @@ button.ly-yao-kind-card:hover {
   opacity: 0.7;
 }
 
+.ly-gua-card-name {
+  margin: -4px 0 10px;
+  text-align: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: rgba(199, 164, 91, 0.75);
+}
+
+.ly-gua-form-why {
+  margin-top: 12px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(8, 9, 13, 0.4);
+  text-align: center;
+}
+
+.ly-gua-form-tri {
+  margin-bottom: 10px;
+}
+
+.ly-gua-form-tri-name {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: var(--ly-mist);
+}
+
+.ly-gua-form-tri-rep {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(180, 186, 198, 0.78);
+}
+
+.ly-gua-form-arrow {
+  margin: 4px 0 8px;
+  font-size: 1rem;
+  color: var(--ly-gold);
+  opacity: 0.75;
+}
+
+.ly-gua-form-result-name {
+  margin: 0 0 4px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+}
+
+.ly-gua-form-result-eq {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
 .ly-gua-card-body {
   margin: 10px 0 0;
   font-size: 0.84rem;
@@ -3558,6 +5257,47 @@ button.ly-yao-kind-card:hover {
   font-size: 0.82rem;
   line-height: 1.55;
   color: var(--ly-mist);
+}
+
+.ly-move-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+  margin: 8px 0 0 !important;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-left: 2px solid rgba(199, 164, 91, 0.55);
+  background: rgba(199, 164, 91, 0.08);
+  color: rgba(232, 220, 190, 0.92) !important;
+}
+
+.ly-move-action-mark {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--ly-gold);
+  opacity: 0.85;
+}
+
+.ly-move-action-k {
+  flex: 0 0 auto;
+  font-weight: 650;
+  color: var(--ly-gold);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.ly-move-action-body {
+  flex: 1 1 12rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.ly-drawer-books .ly-classic-block.is-book-focus {
+  border-color: rgba(199, 164, 91, 0.55);
+  background: rgba(199, 164, 91, 0.1);
+  box-shadow: 0 0 0 1px rgba(199, 164, 91, 0.2);
 }
 
 .ly-classic-lib-fold > summary {
@@ -3631,7 +5371,7 @@ button.ly-yao-kind-card:hover {
 .ly-note-mini-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
   margin: 0 0 12px;
 }
 
@@ -3640,15 +5380,870 @@ button.ly-yao-kind-card:hover {
   border: 1px solid rgba(199, 164, 91, 0.22);
   background: rgba(8, 9, 13, 0.35);
   color: var(--ly-muted);
-  font-size: 0.78rem;
-  padding: 7px 12px;
+  font-size: 0.68rem;
+  padding: 6px 9px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .ly-note-mini-tab.is-active {
   border-color: rgba(199, 164, 91, 0.5);
   color: var(--ly-gold);
   background: rgba(199, 164, 91, 0.1);
+}
+
+/* 本卦辞 ↔ 变卦辞（古籍解析） */
+.ly-gua-switch {
+  margin: 0 0 14px;
+}
+
+.ly-gua-switch-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(12, 10, 8, 0.35);
+}
+
+.ly-gua-switch-tab {
+  flex: 1;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ly-mist);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.ly-gua-switch-tab.is-active {
+  background: rgba(199, 164, 91, 0.16);
+  color: var(--ly-gold);
+  font-weight: 650;
+}
+
+.ly-gua-switch-tab:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.ly-gua-text-name {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-classic-block.is-book-move {
+  border-left: 3px solid rgba(199, 164, 91, 0.55);
+  padding-left: 8px;
+  background: rgba(199, 164, 91, 0.06);
+  border-radius: 0 8px 8px 0;
+}
+
+/* 传统解卦全书 */
+.ly-compendium {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background:
+    linear-gradient(165deg, rgba(32, 28, 22, 0.55), rgba(14, 12, 10, 0.4)),
+    rgba(199, 164, 91, 0.04);
+}
+
+.ly-compendium-title {
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  letter-spacing: 0.06em;
+}
+
+.ly-compendium-gua {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: rgba(232, 220, 190, 0.88);
+}
+
+.ly-compendium-panel {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.ly-compendium-panel:last-child {
+  margin-bottom: 0;
+}
+
+.ly-compendium-panel.is-primary {
+  border-color: rgba(139, 201, 154, 0.35);
+}
+
+.ly-compendium-panel.is-changed {
+  border-color: rgba(212, 160, 122, 0.4);
+}
+
+.ly-compendium-panel.is-bridge {
+  border-color: rgba(224, 192, 120, 0.45);
+  background: rgba(199, 164, 91, 0.08);
+}
+
+.ly-compendium-panel-title {
+  margin: 0 0 2px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: rgba(232, 220, 190, 0.96);
+}
+
+.ly-compendium-panel-hint {
+  margin: 0 0 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: rgba(199, 164, 91, 0.75);
+}
+
+.ly-compendium-block {
+  margin: 0 0 10px;
+  padding: 8px 10px 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid rgba(199, 164, 91, 0.35);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.ly-compendium-panel .ly-compendium-block:last-child {
+  margin-bottom: 0;
+}
+
+.ly-compendium-block.is-xiang {
+  border-left-color: #8bc99a;
+}
+
+.ly-compendium-block.is-shi {
+  border-left-color: #c7a45b;
+}
+
+.ly-compendium-block.is-duan {
+  border-left-color: #d4a07a;
+}
+
+.ly-compendium-block.is-decision {
+  border-left-color: #e0c078;
+  background: rgba(199, 164, 91, 0.1);
+}
+
+.ly-compendium-tag {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ly-gold);
+}
+
+.ly-compendium-text {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(232, 220, 190, 0.94);
+}
+
+/* 进阶：伏神 / 旬空 / 神煞 */
+.ly-adv-block {
+  margin: 0 0 12px;
+}
+
+.ly-adv-block .ly-layer-guide {
+  margin-bottom: 6px;
+}
+
+.ly-adv-list {
+  margin: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-adv-list strong {
+  color: var(--ly-gold);
+}
+
+.ly-adv-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: var(--ly-muted);
+}
+
+.ly-pattern-summary {
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(8, 9, 13, 0.45);
+}
+
+.ly-pattern-summary-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+}
+
+.ly-pattern-chip-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-pattern-chip {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ly-pattern-chip-label {
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  line-height: 1.35;
+}
+
+.ly-pattern-chip.is-rel .ly-pattern-chip-label {
+  color: #e8a090;
+}
+
+.ly-pattern-chip.is-move .ly-pattern-chip-label {
+  color: #e8c56a;
+}
+
+.ly-pattern-chip.is-struct .ly-pattern-chip-label {
+  color: #9ec4a8;
+}
+
+.ly-pattern-chip-tip {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-drawer-reading-one {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(199, 164, 91, 0.08);
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.45;
+  color: var(--ly-gold);
+}
+
+.ly-drawer-xiang .ly-gua-card,
+.ly-drawer-xiang .ly-energy-chain,
+.ly-drawer-xiang .ly-hex-expand,
+.ly-drawer-xiang .ly-guide-snippet {
+  margin-top: 12px;
+}
+
+/* 笔记 ↔ 图鉴共用条 */
+.ly-guide-snippet {
+  margin: 0 0 14px;
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.24);
+  background: rgba(12, 10, 8, 0.45);
+}
+
+.ly-guide-snippet-title {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-guide-snippet-pack {
+  margin: 0 auto 12px;
+  width: min(100%, 320px);
+}
+.ly-guide-snippet-hero {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  max-height: min(42vh, 320px);
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: #0a0c12;
+}
+.ly-guide-snippet.is-compact .ly-guide-snippet-hero {
+  aspect-ratio: 16 / 11;
+  max-height: min(28vh, 220px);
+}
+.ly-guide-snippet-related {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.16);
+  background: rgba(12, 14, 18, 0.55);
+}
+.ly-guide-snippet-tri {
+  margin: 0 0 10px;
+}
+.ly-guide-snippet-tri-k {
+  margin: 0 0 2px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+}
+.ly-guide-snippet-tri-v {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--ly-mist);
+  line-height: 1.4;
+}
+.ly-guide-snippet-tri-why {
+  margin: 3px 0 0;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+  line-height: 1.4;
+}
+.ly-guide-snippet-eq {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ly-mist);
+  text-align: center;
+}
+.ly-guide-snippet-name-why {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: rgba(244, 239, 230, 0.82);
+}
+.ly-guide-snippet-name-why em {
+  font-style: normal;
+  color: var(--ly-gold);
+  margin-right: 4px;
+}
+.ly-guide-snippet-gist {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ly-muted);
+}
+.ly-guide-snippet-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.82;
+}
+.ly-guide-snippet-hero-bg.is-empty {
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(199, 164, 91, 0.16), transparent 55%),
+    linear-gradient(180deg, #14182a, #0a0c12);
+}
+.ly-guide-snippet-hero-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 9, 15, 0.55) 0%,
+    rgba(7, 9, 15, 0.08) 35%,
+    rgba(7, 9, 15, 0.08) 55%,
+    rgba(7, 9, 15, 0.72) 100%
+  );
+  pointer-events: none;
+}
+.ly-guide-snippet-hero-ui {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 10px;
+  z-index: 2;
+  pointer-events: none;
+}
+.ly-guide-snippet-brand {
+  margin: 0;
+  font-size: 0.55rem;
+  letter-spacing: 0.16em;
+  color: rgba(226, 196, 138, 0.72);
+}
+.ly-guide-snippet-name {
+  margin: 2px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+  letter-spacing: 0.14em;
+  background: linear-gradient(180deg, #fceabb, #e2c48a 55%, #c9a045);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.65));
+}
+.ly-guide-snippet-sub {
+  margin: 2px 0 0;
+  font-size: 0.7rem;
+  color: rgba(244, 239, 230, 0.78);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+.ly-guide-snippet-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ly-guide-snippet-chips span {
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 196, 138, 0.28);
+  background: rgba(7, 9, 15, 0.35);
+  color: rgba(244, 239, 230, 0.82);
+}
+.ly-guide-snippet-yao {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 88px;
+  pointer-events: none;
+}
+.ly-guide-snippet-yao-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 3px;
+}
+.ly-guide-snippet-yao-ln {
+  position: relative;
+  width: 64px;
+  height: 3px;
+  flex: 0 0 auto;
+  border-radius: 1px;
+}
+.ly-guide-snippet-yao-row.is-yang .ly-guide-snippet-yao-ln {
+  background: #e8d5a3;
+  box-shadow: 0 0 6px rgba(232, 213, 163, 0.35);
+}
+.ly-guide-snippet-yao-row.is-yin .ly-guide-snippet-yao-ln {
+  background: transparent;
+}
+.ly-guide-snippet-yao-row.is-yin .ly-guide-snippet-yao-ln::before,
+.ly-guide-snippet-yao-row.is-yin .ly-guide-snippet-yao-ln::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 26px;
+  background: #b8c0cc;
+  border-radius: 1px;
+}
+.ly-guide-snippet-yao-row.is-yin .ly-guide-snippet-yao-ln::before { left: 0; }
+.ly-guide-snippet-yao-row.is-yin .ly-guide-snippet-yao-ln::after { right: 0; }
+.ly-guide-snippet-yao-tag {
+  font-size: 0.58rem;
+  color: rgba(232, 213, 163, 0.75);
+  white-space: nowrap;
+}
+.ly-guide-snippet-hero-foot {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  z-index: 2;
+  pointer-events: none;
+}
+.ly-guide-snippet-hero-foot .ly-guide-img-k {
+  margin: 0 0 2px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+.ly-guide-snippet-hero-foot .ly-guide-one-line {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #f4efe6;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+}
+
+.ly-guide-snippet-art,
+.ly-guide-snippet-art.is-in-notes {
+  margin: 0 0 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  max-height: min(28vh, 220px);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.ly-guide-snippet-img,
+.ly-guide-snippet-art .ly-guide-art {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+.ly-foundation-bridge {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(12, 14, 18, 0.55);
+}
+.ly-foundation-bridge-lead {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+.ly-foundation-bridge-ask {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ly-gold);
+}
+.ly-foundation-bridge-ask em {
+  font-style: normal;
+  color: #a8b4d0;
+  margin-right: 4px;
+}
+
+.ly-guide-snippet .ly-guide-art-empty,
+.ly-guide-snippet-art .ly-guide-art-empty {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+}
+
+.ly-guide-snippet .ly-guide-img-k,
+.ly-guide-notes .ly-guide-img-k {
+  margin: 0 0 2px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-muted);
+}
+
+.ly-guide-snippet .ly-guide-one-line,
+.ly-guide-notes .ly-guide-one-line {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgba(245, 236, 214, 0.96);
+}
+
+.ly-guide-form-why {
+  margin: 10px 0;
+}
+
+.ly-guide-form-why .ly-guide-tri-why,
+.ly-guide-form-why .ly-guide-name-why {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-guide-domains {
+  margin: 10px 0 4px;
+}
+
+.ly-guide-snippet-link {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+}
+
+.ly-guide-snippet-link a {
+  color: var(--ly-gold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 图鉴解读笔记 · 独立整页 */
+.ly-hex-notes-page .ly-hex-notes-head {
+  margin-bottom: 8px;
+}
+
+.ly-hex-notes-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+.ly-hex-notes-hero {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(12, 10, 8, 0.4);
+}
+
+@media (min-width: 640px) {
+  .ly-hex-notes-hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.ly-hex-notes-hero-art,
+.ly-hex-notes-hero .ly-guide-art {
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 140px;
+  aspect-ratio: 16 / 10;
+}
+
+.ly-hex-notes-hero-art img,
+.ly-hex-notes-hero .ly-guide-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ly-hex-notes-hero .ly-guide-art-empty {
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+}
+
+.ly-hex-notes-panel {
+  padding: 14px 14px 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(8, 9, 13, 0.55);
+}
+
+.ly-hex-notes-panel .ly-guide-notes {
+  margin: 0;
+}
+
+.ly-hex-notes-empty {
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.ly-hex-expand {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ly-hex-expand-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ly-gold);
+}
+
+.ly-hex-expand-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ly-hex-expand-sec-title {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: var(--ly-gold);
+}
+
+.ly-hex-expand-body,
+.ly-hex-expand-domain-body {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-hex-expand-meta,
+.ly-hex-expand-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 4px;
+}
+
+.ly-hex-expand-domain {
+  padding: 7px 0;
+  border-top: 1px solid rgba(199, 164, 91, 0.12);
+}
+
+.ly-hex-expand-domain:first-of-type {
+  border-top: none;
+  padding-top: 2px;
+}
+
+.ly-hex-expand-domain-line {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-hex-expand-domain-label {
+  margin: 0;
+  display: inline;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+}
+
+.ly-classic-oracle-list {
+  margin: 6px 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-dress-spirits {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(199, 164, 91, 0.06);
+}
+
+.ly-dress-spirit-list {
+  margin: 6px 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-dress-spirit-summary {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(232, 220, 190, 0.92);
+}
+
+/* 用/元/忌/仇 · 成段断语 */
+.ly-spirit-nar {
+  margin: 10px 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background:
+    linear-gradient(165deg, rgba(28, 36, 28, 0.55), rgba(18, 22, 20, 0.35)),
+    rgba(199, 164, 91, 0.05);
+}
+
+.ly-spirit-nar-title {
+  margin: 0 0 4px;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-spirit-nar .ly-guide-tip {
+  margin: 0 0 10px;
+}
+
+.ly-spirit-nar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-spirit-nar-p {
+  margin: 0;
+  padding: 8px 10px 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid rgba(199, 164, 91, 0.35);
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(232, 220, 190, 0.92);
+}
+
+.ly-spirit-nar-p.is-yong {
+  border-left-color: #c7a45b;
+}
+
+.ly-spirit-nar-p.is-yuan {
+  border-left-color: #6aab7a;
+}
+
+.ly-spirit-nar-p.is-ji {
+  border-left-color: #c97a6a;
+}
+
+.ly-spirit-nar-p.is-chou {
+  border-left-color: #b08a5a;
+}
+
+.ly-spirit-nar-p.is-verdict {
+  border-left-color: #d4b56a;
+  background: rgba(199, 164, 91, 0.1);
+  color: rgba(245, 236, 214, 0.96);
+}
+
+.ly-spirit-nar-role {
+  display: inline-block;
+  margin-right: 0.45em;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.ly-spirit-nar-role.is-yong {
+  color: #e0c078;
+}
+
+.ly-spirit-nar-role.is-yuan {
+  color: #8bc99a;
+}
+
+.ly-spirit-nar-role.is-ji {
+  color: #e09a8a;
+}
+
+.ly-spirit-nar-role.is-chou {
+  color: #d0a878;
+}
+
+.ly-spirit-nar-role.is-verdict {
+  color: var(--ly-gold);
+}
+
+.ly-drawer-xiang .ly-spirit-nar,
+.ly-note-tab-panel .ly-spirit-nar {
+  margin-top: 8px;
 }
 
 .ly-note-tab-panel[hidden] {
@@ -3693,6 +6288,136 @@ button.ly-yao-kind-card:hover {
   padding-bottom: 72px;
 }
 
+.ly-course-trail {
+  margin: 0 0 14px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(8, 9, 13, 0.35);
+  overflow: visible;
+}
+
+.ly-course-trail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ly-course-crumb {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+}
+
+.ly-course-crumb-sep {
+  flex: 0 0 auto;
+  padding: 0 1px;
+  font-size: 0.65rem;
+  color: rgba(199, 164, 91, 0.35);
+  user-select: none;
+  line-height: 1;
+}
+
+.ly-course-crumb-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  margin: 0;
+  padding: 6px 2px 7px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  text-align: center;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ly-course-crumb-n {
+  font-size: 0.62rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: rgba(199, 164, 91, 0.65);
+}
+
+.ly-course-crumb-name {
+  font-size: clamp(0.72rem, 2.8vw, 0.84rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  max-width: none;
+  color: var(--ly-mist);
+  word-break: keep-all;
+}
+
+.ly-course-crumb-anno,
+.ly-course-crumb-look {
+  display: none;
+}
+
+.ly-course-crumb.is-done .ly-course-crumb-btn {
+  opacity: 0.72;
+}
+
+.ly-course-crumb.is-done .ly-course-crumb-sep,
+.ly-course-crumb.is-done + .ly-course-crumb-sep {
+  color: rgba(199, 164, 91, 0.45);
+}
+
+.ly-course-crumb.is-todo .ly-course-crumb-btn {
+  opacity: 0.42;
+}
+
+.ly-course-crumb.is-now .ly-course-crumb-btn {
+  border-color: rgba(199, 164, 91, 0.5);
+  background: rgba(199, 164, 91, 0.12);
+}
+
+.ly-course-crumb.is-now .ly-course-crumb-n,
+.ly-course-crumb.is-now .ly-course-crumb-name {
+  color: var(--ly-gold);
+}
+
+.ly-course-crumb-btn:hover {
+  border-color: rgba(199, 164, 91, 0.28);
+  background: rgba(199, 164, 91, 0.06);
+}
+
+.ly-course-trail-tip {
+  margin-top: 10px;
+  padding: 8px 8px 2px;
+  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  text-align: center;
+}
+
+.ly-course-trail-anno {
+  margin: 0 0 4px;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: var(--ly-gold);
+}
+
+.ly-course-trail-hint {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: rgba(180, 186, 198, 0.72);
+}
+
 .ly-course-progress {
   margin: 0 0 6px;
   font-size: 0.72rem;
@@ -3701,7 +6426,7 @@ button.ly-yao-kind-card:hover {
 }
 
 .ly-course-title {
-  margin: 0 0 12px;
+  margin: 0 0 6px;
   font-size: 1.05rem;
   color: var(--ly-mist);
   line-height: 1.35;
@@ -3719,18 +6444,40 @@ button.ly-yao-kind-card:hover {
   background: rgba(8, 9, 13, 0.4);
 }
 
-.ly-course-visual-pair {
+.ly-course-visual.ly-course-visual-pair {
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.ly-course-pair-col {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.ly-course-pair-col .ly-hexagram-svg {
+  display: block;
+  height: 148px;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .ly-course-arrow {
+  flex: 0 0 auto;
+  align-self: center;
   font-size: 1.4rem;
   color: var(--ly-gold);
   animation: ly-course-arrow 1.4s ease-in-out infinite;
+}
+
+@media (max-width: 420px) {
+  .ly-course-pair-col .ly-hexagram-svg {
+    height: 128px;
+  }
 }
 
 @keyframes ly-course-arrow {
@@ -3753,10 +6500,109 @@ button.ly-yao-kind-card:hover {
   line-height: 1.45;
 }
 
+.ly-course-lookat {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ly-gold);
+}
+
+.ly-course-yao-why,
+.ly-course-yao-life {
+  margin: 6px 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-classic-block.is-yao-active {
+  outline: 1px solid rgba(199, 164, 91, 0.55);
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(199, 164, 91, 0.08);
+}
+
+.ly-course-yao-focus {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ly-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ly-yao-focus-tag {
+  margin-right: 0;
+}
+
+.ly-yao-focus-mark {
+  margin-right: 4px;
+  color: var(--ly-gold);
+  font-size: 0.72rem;
+}
+
+.ly-yao-focus-sep {
+  opacity: 0.45;
+  margin: 0 2px;
+}
+
+.ly-course-classic .ly-classic-block {
+  margin-bottom: 10px;
+}
+
+.ly-course-classic .ly-classic-block .ly-yao-focus-mark {
+  margin-left: 4px;
+  margin-right: 8px;
+}
+
 .ly-course-teach {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.ly-yong-focus {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(12, 14, 18, 0.55);
+}
+.ly-yong-focus-intro,
+.ly-yong-focus-core,
+.ly-yong-focus-status {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+.ly-yong-focus-core {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(199, 164, 91, 0.08);
+  color: #f4efe6;
+}
+.ly-yong-focus-expert {
+  margin: 4px 0 10px;
+  font-size: 0.9rem;
+  color: var(--ly-gold);
+  font-weight: 650;
+}
+.ly-yong-focus-block { margin-top: 10px; }
+.ly-yong-focus-k {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  color: var(--ly-gold);
+  font-weight: 600;
+}
+.ly-yong-focus-v {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
 }
 
 .ly-course-basics,
@@ -3765,6 +6611,143 @@ button.ly-yao-kind-card:hover {
   font-size: 0.88rem;
   line-height: 1.55;
   color: var(--ly-mist);
+}
+
+.ly-final-loop {
+  margin-top: 14px;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: linear-gradient(165deg, rgba(199, 164, 91, 0.1), rgba(16, 14, 12, 0.35));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 结合所问 · 四层解答 */
+.ly-question-briefing {
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ly-briefing-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+
+.ly-briefing-layer {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background:
+    linear-gradient(165deg, rgba(32, 28, 22, 0.45), rgba(14, 12, 10, 0.35)),
+    rgba(199, 164, 91, 0.04);
+}
+
+.ly-briefing-layer.is-strategy {
+  border-color: rgba(224, 192, 120, 0.45);
+  background: rgba(199, 164, 91, 0.1);
+}
+
+.ly-briefing-title {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+  letter-spacing: 0.04em;
+}
+
+.ly-briefing-body {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.62;
+  color: rgba(232, 220, 190, 0.94);
+}
+
+.ly-briefing-more {
+  margin: 10px 0 4px;
+  border-radius: 10px;
+  border: 1px dashed rgba(199, 164, 91, 0.28);
+  padding: 8px 12px;
+}
+
+.ly-briefing-more > summary {
+  cursor: pointer;
+  color: rgba(199, 164, 91, 0.85);
+  font-size: 0.8rem;
+}
+
+.ly-final-loop-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--ly-gold);
+}
+
+.ly-final-loop-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ly-final-loop-label {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--ly-gold);
+}
+
+.ly-final-loop-body {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ly-mist);
+}
+
+.ly-final-loop-block.is-conclusion .ly-final-loop-body,
+.ly-final-loop-block.is-action .ly-final-loop-body {
+  color: rgba(232, 220, 190, 0.95);
+}
+
+.ly-final-basis {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-final-basis-step .ly-final-loop-body {
+  white-space: pre-line;
+}
+
+.ly-final-action-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-final-action-item {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(8, 9, 13, 0.35);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-final-action-item strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ly-gold);
+  font-weight: 600;
 }
 
 .ly-course-basics,
@@ -3807,7 +6790,7 @@ button.ly-yao-kind-card:hover {
   position: fixed;
   right: 0;
   top: 38%;
-  z-index: 45;
+  z-index: 70;
   width: 34px;
   padding: 12px 5px;
   border: 1px solid rgba(199, 164, 91, 0.35);
@@ -3823,9 +6806,11 @@ button.ly-yao-kind-card:hover {
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.35);
 }
 
-.ly-course-bookmark[hidden],
-.ly-course.is-drawer-open .ly-course-bookmark {
-  display: none !important;
+.ly-course.is-drawer-open .ly-course-bookmark,
+.ly-learn-notes.is-drawer-open .ly-course-bookmark {
+  right: min(92vw, 400px);
+  border-color: rgba(199, 164, 91, 0.55);
+  background: linear-gradient(180deg, rgba(48, 40, 22, 0.98), rgba(24, 26, 32, 0.98));
 }
 
 .ly-course-nav {
@@ -4067,7 +7052,7 @@ button.ly-yao-kind-card:hover {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  color: var(--ly-mist);
+  color: var(--ly-yao-yang, #e8d5a3);
 }
 
 .ly-teach-main-kicker {
@@ -4421,13 +7406,13 @@ button.ly-yao-kind-card:hover {
 
 .ly-faq-body {
   margin-top: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
   background: rgba(8, 9, 13, 0.45);
 }
 
 .ly-faq-body p {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-size: 0.8rem;
   line-height: 1.55;
   color: var(--ly-muted);
@@ -4435,6 +7420,93 @@ button.ly-yao-kind-card:hover {
 
 .ly-faq-body p:last-child {
   margin-bottom: 0;
+}
+
+.ly-faq-pre {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--ly-muted);
+  white-space: pre-line;
+}
+
+.ly-scene-xiang {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ly-scene-cue {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ly-gold);
+}
+
+.ly-scene-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-scene-meta {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: var(--ly-gold);
+}
+
+.ly-scene-block {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: rgba(199, 164, 91, 0.04);
+}
+
+.ly-scene-block-title {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ly-gold);
+}
+
+.ly-scene-line {
+  margin: 0 0 6px !important;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ly-mist) !important;
+}
+
+.ly-scene-line:last-child {
+  margin-bottom: 0 !important;
+}
+
+.ly-scene-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-scene-list li {
+  display: grid;
+  grid-template-columns: 7.2em 1fr;
+  gap: 8px;
+  align-items: start;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-scene-k {
+  color: var(--ly-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  padding-top: 1px;
 }
 
 .ly-peer-note .ly-note-tags,
@@ -4634,6 +7706,63 @@ button.ly-yao-kind-card:hover {
   }
 }
 
+
+.ly-dress-dual {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (min-width: 720px) {
+  .ly-dress-dual {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.ly-dress-plate {
+  min-width: 0;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(8, 9, 13, 0.35);
+}
+
+.ly-dress-plate.is-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 8rem;
+}
+
+.ly-dress-plate-title {
+  margin: 0 0 2px;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--ly-gold);
+}
+
+.ly-dress-plate-meta {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  color: var(--ly-muted);
+}
+
+.ly-dress-sy {
+  color: var(--ly-gold);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ly-dress-move {
+  margin-left: 2px;
+  font-size: 0.65rem;
+  color: var(--ly-yao-move, #e85a45);
+}
+
+.ly-dress-row.is-static {
+  cursor: default;
+}
 .ly-dress-wrap {
   overflow-x: auto;
   margin-bottom: 10px;
@@ -4701,6 +7830,18 @@ button.ly-yao-kind-card:hover {
   color: var(--ly-muted);
 }
 
+.ly-yao-card-ask {
+  color: var(--ly-gold) !important;
+  font-size: 0.78rem !important;
+}
+
+.ly-yao-card-relate {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(199, 164, 91, 0.08);
+  border-left: 3px solid rgba(199, 164, 91, 0.4);
+}
+
 .ly-yao-card p {
   margin: 0 0 6px;
   font-size: 0.8rem;
@@ -4727,6 +7868,13 @@ button.ly-yao-kind-card:hover {
   margin: 0 0 6px;
   font-size: 0.88rem;
   color: var(--ly-gold);
+}
+
+.ly-sk-ask {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(232, 220, 190, 0.92);
 }
 
 .ly-sk-svg {
@@ -5157,6 +8305,10 @@ button.ly-yao-kind-card:hover {
   background: rgba(18, 20, 26, 0.72);
 }
 
+.ly-quick-board.is-tables-only {
+  margin-top: 4px;
+}
+
 .ly-qb-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -5551,14 +8703,175 @@ button.ly-yao-kind-card:hover {
   filter: drop-shadow(0 0 4px rgba(199, 164, 91, 0.45));
 }
 
-.ly-yao-highlight .ly-yao-yang,
+.ly-yao-highlight .ly-yao-yang {
+  stroke: var(--ly-yao-yang);
+  filter: drop-shadow(0 0 6px rgba(232, 213, 163, 0.65));
+}
+
 .ly-yao-highlight .ly-yao-yin {
-  stroke: #e0c070;
+  stroke: var(--ly-yao-yin);
+  filter: drop-shadow(0 0 6px rgba(168, 176, 188, 0.55));
+}
+
+.ly-yao-highlight.ly-yao-changing .ly-yao-yang,
+.ly-yao-highlight.ly-yao-changing .ly-yao-yin {
+  stroke: var(--ly-yao-move);
+  filter: drop-shadow(0 0 6px rgba(232, 90, 69, 0.65));
 }
 
 .ly-yao-ask-slot {
   margin-top: 10px;
   grid-column: 1 / -1;
+}
+
+.ly-hex-inline-host {
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ly-yao-inline-tip {
+  position: absolute;
+  left: calc(50% + 3.6rem);
+  top: var(--tip-top, 50%);
+  transform: translateY(-50%);
+  z-index: 30;
+  width: min(16.5rem, calc(100vw - 5rem));
+  max-height: min(62vh, 20rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.45);
+  border-left-width: 3px;
+  background: rgba(16, 14, 12, 0.97);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+@media (max-width: 560px) {
+  .ly-yao-inline-tip {
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    width: min(17rem, calc(100% - 12px));
+  }
+}
+
+.ly-yao-inline-tip[hidden] {
+  display: none !important;
+}
+
+.ly-yao-inline-tip-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ly-yao-inline-head {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ly-gold);
+}
+
+.ly-yao-inline-marks {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ly-yao-inline-marks span {
+  font-size: 0.66rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.35);
+  color: var(--ly-gold);
+}
+
+.ly-yao-inline-kw {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-yao-inline-meta {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ly-yao-inline-meta li {
+  display: grid;
+  grid-template-columns: 2.4em 1fr;
+  gap: 6px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--ly-mist);
+}
+
+.ly-yao-inline-meta span {
+  color: var(--ly-muted);
+  font-size: 0.66rem;
+}
+
+.ly-yao-inline-sec {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--ly-gold);
+}
+
+.ly-yao-inline-topic {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(232, 220, 190, 0.9);
+}
+
+.ly-yao-inline-body,
+.ly-yao-inline-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-yao-row.is-tip-open .ly-yao-ask-bg {
+  fill: rgba(199, 164, 91, 0.35);
+  stroke: rgba(199, 164, 91, 0.85);
+}
+
+/* 本卦 / 变卦同高，避免带问号的本卦因 viewBox 更宽而被压扁 */
+.ly-hex-hero-col .ly-hexagram-svg {
+  height: 152px;
+  width: auto;
+  max-width: min(100%, 220px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ly-hex-hero-pair {
+  align-items: start;
+  overflow: visible;
+}
+
+.ly-hex-hero-col.ly-hex-inline-host {
+  overflow: visible;
+}
+
+@media (max-width: 520px) {
+  .ly-hex-hero-col .ly-hexagram-svg {
+    height: 136px;
+  }
 }
 
 .ly-yao-ask-card {
@@ -5804,6 +9117,73 @@ button.ly-yao-kind-card:hover {
 .ly-qin-dict-title {
   margin: 0 0 6px;
   color: var(--ly-gold);
+}
+
+.ly-qin-dict-blurb {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ly-mist);
+}
+
+.ly-qin-facets {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ly-qin-facet {
+  display: grid;
+  grid-template-columns: 2.6em 1fr;
+  gap: 6px 8px;
+  align-items: start;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.ly-qin-facet dt {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ly-gold);
+  line-height: 1.45;
+}
+
+.ly-qin-facet dd {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(232, 220, 190, 0.92);
+}
+
+.ly-qin-chip {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ly-gold);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.ly-qin-chip:hover {
+  color: #e8d4a0;
+}
+
+.ly-yao-inline-tip .ly-qin-facets,
+.ly-yao-card .ly-qin-facets {
+  margin: 8px 0;
+}
+
+.ly-yao-inline-tip .ly-qin-facet,
+.ly-yao-card .ly-qin-facet {
+  background: rgba(199, 164, 91, 0.06);
 }
 
 

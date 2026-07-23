@@ -67,7 +67,9 @@ function buildCardReading(
   const readingContext = buildReadingContext(drawn, question, spreadType, background);
   const meta =
     drawn.positionKey ? getPositionMeta(spreadType, drawn.positionKey) : undefined;
-  const positionText = meta?.meaning ?? '';
+  const positionText =
+    meta?.meaning ??
+    (drawn.position ? `「${drawn.position}」位置：对照你为这个位置写下的含义来读牌。` : '');
 
   const standard = buildStandardLayer(knowledge, reversed);
   const structured = buildStructuredMockReading(readingContext, knowledge, reversed);
@@ -87,6 +89,7 @@ function buildCardReading(
   const actionTags = structured.actionTags;
   const elementMappings = structured.elementMappings;
   const followUps = structured.followUps;
+  const questionAnswers = structured.questionAnswers;
 
   const selfReflection = buildSelfReflectionQuestions(readingContext, knowledge);
   const answerTendency = buildAnswerTendency(readingContext, knowledge, reversed);
@@ -102,6 +105,7 @@ function buildCardReading(
     answerTendency: answerTendency ?? undefined,
     contextualReading,
     contextualSections,
+    questionAnswers: questionAnswers.length ? questionAnswers : undefined,
     actionTags,
     elementMappings,
     followUps,

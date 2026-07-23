@@ -11,11 +11,15 @@ import { formatClauseHtml } from './format-clause.ts';
 import { teachFold } from './flip-teach.ts';
 import { renderXiangVisual } from './xiang-visual.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
+import { hexagramFormModern } from './trigrams.ts';
 import {
   formatLiuqinShort,
   bindQinDict,
   renderQinDictHtml,
+  buildEnergyFocusFromDress,
+  renderEnergyFocusHtml,
 } from './energy-lens.ts';
+import { renderSpiritNarrativeForCast } from './spirit-narrative.ts';
 
 /** 仇神 = 生忌神者 */
 export function chouOf(yongQin: LiuQin): LiuQin {
@@ -28,27 +32,46 @@ function pickRow(rows: YaoDress[], qin: LiuQin): YaoDress | undefined {
   return matches.find((r) => r.changing) ?? matches.find((r) => r.isShi) ?? matches[0];
 }
 
-/** 【卦象解析卡】上下卦符号 + 自然现象翻译 */
+/** 【卦象解析】为什么形成这个卦？上/下象代表 → 合成公式 */
 export function renderGuaXiangCard(cast: CastResult): string {
   const { upper, lower } = upperLowerFromLines(cast.primaryLines);
   const visual = renderXiangVisual(upper, lower);
+  const formEq = hexagramFormModern(
+    cast.primary.name,
+    cast.primary.gist,
+    upper,
+    lower,
+  );
   const natureLine = `上卦为【${upper.id}】（${upper.nature}），下卦为【${lower.id}】（${lower.nature}）。`;
-  const physics =
-    upper.nature === '泽' && lower.nature === '火'
-      ? '泽在火上，水火相互激荡。在自然界，这代表水汽蒸发、改变形态；在现实中，这意味着你将要经历一场打破旧秩序、重塑新规则的过程。'
-      : upper.nature === '山' && lower.nature === '山'
-        ? '两山相叠，边界与停滞感很强。在自然界像山口对峙；在现实中意味着该先停一停、把界限说清，再谈硬冲。'
-        : `${lower.nature}在下、${upper.nature}在上。${upper.whyImage} ${lower.whyImage} 合在一起看：这件事里，谁在动、谁该停、场子是顺还是险。`;
+  const physics = `${lower.nature}在下、${upper.nature}在上。${upper.whyImage} ${lower.whyImage} 合在一起看：这件事里，谁在动、谁该停、场子是顺还是险。`;
+  const upperRep = upper.represents.join('、');
+  const lowerRep = lower.represents.join('、');
 
   return `
     <article class="ly-gua-card">
-      <h4>卦象解析卡 · ${cast.primary.fullName}</h4>
+      <h4>卦象解析 · 为什么形成这个卦？</h4>
+      <p class="ly-gua-card-name">${cast.primary.fullName}</p>
       <div class="ly-gua-card-symbols" aria-hidden="true">
         <span class="ly-gua-sym"><strong>${upper.symbol}</strong><em>上${upper.id}·${upper.nature}</em></span>
         <span class="ly-gua-sym-plus">+</span>
         <span class="ly-gua-sym"><strong>${lower.symbol}</strong><em>下${lower.id}·${lower.nature}</em></span>
       </div>
       ${visual}
+      <div class="ly-gua-form-why">
+        <div class="ly-gua-form-tri">
+          <p class="ly-gua-form-tri-name">${upper.nature} ${upper.symbol}</p>
+          <p class="ly-gua-form-tri-rep">代表：${upperRep}</p>
+        </div>
+        <div class="ly-gua-form-tri">
+          <p class="ly-gua-form-tri-name">${lower.nature} ${lower.symbol}</p>
+          <p class="ly-gua-form-tri-rep">代表：${lowerRep}</p>
+        </div>
+        <p class="ly-gua-form-arrow" aria-hidden="true">↓</p>
+        <div class="ly-gua-form-result">
+          <p class="ly-gua-form-result-name">${cast.primary.fullName}</p>
+          <p class="ly-gua-form-result-eq">= ${formEq}</p>
+        </div>
+      </div>
       <p class="ly-gua-card-body">${natureLine}<br>${physics}</p>
     </article>
   `;
@@ -85,32 +108,32 @@ export function renderEnergyChainHtml(
   if (yong && map.yongQin) {
     lines.push({
       emoji: '💪',
-      title: '核心目标（用神）',
-      body: `你问的事（比如${matter}），在这个卦里用「${formatLiuqinShort(map.yongQin)}」代表，落在${yong.label}。`,
+      title: `核心聚焦（用神）· ${formatLiuqinShort(map.yongQin)}`,
+      body: `你问的事（比如${matter}），在这个卦里用「${formatLiuqinShort(map.yongQin)}」代表，落在${yong.label}——这是本题注意力该放的系统。`,
       note: `用神在${yong.label}${map.yongQin}`,
     });
   } else {
     lines.push({
       emoji: '💪',
-      title: '核心目标（用神）',
-      body: `本题关注「${matter}」，用神尚未落到具体爻——先写清问题再锚定。`,
+      title: '核心聚焦（用神）',
+      body: `本题关注「${matter}」，用神尚未落到具体爻——先写清问题再锚定「该看哪个系统」。`,
     });
   }
 
   if (yuan) {
     lines.push({
       emoji: '🛡️',
-      title: '直接帮助（元神）',
+      title: `补给系统（元神）· ${formatLiuqinShort(yuan.liuqin)}`,
       body: yuan.changing
-        ? `目前有很强的能量（${yuan.label}${formatLiuqinShort(yuan.liuqin)}）在辅助你的目标。结论：外部环境其实对你是有利的。`
-        : `场上有「${formatLiuqinShort(yuan.liuqin)}」可作助力（${yuan.label}），虽未大动，仍值得借力。`,
+        ? `目前有很强的能量在${yuan.label}（${formatLiuqinShort(yuan.liuqin)}）辅助你的核心聚焦。外部环境其实对你是有利的——借力，别空等。`
+        : `场上有「${formatLiuqinShort(yuan.liuqin)}」可作补给（${yuan.label}），虽未大动，仍值得借力。`,
       note: `元神在${yuan.label}${yuan.liuqin}${yuan.changing ? '发动' : ''}，生助用神`,
     });
   } else {
     lines.push({
       emoji: '🛡️',
-      title: '直接帮助（元神）',
-      body: '未见明显元神生助。动力更多靠你自己对齐节奏、做小步验证。',
+      title: '补给系统（元神）',
+      body: '未见明显补给系统。动力更多靠你自己对齐节奏、做小步验证。',
       note: '元神未现',
     });
   }
@@ -118,17 +141,17 @@ export function renderEnergyChainHtml(
   if (ji) {
     lines.push({
       emoji: '⚠️',
-      title: '潜在隐患（忌神）',
+      title: `耗散系统（忌神）· ${formatLiuqinShort(ji.liuqin)}`,
       body: ji.changing
-        ? `底下有暗流（${ji.label}${formatLiuqinShort(ji.liuqin)}）正在动，可能会干扰你的心神。`
-        : `底下有暗流（${ji.label}${formatLiuqinShort(ji.liuqin)}）在悄悄拉扯，可能会干扰你的心神。`,
+        ? `底下有暗流在${ji.label}（${formatLiuqinShort(ji.liuqin)}）正在动，可能在拉走你的注意力与体感。建议先减这一层消耗，再谈大推进。`
+        : `底下有暗流在${ji.label}（${formatLiuqinShort(ji.liuqin)}）悄悄拉扯——干扰未必喧哗，但会拖节奏。`,
       note: `忌神在${ji.label}${ji.liuqin}${ji.changing ? '发动' : '（静/暗处牵制）'}`,
     });
   } else {
     lines.push({
       emoji: '⚠️',
-      title: '潜在隐患（忌神）',
-      body: '忌神不明显，干扰项相对少，可更专注目标本身。',
+      title: '耗散系统（忌神）',
+      body: '耗散系统不明显，干扰项相对少，可更专注核心聚焦本身。',
       note: '忌神未现',
     });
   }
@@ -137,24 +160,30 @@ export function renderEnergyChainHtml(
     const yuanStrong = Boolean(yuan?.changing);
     lines.push({
       emoji: '🤝',
-      title: '最终博弈（仇神）',
+      title: `拉扯层（仇神）· ${formatLiuqinShort(chou.liuqin)}`,
       body: yuanStrong
-        ? `虽然有干扰，但主力帮助的能量太强了，形成了「贪合忘生」式的拉扯与拦截。结论：虽有内耗，但结果依然偏积极。`
-        : `仇神侧（${chou.label}${formatLiuqinShort(chou.liuqin)}）参与博弈。建议：先减忌神干扰，再借元神推进，顺序比速度重要。`,
+        ? `虽然有干扰，但补给能量偏强，形成拉扯与拦截。结论：虽有内耗，结果仍可偏积极——先减耗散，再借补给。`
+        : `拉扯层在${chou.label}（${formatLiuqinShort(chou.liuqin)}）参与博弈。建议：先减耗散干扰，再借补给推进，顺序比速度重要。`,
       note: `仇神倾向${chou.label}${chou.liuqin}（生忌神者）`,
     });
   } else {
     lines.push({
       emoji: '🤝',
-      title: '最终博弈（仇神）',
-      body: '仇神未直接落到爻上。先看忌神是否在暗处牵制，再决定先清干扰还是先借元神。',
+      title: '拉扯层（仇神）',
+      body: '拉扯层未直接落到爻上。先看耗散系统是否在暗处牵制，再决定先清干扰还是先借补给。',
       note: '仇神未直接落到爻',
     });
   }
 
+  const focusHtml = renderEnergyFocusHtml(
+    buildEnergyFocusFromDress(dressed.rows, cast.changingIndexes, dressed.palaceWx),
+  );
+
   return `
     <section class="ly-energy-chain">
+      ${focusHtml}
       <h4>【能量现状推演】</h4>
+      <p class="ly-guide-tip">这里谈的是「注意力放哪」，不是谁克死谁。</p>
       ${lines
         .map(
           (l) => `
@@ -192,17 +221,22 @@ export function renderMovingYaoCards(cast: CastResult, domain: SceneDomain): str
       const label = LINE_LABELS[i]!;
       const action =
         i <= 1
-          ? '行动建议：根基层在动，先稳住底盘与情绪，切忌一次梭哈。'
+          ? '根基层在动，先稳住底盘与情绪，切忌一次梭哈。'
           : i <= 3
-            ? '行动建议：过渡层在动，此时切忌强行突破，停下来深呼吸，看清楚再走。'
-            : '行动建议：结果层在动，把「想要的结果」写成可验证的一小步，而不是空想终点。';
+            ? '过渡层在动，此时切忌强行突破，停下来深呼吸，看清楚再走。'
+            : '结果层在动，把「想要的结果」写成可验证的一小步，而不是空想终点。';
 
       return `
         <article class="ly-move-card">
           <p class="ly-move-card-head">这支爻动了 · ${label}</p>
           <p class="ly-classic-note">传统辞：${classic || '（本库暂无逐爻原文）'}</p>
           <p><strong>翻译成现代话：</strong>${gloss}</p>
-          <p class="ly-guide-tip">对照「${topic}」：${action}</p>
+          <p class="ly-move-action">
+            <span class="ly-move-action-mark" aria-hidden="true">「</span>
+            <span class="ly-move-action-k">行动建议</span>
+            <span class="ly-move-action-body">对照「${topic}」：${action}</span>
+            <span class="ly-move-action-mark" aria-hidden="true">」</span>
+          </p>
         </article>`;
     })
     .join('');
@@ -275,7 +309,8 @@ function renderStudyNotesRight(): string {
   `;
 }
 
-function renderDictFooter(): string {
+/** 六亲黑话对照（笔记区共用） */
+export function renderDictFooter(): string {
   return `
     <section class="ly-dict-footer">
       <h4>【易学黑话翻译对照表】</h4>
@@ -305,6 +340,7 @@ export function renderLearnStudioHtml(
         <p class="ly-studio-col-label">【左侧】推演与教学区</p>
         ${renderGuaXiangCard(cast)}
         ${renderEnergyChainHtml(cast, question, castAt)}
+        ${renderSpiritNarrativeForCast(cast, question, castAt)}
         ${renderMovingYaoCards(cast, domain)}
       </div>
       <div class="ly-studio-right">

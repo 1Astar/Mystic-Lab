@@ -11,6 +11,7 @@ import { mountEnvBanner } from '../ui/banner.ts';
 import { renderXiaoliurenHero, mountXiaoliurenHero } from '../ui/xiaoliuren-hero.ts';
 import { mountNotifyTryControl } from '../ui/xiaoliuren/notify-try.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
+import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 
 export function renderXiaoliurenHome(root: HTMLElement): () => void {
   const journalCount = loadXiaoliurenJournal().length;
@@ -74,6 +75,7 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
   });
 
   root.appendChild(page);
+  attachPersonSwitcherToPage(page);
   mountXiaoliurenHero(page);
 
   return () => {};

@@ -1,23 +1,19 @@
 import type { CastResult } from './engine.ts';
-import { yingLineOf } from './hexagrams.ts';
 import { dressHexagram, type YaoDress } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
 import { buildReadingFacts } from './reading-facts.ts';
 import { buildYaoAskCard } from './energy-lens.ts';
 import { buildShengKeGraph } from './sheng-ke-graph.ts';
-import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
 import {
   bindLearnCourse,
   type CourseStep,
   loadCourseNote,
   renderLearnCourseHtml,
-  saveCourseNote,
 } from './learn-course.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
 import { glossLine } from './classic-gloss.ts';
 import { formatClauseHtml } from './format-clause.ts';
 import { renderDressArchiveHtml } from './dress-archive.ts';
-import { bindDeepNotesBlock, renderDeepNotesBlockHtml } from './deep-course.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -119,47 +115,7 @@ export function renderStepYaoPanelHtml(
   `;
 }
 
-function renderPointYaoBlock(cast: CastResult): string {
-  const changedShi = cast.changed?.shiLine;
-  const changedYing = changedShi ? yingLineOf(changedShi) : undefined;
-  return `
-    <section class="ly-teach-ask ly-result-panel">
-      <h4>点爻学爻</h4>
-      <p class="ly-layer-guide">起了兴趣就点爻旁 ? —— 一条一条学。</p>
-      <div class="ly-layer-pair" data-ask-hex>
-        <div>
-          <p class="ly-guide-label">本卦 · ${escapeHtml(cast.primary.fullName)}</p>
-          ${renderHexagramSvg({
-            lines: cast.primaryLines,
-            shiLine: cast.shiLine,
-            yingLine: cast.yingLine,
-            changingIndexes: cast.changingIndexes,
-            pulseChanging: true,
-            showAskButtons: true,
-            emphasizeShiYing: true,
-            showTrigramLabels: true,
-          })}
-        </div>
-        ${
-          cast.changed
-            ? `<div>
-          <p class="ly-guide-label">变卦 · ${escapeHtml(cast.changed.fullName)}</p>
-          ${renderHexagramSvg({
-            lines: cast.changedLines,
-            shiLine: changedShi,
-            yingLine: changedYing,
-            showTrigramLabels: true,
-          })}
-        </div>`
-            : ''
-        }
-        <div class="ly-yao-ask-slot" data-ask-slot hidden></div>
-      </div>
-    </section>
-  `;
-}
-
-/** 学习结果主叙事：问题卡 → 五步（含深度能量推演）→ 点爻 / 笔记 */
+/** 学习结果主叙事：问题卡 → 五步（含深度能量推演）→ 笔记 */
 export function renderLearnTeachPageHtml(
   cast: CastResult,
   question: string,
@@ -178,10 +134,6 @@ export function renderLearnTeachPageHtml(
         <p class="ly-teach-main-kicker">五步学习 · 边学边推演</p>
         ${renderLearnCourseHtml(cast, question, castAt)}
       </main>
-      <footer class="ly-teach-tools">
-        ${renderPointYaoBlock(cast)}
-        ${renderDeepNotesBlockHtml(cast, castAt)}
-      </footer>
     </div>
   `;
 }
@@ -193,5 +145,4 @@ export function bindLearnTeachPage(
   castAt = new Date(),
 ): void {
   bindLearnCourse(root, cast, question, castAt);
-  bindDeepNotesBlock(root);
 }

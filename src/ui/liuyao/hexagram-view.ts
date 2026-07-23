@@ -24,6 +24,8 @@ export interface HexagramViewOptions {
   teachable?: boolean;
   /** 爻旁问号（学习模式：点哪里学哪里） */
   showAskButtons?: boolean;
+  /** 仅这些下标显示问号；未设则全部可问 */
+  askIndexes?: number[];
   /** 高亮的爻下标（用神等） */
   highlightIndexes?: number[];
   /** 仅这些爻保持清晰；其余变暗（教学聚焦） */
@@ -61,6 +63,7 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
     coinLabels,
     teachable,
     showAskButtons,
+    askIndexes,
     highlightIndexes = [],
     focusIndexes,
     dimOthers,
@@ -152,11 +155,21 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         : '';
 
       const askBtn =
-        showAskButtons && !pending
+        showAskButtons &&
+        !pending &&
+        (askIndexes === undefined || askIndexes.includes(i))
           ? `<g class="ly-yao-ask" data-ask-line="${i}" role="button" tabindex="0" aria-label="问：${LINE_LABELS[i]}跟我有什么关系">
               <circle class="ly-yao-ask-bg" cx="${cx + 58 + kindW * 0.15}" cy="${y}" r="8"/>
               <text class="ly-yao-ask-q" text-anchor="middle" x="${cx + 58 + kindW * 0.15}" y="${y + 4}">?</text>
             </g>`
+          : '';
+
+      const tapHit =
+        showAskButtons &&
+        !pending &&
+        (askIndexes === undefined || askIndexes.includes(i)) &&
+        !canTeach
+          ? `<rect class="ly-yao-hit" data-ask-line="${i}" x="${cx - 52}" y="${y - 9}" width="104" height="18" fill="transparent" role="button" tabindex="0" aria-label="查看${LINE_LABELS[i]}注解" />`
           : '';
 
       return `<g class="${cls}" data-line="${i}">
@@ -164,6 +177,7 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         ${lineSvg(pending ? 0 : bit, y, cx, pending)}
         ${kindAnno}
         ${hit}
+        ${tapHit}
         ${askBtn}
         ${!compact && !showTrigramLabels && !hasKindLabels ? `<text class="ly-yao-label" x="${108 + leftPad}" y="${y + 4}">${LINE_LABELS[i]}</text>` : ''}
       </g>`;

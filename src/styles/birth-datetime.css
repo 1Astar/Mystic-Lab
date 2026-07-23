@@ -1,0 +1,197 @@
+/* 出生时间滚轮弹层 · 公历/农历 */
+
+.birth-dt-field-wrap {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.birth-dt-trigger {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.28);
+  background: rgba(20, 16, 36, 0.65);
+  color: rgba(255, 236, 214, 0.92);
+  font-size: 0.92rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.birth-dt-trigger:hover {
+  border-color: rgba(255, 214, 166, 0.45);
+  background: rgba(28, 22, 44, 0.75);
+}
+
+.birth-dt-field-tip {
+  margin: 0;
+}
+
+.birth-dt-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.birth-dt-sheet.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.birth-dt-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 16, 0.55);
+}
+
+.birth-dt-panel {
+  position: relative;
+  width: min(100%, 440px);
+  max-height: min(78vh, 520px);
+  padding: 12px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+  border-radius: 18px 18px 0 0;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  border-bottom: 0;
+  background: linear-gradient(180deg, #1a1528 0%, #120e1c 100%);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+  transform: translateY(24px);
+  transition: transform 0.28s ease;
+}
+
+.birth-dt-sheet.is-visible .birth-dt-panel {
+  transform: translateY(0);
+}
+
+.birth-dt-toolbar {
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.birth-dt-tool {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.7);
+  font-size: 0.9rem;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.birth-dt-tool-ok {
+  color: #ffd6a6;
+  font-weight: 600;
+  justify-self: end;
+}
+
+.birth-dt-mode {
+  display: inline-flex;
+  justify-self: center;
+  border-radius: 999px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 214, 166, 0.18);
+}
+
+.birth-dt-mode-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.65);
+  background: transparent;
+  cursor: pointer;
+}
+
+.birth-dt-mode-btn.is-active {
+  background: rgba(72, 160, 160, 0.85);
+  color: #fff;
+}
+
+.birth-dt-summary {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 0.86rem;
+  color: rgba(255, 236, 214, 0.9);
+}
+
+.birth-dt-hint {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(255, 230, 200, 0.48);
+}
+
+.birth-dt-wheels {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  height: 200px;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 18%,
+    #000 82%,
+    transparent 100%
+  );
+}
+
+.birth-dt-highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 40px;
+  margin-top: -20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.birth-dt-wheel {
+  position: relative;
+  z-index: 1;
+  height: 200px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.birth-dt-wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.birth-dt-wheel-pad {
+  height: 80px;
+  scroll-snap-align: none;
+}
+
+.birth-dt-wheel-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.84rem;
+  color: rgba(255, 230, 200, 0.45);
+  scroll-snap-align: center;
+  white-space: nowrap;
+}
+
+/* 档案页浅色底时触发器可读性 */
+.life-profile-page .birth-dt-trigger {
+  border-color: rgba(80, 60, 40, 0.18);
+  background: rgba(255, 252, 247, 0.9);
+  color: #3a2f28;
+}

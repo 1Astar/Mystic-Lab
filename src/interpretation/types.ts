@@ -54,6 +54,10 @@ export type ReadingResult = {
   reflection?: string;
   /** 本轮解读使用的补充背景（随快照保存） */
   questionBackground?: string;
+  /** 全翻后写下的整阵/焦点直觉 */
+  userIntuition?: string;
+  /** 直觉焦点牌下标；缺省表示整阵 */
+  intuitionFocusIndex?: number;
   provider: 'static' | 'llm' | 'mock';
 };
 

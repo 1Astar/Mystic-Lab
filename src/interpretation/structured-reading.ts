@@ -2,9 +2,15 @@ import type {
   CardKnowledge,
   ContextualSection,
   ElementMapping,
+  QuestionAnswer,
   ReadingContext,
 } from '../knowledge/types.ts';
 import { getVisualHotspots, getVisualOverview } from '../knowledge/registry.ts';
+import {
+  classifySubQuestion,
+  splitUserQuestions,
+  type SubQuestionIntent,
+} from './question-parts.ts';
 
 /** 结合问题的固定四段结构 */
 export const STRUCTURED_SECTION_TITLES = [
@@ -31,6 +37,7 @@ export type ParsedStructuredReading = {
   actionTags: string[];
   elementMappings: ElementMapping[];
   followUps: string[];
+  questionAnswers: QuestionAnswer[];
   plainText: string;
 };
 
@@ -74,7 +81,28 @@ function parseFollowUps(raw: unknown): string[] {
     .slice(0, 3);
 }
 
-/** 解析 LLM JSON；支持四段 + 元素映射 + 追问 */
+function parseQuestionAnswers(raw: unknown): QuestionAnswer[] {
+  if (!Array.isArray(raw)) return [];
+  const out: QuestionAnswer[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as {
+      question?: unknown;
+      insight?: unknown;
+      answer?: unknown;
+      action?: unknown;
+      body?: unknown;
+    };
+    const question = String(row.question ?? '').trim();
+    const insight = String(row.insight ?? row.answer ?? row.body ?? '').trim();
+    if (!question || !insight) continue;
+    const action = String(row.action ?? '').trim() || undefined;
+    out.push({ question, insight, action });
+  }
+  return out.slice(0, 8);
+}
+
+/** 解析 LLM JSON；支持四段 + 元素映射 + 追问 + 逐条问答 */
 export function parseStructuredReading(
   raw: string,
   options?: { deckId?: string },
@@ -94,6 +122,7 @@ export function parseStructuredReading(
       sections?: unknown;
       elementMappings?: unknown;
       followUps?: unknown;
+      questionAnswers?: unknown;
     };
 
     let sections: ContextualSection[] = [];
@@ -107,6 +136,8 @@ export function parseStructuredReading(
       }
     }
 
+    const questionAnswers = parseQuestionAnswers(parsed.questionAnswers);
+
     if (sections.length < 3) {
       const overviewBody = String(parsed.overview ?? parsed.conclusion ?? '').trim();
       const mapped: ContextualSection[] = [
@@ -116,6 +147,14 @@ export function parseStructuredReading(
         { title: '心理疏导', body: String(parsed.comfort ?? '').trim() },
       ].filter((s) => s.body.length > 0);
       if (mapped.length >= 2) sections = mapped;
+    }
+
+    // 若只有 questionAnswers，补一条总览式 section 便于旧 UI
+    if (sections.length === 0 && questionAnswers.length) {
+      sections = questionAnswers.map((a, i) => ({
+        title: `【提问 ${i + 1}】${a.question}`,
+        body: a.action ? `${a.insight}\n\n行动：${a.action}` : a.insight,
+      }));
     }
 
     const actionTags = Array.isArray(parsed.actionTags)
@@ -131,19 +170,32 @@ export function parseStructuredReading(
     );
     const followUps = parseFollowUps(parsed.followUps);
 
-    if (sections.length >= 2) {
+    if (sections.length >= 2 || questionAnswers.length >= 1) {
       return {
         sections,
         actionTags,
         elementMappings,
         followUps,
+        questionAnswers,
         plainText: [
+          questionAnswers.length
+            ? questionAnswers
+                .map(
+                  (a, i) =>
+                    `【提问 ${i + 1}】${a.question}\n${a.insight}${
+                      a.action ? `\n行动：${a.action}` : ''
+                    }`,
+                )
+                .join('\n\n')
+            : '',
           sectionsToPlainText(sections),
           ...elementMappings.map(
             (m) =>
               `${m.title}\n牌面原意：${m.originalMeaning || '—'}\n场景映射：${m.body}`,
           ),
-        ].join('\n\n'),
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
       };
     }
   } catch {
@@ -156,6 +208,7 @@ export function parseStructuredReading(
     actionTags: [],
     elementMappings: [],
     followUps: [],
+    questionAnswers: [],
     plainText: plain,
   };
 }
@@ -291,7 +344,82 @@ export function buildFollowUpSuggestions(
   ];
 }
 
-/** 规则解读：热点总览 + 元素映射 + 行动 + 追问（无需外接 AI） */
+function buildSubQuestionAnswer(
+  intent: SubQuestionIntent,
+  subQ: string,
+  knowledge: CardKnowledge,
+  reversed: boolean,
+  context: ReadingContext,
+): QuestionAnswer {
+  const name = knowledge.nameCn;
+  const orient = reversed ? '逆位' : '正位';
+  const kw = knowledge.keywords.slice(0, 2).join('、') || name;
+  const work = knowledge.workMeaning.replace(/[。！？.!?]+$/, '');
+  const pos = context.cardPosition ? `（牌阵位置：${context.cardPosition}）` : '';
+
+  switch (intent) {
+    case 'reason':
+      return {
+        question: subQ,
+        insight: reversed
+          ? `【${name}${orient}】${pos}更像在说：你想离开/改变的冲动，混杂着阻滞、失衡与自我怀疑——不只是外面有多糟，也是内在能量在报警。关键词偏「${kw}」。`
+          : `【${name}${orient}】${pos}指向：真正推动你的，常常是「${kw}」带来的身心状态，而不只是某一条外部条款。${work}。`,
+        action: '先写清「我最想摆脱的是什么感觉」——比先写离职理由清单更接近真相。',
+      };
+    case 'leave_path':
+      return {
+        question: subQ,
+        insight: reversed
+          ? `若按「离开」路径走，【${name}${orient}】提醒：过渡期可能有反复、理想化或信息差。别把三个月当成一步登天，先看恢复与核实。`
+          : `若按「离开」路径走，【${name}${orient}】更像「探索/释放」而不是立刻落地。前段可能偏松弛或冲动，中后段才进入真实比对。关键词：「${kw}」。`,
+        action: '离职前先设底线：现金流能撑多久、最低可接受条件、口头承诺必须书面化。',
+      };
+    case 'stay_path':
+      return {
+        question: subQ,
+        insight: reversed
+          ? `若选择留下，【${name}${orient}】提示：舒适未必等于安全。可能用熟悉感麻痹真实需求，三个月后旧纠结仍在。`
+          : `若选择留下，【${name}${orient}】偏「熟悉、温情、可预测」——情绪可能稳住，但成长感未必跟上。关键词：「${kw}」。`,
+        action: '留下也要立一个「三个月后可核对的成长指标」，避免温水煮青蛙。',
+      };
+    case 'risk':
+      return {
+        question: subQ,
+        insight: `结合【${name}${orient}】，最该防的是：情绪化拍板、舒适区幻觉、以及「聊得来≠条件靠谱」的信息差。牌义侧重点：「${kw}」。`,
+        action: '重大决定冷却 48 小时；谈薪/职责逐条书面确认；别只凭一场面试感觉下结论。',
+      };
+    case 'advice':
+      return {
+        question: subQ,
+        insight: reversed
+          ? `【${name}${orient}】建议：先减内耗、换路径，再谈去留。身心合一后的选择，才不像逃避。`
+          : `【${name}${orient}】建议：先稳住能量（休息/边界），再两边并行——一边看市场反馈，一边评估现团队是否还有可成长的一寸。`,
+        action: '未来 1–2 周只做两件事：恢复精力 + 投出可核实的试探（简历/内推），暂不向公司摊牌。',
+      };
+    default:
+      return {
+        question: subQ,
+        insight: `就「${subQ}」而言，【${name}${orient}】${pos}落在「${kw}」——${work}。`,
+        action: '把下一步缩成一个本周可验证的小动作，先验证再加码。',
+      };
+  }
+}
+
+function buildQuestionAnswers(
+  context: ReadingContext,
+  knowledge: CardKnowledge,
+  reversed: boolean,
+): QuestionAnswer[] {
+  const parts = splitUserQuestions(context.question);
+  if (!parts.length) return [];
+  // 单句短问题：不拆成多卡，交给 overview 即可
+  if (parts.length === 1 && parts[0]!.length < 24) return [];
+  return parts.map((p) =>
+    buildSubQuestionAnswer(classifySubQuestion(p), p, knowledge, reversed, context),
+  );
+}
+
+/** 规则解读：热点总览 + 逐条问答 + 元素映射 + 行动（无需外接 AI） */
 export function buildStructuredMockReading(
   context: ReadingContext,
   knowledge: CardKnowledge,
@@ -307,14 +435,21 @@ export function buildStructuredMockReading(
   const scene = sceneMeaning(knowledge, context.topic);
   const kw = knowledge.keywords.slice(0, 2).join('、');
 
+  const topicLock =
+    context.topic === 'work'
+      ? '（本题锁定职场/去留语境，不展开恋爱与原生家庭套话。）'
+      : context.topic === 'love'
+        ? '（本题锁定关系语境。）'
+        : '';
+
   const directLead =
     context.topic === 'work'
       ? reversed
-        ? `直接说：就「${q}」而言，${knowledge.nameCn}${orient}不太像在报一个准日子，而是提醒——路径或策略需要调整，先把选项与核实做起来。`
-        : `直接说：就「${q}」而言，${knowledge.nameCn}${orient}更像在谈「怎么靠近机会、手里有什么筹码」，而不是「哪一天一定成」。关键词偏「${kw}」。`
+        ? `直接说：就你问的事而言，${knowledge.nameCn}${orient}不太像在报准日子，而是提醒——路径或策略需要调整；核心纠结常在情绪内耗与节奏，而不只是「钱多钱少」。${topicLock}`
+        : `直接说：就你问的事而言，${knowledge.nameCn}${orient}更像在谈「状态、节奏、怎么靠近机会」，关键词偏「${kw}」。${topicLock}`
       : context.topic === 'love'
-        ? `直接说：就「${q}」而言，${knowledge.nameCn}${orient}更像一面镜子，照见关系里的倾向与信号，而不是替对方下判决。`
-        : `直接说：就「${q}」而言，${knowledge.nameCn}${orient}指向「${kw || knowledge.oneSentence}」——先看清局面，再谈下一步。`;
+        ? `直接说：就你问的事而言，${knowledge.nameCn}${orient}更像一面镜子，照见关系里的倾向与信号，而不是替对方下判决。`
+        : `直接说：就你问的事而言，${knowledge.nameCn}${orient}指向「${kw || knowledge.oneSentence}」——先看清局面，再谈下一步。`;
 
   const hotspotOverview = [
     directLead,
@@ -325,7 +460,13 @@ export function buildStructuredMockReading(
     .filter(Boolean)
     .join('');
 
-  const elementMappings = buildElementMappings(context, knowledge, reversed);
+  const questionAnswers = buildQuestionAnswers(context, knowledge, reversed);
+  const elementMappings =
+    context.topic === 'love' && context.questionPattern === 'love_likes'
+      ? buildElementMappings(context, knowledge, reversed)
+      : context.topic === 'work'
+        ? buildElementMappings(context, knowledge, reversed).slice(0, 3)
+        : buildElementMappings(context, knowledge, reversed);
   const advice = buildAdviceBody(context, knowledge, reversed);
   const comfort = buildComfortBody(context, knowledge, reversed);
   const actionTags = buildActionTags(context, knowledge, reversed);
@@ -333,7 +474,7 @@ export function buildStructuredMockReading(
 
   const situationFromElements =
     elementMappings.length > 0
-      ? `下面保留每个元素的牌面原意，并翻译成「${q}」里的现实状况——原意不丢，场景说人话。`
+      ? `下面把牌面元素翻译成「${q.length > 36 ? '你问的这几件事' : q}」里的现实状况。`
       : `放在${context.cardPosition ? `「${context.cardPosition}」` : '这一'}位置，${knowledge.nameCn}映照的是你眼前的具体处境。`;
 
   const sections: ContextualSection[] = [
@@ -348,13 +489,26 @@ export function buildStructuredMockReading(
     actionTags,
     elementMappings,
     followUps,
+    questionAnswers,
     plainText: [
+      questionAnswers.length
+        ? questionAnswers
+            .map(
+              (a, i) =>
+                `【提问 ${i + 1}】${a.question}\n${a.insight}${
+                  a.action ? `\n行动：${a.action}` : ''
+                }`,
+            )
+            .join('\n\n')
+        : '',
       sectionsToPlainText(sections),
       ...elementMappings.map(
         (m) =>
           `${m.title}\n牌面原意：${m.originalMeaning || '—'}\n场景映射：${m.body}`,
       ),
-    ].join('\n\n'),
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
   };
 }
 
@@ -401,17 +555,42 @@ function buildComfortBody(
     : '你已经在认真面对问题了。牌是提醒不是判决——信任你能把下一步走小、走实。';
 }
 
-/** 行动指令标签（展示在牌面关键词位置优先） */
+/** 行动指令标签（展示在牌面关键词位置优先；随牌与主题变化） */
 export function buildActionTags(
   context: ReadingContext,
   knowledge: CardKnowledge,
   reversed: boolean,
 ): string[] {
+  const id = knowledge.deckId;
+  const isSwords = id.startsWith('swords-') || /宝剑/.test(knowledge.nameCn);
+  const isCups = id.startsWith('cups-') || /圣杯/.test(knowledge.nameCn);
+  const isPentacles = id.startsWith('pentacles-') || /星币/.test(knowledge.nameCn);
+  const isWands = id.startsWith('wands-') || /权杖/.test(knowledge.nameCn);
+
   if (context.topic === 'work') {
-    if (reversed) {
-      return ['换路径别死磕', '多线推进', '核实口头承诺', '先动再等'];
+    if (isSwords) {
+      return reversed
+        ? ['先停内耗', '列事实再决策', '冷却48小时', '换路径试探']
+        : ['强制休整', '边界下班', '先恢复再抉择', '少脑补多核实'];
     }
-    return ['广撒网多面试', '挖内推与人脉', '谈薪问细防画饼', '保持在线跟进'];
+    if (isCups) {
+      return reversed
+        ? ['防情绪拍板', '别恋舒适区', '感觉打八折', '书面核条件']
+        : ['防画饼', '核福利条款', '两边并行看', '别只凭聊得来'];
+    }
+    if (isPentacles) {
+      return reversed
+        ? ['重核现金流', '别死磕一家', '谈薪问结构', '多线推进']
+        : ['广撒网多面试', '挖内推与人脉', '谈薪问细防画饼', '保持在线跟进'];
+    }
+    if (isWands) {
+      return reversed
+        ? ['收束目标', '忌冲动摊牌', '小步验证', '防空转']
+        : ['主动试探机会', '设可验证节点', '保持行动节奏', '别空等'];
+    }
+    return reversed
+      ? ['换路径别死磕', '多线推进', '核实口头承诺', '先动再等']
+      : ['广撒网多面试', '挖内推与人脉', '谈薪问细防画饼', '保持在线跟进'];
   }
   if (context.topic === 'love') {
     return reversed

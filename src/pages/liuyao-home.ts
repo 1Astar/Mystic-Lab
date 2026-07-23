@@ -4,12 +4,12 @@ import { loadLiuyaoJournal } from '../liuyao/journal.ts';
 import {
   getLiuyaoMode,
   mountLiuyaoModeSwitch,
-  setLiuyaoMode,
   type LiuyaoMode,
 } from '../liuyao/mode.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { liuyaoPageBgStyle, renderLiuyaoHero } from '../ui/liuyao-hero.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
+import { mountPersonSwitcher } from '../ui/person-switcher.ts';
 
 export function renderLiuyaoHome(root: HTMLElement): () => void {
   const journalCount = loadLiuyaoJournal().length;
@@ -33,6 +33,7 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
   const modeBar = page.querySelector<HTMLElement>('.ly-mode-bar')!;
   const actions = page.querySelector<HTMLElement>('.ly-topbar-actions')!;
 
+  mountPersonSwitcher(actions);
   mountLiuyaoSfxToggle(actions);
   mountLiuyaoModeSwitch(modeBar, {
     onChange: (mode) => paint(mode),
@@ -62,20 +63,21 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
       </header>
       <main class="ly-home-main">
         <div class="ly-home-hero-slot"></div>
-        <div class="ly-home-cta">
-          <button type="button" class="ly-home-primary" data-path="/liuyao/reading">${
-            isLearn ? '开始学习起卦' : '开始起卦'
-          }</button>
-          <button type="button" class="ly-home-secondary" data-switch="${
-            isLearn ? 'cast' : 'learn'
-          }">${isLearn ? '切到起卦模式 ›' : '切到学习模式 ›'}</button>
+        <div class="ly-home-actions" aria-label="主要入口">
+          <button type="button" class="ly-home-action is-primary" data-path="/liuyao/reading">
+            ${isLearn ? '开始学习起卦' : '开始起卦'}
+          </button>
+          <button type="button" class="ly-home-action is-ghost" data-path="/liuyao/vault">
+            <span class="ly-home-action-title">我的卦库</span>
+            <span class="ly-home-action-sub">64卦图鉴 · 384爻学习 · 成长档案</span>
+          </button>
+          <button type="button" class="ly-home-action is-ghost" data-path="/liuyao/journal">
+            <span class="ly-home-action-title">我的卦象${
+              journalCount > 0 ? ` · ${journalCount}` : ''
+            }</span>
+            <span class="ly-home-action-sub">每次起卦记录</span>
+          </button>
         </div>
-        <nav class="ly-home-links" aria-label="模块入口">
-          <a href="/liuyao/reading" data-path="/liuyao/reading">立即问卦</a>
-          <a href="/liuyao/journal" data-path="/liuyao/journal">我的卦象${
-            journalCount > 0 ? ` · ${journalCount}` : ''
-          }</a>
-        </nav>
       </main>
       <footer class="ly-home-footer">
         <p>© Starry Product Lab · Mystic Lab</p>
@@ -100,15 +102,6 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
       el.addEventListener('click', (e) => {
         e.preventDefault();
         navigate(el.dataset.path!);
-      });
-    });
-    body.querySelectorAll<HTMLElement>('[data-switch]').forEach((el) => {
-      el.addEventListener('click', () => {
-        const next = el.dataset.switch === 'learn' ? 'learn' : 'cast';
-        setLiuyaoMode(next);
-        modeBar.innerHTML = '';
-        mountLiuyaoModeSwitch(modeBar, { onChange: (m) => paint(m) });
-        paint(next);
       });
     });
   }
