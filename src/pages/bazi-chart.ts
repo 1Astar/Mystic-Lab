@@ -20,6 +20,7 @@ import {
 } from '../bazi/partner.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
 import { formatBirthBrief, hasBirthInfo, loadLifeStore } from '../life/storage.ts';
+import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -275,12 +276,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <fieldset class="life-fieldset">
           <legend>对方出生信息</legend>
           <label class="life-field life-field-full"><span>称呼</span><input name="label" type="text" placeholder="对方" value="${escapeHtml(p.label)}" /></label>
-          <div class="life-birth-row">
-            <label class="life-field"><span>年</span><input name="birthYear" type="text" inputmode="numeric" placeholder="1996" value="${escapeHtml(p.birthYear)}" /></label>
-            <label class="life-field"><span>月</span><input name="birthMonth" type="text" inputmode="numeric" placeholder="8" value="${escapeHtml(p.birthMonth)}" /></label>
-            <label class="life-field"><span>日</span><input name="birthDay" type="text" inputmode="numeric" placeholder="12" value="${escapeHtml(p.birthDay)}" /></label>
-            <label class="life-field"><span>时辰</span><input name="birthHour" type="text" placeholder="可选" value="${escapeHtml(p.birthHour)}" /></label>
-          </div>
+          <div id="bazi-partner-dt-slot" class="life-birth-row"></div>
           <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选 · 真太阳时" value="${escapeHtml(p.birthPlace)}" /></label>
         </fieldset>
         <div class="life-form-actions">
@@ -321,6 +317,17 @@ export function renderBaziChart(root: HTMLElement): () => void {
   function bindHepanForm(): void {
     const form = page.querySelector<HTMLFormElement>('#bazi-partner-form');
     const statusEl = page.querySelector<HTMLElement>('#bazi-partner-status');
+    const slot = page.querySelector<HTMLElement>('#bazi-partner-dt-slot');
+    if (form && slot) {
+      mountBirthDatetimeField({
+        host: form,
+        replaceEl: slot,
+        initialYear: partner.birthYear,
+        initialMonth: partner.birthMonth,
+        initialDay: partner.birthDay,
+        initialHour: partner.birthHour,
+      });
+    }
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
       const g = (name: string) =>
@@ -336,7 +343,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
       if (!parseBirthParts(next.birthYear, next.birthMonth, next.birthDay, next.birthHour)) {
         if (statusEl) {
           statusEl.hidden = false;
-          statusEl.textContent = '请填写对方完整年月日。';
+          statusEl.textContent = '请选择对方完整出生时间。';
         }
         return;
       }
@@ -363,5 +370,8 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
   paint();
   root.appendChild(page);
-  return () => stars.remove();
+  return () => {
+    stars.remove();
+    document.querySelector('.birth-dt-sheet')?.remove();
+  };
 }

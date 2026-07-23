@@ -54,6 +54,11 @@ declare module 'lunar-javascript' {
   }
 
   export class Lunar {
+    static fromYmd(year: number, month: number, day: number): Lunar;
+    getYear(): number;
+    getMonth(): number;
+    getDay(): number;
+    getSolar(): Solar;
     getMonthInChinese(): string;
     getDayInChinese(): string;
     getYearInGanZhi(): string;
@@ -77,6 +82,12 @@ declare module 'lunar-javascript' {
       getTianShenLuck: () => string;
     }>;
     toString(): string;
+  }
+
+  export class LunarMonth {
+    static fromYm(year: number, month: number): LunarMonth;
+    getMonth(): number;
+    getDayCount(): number;
   }
 
   export const LunarUtil: {

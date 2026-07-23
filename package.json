@@ -1,7 +1,7 @@
 {
   "name": "mystic-lab",
   "private": true,
-  "version": "0.3.20",
+  "version": "0.3.22",
   "type": "module",
   "scripts": {
     "dev": "node scripts/fetch-tarot-images.mjs && node scripts/copy-mediapipe.mjs && vite",

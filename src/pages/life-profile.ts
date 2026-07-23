@@ -2,6 +2,7 @@ import { navigate } from '../router.ts';
 import { isAiConfigured } from '../ai/settings.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
+import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 import { generatePortrait } from '../life/generate.ts';
 import {
   formatBirthBrief,
@@ -72,12 +73,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
 
       <fieldset class="life-fieldset">
         <legend>出生信息 · 轻画像入口</legend>
-        <div class="life-birth-row">
-          <label class="life-field"><span>年</span><input name="birthYear" type="text" inputmode="numeric" placeholder="1996" value="${escapeHtml(p.birthYear)}" /></label>
-          <label class="life-field"><span>月</span><input name="birthMonth" type="text" inputmode="numeric" placeholder="8" value="${escapeHtml(p.birthMonth)}" /></label>
-          <label class="life-field"><span>日</span><input name="birthDay" type="text" inputmode="numeric" placeholder="12" value="${escapeHtml(p.birthDay)}" /></label>
-          <label class="life-field"><span>时辰</span><input name="birthHour" type="text" placeholder="可选" value="${escapeHtml(p.birthHour)}" /></label>
-        </div>
+        <div id="life-birth-dt-slot" class="life-birth-row"></div>
         <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
         <p class="life-footnote">也可在「八字」模块直接填写出生信息，两边共用同一份档案。</p>
       </fieldset>
@@ -97,6 +93,16 @@ export function renderLifeProfile(root: HTMLElement): () => void {
   const portraitEl = page.querySelector<HTMLElement>('#life-portrait')!;
   const toLife = page.querySelector<HTMLButtonElement>('#life-to-life')!;
   const genBtn = page.querySelector<HTMLButtonElement>('#life-gen-btn')!;
+  const birthSlot = page.querySelector<HTMLElement>('#life-birth-dt-slot')!;
+
+  mountBirthDatetimeField({
+    host: form,
+    replaceEl: birthSlot,
+    initialYear: p.birthYear,
+    initialMonth: p.birthMonth,
+    initialDay: p.birthDay,
+    initialHour: p.birthHour,
+  });
 
   function renderPortrait(): void {
     const portrait = store.portrait;
@@ -166,5 +172,8 @@ export function renderLifeProfile(root: HTMLElement): () => void {
   });
 
   root.appendChild(page);
-  return () => stars.remove();
+  return () => {
+    stars.remove();
+    document.querySelector('.birth-dt-sheet')?.remove();
+  };
 }

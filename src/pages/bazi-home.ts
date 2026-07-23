@@ -2,6 +2,7 @@ import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
+import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 import {
   formatBirthBrief,
   hasBirthInfo,
@@ -18,7 +19,12 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function canCast(p: { birthYear: string; birthMonth: string; birthDay: string; birthHour: string }): boolean {
+function canCast(p: {
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
+  birthHour: string;
+}): boolean {
   return Boolean(parseBirthParts(p.birthYear, p.birthMonth, p.birthDay, p.birthHour));
 }
 
@@ -99,15 +105,10 @@ export function renderBaziHome(root: HTMLElement): () => void {
           ${
             hasBirthInfo(p)
               ? `当前：${escapeHtml(formatBirthBrief(p))} · 改完点保存即可同步`
-              : '填写年月日（时辰、地点可选），保存后同步到「我的档案」'
+              : '点选出生时间（可滑动，弹层内切公历/农历），保存后同步到「我的档案」'
           }
         </p>
-        <div class="life-birth-row">
-          <label class="life-field"><span>年</span><input name="birthYear" type="text" inputmode="numeric" placeholder="1996" value="${escapeHtml(p.birthYear)}" autocomplete="bday-year" /></label>
-          <label class="life-field"><span>月</span><input name="birthMonth" type="text" inputmode="numeric" placeholder="8" value="${escapeHtml(p.birthMonth)}" autocomplete="bday-month" /></label>
-          <label class="life-field"><span>日</span><input name="birthDay" type="text" inputmode="numeric" placeholder="12" value="${escapeHtml(p.birthDay)}" autocomplete="bday-day" /></label>
-          <label class="life-field"><span>时辰</span><input name="birthHour" type="text" placeholder="午时 / 14:30" value="${escapeHtml(p.birthHour)}" /></label>
-        </div>
+        <div id="bazi-birth-dt-slot" class="life-birth-row"></div>
         <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="如 成都（用于真太阳时）" value="${escapeHtml(p.birthPlace)}" /></label>
       </fieldset>
       <div class="life-form-actions">
@@ -126,6 +127,16 @@ export function renderBaziHome(root: HTMLElement): () => void {
   const syncHint = page.querySelector<HTMLElement>('#bazi-birth-sync')!;
   const entriesEl = page.querySelector<HTMLElement>('#bazi-entries')!;
   const toChart = page.querySelector<HTMLButtonElement>('#bazi-to-chart')!;
+  const slot = page.querySelector<HTMLElement>('#bazi-birth-dt-slot')!;
+
+  mountBirthDatetimeField({
+    host: form,
+    replaceEl: slot,
+    initialYear: p.birthYear,
+    initialMonth: p.birthMonth,
+    initialDay: p.birthDay,
+    initialHour: p.birthHour,
+  });
 
   function refreshCastGate(): void {
     castReady = canCast(store.profile);
@@ -161,7 +172,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
     };
     if (!birth.birthYear && !birth.birthMonth && !birth.birthDay) {
       statusEl.hidden = false;
-      statusEl.textContent = '请至少填写年、月、日中的一项。';
+      statusEl.textContent = '请先选择出生时间。';
       return;
     }
     store = updateBirthFields(birth);
@@ -174,5 +185,8 @@ export function renderBaziHome(root: HTMLElement): () => void {
   });
 
   root.appendChild(page);
-  return () => stars.remove();
+  return () => {
+    stars.remove();
+    document.querySelector('.birth-dt-sheet')?.remove();
+  };
 }

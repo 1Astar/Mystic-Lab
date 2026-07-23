@@ -5,6 +5,7 @@ import './styles/tarot.css';
 import './styles/codex.css';
 import './styles/life.css';
 import './styles/bazi.css';
+import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
 import { renderCodex } from './pages/codex.ts';
 import { renderCodexFoolJourney } from './pages/codex-fool-journey.ts';
