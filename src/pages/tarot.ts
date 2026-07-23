@@ -23,6 +23,7 @@ import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
 import { saveJournalEntry, updateJournalReflection, upsertJournalProgress } from '../journal/records.ts';
+import { resolveResumeFromStash } from '../journal/resume.ts';
 import { mergeReadingBackground } from '../life/profile-context.ts';
 import { navigate } from '../router.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
@@ -1887,8 +1888,32 @@ export function renderTarot(root: HTMLElement): () => void {
     setState('draw');
   }
 
-  renderStage();
-  syncHintBar();
+  const resume = resolveResumeFromStash();
+  if (resume?.ok) {
+    const s = resume.session;
+    currentJournalId = s.journalId;
+    question = s.question;
+    spreadType = s.spreadType;
+    drawnCards = s.drawnCards;
+    cardPool = s.cardPool;
+    currentIndex = s.currentIndex;
+    revealedFlags = s.revealedFlags;
+    reading = s.reading;
+    drawMode = 'touch';
+    boardPlacements = ensurePlacements(resolveActiveSpread(spreadType), null);
+    setState(s.readyForResult ? 'flip' : 'draw');
+    hintBar.setProgress(
+      s.readyForResult
+        ? '已恢复未完成的占问 · 牌已齐，可看解读'
+        : `已恢复未完成的占问 · 已抽 ${s.drawnCards.length}/${s.cardPool.length} 张`,
+    );
+  } else {
+    if (resume && !resume.ok) {
+      hintBar.setProgress(resume.reason);
+    }
+    renderStage();
+    syncHintBar();
+  }
 
   window.addEventListener('pagehide', onPageHide);
 

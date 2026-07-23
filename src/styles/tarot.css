@@ -2085,6 +2085,11 @@
   color: var(--gold);
 }
 
+.journal-detail-continue {
+  margin-top: 14px;
+  width: 100%;
+}
+
 .journal-detail-regen {
   margin: 12px 0 0;
   padding: 8px 12px;

@@ -18,14 +18,17 @@ export type JournalDetailOptions = {
   reading: ReadingResult;
   regenerated: boolean;
   onClose: () => void;
+  /** 未完成手札：继续抽完 */
+  onContinue?: () => void;
 };
 
 export function mountJournalDetail(container: HTMLElement, options: JournalDetailOptions): void {
-  const { entry, regenerated, onClose } = options;
+  const { entry, regenerated, onClose, onContinue } = options;
   let reading = options.reading;
   const date = new Date(entry.createdAt).toLocaleString('zh-CN');
   const spreadLabel = SPREADS[entry.spreadType]?.name ?? entry.spreadType;
   const isPartial = entry.status === 'partial';
+  const canContinue = Boolean(isPartial && onContinue);
 
   container.className = 'journal-detail';
   container.innerHTML = `
@@ -34,6 +37,11 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
       <time class="journal-detail-date">${escapeHtml(date)}${isPartial ? ' · 未完成' : ''}</time>
       <h2 class="journal-detail-question">${escapeHtml(entry.question || '（未记录问题）')}</h2>
       <p class="journal-detail-meta">${escapeHtml(spreadLabel)} · ${reading.cards.length} 张牌</p>
+      ${
+        canContinue
+          ? '<button type="button" class="btn journal-detail-continue" data-continue>继续完成</button>'
+          : ''
+      }
     </header>
     ${regenerated ? '<p class="journal-detail-regen">根据记录重新生成的解读（旧手札无完整快照）</p>' : ''}
     <div class="journal-detail-cards" id="journal-detail-cards"></div>
@@ -76,4 +84,5 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
   }
 
   container.querySelector('.journal-detail-close')?.addEventListener('click', onClose);
+  container.querySelector('[data-continue]')?.addEventListener('click', () => onContinue?.());
 }
