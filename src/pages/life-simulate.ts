@@ -58,7 +58,7 @@ export function renderLifeSimulate(root: HTMLElement): () => void {
     <header class="life-header">
       <p class="home-eyebrow">CHOICE SIM</p>
       <h1 class="page-title">选择模拟</h1>
-      <p class="page-subtitle">同一决策，并排看几条可能轨迹（探索对照，非算命）</p>
+      <p class="page-subtitle">同一决策，并排看几条可能轨迹</p>
       <p class="life-ai-hint">${aiOn ? 'AI 已启用 · 轨迹会更贴你的现状' : '本地模板 · 配置 AI 后可增强'}</p>
     </header>
 

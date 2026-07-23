@@ -152,7 +152,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <section class="life-profile-gate">
           <div>
             <p class="life-card-kicker">还不能排盘</p>
-            <p class="life-gate-brief">回到八字首页填写出生信息（可同步到档案）。</p>
+            <p class="life-gate-brief">回到八字首页填写出生信息。</p>
           </div>
           <button type="button" class="life-btn-primary" data-path="/bazi">去填写</button>
         </section>
@@ -182,7 +182,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <p class="home-eyebrow">BAZI CHART</p>
         <h1 class="page-title">四柱排盘</h1>
-        <p class="page-subtitle">日主 ${escapeHtml(chart.dayMaster)}${chart.dayMasterWx ? ` · ${escapeHtml(chart.dayMasterWx)}` : ''} · 探索学习非宣判</p>
+        <p class="page-subtitle">日主 ${escapeHtml(chart.dayMaster)}${chart.dayMasterWx ? ` · ${escapeHtml(chart.dayMasterWx)}` : ''}</p>
       </header>
 
       <nav class="bazi-mode-tabs" aria-label="盘面模式">
@@ -269,7 +269,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
     return `
       <section class="bazi-meta" aria-label="合盘说明">
-        <p>合盘：填写对方出生信息，对照双方日主十神与日支关系。对方信息仅保存在本机，不同步到「档案」。</p>
+        <p>填写对方出生信息，对照双方日主、十神与日支关系。</p>
       </section>
 
       <form class="life-form bazi-partner-form" id="bazi-partner-form">
@@ -277,7 +277,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
           <legend>对方出生信息</legend>
           <label class="life-field life-field-full"><span>称呼</span><input name="label" type="text" placeholder="对方" value="${escapeHtml(p.label)}" /></label>
           <div id="bazi-partner-dt-slot" class="life-birth-row"></div>
-          <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选 · 真太阳时" value="${escapeHtml(p.birthPlace)}" /></label>
+          <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="如 成都" value="${escapeHtml(p.birthPlace)}" /></label>
         </fieldset>
         <div class="life-form-actions">
           <button type="submit" class="life-btn-primary">保存并合盘</button>

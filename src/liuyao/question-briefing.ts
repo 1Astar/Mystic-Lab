@@ -73,6 +73,34 @@ function buildLayer1(cast: CastResult, question: string): BriefingBlock {
   };
 }
 
+function buildMovingLineReason(r: YaoDress): string {
+  const energy = LIUQIN_ENERGY[r.liuqin];
+  const role = LINE_ROLE[r.index] ?? '';
+  const god = LIUSHEN_PLAIN[r.liushen] ?? '';
+  const roleHint = role ? `（爻位偏「${role}」）` : '';
+  return (
+    `· ${r.label}发动：落在「${energy.modern}」${roleHint}；六神「${r.liushen}」偏「${god.replace(/。$/, '')}」。\n` +
+    `  → 所以：这一层正在松动——和「${energy.modern}」相关的事，过程可能带上「${r.liushen}」的气味，宜当关键节点盯住，而不是当背景噪声。`
+  );
+}
+
+function buildMovingSubtext(moving: YaoDress[]): string {
+  if (moving.length === 1) {
+    const r = moving[0]!;
+    const energy = LIUQIN_ENERGY[r.liuqin];
+    return (
+      `变化主要落在「${energy.modern}」这一层（${r.label}动）。` +
+      `不是全局一起翻盘，而是这一层在松动；过程可能反复，宜小步核对，少一次赌赢。`
+    );
+  }
+  const layers = moving.map((r) => LIUQIN_ENERGY[r.liuqin].modern);
+  const unique = [...new Set(layers)];
+  return (
+    `不止一处在动：${moving.map((r) => r.label).join('、')}分别牵动「${unique.join('」与「')}」。` +
+    `所以过程未必一步到位，可能有拉扯或来回——要把这些动爻当成「正在松动的节点」合起来看，而不是只看一句总判词。`
+  );
+}
+
 function buildLayer2(
   cast: CastResult,
   _question: string,
@@ -87,7 +115,10 @@ function buildLayer2(
   if (shi) {
     const energy = LIUQIN_ENERGY[shi.liuqin];
     parts.push(
-      `1. 你的现状（世爻：${shi.label} · ${formatLiuqinShort(shi.liuqin)}）\n\n潜台词：你现在的站位落在「${energy.modern}」——${energy.blurb}\n\n建议：这种状态说明你很在意「${topic}」相关的掌控感与外部反馈；先承认压力/期待是真实的，再用一小步可验证的动作去对齐，而不是一次赌赢。`,
+      `1. 你的现状（世爻：${shi.label} · ${formatLiuqinShort(shi.liuqin)}）\n\n` +
+        `潜台词：你现在的站位落在「${energy.modern}」——${energy.blurb}\n\n` +
+        `依据：世爻是「你」在卦里的落点；本卦世在${shi.label}、六亲为${formatLiuqinShort(shi.liuqin)}，所以用「${energy.modern}」来描述你当下站位，而不是空泛心情。\n\n` +
+        `建议：你很在意「${topic}」相关的掌控感与外部反馈；先承认压力/期待是真实的，再用一小步可验证的动作去对齐，而不是一次赌赢。`,
     );
   } else {
     parts.push('1. 你的现状（世爻）\n\n本卦世爻信息不足，先回看装卦表确认「你」落在哪一爻。');
@@ -95,25 +126,27 @@ function buildLayer2(
 
   if (moving.length) {
     const labels = moving.map((r) => r.label).join('、');
-    const moveBits = moving
-      .map((r) => {
-        const role = LINE_ROLE[r.index] ?? '';
-        const god = LIUSHEN_PLAIN[r.liushen] ?? '';
-        return `· ${r.label}（${formatLiuqinShort(r.liuqin)} · ${role}）发动；六神见「${r.liushen}」——${god}`;
-      })
-      .join('\n');
+    const reasons = moving.map(buildMovingLineReason).join('\n');
     parts.push(
-      `2. 你的下一步（动爻：${labels}）\n\n潜台词：卦象里有变化在发生，说明过程未必「一步到位」，可能有拉扯或反复。\n\n具体指向：\n${moveBits}\n\n翻译：先把动的那一层当「正在松动的节点」盯住，少把全部希望押在一次结果上。`,
+      `2. 你的下一步（动爻：${labels}）\n\n` +
+        `潜台词：${buildMovingSubtext(moving)}\n\n` +
+        `依据（动爻怎么推出上面这句话）：\n${reasons}\n\n` +
+        `合起来怎么用：先把上述动爻当「正在松动的节点」盯住，少把全部希望押在一次结果上。`,
     );
   } else {
     parts.push(
-      '2. 你的下一步（动爻）\n\n潜台词：本卦无动爻——格局相对稳。关键不在突变，而在把世应与准备做实，再谈加码。',
+      '2. 你的下一步（动爻）\n\n' +
+        '潜台词：本卦无动爻——格局相对稳。关键不在突变，而在把世应与准备做实，再谈加码。\n\n' +
+        '依据：六爻皆静，没有「哪一层正在松动」的发动信号；所以策略偏稳住与核对，而不是赌突变。',
     );
   }
 
   if (cast.changed) {
     parts.push(
-      `3. 你的资源与底气（变卦 · ${cast.changed.fullName}）\n\n潜台词：最终走向「${cast.changed.keywords.slice(0, 2).join('、') || cast.changed.name}」——${cast.changed.gist}\n\n这是偏积极的方向感：熬过眼前过渡与核实期，后面更可能摸到更稳的资源/位置；变卦是方向，不是死刑判决。`,
+      `3. 你的资源与底气（变卦 · ${cast.changed.fullName}）\n\n` +
+        `潜台词：最终走向「${cast.changed.keywords.slice(0, 2).join('、') || cast.changed.name}」——${cast.changed.gist}\n\n` +
+        `依据：动爻变出「${cast.changed.fullName}」，关键词偏「${cast.changed.keywords.slice(0, 3).join('、') || cast.changed.name}」；变卦是方向感，不是死刑判决。\n\n` +
+        `这是偏积极的方向感：熬过眼前过渡与核实期，后面更可能摸到更稳的资源/位置。`,
     );
   }
 

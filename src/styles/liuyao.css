@@ -11,7 +11,8 @@
 .ly-concepts-page,
 .ly-classic-page,
 .ly-learn-board-page,
-.ly-teach-page {
+.ly-teach-page,
+.ly-replay {
   --ly-ink: #08090d;
   --ly-mist: #e8e2d5;
   --ly-gold: #c7a45b;
@@ -502,6 +503,7 @@
   z-index: 320;
   opacity: 0;
   transition: opacity 0.22s ease;
+  color: var(--ly-mist, #e8e2d5);
 }
 .ly-replay.is-visible {
   opacity: 1;
@@ -1716,24 +1718,24 @@
 
 .ly-yao-row.is-teachable:hover .ly-yao-yang,
 .ly-yao-row.is-teachable:focus-within .ly-yao-yang {
-  stroke: var(--ly-yao-yang);
+  stroke: var(--ly-yao-yang, #e8d5a3);
   filter: drop-shadow(0 0 5px rgba(232, 213, 163, 0.55));
 }
 
 .ly-yao-row.is-teachable:hover .ly-yao-yin,
 .ly-yao-row.is-teachable:focus-within .ly-yao-yin {
-  stroke: var(--ly-yao-yin);
+  stroke: var(--ly-yao-yin, #a8b0bc);
   filter: drop-shadow(0 0 5px rgba(168, 176, 188, 0.45));
 }
 
 .ly-yao-yang {
-  stroke: var(--ly-yao-yang);
+  stroke: var(--ly-yao-yang, #e8d5a3);
   stroke-width: 3;
   stroke-linecap: round;
 }
 
 .ly-yao-yin {
-  stroke: var(--ly-yao-yin);
+  stroke: var(--ly-yao-yin, #a8b0bc);
   stroke-width: 3;
   stroke-linecap: round;
   opacity: 1;

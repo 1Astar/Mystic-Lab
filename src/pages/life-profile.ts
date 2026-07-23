@@ -210,7 +210,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           <legend>出生信息</legend>
           <div id="life-birth-dt-slot" class="life-birth-row"></div>
           <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
-          <p class="life-footnote">也可在「八字」模块填写出生信息，会同步到当前选中的档案。</p>
+          <p class="life-footnote">出生信息也可在「八字」里填写。</p>
         </fieldset>
 
         <div class="life-form-actions">

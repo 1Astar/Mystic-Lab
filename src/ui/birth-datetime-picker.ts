@@ -121,7 +121,6 @@ export function openBirthDatetimePicker(opts: OpenBirthDatetimePickerOptions): v
         <button type="button" class="birth-dt-tool birth-dt-tool-ok" data-birth-dt-ok>完成</button>
       </div>
       <p class="birth-dt-summary" id="birth-dt-summary"></p>
-      <p class="birth-dt-hint">若出生时间不详，可选择默认 12:00，会对结果有一定影响</p>
       <div class="birth-dt-wheels" aria-label="滑动选择">
         <div class="birth-dt-highlight" aria-hidden="true"></div>
         <div class="birth-dt-wheel" data-col="year"></div>
@@ -318,7 +317,6 @@ export function mountBirthDatetimeField(opts: MountBirthDatetimeFieldOptions): {
         ${escapeHtml(formatBirthTriggerLabel(value))}
       </button>
     </label>
-    <p class="life-footnote birth-dt-field-tip">点选后可滑动年月日时分；弹层内切换公历 / 农历</p>
     <input type="hidden" name="birthYear" value="${escapeHtml(value ? String(value.year) : '')}" />
     <input type="hidden" name="birthMonth" value="${escapeHtml(value ? String(value.month) : '')}" />
     <input type="hidden" name="birthDay" value="${escapeHtml(value ? String(value.day) : '')}" />

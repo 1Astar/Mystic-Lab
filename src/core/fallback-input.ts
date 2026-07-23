@@ -20,7 +20,7 @@ const STEP_BUTTONS: Record<RitualStep, { action: FallbackAction; label: string }
   cut: [{ action: 'cut', label: '👋 切牌' }],
   draw: [{ action: 'draw', label: '🤏 捏合抽牌' }],
   place: [{ action: 'place', label: '✋ 放到阵位' }],
-  flip: [{ action: 'flip', label: '👆 翻开牌面' }],
+  flip: [{ action: 'flip', label: '👆 翻开下一张' }],
   review: [],
   reading: [
     { action: 'zoom_in', label: '⬆️ 放大细读' },

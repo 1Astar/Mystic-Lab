@@ -181,34 +181,49 @@ export function bindRitualInput(
   }
 
   if (step === 'flip') {
-    const cardSlot =
-      (container.querySelector(
-        '.spread-board-slot.is-active .tarot-slot-single',
-      ) as HTMLElement | null) ??
-      (container.querySelector('.tarot-slot-single') as HTMLElement | null);
-    if (!cardSlot) return () => {};
+    const cardSlots = [
+      ...container.querySelectorAll<HTMLElement>('.tarot-slot-single.is-revealable'),
+    ];
+    if (cardSlots.length === 0) {
+      const fallback =
+        (container.querySelector(
+          '.spread-board-slot.is-active .tarot-slot-single',
+        ) as HTMLElement | null) ??
+        (container.querySelector('.tarot-slot-single') as HTMLElement | null);
+      if (fallback) cardSlots.push(fallback);
+    }
+    if (cardSlots.length === 0) return () => {};
 
-    let startX = 0;
-    let startY = 0;
+    cardSlots.forEach((cardSlot) => {
+      let startX = 0;
+      let startY = 0;
+      let armed = false;
 
-    const onDown = (e: PointerEvent): void => {
-      startX = e.clientX;
-      startY = e.clientY;
-      cardSlot.setPointerCapture(e.pointerId);
-    };
+      const onDown = (e: PointerEvent): void => {
+        startX = e.clientX;
+        startY = e.clientY;
+        armed = true;
+        cardSlot.setPointerCapture(e.pointerId);
+      };
 
-    const onUp = (e: PointerEvent): void => {
-      const moved = Math.hypot(e.clientX - startX, e.clientY - startY);
-      // 仅点击翻开，不再上滑翻牌
-      if (moved < 28) once(callbacks.onFlip);
-    };
+      const onUp = (e: PointerEvent): void => {
+        if (!armed) return;
+        armed = false;
+        const moved = Math.hypot(e.clientX - startX, e.clientY - startY);
+        // 仅点击翻开；把目标下标挂在元素上，由页面读取
+        if (moved < 28) {
+          const idx = cardSlot.dataset.revealIndex;
+          if (idx != null) (container as HTMLElement).dataset.flipTarget = idx;
+          once(callbacks.onFlip);
+        }
+      };
 
-    cardSlot.classList.add('is-interactive');
-    on(cardSlot, 'pointerdown', onDown as EventListener);
-    on(cardSlot, 'pointerup', onUp as EventListener);
-    on(cardSlot, 'click', () => once(callbacks.onFlip));
+      cardSlot.classList.add('is-interactive');
+      on(cardSlot, 'pointerdown', onDown as EventListener);
+      on(cardSlot, 'pointerup', onUp as EventListener);
+    });
     return () => {
-      cardSlot.classList.remove('is-interactive');
+      cardSlots.forEach((cardSlot) => cardSlot.classList.remove('is-interactive'));
       cleanups.forEach((fn) => fn());
     };
   }

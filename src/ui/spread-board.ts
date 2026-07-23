@@ -15,8 +15,8 @@ export type SpreadBoardPaintOpts = {
   drawn: DrawnCard[];
   currentIndex: number;
   phase: BoardPhase;
-  /** flip 阶段当前牌是否已翻开 */
-  flipRevealed: boolean;
+  /** 各位置是否已翻开（与 drawn 对齐；未填视为未翻） */
+  revealedFlags: boolean[];
   /** 自定义随心摆：各位置中心点 %；长度应覆盖 positions */
   placements: SlotLayout[];
   onPlacementChange?: (index: number, pos: SlotLayout) => void;
@@ -52,13 +52,9 @@ export function renderSpreadBoardShellHtml(
     .map((pos, i) => {
       const layout = placements[i] ?? layoutsForSpread(spread)[i]!;
       const isNext = (phase === 'draw' || phase === 'place') && i === currentIndex;
-      const isActive = phase === 'flip' && i === currentIndex;
-      const isAimed = phase === 'place' && false; // painted via class sync from outside
       const cls = [
         'spread-board-slot',
         isNext ? 'is-next' : '',
-        isActive ? 'is-active' : '',
-        isAimed ? 'is-aimed' : '',
         free ? 'is-free' : 'is-fixed',
       ]
         .filter(Boolean)
@@ -70,7 +66,7 @@ export function renderSpreadBoardShellHtml(
           style="left:${layout.x}%;top:${layout.y}%"
         >
           <span class="spread-board-label">${escapeHtml(pos.label)}</span>
-          <div class="spread-board-card-host${isActive ? ' tarot-slot-single' : ''}" data-card-host="${i}"></div>
+          <div class="spread-board-card-host" data-card-host="${i}"></div>
         </div>`;
     })
     .join('');
@@ -95,7 +91,7 @@ export function paintSpreadBoard(
     drawn,
     currentIndex,
     phase,
-    flipRevealed,
+    revealedFlags,
     placements,
     onPlacementChange,
   } = opts;
@@ -111,29 +107,27 @@ export function paintSpreadBoard(
     const holding = phase === 'place' && i === currentIndex;
     if (!card || holding) {
       host.innerHTML = '';
+      host.removeAttribute('data-reveal-index');
+      host.classList.remove('tarot-slot-single', 'is-revealable');
       slot.classList.add('is-empty');
-      slot.classList.remove('is-filled');
+      slot.classList.remove('is-filled', 'is-active');
       return;
     }
 
     slot.classList.remove('is-empty');
     slot.classList.add('is-filled');
 
-    const showCard =
-      i < currentIndex || (i === currentIndex && phase === 'flip');
-    if (!showCard) {
-      host.innerHTML = '';
-      return;
-    }
-
-    const revealed = i < currentIndex || (i === currentIndex && flipRevealed);
-    const active = i === currentIndex && phase === 'flip';
-    host.classList.toggle('tarot-slot-single', active);
+    const revealed = Boolean(revealedFlags[i]);
+    const revealable = phase === 'flip' && !revealed;
+    host.dataset.revealIndex = String(i);
+    host.classList.toggle('tarot-slot-single', revealable);
+    host.classList.toggle('is-revealable', revealable);
+    slot.classList.toggle('is-active', revealable);
     renderCardFace(host, card, revealed);
     host.querySelector('.tarot-card')?.classList.add('is-board-card');
 
-    // 未翻开的当前牌留给翻牌手势，不绑拖拽
-    if (active && !flipRevealed) return;
+    // 待翻开的牌留给翻牌点击，不绑拖拽
+    if (revealable) return;
 
     let startX = 0;
     let startY = 0;

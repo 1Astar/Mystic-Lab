@@ -35,6 +35,21 @@ describe('question-briefing', () => {
     expect(b.strategy.body).toMatch(/1\.|2\./);
   });
 
+  it('ties moving-line subtext to concrete line reasons', () => {
+    const cast = castGuaiSample();
+    const b = buildQuestionBriefing(
+      cast,
+      '离职后三个月求职发展如何',
+      new Date('2026-07-22T20:50:00'),
+    );
+    expect(b.layer2.body).toMatch(/潜台词/);
+    expect(b.layer2.body).toMatch(/依据/);
+    if (cast.changingIndexes.length > 0) {
+      expect(b.layer2.body).toMatch(/发动/);
+      expect(b.layer2.body).toMatch(/所以/);
+    }
+  });
+
   it('renders html panel', () => {
     const cast = castGuaiSample();
     const html = renderQuestionBriefingHtml(
