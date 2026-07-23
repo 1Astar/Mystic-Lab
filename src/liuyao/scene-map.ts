@@ -131,7 +131,7 @@ function escapeScene(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 取象注解：分行 + 分块排版（FAQ / 笔记用）；工作上 / 感情上始终同屏 */
+/** 取象注解：断语标签 + 工作/感情合并成一段解说 */
 export function renderSceneXiangHtml(
   scene: ComposedScene,
   opts?: {
@@ -140,39 +140,35 @@ export function renderSceneXiangHtml(
     showFormula?: boolean;
   },
 ): string {
-  const domain = opts?.domain ?? 'general';
   const hint = opts?.hint?.trim();
+  const tags = [
+    scene.careerLower,
+    scene.careerUpper,
+    scene.loveLower,
+    scene.loveUpper,
+    scene.themeWords,
+  ]
+    .flatMap((t) => t.split(/[、，]/).map((s) => s.trim()).filter(Boolean))
+    .filter((t, i, arr) => arr.indexOf(t) === i)
+    .slice(0, 8);
 
-  const careerBlock = `
-    <div class="ly-scene-block">
-      <p class="ly-scene-block-title">工作上</p>
-      <ul class="ly-scene-list">
-        <li><span class="ly-scene-k">下卦：</span>${escapeScene(scene.careerLower)}</li>
-        <li><span class="ly-scene-k">上卦：</span>${escapeScene(scene.careerUpper)}</li>
-        <li><span class="ly-scene-k">合看：</span>${escapeScene(scene.themeWords)}正在成为主旋律</li>
-        <li><span class="ly-scene-k">自问：</span>${escapeScene(scene.careerAsk)}</li>
-      </ul>
-    </div>`;
+  const tagHtml = tags
+    .map((t) => `<span class="ly-oracle-tag">${escapeScene(t)}</span>`)
+    .join('');
 
-  const loveBlock = `
-    <div class="ly-scene-block">
-      <p class="ly-scene-block-title">感情上</p>
-      <ul class="ly-scene-list">
-        <li><span class="ly-scene-k">下卦（你这边）：</span>${escapeScene(scene.loveLower)}</li>
-        <li><span class="ly-scene-k">上卦（关系场/对方）：</span>${escapeScene(scene.loveUpper)}</li>
-        <li><span class="ly-scene-k">合看：</span>${escapeScene(scene.themeWords)}</li>
-        <li><span class="ly-scene-k">自问：</span>${escapeScene(scene.loveAsk)}</li>
-      </ul>
-    </div>`;
-
-  // 问题偏感情时，感情块放前；其余默认工作在前
-  const blocks = domain === 'love' ? `${loveBlock}${careerBlock}` : `${careerBlock}${loveBlock}`;
+  const body = [
+    `下卦这一边：工作上像「${scene.careerLower}」，感情上则像「${scene.loveLower}」。`,
+    `上卦在外面：事业场偏「${scene.careerUpper}」，关系场偏「${scene.loveUpper}」。`,
+    `合看主调是「${scene.themeWords}」——${scene.meaning}`,
+    `此刻可自问：工作上，${scene.careerAsk} 感情上，${scene.loveAsk}`,
+  ].join('');
 
   return `
     <div class="ly-scene-xiang">
       <p class="ly-scene-cue">${escapeScene(scene.bridgeCue)}</p>
       ${hint ? `<p class="ly-scene-hint">${escapeScene(hint)}</p>` : ''}
-      ${blocks}
+      <div class="ly-oracle-tags" aria-label="取象关键词">${tagHtml}</div>
+      <p class="ly-scene-merged">${escapeScene(body)}</p>
     </div>
   `;
 }
@@ -204,7 +200,7 @@ export function renderFoundationBridgeHtml(
         合在一起，主调偏「${escapeScene(scene.themeWords)}」——${escapeScene(scene.meaning)}
       </p>
       <p class="ly-foundation-bridge-ask"><em>此刻可自问：</em>${escapeScene(ask)}</p>
-      <p class="ly-guide-tip">工作 / 感情分行细译，请开右侧「解读笔记 · 卦象解析」。</p>
+      <p class="ly-guide-tip">工作 / 感情分行细译，请打开「解读笔记 · 卦象解析」（手机点下方「打开解读笔记」或右侧书签）。</p>
     </div>
   `;
 }

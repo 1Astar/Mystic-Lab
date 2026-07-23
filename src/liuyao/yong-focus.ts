@@ -216,7 +216,9 @@ export function renderYongFocusHtml(pack: YongFocusPack): string {
       </div>
       <div class="ly-yong-focus-block">
         <p class="ly-yong-focus-k">🔹 给你的行动建议</p>
-        <p class="ly-yong-focus-v">${escapeHtml(pack.actionText)}</p>
+        <blockquote class="ly-briefing-quote ly-yong-focus-quote">
+          <p>${escapeHtml(pack.actionText)}</p>
+        </blockquote>
       </div>
     </div>
   `;

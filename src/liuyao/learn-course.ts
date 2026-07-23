@@ -8,15 +8,21 @@ import { formatClauseHtml } from './format-clause.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
 import { glossLine, glossDaXiang } from './classic-gloss.ts';
-import { composeScene, renderFoundationBridgeHtml, renderSceneXiangHtml } from './scene-map.ts';
+import { composeScene, renderFoundationBridgeHtml } from './scene-map.ts';
 import {
   buildShengKeGraph,
   buildCourseShengKeDialogue,
-  renderShengKeGraphHtml,
+  renderCourseShengKeHtml,
 } from './sheng-ke-graph.ts';
 import { resolveClassicDossier } from './classic-folder.ts';
 import { teachFold } from './flip-teach.ts';
-import { renderDressArchiveHtml, bindDressArchive, showDressYaoCard } from './dress-archive.ts';
+import {
+  renderDressArchiveHtml,
+  bindDressArchive,
+  closeDressYaoModal,
+  selectDressLens,
+  highlightDressYaoRow,
+} from './dress-archive.ts';
 import {
   renderEnergyChainHtml,
   renderMovingYaoCards,
@@ -24,31 +30,26 @@ import {
   bindLearnStudio,
   renderDictFooter,
 } from './learn-studio.ts';
-import { renderSpiritNarrativeForCast } from './spirit-narrative.ts';
-import { renderLearnFaqHtml } from './narrative-learn.ts';
 import { buildBianQuiz, renderBianQuizHtml, bindBianQuiz } from './bian-quiz.ts';
+import { renderAskPanelHtml, bindAskPanel } from './ask-panel.ts';
 import { showYaoInlineTip } from './yao-inline-tip.ts';
-import { buildFinalLoop, renderFinalLoopHtml } from './final-loop.ts';
+import { buildFinalLoop } from './final-loop.ts';
 import {
   buildPatternSummary,
   renderPatternSummaryHtml,
 } from './pattern-summary.ts';
 import { renderQuestionBriefingForCast } from './question-briefing.ts';
 import {
-  buildHexExpandPack,
-  renderHexExpandHtml,
-  renderClassicDomainOraclesHtml,
-} from './hex-expand.ts';
-import {
   renderClassicGuaSwitchHtml,
   bindClassicGuaSwitch,
 } from './classic-gua-switch.ts';
 import { renderClassicCompendiumForCast } from './classic-compendium.ts';
+import { bindGuideDomainTabs } from './hex-guide.ts';
 import {
-  buildHexGuidePack,
-  renderGuideXiangSnippetHtml,
-  bindGuideDomainTabs,
-} from './hex-guide.ts';
+  renderXiangNotesPaneHtml,
+  bindXiangNotesPane,
+  selectXiangSec,
+} from './xiang-notes-pane.ts';
 import {
   buildYongFocusPack,
   renderYongFocusHtml,
@@ -59,7 +60,7 @@ import { navigate } from '../router.ts';
 
 export type CourseStep = 1 | 2 | 3 | 4 | 5 | 6;
 
-export type NoteDrawerTab = 'xiang' | 'dress' | 'books' | 'journal';
+export type NoteDrawerTab = 'xiang' | 'dress' | 'books' | 'ask' | 'journal';
 
 /** 点哪学哪：当前 Step → 笔记侧栏默认 Tab（结论在主屏，笔记只放拓展） */
 export function noteDrawerTabForStep(step: CourseStep): NoteDrawerTab {
@@ -118,6 +119,21 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function methodBlock(why: string, how: string): string {
+  return `
+    <div class="ly-course-method">
+      <p class="ly-course-method-label">📚 这一步为什么要做</p>
+      <p class="ly-course-basics">${escapeHtml(why)}</p>
+      <p class="ly-course-method-label">🔍 怎么分析</p>
+      <p class="ly-course-basics">${escapeHtml(how)}</p>
+    </div>`;
+}
+
+function applyLead(question: string): string {
+  const q = question.trim();
+  return q ? `结合你问的「${q.length > 36 ? `${q.slice(0, 36)}…` : q}」` : '结合你关心的事';
 }
 
 function formatYaoFocusChip(f: CourseYaoFocus): string {
@@ -327,7 +343,11 @@ export function buildCourseLessons(
       title: '查灵魂 · 世应',
       lookAt: `世（我）在${shiLabel} · 应（外界）在${yingLabel}`,
       basics: '',
-      vernacular: '',
+      methodHtml: methodBlock(
+        '断卦先认「谁是我、谁是外界」。世爻代表你，应爻代表对方/岗位/环境。找不准这两点，后面的动爻、用神都会漂。',
+        '在卦图上找金色圈（世）与红色圈（应）；看它们落在第几爻、六亲是什么，再判断世应相生还是相克。',
+      ),
+      vernacular: `${applyLead(question)}：${loop.steps[0]!.body} 你现在偏「${shiE?.modern ?? '当下状态'}」，外面偏「${yingE?.modern ?? '外部环境'}」——世应${facts.shiYingRel.rel}，${facts.shiYingRel.verdict}。${facts.shiYingRel.tip}`,
       notePrompt: '我感觉我现在确实是 / 不是这个状态…',
       noteHint:
         '例如：我确实感觉现在的处境让我很内耗；或者我并没有在打破常规，而是在硬撑。',
@@ -352,7 +372,11 @@ export function buildCourseLessons(
         ? `用神「${yongPack.yongModern}」在${yongPack.primaryRow.label}`
         : `用神倾向「${yongPack.yongModern}」`,
       basics: '',
-      vernacular: '',
+      methodHtml: methodBlock(
+        '用神不是封建身份标签，而是「本题注意力该放在哪个能量系统」：求职看目标/考核，文书看信息网，薪资看物质根基。',
+        '按所问取六亲 → 在装卦表里落到具体爻 → 只高亮这一两爻，看六神与是否发动，再翻译成你的问题。',
+      ),
+      vernacular: `${applyLead(question)}：${yongPack.intro} ${yongPack.translateText}`,
       notePrompt: '我觉得真正该盯的，是这一爻，因为…',
       noteHint: '例如：原来我一直在看公开招聘，但卦提醒我机会在暗线。',
       classicTitle: yongPack.primaryRow
@@ -371,12 +395,14 @@ export function buildCourseLessons(
       crumbHint: '哪里在动？哪个位置在变？变化发生在哪里？',
       title: '抓重点 · 动爻',
       lookAt: moveLabels ? `${moveCount} 个动爻：${moveLabels}` : '无动爻',
-      basics: moveLabels
-        ? '卦里不是静止的。变红、闪烁的线叫【动爻】，代表这件事里「正在发生变化」的部分。'
-        : '本卦没有动爻：格局相对稳。关键不在突变，而在把世应看清。',
+      basics: '',
+      methodHtml: methodBlock(
+        '卦不是静止照片。变红、闪烁的线叫动爻，代表这件事里「正在发生变化」的部分——转机往往就在这里。',
+        '数清有几根动爻、落在哪一爻、六亲是什么；再看它们是否推着本卦走向变卦。无动则先稳住结构，不必硬找变。',
+      ),
       vernacular: moveLabels
-        ? `你这件事的转机在${moveLabels}（偏「${moveRoles}」）。因为这一层在变，整体局势才会跟着松动。`
-        : '没有动爻推动变卦——先稳住当下结构，再谈下一步。',
+        ? `${applyLead(question)}：${loop.steps[1]!.body} 转机偏「${moveRoles}」这一层——因为这一层在变，整体局势才会跟着松动。`
+        : `${applyLead(question)}：${loop.steps[1]!.body}`,
       notePrompt: '我觉得真正在变的，可能是…',
       classicTitle: moveLabels
         ? `Step 3 · 动爻注解（${moveLabels}）`
@@ -394,9 +420,12 @@ export function buildCourseLessons(
       crumbHint: '上下卦叠成什么场？落到你问的事，先抓哪一问？',
       title: '看根基 · 取象翻译',
       lookAt: `上${upper.nature}（环境）· 下${lower.nature}（自己）`,
-      basics:
-        '六爻分成两半：上面三爻叫上卦（大环境），下面三爻叫下卦（你自己这边）。两者叠合，才是本卦。',
-      vernacular: `上卦是${upper.id}·${upper.nature}（环境侧），下卦是${lower.id}·${lower.nature}（你这边）。先看结构，再看「根基×实际」合一句。`,
+      basics: '',
+      methodHtml: methodBlock(
+        '六爻分成两半：上卦像大环境，下卦像你自己这边。两者叠合，才是本卦的「场」——先懂场，再谈对策。',
+        '认出上卦、下卦的八卦象与五行，用一句生活场景把它们合起来；再对照分域里的工作 / 感情，问自己此刻最卡在哪一问。',
+      ),
+      vernacular: `${applyLead(question)}：${loop.steps[2]!.body}`,
       notePrompt: '上下卦合在一起，让我想到…',
       classicTitle: 'Step 4 · 卦辞与大象（整卦，非单爻）',
       classicText: [
@@ -421,30 +450,34 @@ export function buildCourseLessons(
       lookAt: cast.changed
         ? `${cast.primary.name} → ${cast.changed.name}`
         : `${cast.primary.name}（无变）`,
-      basics: cast.changed
-        ? `现在（本卦「${cast.primary.fullName}」）→ 经历变化（动爻）→ 下一幕（变卦「${cast.changed.fullName}」）。`
-        : '无动则无变：时间轴停在本卦。把当前状态看清，比空想结局更有用。',
+      basics: '',
+      methodHtml: methodBlock(
+        '本卦是当下底色，动爻是推手，变卦是可能滑向的下一幕。分清「现在」和「走向」，才不会把方向感当成死刑判决。',
+        '对照本卦全名与关键词 → 看动爻如何推动 → 读变卦关键词与生克谁在帮谁拖。无动则停在本卦，先把结构看清。',
+      ),
       vernacular: cast.changed
-        ? `因为动爻在动，事情从「${cast.primary.keywords[0]}」滑向「${cast.changed.keywords[0]}」。变卦是方向感，不是死判决。`
-        : '没有动爻推动变卦——先把本卦与世应看清，再谈下一步。',
-      notePrompt: '我觉得从本卦到变卦，像是从…走向…',
+        ? `${applyLead(question)}：${loop.steps[3]!.body} 事情从「${cast.primary.keywords[0]}」滑向「${cast.changed.keywords[0]}」。${skTalk.dialogue}`
+        : `${applyLead(question)}：${loop.steps[3]!.body}`,
+      notePrompt: '我觉得事情接下来更像…',
       classicTitle: cast.changed
-        ? `Step 5 · 本变对照（${cast.primary.name} → ${cast.changed.name}）`
-        : 'Step 5 · 本卦（无变）',
+        ? `Step 5 · 本「${cast.primary.name}」→ 变「${cast.changed.name}」`
+        : 'Step 5 · 无变 · 对照本卦',
       classicText: cast.changed
-        ? `本卦「${cast.primary.fullName}」→ 变卦「${cast.changed.fullName}」\n${corpus?.judgment ?? ''}`
+        ? `本卦：${corpus?.judgment ?? cast.primary.gist}\n变卦关键词：${cast.changed.keywords.join('、')}`
         : corpus?.judgment ?? cast.primary.gist,
       classicBai: cast.changed
-        ? `${cast.primary.gist} → ${cast.changed.gist}`
-        : cast.primary.gist,
+        ? `从「${cast.primary.keywords[0]}」到「${cast.changed.keywords[0]}」——变卦是方向感。`
+        : glossDaXiang(cast.primary.name) ?? '',
       yaoFocus: step4Focus,
       toolHtml: `
-        ${bianQuiz ? renderBianQuizHtml(bianQuiz) : '<p class="ly-guide-tip">无变卦：本卦实战足够，先把当下看清。</p>'}
-        <p class="ly-sk-course-tease">${escapeHtml(skTalk.tease)}</p>
-        ${renderShengKeGraphHtml(skGraph, { question })}
-        <p class="ly-sk-course-dialogue">${escapeHtml(skTalk.dialogue)}</p>
-        ${renderSpiritNarrativeForCast(cast, question, castAt)}
+        ${renderCourseShengKeHtml(skGraph, { question })}
+        <p class="ly-guide-tip">${escapeHtml(skTalk.tease)}</p>
         ${energyFold}
+        ${
+          bianQuiz
+            ? renderBianQuizHtml(bianQuiz)
+            : '<p class="ly-guide-tip">无变卦：先把本卦与世应看清，再谈下一幕。</p>'
+        }
       `,
     },
     {
@@ -455,8 +488,12 @@ export function buildCourseLessons(
       crumbHint: '这一卦落到现实里，我接下来怎么做？',
       title: '连生活 · 策略',
       lookAt: question.trim() || '对照你真正在意的事',
-      basics: '把前面几步收成下面的推演闭环；一句话会同步到顶部卦象旁与主屏「此刻解读」。',
-      vernacular: '',
+      basics: '',
+      methodHtml: methodBlock(
+        '前面五步是「为什么」；这一步把结论收成可执行的一小步，避免停在概念里。',
+        '回看世应与用神 → 确认变卦方向 → 写清本周可验证的动作与底线（现金流、文书、边界）。',
+      ),
+      vernacular: `${applyLead(question)}：${loop.conclusion} 建议：${loop.action}`,
       notePrompt: '我这周打算验证的一小步是…',
       classicTitle: 'Step 6 · 教学摘录（整卦总览）',
       classicText:
@@ -466,7 +503,6 @@ export function buildCourseLessons(
       toolHtml: `
         ${renderQuestionBriefingForCast(cast, question, castAt)}
         ${renderPatternSummaryHtml(buildPatternSummary(cast, question, castAt))}
-        ${renderFinalLoopHtml(loop)}
       `,
     },
   ];
@@ -604,17 +640,15 @@ function renderCourseVisual(
     </div>`;
 }
 
-/** 古籍原文：本/变卦辞切换 + 传统断语 + 边看边问 */
+/** 古籍原文：本/变卦辞切换 + 传统断语（分域解析改在卦象解析） */
 function renderBooksAnnotationHtml(cast: CastResult, question: string): string {
   const d = resolveClassicDossier(cast.primary.name);
-  const pack = buildHexExpandPack(cast);
 
   return `
     <div class="ly-drawer-books" data-drawer-books>
-      <p class="ly-guide-tip">古人怎么说：本卦辞 / 变卦辞切换对照。生僻字先看白话，现代分域见「卦象解析」。</p>
+      <p class="ly-guide-tip">古人怎么说：用上方切换本卦辞 / 变卦辞。生僻字先看白话；工作感情等分域见「卦象解析」。</p>
       ${renderClassicGuaSwitchHtml(cast)}
       ${renderClassicCompendiumForCast(cast, question)}
-      ${renderClassicDomainOraclesHtml(pack)}
       ${
         d.zengshan
           ? teachFold(
@@ -623,7 +657,6 @@ function renderBooksAnnotationHtml(cast: CastResult, question: string): string {
             )
           : ''
       }
-      ${renderLearnFaqHtml(cast, question)}
     </div>
   `;
 }
@@ -695,43 +728,13 @@ function saveStudyNote(cast: CastResult, field: string, text: string): void {
   storageSet(studyNoteStorageKey(cast, field), text);
 }
 
-/** 为什么：图鉴意象 + 分域实际 + 能量推演（结构成卦见主屏「看根基」） */
+/** 为什么：卦象解析（意象 / 分域；能量与六神在专业排盘） */
 function renderDrawerXiangPaneHtml(
   cast: CastResult,
   question: string,
   castAt: Date,
 ): string {
-  const guide = buildHexGuidePack(cast.primary);
-  const { upper, lower } = upperLowerFromLines(cast.primaryLines);
-  const scene = composeScene(upper, lower, cast.primary);
-  const facts = buildReadingFacts(cast, question);
-  return `
-    <div class="ly-drawer-xiang" data-drawer-xiang>
-      <p class="ly-guide-tip">笔记侧：图鉴意象、工作/感情分行、能量链。成卦结构已在主屏「看根基」，此处不重复。</p>
-      ${renderGuideXiangSnippetHtml(guide, { linkToGuide: true })}
-      <p class="ly-layer-guide">实际落点 · 工作 / 感情</p>
-      ${renderSceneXiangHtml(scene, {
-        domain: facts.domain,
-        showFormula: false,
-      })}
-      <div class="ly-xiang-extra" data-xiang-extra-host>
-        <div class="ly-note-mini-tabs" role="tablist" aria-label="卦象解析续">
-          <button type="button" class="ly-note-mini-tab is-active" data-xiang-extra="energy" role="tab" aria-selected="true">能量链</button>
-          <button type="button" class="ly-note-mini-tab" data-xiang-extra="spirit" role="tab" aria-selected="false">六神</button>
-          <button type="button" class="ly-note-mini-tab" data-xiang-extra="expand" role="tab" aria-selected="false">分域拓展</button>
-        </div>
-        <div class="ly-xiang-extra-pane is-active" data-xiang-extra-pane="energy">
-          ${renderEnergyChainHtml(cast, question, castAt)}
-        </div>
-        <div class="ly-xiang-extra-pane" data-xiang-extra-pane="spirit" hidden>
-          ${renderSpiritNarrativeForCast(cast, question, castAt)}
-        </div>
-        <div class="ly-xiang-extra-pane" data-xiang-extra-pane="expand" hidden>
-          ${renderHexExpandHtml(buildHexExpandPack(cast))}
-        </div>
-      </div>
-    </div>
-  `;
+  return renderXiangNotesPaneHtml(cast, question, castAt);
 }
 
 function renderDrawerNotePaneHtml(lesson: CourseLesson | null, cast: CastResult): string {
@@ -810,6 +813,7 @@ export function renderLearnNotesShellHtml(
             <button type="button" class="ly-note-mini-tab is-active" data-drawer-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
             <button type="button" class="ly-note-mini-tab" data-drawer-tab="dress" role="tab" aria-selected="false">专业排盘</button>
             <button type="button" class="ly-note-mini-tab" data-drawer-tab="books" role="tab" aria-selected="false">古籍解析</button>
+            <button type="button" class="ly-note-mini-tab" data-drawer-tab="ask" role="tab" aria-selected="false">边看边问</button>
             <button type="button" class="ly-note-mini-tab" data-drawer-tab="journal" role="tab" aria-selected="false">个人沉淀</button>
           </div>
           <div class="ly-note-mini-body">
@@ -822,6 +826,9 @@ export function renderLearnNotesShellHtml(
             </div>
             <div class="ly-note-tab-panel" data-drawer-pane="books" hidden>
               ${renderBooksAnnotationHtml(cast, question)}
+            </div>
+            <div class="ly-note-tab-panel" data-drawer-pane="ask" hidden>
+              ${renderAskPanelHtml(cast, question, castAt)}
             </div>
             <div class="ly-note-tab-panel" data-drawer-pane="journal" hidden>
               ${renderDrawerNotePaneHtml(stepLesson, cast)}
@@ -861,14 +868,15 @@ function renderStepPanel(
       </div>`
           : ''
       }
-      ${lesson.toolHtml ?? ''}
       ${
         lesson.vernacular
-          ? `<div class="ly-course-teach">
+          ? `<div class="ly-course-apply">
+        <p class="ly-course-apply-label">🎯 结合你的问题</p>
         <p class="ly-course-vernacular">${formatClauseHtml(lesson.vernacular)}</p>
       </div>`
           : ''
       }
+      ${lesson.toolHtml ?? ''}
     </div>
   `;
 }
@@ -950,6 +958,8 @@ export function bindLearnCourse(
     bindQinDict(notes);
     bindClassicGuaSwitch(notes);
     bindGuideDomainTabs(notes);
+    bindXiangNotesPane(notes);
+    bindAskPanel(notes, cast, question, castAt);
     bindTermGloss(notes);
     refreshNotePending();
   };
@@ -1040,7 +1050,8 @@ export function bindLearnCourse(
     }
 
     if (opts?.showDressCard && opts.focusYaoIndex !== undefined) {
-      showDressYaoCard(notes, cast, question, opts.focusYaoIndex, castAt);
+      // 笔记侧栏内高亮装卦行即可，不弹居中爻卡（否则 body 锁滚 + 全屏罩会挡住主界面滑动）
+      highlightDressYaoRow(notes, opts.focusYaoIndex);
       const row = rows.find((r) => r.index === opts.focusYaoIndex);
       if (row) openQinDict(notes, row.liuqin);
     }
@@ -1075,11 +1086,31 @@ export function bindLearnCourse(
   const closeDrawer = () => {
     persistCurrentNote();
     persistStudyNotes();
+    closeDressYaoModal(notes);
     const drawer = notes.querySelector<HTMLElement>('[data-course-drawer]');
     if (drawer) drawer.hidden = true;
     notes.classList.remove('is-drawer-open');
     course.classList.remove('is-drawer-open');
     refreshNotePending();
+  };
+
+  const openFromPatternChip = (patternChip: HTMLElement) => {
+    const open = patternChip.dataset.patternOpen === 'xiang' ? 'xiang' : 'dress';
+    const yaoRaw = patternChip.dataset.patternYao;
+    const yaoIndex =
+      yaoRaw !== undefined && yaoRaw !== '' ? Number(yaoRaw) : Number.NaN;
+    if (open === 'dress' && Number.isFinite(yaoIndex)) {
+      openDrawer({ tab: 'dress', focusYaoIndex: yaoIndex, showDressCard: true });
+    } else {
+      openDrawer({ tab: open });
+    }
+    if (open === 'xiang') {
+      const host = notes.querySelector<HTMLElement>('[data-xiang-notes]');
+      if (host) {
+        const kind = patternChip.dataset.patternKind;
+        selectXiangSec(host, kind === 'struct' ? 'domain' : 'guide');
+      }
+    }
   };
 
   const wireStepUi = () => {
@@ -1095,6 +1126,13 @@ export function bindLearnCourse(
 
   course.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
+    const patternChip = t.closest<HTMLElement>('[data-pattern-chip]');
+    if (patternChip && course.contains(patternChip)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openFromPatternChip(patternChip);
+      return;
+    }
     const sk = t.closest<SVGGElement>('.ly-sk-node');
     if (sk && course.contains(sk)) {
       e.stopPropagation();
@@ -1115,6 +1153,13 @@ export function bindLearnCourse(
       if (row && host) {
         showYaoInlineTip(host, row, { domain });
       }
+      // 爻旁注解已含六神/六亲/能量，不再同步开笔记抽屉
+      return;
+    }
+    const hexHost = t.closest<HTMLElement>('[data-ask-hex], .ly-hex-inline-host');
+    if (hexHost && course.contains(hexHost)) {
+      e.stopPropagation();
+      openDrawer({ tab: 'dress' });
       return;
     }
     if (t.closest('[data-course-note-open]')) {
@@ -1123,12 +1168,14 @@ export function bindLearnCourse(
     }
   });
 
-  // 点爻旁注打开时：同步拉开笔记（专业排盘 + 该爻实盘卡）
-  root.addEventListener('ly-yao-tip-open', ((e: CustomEvent<{ index: number }>) => {
-    const idx = e.detail?.index;
-    if (!Number.isFinite(idx)) return;
-    openDrawer({ focusYaoIndex: idx, tab: 'dress', showDressCard: true });
-  }) as EventListener);
+  // 结果页顶部「格局摘要」也在 root 内，统一跳转专业排盘 / 卦象解析
+  root.addEventListener('click', (e) => {
+    const patternChip = (e.target as HTMLElement).closest<HTMLElement>('[data-pattern-chip]');
+    if (!patternChip || !root.contains(patternChip)) return;
+    if (course.contains(patternChip) || notes.contains(patternChip)) return; // 已由 course/notes 处理
+    e.preventDefault();
+    openFromPatternChip(patternChip);
+  });
 
   notes.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
@@ -1136,6 +1183,12 @@ export function bindLearnCourse(
     if (pathLink && notes.contains(pathLink) && pathLink.dataset.path) {
       e.preventDefault();
       navigate(pathLink.dataset.path);
+      return;
+    }
+    const patternChip = t.closest<HTMLElement>('[data-pattern-chip]');
+    if (patternChip && notes.contains(patternChip)) {
+      e.preventDefault();
+      openFromPatternChip(patternChip);
       return;
     }
     if (t.closest('[data-course-note-open]')) {
@@ -1157,6 +1210,14 @@ export function bindLearnCourse(
     }
   });
 
+  /** 此刻解读等处的「打开解读笔记」——不在 notes/course 内，需单独委托 */
+  root.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-course-note-open]');
+    if (!btn || !root.contains(btn)) return;
+    if (notes.contains(btn) || course.contains(btn)) return;
+    openDrawer();
+  });
+
   const paint = () => {
     persistCurrentNote();
     persistStudyNotes();
@@ -1165,17 +1226,28 @@ export function bindLearnCourse(
     if (body) body.innerHTML = renderStepPanel(lesson, cast, castAt, question);
     syncDrawerForStep(lesson);
     syncCourseTrail(course, index, lessons);
-    if (notes.classList.contains('is-drawer-open')) {
-      selectDrawerTab(drawerTabForStep(lesson.step));
-      if (drawerTabForStep(lesson.step) === 'books') {
-        highlightBookLines(focusLinesForStep(lesson.step));
-      }
-    }
     if (prevBtn) prevBtn.disabled = index === 0;
     if (nextBtn) {
       nextBtn.textContent = index >= lessons.length - 1 ? '完成 ✓' : '下一步 →';
     }
     wireStepUi();
+
+    // 第 2 步用神：自动打开专业排盘对照装卦
+    if (lesson.step === 2) {
+      const yongIdx = buildYongFocusPack(cast, question, castAt).focusIndexes[0];
+      selectDressLens(notes, 'energy');
+      openDrawer({
+        tab: 'dress',
+        focusYaoIndex: Number.isFinite(yongIdx) ? yongIdx : undefined,
+        showDressCard: Number.isFinite(yongIdx),
+      });
+    } else if (notes.classList.contains('is-drawer-open')) {
+      selectDrawerTab(drawerTabForStep(lesson.step));
+      if (drawerTabForStep(lesson.step) === 'books') {
+        highlightBookLines(focusLinesForStep(lesson.step));
+      }
+    }
+
     opts?.onStepChange?.(lesson.step);
   };
 

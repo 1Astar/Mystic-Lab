@@ -172,7 +172,7 @@ export function renderEnergyFocusHtml(items: EnergyFocusItem[]): string {
   return `
     <section class="ly-energy-focus" data-energy-focus>
       <h4>你的当下能量聚焦表</h4>
-      <p class="ly-layer-guide">不谈谁克死谁，只谈：注意力与能量，现在该放在哪个系统上。</p>
+      <p class="ly-layer-guide">注意力与能量，现在该放在哪个系统上。</p>
       <ul class="ly-energy-focus-list">
         ${items
           .map(
@@ -506,11 +506,13 @@ export const LIUQIN_DICT: Record<LiuQin, QinDictEntry> = {
     tag: '父母',
     modernTitle: '安全基地 / 信息网',
     modern:
-      '代表你的知识储备、学习能力、过往经验、基础盘（家庭支持、社保、合同文书、考题信息）。',
-    classic: '传统释：父母、师长、房屋、文书',
-    people: '父母、师长、长辈、文书主管、房东、信任的靠山',
-    place: '家、学校、办公室、档案馆、房产、照顾长辈的场域',
-    affair: '文书、合同、学业考试、房产事务、资讯与照顾',
+      '生助我者父母——一切庇护我身之人与物。现代可理解为知识储备、学习能力、基础盘（家庭支持、合同文书、考题信息）。',
+    classic: '生助我者父母。即一切庇护我身之人与物，以卦中父母爻为用神。',
+    people:
+      '父母、伯叔姑姨、义父母、师父、长辈、老人；尊长：老师、师傅、公司老板、大股东、靠山、问卜主人',
+    place: '城市、土地、房屋、车船、衣服、雨具、布匹、电话、床柜、物件',
+    affair:
+      '考试、资格、文书、契约、投稿、票据、证件、合同、帐目；学校、单位、工程、项目、投标；占天气则指下雨',
     mindset: '求安稳、依赖支持、责任感、文书焦虑',
   },
   官鬼: {
@@ -518,23 +520,24 @@ export const LIUQIN_DICT: Record<LiuQin, QinDictEntry> = {
     tag: '官鬼',
     modernTitle: '目标系统 / 外部规则',
     modern:
-      '代表你追求的目标（职位、项目）、外部施加的压力（KPI、行业环境），以及社会评价体系的框架。',
-    classic: '传统释：丈夫、领导、官非、灾祸',
-    people: '领导、考官、对手、约束你的人、关键客户',
-    place: '公司、考场、医院、评审场、高压场合',
-    affair: '考核升迁、项目交付、官司诉讼、疾病压力、KPI',
-    mindset: '被审视、进取心、压力感、较劲与边界',
+      '约制我者官鬼——一切拘束与约制我身者。现代可理解为职位项目、KPI、考核与社会评价框架。',
+    classic: '约制我者官鬼。即一切拘束与约制我身者，以卦中官鬼爻为用神。',
+    people: '丈夫、未婚夫、情夫、男友、上司、领导、祈求之贵人、男人',
+    place: '公司、考场、官府、公证场合、评审场、高压场合',
+    affair:
+      '功名、事业、荣誉、成就、工作、职位、学科、专业、官府、公证、诉讼；鬼神、贼盗、邪祟、敌国、敌对方；天气指乌云雷电；占病代表疾病',
+    mindset: '忧虑、担心、祸患、虚假、不利、不如愿、厌恶、冷门',
   },
   妻财: {
     qin: '妻财',
     tag: '妻财',
     modernTitle: '物质根基 / 自我价值',
     modern:
-      '代表你能掌控的实际资源（金钱、技能）、自我价值的回报，以及让你感到稳定和安全的生活基础。',
-    classic: '传统释：妻子、仆人、财富、欲望',
-    people: '财务相关人、付钱的客户、你所养之人、物质交换对象',
+      '我所克者妻财——能掌控的实际资源与回报。现代可理解为金钱、技能变现，以及让你感到稳定的生活基础。',
+    classic: '我所克者妻财。传统释：妻子、仆人、财富、欲望。',
+    people: '财务相关人、付钱的客户、你所养之人、物质交换对象；女测婚恋常看此',
     place: '市场、交易场、家庭财务角落、资源池',
-    affair: '薪资报酬、买卖投资、资产配置、技能变现',
+    affair: '薪资报酬、买卖投资、资产配置、技能变现、经营求财',
     mindset: '安全感、价值感、占有欲、怕失去的底气',
   },
   子孙: {
@@ -542,11 +545,11 @@ export const LIUQIN_DICT: Record<LiuQin, QinDictEntry> = {
     tag: '子孙',
     modernTitle: '内在创造力 / 破局点',
     modern:
-      '代表你的创造力、灵感、打破常规的能力、健康的身体，以及能让你放松和愉悦的源泉。',
-    classic: '传统释：儿女、下属、晚辈',
+      '我所生者子孙——创造力、灵感、健康与解压之源。能破官鬼压力，也常主技艺与晚辈。',
+    classic: '我所生者子孙。传统释：儿女、下属、晚辈、医生、技艺。',
     people: '子女、下属、晚辈、医生、技艺导师、解压搭子',
-    place: '工作室、诊室、工作室、放松空间、技艺练习场',
-    affair: '技艺创作、享乐休息、破局解压、疗愈照顾',
+    place: '诊所、诊室、工作室、放松空间、技艺练习场',
+    affair: '技艺创作、享乐休息、破局解压、疗愈照顾、求子',
     mindset: '轻松、创造力、喜悦、想卸压的冲动',
   },
   兄弟: {
@@ -554,9 +557,9 @@ export const LIUQIN_DICT: Record<LiuQin, QinDictEntry> = {
     tag: '兄弟',
     modernTitle: '同侪环境 / 盟友圈',
     modern:
-      '代表你的同代人、所处社交圈层的状态、竞争关系，以及你在群体中的合作与拉扯。',
-    classic: '传统释：兄弟、朋友、竞争者',
-    people: '朋友、同侪、合伙人、竞争者',
+      '与我同类者兄弟——同代人、社交圈层、合作与竞争。常主耗财往来与分杯之争。',
+    classic: '与我同类者兄弟。传统释：兄弟、朋友、竞争者。',
+    people: '朋友、同侪、合伙人、竞争者、同辈手足',
     place: '社交圈、同辈场合、合伙场域、群体拉扯的场',
     affair: '合伙协作、竞争分杯、争抢资源、耗财往来',
     mindset: '比较心、同盟感、消耗感、怕被分走',
@@ -726,12 +729,14 @@ export function renderInternalInferenceHtml(inf: InternalInference): string {
   `;
 }
 
-export function renderQinDictHtml(): string {
+export function renderQinDictHtml(defaultQin: LiuQin = '父母'): string {
   const order: LiuQin[] = ['父母', '官鬼', '妻财', '子孙', '兄弟'];
+  const active = LIUQIN_DICT[defaultQin] ? defaultQin : '父母';
   const tags = order
     .map((q) => {
       const d = LIUQIN_DICT[q];
-      return `<button type="button" class="ly-qin-dict-tag" data-qin-dict="${q}" aria-pressed="false" title="${escapeQinHtml(
+      const on = q === active;
+      return `<button type="button" class="ly-qin-dict-tag" data-qin-dict="${q}" aria-pressed="${on}" title="${escapeQinHtml(
         d.modernTitle,
       )}">${escapeQinHtml(d.tag)}</button>`;
     })
@@ -739,9 +744,9 @@ export function renderQinDictHtml(): string {
   return `
     <section class="ly-qin-dict" data-qin-dict-root>
       <h4>六亲词典</h4>
-      <p class="ly-guide-tip">点「父母 / 官鬼…」立刻看人物 · 场所 · 事务 · 心态。</p>
+      <p class="ly-guide-tip">切换「父母 / 官鬼…」看人物 · 场所 · 事务 · 心态（默认展开）。</p>
       <div class="ly-qin-dict-tags">${tags}</div>
-      <div class="ly-qin-dict-panel" data-qin-dict-panel hidden></div>
+      <div class="ly-qin-dict-panel" data-qin-dict-panel>${renderQinDictPanelHtml(LIUQIN_DICT[active])}</div>
     </section>
   `;
 }
@@ -774,21 +779,13 @@ export function bindQinDict(root: HTMLElement): void {
       if (!btn || !host.contains(btn)) return;
       const q = btn.dataset.qinDict as LiuQin;
       const d = LIUQIN_DICT[q];
-      if (!d) return;
-      const on = btn.getAttribute('aria-pressed') === 'true';
-      host.querySelectorAll('[data-qin-dict]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-      if (on) {
-        if (panel) {
-          panel.hidden = true;
-          panel.innerHTML = '';
-        }
-        return;
-      }
-      btn.setAttribute('aria-pressed', 'true');
-      if (panel) {
-        panel.hidden = false;
-        panel.innerHTML = renderQinDictPanelHtml(d);
-      }
+      if (!d || !panel) return;
+      // 始终展开；再点同一项只保持展开，不收起
+      host.querySelectorAll('[data-qin-dict]').forEach((b) => {
+        b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.qinDict === q));
+      });
+      panel.hidden = false;
+      panel.innerHTML = renderQinDictPanelHtml(d);
     });
   });
 

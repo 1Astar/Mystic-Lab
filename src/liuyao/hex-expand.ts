@@ -2,7 +2,7 @@ import type { CastResult } from './engine.ts';
 import type { Hexagram } from './hexagrams.ts';
 import { upperLowerFromLines } from './hexagrams.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
-import { composeScene, renderSceneXiangHtml } from './scene-map.ts';
+import { trigramScene } from './scene-map.ts';
 import type { TrigramId } from './trigrams.ts';
 
 export type DomainOracle = {
@@ -173,13 +173,18 @@ function buildDomains(
 
   const love: DomainOracle = {
     label: '感情',
-    modern: pick(
-      tone,
-      '热度与条件较匹配，关系偏热烈稳定；好过了头也易碰触，宜多包容。',
-      '内外期待有落差，易见冷淡、拉扯。先对齐边界，再谈升温。',
-      '关系有回暖、重谈之机，适合一次真诚对话验证。',
-      '宜渐进沟通，把没说清的话说清，勿制造戏剧转折。',
-    ),
+    modern: (() => {
+      const u = trigramScene(upper);
+      const l = trigramScene(lower);
+      const tip = pick(
+        tone,
+        '热度与条件较匹配，关系偏热烈稳定；好过了头也易碰触，宜多包容。',
+        '内外期待有落差，易见冷淡、拉扯。先对齐边界，再谈升温。',
+        '关系有回暖、重谈之机，适合一次真诚对话验证。',
+        '宜渐进沟通，把没说清的话说清，勿制造戏剧转折。',
+      );
+      return `你这边偏「${l.love}」；关系场偏「${u.love}」。合看主调「${kw}」——${tip}可自问：该推进、该止步，还是先说清楚？`;
+    })(),
     classic: pick(tone, '情热而稳', '情路不顺', '情可复温', '情宜缓语'),
   };
 
@@ -244,14 +249,19 @@ function buildDomains(
   };
 
   const career: DomainOracle = {
-    label: '事业',
-    modern: pick(
-      tone,
-      `运势偏上升（${kw}）。多能遇见提携或被看见；脚踏实地、戒骄。`,
-      `局面偏紧（${kw}）。宜守边界与证据，减无效消耗，再等窗口。`,
-      `转机露头（${kw}）。旧法可能失效，适合小步试新路径。`,
-      `结构偏稳（${kw}）。把节奏与职责对齐，积小成，忌大转向。`,
-    ),
+    label: '工作',
+    modern: (() => {
+      const u = trigramScene(upper);
+      const l = trigramScene(lower);
+      const tip = pick(
+        tone,
+        `运势偏上升（${kw}）。多能遇见提携或被看见；脚踏实地、戒骄。`,
+        `局面偏紧（${kw}）。宜守边界与证据，减无效消耗，再等窗口。`,
+        `转机露头（${kw}）。旧法可能失效，适合小步试新路径。`,
+        `结构偏稳（${kw}）。把节奏与职责对齐，积小成，忌大转向。`,
+      );
+      return `你这边偏「${l.career}」；外面场偏「${u.career}」。合看主调「${kw}」——${tip}可自问：我是在硬推，还是该先停/先谈？`;
+    })(),
     classic: pick(tone, '事业渐开', '事业宜守', '事业有转', '事业稳进'),
   };
 
@@ -365,15 +375,15 @@ function buildDomains(
 
   return [
     fortune,
+    career,
+    love,
     family,
     diseaseFromTrigrams(upper, lower),
-    love,
     marriage,
     pregnancy,
     children,
     cashflow,
     trade,
-    career,
     jobSeek,
     careerChange,
     openShop,
@@ -409,7 +419,6 @@ function buildChangedImpact(primary: Hexagram, changed: Hexagram): string {
 export function buildHexExpandPack(cast: CastResult): HexExpandPack {
   const { upper, lower } = upperLowerFromLines(cast.primaryLines);
   const primary = cast.primary;
-  const scene = composeScene(upper, lower, primary);
   const tone = toneFromKeywords(primary);
 
   return {
@@ -418,115 +427,75 @@ export function buildHexExpandPack(cast: CastResult): HexExpandPack {
     meta: buildMeta(primary, tone),
     domains: buildDomains(primary, upper.id, lower.id),
     changedImpact: cast.changed ? buildChangedImpact(primary, cast.changed) : null,
-    sceneHtml: renderSceneXiangHtml(scene, { domain: 'general', showFormula: false }),
+    /** 兼容旧字段：工作/感情已并入分域卡 */
+    sceneHtml: '',
   };
 }
 
-function renderDomainRows(items: DomainOracle[]): string {
-  return items
+function renderOracleTags(domains: DomainOracle[]): string {
+  return `<div class="ly-oracle-tags" aria-label="传统断语标签">${domains
     .map(
-      (d) => `
-      <div class="ly-hex-expand-domain">
-        <p class="ly-hex-expand-domain-line">
-          <strong class="ly-hex-expand-domain-label">${escapeHtml(d.label)}：</strong>
-          <span class="ly-hex-expand-domain-body">${escapeHtml(d.modern)}</span>
-        </p>
-      </div>`,
+      (d) =>
+        `<span class="ly-oracle-tag" title="${escapeHtml(d.label)}"><span class="ly-oracle-tag-k">${escapeHtml(d.label)}</span>${escapeHtml(d.classic)}</span>`,
     )
-    .join('');
+    .join('')}</div>`;
 }
 
-function renderDomainChipTabs(items: DomainOracle[]): string {
-  if (!items.length) return '';
-  const tabs = items
-    .map(
-      (d, i) =>
-        `<button type="button" class="ly-note-mini-tab${i === 0 ? ' is-active' : ''}" data-expand-domain="${i}" role="tab" aria-selected="${i === 0}">${escapeHtml(d.label)}</button>`,
-    )
-    .join('');
-  const panes = items
-    .map(
-      (d, i) => `
-      <div class="ly-hex-expand-domain-pane${i === 0 ? ' is-active' : ''}" data-expand-domain-pane="${i}" ${i === 0 ? '' : 'hidden'}>
-        <p class="ly-hex-expand-domain-body">${escapeHtml(d.modern)}</p>
-      </div>`,
-    )
-    .join('');
+/** 单条分域：标题与断语标签同行，下面写解释 */
+function renderDomainCardHtml(d: DomainOracle): string {
   return `
-    <div class="ly-hex-expand-domains" data-expand-domains>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="分域解说">${tabs}</div>
-      ${panes}
-    </div>
-  `;
+    <article class="ly-domain-card" data-domain-card="${escapeHtml(d.label)}">
+      <div class="ly-domain-card-head">
+        <h4 class="ly-domain-card-title">${escapeHtml(d.label)}</h4>
+        <span class="ly-oracle-tag ly-domain-card-tag">${escapeHtml(d.classic)}</span>
+      </div>
+      <p class="ly-domain-card-body">${escapeHtml(d.modern)}</p>
+    </article>`;
 }
 
-export function renderHexExpandHtml(pack: HexExpandPack): string {
+/** 白话分域：每条 = 大标题 + 断语标签 + 解释（工作/感情已写全） */
+export function renderHexExpandBaiHtml(pack: HexExpandPack): string {
   const changedBody = pack.changedImpact
     ? `<p class="ly-hex-expand-body">${escapeHtml(pack.changedImpact)}</p>`
     : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下结构看清。</p>`;
 
+  const allDomains = [...pack.meta, ...pack.domains];
+  const cards = allDomains.map(renderDomainCardHtml).join('');
+
   return `
     <article class="ly-hex-expand" data-hex-expand>
       <h4 class="ly-hex-expand-title">📜 · ${escapeHtml(pack.primaryTitle)}</h4>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="本卦拓展">
-        <button type="button" class="ly-note-mini-tab is-active" data-expand-tab="core" role="tab" aria-selected="true">卦象核心释义</button>
-        <button type="button" class="ly-note-mini-tab" data-expand-tab="domains" role="tab" aria-selected="false">分域解说</button>
-        <button type="button" class="ly-note-mini-tab" data-expand-tab="changed" role="tab" aria-selected="false">变卦</button>
-      </div>
-      <div class="ly-hex-expand-pane is-active" data-expand-pane="core">
-        <section class="ly-hex-expand-sec">
-          <p class="ly-hex-expand-body">${escapeHtml(pack.coreBai)}</p>
-          ${pack.sceneHtml}
-          <div class="ly-hex-expand-meta">${renderDomainRows(pack.meta)}</div>
-        </section>
-      </div>
-      <div class="ly-hex-expand-pane" data-expand-pane="domains" hidden>
-        <section class="ly-hex-expand-sec">
-          <p class="ly-guide-tip">按所问点选领域；断语仅供参考。</p>
-          ${renderDomainChipTabs(pack.domains)}
-        </section>
-      </div>
-      <div class="ly-hex-expand-pane" data-expand-pane="changed" hidden>
-        <section class="ly-hex-expand-sec">${changedBody}</section>
-      </div>
+      <section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">卦象核心释义</p>
+        <p class="ly-hex-expand-body">${escapeHtml(pack.coreBai)}</p>
+      </section>
+      <section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">分域解说</p>
+        <div class="ly-domain-cards" data-expand-domains>
+          ${cards}
+        </div>
+      </section>
+      <section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">变卦方向</p>
+        ${changedBody}
+      </section>
     </article>
   `;
 }
 
-/** 古籍区：传统分类短断 */
-export function renderClassicDomainOraclesHtml(pack: HexExpandPack): string {
-  const metaTabs = pack.meta
-    .map(
-      (d, i) =>
-        `<button type="button" class="ly-note-mini-tab${i === 0 ? ' is-active' : ''}" data-oracle-tab="m${i}" role="tab" aria-selected="${i === 0}">${escapeHtml(d.label)}</button>`,
-    )
-    .join('');
-  const domainTabs = pack.domains
-    .map(
-      (d, i) =>
-        `<button type="button" class="ly-note-mini-tab" data-oracle-tab="d${i}" role="tab" aria-selected="false">${escapeHtml(d.label)}</button>`,
-    )
-    .join('');
-  const metaPanes = pack.meta
-    .map(
-      (d, i) =>
-        `<div class="ly-classic-oracle-pane${i === 0 ? ' is-active' : ''}" data-oracle-pane="m${i}" ${i === 0 ? '' : 'hidden'}><p><strong>${escapeHtml(d.label)}</strong>：${escapeHtml(d.classic)}</p></div>`,
-    )
-    .join('');
-  const domainPanes = pack.domains
-    .map(
-      (d, i) =>
-        `<div class="ly-classic-oracle-pane" data-oracle-pane="d${i}" hidden><p><strong>${escapeHtml(d.label)}</strong>：${escapeHtml(d.classic)}</p></div>`,
-    )
-    .join('');
+/** @deprecated 用 renderHexExpandBaiHtml；保留兼容旧调用 */
+export function renderHexExpandHtml(pack: HexExpandPack): string {
+  return renderHexExpandBaiHtml(pack);
+}
 
+/** 卦象解析：传统断语 → 标签（解说见白话分域） */
+export function renderClassicDomainOraclesHtml(pack: HexExpandPack): string {
+  const allDomains = [...pack.meta, ...pack.domains];
   return `
     <div class="ly-classic-oracles" data-classic-oracles>
-      <p class="ly-layer-guide">传统断语（教学整理 · 仅供对照）</p>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="传统断语">${metaTabs}${domainTabs}</div>
-      ${metaPanes}
-      ${domainPanes}
-      <p class="ly-guide-tip">断语仅供参考，吉凶请结合具体所测人事与动变细断。</p>
+      <p class="ly-layer-guide">传统断语（标签 · 仅供对照）</p>
+      ${renderOracleTags(allDomains)}
+      <p class="ly-guide-tip">下方白话解说为展开；断语仅供参考，吉凶请结合所测人事与动变细断。</p>
     </div>
   `;
 }

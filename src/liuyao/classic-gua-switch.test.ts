@@ -36,7 +36,7 @@ describe('classic-gua-switch', () => {
     expect(cast.changed).toBeTruthy();
     const html = renderClassicGuaSwitchHtml(cast);
     expect(html).toMatch(/data-gua-switch/);
-    expect(html).toMatch(/本卦辞 · 六爻/);
+    expect(html).toMatch(/本卦辞 · /);
     expect(html).toMatch(/变卦辞/);
     expect(html).toMatch(/data-gua-side="primary"/);
     expect(html).toMatch(/data-gua-side="changed"/);

@@ -42,10 +42,10 @@ describe('classic-compendium', () => {
     );
     expect(html).toMatch(/传统解卦全书/);
     expect(html).toMatch(/ly-compendium/);
-    expect(html).toMatch(/data-compendium-primary/);
-    expect(html).toMatch(/本卦 ·/);
-    expect(html).toMatch(/data-compendium-changed/);
-    expect(html).toMatch(/变卦 ·/);
+    expect(html).toMatch(/data-compendium-side="primary"/);
+    expect(html).toMatch(/data-compendium-side="changed"/);
+    expect(html).not.toMatch(/data-gua-switch/);
+    expect(html).toMatch(/跟上方切换/);
     expect(html).toMatch(/本变对照/);
     expect(html).toMatch(/象曰/);
     expect(html).toMatch(/诗曰/);

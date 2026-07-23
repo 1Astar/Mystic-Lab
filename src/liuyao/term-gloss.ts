@@ -57,6 +57,21 @@ export const TERM_GLOSS: Record<string, TermGloss> = {
     tip: '老阳／老阴会翻的爻，标出哪里正在变。',
     conceptId: 'dong-yao',
   },
+  'yue-jian': {
+    id: 'yue-jian',
+    title: '月建',
+    tip: '起卦那个月的地支（如未、子）。用来当「这个月的气场标尺」，量爻的五行旺不旺——和动不动无关。',
+  },
+  'wu-xing': {
+    id: 'wu-xing',
+    title: '五行',
+    tip: '金、木、水、火、土。地支各带固定五行：如子水、未土、寅木。',
+  },
+  'xiang-ke': {
+    id: 'xiang-ke',
+    title: '相克',
+    tip: '五行相克口诀：土克水、水克火、火克金、金克木、木克土。月建克爻 → 爻偏弱（死）。',
+  },
 };
 
 function escapeHtml(s: string): string {
@@ -67,8 +82,12 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 可点开的名词标签（旁挂短释义） */
-export function renderTermLabelHtml(termId: string, label?: string): string {
+/** 可点开的名词标签（旁挂短释义；askMark 时在旁加小问号） */
+export function renderTermLabelHtml(
+  termId: string,
+  label?: string,
+  opts?: { askMark?: boolean },
+): string {
   const t = TERM_GLOSS[termId];
   if (!t) return escapeHtml(label ?? termId);
   const text = label ?? t.title;
@@ -77,11 +96,14 @@ export function renderTermLabelHtml(termId: string, label?: string): string {
         t.conceptId,
       )}" data-path="/liuyao/concepts#${escapeHtml(t.conceptId)}">详解 →</a>`
     : '';
+  const ask = opts?.askMark
+    ? `<span class="ly-term-ask" aria-hidden="true">?</span>`
+    : '';
   return `
     <span class="ly-term" data-term="${escapeHtml(t.id)}">
       <button type="button" class="ly-term-btn" aria-expanded="false" title="${escapeHtml(t.tip)}">${escapeHtml(
         text,
-      )}</button>
+      )}${ask}</button>
       <span class="ly-term-tip" hidden>
         <span class="ly-term-tip-body">${escapeHtml(t.tip)}</span>
         ${more}

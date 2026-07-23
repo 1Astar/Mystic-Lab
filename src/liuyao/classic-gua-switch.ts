@@ -103,7 +103,7 @@ export function renderClassicGuaSwitchHtml(cast: CastResult): string {
     <section class="ly-gua-switch" data-gua-switch>
       <div class="ly-gua-switch-tabs" role="tablist" aria-label="本卦 / 变卦辞切换">
         <button type="button" class="ly-gua-switch-tab is-active" data-gua-side="primary" role="tab" aria-selected="true">
-          本卦辞 · 六爻
+          本卦辞 · ${escapeHtml(primaryName)}
         </button>
         <button type="button" class="ly-gua-switch-tab" data-gua-side="changed" role="tab" aria-selected="false"${
           hasChanged ? '' : ' disabled title="无动爻则无变卦"'
@@ -119,6 +119,15 @@ export function renderClassicGuaSwitchHtml(cast: CastResult): string {
       </div>
     </section>
   `;
+}
+
+function syncCompendiumSides(scope: ParentNode | null, side: 'primary' | 'changed'): void {
+  if (!scope) return;
+  scope.querySelectorAll<HTMLElement>('[data-compendium-side]').forEach((pane) => {
+    const on = pane.dataset.compendiumSide === side;
+    pane.classList.toggle('is-active', on);
+    pane.hidden = !on;
+  });
 }
 
 export function bindClassicGuaSwitch(root: HTMLElement): void {
@@ -141,6 +150,14 @@ export function bindClassicGuaSwitch(root: HTMLElement): void {
         pane.classList.toggle('is-active', on);
         (pane as HTMLElement).hidden = !on;
       });
+
+      // 古籍全文跟上方「本卦辞 / 变卦辞」联动；装卦本/变表不碰
+      if (host.hasAttribute('data-dress-dual')) return;
+      const scope =
+        host.closest('[data-drawer-books]') ??
+        host.closest('[data-note-pane="classic"]') ??
+        host.parentElement;
+      syncCompendiumSides(scope, side);
     });
   });
 }

@@ -312,7 +312,8 @@ export function renderAdvancedPlateBodyHtml(plate: AdvancedPlate): string {
   return `
     <p class="ly-guide-tip">专业向参考：默认收起，不影响新手主路径。象义提示，不作定论。</p>
     <div class="ly-adv-block">
-      <p class="ly-layer-guide">伏神</p>
+      <p class="ly-layer-guide">伏神（伏藏）</p>
+      <p class="ly-guide-tip">本卦缺某个六亲时，从本宫纯卦「藏」在对应爻下，叫伏神／伏藏——表上暂时看不见，但仍可能起作用。飞神＝本卦同爻现出的那一层。</p>
       ${fu}
     </div>
     <div class="ly-adv-block">

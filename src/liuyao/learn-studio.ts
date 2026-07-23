@@ -1,8 +1,8 @@
 import type { CastResult } from './engine.ts';
 import { LINE_LABELS, upperLowerFromLines } from './hexagrams.ts';
-import { dressHexagram, type YaoDress, type LiuQin } from './najia.ts';
+import { dressHexagram, type LiuQin } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
-import { buildShengKeMap, YUAN_OF, JI_OF } from './shengke-map.ts';
+import { YUAN_OF, JI_OF } from './shengke-map.ts';
 import { detectSceneDomain, type SceneDomain } from './scene-map.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
 import { glossLine, glossDaXiang } from './classic-gloss.ts';
@@ -13,7 +13,6 @@ import { renderXiangVisual } from './xiang-visual.ts';
 import { renderHexagramSvg } from '../ui/liuyao/hexagram-view.ts';
 import { hexagramFormModern } from './trigrams.ts';
 import {
-  formatLiuqinShort,
   bindQinDict,
   renderQinDictHtml,
   buildEnergyFocusFromDress,
@@ -24,12 +23,6 @@ import { renderSpiritNarrativeForCast } from './spirit-narrative.ts';
 /** 仇神 = 生忌神者 */
 export function chouOf(yongQin: LiuQin): LiuQin {
   return YUAN_OF[JI_OF[yongQin]];
-}
-
-function pickRow(rows: YaoDress[], qin: LiuQin): YaoDress | undefined {
-  const matches = rows.filter((r) => r.liuqin === qin);
-  if (!matches.length) return undefined;
-  return matches.find((r) => r.changing) ?? matches.find((r) => r.isShi) ?? matches[0];
 }
 
 /** 【卦象解析】为什么形成这个卦？上/下象代表 → 合成公式 */
@@ -77,7 +70,10 @@ export function renderGuaXiangCard(cast: CastResult): string {
   `;
 }
 
-/** 【能量现状推演】用/元/忌/仇 因果链 */
+/**
+ * 【能量现状】唯一入口：世应聚焦表 + 用/元/忌/仇叙事。
+ * 不再另写一套卡片，避免与 spirit-narrative 重复。
+ */
 export function renderEnergyChainHtml(
   cast: CastResult,
   question: string,
@@ -85,114 +81,14 @@ export function renderEnergyChainHtml(
 ): string {
   const sz = siZhuFromDate(castAt);
   const dressed = dressHexagram(cast, sz.dayStem);
-  const map = buildShengKeMap(cast, dressed, question);
-  const domain = detectSceneDomain(question);
-  const yong = map.nodes.find((n) => n.role === '用神')?.row;
-  const yuan = map.nodes.find((n) => n.role === '原神')?.row;
-  const ji = map.nodes.find((n) => n.role === '忌神')?.row;
-  const chouQin = map.yongQin ? chouOf(map.yongQin) : null;
-  const chou = chouQin ? pickRow(dressed.rows, chouQin) : undefined;
-
-  // 重写为用户模板语气
-  const matter =
-    domain === 'career'
-      ? '事业 / 面试'
-      : domain === 'love'
-        ? '感情 / 关系'
-        : domain === 'life'
-          ? '资源 / 钱财'
-          : '你问的事';
-
-  const lines: { emoji: string; title: string; body: string; note?: string }[] = [];
-
-  if (yong && map.yongQin) {
-    lines.push({
-      emoji: '💪',
-      title: `核心聚焦（用神）· ${formatLiuqinShort(map.yongQin)}`,
-      body: `你问的事（比如${matter}），在这个卦里用「${formatLiuqinShort(map.yongQin)}」代表，落在${yong.label}——这是本题注意力该放的系统。`,
-      note: `用神在${yong.label}${map.yongQin}`,
-    });
-  } else {
-    lines.push({
-      emoji: '💪',
-      title: '核心聚焦（用神）',
-      body: `本题关注「${matter}」，用神尚未落到具体爻——先写清问题再锚定「该看哪个系统」。`,
-    });
-  }
-
-  if (yuan) {
-    lines.push({
-      emoji: '🛡️',
-      title: `补给系统（元神）· ${formatLiuqinShort(yuan.liuqin)}`,
-      body: yuan.changing
-        ? `目前有很强的能量在${yuan.label}（${formatLiuqinShort(yuan.liuqin)}）辅助你的核心聚焦。外部环境其实对你是有利的——借力，别空等。`
-        : `场上有「${formatLiuqinShort(yuan.liuqin)}」可作补给（${yuan.label}），虽未大动，仍值得借力。`,
-      note: `元神在${yuan.label}${yuan.liuqin}${yuan.changing ? '发动' : ''}，生助用神`,
-    });
-  } else {
-    lines.push({
-      emoji: '🛡️',
-      title: '补给系统（元神）',
-      body: '未见明显补给系统。动力更多靠你自己对齐节奏、做小步验证。',
-      note: '元神未现',
-    });
-  }
-
-  if (ji) {
-    lines.push({
-      emoji: '⚠️',
-      title: `耗散系统（忌神）· ${formatLiuqinShort(ji.liuqin)}`,
-      body: ji.changing
-        ? `底下有暗流在${ji.label}（${formatLiuqinShort(ji.liuqin)}）正在动，可能在拉走你的注意力与体感。建议先减这一层消耗，再谈大推进。`
-        : `底下有暗流在${ji.label}（${formatLiuqinShort(ji.liuqin)}）悄悄拉扯——干扰未必喧哗，但会拖节奏。`,
-      note: `忌神在${ji.label}${ji.liuqin}${ji.changing ? '发动' : '（静/暗处牵制）'}`,
-    });
-  } else {
-    lines.push({
-      emoji: '⚠️',
-      title: '耗散系统（忌神）',
-      body: '耗散系统不明显，干扰项相对少，可更专注核心聚焦本身。',
-      note: '忌神未现',
-    });
-  }
-
-  if (chou) {
-    const yuanStrong = Boolean(yuan?.changing);
-    lines.push({
-      emoji: '🤝',
-      title: `拉扯层（仇神）· ${formatLiuqinShort(chou.liuqin)}`,
-      body: yuanStrong
-        ? `虽然有干扰，但补给能量偏强，形成拉扯与拦截。结论：虽有内耗，结果仍可偏积极——先减耗散，再借补给。`
-        : `拉扯层在${chou.label}（${formatLiuqinShort(chou.liuqin)}）参与博弈。建议：先减耗散干扰，再借补给推进，顺序比速度重要。`,
-      note: `仇神倾向${chou.label}${chou.liuqin}（生忌神者）`,
-    });
-  } else {
-    lines.push({
-      emoji: '🤝',
-      title: '拉扯层（仇神）',
-      body: '拉扯层未直接落到爻上。先看耗散系统是否在暗处牵制，再决定先清干扰还是先借补给。',
-      note: '仇神未直接落到爻',
-    });
-  }
-
   const focusHtml = renderEnergyFocusHtml(
     buildEnergyFocusFromDress(dressed.rows, cast.changingIndexes, dressed.palaceWx),
   );
 
   return `
-    <section class="ly-energy-chain">
+    <section class="ly-energy-chain" data-energy-chain>
       ${focusHtml}
-      <h4>【能量现状推演】</h4>
-      <p class="ly-guide-tip">这里谈的是「注意力放哪」，不是谁克死谁。</p>
-      ${lines
-        .map(
-          (l) => `
-        <div class="ly-energy-chain-item">
-          <p><strong>${l.emoji} ${l.title}：</strong>${l.body}</p>
-          ${l.note ? `<p class="ly-classic-note">（注：传统断语为：${l.note}）</p>` : ''}
-        </div>`,
-        )
-        .join('')}
+      ${renderSpiritNarrativeForCast(cast, question, castAt)}
     </section>
   `;
 }
@@ -340,7 +236,6 @@ export function renderLearnStudioHtml(
         <p class="ly-studio-col-label">【左侧】推演与教学区</p>
         ${renderGuaXiangCard(cast)}
         ${renderEnergyChainHtml(cast, question, castAt)}
-        ${renderSpiritNarrativeForCast(cast, question, castAt)}
         ${renderMovingYaoCards(cast, domain)}
       </div>
       <div class="ly-studio-right">

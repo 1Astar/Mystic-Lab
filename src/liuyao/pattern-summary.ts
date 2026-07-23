@@ -5,11 +5,20 @@ import { siZhuFromDate } from './ganzhi.ts';
 import { buildReadingFacts } from './reading-facts.ts';
 import type { ShiYingRel } from './wuxing.ts';
 
+/** 点标签打开哪一侧：盘面事实 vs 卦象白话 */
+export type PatternOpenTarget = 'dress' | 'xiang';
+
 export type PatternChip = {
   id: string;
   label: string;
   tip: string;
   kind: 'shi' | 'rel' | 'move' | 'struct';
+  /** 点击后打开的笔记 Tab */
+  open: PatternOpenTarget;
+  /** 关联爻（0–5），便于专业排盘高亮 */
+  yaoIndex?: number;
+  /** 小备注，如「官鬼（二世）」 */
+  note?: string;
 };
 
 export type PatternSummary = {
@@ -52,7 +61,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 从本卦装卦提炼格局摘要条 */
+/** 从本卦装卦提炼格局摘要条（每条都能回链到盘面或卦象） */
 export function buildPatternSummary(
   cast: CastResult,
   question = '',
@@ -61,6 +70,14 @@ export function buildPatternSummary(
   const facts = buildReadingFacts(cast, question, castAt);
   const rows = dressHexagram(cast, siZhuFromDate(castAt).dayStem).rows;
   const shi = rows.find((r) => r.isShi);
+  const stage = palaceStageOfHexagram(cast.primary.name);
+  /** 八宫阶位备注：二世 →「官鬼（二世卦）」 */
+  const stageNote = (qin: string) => {
+    if (!stage) return undefined;
+    const lab = stage.stageLabel;
+    if (lab === '本宫' || lab === '游魂' || lab === '归魂') return `${qin}（${lab}）`;
+    return `${qin}（${lab}卦）`;
+  };
   const chips: PatternChip[] = [];
 
   if (shi) {
@@ -69,26 +86,35 @@ export function buildPatternSummary(
       label: `${shi.liuqin}持世`,
       tip: SHI_TIP[shi.liuqin],
       kind: 'shi',
+      open: 'dress',
+      yaoIndex: shi.index,
+      note: stageNote(shi.liuqin),
     });
   }
 
   chips.push({
     id: `rel-${facts.shiYingRel.rel}`,
     label: `世应${facts.shiYingRel.rel}`,
-    tip: `${facts.shiYingRel.verdict}——${REL_TIP[facts.shiYingRel.rel]}`,
+    tip: REL_TIP[facts.shiYingRel.rel],
     kind: 'rel',
+    open: 'dress',
+    yaoIndex: shi?.index,
+    note: stageNote('世应'),
   });
 
-  const movingQin = new Set<LiuQin>();
+  const movingByQin = new Map<LiuQin, number>();
   for (const r of rows) {
-    if (r.changing) movingQin.add(r.liuqin);
+    if (r.changing && !movingByQin.has(r.liuqin)) movingByQin.set(r.liuqin, r.index);
   }
-  for (const q of movingQin) {
+  for (const [q, idx] of movingByQin) {
     chips.push({
       id: `move-${q}`,
       label: `${q}发动`,
       tip: MOVE_TIP[q],
       kind: 'move',
+      open: 'dress',
+      yaoIndex: idx,
+      note: stageNote(q),
     });
   }
 
@@ -99,6 +125,7 @@ export function buildPatternSummary(
       label: '六合卦',
       tip: '合局偏和合、牵绊，易成事也易纠缠；合作、感情常看这一层。',
       kind: 'struct',
+      open: 'xiang',
     });
   } else if (LIUCHONG_NAMES.has(name)) {
     chips.push({
@@ -106,16 +133,17 @@ export function buildPatternSummary(
       label: '六冲卦',
       tip: '冲局偏动荡、离散，宜快不宜拖；拖久易散。',
       kind: 'struct',
+      open: 'xiang',
     });
   }
 
-  const stage = palaceStageOfHexagram(name);
   if (stage?.stageLabel === '游魂') {
     chips.push({
       id: 'struct-youhun',
       label: '游魂卦',
       tip: '游魂主漂泊、未定；宜先找落脚点，再谈扩张。',
       kind: 'struct',
+      open: 'xiang',
     });
   } else if (stage?.stageLabel === '归魂') {
     chips.push({
@@ -123,6 +151,7 @@ export function buildPatternSummary(
       label: '归魂卦',
       tip: '归魂主回拢、归位；宜回收精力，把事收到可验证的一步。',
       kind: 'struct',
+      open: 'xiang',
     });
   }
 
@@ -132,13 +161,25 @@ export function buildPatternSummary(
 export function renderPatternSummaryHtml(summary: PatternSummary): string {
   if (!summary.chips.length) return '';
   const chips = summary.chips
-    .map(
-      (c) => `
-      <li class="ly-pattern-chip is-${c.kind}" title="${escapeHtml(c.tip)}">
-        <span class="ly-pattern-chip-label">${escapeHtml(c.label)}</span>
-        <span class="ly-pattern-chip-tip">${escapeHtml(c.tip)}</span>
-      </li>`,
-    )
+    .map((c) => {
+      const yao =
+        c.yaoIndex !== undefined ? ` data-pattern-yao="${c.yaoIndex}"` : '';
+      const note = c.note
+        ? `<span class="ly-pattern-chip-note">${escapeHtml(c.note)}</span>`
+        : '';
+      return `
+      <li>
+        <button type="button" class="ly-pattern-chip is-${c.kind}" data-pattern-chip="${escapeHtml(
+          c.id,
+        )}" data-pattern-open="${c.open}" data-pattern-kind="${c.kind}"${yao} title="${escapeHtml(
+          c.tip,
+        )}">
+          <span class="ly-pattern-chip-label">${escapeHtml(c.label)}</span>
+          ${note}
+          <span class="ly-pattern-chip-tip">${escapeHtml(c.tip)}</span>
+        </button>
+      </li>`;
+    })
     .join('');
 
   return `

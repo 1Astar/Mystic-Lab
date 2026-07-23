@@ -26,7 +26,7 @@ import {
   renderQuickBoard,
   renderQuickTabsHtml,
 } from '../../liuyao/narrative-quick.ts';
-import { buildFinalLoop, renderFinalLoopHtml } from '../../liuyao/final-loop.ts';
+import { buildFinalLoop } from '../../liuyao/final-loop.ts';
 import {
   buildPatternSummary,
   renderPatternSummaryHtml,
@@ -136,7 +136,7 @@ export function mountLiuyaoResultTabs(
   } else {
     const tabs = [
       { id: 'reading', label: '此刻解读' },
-      { id: 'teach', label: '五步学习' },
+      { id: 'teach', label: '六步学习' },
     ];
     const loop = buildFinalLoop(cast, question, castAt);
     const pattern = buildPatternSummary(cast, question, castAt);
@@ -156,13 +156,16 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">结果：结合你的问题，按四层读这一卦。</p>
+          <p class="ly-guide-tip">结果：开头点明你的问题，后面直接读分析。分域与装卦细节在「解读笔记」。</p>
           ${renderQuestionBriefingForCast(cast, question, castAt)}
-          <details class="ly-briefing-more">
-            <summary>展开 · 卦象依据（教学明细）</summary>
-            <p class="ly-drawer-reading-one">${escapeHtml(loop.oneLiner)}</p>
-            ${renderFinalLoopHtml(loop)}
-          </details>
+          <div class="ly-briefing-actions">
+            <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>
+              📖 打开解读笔记
+            </button>
+            <button type="button" class="btn ly-briefing-to-course" data-goto-teach>
+              想弄懂为什么 → 去六步学习
+            </button>
+          </div>
         </div>
         <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
           ${renderLearnTeachPageHtml(cast, question, castAt)}
@@ -194,6 +197,11 @@ export function mountLiuyaoResultTabs(
     });
   };
   paintTags();
+
+  host.querySelector('[data-goto-teach]')?.addEventListener('click', () => {
+    host.querySelector<HTMLButtonElement>('.ly-result-tab[data-tab="teach"]')?.click();
+    host.querySelector('[data-learn-course]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   const addCustomTag = () => {
     const input = host.querySelector<HTMLInputElement>('[data-tag-input]');

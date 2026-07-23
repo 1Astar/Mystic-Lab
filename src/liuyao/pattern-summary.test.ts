@@ -27,6 +27,10 @@ describe('pattern-summary', () => {
     expect(html).toMatch(/ly-pattern-summary/);
     expect(html).toMatch(/格局摘要/);
     expect(html).toMatch(/持世/);
+    expect(html).toMatch(/data-pattern-chip/);
+    expect(html).toMatch(/data-pattern-open="dress"/);
+    expect(html).not.toMatch(/从装卦盘读出/);
+    expect(summary.chips.some((c) => Boolean(c.note))).toBe(true);
   });
 
   it('marks 六冲 for pure hexagrams', () => {
