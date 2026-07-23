@@ -46,13 +46,14 @@ export function renderJournal(root: HTMLElement): void {
 
   function openDetail(entry: JournalEntry): void {
     try {
-      const { reading, regenerated } = resolveJournalReading(entry);
+      const { reading, regenerated, hydratedThread } = resolveJournalReading(entry);
       closeDetail();
       const detail = document.createElement('aside');
       mountJournalDetail(detail, {
         entry,
         reading,
         regenerated,
+        hydratedThread,
         onClose: closeDetail,
         onContinue: entry.status === 'partial' ? () => continuePartialReading(entry) : undefined,
       });

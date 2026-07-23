@@ -8210,6 +8210,71 @@ a.ly-derived-name:hover {
   color: var(--ly-muted);
 }
 
+.ly-time-plaque-chong {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-time-plaque-chong strong {
+  color: var(--ly-gold);
+  font-weight: 650;
+}
+
+.ly-time-token.is-accent {
+  border-color: rgba(199, 164, 91, 0.4);
+  background: rgba(199, 164, 91, 0.1);
+}
+
+.ly-time-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  color: var(--ly-gold);
+}
+
+.ly-date-chong {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: rgba(8, 9, 13, 0.35);
+}
+
+.ly-date-chong-time {
+  margin: 0 0 8px;
+  font-size: 0.76rem;
+  color: var(--ly-muted);
+}
+
+.ly-date-chong-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ly-mist);
+}
+
+.ly-date-chong-list strong {
+  color: var(--ly-gold);
+  font-weight: 650;
+  margin-right: 4px;
+}
+
+.ly-date-chong-list em {
+  font-style: normal;
+  color: #e8c56a;
+  font-weight: 650;
+}
+
 @media (max-width: 480px) {
   .ly-time-token {
     font-size: 0.82rem;

@@ -1,77 +1,39 @@
 import type { CardReading } from '../interpretation/types.ts';
-
 import { isAiConfigured } from '../ai/settings.ts';
-
-import { getSceneMeaning, getVisualHotspots, getVisualOverview } from '../knowledge/registry.ts';
-
-import type { QuestionTopic } from '../knowledge/types.ts';
-
+import { getVisualHotspots, getVisualOverview } from '../knowledge/registry.ts';
 import { getCardById } from '../tarot/deck.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
-
-
-
-export type ResultTabId = 'reading' | 'visual' | 'codex' | 'encounter';
-
-
+import { loadJournalEntries } from '../journal/records.ts';
+import {
+  encounterGuidanceLabel,
+  encounterPositionKind,
+  encounterReflectPrompt,
+  resolveEncounterGuidance,
+} from '../knowledge/encounter-guidance.ts';export type ResultTabId = 'reading' | 'visual' | 'codex' | 'encounter';
 
 const TAB_LABELS: Record<ResultTabId, string> = {
-
   reading: '此刻解读',
-
   visual: '看懂牌面',
-
   codex: '牌义图鉴',
-
   encounter: '我的相遇',
-
 };
 
+const TAB_ORDER: ResultTabId[] = ['reading', 'visual', 'codex', 'encounter'];
 
-
-const TOPIC_LABELS: Record<QuestionTopic, string> = {
-
-  work: '工作',
-
-  love: '感情',
-
-  study: '学业',
-
-  self: '自我',
-
-};
-
-
+function isResultTabId(v: string): v is ResultTabId {
+  return (TAB_ORDER as string[]).includes(v);
+}
 
 function escapeHtml(text: string): string {
-
   return text
-
     .replace(/&/g, '&amp;')
-
     .replace(/</g, '&lt;')
-
     .replace(/>/g, '&gt;')
-
     .replace(/"/g, '&quot;');
-
 }
-
-
 
 function formatParagraph(text: string): string {
-
   return escapeHtml(text).replace(/\n/g, '<br>');
-
-}
-
-
-
-function stripReminderPrefix(text: string): string {
-  return text
-    .replace(/^（逆位时）/, '')
-    .replace(/^逆位提醒[：:]\s*/, '')
-    .replace(/^正位提醒[：:]\s*/, '');
 }
 
 
@@ -137,16 +99,16 @@ function followUpSourceDot(provider: 'llm' | 'mock'): string {
   return `<span class="source-dot source-dot-${kind}" title="${escapeHtml(tip)}" aria-label="${escapeHtml(tip)}"></span>`;
 }
 
-function renderAnswerTendency(r: CardReading): string {
+function renderAnswerTendencyLead(r: CardReading): string {
   const t = r.interpretationLayers.answerTendency;
-  if (!t) return '';
-
+  if (!t?.oneLiner?.trim()) return '';
+  // 只保留高度概括结论；落地行动交给「行动指南」/逐条问答
+  const short = t.overall?.trim() || t.tendency?.trim() || '';
   return `
-      <section class="reading-layer-card reading-layer-answer">
-        <h4 class="layer-tag">你的答案倾向</h4>
-        <p class="answer-tendency-oneliner"><span class="answer-tendency-label">一句话答案</span>${formatParagraph(t.oneLiner)}</p>
-        <p class="answer-tendency-action"><span class="answer-tendency-label">关键提醒</span>${formatParagraph(t.actionTip)}</p>
-      </section>`;
+      <div class="reading-lead-conclusion">
+        ${short ? `<p class="reading-lead-tag">${escapeHtml(short)}</p>` : ''}
+        <p class="reading-lead-body">${formatParagraph(t.oneLiner)}</p>
+      </div>`;
 }
 
 function renderQuestionAnswers(r: CardReading): string {
@@ -160,7 +122,7 @@ function renderQuestionAnswers(r: CardReading): string {
         <p class="qa-answer-insight"><span class="qa-answer-label">牌面洞察</span>${formatParagraph(a.insight)}</p>
         ${
           a.action
-            ? `<p class="qa-answer-action"><span class="qa-answer-label">行动</span>${formatParagraph(a.action)}</p>`
+            ? `<p class="qa-answer-action"><span class="qa-answer-label">可执行</span>${formatParagraph(a.action)}</p>`
             : ''
         }
       </article>`,
@@ -168,10 +130,10 @@ function renderQuestionAnswers(r: CardReading): string {
     .join('');
   return `
       <section class="reading-layer-card reading-layer-qa">
-        <h4 class="layer-tag">针对你的问题逐条回答 ${contextualSourceDot(r)}</h4>
-        <p class="layer-badge">指哪打哪 · 先看结论再看行动</p>
+        <h4 class="layer-tag">针对你的问题 ${contextualSourceDot(r)}</h4>
+        <p class="layer-badge">指哪打哪 · 行动导向</p>
         ${cards}
-        <p class="qa-codex-hint">想了解牌面更详细的背景故事？可切到「牌义图鉴」。</p>
+        <p class="qa-codex-hint">想了解牌面更详细的背景故事？切到「牌义图鉴」Tab</p>
       </section>`;
 }
 
@@ -200,7 +162,7 @@ function accordionBlock(title: string, body: string, open: boolean): string {
     <details class="reading-accordion"${open ? ' open' : ''}>
       <summary class="reading-accordion-summary">
         <span class="reading-accordion-title">${escapeHtml(title)}</span>
-        <span class="reading-accordion-hint" aria-hidden="true"></span>
+        <span class="reading-accordion-chevron" aria-hidden="true"></span>
       </summary>
       <div class="reading-accordion-body">${body}</div>
     </details>`;
@@ -208,11 +170,13 @@ function accordionBlock(title: string, body: string, open: boolean): string {
 
 function renderElementMappings(
   mappings: NonNullable<CardReading['interpretationLayers']['elementMappings']>,
+  question = '',
 ): string {
   if (!mappings.length) return '';
   return mappings
-    .map(
-      (m) => `
+    .map((m) => {
+      const body = sanitizeElementMappingBody(m.body, question);
+      return `
         <div class="element-mapping-item">
           <h6 class="element-mapping-title">${escapeHtml(m.title)}</h6>
           ${
@@ -220,10 +184,42 @@ function renderElementMappings(
               ? `<p class="element-mapping-original"><span class="element-mapping-label">牌面原意</span>${escapeHtml(m.originalMeaning)}</p>`
               : ''
           }
-          <p class="element-mapping-scene"><span class="element-mapping-label">场景映射</span>${formatParagraph(m.body)}</p>
-        </div>`,
-    )
+          <p class="element-mapping-scene"><span class="element-mapping-label">场景映射</span>${formatParagraph(body)}</p>
+        </div>`;
+    })
     .join('');
+}
+
+/** 去掉「对照你的问题」复读，以及把整段子问题列表塞进映射的脏数据 */
+function sanitizeElementMappingBody(body: string, question: string): string {
+  let text = body.trim();
+  text = text.replace(/^对照你的问题[「「][^」」]*[」」][：:]\s*/u, '');
+  text = text.replace(/^对照[「「][^」」]*[」」][：:]\s*/u, '');
+
+  const parts = question
+    ? question
+        .split(/[\n；;]+/)
+        .map((p) => p.replace(/^\s*\d+[\.．、)\）]\s*/, '').trim())
+        .filter((p) => p.length >= 4)
+    : [];
+  if (parts.length >= 2) {
+    const hit = parts.filter((p) => text.includes(p.slice(0, Math.min(10, p.length)))).length;
+    if (hit >= Math.min(3, parts.length)) {
+      const lines = text
+        .split(/\n+/)
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .filter((l) => {
+          if (/^对照你的问题/.test(l)) return false;
+          if (/^\d+[\.．、]/.test(l) && parts.some((p) => l.includes(p.slice(0, 8)))) {
+            return false;
+          }
+          return true;
+        });
+      if (lines.length) text = lines.join('\n');
+    }
+  }
+  return text.trim() || body.trim();
 }
 
 function renderFollowUpAnswers(
@@ -245,7 +241,7 @@ function renderFollowUpAnswers(
         </div>`,
         )
         .join('')}
-      ${a.elementMappings?.length ? `<div class="element-mapping-block">${renderElementMappings(a.elementMappings)}</div>` : ''}
+      ${a.elementMappings?.length ? `<div class="element-mapping-block">${renderElementMappings(a.elementMappings, a.question)}</div>` : ''}
     </section>`,
     )
     .join('');
@@ -269,16 +265,13 @@ function renderFollowUpChips(followUps: string[] | undefined): string {
 
 function renderReadingTab(r: CardReading): string {
   const {
-    standard,
     contextualReading,
     contextualSections,
     selfReflection,
-    elementMappings,
     followUps,
     followUpAnswers,
     answerTendency,
   } = r.interpretationLayers;
-  const reminderLabel = r.orientation === 'reversed' ? '逆位提醒' : '正位提醒';
   const questions = selfReflection
     .map((q) => `<li>${formatParagraph(q)}</li>`)
     .join('');
@@ -292,20 +285,18 @@ function renderReadingTab(r: CardReading): string {
   );
   const restSections = otherSections.filter((s) => !adviceSections.includes(s));
 
-  const step2Body = elementMappings?.length
-    ? `<div class="element-mapping-block">${renderElementMappings(elementMappings)}</div>`
-    : restSections
-        .map(
-          (s) => `
+  const step2Body = restSections
+    .map(
+      (s) => `
         <div class="context-section">
           <h5 class="context-section-title">${escapeHtml(s.title)}</h5>
           <p class="reading-block-text">${formatParagraph(s.body)}</p>
         </div>`,
-        )
-        .join('') ||
-      (!overviewSection && contextualReading
-        ? `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`
-        : '');
+    )
+    .join('') ||
+    (!overviewSection && contextualReading
+      ? `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`
+      : `<p class="layer-badge">牌面元素映射 →「看懂牌面」；百科知识 →「牌义图鉴」</p>`);
 
   const step3Body = adviceSections.length
     ? adviceSections
@@ -340,32 +331,25 @@ function renderReadingTab(r: CardReading): string {
     ? `<p class="context-background-echo">补充背景：${escapeHtml(r.readingContext.background.trim())}</p>`
     : '';
 
-  // 热点整体解读迁到「看懂牌面」；此刻解读直接摊开现实状况与行动
-  const contextBody = `${accordionBlock('① 现实状况 · 结合你的问题', step2Body, true)}${accordionBlock('② 行动指南', step3Body, true)}`;
-  const hotspotHint = overviewSection
-    ? `<p class="layer-badge reading-hotspot-jump">结合问题的「热点整体解读」已放到 Tab「看懂牌面」</p>`
-    : '';
+  const hasQa = Boolean(r.interpretationLayers.questionAnswers?.length);
+  const contextBody = hasQa
+    ? ''
+    : `${accordionBlock('① 情境补充', step2Body, false)}${accordionBlock('② 行动指南', step3Body, true)}`;
 
   return `
     <div class="result-tab-panel" data-panel="reading">
-      <section class="reading-layer-card">
-        <h4 class="layer-tag">这张牌在说什么</h4>
-        <div class="std-meaning-block">
-          <p class="std-field"><span class="std-label">关键词</span><span class="std-value">${escapeHtml(standard.keywords.join('、'))}</span></p>
-          <p class="std-field"><span class="std-label">一句话理解</span><span class="std-value">${formatParagraph(standard.oneSentence)}</span></p>
-          <p class="std-field"><span class="std-label">${reminderLabel}</span><span class="std-value">${formatParagraph(stripReminderPrefix(standard.reminder))}</span></p>
-        </div>
-      </section>
       ${renderUserIntuition(r)}
-      ${renderQuestionAnswers(r)}
-      ${renderAnswerTendency(r)}
-      <section class="reading-layer-card reading-layer-context">
-        <h4 class="layer-tag">结合你的问题 · 补充拆解 ${contextualSourceDot(r)}</h4>
+      ${
+        hasQa
+          ? renderQuestionAnswers(r)
+          : `<section class="reading-layer-card reading-layer-context">
+        <h4 class="layer-tag">结合你的问题 ${contextualSourceDot(r)}</h4>
         ${questionEcho}
         ${bgEcho}
-        ${hotspotHint}
+        ${renderAnswerTendencyLead(r)}
         ${contextBody}
-      </section>
+      </section>`
+      }
       ${
         followUpBody.trim()
           ? `<section class="reading-layer-card reading-layer-followup-wrap">${accordionBlock(
@@ -380,8 +364,8 @@ function renderReadingTab(r: CardReading): string {
         <p class="layer-badge">回到心里</p>
         <ul class="reflect-list">${questions}</ul>
       </section>
-      <button type="button" class="codex-story-cta" data-codex-sheet="${escapeHtml(r.cardId)}">
-        这张牌有什么故事？前往【图鉴】查看它的愚人之旅 →
+      <button type="button" class="codex-story-cta" data-goto-tab="codex">
+        想学这张牌的百科与结构？切到【牌义图鉴】→
       </button>
     </div>`;
 }
@@ -395,9 +379,17 @@ function renderVisualTab(r: CardReading): string {
   const overviewSection = r.interpretationLayers.contextualSections?.find(
     (s) => s.title.includes('热点') || s.title.includes('核心') || s.title.includes('整体'),
   );
-  const questionEcho = r.question
-    ? `<p class="context-question-echo">你正在问：${escapeHtml(r.question)}</p>`
-    : '';
+  const questionEcho = (() => {
+    const q = r.question?.trim();
+    if (!q) return '';
+    const pos = r.position?.trim();
+    const posBit = pos ? ` · 本张位次「${pos}」` : '';
+    // 多子问不在热点区再复述整串问题
+    if (q.includes('\n') || /[；;]/.test(q) || q.length > 48) {
+      return `<p class="context-question-echo">结合本题与位次解读本张牌${escapeHtml(posBit)}（子问题见「此刻解读」，此处不重复罗列）</p>`;
+    }
+    return `<p class="context-question-echo">你正在问：${escapeHtml(q)}${escapeHtml(posBit)}</p>`;
+  })();
   const bgEcho = r.readingContext.background?.trim()
     ? `<p class="context-background-echo">补充背景：${escapeHtml(r.readingContext.background.trim())}</p>`
     : '';
@@ -405,7 +397,7 @@ function renderVisualTab(r: CardReading): string {
   const hotspotAnswer = overviewSection
     ? `
       <section class="visual-hotspot-answer reading-layer-card">
-        <h4 class="layer-tag">热点整体解读 · 结合你的问题 ${contextualSourceDot(r)}</h4>
+        <h4 class="layer-tag">热点整体解读 · 结合位次 ${contextualSourceDot(r)}</h4>
         ${questionEcho}
         ${bgEcho}
         <p class="reading-block-text">${formatParagraph(overviewSection.body)}</p>
@@ -413,7 +405,7 @@ function renderVisualTab(r: CardReading): string {
     : questionBridge
       ? `
       <section class="visual-hotspot-answer reading-layer-card">
-        <h4 class="layer-tag">热点整体解读 · 结合你的问题</h4>
+        <h4 class="layer-tag">热点整体解读 · 结合位次</h4>
         ${questionEcho}
         <p class="reading-block-text">${formatParagraph(questionBridge)}</p>
       </section>`
@@ -423,6 +415,9 @@ function renderVisualTab(r: CardReading): string {
     return `
       <div class="result-tab-panel" data-panel="visual">
         ${hotspotAnswer || `<div class="result-empty"><p>这张牌的牌面热点还在整理中。</p></div>`}
+        <button type="button" class="codex-story-cta" data-goto-tab="codex">
+          切到【牌义图鉴】看百科与结构 →
+        </button>
       </div>`;
   }
 
@@ -440,6 +435,16 @@ function renderVisualTab(r: CardReading): string {
     .map((h) => `<li><strong>${escapeHtml(h.label)}</strong>：${escapeHtml(h.meaning)}</li>`)
     .join('');
 
+  const mappings = r.interpretationLayers.elementMappings;
+  const mappingBlock =
+    mappings?.length
+      ? `<section class="visual-mapping-block reading-layer-card">
+        <h4 class="layer-tag">牌面元素 · 场景映射</h4>
+        <p class="visual-hint">问题只在上方出现一次；下面按元素翻译到你的场景。</p>
+        <div class="element-mapping-block">${renderElementMappings(mappings, r.question)}</div>
+      </section>`
+      : '';
+
   return `
     <div class="result-tab-panel" data-panel="visual">
       ${hotspotAnswer}
@@ -454,65 +459,17 @@ function renderVisualTab(r: CardReading): string {
         <h4 class="visual-section-title">整牌画面</h4>
         <p class="visual-overview-text">${formatParagraph(overview)}</p>
       </section>
+      ${mappingBlock}
       <section class="visual-elements-block">
         <h4 class="visual-section-title">牌面元素</h4>
         <p class="visual-hint">也可直接看下方列表；点列表或牌面光点都会更新说明</p>
         <ul class="visual-elements-list">${elementList}</ul>
       </section>
+      <button type="button" class="codex-story-cta" data-goto-tab="codex">
+        关键词 · 愚人之旅 / 牌组×数字 → 切到【牌义图鉴】
+      </button>
     </div>`;
 }
-
-function renderCodexTab(r: CardReading): string {
-
-  const k = r.selectedCard;
-
-  const reversed = r.orientation === 'reversed';
-
-  const scene = getSceneMeaning(k, r.topic, reversed);
-
-
-
-  return `
-
-    <div class="result-tab-panel" data-panel="codex">
-
-      <p class="codex-one-line">${formatParagraph(k.oneSentence)}</p>
-
-      <p class="codex-keywords"><strong>关键词</strong>：${escapeHtml(k.keywords.join('、'))}</p>
-
-      <section class="codex-scene">
-
-        <h4>常见场景 · ${TOPIC_LABELS[r.topic]}</h4>
-
-        <p>${formatParagraph(scene)}</p>
-
-      </section>
-
-      ${k.foolJourney ? `
-
-      <section class="codex-journey-placeholder">
-
-        <h4>愚人之旅 · 占位</h4>
-
-        <p>第 ${k.foolJourney.order} 步 · ${escapeHtml(k.foolJourney.title)}</p>
-
-        <p class="result-empty-sub">${formatParagraph(k.foolJourney.summary)}</p>
-
-      </section>` : `
-
-      <section class="codex-journey-placeholder">
-
-        <h4>愚人之旅 · 占位</h4>
-
-        <p class="result-empty-sub">完整 78 张牌的愚人之旅地图将在 P4 开放。</p>
-
-      </section>`}
-
-    </div>`;
-
-}
-
-
 
 function formatDate(iso: string): string {
 
@@ -566,14 +523,41 @@ function renderEncounterTab(r: CardReading): string {
 
   const timeline = enc.timeline?.length
     ? enc.timeline
-        .map(
-          (e) => `
+        .map((e) => {
+          const kind = encounterPositionKind(e.spreadLabel);
+          const snap = e.journalId
+            ? loadJournalEntries().find((j) => j.id === e.journalId)?.readingSnapshot
+            : undefined;
+          const guidance = resolveEncounterGuidance(
+            {
+              at: e.at,
+              question: e.question,
+              summary: e.summary ?? '',
+              reversed: e.reversed,
+              spreadLabel: e.spreadLabel,
+              journalId: e.journalId,
+              guidance: e.guidance,
+            },
+            r.cardId,
+            r.cardName,
+            snap,
+          );
+          return `
         <div class="encounter-timeline-item">
           <time>${formatDateTime(e.at)}</time>
           <p>${e.question ? `问：${escapeHtml(e.question)}` : '（未记录问题）'}</p>
           <p class="encounter-timeline-meta">${escapeHtml(e.spreadLabel)} · ${e.reversed ? '逆位' : '正位'}</p>
-        </div>`,
-        )
+          ${
+            guidance
+              ? `<div class="encounter-guidance">
+                  <p class="encounter-guidance-label">${escapeHtml(encounterGuidanceLabel(kind))}</p>
+                  <p class="encounter-guidance-body">${formatParagraph(guidance)}</p>
+                </div>`
+              : ''
+          }
+          <p class="encounter-reflect">${escapeHtml(encounterReflectPrompt(kind))}</p>
+        </div>`;
+        })
         .join('')
     : '<p class="result-empty-sub">暂无相遇记录</p>';
 
@@ -601,16 +585,19 @@ function renderEncounterTab(r: CardReading): string {
 
 
 
+function renderCodexTab(r: CardReading): string {
+  // 同步渲染占位；mount 时用真实正文替换（避免循环依赖体积）
+  return `
+    <div class="result-tab-panel" data-panel="codex" data-codex-host="${escapeHtml(r.cardId)}">
+      <p class="codex-tab-loading">加载牌义图鉴…</p>
+    </div>`;
+}
+
 const PANEL_RENDERERS: Record<ResultTabId, (r: CardReading) => string> = {
-
   reading: renderReadingTab,
-
   visual: renderVisualTab,
-
   codex: renderCodexTab,
-
   encounter: renderEncounterTab,
-
 };
 
 
@@ -618,18 +605,48 @@ const PANEL_RENDERERS: Record<ResultTabId, (r: CardReading) => string> = {
 export type CardResultTabsOptions = {
   /** 追问后更新牌解读（写入 reading / 手札快照） */
   onCardReadingChange?: (reading: CardReading) => void;
+  /** 隐藏「此刻解读」（整盘串讲已覆盖时用） */
+  hideReadingTab?: boolean;
 };
 
 export function mountCardResultTabs(
   container: HTMLElement,
   reading: CardReading,
-  activeTab: ResultTabId = 'reading',
+  activeTab: ResultTabId | string = 'reading',
   options?: CardResultTabsOptions,
 ): void {
   let current = reading;
+  const tabOrder = options?.hideReadingTab
+    ? (TAB_ORDER.filter((id) => id !== 'reading') as ResultTabId[])
+    : TAB_ORDER;
+  const startTab: ResultTabId = isResultTabId(activeTab)
+    ? tabOrder.includes(activeTab)
+      ? activeTab
+      : tabOrder[0]!
+    : tabOrder[0]!;
+
+  const fillCodexPanel = (panelHost: Element): void => {
+    const host = panelHost.querySelector<HTMLElement>('[data-codex-host]');
+    if (!host) return;
+    void import('./codex-quick-sheet.ts').then(({ renderCodexKnowledgeBody }) => {
+      host.innerHTML = `
+        <section class="reading-layer-card codex-tab-card">
+          <h4 class="layer-tag">牌义图鉴 · 学会看牌</h4>
+          ${renderCodexKnowledgeBody(current.cardId, {
+            topic: current.topic,
+            reversed: current.orientation === 'reversed',
+          })}
+          <button type="button" class="btn btn-ghost codex-full-link" data-full-codex>打开完整图鉴</button>
+        </section>`;
+      host.querySelector('[data-full-codex]')?.addEventListener('click', () => {
+        void import('../router.ts').then(({ navigate }) => navigate('/tarot/tujian'));
+      });
+      wireHotspotClicks(host, current.cardId);
+    });
+  };
 
   const renderShell = (tab: ResultTabId): void => {
-    const tabs = (Object.keys(TAB_LABELS) as ResultTabId[])
+    const tabs = tabOrder
       .map((id) => {
         const hotspotDot =
           id === 'visual' && current.hasVisualHotspots
@@ -643,7 +660,7 @@ export function mountCardResultTabs(
       .join('');
 
     container.innerHTML = `
-    <div class="card-result-tabs" data-card-id="${escapeHtml(current.cardId)}">
+    <div class="card-result-tabs${tabOrder.length === 4 ? ' is-four-tabs' : ' is-three-tabs'}" data-card-id="${escapeHtml(current.cardId)}">
       ${renderCardHero(current)}
       <div class="result-tab-bar" role="tablist">${tabs}</div>
       <div class="result-tab-panels">
@@ -655,37 +672,37 @@ export function mountCardResultTabs(
     const root = container.querySelector('.card-result-tabs')!;
     const panelHost = container.querySelector('.result-tab-panels')!;
 
+    const switchTab = (next: ResultTabId): void => {
+      root.querySelectorAll('.result-tab-btn').forEach((b) => {
+        const btn = b as HTMLButtonElement;
+        const on = btn.dataset.tab === next;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      panelHost.innerHTML = PANEL_RENDERERS[next](current);
+      wireHotspotClicks(panelHost, current.cardId);
+      wireFollowUpChips(panelHost);
+      wireGotoCodex(panelHost);
+      if (next === 'codex') fillCodexPanel(panelHost);
+    };
+
     root.querySelectorAll<HTMLButtonElement>('.result-tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const next = btn.dataset.tab as ResultTabId;
-        root.querySelectorAll('.result-tab-btn').forEach((b) => {
-          b.classList.remove('is-active');
-          b.setAttribute('aria-selected', 'false');
-        });
-        btn.classList.add('is-active');
-        btn.setAttribute('aria-selected', 'true');
-        panelHost.innerHTML = PANEL_RENDERERS[next](current);
-        wireHotspotClicks(panelHost, current.cardId);
-        wireFollowUpChips(panelHost);
-        wireCodexStoryCta(panelHost);
+        const next = btn.dataset.tab;
+        if (next && isResultTabId(next)) switchTab(next);
       });
     });
+
+    const wireGotoCodex = (scope: Element): void => {
+      scope.querySelectorAll<HTMLButtonElement>('[data-goto-tab="codex"]').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab('codex'));
+      });
+    };
 
     wireHotspotClicks(panelHost, current.cardId);
     wireFollowUpChips(panelHost);
-    wireCodexStoryCta(panelHost);
-  };
-
-  const wireCodexStoryCta = (panelHost: Element): void => {
-    panelHost.querySelectorAll<HTMLButtonElement>('[data-codex-sheet]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.codexSheet?.trim();
-        if (!id) return;
-        void import('./codex-quick-sheet.ts').then(({ openCodexQuickSheet }) => {
-          openCodexQuickSheet(id);
-        });
-      });
-    });
+    wireGotoCodex(panelHost);
+    if (tab === 'codex') fillCodexPanel(panelHost);
   };
 
   const wireFollowUpChips = (panelHost: Element): void => {
@@ -723,61 +740,42 @@ export function mountCardResultTabs(
     });
   };
 
-  renderShell(activeTab);
+  renderShell(startTab);
 }
 
 
 
 function wireHotspotClicks(panelHost: Element, cardId: string): void {
-
-  const detail = panelHost.querySelector(`#hotspot-detail-${cardId}`) as HTMLElement | null;
+  const detail =
+    (panelHost.querySelector(`#hotspot-detail-codex-${cardId}`) as HTMLElement | null) ||
+    (panelHost.querySelector(`#hotspot-detail-${cardId}`) as HTMLElement | null) ||
+    (panelHost.querySelector('.hotspot-detail') as HTMLElement | null);
 
   const markers = panelHost.querySelectorAll<HTMLButtonElement>('.hotspot-marker');
 
   markers.forEach((btn) => {
-
     btn.addEventListener('click', () => {
-
       panelHost.querySelectorAll('.hotspot-marker').forEach((m) => m.classList.remove('is-active', 'is-hint'));
-
       btn.classList.add('is-active');
-
       if (detail) {
-
         const label = btn.dataset.label ?? '';
-
         const meaning = btn.dataset.meaning ?? '';
-
         detail.innerHTML = label
-
           ? `<strong>${escapeHtml(label)}</strong>：${escapeHtml(meaning)}`
-
           : escapeHtml(meaning);
-
       }
-
     });
-
   });
 
   const first = markers[0];
-
   if (first && detail) {
-
     first.classList.add('is-active');
-
     const label = first.dataset.label ?? '';
-
     const meaning = first.dataset.meaning ?? '';
-
     detail.innerHTML = label
-
       ? `<strong>${escapeHtml(label)}</strong>：${escapeHtml(meaning)}`
-
       : escapeHtml(meaning);
-
   }
-
 }
 
 

@@ -14,10 +14,12 @@ import type { ReadingContext, StandardMeaningLayer } from '../knowledge/types.ts
 import type { CardReading, InterpretOptions, ReadingResult } from './types.ts';
 import { getPositionMeta } from '../tarot/spreads.ts';
 import { analyzeQuestion } from '../tarot/question-coach.ts';
+import { buildQuestionThread } from './question-thread.ts';
 import {
   buildStructuredMockReading,
   sectionsToPlainText,
 } from './structured-reading.ts';
+import { sanitizeTopicText } from './topic-sanitize.ts';
 
 function buildStandardLayer(
   knowledge: ReturnType<typeof resolveCardKnowledge>,
@@ -89,10 +91,20 @@ function buildCardReading(
   const actionTags = structured.actionTags;
   const elementMappings = structured.elementMappings;
   const followUps = structured.followUps;
-  const questionAnswers = structured.questionAnswers;
+  const questionAnswers = structured.questionAnswers.map((a) => ({
+    ...a,
+    insight: sanitizeTopicText(a.insight, readingContext.topic),
+    action: a.action
+      ? sanitizeTopicText(a.action, readingContext.topic)
+      : undefined,
+  }));
 
   const selfReflection = buildSelfReflectionQuestions(readingContext, knowledge);
-  const answerTendency = buildAnswerTendency(readingContext, knowledge, reversed);
+  // 有逐条问答时不再叠「一句话答案」——避免把全部子问塞进一句重复展示
+  const answerTendency =
+    questionAnswers.length >= 2
+      ? null
+      : buildAnswerTendency(readingContext, knowledge, reversed);
   const visualQuestionBridge = buildVisualQuestionBridge(
     readingContext,
     knowledge,
@@ -103,11 +115,17 @@ function buildCardReading(
   const interpretationLayers = {
     standard,
     answerTendency: answerTendency ?? undefined,
-    contextualReading,
-    contextualSections,
+    contextualReading: sanitizeTopicText(contextualReading, readingContext.topic),
+    contextualSections: contextualSections?.map((s) => ({
+      ...s,
+      body: sanitizeTopicText(s.body, readingContext.topic),
+    })),
     questionAnswers: questionAnswers.length ? questionAnswers : undefined,
     actionTags,
-    elementMappings,
+    elementMappings: elementMappings?.map((m) => ({
+      ...m,
+      body: sanitizeTopicText(m.body, readingContext.topic),
+    })),
     followUps,
     visualQuestionBridge,
     selfReflection,
@@ -154,15 +172,18 @@ export function buildReadingResult(
   const background = options?.background?.trim() || undefined;
   const readings = cards.map((c) => buildCardReading(c, question, spreadType, background));
   const names = readings.map((c) => c.cardName).join('、');
+  const questionThread = buildQuestionThread(readings, question, 'mock') ?? undefined;
 
   const summary =
-    cards.length === 1
+    questionThread?.oneLiner ||
+    (cards.length === 1
       ? `「${names}」已加入你的图鉴。答案不在牌里，在你心里。`
-      : `「${names}」共同描绘这次占问的脉络。新牌已解锁图鉴，可随时回看。`;
+      : `「${names}」共同描绘这次占问的脉络。新牌已解锁图鉴，可随时回看。`);
 
   return {
     cards: readings,
     summary,
+    questionThread,
     provider: 'mock',
     questionBackground: background,
   };

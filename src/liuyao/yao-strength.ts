@@ -6,6 +6,7 @@ import { buildShengKeMap } from './shengke-map.ts';
 import { resolveYongShen, yongLiuQinList } from './yong-shen.ts';
 import { formatLiuqinShort, LIUQIN_ENERGY } from './energy-lens.ts';
 import { renderTermLabelHtml } from './term-gloss.ts';
+import { LIU_CHONG } from './yao-special.ts';
 
 /** 相对月令：旺相休囚死（教学用，月建五行论） */
 export type WangXiang = '旺' | '相' | '休' | '囚' | '死';
@@ -234,7 +235,11 @@ export function renderYongStatusHtml(pack: YongStatusPack): string {
       <p class="ly-layer-guide">用神状态 · 本题该盯哪一层</p>
       <p class="ly-guide-tip">用神＝按你的问题要看的那一层；旺衰看它相对${yueJian}力气够不够。</p>
       <div class="ly-yong-status-chips">${chipHtml}</div>
-      <p class="ly-yong-status-meta">${yueJian}：${escapeHtml(monthLabel)}（起卦这个月的地支） · 今日地支：${escapeHtml(pack.dayBranch)} · 空亡：${escapeHtml(pack.dayXunKong || '—')}</p>
+      <p class="ly-yong-status-meta">${yueJian}：${escapeHtml(monthLabel)}（冲${escapeHtml(
+        LIU_CHONG[pack.monthBranch] ?? '—',
+      )}→月破） · 日建：${escapeHtml(pack.dayBranch)}（冲${escapeHtml(
+        LIU_CHONG[pack.dayBranch] ?? '—',
+      )}→暗动） · 空亡：${escapeHtml(pack.dayXunKong || '—')}</p>
       <p class="ly-yong-status-summary">${escapeHtml(pack.summary)}</p>
       ${whyHtml}
     </section>

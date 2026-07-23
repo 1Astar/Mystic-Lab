@@ -665,6 +665,13 @@
   margin-bottom: 8px;
 }
 
+.codex-misread-hint {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
 .codex-theme-list {
   list-style: none;
   font-size: 0.82rem;
@@ -675,6 +682,236 @@
 .codex-theme-list li {
   padding: 6px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.codex-scene-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.codex-scene-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  background: rgba(12, 8, 22, 0.35);
+}
+
+.codex-scene-card[data-scene='love'] {
+  border-color: rgba(232, 120, 160, 0.35);
+  background: rgba(120, 40, 70, 0.18);
+}
+
+.codex-scene-card[data-scene='work'] {
+  border-color: rgba(120, 170, 220, 0.35);
+  background: rgba(40, 70, 110, 0.2);
+}
+
+.codex-scene-card[data-scene='wealth'] {
+  border-color: rgba(201, 168, 76, 0.4);
+  background: rgba(90, 70, 20, 0.22);
+}
+
+.codex-scene-card[data-scene='self'],
+.codex-scene-card[data-scene='study'] {
+  border-color: rgba(191, 163, 255, 0.28);
+  background: rgba(60, 40, 100, 0.18);
+}
+
+.codex-scene-card-title {
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(245, 235, 210, 0.95);
+}
+
+.codex-scene-card-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.codex-scene-card-body {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgba(220, 210, 190, 0.88);
+}
+
+.codex-scene-more {
+  margin-top: 2px;
+}
+
+.codex-scene-more-summary {
+  color: var(--gold) !important;
+}
+
+.codex-scene-more-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* 图鉴学习布局：误区 / 生活情境 / 日常练习 */
+.codex-learn-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.codex-alert-card {
+  margin: 4px 0 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(232, 140, 90, 0.45);
+  background: linear-gradient(135deg, rgba(90, 40, 20, 0.35), rgba(40, 20, 12, 0.4));
+  box-shadow: inset 0 0 0 1px rgba(255, 180, 100, 0.08);
+}
+
+.codex-alert-kicker {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(255, 190, 120, 0.95);
+}
+
+.codex-alert-body {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: rgba(245, 230, 210, 0.92);
+}
+
+.codex-one-liner {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(245, 235, 210, 0.95);
+}
+
+.codex-learn-folds {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.codex-learn-fold .reading-accordion-body {
+  padding-top: 8px;
+}
+
+.codex-orient-panel {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  background: rgba(12, 8, 22, 0.35);
+}
+
+.codex-orient-panel-title {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(245, 235, 210, 0.95);
+}
+
+.codex-orient-brief {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.codex-orient-h {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.codex-orient-h:first-child {
+  margin-top: 0;
+}
+
+.codex-orient-brief p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(220, 210, 190, 0.9);
+}
+
+.codex-life-scenes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.codex-life-scene-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  background: rgba(12, 8, 22, 0.35);
+}
+
+.codex-life-scene-title {
+  margin: 0 0 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(245, 235, 210, 0.95);
+}
+
+.codex-life-scene-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.codex-life-scene-body {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(220, 210, 190, 0.88);
+}
+
+.codex-practice-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(150, 130, 220, 0.35);
+  background: linear-gradient(145deg, rgba(50, 40, 90, 0.35), rgba(20, 16, 40, 0.4));
+}
+
+.codex-practice-kicker {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(200, 180, 255, 0.95);
+}
+
+.codex-practice-body {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: rgba(230, 220, 245, 0.9);
+}
+
+.codex-structure-hint h3 {
+  margin: 0 0 6px;
+}
+
+.codex-tab-card .codex-learn-layout,
+.codex-quick-sheet-body .codex-learn-layout {
+  gap: 14px;
+}
+
+.codex-tab-card .codex-alert-card,
+.codex-quick-sheet-body .codex-alert-card {
+  margin-top: 2px;
 }
 
 .codex-encounter {
@@ -715,9 +952,69 @@
   color: var(--gold);
 }
 
+.codex-note-section {
+  margin-top: 4px;
+}
+
+.codex-note-hint {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.codex-note-field {
+  padding: 2px;
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(201, 168, 76, 0.18),
+    rgba(80, 60, 140, 0.12) 45%,
+    rgba(26, 18, 48, 0.2)
+  );
+}
+
 .codex-note-input {
+  display: block;
   width: 100%;
-  margin-bottom: 10px;
+  min-height: 96px;
+  margin: 0;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink);
+  background: rgba(14, 10, 28, 0.88);
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  border-radius: 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.codex-note-input::placeholder {
+  color: rgba(180, 168, 200, 0.45);
+}
+
+.codex-note-input:hover {
+  border-color: rgba(201, 168, 76, 0.35);
+}
+
+.codex-note-input:focus {
+  border-color: rgba(201, 168, 76, 0.55);
+  background: rgba(18, 12, 36, 0.95);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+
+.codex-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .journal-reflection {
@@ -782,6 +1079,14 @@
   padding-bottom: 8px;
 }
 
+.codex-detail .codex-visual-stage {
+  margin: 12px 0 10px;
+}
+
+.codex-detail .hotspot-detail {
+  margin: 0;
+}
+
 .codex-scene-list li {
   padding: 10px 0;
 }
@@ -813,6 +1118,49 @@
   margin-top: 4px;
   font-size: 0.78rem;
   color: var(--ink);
+}
+
+.codex-encounter-guidance {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.1);
+  border-left: 3px solid rgba(201, 168, 76, 0.5);
+  text-align: left;
+}
+
+.codex-encounter-guidance-label {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+}
+
+.codex-encounter-guidance-body {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.codex-encounter-reflect,
+.codex-encounter-reflect-lead {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(232, 220, 190, 0.78);
+  font-style: italic;
+}
+
+.codex-encounter-reflect-lead {
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(201, 168, 76, 0.4);
+  background: rgba(201, 168, 76, 0.06);
+  font-style: normal;
+  color: rgba(245, 235, 210, 0.9);
 }
 
 /* 未解锁预览页 */
@@ -2287,6 +2635,57 @@
   font-size: 0.72rem;
   color: var(--gold);
   line-height: 1.4;
+}
+
+.codex-kw-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 10px;
+}
+
+.codex-kw-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(245, 235, 210, 0.95);
+  background: rgba(201, 168, 76, 0.16);
+  border: 1px solid rgba(201, 168, 76, 0.42);
+}
+
+.codex-kw-tags.is-upright .codex-kw-tag {
+  color: #d8ecff;
+  background: rgba(120, 170, 220, 0.18);
+  border-color: rgba(120, 170, 220, 0.45);
+}
+
+.codex-kw-tags.is-reversed .codex-kw-tag {
+  color: #ffd4c4;
+  background: rgba(220, 120, 90, 0.18);
+  border-color: rgba(220, 120, 90, 0.45);
+}
+
+.codex-quick-meaning {
+  margin: 0 !important;
+}
+
+.codex-quick-scenes {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.codex-quick-scenes li + li {
+  margin-top: 6px;
+}
+
+.codex-detail .codex-kw-tags {
+  margin-top: 0;
 }
 
 .codex-quick-close {

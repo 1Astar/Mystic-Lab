@@ -241,12 +241,11 @@ export function buildElementMappings(
   const visual = getVisualHotspots(knowledge.deckId);
   if (!visual?.hotspots.length) return [];
 
-  const q = context.question.trim() || '你的问题';
   const topic = context.topic;
 
   return visual.hotspots.slice(0, 4).map((h) => {
     const title = `现实状况：「${h.label}」意味着什么？`;
-    const body = mapHotspotToScene(h.label, h.meaning, q, topic, knowledge.nameCn, reversed);
+    const body = mapHotspotToScene(h.label, h.meaning, topic, knowledge.nameCn, reversed);
     return { label: h.label, title, originalMeaning: h.meaning, body };
   });
 }
@@ -254,12 +253,11 @@ export function buildElementMappings(
 function mapHotspotToScene(
   label: string,
   meaning: string,
-  question: string,
   topic: ReadingContext['topic'],
   nameCn: string,
   reversed: boolean,
 ): string {
-  const core = meaning.replace(/[。！？.!?]+$/, '');
+  const core = meaning.replace(/[。！？.!?]+$/g, '');
   const blob = `${label}${meaning}`;
 
   if (topic === 'work') {
@@ -283,7 +281,6 @@ function mapHotspotToScene(
       hook = `求职里对应留意：${core}——它更像在提示你看清局面，而不是给你一个准日子。`;
     }
     return [
-      `对照你的问题「${question}」：`,
       hook,
       reversed ? '逆位时更要警惕绕弯、信息打折或自我设限。' : '',
     ]
@@ -300,16 +297,16 @@ function mapHotspotToScene(
     } else {
       hook = `感情里对应留意「${core}」如何出现在相处节奏里。`;
     }
-    return `对照「${question}」：${hook}`;
+    return hook;
   }
 
   if (topic === 'study') {
-    return `对照「${question}」：${core}——落到复习/方法上，问自己缺的是时间、方法，还是节奏。${
+    return `${core}——落到复习/方法上，问自己缺的是时间、方法，还是节奏。${
       reversed ? '逆位时优先调整路径，别只加时长。' : ''
     }`;
   }
 
-  return `对照「${question}」：${nameCn}里「${label}」的画面指向「${core}」。问自己：它此刻对应生活里的哪一块？`;
+  return `${nameCn}里「${label}」的画面指向「${core}」。问自己：它此刻对应生活里的哪一块？`;
 }
 
 export function buildFollowUpSuggestions(
@@ -419,21 +416,81 @@ function buildQuestionAnswers(
   );
 }
 
+function isObstaclePosition(context: ReadingContext): boolean {
+  return (
+    context.positionKey === 'obstacle' ||
+    context.cardPosition === '阻碍' ||
+    (context.cardPosition?.includes('阻碍') ?? false)
+  );
+}
+
+function isSituationPosition(context: ReadingContext): boolean {
+  return (
+    context.positionKey === 'situation' ||
+    context.cardPosition === '情况' ||
+    (context.cardPosition?.includes('情况') ?? false)
+  );
+}
+
+function isAdvicePosition(context: ReadingContext): boolean {
+  return (
+    context.positionKey === 'advice' ||
+    context.cardPosition === '建议' ||
+    (context.cardPosition?.includes('建议') ?? false)
+  );
+}
+
+/** 按牌阵位次解读本张牌：阻碍≠正位好牌的百科复述 */
+function buildPositionLensLead(
+  context: ReadingContext,
+  knowledge: CardKnowledge,
+  reversed: boolean,
+): string {
+  const name = knowledge.nameCn;
+  const orient = reversed ? '逆位' : '正位';
+  const kw = knowledge.keywords.slice(0, 3).join('、') || name;
+  const bg = context.background?.trim();
+
+  if (isObstaclePosition(context)) {
+    const workObstacle =
+      context.topic === 'work'
+        ? reversed
+          ? `作为「阻碍」，${name}${orient}常指向：理想化/情绪决策的副作用正在显形——或你已开始看清「感觉好」不等于条件靠谱，但仍可能被旧惯性拖住。`
+          : `作为「阻碍」，${name}${orient}不是在夸你「追梦浪漫」，而是在提醒卡点：容易跟着感觉走、理想化机会、被「聊得来/画饼」吸引，而耽误核实与冷静裁断。关键词「${kw}」在此位要读成风险轴。`
+        : `作为「阻碍」，${name}${orient}指出真正卡住你的因素——外在条件或内在模式（「${kw}」），勿按正位好牌的顺风读法。`;
+    const bgHint = bg
+      ? `结合你补充的背景，重点看：手里已有的选项是否被情绪叙事冲淡、该核实却还没核实的那一层。`
+      : '';
+    return [`放在「阻碍」位读【${name}】。`, workObstacle, bgHint].filter(Boolean).join('');
+  }
+
+  if (isSituationPosition(context)) {
+    return `放在「情况」位读【${name}${orient}】：它映照的是眼下局面与内在状态（「${kw}」），先看清处境，再谈去留。`;
+  }
+
+  if (isAdvicePosition(context)) {
+    return `放在「建议」位读【${name}${orient}】：给出可调整方向，不是标准答案——围绕「${kw}」试一小步即可。`;
+  }
+
+  if (context.cardPosition) {
+    return `放在「${context.cardPosition}」位读【${name}${orient}】：牌意必须落在这个位置功能上，禁止只背正位百科。`;
+  }
+
+  return `就本张【${name}${orient}】而言：先落点「${kw}」，再对照你的提问，不要复述整串子问题。`;
+}
+
 /** 规则解读：热点总览 + 逐条问答 + 元素映射 + 行动（无需外接 AI） */
 export function buildStructuredMockReading(
   context: ReadingContext,
   knowledge: CardKnowledge,
   reversed: boolean,
 ): ParsedStructuredReading {
-  const q = context.question.trim() || '（未填写具体问题）';
-  const orient = reversed ? '逆位' : '正位';
   const bg = backgroundLine(context);
   const overview =
     getVisualOverview(knowledge.deckId)?.trim() ||
     knowledge.visualOverview?.trim() ||
     knowledge.oneSentence;
   const scene = sceneMeaning(knowledge, context.topic);
-  const kw = knowledge.keywords.slice(0, 2).join('、');
 
   const topicLock =
     context.topic === 'work'
@@ -442,19 +499,20 @@ export function buildStructuredMockReading(
         ? '（本题锁定关系语境。）'
         : '';
 
-  const directLead =
-    context.topic === 'work'
-      ? reversed
-        ? `直接说：就你问的事而言，${knowledge.nameCn}${orient}不太像在报准日子，而是提醒——路径或策略需要调整；核心纠结常在情绪内耗与节奏，而不只是「钱多钱少」。${topicLock}`
-        : `直接说：就你问的事而言，${knowledge.nameCn}${orient}更像在谈「状态、节奏、怎么靠近机会」，关键词偏「${kw}」。${topicLock}`
-      : context.topic === 'love'
-        ? `直接说：就你问的事而言，${knowledge.nameCn}${orient}更像一面镜子，照见关系里的倾向与信号，而不是替对方下判决。`
-        : `直接说：就你问的事而言，${knowledge.nameCn}${orient}指向「${kw || knowledge.oneSentence}」——先看清局面，再谈下一步。`;
+  const positionLead = buildPositionLensLead(context, knowledge, reversed);
 
+  // 禁止在 overview 里罗列全部子问题；位次优先于百科画面
   const hotspotOverview = [
-    directLead,
-    `整幅画面：${overview}`,
-    scene ? `放到${topicLabel(context.topic)}语境：${scene}` : '',
+    positionLead,
+    topicLock,
+    isObstaclePosition(context)
+      ? `画面可作对照（勿当顺风解读）：${overview}`
+      : `整幅画面：${overview}`,
+    scene && !isObstaclePosition(context)
+      ? `放到${topicLabel(context.topic)}语境：${scene}`
+      : scene && isObstaclePosition(context)
+        ? `职场阻碍落点：把「${knowledge.keywords.slice(0, 2).join('、') || knowledge.nameCn}」读成需防范的模式，而不是鼓励你凭感觉冲。`
+        : '',
     bg,
   ]
     .filter(Boolean)
@@ -474,7 +532,9 @@ export function buildStructuredMockReading(
 
   const situationFromElements =
     elementMappings.length > 0
-      ? `下面把牌面元素翻译成「${q.length > 36 ? '你问的这几件事' : q}」里的现实状况。`
+      ? isObstaclePosition(context)
+        ? `下面把牌面元素翻译成「阻碍」位上的现实卡点（不复述你的全部子问题）。`
+        : `下面把牌面元素翻译成你所问主题里的现实状况（不复述问题清单）。`
       : `放在${context.cardPosition ? `「${context.cardPosition}」` : '这一'}位置，${knowledge.nameCn}映照的是你眼前的具体处境。`;
 
   const sections: ContextualSection[] = [

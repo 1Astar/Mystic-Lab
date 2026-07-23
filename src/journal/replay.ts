@@ -1,6 +1,7 @@
 import type { CodexEncounter } from '../codex/collection.ts';
 import type { DrawnCard } from '../tarot/engine.ts';
 import { buildReadingResult } from '../interpretation/contextual-reading.ts';
+import { buildQuestionThread } from '../interpretation/question-thread.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { SPREADS, isKnownSpreadType } from '../tarot/spreads.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
@@ -31,16 +32,51 @@ export function reconstructDrawnCards(entry: JournalEntry): DrawnCard[] {
   });
 }
 
+/**
+ * 旧快照没有 questionThread：用现有牌 + 问题补一层串讲（不覆盖原有牌文）。
+ */
+export function hydrateReadingQuestionThread(
+  reading: ReadingResult,
+  question?: string,
+): ReadingResult {
+  if (reading.questionThread?.answers?.length) return reading;
+  const q = (question ?? reading.cards[0]?.question ?? '').trim();
+  if (!q || !reading.cards.length) return reading;
+  const thread = buildQuestionThread(
+    reading.cards,
+    q,
+    reading.provider === 'llm' ? 'llm' : 'mock',
+  );
+  if (!thread) return reading;
+  return {
+    ...reading,
+    questionThread: thread,
+    summary: reading.summary?.trim() || thread.oneLiner,
+  };
+}
+
 export type JournalReadingResolve = {
   reading: ReadingResult;
   /** 无快照时为根据记录重新生成 */
   regenerated: boolean;
+  /** 仅为旧快照补了 questionThread */
+  hydratedThread?: boolean;
   entry: JournalEntry;
 };
 
 export function resolveJournalReading(entry: JournalEntry): JournalReadingResolve {
   if (entry.readingSnapshot?.cards?.length) {
-    return { reading: entry.readingSnapshot, regenerated: false, entry };
+    const hadThread = Boolean(entry.readingSnapshot.questionThread?.answers?.length);
+    const reading = hydrateReadingQuestionThread(
+      entry.readingSnapshot,
+      entry.question,
+    );
+    return {
+      reading,
+      regenerated: false,
+      hydratedThread: !hadThread && Boolean(reading.questionThread?.answers?.length),
+      entry,
+    };
   }
 
   const drawn = reconstructDrawnCards(entry);

@@ -72,6 +72,11 @@ export const TERM_GLOSS: Record<string, TermGloss> = {
     title: '相克',
     tip: '五行相克口诀：土克水、水克火、火克金、金克木、木克土。月建克爻 → 爻偏弱（死）。',
   },
+  'an-dong': {
+    id: 'an-dong',
+    title: '暗动',
+    tip: '静爻被日支六冲，表上不标「动」，仍可能暗地里起作用（教学口径：日冲暗动）。',
+  },
 };
 
 function escapeHtml(s: string): string {

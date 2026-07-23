@@ -1,5 +1,7 @@
 import type { DrawnCard } from '../tarot/engine.ts';
 import { TAROT_DECK, type CardDefinition } from '../tarot/deck.ts';
+import { buildEncounterGuidance } from '../knowledge/encounter-guidance.ts';
+import type { ReadingResult } from '../interpretation/types.ts';
 
 export type UnlockResult = {
   isFirstTime: boolean;
@@ -67,6 +69,8 @@ export type CodexEncounter = {
   spreadLabel: string;
   /** 关联手札，用于复原完整结果页 */
   journalId?: string;
+  /** 当时位次相关的解读要点（建议/阻碍/局面） */
+  guidance?: string;
 };
 
 export type CodexEntry = {
@@ -136,8 +140,15 @@ function loadStore(): CodexStore {
 
 export function detectQuestionTheme(question: string): QuestionTheme {
   const q = question.trim();
-  if (/工作|事业|职场|换工作|找工作|求职|offer|面试|跳槽|升职|项目|辞职|离职/.test(q)) return 'work';
-  if (/感情|爱情|关系|喜欢|分手|复合|婚姻|伴侣|表白/.test(q)) return 'love';
+  // 职场优先：离职/转正/试用等具体场景即使夹杂「关系」也锁 work
+  if (
+    /工作|事业|职场|换工作|找工作|求职|offer|面试|跳槽|升职|项目|辞职|离职|转正|试用|年假|薪资|薪水|裁员|加班|同事|老板|汇报|绩效|合同|入职|兼职|副业|创业|岗|想离开|去留|离开的原因/.test(
+      q,
+    )
+  ) {
+    return 'work';
+  }
+  if (/感情|爱情|恋爱|喜欢|分手|复合|婚姻|伴侣|表白|前任|旧情人/.test(q)) return 'love';
   if (/学业|考试|学习|考研|留学|论文|学校/.test(q)) return 'study';
   return 'self';
 }
@@ -257,6 +268,51 @@ export function linkEncountersToJournal(
       changed = true;
     }
   }
+
+  if (changed) saveStore(store);
+}
+
+/** 用完整解读回填相遇记录的 guidance / summary */
+export function enrichEncountersFromReading(
+  reading: ReadingResult,
+  journalId?: string | null,
+): void {
+  if (!reading.cards.length) return;
+  const store = loadStore();
+  const q = (reading.cards[0]?.question ?? reading.questionThread?.answers[0]?.question ?? '').trim();
+  const jid = journalId?.trim() || undefined;
+  let changed = false;
+
+  reading.cards.forEach((card, i) => {
+    const entry = store.entries[card.cardId];
+    if (!entry?.encounters.length) return;
+    const guidance = buildEncounterGuidance(reading, i);
+    if (!guidance) return;
+
+    // 优先匹配同问题 + 同位次的最近一条
+    const match =
+      entry.encounters.find(
+        (e) =>
+          (!jid || e.journalId === jid || !e.journalId) &&
+          e.question.trim() === q &&
+          (e.spreadLabel || '') === (card.position || ''),
+      ) ??
+      entry.encounters.find(
+        (e) => e.question.trim() === q || (jid && e.journalId === jid),
+      ) ??
+      entry.encounters[0];
+
+    if (!match) return;
+    if (jid && !match.journalId) match.journalId = jid;
+    if (match.guidance !== guidance) {
+      match.guidance = guidance;
+      changed = true;
+    }
+    if (!match.summary || match.summary === card.cardName) {
+      match.summary = guidance.slice(0, 120);
+      changed = true;
+    }
+  });
 
   if (changed) saveStore(store);
 }

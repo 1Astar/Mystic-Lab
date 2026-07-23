@@ -23,15 +23,23 @@ export type PersonSwitcherOptions = {
   onChange?: (person: PersonProfile) => void;
 };
 
+function findPersonSheet(host: HTMLElement): HTMLElement | null {
+  const page = host.closest('.page') ?? document.body;
+  return (
+    page.querySelector<HTMLElement>('[data-person-sheet]') ??
+    document.querySelector<HTMLElement>('[data-person-sheet]')
+  );
+}
+
 function closeSheet(host: HTMLElement): void {
-  const sheet = host.querySelector<HTMLElement>('[data-person-sheet]');
+  const sheet = findPersonSheet(host);
   if (!sheet) return;
   sheet.classList.remove('is-open');
   window.setTimeout(() => sheet.remove(), 220);
 }
 
 function openSheet(host: HTMLElement, options?: PersonSwitcherOptions): void {
-  host.querySelector('[data-person-sheet]')?.remove();
+  findPersonSheet(host)?.remove();
   const active = getActivePerson();
   const people = listPersons();
 
@@ -112,6 +120,12 @@ function paintTrigger(host: HTMLElement): void {
   const person = getActivePerson();
   const btn = host.querySelector<HTMLButtonElement>('[data-person-trigger]');
   if (!btn) return;
+  if (btn.classList.contains('lab-avatar-btn')) {
+    btn.textContent = person.nickname.slice(0, 1) || '我';
+    btn.setAttribute('aria-label', `当前档案：${person.nickname}，点击切换`);
+    btn.title = person.nickname;
+    return;
+  }
   btn.textContent = `${person.nickname} ▾`;
   btn.setAttribute('aria-label', `当前所问对象：${person.nickname}，点击切换`);
 }
@@ -137,6 +151,38 @@ export function mountPersonSwitcher(
 
   wrap.querySelector('[data-person-trigger]')?.addEventListener('click', () => {
     openSheet(host, options);
+  });
+
+  return { refresh: () => paintTrigger(host) };
+}
+
+/** 主页顶栏：头像切换档案 +「+」添加 */
+export function mountPersonAvatarChrome(
+  host: HTMLElement,
+  options?: PersonSwitcherOptions,
+): { refresh: () => void } {
+  host.querySelector('[data-person-switcher]')?.remove();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'lab-avatar-chrome';
+  wrap.dataset.personSwitcher = '';
+  wrap.innerHTML = `
+    <button type="button" class="lab-avatar-btn" data-person-trigger></button>
+    <button type="button" class="lab-avatar-add" data-person-add aria-label="添加档案">+</button>
+  `;
+  host.appendChild(wrap);
+  paintTrigger(host);
+
+  wrap.querySelector('[data-person-trigger]')?.addEventListener('click', () => {
+    openSheet(host, options);
+  });
+  wrap.querySelector('[data-person-add]')?.addEventListener('click', () => {
+    try {
+      sessionStorage.setItem('mystic-lab-profile-open-new', '1');
+    } catch {
+      /* ignore */
+    }
+    navigate('/profile');
   });
 
   return { refresh: () => paintTrigger(host) };

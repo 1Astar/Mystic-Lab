@@ -3,6 +3,13 @@ import { createStarsLayer } from '../tarot/animations.ts';
 import { mysticEmblemHtml, type MysticEmblemKind } from '../ui/mystic-emblem.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { showLabGuideModal } from '../ui/lab-guide-modal.ts';
+import { mountPersonAvatarChrome } from '../ui/person-switcher.ts';
+import {
+  isAiConfigured,
+  loadAiSettings,
+  type AiSettings,
+} from '../ai/settings.ts';
+import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 
 interface LabEntry {
   path: string;
@@ -15,6 +22,7 @@ interface LabEntry {
   comingSoon?: boolean;
 }
 
+/** 第一行塔罗 | 六爻；无单独档案卡片（改顶栏头像） */
 const SYSTEMS: LabEntry[] = [
   {
     path: '/tarot',
@@ -24,18 +32,18 @@ const SYSTEMS: LabEntry[] = [
     emblem: 'tarot',
   },
   {
-    path: '/xiaoliuren',
-    title: '小六壬',
-    desc: '今天明天顺不顺',
-    note: '时间趋势',
-    emblem: 'star',
-  },
-  {
     path: '/liuyao',
     title: '六爻',
     desc: '六爻叠合、动爻、世应',
     note: '变化结构',
     emblem: 'hex',
+  },
+  {
+    path: '/xiaoliuren',
+    title: '小六壬',
+    desc: '今天明天顺不顺',
+    note: '时间趋势',
+    emblem: 'star',
   },
   {
     path: '/meihua',
@@ -50,13 +58,6 @@ const SYSTEMS: LabEntry[] = [
     desc: '四柱排盘 · 日主十神',
     note: '命理结构',
     emblem: 'bazi',
-  },
-  {
-    path: '/profile',
-    title: '档案',
-    desc: '自己与他人 · 各体系可切换所问对象',
-    note: '人物底座',
-    emblem: 'heart',
   },
   {
     path: '/life',
@@ -117,6 +118,29 @@ function appendEntryCard(
   container.appendChild(card);
 }
 
+function mountLabHomeAiButton(host: HTMLElement): void {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lab-home-ai-btn';
+  btn.setAttribute('aria-label', 'AI 配置');
+
+  const paint = (settings: AiSettings) => {
+    const on = isAiConfigured(settings);
+    btn.classList.toggle('is-on', on);
+    btn.innerHTML = `
+      <span class="lab-home-ai-dot" aria-hidden="true"></span>
+      <span class="lab-home-ai-label">AI</span>
+    `;
+    btn.title = on ? `AI 已启用 · ${settings.model}` : 'AI 配置';
+  };
+
+  paint(loadAiSettings());
+  btn.addEventListener('click', () => {
+    openAiSettingsModal((s) => paint(s));
+  });
+  host.appendChild(btn);
+}
+
 export function renderLabHome(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
@@ -126,6 +150,10 @@ export function renderLabHome(root: HTMLElement): () => void {
   mountEnvBanner(page);
 
   page.innerHTML = `
+    <div class="lab-home-chrome" aria-label="档案与 AI">
+      <div class="lab-home-chrome-left" data-lab-person-host></div>
+      <div class="lab-home-chrome-right" data-lab-ai-host></div>
+    </div>
     <header class="home-header">
       <p class="home-eyebrow">MYSTIC LAB</p>
       <h1 class="page-title">Mystic Lab</h1>
@@ -146,6 +174,12 @@ export function renderLabHome(root: HTMLElement): () => void {
     showLabGuideModal();
   });
 
+  const personHost = page.querySelector<HTMLElement>('[data-lab-person-host]')!;
+  mountPersonAvatarChrome(personHost);
+
+  const aiHost = page.querySelector<HTMLElement>('[data-lab-ai-host]')!;
+  mountLabHomeAiButton(aiHost);
+
   const systems = page.querySelector<HTMLElement>('.lab-systems')!;
   for (const entry of SYSTEMS) {
     appendEntryCard(systems, entry, true);
@@ -161,5 +195,7 @@ export function renderLabHome(root: HTMLElement): () => void {
   return () => {
     stars.remove();
     document.querySelector('.lab-guide-modal')?.remove();
+    document.querySelector('.person-switch-sheet')?.remove();
+    document.querySelector('.ai-settings-modal')?.remove();
   };
 }

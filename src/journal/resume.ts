@@ -79,7 +79,7 @@ export function fillRemainingCardPool(
     const pos = spread.positions[drawn.length + i];
     pool.push({
       card: def,
-      reversed: Math.random() < 0.3,
+      reversed: Math.random() < 0.5,
       position: pos?.label ?? '补位',
       positionKey: pos?.key,
     });

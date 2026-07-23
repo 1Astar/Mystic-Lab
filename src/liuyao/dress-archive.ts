@@ -1,6 +1,6 @@
 import type { CastResult } from './engine.ts';
 import { dressHexagram, dressChangedHexagram, type YaoDress, type DressedHexagram } from './najia.ts';
-import { siZhuFromDate } from './ganzhi.ts';
+import { siZhuFromDate, renderDateChongBarHtml } from './ganzhi.ts';
 import { renderYaoCard } from './yao-card.ts';
 import { renderQinDictHtml } from './energy-lens.ts';
 import { renderAdvancedPlateFoldHtml } from './advanced-plate.ts';
@@ -186,6 +186,7 @@ function renderDressLensHtml(
       </div>
       <div class="ly-xiang-sec-pane" data-dress-lens-pane="energy" role="tabpanel" hidden>
         <p class="ly-guide-tip">能量＝本题该盯哪一层、这个月力气够不够、谁帮谁拖。用 / 元 / 忌 / 仇都落在<strong>本卦</strong>装卦表上的爻。</p>
+        ${renderDateChongBarHtml(castAt)}
         ${renderYongStatusHtml(statusPack)}
         <div class="ly-dress-energy" data-dress-energy>
           ${renderSpiritNarrativeForCast(cast, question, castAt)}

@@ -1,6 +1,6 @@
 import type { DrawnCard } from '../tarot/engine.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
-import { getAllEntries, linkEncountersToJournal } from '../codex/collection.ts';
+import { getAllEntries, linkEncountersToJournal, enrichEncountersFromReading } from '../codex/collection.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
 import {
   buildLearningNote,
@@ -19,6 +19,10 @@ export type JournalReadingFeedback = {
   /** 针对焦点牌或整次占问的细节 */
   cardNote: string;
   focusCardId?: string;
+  /** 这对我有用吗？1–5 星 */
+  usefulness?: 1 | 2 | 3 | 4 | 5;
+  /** 标记心情 */
+  mood?: 'up' | 'ok' | 'down';
   at: string;
 };
 
@@ -236,6 +240,9 @@ export function upsertJournalProgress(
 
   if (status === 'complete') {
     linkEncountersToJournal(entry.id, question, cardIds, entry.createdAt);
+    if (entry.readingSnapshot) {
+      enrichEncountersFromReading(entry.readingSnapshot, entry.id);
+    }
   }
 
   return entry;

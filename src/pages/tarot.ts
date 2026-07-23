@@ -19,10 +19,16 @@ import {
   toggleChipInText,
   type ChipGroup,
 } from '../knowledge/pre-reading-chips.ts';
-import { mountCardResultTabs } from '../ui/card-result-tabs.ts';
+import { mountQuestionThread, openThreadCardPeek } from '../ui/question-thread-panel.ts';
+import { mountReadingFeedbackPanel } from '../ui/reading-feedback-panel.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
-import { saveJournalEntry, updateJournalReflection, upsertJournalProgress } from '../journal/records.ts';
+import {
+  getJournalEntryById,
+  saveJournalEntry,
+  updateJournalReflection,
+  upsertJournalProgress,
+} from '../journal/records.ts';
 import { resolveResumeFromStash } from '../journal/resume.ts';
 import { mergeReadingBackground } from '../life/profile-context.ts';
 import { navigate } from '../router.ts';
@@ -118,8 +124,6 @@ export function renderTarot(root: HTMLElement): () => void {
   let revealedFlags: boolean[] = [];
   /** 直觉焦点：null=整阵，数字=牌下标 */
   let intuitionFocus: number | null = null;
-  /** 结果页切换：overall | 牌下标 */
-  let resultView: 'overall' | number = 'overall';
   let reading: ReadingResult | null = null;
   let learningNote = '';
   let questionBackground = '';
@@ -792,7 +796,7 @@ export function renderTarot(root: HTMLElement): () => void {
               ? '全盘已开 · 先看一眼整体关系。'
               : `已翻开 ${revealedCount}/${drawnCards.length} · 点牌翻开，或全部翻开。`;
       const gestureSoft =
-        drawMode === 'gesture'
+          drawMode === 'gesture'
           ? phase === 'draw'
             ? '左右挥手浏览牌堆；捏合抽起这张牌。'
             : phase === 'place'
@@ -806,7 +810,7 @@ export function renderTarot(root: HTMLElement): () => void {
           : `<p class="tarot-hint">第 ${currentIndex + 1}/${spread.positions.length} 张 · <strong>${posLabel}</strong></p>`;
 
       main.innerHTML = `
-        ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
+      ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
         ${teach && phase !== 'flip' ? `<p class="teach-hint">${teach}</p>` : ''}
         ${progressHint}
         ${renderSpreadBoardShellHtml(spread, spreadType, boardPlacements, currentIndex, phase)}
@@ -1126,29 +1130,20 @@ export function renderTarot(root: HTMLElement): () => void {
     questionRewrite = null;
 
     const journalId = ensureJournalSaved();
-    if (resultView !== 'overall' && typeof resultView === 'number') {
-      if (resultView < 0 || resultView >= reading.cards.length) resultView = 'overall';
-    }
-
-    const switcherBtns = [
-      `<button type="button" class="reading-switch-btn${resultView === 'overall' ? ' is-active' : ''}" data-view="overall">整体</button>`,
-      ...reading.cards.map((c, i) => {
-        const label = c.position || c.cardName || `牌 ${i + 1}`;
-        return `<button type="button" class="reading-switch-btn${resultView === i ? ' is-active' : ''}" data-view="${i}">${escapePreReading(label)}</button>`;
-      }),
-    ].join('');
+    const live = reading;
 
     actions.innerHTML = '';
     stage.innerHTML = `
       <h2 class="section-title">占问结果</h2>
-      <p class="tarot-hint">先看整体，再按位置切换细读 · 新牌已收入图鉴</p>
-      <nav class="reading-switcher" aria-label="解读切换">${switcherBtns}</nav>
+      <p class="tarot-hint">先看整盘串讲；点牌可看牌面热点与图鉴 · 新牌已收入图鉴</p>
       <div class="result-panel" id="result-cards">
         <div id="reading-switch-panel"></div>
         <div class="learning-card">
           <h3>写下此刻的感悟</h3>
           <textarea id="result-reflection" class="question-input" rows="3" placeholder="这次占问，你想记住什么？"></textarea>
+          <p class="result-reflection-echo" id="result-reflection-echo" hidden></p>
         </div>
+        <div id="result-feedback-host"></div>
         <div class="result-rewrite-block">
           <button type="button" class="result-rewrite-trigger">
             对结果有疑问？可能是问法不对 — 让 AI 帮你改问
@@ -1159,22 +1154,31 @@ export function renderTarot(root: HTMLElement): () => void {
 
     const paintPanel = (): void => {
       const panel = document.getElementById('reading-switch-panel');
-      if (!panel || !reading) return;
-      stage.querySelectorAll('.reading-switch-btn').forEach((btn) => {
-        const v = (btn as HTMLElement).dataset.view;
-        const active =
-          v === 'overall' ? resultView === 'overall' : Number(v) === resultView;
-        btn.classList.toggle('is-active', active);
-      });
+      if (!panel) return;
 
-      if (resultView === 'overall') {
-        const tip = reading.userIntuition?.trim();
-        const focusNote =
-          tip && reading.intuitionFocusIndex != null
-            ? `（焦点：${reading.cards[reading.intuitionFocusIndex]?.position ?? '该牌'}）`
-            : tip
-              ? '（整阵）'
-              : '';
+      const tip = live.userIntuition?.trim();
+      const focusNote =
+        tip && live.intuitionFocusIndex != null
+          ? `（焦点：${live.cards[live.intuitionFocusIndex]?.position ?? '该牌'}）`
+          : tip
+            ? '（整阵）'
+            : '';
+      const openCard = (i: number): void => {
+        const card = live.cards[i];
+        if (!card) return;
+        openThreadCardPeek(card, {
+          initialTab: 'visual',
+          onCardReadingChange: (updated) => {
+            live.cards[i] = updated;
+            if (updated.interpretationProvider === 'llm') {
+              live.provider = 'llm';
+            }
+            ensureJournalSaved();
+          },
+        });
+      };
+      const mounted = mountQuestionThread(panel, live, openCard);
+      if (!mounted) {
         panel.innerHTML = `
           <div class="reading-overall">
             ${
@@ -1182,9 +1186,9 @@ export function renderTarot(root: HTMLElement): () => void {
                 ? `<p class="overall-intuition"><span class="overall-intuition-label">你的直觉${focusNote}</span>${escapePreReading(tip)}</p>`
                 : ''
             }
-            <p class="result-summary">${escapePreReading(reading.summary)}</p>
+            <p class="result-summary">${escapePreReading(live.summary)}</p>
             <div class="overall-jumps" role="list">
-              ${reading.cards
+              ${live.cards
                 .map((c, i) => {
                   const one =
                     c.interpretationLayers.answerTendency?.oneLiner?.trim() ||
@@ -1207,44 +1211,48 @@ export function renderTarot(root: HTMLElement): () => void {
             </div>
           </div>`;
         panel.querySelectorAll<HTMLButtonElement>('.overall-card-jump').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            resultView = Number(btn.dataset.jump);
-            paintPanel();
-          });
+          btn.addEventListener('click', () => openCard(Number(btn.dataset.jump)));
         });
-      } else {
-        const i = resultView;
-        const cardReading = reading.cards[i];
-        panel.innerHTML = `<div class="result-card-item" data-card-id="${cardReading?.cardId ?? ''}"><div class="result-tabs-host"></div></div>`;
-        const host = panel.querySelector('.result-tabs-host') as HTMLElement | null;
-        if (host && cardReading) {
-          mountCardResultTabs(host, cardReading, 'reading', {
-            onCardReadingChange: (updated) => {
-              if (!reading) return;
-              reading.cards[i] = updated;
-              if (updated.interpretationProvider === 'llm') {
-                reading.provider = 'llm';
-              }
-              ensureJournalSaved();
-            },
-          });
-        }
+      } else if (tip) {
+        panel.insertAdjacentHTML(
+          'afterbegin',
+          `<p class="overall-intuition"><span class="overall-intuition-label">你的直觉${focusNote}</span>${escapePreReading(tip)}</p>`,
+        );
       }
     };
 
-    stage.querySelectorAll<HTMLButtonElement>('.reading-switch-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const v = btn.dataset.view;
-        resultView = v === 'overall' || v == null ? 'overall' : Number(v);
-        paintPanel();
-      });
-    });
     paintPanel();
 
     const reflectionEl = document.getElementById('result-reflection') as HTMLTextAreaElement | null;
+    const reflectionEcho = document.getElementById('result-reflection-echo');
+    const paintReflectionEcho = (text: string): void => {
+      if (!reflectionEcho) return;
+      const t = text.trim();
+      if (!t) {
+        reflectionEcho.hidden = true;
+        reflectionEcho.textContent = '';
+        return;
+      }
+      reflectionEcho.hidden = false;
+      reflectionEcho.textContent = `手札记录：${t}`;
+    };
     if (reflectionEl && journalId) {
+      const existing = getJournalEntryById(journalId)?.reflection?.trim() ?? '';
+      if (existing && !reflectionEl.value.trim()) reflectionEl.value = existing;
+      paintReflectionEcho(reflectionEl.value);
       reflectionEl.addEventListener('input', () => {
         updateJournalReflection(journalId, reflectionEl.value.trim());
+        paintReflectionEcho(reflectionEl.value);
+      });
+    }
+
+    const feedbackHost = document.getElementById('result-feedback-host');
+    if (feedbackHost && journalId && reading) {
+      mountReadingFeedbackPanel(feedbackHost, {
+        journalId,
+        question,
+        cardIds: reading.cards.map((c) => c.cardId),
+        initial: getJournalEntryById(journalId)?.feedback,
       });
     }
 
@@ -1308,7 +1316,7 @@ export function renderTarot(root: HTMLElement): () => void {
       const hint = document.createElement('p');
       hint.className = 'supplement-guide-hint';
       hint.textContent = `如果还不够清晰，可针对【${theme}】再补一张`;
-      actions.appendChild(resultActions);
+    actions.appendChild(resultActions);
       actions.appendChild(hint);
     } else {
       actions.appendChild(resultActions);
@@ -1336,7 +1344,6 @@ export function renderTarot(root: HTMLElement): () => void {
     currentIndex = 0;
     revealedFlags = [];
     intuitionFocus = null;
-    resultView = 'overall';
     supplementCount = 0;
     reading = null;
     learningNote = '';
@@ -1367,7 +1374,6 @@ export function renderTarot(root: HTMLElement): () => void {
     currentIndex = 0;
     revealedFlags = [];
     intuitionFocus = null;
-    resultView = 'overall';
     supplementCount = 0;
     reading = null;
     learningNote = '';
@@ -1830,11 +1836,9 @@ export function renderTarot(root: HTMLElement): () => void {
       await finalizeReadingSummary();
       currentJournalId = ensureJournalSaved();
       if (isSupplement) {
-        resultView = Math.max(0, drawnCards.length - 1);
         setState('result');
         return;
       }
-      resultView = 'overall';
       showRitualCompleteModal(reading!, () => setState('result'));
     } catch (err) {
       console.warn('[tarot] finish after reveal failed', err);
@@ -1863,7 +1867,6 @@ export function renderTarot(root: HTMLElement): () => void {
       applySpreadIntuition(raw);
       await finalizeReadingSummary();
       currentJournalId = ensureJournalSaved();
-      resultView = 'overall';
       showRitualCompleteModal(reading!, () => setState('result'));
     } catch (err) {
       console.warn('[tarot] intuition → result failed', err);
@@ -1907,12 +1910,12 @@ export function renderTarot(root: HTMLElement): () => void {
         ? '已恢复未完成的占问 · 牌已齐，可看解读'
         : `已恢复未完成的占问 · 已抽 ${s.drawnCards.length}/${s.cardPool.length} 张`,
     );
-  } else {
+    } else {
     if (resume && !resume.ok) {
       hintBar.setProgress(resume.reason);
     }
-    renderStage();
-    syncHintBar();
+  renderStage();
+  syncHintBar();
   }
 
   window.addEventListener('pagehide', onPageHide);

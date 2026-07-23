@@ -454,7 +454,7 @@ export function renderSpiritNarrativeHtml(n: SpiritNarrative): string {
       <h4 class="ly-spirit-nar-title">能量 · 用 / 元 / 忌 / 仇</h4>
       <p class="ly-guide-tip">用神、元神、忌神、仇神都落在<strong>本卦「${escapeHtml(
         n.hexName,
-      )}」</strong>装卦表上的爻（按所问取六亲关系），不是另起一卦。绿看补给，红看耗散。</p>
+      )}」</strong>装卦表上的爻。绿看补给，红看耗散。若出现暗动 / 贪生忘克 / 回头克等，下方会自动补古诀与白话。</p>
       ${rosterHtml}
       <div class="ly-spirit-nar-body">${paras}</div>
       ${classicHtml}

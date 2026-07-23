@@ -18,6 +18,8 @@ export type ReadingFeedbackSubmitInput = {
   verdict: ReadingFeedbackVerdict;
   reasons: ReadingFeedbackReason[];
   cardNote: string;
+  usefulness?: JournalReadingFeedback['usefulness'];
+  mood?: JournalReadingFeedback['mood'];
   /** 合成手札不落库，只走 Star PM / 回调 */
   persistLocal?: boolean;
 };
@@ -35,6 +37,8 @@ export async function submitReadingFeedback(
     reasons: input.verdict === 'miss' ? input.reasons : [],
     cardNote: input.cardNote.trim(),
     focusCardId: input.focusCardId,
+    usefulness: input.usefulness,
+    mood: input.mood,
     at: new Date().toISOString(),
   };
 
@@ -92,6 +96,8 @@ async function postReadingFeedbackToStarPm(
       rawThought: [
         `结论: ${verdictLabel}`,
         `原因: ${feedback.reasons.join('、') || '无'}`,
+        `有用度: ${feedback.usefulness ? `${feedback.usefulness}/5` : '未评'}`,
+        `心情: ${feedback.mood ?? '未标'}`,
         `牌细节: ${feedback.cardNote || '无'}`,
         `焦点牌: ${feedback.focusCardId || '整次'}`,
         `问题: ${input.question}`,

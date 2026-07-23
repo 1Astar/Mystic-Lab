@@ -64,6 +64,7 @@ describe('dress-archive yong status', () => {
     expect(html).toMatch(/data-dress-lens="energy"/);
     expect(html).toMatch(/ly-xiang-rail/);
     expect(html).toMatch(/data-yong-status/);
+    expect(html).toMatch(/data-date-chong/);
     expect(html).toMatch(/用神状态/);
     expect(html).toMatch(/ly-spirit-nar/);
     expect(html).toMatch(/data-yao-modal/);

@@ -7,6 +7,13 @@ import type {
 
 const REASONS: ReadingFeedbackReason[] = ['解读不准', '问法问题', '牌感不对', '其他'];
 
+const MOODS: Array<{ id: NonNullable<JournalReadingFeedback['mood']>; label: string; icon: string }> =
+  [
+    { id: 'up', label: '被看见', icon: '🙂' },
+    { id: 'ok', label: '还好', icon: '😐' },
+    { id: 'down', label: '没对上', icon: '🙁' },
+  ];
+
 export type ReadingFeedbackPanelOptions = {
   journalId: string;
   question: string;
@@ -25,6 +32,8 @@ export function mountReadingFeedbackPanel(
   let verdict: ReadingFeedbackVerdict | null = options.initial?.verdict ?? null;
   let reasons = new Set<ReadingFeedbackReason>(options.initial?.reasons ?? []);
   let cardNote = options.initial?.cardNote ?? '';
+  let usefulness: JournalReadingFeedback['usefulness'] = options.initial?.usefulness;
+  let mood: JournalReadingFeedback['mood'] = options.initial?.mood;
   let status = '';
   let error = '';
   let loading = false;
@@ -39,12 +48,32 @@ export function mountReadingFeedbackPanel(
 
   function render(): void {
     const missOpen = verdict === 'miss';
+    const stars = [1, 2, 3, 4, 5]
+      .map(
+        (n) =>
+          `<button type="button" class="reading-feedback-star${usefulness && usefulness >= n ? ' is-on' : ''}" data-star="${n}" aria-label="${n}星">${usefulness && usefulness >= n ? '★' : '☆'}</button>`,
+      )
+      .join('');
+
     container.innerHTML = `
       <section class="reading-feedback-panel">
         <h3 class="reading-feedback-title">对这次占问的反馈</h3>
         <div class="reading-feedback-verdicts" role="group" aria-label="呼应程度">
           <button type="button" class="reading-feedback-verdict ${verdict === 'echo' ? 'is-active' : ''}" data-verdict="echo">有呼应</button>
           <button type="button" class="reading-feedback-verdict ${verdict === 'miss' ? 'is-active is-miss' : ''}" data-verdict="miss">不准</button>
+        </div>
+        <div class="reading-feedback-mood" role="group" aria-label="标记心情">
+          <p class="reading-feedback-hint">标记心情（选填）</p>
+          <div class="reading-feedback-mood-row">
+            ${MOODS.map(
+              (m) =>
+                `<button type="button" class="reading-feedback-mood-btn${mood === m.id ? ' is-active' : ''}" data-mood="${m.id}">${m.icon} ${escapeHtml(m.label)}</button>`,
+            ).join('')}
+          </div>
+        </div>
+        <div class="reading-feedback-useful" role="group" aria-label="有用程度">
+          <p class="reading-feedback-hint">这对我有用吗？（1–5 星，选填）</p>
+          <div class="reading-feedback-stars">${stars}</div>
         </div>
         ${
           missOpen
@@ -79,6 +108,22 @@ export function mountReadingFeedbackPanel(
         if (verdict === 'echo') reasons = new Set();
         error = '';
         status = '';
+        render();
+      });
+    });
+
+    container.querySelectorAll<HTMLButtonElement>('[data-mood]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.mood as NonNullable<JournalReadingFeedback['mood']>;
+        mood = mood === next ? undefined : next;
+        render();
+      });
+    });
+
+    container.querySelectorAll<HTMLButtonElement>('[data-star]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const n = Number(btn.dataset.star) as 1 | 2 | 3 | 4 | 5;
+        usefulness = usefulness === n ? undefined : n;
         render();
       });
     });
@@ -128,6 +173,8 @@ export function mountReadingFeedbackPanel(
         verdict,
         reasons: [...reasons],
         cardNote,
+        usefulness,
+        mood,
         persistLocal: options.persistLocal,
       });
       status = result.starPm.ok

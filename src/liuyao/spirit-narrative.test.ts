@@ -78,11 +78,25 @@ describe('spirit-narrative', () => {
       wuxing: '木',
     });
     expect(isBranchLiuHe('午', '未')).toBe(true);
-    const notes = buildSpiritClassicNotes(yuan, ji);
+    const notes = buildSpiritClassicNotes(yuan, ji, '未');
     expect(notes.length).toBe(2);
     expect(notes[0]!.classic).toMatch(/贪生忘克/);
     expect(notes[0]!.baihua).toMatch(/忌神本来会克用神/);
     expect(notes[1]!.classic).toMatch(/贪合忘生/);
     expect(notes[1]!.baihua).toMatch(/六合|粘/);
+  });
+
+  it('emits 暗动 classic when 忌神日冲', () => {
+    const ji = fakeRow({
+      index: 1,
+      label: '二爻',
+      branch: '寅',
+      liuqin: '妻财',
+      changing: false,
+      wuxing: '木',
+    });
+    const notes = buildSpiritClassicNotes(undefined, ji, '申');
+    expect(notes.some((n) => /暗动/.test(n.classic))).toBe(true);
+    expect(notes[0]!.baihua).toMatch(/暗动/);
   });
 });

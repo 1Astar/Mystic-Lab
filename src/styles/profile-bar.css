@@ -359,13 +359,42 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 10px;
+  margin: 4px 0 12px;
 }
 
 .profile-life-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background: rgba(8, 6, 18, 0.4);
+  color: rgba(255, 230, 200, 0.78);
+  font-size: 0.78rem;
+  line-height: 1.2;
   cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.profile-life-tag input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.profile-life-tag:hover {
+  border-color: rgba(255, 214, 166, 0.4);
+  color: #fff5e6;
+}
+
+.profile-life-tag:has(input:checked),
+.profile-life-tag.is-on {
+  border-color: rgba(255, 214, 166, 0.55);
+  background: rgba(255, 214, 166, 0.14);
+  color: #ffd6a6;
+  font-weight: 600;
 }
