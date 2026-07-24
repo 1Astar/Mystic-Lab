@@ -12,8 +12,10 @@ import { renderXiaoliurenHero, mountXiaoliurenHero } from '../ui/xiaoliuren-hero
 import { mountNotifyTryControl } from '../ui/xiaoliuren/notify-try.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
+import { preloadXlrFlowAssets } from '../ui/xiaoliuren/assets.ts';
 
 export function renderXiaoliurenHome(root: HTMLElement): () => void {
+  preloadXlrFlowAssets();
   const journalCount = loadXiaoliurenJournal().length;
   const journeyDone = getPalmJourneyDoneCount();
   const journeyLevel = getPalmJourneyLevel();

@@ -64,7 +64,7 @@ function renderPointHtmlLayer(opts: {
           : '';
     const icon =
       opts.showGodIcons && !opts.blank
-        ? `<img class="xlr-palm-god-chip" src="${getSixGodIconUrl(p.godId)}" alt="" width="22" height="22" loading="lazy" />`
+        ? `<img class="xlr-palm-god-chip" src="${getSixGodIconUrl(p.godId)}" alt="" width="22" height="22" loading="eager" decoding="async" />`
         : '';
     const num = opts.blank ? '' : `<span class="xlr-palm-point-num">${p.id}</span>`;
     const label = opts.blank ? '' : `<span class="xlr-palm-point-label">${p.name}</span>`;
@@ -148,7 +148,7 @@ export function renderPalmPlate(opts: PalmPlateOptions = {}): string {
       </div>
       <div class="xlr-palm-stage${useStagger ? ' xlr-stagger-item' : ''}" style="--si:3">
         <div class="xlr-palm-map">
-          <img class="xlr-palm-hand-img" src="${XLR_ASSETS.palmChart}" alt="掌诀示意" loading="lazy" />
+          <img class="xlr-palm-hand-img" src="${XLR_ASSETS.palmChart}" alt="掌诀示意" width="900" height="900" loading="eager" fetchpriority="high" decoding="async" />
           <div class="xlr-palm-points-html"${interactive || allPointsInteractive ? '' : ' aria-hidden="true"'}>
             ${renderPointHtmlLayer({
               litIndices,

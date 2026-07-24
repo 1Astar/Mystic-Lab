@@ -63,7 +63,7 @@ import { renderTimeBadge } from '../ui/xiaoliuren/time-badge.ts';
 import { mountShichenTableLore, renderShichenTable } from '../ui/xiaoliuren/shichen-table.ts';
 import { buildGodHuangliBridge } from '../xiaoliuren/god-huangli-bridge.ts';
 import { renderCountSteps } from '../ui/xiaoliuren/count-steps.ts';
-import { renderXlrDivider } from '../ui/xiaoliuren/assets.ts';
+import { renderXlrDivider, preloadXlrFlowAssets } from '../ui/xiaoliuren/assets.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 
@@ -80,6 +80,7 @@ const HOP_MS_LEARN = 1500;
 const HOP_MS_BEGINNER = 1100;
 
 export function renderXiaoliurenReading(root: HTMLElement): () => void {
+  preloadXlrFlowAssets();
   let state: FlowState = 'question';
   let lessonMode: LessonMode | null = null;
   let question = takeCrossAskQuestion().slice(0, 80);
@@ -751,35 +752,30 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
               <section class="xlr-result-reflect" data-layer="5">
                 <h3><span class="xlr-result-layer-no">五</span>轻反思（写入手札）</h3>
                 <p class="xlr-result-reflect-lead">${reflectPrompt}</p>
-                <textarea id="xlr-reflection" class="question-input xlr-reflection-input" rows="3" placeholder="写一句就好，例如：先不催、先确认一件事…" required></textarea>
-                <p class="xlr-result-reflect-hint" hidden>写完这句，才能完成手札。</p>
+                <textarea id="xlr-reflection" class="question-input xlr-reflection-input" rows="3" placeholder="写一句就好，例如：先不催、先确认一件事…"></textarea>
+                <p class="xlr-result-reflect-hint">可不写，之后在手札里补。</p>
               </section>
             `,
             'xlr-flow-result',
           );
 
           const reflectEl = stage.querySelector<HTMLTextAreaElement>('#xlr-reflection');
-          const reflectHint = stage.querySelector<HTMLElement>('.xlr-result-reflect-hint');
           const journalBtn = document.createElement('button');
           journalBtn.type = 'button';
           journalBtn.className = 'btn';
-          journalBtn.textContent = '手札记录 · 完成';
-          journalBtn.disabled = true;
-          journalBtn.setAttribute('aria-disabled', 'true');
 
-          const syncReflectGate = (): void => {
+          const syncReflectDraft = (): void => {
             const text = reflectEl?.value.trim() ?? '';
-            const ready = text.length > 0;
-            journalBtn.disabled = !ready;
-            journalBtn.setAttribute('aria-disabled', ready ? 'false' : 'true');
-            if (reflectHint) reflectHint.hidden = ready;
+            journalBtn.textContent = text ? '手札记录 · 完成' : '先完成 · 以后再写';
             if (journalId && reflectEl) updateXiaoliurenReflection(journalId, text);
           };
 
-          reflectEl?.addEventListener('input', syncReflectGate);
-          syncReflectGate();
+          reflectEl?.addEventListener('input', syncReflectDraft);
+          syncReflectDraft();
           journalBtn.addEventListener('click', () => {
-            if (journalBtn.disabled) return;
+            if (journalId && reflectEl) {
+              updateXiaoliurenReflection(journalId, reflectEl.value.trim());
+            }
             navigate('/xiaoliuren/journal');
           });
           actions.appendChild(journalBtn);

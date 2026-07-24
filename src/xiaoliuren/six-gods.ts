@@ -178,13 +178,13 @@ export function sixGodKeywordsLine(god: SixGod): string {
 }
 
 export function getSixGodIconUrl(id: SixGodId): string {
-  return `/xiaoliuren/gods/god-${id}.png`;
+  return `/xiaoliuren/gods/god-${id}.webp`;
 }
 
 export const SIX_GODS_GRID_URL = '/xiaoliuren/gods/six-gods-grid.png';
 
 export function renderSixGodIcon(god: SixGod, className = 'xlr-god-icon'): string {
-  return `<img class="${className}" src="${getSixGodIconUrl(god.id)}" alt="${god.name}" width="72" height="72" loading="lazy" />`;
+  return `<img class="${className}" src="${getSixGodIconUrl(god.id)}" alt="${god.name}" width="72" height="72" loading="lazy" decoding="async" />`;
 }
 
 export function getSixGodByIndex(index: number): SixGod {

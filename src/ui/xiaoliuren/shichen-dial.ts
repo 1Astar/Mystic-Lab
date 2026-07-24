@@ -37,7 +37,7 @@ export function renderShichenDial(opts: ShichenDialOptions): string {
   return `
     <div class="xlr-shichen-scene${sizeClass}${enter} xlr-stagger-item" style="--si:3" data-clock-deg="${opts.clockDeg}" data-active-index="${opts.activeIndex}">
       <div class="xlr-shichen-dial">
-        <img class="xlr-shichen-dial-bg" src="${XLR_ASSETS.shichenDialBg}" alt="" loading="lazy" />
+        <img class="xlr-shichen-dial-bg" src="${XLR_ASSETS.shichenDialBg}" alt="" loading="eager" decoding="async" />
         <svg class="xlr-shichen-overlay" viewBox="0 0 240 240" aria-hidden="true">
           <path class="xlr-shichen-seg is-active is-lit" d="${activeWedge}"/>
         </svg>

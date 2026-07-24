@@ -19,7 +19,7 @@ function renderActivityCol(tag: '宜' | '忌', items: string[], src: string): st
   const lines = items.map((item) => `<li>${item}</li>`).join('');
   return `
     <div class="xlr-cal-yiji-col">
-      <img class="xlr-cal-tag ${tagClass}" src="${src}" alt="${tag}" loading="lazy" />
+      <img class="xlr-cal-tag ${tagClass}" src="${src}" alt="${tag}" width="34" height="34" loading="eager" decoding="async" />
       <ul class="xlr-cal-yiji-list">${lines}</ul>
     </div>
   `;
@@ -32,7 +32,7 @@ function renderMetaRow(label: string, value: string): string {
 function renderPaperShell(bodyHtml: string): string {
   return `
     <div class="xlr-cal-page">
-      <img class="xlr-cal-paper-main" src="${XLR_ASSETS.calendarPaperMain}" alt="" loading="lazy" aria-hidden="true" />
+      <img class="xlr-cal-paper-main" src="${XLR_ASSETS.calendarPaperMain}" alt="" width="720" height="900" loading="eager" fetchpriority="high" decoding="async" aria-hidden="true" />
       <div class="xlr-cal-body">
         ${bodyHtml}
       </div>
@@ -57,7 +57,7 @@ function renderSolarFace(
       <p class="xlr-cal-sub">${view.solarMonthDay}</p>
       <p class="xlr-cal-hour">当前时辰：${view.hourLabel}<span>（${range}）</span></p>
       <p class="xlr-cal-note">${layout.weekdayLabel} · ${timePart}</p>
-      <img class="xlr-cal-rule" src="${XLR_ASSETS.calendarDivider}" alt="" loading="lazy" aria-hidden="true" />
+      <img class="xlr-cal-rule" src="${XLR_ASSETS.calendarDivider}" alt="" loading="eager" decoding="async" aria-hidden="true" />
       <p class="xlr-cal-hint">公历 → 农历</p>
     </div>
   `;
@@ -84,7 +84,7 @@ function renderLunarFace(
         ${renderActivityCol('忌', layout.jiColumn, XLR_ASSETS.calendarBadgeJi)}
       </div>
 
-      <img class="xlr-cal-rule" src="${XLR_ASSETS.calendarDivider}" alt="" loading="lazy" aria-hidden="true" />
+      <img class="xlr-cal-rule" src="${XLR_ASSETS.calendarDivider}" alt="" loading="eager" decoding="async" aria-hidden="true" />
 
       <div class="xlr-cal-meta" aria-label="简版黄历">
         <ul class="xlr-cal-meta-col">
@@ -140,13 +140,13 @@ export function renderLunarFlipScroll(
 
   return `
     <div class="xlr-lunar-calendar${convertedClass}" aria-label="公历转农历">
-      <p class="xlr-lunar-status${flipped ? ' is-done' : ''}" id="xlr-converting">
+      <p class="xlr-lunar-status${flipped ? ' is-done' : ''}" id="xlr-converting" aria-live="polite">
         ${flipped ? '换算完成' : '正在换算…'}
       </p>
 
       <div class="xlr-cal-card">
         <div class="xlr-cal-stack">
-          <img class="xlr-cal-hanger" src="${XLR_ASSETS.calendarHanger}" alt="" loading="lazy" />
+          <img class="xlr-cal-hanger" src="${XLR_ASSETS.calendarHanger}" alt="" width="640" height="213" loading="eager" decoding="async" />
           ${renderPaperShell(faces)}
         </div>
       </div>
