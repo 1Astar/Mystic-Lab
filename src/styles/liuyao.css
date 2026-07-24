@@ -5638,10 +5638,17 @@ a.ly-derived-name:hover {
 }
 
 .ly-pattern-summary-kicker {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   color: var(--ly-gold);
+}
+
+.ly-pattern-summary-lead {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(232, 224, 212, 0.55);
 }
 
 .ly-pattern-chip-list {
@@ -6839,8 +6846,61 @@ a.ly-derived-name:hover {
     rgba(199, 164, 91, 0.04);
 }
 
-.ly-briefing-layer.is-strategy,
-.ly-briefing-layer.is-actions {
+.ly-briefing-layer.is-verdict .ly-briefing-quote {
+  margin-top: 4px;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  border-left-width: 3px;
+}
+
+.ly-quick-verdict-quote {
+  margin: 10px 0 12px;
+}
+
+.ly-quick-decision-h {
+  margin: 14px 0 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 214, 166, 0.72);
+}
+
+.ly-quick-direct-body {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: rgba(245, 239, 230, 0.82);
+  white-space: pre-wrap;
+}
+
+.ly-quick-parts {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-quick-parts li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 248, 236, 0.04);
+  border: 1px solid rgba(201, 168, 108, 0.12);
+}
+
+.ly-quick-parts strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+  color: rgba(255, 214, 166, 0.78);
+}
+
+.ly-quick-parts span {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: rgba(245, 239, 230, 0.78);
+}
+
   border-color: rgba(224, 192, 120, 0.45);
   background: rgba(199, 164, 91, 0.1);
 }
@@ -10103,3 +10163,281 @@ body.ly-yao-modal-open {
 }
 
 
+
+/* ── 结果页追问：滑动复制 + 聊天弹层 ── */
+.ly-result-shell {
+  position: relative;
+  padding-bottom: 56px;
+}
+
+.ly-swipe-ask {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s ease;
+}
+
+.ly-swipe-ask-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  transform: translateX(100%);
+  transition: transform 0.22s ease;
+  z-index: 2;
+}
+
+.ly-swipe-ask.is-swiped .ly-swipe-ask-actions {
+  transform: translateX(0);
+}
+
+.ly-swipe-ask.is-swiped {
+  /* 给操作条留空：内容略左移观感 */
+  box-shadow: inset -120px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.ly-swipe-ask-btn {
+  border: 0;
+  min-width: 64px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: #1a1520;
+  background: rgba(232, 210, 160, 0.92);
+  cursor: pointer;
+}
+
+.ly-swipe-ask-btn.is-ask {
+  background: rgba(201, 140, 72, 0.95);
+  color: #1a1208;
+}
+
+.ly-follow-fab {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  display: block;
+  width: calc(100% - 8px);
+  margin: 16px auto 0;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  color: #1a1208;
+  background: linear-gradient(135deg, #e8d2a0, #c98c48);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.ly-follow-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 88px;
+  z-index: 80;
+  transform: translateX(-50%) translateY(8px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #f5efe6;
+  background: rgba(20, 16, 28, 0.92);
+  border: 1px solid rgba(201, 168, 108, 0.28);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.ly-follow-toast.is-on {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ly-follow-chat {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ly-follow-chat.is-open {
+  pointer-events: auto;
+}
+
+.ly-follow-chat-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  cursor: pointer;
+}
+
+.ly-follow-chat.is-open .ly-follow-chat-backdrop {
+  opacity: 1;
+}
+
+.ly-follow-chat-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-radius: 18px 18px 0 0;
+  background: #14101c;
+  border: 1px solid rgba(201, 168, 108, 0.2);
+  border-bottom: 0;
+  box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.45);
+  transform: translateY(110%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ly-follow-chat.is-open .ly-follow-chat-sheet {
+  transform: translateY(0);
+}
+
+.ly-follow-chat-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ly-follow-chat-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: rgba(201, 168, 108, 0.62);
+}
+
+.ly-follow-chat-head h2 {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: #f5efe6;
+}
+
+.ly-follow-chat-x {
+  border: 0;
+  background: transparent;
+  color: rgba(245, 239, 230, 0.55);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.ly-follow-chat-persona {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: rgba(201, 168, 108, 0.7);
+}
+
+.ly-follow-seed-ctx {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: rgba(232, 224, 212, 0.72);
+  background: rgba(255, 248, 236, 0.05);
+  border: 1px solid rgba(201, 168, 108, 0.12);
+}
+
+.ly-follow-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  max-height: 28vh;
+  overflow: auto;
+}
+
+.ly-follow-preset {
+  text-align: left;
+  border: 1px solid rgba(201, 168, 108, 0.22);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(245, 239, 230, 0.88);
+  background: rgba(255, 248, 236, 0.04);
+  cursor: pointer;
+}
+
+.ly-follow-preset:active {
+  background: rgba(201, 168, 108, 0.12);
+}
+
+.ly-follow-messages {
+  flex: 1;
+  min-height: 120px;
+  max-height: 36vh;
+  overflow: auto;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ly-follow-bubble {
+  max-width: 92%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.ly-follow-bubble.is-user {
+  align-self: flex-end;
+  background: rgba(201, 140, 72, 0.28);
+  color: #f5efe6;
+}
+
+.ly-follow-bubble.is-assistant {
+  align-self: flex-start;
+  background: rgba(255, 248, 236, 0.06);
+  border: 1px solid rgba(201, 168, 108, 0.14);
+  color: rgba(245, 239, 230, 0.9);
+}
+
+.ly-follow-bubble.is-thinking {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.ly-follow-ai-hint {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: rgba(201, 168, 108, 0.65);
+}
+
+.ly-follow-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: end;
+}
+
+.ly-follow-composer textarea {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ly-swipe-ask,
+  .ly-swipe-ask-actions,
+  .ly-follow-chat-sheet,
+  .ly-follow-chat-backdrop {
+    transition: none;
+  }
+}

@@ -4,10 +4,10 @@ import { getClassicCorpus } from './classic-corpus.ts';
 import { glossDaXiang, glossLine } from './classic-gloss.ts';
 import { formatClauseHtml } from './format-clause.ts';
 import { buildReadingFacts, type ReadingFacts } from './reading-facts.ts';
-import { buildQuickSummary } from './interpret.ts';
 import { dressHexagram } from './najia.ts';
 import { siZhuFromDate, renderCastTimePlaque } from './ganzhi.ts';
 import { formatLiuqinShort } from './energy-lens.ts';
+import { buildDirectReading } from './direct-reading.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -103,35 +103,44 @@ export function renderQuickBoard(
   `;
 }
 
-function renderConclusionTab(facts: ReadingFacts): string {
+function renderConclusionTab(cast: CastResult, question: string, facts: ReadingFacts): string {
+  const direct = buildDirectReading(cast, question);
   const move =
     facts.changing.labels.length === 0
       ? '无动爻'
-      : `动爻 ${facts.changing.labels.length} 处`;
+      : `动爻 ${facts.changing.labels.join('、')}`;
   const arrow = facts.changed
     ? `「${facts.primary.keywords[0]}」→「${facts.changed.keywords[0]}」`
     : `「${facts.primary.keywords[0]}」`;
+  const partHtml =
+    direct.partLeans.length > 1
+      ? `<ul class="ly-quick-parts">${direct.partLeans
+          .map(
+            (p) =>
+              `<li><strong>${escapeHtml(p.part)}</strong><span>${escapeHtml(p.lean)}</span></li>`,
+          )
+          .join('')}</ul>`
+      : '';
   return `
     <section class="ly-result-panel">
       <h3>结论</h3>
-      <p class="ly-quick-verdict">${formatClauseHtml(facts.primary.gist)}</p>
+      <p class="ly-briefing-kicker">${escapeHtml(direct.frame)}</p>
+      <blockquote class="ly-briefing-quote ly-quick-verdict-quote"><p>${escapeHtml(direct.verdict)}</p></blockquote>
       <p class="ly-quick-tags">世应${escapeHtml(facts.shiYingRel.rel)} · ${escapeHtml(move)} · ${escapeHtml(arrow)}</p>
-      ${
-        facts.changed
-          ? `<p class="ly-guide-tip">变卦「${escapeHtml(facts.changed.fullName)}」：${formatClauseHtml(facts.changed.gist)}</p>`
-          : ''
-      }
+      <div class="ly-quick-direct-body">${escapeHtml(direct.analysis).replace(/\n/g, '<br>')}</div>
+      <h4 class="ly-quick-decision-h">决策参考</h4>
+      <p class="ly-guide-tip">${escapeHtml(direct.decision.split('\n\n')[0] ?? direct.decision)}</p>
+      ${partHtml}
     </section>
   `;
 }
 
-function renderCategoryTab(facts: ReadingFacts): string {
+function renderCategoryTab(cast: CastResult, question: string, facts: ReadingFacts): string {
+  const direct = buildDirectReading(cast, question);
   const luck = clip(facts.primary.gist, 48);
-  const career = clip(facts.sceneCareer, 40);
+  const career = facts.domain === 'career' ? clip(direct.verdict, 64) : clip(facts.sceneCareer, 40);
   const love = clip(facts.sceneLove, 40);
-  const decision = facts.changed
-    ? `朝「${facts.changed.keywords[0]}」做一小步验证，忌硬冲旧法。`
-    : `先稳「${facts.themeWord}」相关边界，再谈大动作。`;
+  const decision = clip(direct.decision.split('\n\n')[0] ?? direct.decision, 72);
 
   const items: { label: string; text: string; hot?: boolean }[] = [
     { label: '运势', text: luck, hot: facts.domain === 'general' || facts.domain === 'life' },
@@ -154,6 +163,8 @@ function renderCategoryTab(facts: ReadingFacts): string {
           )
           .join('')}
       </ul>
+      <h4 class="ly-quick-decision-h">本周三步</h4>
+      <div class="ly-quick-direct-body">${escapeHtml(direct.nextSteps).replace(/\n/g, '<br>')}</div>
     </section>
   `;
 }
@@ -202,13 +213,12 @@ function renderClassicTab(cast: CastResult): string {
 
 export function renderQuickTabsHtml(cast: CastResult, question: string, castAt?: Date): string {
   const facts = buildReadingFacts(cast, question, castAt);
-  void buildQuickSummary;
   return `
     <div class="ly-result-tab-panel is-active" data-panel="conclusion" role="tabpanel">
-      ${renderConclusionTab(facts)}
+      ${renderConclusionTab(cast, question, facts)}
     </div>
     <div class="ly-result-tab-panel" data-panel="category" role="tabpanel" hidden>
-      ${renderCategoryTab(facts)}
+      ${renderCategoryTab(cast, question, facts)}
     </div>
     <div class="ly-result-tab-panel" data-panel="classic" role="tabpanel" hidden>
       ${renderClassicTab(cast)}

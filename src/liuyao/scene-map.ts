@@ -216,7 +216,13 @@ export function pickSceneLine(
 
 export function detectSceneDomain(question: string): SceneDomain {
   const q = question.trim();
-  if (/工作|offer|职业|升职|跳槽|事业|项目|老板|同事|面试/.test(q)) return 'career';
+  if (
+    /工作|offer|职业|升职|跳槽|事业|项目|老板|同事|面试|离职|辞职|转正|留任|留在|薪|工资|月薪|\d+\s*k|求职|入职|裁员/.test(
+      q,
+    )
+  ) {
+    return 'career';
+  }
   if (/感情|恋爱|分手|复合|婚姻|对象|喜欢|关系/.test(q)) return 'love';
   if (/生活|搬家|健康|家庭|钱|财务/.test(q)) return 'life';
   return 'general';

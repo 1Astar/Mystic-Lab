@@ -29,8 +29,10 @@ describe('pattern-summary', () => {
     expect(html).toMatch(/持世/);
     expect(html).toMatch(/data-pattern-chip/);
     expect(html).toMatch(/data-pattern-open="dress"/);
-    expect(html).not.toMatch(/从装卦盘读出/);
-    expect(summary.chips.some((c) => Boolean(c.note))).toBe(true);
+    expect(html).toMatch(/简单说|白话/);
+    expect(summary.chips.every((c) => /简单说/.test(c.tip) || /合局|冲局|游魂|归魂/.test(c.tip))).toBe(
+      true,
+    );
   });
 
   it('marks 六冲 for pure hexagrams', () => {

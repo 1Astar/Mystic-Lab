@@ -26,12 +26,13 @@ import {
   renderQuickBoard,
   renderQuickTabsHtml,
 } from '../../liuyao/narrative-quick.ts';
-import { buildFinalLoop } from '../../liuyao/final-loop.ts';
 import {
   buildPatternSummary,
   renderPatternSummaryHtml,
 } from '../../liuyao/pattern-summary.ts';
 import { renderQuestionBriefingForCast } from '../../liuyao/question-briefing.ts';
+import { buildDirectReading } from '../../liuyao/direct-reading.ts';
+import { bindFollowupGestures } from '../../liuyao/followup-chat.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -82,7 +83,7 @@ export function renderPeerNoteFold(opts: {
         <textarea class="question-input ly-note-draft" rows="3" placeholder="${
           learn ? '自由补充：还可以写别的感受…' : '可选：记下此刻的感受'
         }"></textarea>
-        <p class="ly-note-meta">将保存：${cast.primary.fullName}${
+        <p class="ly-note-meta">已自动记入卦象：${cast.primary.fullName}${
           cast.changed ? ` → ${cast.changed.fullName}` : ''
         } · 世${LINE_LABELS[cast.shiLine - 1]} / 应${LINE_LABELS[cast.yingLine - 1]}</p>
       </div>
@@ -117,8 +118,9 @@ export function mountLiuyaoResultTabs(
   let noteDraft = opts.initialNoteDraft ?? '';
 
   if (!learn) {
+    const direct = buildDirectReading(cast, question);
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: cast.primary.gist })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: direct.verdict })}
       ${renderQuickBoard(cast, castAt, { omitHeader: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
@@ -138,11 +140,11 @@ export function mountLiuyaoResultTabs(
       { id: 'reading', label: '此刻解读' },
       { id: 'teach', label: '六步学习' },
     ];
-    const loop = buildFinalLoop(cast, question, castAt);
+    const direct = buildDirectReading(cast, question);
     const pattern = buildPatternSummary(cast, question, castAt);
 
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: loop.oneLiner })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: direct.verdict })}
       ${renderPatternSummaryHtml(pattern)}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
@@ -178,6 +180,7 @@ export function mountLiuyaoResultTabs(
 
   const layersApi = bindResultLayers(host, cast, question);
   bindYaoAskButtons(host, cast, question, castAt);
+  bindFollowupGestures(host, { cast, question, castAt });
   if (learn) {
     bindQinDict(host);
     bindLearnTeachPage(host, cast, question, castAt);

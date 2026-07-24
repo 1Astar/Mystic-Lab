@@ -11,7 +11,11 @@ import {
 import { LINE_LABELS } from '../liuyao/hexagrams.ts';
 import { buildFourLayerReading } from '../liuyao/interpret.ts';
 import { mergeReflection } from '../liuyao/journal-prompts.ts';
-import { saveLiuyaoJournalEntry } from '../liuyao/journal.ts';
+import {
+  saveLiuyaoJournalEntry,
+  updateLiuyaoReflection,
+  updateLiuyaoTags,
+} from '../liuyao/journal.ts';
 import { meetCountFor, meetLineFor, buildVaultSnapshot } from '../liuyao/vault.ts';
 import { playLiuyaoSfx, preloadLiuyaoSfx } from '../liuyao/sfx.ts';
 import { LIUYAO_ASSETS, preloadLiuyaoCoins } from '../liuyao/assets.ts';
@@ -48,9 +52,11 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   const throws: YaoThrow[] = [];
   let cast: CastResult | null = null;
   let journalSaved = false;
+  let journalId: string | null = null;
   let castingAnim = false;
   let phase: Phase = 'question';
   let lastResult: CastResult | null = null;
+  let resultTabsApi: ReturnType<typeof mountLiuyaoResultTabs> | null = null;
 
   const page = document.createElement('div');
   page.className = 'page ly-reading-page';
@@ -109,12 +115,40 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
       return;
     }
     if (phase === 'result') {
+      syncJournalNotes();
       throws.length = 0;
       cast = null;
       lastResult = null;
       journalSaved = false;
+      journalId = null;
+      resultTabsApi = null;
       renderMethod();
     }
+  }
+
+  function syncJournalNotes(): void {
+    if (!journalId || !resultTabsApi) return;
+    updateLiuyaoReflection(
+      journalId,
+      mergeReflection(resultTabsApi.getNoteDraft(), resultTabsApi.collectPrompts()),
+    );
+    updateLiuyaoTags(journalId, resultTabsApi.getNoteTags());
+  }
+
+  function showMeetToast(result: CastResult): void {
+    const count = meetCountFor(result.primary.name);
+    const stat = buildVaultSnapshot().meets.find((m) => m.name === result.primary.name) ?? null;
+    const line = meetLineFor(stat) || `这是你第 ${count} 次遇见「${result.primary.fullName}」。`;
+    const toast = document.createElement('div');
+    toast.className = 'ly-meet-toast';
+    toast.setAttribute('role', 'status');
+    toast.textContent = line;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('is-on'));
+    setTimeout(() => {
+      toast.classList.remove('is-on');
+      setTimeout(() => toast.remove(), 320);
+    }, 2800);
   }
 
   function refreshForMode(): void {
@@ -232,6 +266,8 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     cast = null;
     lastResult = null;
     journalSaved = false;
+    journalId = null;
+    resultTabsApi = null;
     if (method === 'random') {
       cast = castSixYao('random');
       playLiuyaoSfx('shake');
@@ -421,7 +457,7 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
         <p class="ly-question-recap">${question ? `你的问题 · ${escapeHtml(question)}` : '未写下具体问题 · 以下按卦象结构推演'}</p>
         ${
           profileContext
-            ? `<p class="ly-question-recap ly-profile-recap">我的我的档案 · ${escapeHtml(
+            ? `<p class="ly-question-recap ly-profile-recap">档案 · ${escapeHtml(
                 profileContext.replace(/\n/g, ' · '),
               )}</p>`
             : ''
@@ -431,55 +467,57 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     `;
 
     const shell = stage.querySelector<HTMLElement>('[data-result-shell]')!;
-    const tabsApi = mountLiuyaoResultTabs(shell, {
+    resultTabsApi = mountLiuyaoResultTabs(shell, {
       cast: result,
       reading,
       question,
       learn,
     });
 
-    appendBtn('保存到我的卦象', () => {
-      if (!journalSaved) {
-        saveLiuyaoJournalEntry({
-          question,
-          cast: result,
-          reading,
-          changingLabels,
-          tags: tabsApi.getNoteTags(),
-          reflection: mergeReflection(tabsApi.getNoteDraft(), tabsApi.collectPrompts()),
-          castAt: tabsApi.getCastAt().toISOString(),
-          learnMode: learn,
-        });
-        journalSaved = true;
-        // 沉浸感：第 N 次遇见
-        const count = meetCountFor(result.primary.name);
-        const stat = buildVaultSnapshot().meets.find((m) => m.name === result.primary.name) ?? null;
-        const line = meetLineFor(stat) || `这是你第 ${count} 次遇见「${result.primary.fullName}」。`;
-        const toast = document.createElement('div');
-        toast.className = 'ly-meet-toast';
-        toast.setAttribute('role', 'status');
-        toast.textContent = line;
-        document.body.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add('is-on'));
-        setTimeout(() => {
-          toast.classList.remove('is-on');
-          setTimeout(() => toast.remove(), 320);
-        }, 2800);
-      }
+    if (!journalSaved) {
+      const entry = saveLiuyaoJournalEntry({
+        question,
+        cast: result,
+        reading,
+        changingLabels,
+        tags: resultTabsApi.getNoteTags(),
+        reflection: mergeReflection(resultTabsApi.getNoteDraft(), resultTabsApi.collectPrompts()),
+        castAt: resultTabsApi.getCastAt().toISOString(),
+        learnMode: learn,
+      });
+      journalId = entry.id;
+      journalSaved = true;
+      showMeetToast(result);
+    }
+
+    const noteFold = shell.querySelector('.ly-peer-note');
+    noteFold?.addEventListener('input', () => syncJournalNotes());
+    noteFold?.addEventListener('change', () => syncJournalNotes());
+
+    appendBtn('打开我的卦象', () => {
+      syncJournalNotes();
       navigate('/liuyao/journal');
     });
     appendBtn('再占一卦', () => {
+      syncJournalNotes();
       throws.length = 0;
       cast = null;
       lastResult = null;
+      journalSaved = false;
+      journalId = null;
+      resultTabsApi = null;
       renderMethod();
     }, true);
-    appendBtn('返回六爻', () => navigate('/liuyao'), true);
+    appendBtn('返回六爻', () => {
+      syncJournalNotes();
+      navigate('/liuyao');
+    }, true);
   }
 
   page.classList.toggle('is-learn-mode', isLearn());
   renderQuestion();
   return () => {
+    syncJournalNotes();
     document.querySelector('.ly-yao-pop')?.remove();
     document.querySelector('.ly-flip-modal')?.remove();
   };
