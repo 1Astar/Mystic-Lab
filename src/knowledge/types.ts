@@ -8,6 +8,15 @@ export type FoolJourneyStep = {
   summary: string;
 };
 
+/** 具体生活情境（非感情/工作大模块） */
+export type LifeSceneCue = {
+  /** 如 🙋 */
+  icon: string;
+  /** 如「如果你正在找工作」 */
+  when: string;
+  body: string;
+};
+
 export type CardKnowledge = {
   id: string;
   deckId: string;
@@ -29,11 +38,15 @@ export type CardKnowledge = {
   reversedKeywords?: string[];
   /** 财富议题 */
   wealthMeaning?: string;
-  /** 容易误读的点 */
+  /** 容易误读的点（正向纠正口吻） */
   misreadings?: string[];
   /** 整牌总览（牌面画面描述，图鉴 / 看懂牌面） */
   visualOverview?: string;
   foolJourney?: FoolJourneyStep;
+  /** 现实对应场景：具体生活情境 */
+  lifeScenes?: LifeSceneCue[];
+  /** 日常小练习：把看牌变成自我对话 */
+  dailyPractice?: string;
 };
 
 export type VisualHotspot = {
@@ -128,6 +141,9 @@ export type EncounterRecord = {
     question: string;
     spreadLabel: string;
     reversed: boolean;
+    summary?: string;
+    guidance?: string;
+    journalId?: string;
   }[];
 };
 

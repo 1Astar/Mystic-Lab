@@ -115,6 +115,100 @@ export const COMBINATION_EXAMPLES: CombinationExample[] = [
   },
 ];
 
+const RANK_TO_STAGE: Record<string, string> = {
+  ace: '1',
+  two: '2',
+  three: '3',
+  four: '4',
+  five: '5',
+  six: '6',
+  seven: '7',
+  eight: '8',
+  nine: '9',
+  ten: '10',
+};
+
+const SUIT_DOMAIN: Record<SuitGroup['key'], string> = {
+  cups: '情感连接',
+  wands: '行动与热情',
+  swords: '思辨与沟通',
+  pentacles: '现实与资源',
+};
+
+const COURT_RANKS = new Set(['page', 'knight', 'queen', 'king']);
+
+export type MinorSuitNumberFormula = {
+  suitLabel: string;
+  suitTheme: string;
+  num: string;
+  numTheme: string;
+  /** 极简公式整句 */
+  line: string;
+  isCourt: boolean;
+};
+
+function compactTheme(theme: string, maxParts = 2): string {
+  return theme
+    .split(/[、,，]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, maxParts)
+    .join('、');
+}
+
+/**
+ * 小阿卡那「牌组 × 数字」一句公式；大阿卡那 / 未知 id 返回 null。
+ * 例：圣杯（情感） + 6（过渡、回馈） = 在情感连接中体会「调整、回馈、过渡」
+ */
+export function buildMinorSuitNumberFormula(
+  deckId: string,
+  options?: { suit?: SuitGroup['key']; rank?: string; nameZh?: string },
+): MinorSuitNumberFormula | null {
+  const parts = deckId.split('-');
+  const suitKey = (options?.suit ?? parts[0]) as SuitGroup['key'];
+  const rankRaw = (options?.rank ?? parts.slice(1).join('-')).toLowerCase();
+  const suit = SUIT_GROUPS.find((s) => s.key === suitKey);
+  if (!suit) return null;
+
+  if (COURT_RANKS.has(rankRaw)) {
+    const role =
+      rankRaw === 'page'
+        ? '探索'
+        : rankRaw === 'knight'
+          ? '行动'
+          : rankRaw === 'queen'
+            ? '滋养'
+            : '掌控';
+    return {
+      suitLabel: suit.label,
+      suitTheme: compactTheme(suit.theme, 1),
+      num: role,
+      numTheme: '宫廷牌人格面向',
+      line: `${suit.label}（${compactTheme(suit.theme, 1)}） + ${role} = 该花色的「${role}」面向——${COURT_NOTE.slice(0, 28)}…`,
+      isCourt: true,
+    };
+  }
+
+  const num = RANK_TO_STAGE[rankRaw];
+  if (!num) return null;
+  const stage = NUMBER_STAGES.find((n) => n.num === num);
+  if (!stage) return null;
+
+  const suitShort = compactTheme(suit.theme, 1);
+  const numShort = compactTheme(stage.theme, 2);
+  const domain = SUIT_DOMAIN[suit.key];
+  const equals = `在${domain}中体会「${numShort}」`;
+
+  return {
+    suitLabel: suit.label,
+    suitTheme: suitShort,
+    num: stage.num,
+    numTheme: numShort,
+    line: `${suit.label}（${suitShort}） + ${stage.num}（${numShort}） = ${equals}`,
+    isCourt: false,
+  };
+}
+
 /** @deprecated 使用 SUIT_GROUPS / NUMBER_STAGES */
 export const MINOR_ARCANA_BRIEF = {
   title: '小阿尔克那怎么看',

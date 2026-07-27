@@ -1,11 +1,5 @@
 import type { CastResult } from './engine.ts';
-import {
-  composeScene,
-  detectSceneDomain,
-  renderSceneXiangHtml,
-} from './scene-map.ts';
-import { upperLowerFromLines } from './hexagrams.ts';
-import { renderLearnFaqHtml } from './narrative-learn.ts';
+import { detectSceneDomain } from './scene-map.ts';
 import {
   renderGuaXiangCard,
   renderEnergyChainHtml,
@@ -13,7 +7,6 @@ import {
   bindLearnStudio,
   renderDictFooter,
 } from './learn-studio.ts';
-import { renderSpiritNarrativeForCast } from './spirit-narrative.ts';
 import { resolveClassicDossier } from './classic-folder.ts';
 import { teachFold } from './flip-teach.ts';
 import { bindQinDict } from './energy-lens.ts';
@@ -26,20 +19,17 @@ import { dressHexagram } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
 import { renderDressArchiveHtml, bindDressArchive, showDressYaoCard } from './dress-archive.ts';
 import {
-  buildHexExpandPack,
-  renderHexExpandHtml,
-  renderClassicDomainOraclesHtml,
-} from './hex-expand.ts';
-import {
   renderClassicGuaSwitchHtml,
   bindClassicGuaSwitch,
 } from './classic-gua-switch.ts';
 import { renderClassicCompendiumForCast } from './classic-compendium.ts';
+import { bindGuideDomainTabs } from './hex-guide.ts';
 import {
-  buildHexGuidePack,
-  renderGuideXiangSnippetHtml,
-  bindGuideDomainTabs,
-} from './hex-guide.ts';
+  renderXiangNotesPaneHtml,
+  bindXiangNotesPane,
+} from './xiang-notes-pane.ts';
+import { bindTermGloss } from './term-gloss.ts';
+import { renderAskPanelHtml, bindAskPanel } from './ask-panel.ts';
 
 export type DeepStep = 1 | 2 | 3;
 
@@ -81,7 +71,6 @@ export function buildDeepLessons(
       title: '② 能量现状：谁在帮你，谁在拖你？',
       bodyHtml: `
         ${renderEnergyChainHtml(cast, question, castAt)}
-        ${renderSpiritNarrativeForCast(cast, question, castAt)}
         <p class="ly-deep-step-bridge">${escapeHtml(talk.tease)}</p>
         ${renderCourseShengKeHtml(sk, { compact: true, question })}
         <p class="ly-sk-course-dialogue">${escapeHtml(talk.dialogue)}</p>
@@ -196,12 +185,10 @@ export function bindDeepCourse(
 
 function renderClassicPane(cast: CastResult, question: string): string {
   const d = resolveClassicDossier(cast.primary.name);
-  const pack = buildHexExpandPack(cast);
   return `
-    <p class="ly-guide-tip">古人怎么说：本卦辞 / 变卦辞切换对照。字眼生僻可先看白话；现代分域见「卦象解析」。</p>
+    <p class="ly-guide-tip">古人怎么说：用上方切换本卦辞 / 变卦辞。字眼生僻可先看白话；工作感情等分域见「卦象解析」。</p>
     ${renderClassicGuaSwitchHtml(cast)}
     ${renderClassicCompendiumForCast(cast, question)}
-    ${renderClassicDomainOraclesHtml(pack)}
     ${
       d.zengshan
         ? teachFold(
@@ -212,7 +199,6 @@ function renderClassicPane(cast: CastResult, question: string): string {
           )
         : ''
     }
-    ${renderLearnFaqHtml(cast, question)}
   `;
 }
 
@@ -229,39 +215,12 @@ export function renderDeepNotesBlockHtml(
         <button type="button" class="ly-note-mini-tab is-active" data-note-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
         <button type="button" class="ly-note-mini-tab" data-note-tab="dress" role="tab" aria-selected="false">专业排盘</button>
         <button type="button" class="ly-note-mini-tab" data-note-tab="classic" role="tab" aria-selected="false">古籍解析</button>
+        <button type="button" class="ly-note-mini-tab" data-note-tab="ask" role="tab" aria-selected="false">边看边问</button>
         <button type="button" class="ly-note-mini-tab" data-note-tab="journal" role="tab" aria-selected="false">个人沉淀</button>
       </div>
       <div class="ly-note-mini-body">
         <div class="ly-note-tab-panel is-active" data-note-pane="xiang">
-          <p class="ly-guide-tip">笔记侧：图鉴意象、工作/感情分行、能量链。成卦结构见主屏第一步，此处不重复。</p>
-          ${renderGuideXiangSnippetHtml(buildHexGuidePack(cast.primary), {
-            linkToGuide: true,
-          })}
-          <p class="ly-layer-guide">实际落点 · 工作 / 感情</p>
-          ${renderSceneXiangHtml(
-            composeScene(
-              upperLowerFromLines(cast.primaryLines).upper,
-              upperLowerFromLines(cast.primaryLines).lower,
-              cast.primary,
-            ),
-            { domain: detectSceneDomain(question), showFormula: false },
-          )}
-          <div class="ly-xiang-extra" data-xiang-extra-host>
-            <div class="ly-note-mini-tabs" role="tablist" aria-label="卦象解析续">
-              <button type="button" class="ly-note-mini-tab is-active" data-xiang-extra="energy" role="tab" aria-selected="true">能量链</button>
-              <button type="button" class="ly-note-mini-tab" data-xiang-extra="spirit" role="tab" aria-selected="false">六神</button>
-              <button type="button" class="ly-note-mini-tab" data-xiang-extra="expand" role="tab" aria-selected="false">分域拓展</button>
-            </div>
-            <div class="ly-xiang-extra-pane is-active" data-xiang-extra-pane="energy">
-              ${renderEnergyChainHtml(cast, question, castAt)}
-            </div>
-            <div class="ly-xiang-extra-pane" data-xiang-extra-pane="spirit" hidden>
-              ${renderSpiritNarrativeForCast(cast, question, castAt)}
-            </div>
-            <div class="ly-xiang-extra-pane" data-xiang-extra-pane="expand" hidden>
-              ${renderHexExpandHtml(buildHexExpandPack(cast))}
-            </div>
-          </div>
+          ${renderXiangNotesPaneHtml(cast, question, castAt)}
         </div>
         <div class="ly-note-tab-panel" data-note-pane="dress" hidden>
           <p class="ly-guide-tip">怎么算：六亲六神装卦与点爻注解。</p>
@@ -269,6 +228,9 @@ export function renderDeepNotesBlockHtml(
         </div>
         <div class="ly-note-tab-panel" data-note-pane="classic" hidden>
           ${renderClassicPane(cast, question)}
+        </div>
+        <div class="ly-note-tab-panel" data-note-pane="ask" hidden>
+          ${renderAskPanelHtml(cast, question, castAt)}
         </div>
         <div class="ly-note-tab-panel" data-note-pane="journal" hidden>
           <p class="ly-layer-guide">个人沉淀 · 写下来，才真正变成你的六爻日记。</p>
@@ -321,5 +283,10 @@ export function bindDeepNotesBlock(
   bindQinDict(host);
   bindClassicGuaSwitch(host);
   bindGuideDomainTabs(host);
-  if (cast) bindDressArchive(host, cast, question, castAt);
+  bindXiangNotesPane(host);
+  bindTermGloss(host);
+  if (cast) {
+    bindAskPanel(host, cast, question, castAt);
+    bindDressArchive(host, cast, question, castAt);
+  }
 }

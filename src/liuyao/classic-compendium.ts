@@ -24,10 +24,13 @@ export type ClassicCompendiumBlock = {
 export type ClassicCompendium = {
   title: string;
   fullName: string;
+  /** 卦名短称，如「夬」 */
+  name: string;
   blocks: ClassicCompendiumBlock[];
   /** 有变卦时附变卦简断 */
   changed?: {
     fullName: string;
+    name: string;
     blocks: ClassicCompendiumBlock[];
   };
 };
@@ -128,6 +131,7 @@ export function buildClassicCompendium(
   const pack: ClassicCompendium = {
     title: '传统解卦全书',
     fullName: primary.fullName,
+    name: primary.name,
     blocks: blocksForHex(
       cast,
       primary,
@@ -142,6 +146,7 @@ export function buildClassicCompendium(
   if (cast.changed) {
     pack.changed = {
       fullName: cast.changed.fullName,
+      name: cast.changed.name,
       blocks: [
         { tag: '象曰', text: buildXiangYue(cast.changed.name, []) },
         { tag: '诗曰', text: buildShiYue(cast.changed) },
@@ -181,35 +186,38 @@ export function renderClassicCompendiumHtml(c: ClassicCompendium): string {
   const decision = c.blocks.find((b) => b.tag === '决策');
 
   const primaryPanel = `
-    <div class="ly-compendium-panel is-primary" data-compendium-primary>
-      <p class="ly-compendium-panel-title">本卦 · ${escapeHtml(c.fullName)}</p>
-      <p class="ly-compendium-panel-hint">传统象辞 · 本卦</p>
+    <div class="ly-compendium-panel is-primary">
+      <p class="ly-compendium-panel-hint">传统象辞 · 本卦 · ${escapeHtml(c.fullName)}</p>
       ${renderBlocksHtml(primaryBlocks)}
     </div>`;
 
   const changedPanel = c.changed
     ? `
-    <div class="ly-compendium-panel is-changed" data-compendium-changed>
-      <p class="ly-compendium-panel-title">变卦 · ${escapeHtml(c.changed.fullName)}</p>
-      <p class="ly-compendium-panel-hint">传统象辞 · 变卦</p>
+    <div class="ly-compendium-panel is-changed">
+      <p class="ly-compendium-panel-hint">传统象辞 · 变卦 · ${escapeHtml(c.changed.fullName)}</p>
       ${renderBlocksHtml(c.changed.blocks)}
     </div>`
-    : '';
+    : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把本卦象辞看清。</p>`;
 
   const decisionPanel = decision
     ? `
     <div class="ly-compendium-panel is-bridge" data-compendium-decision>
-      <p class="ly-compendium-panel-hint">本变对照</p>
+      <p class="ly-compendium-panel-hint">本变对照 · 落到所问</p>
       ${renderBlocksHtml([decision])}
     </div>`
     : '';
 
+  // 不再自带本/变切换：与上方「本卦辞 / 变卦辞」共用同一套 Tab（bindClassicGuaSwitch 联动）
   return `
     <section class="ly-compendium" data-classic-compendium>
       <h4 class="ly-compendium-title">${escapeHtml(c.title)}</h4>
-      <p class="ly-guide-tip">本卦传统归本卦，变卦传统归变卦；象曰取大象／动爻小象，诗曰为教学对照诗，不作定论。</p>
-      ${primaryPanel}
-      ${changedPanel}
+      <p class="ly-guide-tip">象曰取大象／动爻小象；诗曰为教学对照诗，不作定论。本 / 变跟上方切换。</p>
+      <div class="ly-compendium-side is-active" data-compendium-side="primary">
+        ${primaryPanel}
+      </div>
+      <div class="ly-compendium-side" data-compendium-side="changed" hidden>
+        ${changedPanel}
+      </div>
       ${decisionPanel}
     </section>
   `;

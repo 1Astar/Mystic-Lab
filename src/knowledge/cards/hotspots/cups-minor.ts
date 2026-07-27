@@ -41,7 +41,7 @@ export const CUPS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
     cardId: 'cups-four',
     deckId: 'cups-four',
     overview:
-      '青年抱臂坐在树下，眼前三杯未接，云端又递来一杯。倦怠或对拥有的视而不见——新可能在递来，需先放下防守的双臂。',
+      '青年抱臂坐在树下，眼前三杯未接，云端又递来一杯。牌义详解：不满足、失望、倾向向内收缩或拒绝外部机会——匮乏感常是自己筑起的。稳定在旁，新可能在递来，需先放下防守的双臂。',
     hotspots: [
       { id: 'youth', label: '抱臂青年', x: 50, y: 52, meaning: '倦怠、冷漠或对眼前拥有的视而不见。' },
       { id: 'cups', label: '前三杯', x: 50, y: 68, meaning: '已提供的选项，但你尚未伸手。' },
@@ -68,7 +68,7 @@ export const CUPS_MINOR_HOTSPOTS: CardVisualHotspots[] = [
       '孩童在花园中交换杯中花，远处有守卫与村落。纯真、回忆与旧日温情——过去仍可滋养，但不必沉溺。',
     hotspots: [
       { id: 'children', label: '孩童', x: 50, y: 52, meaning: '纯真、回忆与旧日温情——过去仍在滋养你。' },
-      { id: 'cups', label: '杯中花', x: 50, y: 42, meaning: '简单的美好，常被成人世界遗忘。' },
+      { id: 'cups', label: '杯中花', x: 50, y: 42, meaning: '这些花代表着安全和温暖，但因为是画在杯子上，意味着这是一种被保护的、不真实的温暖——怀旧美好，却不必当成此刻的全部真相。' },
       { id: 'guard', label: '守卫', x: 72, y: 38, meaning: '安全边界内的怀旧，不必沉溺。' },
       { id: 'village', label: '远村', x: 50, y: 82, meaning: '故乡与根源，提醒你从何处来。' },
     ],

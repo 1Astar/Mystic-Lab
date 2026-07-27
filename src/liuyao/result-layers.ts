@@ -44,7 +44,7 @@ function renderSiZhuBar(sz: SiZhu, castAt?: Date): string {
 
 function renderDressTable(cast: CastResult, castAt: Date): string {
   return `
-    <p class="ly-guide-tip">本卦 ∥ 变卦对照 · 点本卦一行看实盘卡</p>
+    <p class="ly-guide-tip">本卦 / 变卦用上方切换查看 · 点本卦一行看实盘卡</p>
     ${renderDressDualPlatesHtml(cast, castAt)}
     <div class="ly-yao-card-slot" data-yao-card-slot></div>
   `;
@@ -283,6 +283,7 @@ function openYaoCard(
   question: string,
   tableRoot: HTMLElement,
   hexName?: string,
+  castAt?: Date,
 ): void {
   const row = rows.find((r) => r.index === index);
   if (!row) return;
@@ -292,7 +293,7 @@ function openYaoCard(
     syncDressAndSk(tableRoot, null);
     return;
   }
-  slot.innerHTML = renderYaoCard(row, question, { hexName });
+  slot.innerHTML = renderYaoCard(row, question, { hexName, castAt });
   syncDressAndSk(tableRoot, index);
   tableRoot
     .querySelector<HTMLElement>(`.ly-dress-row[data-dress-side="primary"][data-dress-line="${index}"]`)
@@ -311,7 +312,7 @@ export function bindDeepPanel(
 
   const openLine = (idx: number) => {
     const slot = deep.querySelector<HTMLElement>('[data-yao-card-slot]');
-    if (slot) openYaoCard(slot, dressed.rows, idx, question, deep, cast.primary.name);
+    if (slot) openYaoCard(slot, dressed.rows, idx, question, deep, cast.primary.name, castAt);
   };
 
   deep.querySelectorAll<HTMLElement>('.ly-dress-row[data-dress-side="primary"]').forEach((tr) => {

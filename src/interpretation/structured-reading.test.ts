@@ -67,6 +67,8 @@ describe('structured reading', () => {
   it('builds mock hotspot overview and element mappings for work', () => {
     const mock = buildStructuredMockReading(workCtx, knowledge, false);
     expect(mock.sections[0]?.title).toBe('热点整体解读');
+    expect(mock.sections[0]?.body).toMatch(/情况/);
+    expect(mock.sections[0]?.body).not.toMatch(/关于【提问/);
     expect(mock.plainText).toContain('已面了三家');
     expect(mock.elementMappings.length).toBeGreaterThanOrEqual(1);
     expect(mock.elementMappings.some((m) => m.label.includes('剑') || m.title.includes('意味着'))).toBe(
@@ -74,6 +76,34 @@ describe('structured reading', () => {
     );
     expect(mock.followUps.length).toBe(3);
     expect(mock.actionTags.join('')).toMatch(/休整|核实|边界|内耗|决策/);
+  });
+
+  it('obstacle position frames upright card as risk, without restating all questions', () => {
+    const obstacleCtx: ReadingContext = {
+      ...workCtx,
+      cardPosition: '阻碍',
+      positionKey: 'obstacle',
+      question: `1. 我现在真正想离开的原因
+2. 如果7月底离职，未来三个月走势
+3. 如果转正后继续留三个月，走势
+4. 我最需要防范的风险
+5. 最终建议/行动策略`,
+      background: '已经面试了3家，有offer在等',
+    };
+    const knight = {
+      ...knowledge,
+      deckId: 'cups-knight',
+      nameCn: '圣杯骑士',
+      keywords: ['浪漫', '探索', '跟着感觉'],
+      workMeaning: '跟着感觉找方向。',
+    } as CardKnowledge;
+    const mock = buildStructuredMockReading(obstacleCtx, knight, false);
+    const body = mock.sections[0]?.body ?? '';
+    expect(body).toMatch(/阻碍/);
+    expect(body).toMatch(/卡点|风险|理想化|感觉|核实/);
+    expect(body).not.toMatch(/关于【提问/);
+    expect(body).not.toMatch(/【提问 1】/);
+    expect(body).toContain('offer');
   });
 
   it('builds per-question answers for multi-part work questions', () => {
@@ -91,11 +121,12 @@ describe('structured reading', () => {
     expect(mock.plainText).toMatch(/【提问 1】/);
   });
 
-  it('element mappings keep original meaning and add scene mapping', () => {
+  it('element mappings keep original meaning and add scene mapping without echoing full question', () => {
     const maps = buildElementMappings(workCtx, knowledge, false);
     expect(maps.length).toBeGreaterThan(0);
     expect(maps[0]?.originalMeaning.length).toBeGreaterThan(4);
-    expect(maps[0]?.body).toMatch(/什么时候能找到新工作|求职|面试|筹码|窗口/);
+    expect(maps[0]?.body).toMatch(/海投|渠道|内推|筹码|窗口|资源|策略|局面|求职|面试/);
+    expect(maps[0]?.body).not.toMatch(/对照你的问题/);
     expect(maps[0]?.body).not.toBe(maps[0]?.originalMeaning);
   });
 

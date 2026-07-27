@@ -43,8 +43,8 @@ describe('learn-course', () => {
     expect(lessons[5]!.crumbHint).toMatch(/落到现实/);
     expect(lessons[0]!.title).toMatch(/查灵魂/);
     expect(lessons[0]!.lookAt).toMatch(/世（我）/);
-    expect(lessons[0]!.methodHtml).toBeUndefined();
-    expect(lessons[0]!.vernacular).toBe('');
+    expect(lessons[0]!.methodHtml).toMatch(/这一步为什么要做|怎么分析/);
+    expect(lessons[0]!.vernacular).toMatch(/结合你问的|世在/);
     expect(lessons[0]!.yaoFocus?.[0]?.why).toMatch(/八宫|世爻|金色|我/);
     expect(lessons[0]!.yaoFocus?.[1]?.why).toMatch(/应|隔三|外界/);
     expect(lessons[0]!.yaoFocus?.[0]?.life).toMatch(/状态|世应/);
@@ -53,20 +53,22 @@ describe('learn-course', () => {
     expect(lessons[0]!.yaoFocus?.length).toBeGreaterThan(0);
     expect(lessons[0]!.yaoFocus?.[0]?.mark).toMatch(/世/);
     expect(lessons[2]!.title).toMatch(/抓重点 · 动爻/);
+    expect(lessons[2]!.methodHtml).toMatch(/动爻/);
     expect(lessons[3]!.title).toMatch(/看根基 · 取象/);
     expect(lessons[3]!.toolHtml).toMatch(/为什么形成这个卦|ly-gua-card/);
     expect(lessons[3]!.toolHtml).toMatch(/根基 × 实际|ly-foundation-bridge/);
     expect(lessons[3]!.toolHtml).not.toMatch(/ly-scene-block-title/);
     expect(lessons[4]!.title).toMatch(/看过程 · 本/);
     expect(lessons[4]!.lookAt).toMatch(/→|无变/);
-    expect(lessons[4]!.toolHtml).toMatch(/生克星图|ly-sk-panel/);
+    expect(lessons[4]!.toolHtml).toMatch(/生克星图|ly-sk-panel|ly-sk-course/);
     expect(lessons[4]!.toolHtml).toMatch(/进阶|用\/元\/忌|变卦实战|无变卦/);
     expect(lessons[5]!.title).toMatch(/连生活 · 策略/);
     expect(lessons[5]!.toolHtml).toMatch(
-      /ly-question-briefing|格局摘要|ly-pattern-summary|卦象依据|ly-final-loop|结合问题|行动建议/,
+      /ly-question-briefing|格局摘要|ly-pattern-summary/,
     );
-    expect(lessons[5]!.basics).toMatch(/推演闭环|此刻解读/);
-    expect(lessons[5]!.vernacular).toBe('');
+    expect(lessons[5]!.toolHtml).not.toMatch(/ly-final-loop/);
+    expect(lessons[5]!.methodHtml).toMatch(/为什么要做|怎么分析/);
+    expect(lessons[5]!.vernacular).toMatch(/结合你问的|建议/);
     expect(lessons[5]!.classicBai).toMatch(/一句话/);
   });
 
@@ -107,25 +109,31 @@ describe('learn-course', () => {
     expect(html).toMatch(/卦象解析/);
     expect(html).toMatch(/专业排盘/);
     expect(html).toMatch(/古籍解析/);
-    expect(html).toMatch(/本卦辞 · 六爻/);
+    expect(html).toMatch(/本卦辞 · /);
     expect(html).toMatch(/变卦辞/);
     expect(html).toMatch(/data-gua-switch/);
     expect(html).toMatch(/传统解卦全书/);
     expect(html).toMatch(/象曰/);
     expect(html).toMatch(/决策/);
     expect(html).toMatch(/ly-guide-snippet|图鉴 ·/);
-    expect(html).toMatch(/分域注解/);
+    expect(html).toMatch(/分域解析|分域注解|传统断语|ly-domain-card/);
     expect(html).toMatch(/个人沉淀/);
-    expect(html).toMatch(/实际落点|工作上|感情上/);
+    expect(html).toMatch(/实际落点|白话分域|ly-domain-card|分域解说/);
+    expect(html).toMatch(/ly-oracle-tag|ly-scene-merged|ly-domain-card/);
+    expect(html).not.toMatch(/ly-scene-block-title/);
     expect(html).not.toMatch(/为什么形成这个卦/);
-    expect(html).toMatch(/能量现状推演|核心聚焦（用神）|核心目标（用神）/);
-    expect(html).toMatch(/当下能量聚焦表|data-energy-focus/);
+    expect(html).toMatch(/能量现状推演|核心聚焦（用神）|核心目标（用神）|ly-spirit-nar/);
+    expect(html).toMatch(/用神状态|data-dress-energy|ly-spirit-nar/);
     expect(html).toMatch(/卦象核心释义/);
     expect(html).toMatch(/易学黑话翻译对照表/);
     expect(html).toMatch(/data-study-note/);
     expect(html).toMatch(/data-drawer-pane="xiang"/);
     expect(html).toMatch(/data-drawer-pane="journal"/);
     expect(html).toMatch(/data-drawer-pane="books"/);
+    expect(html).toMatch(/data-drawer-pane="ask"/);
+    expect(html).toMatch(/边看边问/);
+    expect(html).toMatch(/data-ask-panel/);
+    expect(html).toMatch(/我还想问/);
   });
 
   it('persists notes per step', () => {

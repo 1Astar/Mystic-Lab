@@ -6,9 +6,16 @@ import {
   updateJournalReflection,
   type JournalEntry,
 } from '../journal/records.ts';
+import { canResumePartial, stashResumeJournalId } from '../journal/resume.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
+
+function continuePartialReading(entry: JournalEntry): void {
+  if (!canResumePartial(entry)) return;
+  stashResumeJournalId(entry.id);
+  navigate('/tarot/reading');
+}
 
 export function renderJournal(root: HTMLElement): void {
   const page = document.createElement('div');
@@ -39,14 +46,16 @@ export function renderJournal(root: HTMLElement): void {
 
   function openDetail(entry: JournalEntry): void {
     try {
-      const { reading, regenerated } = resolveJournalReading(entry);
+      const { reading, regenerated, hydratedThread } = resolveJournalReading(entry);
       closeDetail();
       const detail = document.createElement('aside');
       mountJournalDetail(detail, {
         entry,
         reading,
         regenerated,
+        hydratedThread,
         onClose: closeDetail,
+        onContinue: entry.status === 'partial' ? () => continuePartialReading(entry) : undefined,
       });
       page.appendChild(detail);
     } catch {
@@ -105,6 +114,7 @@ export function renderJournal(root: HTMLElement): void {
         ${fulfilledLabel ? `<p class="journal-fulfilled">${fulfilledLabel}</p>` : ''}
         <textarea class="journal-reflection" rows="2" placeholder="后来的感悟…">${entry.reflection}</textarea>
         <div class="journal-actions">
+          ${isPartial ? '<button type="button" class="btn btn-sm" data-continue>继续完成</button>' : ''}
           <button type="button" class="btn btn-secondary btn-sm" data-save>保存感悟</button>
           ${isPartial ? '' : `
           <button type="button" class="btn btn-ghost btn-sm" data-yes>有呼应</button>
@@ -116,6 +126,9 @@ export function renderJournal(root: HTMLElement): void {
       item.querySelector('.journal-reflection')?.addEventListener('click', (e) => e.stopPropagation());
       item.querySelector('.journal-actions')?.addEventListener('click', (e) => e.stopPropagation());
 
+      item.querySelector('[data-continue]')?.addEventListener('click', () => {
+        continuePartialReading(entry);
+      });
       item.querySelector('[data-save]')?.addEventListener('click', () => {
         const ta = item.querySelector<HTMLTextAreaElement>('.journal-reflection');
         if (ta) updateJournalReflection(entry.id, ta.value);

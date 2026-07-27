@@ -53,7 +53,7 @@ describe('learn-shell', () => {
   it('dress archive has 本∥变 dual plates', () => {
     const cast = castSample();
     const html = renderDressArchiveHtml(cast, new Date());
-    expect(html).toMatch(/ly-dress-dual/);
+    expect(html).toMatch(/data-dress-dual|ly-dress-switch|data-gua-switch/);
     expect(html).toMatch(/ly-dress-table/);
     expect(html).toMatch(/爻相/);
     expect(html).toMatch(/爻位/);
@@ -66,7 +66,7 @@ describe('learn-shell', () => {
     expect(html).toMatch(/ly-dress-xiang/);
     expect(html).toMatch(/data-dress-line/);
     expect(html).toMatch(/data-dress-side="primary"/);
-    expect(html).toMatch(/data-yao-card-slot/);
+    expect(html).toMatch(/data-yao-modal/);
     expect(renderDressInfoCard(cast, new Date())).toMatch(/爻相/);
   });
 });

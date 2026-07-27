@@ -26,12 +26,14 @@ import {
   renderQuickBoard,
   renderQuickTabsHtml,
 } from '../../liuyao/narrative-quick.ts';
-import { buildFinalLoop, renderFinalLoopHtml } from '../../liuyao/final-loop.ts';
 import {
   buildPatternSummary,
   renderPatternSummaryHtml,
 } from '../../liuyao/pattern-summary.ts';
 import { renderQuestionBriefingForCast } from '../../liuyao/question-briefing.ts';
+import { buildOfflineAnswerPack } from '../../mystic-engine/build-pack.ts';
+import { loadUseProfilePref } from '../../life/profile-context.ts';
+import { bindFollowupGestures } from '../../liuyao/followup-chat.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -82,7 +84,7 @@ export function renderPeerNoteFold(opts: {
         <textarea class="question-input ly-note-draft" rows="3" placeholder="${
           learn ? '自由补充：还可以写别的感受…' : '可选：记下此刻的感受'
         }"></textarea>
-        <p class="ly-note-meta">将保存：${cast.primary.fullName}${
+        <p class="ly-note-meta">已自动记入卦象：${cast.primary.fullName}${
           cast.changed ? ` → ${cast.changed.fullName}` : ''
         } · 世${LINE_LABELS[cast.shiLine - 1]} / 应${LINE_LABELS[cast.yingLine - 1]}</p>
       </div>
@@ -117,8 +119,15 @@ export function mountLiuyaoResultTabs(
   let noteDraft = opts.initialNoteDraft ?? '';
 
   if (!learn) {
+    const pack = buildOfflineAnswerPack({
+      question,
+      cast,
+      castAt,
+      useProfile: loadUseProfilePref(true),
+    });
+    const gist = pack.answers[0]?.lean ?? pack.decision;
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: cast.primary.gist })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: gist })}
       ${renderQuickBoard(cast, castAt, { omitHeader: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
@@ -136,13 +145,19 @@ export function mountLiuyaoResultTabs(
   } else {
     const tabs = [
       { id: 'reading', label: '此刻解读' },
-      { id: 'teach', label: '五步学习' },
+      { id: 'teach', label: '六步学习' },
     ];
-    const loop = buildFinalLoop(cast, question, castAt);
+    const pack = buildOfflineAnswerPack({
+      question,
+      cast,
+      castAt,
+      useProfile: loadUseProfilePref(true),
+    });
+    const gist = pack.answers[0]?.lean ?? pack.decision;
     const pattern = buildPatternSummary(cast, question, castAt);
 
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: loop.oneLiner })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: gist })}
       ${renderPatternSummaryHtml(pattern)}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
@@ -156,13 +171,16 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">结果：结合你的问题，按四层读这一卦。</p>
+          <p class="ly-guide-tip">先答子问 → 证据 → 决策 → 破局动作。分域与装卦细节在「解读笔记」。</p>
           ${renderQuestionBriefingForCast(cast, question, castAt)}
-          <details class="ly-briefing-more">
-            <summary>展开 · 卦象依据（教学明细）</summary>
-            <p class="ly-drawer-reading-one">${escapeHtml(loop.oneLiner)}</p>
-            ${renderFinalLoopHtml(loop)}
-          </details>
+          <div class="ly-briefing-actions">
+            <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>
+              📖 打开解读笔记
+            </button>
+            <button type="button" class="btn ly-briefing-to-course" data-goto-teach>
+              想弄懂为什么 → 去六步学习
+            </button>
+          </div>
         </div>
         <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
           ${renderLearnTeachPageHtml(cast, question, castAt)}
@@ -175,6 +193,7 @@ export function mountLiuyaoResultTabs(
 
   const layersApi = bindResultLayers(host, cast, question);
   bindYaoAskButtons(host, cast, question, castAt);
+  bindFollowupGestures(host, { cast, question, castAt });
   if (learn) {
     bindQinDict(host);
     bindLearnTeachPage(host, cast, question, castAt);
@@ -194,6 +213,11 @@ export function mountLiuyaoResultTabs(
     });
   };
   paintTags();
+
+  host.querySelector('[data-goto-teach]')?.addEventListener('click', () => {
+    host.querySelector<HTMLButtonElement>('.ly-result-tab[data-tab="teach"]')?.click();
+    host.querySelector('[data-learn-course]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   const addCustomTag = () => {
     const input = host.querySelector<HTMLInputElement>('[data-tag-input]');

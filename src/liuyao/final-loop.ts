@@ -68,7 +68,7 @@ function buildStep1(cast: CastResult, rel: ShiYingRel, verdict: string): FinalLo
   const shiLabel = LINE_LABELS[cast.shiLine - 1]!;
   const yingLabel = LINE_LABELS[cast.yingLine - 1]!;
   return {
-    tag: '【Step1 世应】',
+    tag: '🧍 你与外界',
     body: `世在${shiLabel}（我），应在${yingLabel}（外界）。${rel}→${verdict}。`,
   };
 }
@@ -77,13 +77,13 @@ function buildStep2(cast: CastResult): FinalLoopStep {
   const n = cast.changingIndexes.length;
   if (n === 0) {
     return {
-      tag: '【Step2 动爻】',
+      tag: '🔑 哪里在变',
       body: '无动爻：格局相对稳，关键不在突变，而在把世应与用神所在层看清。',
     };
   }
   const labels = cast.changingIndexes.map((i) => LINE_LABELS[i]!).join('、');
   return {
-    tag: '【Step2 动爻】',
+    tag: '🔑 哪里在变',
     body: `${n} 个变心爻：${labels}。`,
   };
 }
@@ -103,7 +103,7 @@ function buildStep3(cast: CastResult): FinalLoopStep {
     `问自己：${scene.loveAsk}`,
   ].join('\n');
   return {
-    tag: '【Step3 取象】',
+    tag: '🌊 卦象在说什么',
     body: `${head}\n${career}\n\n${love}`,
   };
 }
@@ -111,12 +111,12 @@ function buildStep3(cast: CastResult): FinalLoopStep {
 function buildStep4(cast: CastResult): FinalLoopStep {
   if (!cast.changed) {
     return {
-      tag: '【Step4 过程】',
+      tag: '➡️ 本变轨迹',
       body: `${cast.primary.fullName}（无动则无变）——时间轴停在本卦。`,
     };
   }
   return {
-    tag: '【Step4 过程】',
+    tag: '➡️ 本变轨迹',
     body: `${cast.primary.fullName} →（动爻）→ ${cast.changed.fullName}`,
   };
 }
@@ -207,9 +207,10 @@ function buildConclusion(
 function buildQuestionBody(question: string, conclusion: string): string {
   const q = question.trim();
   if (!q) {
-    return `你还没写下具体问题。先对照上面五步看结构，再补一句「我真正在问什么」，结论才落得准。\n\n${conclusion}`;
+    return `你还没写下具体问题。先对照上面结构看清格局，再补一句「我真正在问什么」，结论才落得准。\n\n${conclusion}`;
   }
-  return `对照你问的「${q}」：${conclusion}`;
+  // 问题锚点已在主文案开头出现一次，此处直接接结论
+  return conclusion;
 }
 
 function buildActions(
@@ -307,11 +308,11 @@ export function renderFinalLoopHtml(loop: FinalLoop): string {
       <h4 class="ly-final-loop-title">卦象依据</h4>
       <div class="ly-final-basis">${stepsHtml}</div>
       <div class="ly-final-loop-block is-conclusion">
-        <p class="ly-final-loop-label">结合问题</p>
+        <p class="ly-final-loop-label">💡 落到结论</p>
         <p class="ly-final-loop-body">${nlToBr(loop.questionBody)}</p>
       </div>
       <div class="ly-final-loop-block is-action">
-        <p class="ly-final-loop-label">行动建议</p>
+        <p class="ly-final-loop-label">📝 行动建议</p>
         <ul class="ly-final-action-list">${actionsHtml}</ul>
       </div>
     </section>

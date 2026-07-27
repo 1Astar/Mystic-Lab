@@ -110,11 +110,15 @@ describe('energy-lens', () => {
     expect(html).toMatch(/data-qin-dict-panel/);
     expect(html).toMatch(/六亲词典/);
     expect(html).toMatch(/人物 · 场所 · 事务 · 心态/);
+    expect(html).toMatch(/aria-pressed="true"/);
+    expect(html).not.toMatch(/data-qin-dict-panel hidden/);
   });
 
   it('qin dict facets cover 人物场所事务心态', () => {
-    expect(LIUQIN_DICT['父母'].people).toMatch(/父母|师长/);
+    expect(LIUQIN_DICT['父母'].people).toMatch(/父母|师父/);
+    expect(LIUQIN_DICT['父母'].classic).toMatch(/生助我者/);
     expect(LIUQIN_DICT['官鬼'].place).toMatch(/公司|考场/);
+    expect(LIUQIN_DICT['官鬼'].classic).toMatch(/约制我者/);
     const panel = renderQinDictPanelHtml(LIUQIN_DICT['官鬼']);
     expect(panel).toMatch(/人物/);
     expect(panel).toMatch(/场所/);

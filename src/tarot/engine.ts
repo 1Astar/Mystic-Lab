@@ -16,7 +16,7 @@ export function shuffleDeck<T>(items: T[]): T[] {
   return arr;
 }
 
-export function drawCards(count: number, reversedChance = 0.3): DrawnCard[] {
+export function drawCards(count: number, reversedChance = 0.5): DrawnCard[] {
   const shuffled = shuffleDeck(TAROT_DECK);
   return shuffled.slice(0, count).map((card) => ({
     card,
@@ -31,7 +31,7 @@ export function drawClarifierCard(excludeIds: string[]): DrawnCard | null {
   const card = shuffled[0]!;
   return {
     card,
-    reversed: Math.random() < 0.3,
+    reversed: Math.random() < 0.5,
     position: '补牌',
     positionKey: 'clarifier',
   };

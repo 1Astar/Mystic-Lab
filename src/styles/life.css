@@ -387,6 +387,7 @@
 
 .life-field input,
 .life-field textarea,
+.life-field select,
 .life-fork-input {
   width: 100%;
   box-sizing: border-box;
@@ -396,6 +397,35 @@
   color: #fff5e6;
   padding: 10px 12px;
   font: inherit;
+  color-scheme: dark;
+}
+
+.life-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255, 214, 166, 0.75) 50%),
+    linear-gradient(135deg, rgba(255, 214, 166, 0.75) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 10px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.life-field select:focus,
+.life-field input:focus,
+.life-field textarea:focus {
+  outline: none;
+  border-color: rgba(255, 214, 166, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 214, 166, 0.1);
+}
+
+.life-field select option {
+  background: #16121f;
+  color: #fff5e6;
 }
 
 .life-field textarea {

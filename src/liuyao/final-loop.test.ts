@@ -15,37 +15,36 @@ function castSample() {
 }
 
 describe('final-loop', () => {
-  it('builds Step1–4 basis + question + actions + oneLiner', () => {
+  it('builds emoji-titled basis + conclusion + actions + oneLiner', () => {
     const cast = castSample();
     const loop = buildFinalLoop(cast, '这次投标能中吗', new Date('2026-07-21'));
     expect(loop.steps).toHaveLength(4);
-    expect(loop.steps[0]!.tag).toMatch(/Step1 世应/);
+    expect(loop.steps[0]!.tag).toMatch(/你与外界/);
     expect(loop.steps[0]!.body).toMatch(/世在.+应在.+/);
-    expect(loop.steps[1]!.tag).toMatch(/Step2 动爻/);
-    expect(loop.steps[2]!.tag).toMatch(/Step3 取象/);
+    expect(loop.steps[1]!.tag).toMatch(/哪里在变/);
+    expect(loop.steps[2]!.tag).toMatch(/卦象在说什么/);
     expect(loop.steps[2]!.body).toMatch(/若偏事务/);
     expect(loop.steps[2]!.body).toMatch(/若偏关系/);
-    expect(loop.steps[3]!.tag).toMatch(/Step4 过程/);
+    expect(loop.steps[3]!.tag).toMatch(/本变轨迹/);
     expect(loop.steps.every((s) => !/不要只拿|交差|策略清单/.test(s.body))).toBe(true);
-    expect(loop.questionBody).toMatch(/这次投标能中吗/);
+    // 问题不再重复前缀，正文直接是结论
+    expect(loop.questionBody).not.toMatch(/对照你问的/);
+    expect(loop.questionBody.length).toBeGreaterThan(8);
     expect(loop.actions.length).toBeGreaterThan(0);
-    expect(loop.relationLabel).toMatch(/Step 1/);
-    expect(loop.focusLabel).toMatch(/Step 2/);
-    expect(loop.trajectoryLabel).toMatch(/Step 4/);
     expect(loop.conclusion.length).toBeGreaterThan(8);
     expect(loop.action.length).toBeGreaterThan(8);
     expect(loop.oneLiner.length).toBeGreaterThan(8);
     expect(loop.oneLiner.length).toBeLessThanOrEqual(72);
   });
 
-  it('renders 卦象依据 / 结合问题 / 行动建议', () => {
+  it('renders 卦象依据 / 落到结论 / 行动建议', () => {
     const cast = castSample();
     const loop = buildFinalLoop(cast, '面试能过吗');
     const html = renderFinalLoopHtml(loop);
     expect(html).toMatch(/卦象依据/);
-    expect(html).toMatch(/Step1 世应/);
-    expect(html).toMatch(/Step3 取象/);
-    expect(html).toMatch(/结合问题/);
+    expect(html).toMatch(/你与外界/);
+    expect(html).toMatch(/卦象在说什么/);
+    expect(html).toMatch(/落到结论/);
     expect(html).toMatch(/行动建议/);
     expect(html).toMatch(/ly-final-loop/);
     expect(html).toMatch(/ly-final-action-list/);

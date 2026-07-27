@@ -14,28 +14,27 @@ describe('scene-map structure', () => {
     expect(scene.love).toMatch(/\n/);
   });
 
-  it('renderSceneXiangHtml is block-structured', () => {
+  it('renderSceneXiangHtml uses tags + merged body', () => {
     const hex = HEXAGRAMS.find((h) => h.name === '豫')!;
     const scene = composeScene(TRIGRAMS.震, TRIGRAMS.坤, hex);
     const html = renderSceneXiangHtml(scene, { domain: 'general' });
     expect(html).toMatch(/ly-scene-xiang/);
     expect(html).toMatch(/ly-scene-cue/);
+    expect(html).toMatch(/ly-oracle-tags/);
+    expect(html).toMatch(/ly-scene-merged/);
     expect(html).toMatch(/「雷\+地」译成/);
-    expect(html).not.toMatch(/别停在/);
-    expect(html).not.toMatch(/还没写下具体问题/);
-    expect(html).toMatch(/工作上/);
-    expect(html).toMatch(/感情上/);
-    expect(html).toMatch(/下卦（你这边）/);
-    expect(html).toMatch(/上卦（关系场\/对方）/);
-    expect(html).toMatch(/自问：/);
+    expect(html).not.toMatch(/ly-scene-block-title/);
+    expect(html).not.toMatch(/工作上<\/p>/);
+    expect(html).toMatch(/下卦这一边/);
+    expect(html).toMatch(/此刻可自问/);
   });
 
-  it('always shows both 工作上 and 感情上 even for career domain', () => {
+  it('merges work and love for career domain too', () => {
     const hex = HEXAGRAMS.find((h) => h.name === '豫')!;
     const scene = composeScene(TRIGRAMS.震, TRIGRAMS.坤, hex);
     const html = renderSceneXiangHtml(scene, { domain: 'career' });
-    expect(html).toMatch(/工作上/);
-    expect(html).toMatch(/感情上/);
-    expect(html.indexOf('工作上')).toBeLessThan(html.indexOf('感情上'));
+    expect(html).not.toMatch(/ly-scene-block-title/);
+    expect(html).toMatch(/工作上像/);
+    expect(html).toMatch(/感情上则像/);
   });
 });

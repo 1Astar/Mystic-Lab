@@ -6,6 +6,7 @@ import type {
   InterpretationLayers,
   ReadingContext,
 } from '../knowledge/types.ts';
+import type { QuestionThread } from './question-thread.ts';
 
 export type CardReading = {
   position: string;
@@ -58,6 +59,11 @@ export type ReadingResult = {
   userIntuition?: string;
   /** 直觉焦点牌下标；缺省表示整阵 */
   intuitionFocusIndex?: number;
+  /**
+   * 按用户子问题串讲的整盘解读（优先于「一张张卡分别解析」）。
+   * 有提问且可拆条时生成。
+   */
+  questionThread?: QuestionThread;
   provider: 'static' | 'llm' | 'mock';
 };
 

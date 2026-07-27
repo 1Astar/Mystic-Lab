@@ -71,13 +71,93 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 已有氛围图的文王卦序；其余走 CSS 程序化底 */
-const ATMOSPHERE_MAX = 64;
+/**
+ * 卦象氛围图（R2 WebP）。键名与本地 assets/hexagram-cards/webp/ 一致：
+ * https://pub-….r2.dev/webp/atmosphere-01-08/01-qian-乾为天.webp
+ * 可用 VITE_HEX_CDN_BASE 覆盖（勿带尾斜杠，或带了也会被去掉）。
+ */
+const HEX_ATMOSPHERE_CDN = String(
+  import.meta.env.VITE_HEX_CDN_BASE ||
+    'https://pub-307f27a2ab434d19adcfceac21a35578.r2.dev/webp',
+).replace(/\/$/, '');
+
+/** 文王卦序 1..64 → 相对 webp 根目录的路径（含中文文件名） */
+const ATMOSPHERE_REL: readonly (string | null)[] = [
+  null,
+  'atmosphere-01-08/01-qian-乾为天.webp',
+  'atmosphere-01-08/02-kun-坤为地.webp',
+  'atmosphere-01-08/03-tun-水雷屯.webp',
+  'atmosphere-01-08/04-meng-山水蒙.webp',
+  'atmosphere-01-08/05-xu-水天需.webp',
+  'atmosphere-01-08/06-song-天水讼.webp',
+  'atmosphere-01-08/07-shi-地水师.webp',
+  'atmosphere-01-08/08-bi-水地比.webp',
+  'atmosphere-09-16/09-xiaoxu-风天小畜.webp',
+  'atmosphere-09-16/10-lv-天泽履.webp',
+  'atmosphere-09-16/11-tai-地天泰.webp',
+  'atmosphere-09-16/12-pi-天地否.webp',
+  'atmosphere-09-16/13-tongren-天火同人.webp',
+  'atmosphere-09-16/14-dayou-火天大有.webp',
+  'atmosphere-09-16/15-qian-地山谦.webp',
+  'atmosphere-09-16/16-yu-雷地豫.webp',
+  'atmosphere-17-24/17-sui-泽雷随.webp',
+  'atmosphere-17-24/18-gu-山风蛊.webp',
+  'atmosphere-17-24/19-lin-地泽临.webp',
+  'atmosphere-17-24/20-guan-风地观.webp',
+  'atmosphere-17-24/21-shike-火雷噬嗑.webp',
+  'atmosphere-17-24/22-bi-山火贲.webp',
+  'atmosphere-17-24/23-bo-山地剥.webp',
+  'atmosphere-17-24/24-fu-地雷复.webp',
+  'atmosphere-25-32/atm-25-wuwang.webp',
+  'atmosphere-25-32/atm-26-dachu.webp',
+  'atmosphere-25-32/atm-27-yi.webp',
+  'atmosphere-25-32/atm-28-daguo.webp',
+  'atmosphere-25-32/atm-29-kan.webp',
+  'atmosphere-25-32/atm-30-li.webp',
+  'atmosphere-25-32/atm-31-xian.webp',
+  'atmosphere-25-32/atm-32-heng.webp',
+  'atmosphere-33-40/atm-33-dun.webp',
+  'atmosphere-33-40/atm-34-dazhuang.webp',
+  'atmosphere-33-40/atm-35-jin.webp',
+  'atmosphere-33-40/atm-36-mingyi.webp',
+  'atmosphere-33-40/atm-37-jiaren.webp',
+  'atmosphere-33-40/atm-38-kui.webp',
+  'atmosphere-33-40/atm-39-jian.webp',
+  'atmosphere-33-40/atm-40-jie.webp',
+  'atmosphere-41-48/atm-41-sun.webp',
+  'atmosphere-41-48/atm-42-yi.webp',
+  'atmosphere-41-48/atm-43-guai.webp',
+  'atmosphere-41-48/atm-44-gou.webp',
+  'atmosphere-41-48/atm-45-cui.webp',
+  'atmosphere-41-48/atm-46-sheng.webp',
+  'atmosphere-41-48/atm-47-kun.webp',
+  'atmosphere-41-48/atm-48-jing.webp',
+  'atmosphere-49-56/atm-49-ge.webp',
+  'atmosphere-49-56/atm-50-ding.webp',
+  'atmosphere-49-56/atm-51-zhen.webp',
+  'atmosphere-49-56/atm-52-gen.webp',
+  'atmosphere-49-56/atm-53-jian.webp',
+  'atmosphere-49-56/atm-54-guimei.webp',
+  'atmosphere-49-56/atm-55-feng.webp',
+  'atmosphere-49-56/atm-56-lv.webp',
+  'atmosphere-57-64/atm-57-xun.webp',
+  'atmosphere-57-64/atm-58-dui.webp',
+  'atmosphere-57-64/atm-59-huan.webp',
+  'atmosphere-57-64/atm-60-jie.webp',
+  'atmosphere-57-64/atm-61-zhongfu.webp',
+  'atmosphere-57-64/atm-62-xiaoguo.webp',
+  'atmosphere-57-64/atm-63-jiji.webp',
+  'atmosphere-57-64/atm-64-weiji.webp',
+];
 
 export function atmosphereSrcFor(kingWen: number): string | null {
-  if (kingWen < 1 || kingWen > ATMOSPHERE_MAX) return null;
-  const n = String(kingWen).padStart(2, '0');
-  return `/liuyao/hex-guide/${n}.png`;
+  const rel = ATMOSPHERE_REL[kingWen];
+  if (!rel) return null;
+  const encoded = rel
+    .split('/')
+    .map((seg) => encodeURIComponent(seg))
+    .join('/');
+  return `${HEX_ATMOSPHERE_CDN}/${encoded}`;
 }
 
 function toneFromKeywords(hex: Hexagram): 'rise' | 'hold' | 'hard' | 'turn' {

@@ -211,7 +211,9 @@ export function enrichMajorFive(base: CardKnowledge): CardKnowledge {
       uprightKeywords: ['迷雾', '潜意识', '恐惧', '直觉', '不确定'],
       reversedKeywords: ['迷雾散去', '真相渐明', '恐惧减轻', '澄清'],
       wealthMeaning: '财富议题里，月亮提醒信息不全——别在模糊中做重大财务决定。',
-      misreadings: ['误读为「一定有欺骗」——也可能是自己的焦虑投影。'],
+      misreadings: [
+        '【月亮】不代表一定有欺骗——它更多指向「未知的恐惧」、「信息的不透明」，或者是自己内心的焦虑投射。不要过早下定论。',
+      ],
       visualOverview:
         '一轮满月悬在双塔之间，脚下小路蜿蜒，狗与狼对月长啸，水中浮出小龙虾。迷雾未散——真相尚在潜意识深处，直觉比匆忙结论更可靠。',
     },

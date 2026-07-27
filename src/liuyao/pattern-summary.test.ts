@@ -27,6 +27,12 @@ describe('pattern-summary', () => {
     expect(html).toMatch(/ly-pattern-summary/);
     expect(html).toMatch(/格局摘要/);
     expect(html).toMatch(/持世/);
+    expect(html).toMatch(/data-pattern-chip/);
+    expect(html).toMatch(/data-pattern-open="dress"/);
+    expect(html).toMatch(/简单说|白话/);
+    expect(summary.chips.every((c) => /简单说/.test(c.tip) || /合局|冲局|游魂|归魂/.test(c.tip))).toBe(
+      true,
+    );
   });
 
   it('marks 六冲 for pure hexagrams', () => {

@@ -3,7 +3,7 @@ import { resolveEncounterReplay, resolveJournalReading } from '../journal/replay
 import type { JournalEntry } from '../journal/records.ts';
 import { updateJournalReadingSnapshot } from '../journal/records.ts';
 import { SPREADS } from '../tarot/spreads.ts';
-import { mountCardResultTabs } from './card-result-tabs.ts';
+import { mountQuestionThread, openThreadCardPeek } from './question-thread-panel.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
 
 function escapeHtml(text: string): string {
@@ -18,16 +18,24 @@ export type ReadingReplayOptions = {
   entry: JournalEntry;
   focusCardId?: string;
   regenerated?: boolean;
+  hydratedThread?: boolean;
   onClose: () => void;
 };
 
-/** 复原完整抽牌结果场景（可交互四 Tab + 反馈） */
+/** 复原完整抽牌结果场景（串讲 + 点牌弹窗） */
 export function mountReadingReplay(container: HTMLElement, options: ReadingReplayOptions): void {
   const { entry, focusCardId, onClose } = options;
-  const { reading, regenerated } = resolveJournalReading(entry);
+  const resolved = resolveJournalReading(entry);
+  const reading = resolved.reading;
+  const regenerated = options.regenerated ?? resolved.regenerated;
+  const hydratedThread = options.hydratedThread ?? resolved.hydratedThread;
   const date = new Date(entry.createdAt).toLocaleString('zh-CN');
   const spreadLabel = SPREADS[entry.spreadType]?.name ?? entry.spreadType;
   const isSynthetic = entry.id.startsWith('j-synthetic-');
+
+  if (hydratedThread && reading.questionThread && !isSynthetic) {
+    updateJournalReadingSnapshot(entry.id, reading);
+  }
 
   container.className = 'reading-replay';
   container.innerHTML = `
@@ -45,36 +53,42 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
           ? `<p class="reading-replay-regen">根据记录重建的解读${isSynthetic ? '（仅找到单张相遇，完整牌阵未关联到手札）' : '（旧记录无完整快照）'}</p>`
           : ''
       }
-      <div class="reading-replay-cards" id="reading-replay-cards"></div>
+      ${hydratedThread ? '<p class="reading-replay-regen">已按你的问题补成「此刻解读」串讲（牌面原文保留）</p>' : ''}
+      <div class="reading-replay-thread" id="reading-replay-thread"></div>
+      ${
+        entry.reflection?.trim()
+          ? `<div class="journal-handnote"><span class="journal-handnote-prefix">手札记录：</span>${escapeHtml(entry.reflection.trim())}</div>`
+          : ''
+      }
       <p class="reading-replay-summary">${escapeHtml(reading.summary)}</p>
       <div id="reading-replay-feedback"></div>
     </div>
   `;
 
-  const cardsHost = container.querySelector('#reading-replay-cards');
-  if (cardsHost) {
-    let liveReading = reading;
-    liveReading.cards.forEach((cardReading, i) => {
-      const item = document.createElement('div');
-      item.className = 'reading-replay-card-item';
-      if (focusCardId && cardReading.cardId === focusCardId) {
-        item.classList.add('is-focus');
-      }
-      const host = document.createElement('div');
-      host.className = 'result-tabs-host';
-      item.appendChild(host);
-      cardsHost.appendChild(item);
-      mountCardResultTabs(host, cardReading, 'reading', {
+  const threadHost = container.querySelector('#reading-replay-thread') as HTMLElement | null;
+  if (threadHost) {
+    const ok = mountQuestionThread(threadHost, reading, (i) => {
+      const card = reading.cards[i];
+      if (!card) return;
+      openThreadCardPeek(card, {
+        initialTab: 'visual',
         onCardReadingChange: (updated) => {
-          liveReading = {
-            ...liveReading,
-            cards: liveReading.cards.map((c, idx) => (idx === i ? updated : c)),
-            provider: updated.interpretationProvider === 'llm' ? 'llm' : liveReading.provider,
-          };
-          updateJournalReadingSnapshot(entry.id, liveReading);
+          reading.cards[i] = updated;
+          if (!isSynthetic) updateJournalReadingSnapshot(entry.id, reading);
         },
       });
     });
+    if (!ok) threadHost.remove();
+  }
+
+  if (focusCardId) {
+    const idx = reading.cards.findIndex((c) => c.cardId === focusCardId);
+    if (idx >= 0) {
+      requestAnimationFrame(() => {
+        const card = reading.cards[idx]!;
+        openThreadCardPeek(card, { initialTab: 'visual' });
+      });
+    }
   }
 
   const feedbackHost = container.querySelector('#reading-replay-feedback');
@@ -108,6 +122,7 @@ export function openEncounterReplay(
       entry: resolved.entry,
       focusCardId: cardId,
       regenerated: resolved.regenerated,
+      hydratedThread: resolved.hydratedThread,
       onClose: () => {
         overlay.classList.remove('is-visible');
         window.setTimeout(() => overlay.remove(), 220);

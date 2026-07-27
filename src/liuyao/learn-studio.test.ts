@@ -46,7 +46,11 @@ describe('learn-studio', () => {
     expect(html).toMatch(/补给系统（元神）/);
     expect(html).toMatch(/耗散系统（忌神）/);
     expect(html).toMatch(/拉扯层（仇神）/);
-    expect(html).toMatch(/注意力放哪|谁克死谁/);
+    expect(html).toMatch(/注意力放哪|该盯哪|绿看补给/);
+    expect(html).not.toMatch(/谁克死谁/);
+    expect(html).toMatch(/ly-spirit-nar/);
+    // 不再叠两套卡片
+    expect(html).not.toMatch(/ly-energy-chain-item/);
   });
 
   it('学习工作室含左右栏与笔记引导', () => {

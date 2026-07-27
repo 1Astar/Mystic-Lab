@@ -115,12 +115,12 @@ export function buildVisualQuestionBridge(
 
   if (knowledge.deckId === 'pentacles-four' && isInterviewQuestion(q)) {
     if (reversed) {
-      return `你问的是「${q}」。星币四逆位提醒：你可能不是没准备，而是太怕失控，反而把优势收得太紧，面试官未必看得见。`;
+      return `星币四逆位提醒：你可能不是没准备，而是太怕失控，反而把优势收得太紧，面试官未必看得见。`;
     }
     const posHint = isPresentPosition(context)
       ? '放在「当下」位置，说明你目前的状态偏保守、防御、求稳。'
       : '';
-    return `你问的是「${q}」。${posHint}星币四提醒：你不是没准备，而是可能太想稳住，导致表达不够放开。这张牌不是「冲刺爆发型」，而是「守住基本盘型」——能稳住，但要避免太收着。`;
+    return `${posHint}星币四提醒：你不是没准备，而是可能太想稳住，导致表达不够放开。这张牌不是「冲刺爆发型」，而是「守住基本盘型」——能稳住，但要避免太收着。`;
   }
 
   const orient = reversed ? '逆位' : '正位';
@@ -129,11 +129,31 @@ export function buildVisualQuestionBridge(
     knowledge.visualOverview?.trim() ||
     knowledge.oneSentence.trim();
 
+  const pos = context.cardPosition?.trim();
+  const isObstacle =
+    context.positionKey === 'obstacle' || pos === '阻碍' || (pos?.includes('阻碍') ?? false);
+
+  if (isObstacle) {
+    const workHint =
+      context.topic === 'work'
+        ? reversed
+          ? `阻碍位上，${knowledge.nameCn}${orient}更像提醒：理想化/情绪决策的副作用，或「感觉对了」却未核实的风险。`
+          : `阻碍位上，${knowledge.nameCn}${orient}要读成卡点：跟着感觉走、理想化机会、被聊得来吸引——『务必核实，别只凭感觉。』`
+        : `阻碍位上，${knowledge.nameCn}${orient}指出真正卡住你的模式，勿按顺风好牌读。`;
+    return [
+      workHint,
+      `画面对照：${overview}`,
+    ].join('');
+  }
+
   const topicHint = topicBridgeHint(context, knowledge, reversed);
+  const posLead = pos
+    ? `放在「${pos}」位读【${knowledge.nameCn}${orient}】。`
+    : `【${knowledge.nameCn}${orient}】`;
 
   return [
-    `你问的是${q.length > 40 || q.includes('\n') ? '这些事' : `「${q}」`}。`,
-    `${knowledge.nameCn}${orient}的整体画面：${overview}`,
+    posLead,
+    `整体画面：${overview}`,
     topicHint,
   ]
     .filter(Boolean)

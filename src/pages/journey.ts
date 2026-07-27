@@ -199,13 +199,14 @@ export function renderJourney(root: HTMLElement): void {
     const entry = item.tarot;
     if (!entry) return;
     try {
-      const { reading, regenerated } = resolveJournalReading(entry);
+      const { reading, regenerated, hydratedThread } = resolveJournalReading(entry);
       closeDetail();
       const detail = document.createElement('aside');
       mountJournalDetail(detail, {
         entry,
         reading,
         regenerated,
+        hydratedThread,
         onClose: closeDetail,
       });
       mountSiblingSummary(detail, item);

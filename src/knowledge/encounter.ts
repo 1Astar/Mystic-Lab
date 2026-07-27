@@ -37,6 +37,9 @@ export function buildEncounterRecord(deckId: string): EncounterRecord | null {
       question: e.question.trim(),
       spreadLabel: e.spreadLabel,
       reversed: e.reversed,
+      summary: e.summary,
+      guidance: e.guidance,
+      journalId: e.journalId,
     })),
   };
 }

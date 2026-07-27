@@ -33,6 +33,8 @@ export type LifeProfileInput = {
   birthHour: string;
   birthPlace: string;
   confusion: string;
+  /** 解读风险偏好：稳健 / 均衡 / 进取 */
+  riskPreference?: 'cautious' | 'balanced' | 'bold';
 };
 
 /** 一个人的档案（自己或他人） */
@@ -155,6 +157,7 @@ export function toLifeProfileInput(
     birthHour: p.birthHour ?? '',
     birthPlace: p.birthPlace ?? '',
     confusion: p.confusion ?? '',
+    riskPreference: p.riskPreference,
   };
 }
 

@@ -79,7 +79,7 @@ export function renderXiaoliurenJournal(root: HTMLElement): void {
         <p class="xlr-journal-summary">${entry.summary}</p>
         ${due ? '<p class="xlr-journal-due">待对照 · 起课已满 3 天</p>' : ''}
         ${later ? `<p class="journal-fulfilled">${later}</p>` : ''}
-        <textarea class="question-input xlr-journal-reflect" rows="2" placeholder="后来的感悟…">${entry.reflection}</textarea>
+        <textarea class="question-input xlr-journal-reflect" rows="2" placeholder="${entry.reflection.trim() ? '后来的感悟…' : '补写轻反思，或记下后来的感悟…'}">${entry.reflection}</textarea>
         <div class="xlr-journal-actions">
           <button type="button" class="btn btn-sm" data-replay>复原当时</button>
           <button type="button" class="btn btn-ghost btn-sm" data-yes>应验</button>

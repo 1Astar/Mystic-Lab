@@ -34,7 +34,7 @@ describe('visual hotspot overall reading', () => {
     expect(overview!).not.toMatch(/围绕坚持与考验展开/);
   });
 
-  it('builds question-tied overall bridge instead of empty preamble', () => {
+  it('builds position-tied overall bridge without restating the full question', () => {
     const context: ReadingContext = {
       question: '什么时候能找到下一份工作？',
       spreadType: 'past-present-future',
@@ -50,13 +50,36 @@ describe('visual hotspot overall reading', () => {
       getVisualOverview('swords-seven'),
     );
     expect(bridge).toBeTruthy();
-    expect(bridge!).toContain('什么时候能找到下一份工作');
+    expect(bridge!).toMatch(/现在|宝剑七/);
+    expect(bridge!).not.toContain('什么时候能找到下一份工作');
     expect(bridge!).toMatch(/整体画面|潜行|取舍/);
     expect(bridge!).toMatch(/求职|工作/);
     expect(bridge!).toMatch(/策略|取舍/);
     expect(bridge!).toMatch(/日历日期|可改的一步/);
     expect(bridge!).not.toContain('你正在用什么策略靠近机会、又放下了什么');
     expect(bridge!).not.toContain('下面每处符号都在补充这个语境');
+  });
+
+  it('reads obstacle position as risk, not upright pep talk', () => {
+    const context: ReadingContext = {
+      question: '我最需要防范的风险？',
+      spreadType: 'situation-obstacle-advice',
+      cardPosition: '阻碍',
+      positionKey: 'obstacle',
+      topic: 'work',
+      selectedCardId: 'cups-knight',
+    };
+    const cupsKnight = {
+      ...knowledge,
+      deckId: 'cups-knight',
+      nameCn: '圣杯骑士',
+      keywords: ['浪漫', '探索', '跟着感觉'],
+      oneSentence: '跟着感觉向外探索。',
+    } as CardKnowledge;
+    const bridge = buildVisualQuestionBridge(context, cupsKnight, false, '骑士捧杯缓行');
+    expect(bridge!).toMatch(/阻碍/);
+    expect(bridge!).toMatch(/卡点|理想化|感觉|核实/);
+    expect(bridge!).not.toContain('我最需要防范的风险');
   });
 
   it('differs work bridge by card keywords', () => {

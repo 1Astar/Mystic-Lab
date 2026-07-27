@@ -62,15 +62,15 @@ function readForm(form: HTMLFormElement): {
     gender,
     lifeTags: lifeTags.slice(0, 8),
     profile: {
-      age: g('age'),
-      occupation: g('occupation'),
-      city: g('city'),
-      birthYear: g('birthYear'),
-      birthMonth: g('birthMonth'),
-      birthDay: g('birthDay'),
-      birthHour: g('birthHour'),
-      birthPlace: g('birthPlace'),
-      confusion: g('confusion'),
+    age: g('age'),
+    occupation: g('occupation'),
+    city: g('city'),
+    birthYear: g('birthYear'),
+    birthMonth: g('birthMonth'),
+    birthDay: g('birthDay'),
+    birthHour: g('birthHour'),
+    birthPlace: g('birthPlace'),
+    confusion: g('confusion'),
     },
   };
 }
@@ -165,7 +165,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
 
     body.innerHTML = `
       ${paintListHint()}
-      <form class="life-form" id="life-profile-form">
+    <form class="life-form" id="life-profile-form">
         <fieldset class="life-fieldset">
           <legend>${isNew ? '添加档案' : `编辑 · ${escapeHtml(p.nickname)}`}</legend>
           <label class="life-field"><span>昵称</span><input name="nickname" type="text" maxlength="8" placeholder="1–8 字" value="${escapeHtml(isNew ? '' : p.nickname)}" ${p.id === SELF_PROFILE_ID && !isNew ? 'readonly' : ''} /></label>
@@ -186,7 +186,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           <div class="profile-life-tags">
             ${SCENE_TAG_OPTIONS.map(
               (t) => `
-              <label class="profile-life-tag">
+              <label class="profile-life-tag${p.lifeTags.includes(t) ? ' is-on' : ''}">
                 <input type="checkbox" data-life-tag value="${t}" ${p.lifeTags.includes(t) ? 'checked' : ''} />
                 <span>#${t}</span>
               </label>`,
@@ -195,25 +195,25 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           <label class="life-field life-field-full"><span>自定义标签</span><input name="lifeTagCustom" type="text" maxlength="10" placeholder="如 求职期" /></label>
         </fieldset>
 
-        <fieldset class="life-fieldset">
-          <legend>当前人生状态</legend>
-          <label class="life-field"><span>年龄</span><input name="age" type="text" inputmode="numeric" placeholder="如 29" value="${escapeHtml(p.age)}" /></label>
-          <label class="life-field"><span>职业</span><input name="occupation" type="text" placeholder="如 产品经理" value="${escapeHtml(p.occupation)}" /></label>
-          <label class="life-field"><span>城市</span><input name="city" type="text" placeholder="如 上海" value="${escapeHtml(p.city)}" /></label>
-          <label class="life-field life-field-full">
-            <span>当前困惑</span>
+      <fieldset class="life-fieldset">
+        <legend>当前人生状态</legend>
+        <label class="life-field"><span>年龄</span><input name="age" type="text" inputmode="numeric" placeholder="如 29" value="${escapeHtml(p.age)}" /></label>
+        <label class="life-field"><span>职业</span><input name="occupation" type="text" placeholder="如 产品经理" value="${escapeHtml(p.occupation)}" /></label>
+        <label class="life-field"><span>城市</span><input name="city" type="text" placeholder="如 上海" value="${escapeHtml(p.city)}" /></label>
+        <label class="life-field life-field-full">
+          <span>当前困惑</span>
             <textarea name="confusion" rows="3" placeholder="例如：要不要离职？">${escapeHtml(p.confusion)}</textarea>
-          </label>
-        </fieldset>
+        </label>
+      </fieldset>
 
-        <fieldset class="life-fieldset">
+      <fieldset class="life-fieldset">
           <legend>出生信息</legend>
-          <div id="life-birth-dt-slot" class="life-birth-row"></div>
-          <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
+        <div id="life-birth-dt-slot" class="life-birth-row"></div>
+        <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
           <p class="life-footnote">出生信息也可在「八字」里填写。</p>
-        </fieldset>
+      </fieldset>
 
-        <div class="life-form-actions">
+      <div class="life-form-actions">
           <button type="submit" class="life-btn-primary" id="life-save-btn">保存档案</button>
           ${
             p.id === SELF_PROFILE_ID && !isNew
@@ -227,9 +227,9 @@ export function renderLifeProfile(root: HTMLElement): () => void {
               : ''
           }
           ${isNew ? `<button type="button" class="life-btn-ghost" id="life-cancel-new">取消</button>` : ''}
-        </div>
-        <p class="life-status" id="life-status" hidden></p>
-      </form>
+      </div>
+      <p class="life-status" id="life-status" hidden></p>
+    </form>
       <section class="life-portrait" id="life-portrait" ${store.portrait && p.id === SELF_PROFILE_ID && !isNew ? '' : 'hidden'}></section>
     `;
 
@@ -238,13 +238,19 @@ export function renderLifeProfile(root: HTMLElement): () => void {
     const portraitEl = body.querySelector<HTMLElement>('#life-portrait')!;
     const birthSlot = body.querySelector<HTMLElement>('#life-birth-dt-slot')!;
 
-    mountBirthDatetimeField({
-      host: form,
-      replaceEl: birthSlot,
-      initialYear: p.birthYear,
-      initialMonth: p.birthMonth,
-      initialDay: p.birthDay,
-      initialHour: p.birthHour,
+  mountBirthDatetimeField({
+    host: form,
+    replaceEl: birthSlot,
+    initialYear: p.birthYear,
+    initialMonth: p.birthMonth,
+    initialDay: p.birthDay,
+    initialHour: p.birthHour,
+  });
+
+    form.querySelectorAll<HTMLInputElement>('[data-life-tag]').forEach((input) => {
+      input.addEventListener('change', () => {
+        input.closest('.profile-life-tag')?.classList.toggle('is-on', input.checked);
+      });
     });
 
     body.querySelector('[data-add-person]')?.addEventListener('click', () => {
@@ -278,39 +284,39 @@ export function renderLifeProfile(root: HTMLElement): () => void {
     const toLife = body.querySelector<HTMLButtonElement>('#life-to-life');
     toLife?.addEventListener('click', () => navigate('/life'));
 
-    function renderPortrait(): void {
-      const portrait = store.portrait;
+  function renderPortrait(): void {
+    const portrait = store.portrait;
       if (!portrait || p.id !== SELF_PROFILE_ID) {
         if (portraitEl) {
-          portraitEl.hidden = true;
-          portraitEl.innerHTML = '';
+      portraitEl.hidden = true;
+      portraitEl.innerHTML = '';
         }
         if (toLife) toLife.disabled = true;
-        return;
-      }
-      portraitEl.hidden = false;
-      if (toLife) toLife.disabled = false;
-      const sourceLabel = portrait.source === 'ai' ? 'AI 推演' : '本地模板';
-      portraitEl.innerHTML = `
-        <div class="life-card life-card-portrait">
-          <p class="life-card-kicker">当前人生阶段 · ${escapeHtml(sourceLabel)}</p>
-          <h2>${escapeHtml(portrait.stageTitle)}</h2>
-          <p class="life-card-body">${escapeHtml(portrait.stageSummary)}</p>
-          <div class="life-chip-row">
-            ${portrait.tendencies.map((t) => `<span class="life-chip">${escapeHtml(t)}</span>`).join('')}
-          </div>
-          <p class="life-meta">人生主题：${portrait.themes.map(escapeHtml).join(' · ')}</p>
-          <p class="life-meta">出生简记：${escapeHtml(formatBirthBrief(store.profile))}</p>
-          <ul class="life-hint-list">
-            ${portrait.stageHints.map((h) => `<li>${escapeHtml(h)}</li>`).join('')}
-          </ul>
-        </div>
-      `;
+      return;
     }
-    renderPortrait();
+    portraitEl.hidden = false;
+      if (toLife) toLife.disabled = false;
+    const sourceLabel = portrait.source === 'ai' ? 'AI 推演' : '本地模板';
+    portraitEl.innerHTML = `
+      <div class="life-card life-card-portrait">
+          <p class="life-card-kicker">当前人生阶段 · ${escapeHtml(sourceLabel)}</p>
+        <h2>${escapeHtml(portrait.stageTitle)}</h2>
+        <p class="life-card-body">${escapeHtml(portrait.stageSummary)}</p>
+        <div class="life-chip-row">
+          ${portrait.tendencies.map((t) => `<span class="life-chip">${escapeHtml(t)}</span>`).join('')}
+        </div>
+        <p class="life-meta">人生主题：${portrait.themes.map(escapeHtml).join(' · ')}</p>
+        <p class="life-meta">出生简记：${escapeHtml(formatBirthBrief(store.profile))}</p>
+        <ul class="life-hint-list">
+          ${portrait.stageHints.map((h) => `<li>${escapeHtml(h)}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+  renderPortrait();
 
     form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    e.preventDefault();
       const data = readForm(form);
       if (p.id === SELF_PROFILE_ID && !isNew) {
         data.nickname = '自己';
@@ -340,13 +346,13 @@ export function renderLifeProfile(root: HTMLElement): () => void {
       const data = readForm(form);
       const profile = data.profile;
       if (!hasUsableProfile(profile)) {
-        statusEl.hidden = false;
-        statusEl.textContent = '请至少填写年龄、职业、城市或困惑中的一项。';
-        return;
-      }
-      const genBtn = body.querySelector<HTMLButtonElement>('#life-gen-btn')!;
-      genBtn.disabled = true;
       statusEl.hidden = false;
+      statusEl.textContent = '请至少填写年龄、职业、城市或困惑中的一项。';
+      return;
+    }
+      const genBtn = body.querySelector<HTMLButtonElement>('#life-gen-btn')!;
+    genBtn.disabled = true;
+    statusEl.hidden = false;
       statusEl.textContent = aiOn ? '正在结合信息推演…' : '正在用本地模板生成…';
       try {
         upsertPerson({
@@ -357,24 +363,24 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           lifeTags: data.lifeTags,
           ...profile,
         });
-        const portrait = await generatePortrait(profile);
+      const portrait = await generatePortrait(profile);
         store = loadLifeStore();
-        store = {
-          ...store,
+      store = {
+        ...store,
           profile: toLifeProfileInput(profile),
-          portrait,
-          updatedAt: new Date().toISOString(),
-        };
-        saveLifeStore(store);
-        statusEl.textContent =
+        portrait,
+        updatedAt: new Date().toISOString(),
+      };
+      saveLifeStore(store);
+      statusEl.textContent =
           portrait.source === 'ai' ? '已生成（AI）。' : '已生成（本地模板）。';
         paint();
-      } catch (err) {
-        statusEl.textContent = err instanceof Error ? err.message : '生成失败';
-      } finally {
-        genBtn.disabled = false;
-      }
-    });
+    } catch (err) {
+      statusEl.textContent = err instanceof Error ? err.message : '生成失败';
+    } finally {
+      genBtn.disabled = false;
+    }
+  });
   }
 
   page.querySelector('.life-back')?.addEventListener('click', () => navigate('/'));
