@@ -14,8 +14,14 @@ describe('hex-guide shared snippets', () => {
     const pack = buildHexGuidePack(qian);
     expect(pack.oneLiner.length).toBeGreaterThan(4);
     expect(pack.domains.length).toBeGreaterThanOrEqual(4);
-    expect(atmosphereSrcFor(1)).toMatch(/hex-guide\/01\.png/);
-    expect(pack.atmosphereSrc).toMatch(/01\.png/);
+    expect(atmosphereSrcFor(1)).toMatch(
+      /r2\.dev\/webp\/atmosphere-01-08\/01-qian-%E4%B9%BE%E4%B8%BA%E5%A4%A9\.webp$/,
+    );
+    expect(pack.atmosphereSrc).toBe(atmosphereSrcFor(1));
+    expect(atmosphereSrcFor(25)).toMatch(/atmosphere-25-32\/atm-25-wuwang\.webp$/);
+    expect(atmosphereSrcFor(64)).toMatch(/atmosphere-57-64\/atm-64-weiji\.webp$/);
+    expect(atmosphereSrcFor(0)).toBeNull();
+    expect(atmosphereSrcFor(65)).toBeNull();
   });
 
   it('renders notes snippet with art + form + domains', () => {
