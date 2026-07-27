@@ -48,20 +48,19 @@ describe('direct-reading', () => {
 });
 
 describe('question-briefing', () => {
-  it('uses direct-reading section titles', () => {
+  it('uses OfflineAnswerPack section titles', () => {
     const cast = castHuanToXun();
     const q = '我要不要留在冠英？8月初要不要离职？转正能拿到8k吗？';
     const b = buildQuestionBriefing(cast, q, new Date('2026-07-24T14:56:00'));
     expect(b.questionLead).toMatch(/基于/);
-    expect(b.layer1.title).toMatch(/核心判词/);
-    expect(b.layer1.quote).toMatch(/8k|心累/);
-    expect(b.layer2.title).toMatch(/解析/);
-    expect(b.layer3.title).toMatch(/决策参考/);
-    expect(b.layer4.title).toMatch(/为什么/);
-    expect(b.layer4.body).toMatch(/三件事/);
+    expect(b.layer1.title).toMatch(/先答你的问题/);
+    expect(b.pack.answers.length).toBeGreaterThanOrEqual(2);
+    expect(b.layer2.title).toMatch(/决策参考/);
+    expect(b.layer3.title).toMatch(/破局动作/);
+    expect(b.pack.breakthrough.body).not.toMatch(/只选一个可验证动作/);
   });
 
-  it('renders briefing with verdict quote', () => {
+  it('renders briefing with answer pack', () => {
     const cast = castHuanToXun();
     const html = renderQuestionBriefingForCast(
       cast,
@@ -69,8 +68,7 @@ describe('question-briefing', () => {
       new Date('2026-07-24T14:56:00'),
     );
     expect(html).toMatch(/ly-question-briefing/);
-    expect(html).toMatch(/ly-briefing-quote/);
-    expect(html).toMatch(/核心判词/);
+    expect(html).toMatch(/ly-answer-pack|先答你的问题|破局动作/);
     expect(html).not.toMatch(/第一层/);
     expect(html).not.toMatch(/现状与转折点/);
   });

@@ -10,6 +10,10 @@
 
 ---
 
+## v0.3.32 · 2026-07-27
+【板块：Lab·解读·Mystic Engine】【板块：六爻·结果·离线答问】【板块：六爻·结果·此刻解读】【板块：六爻·结果·速断】
+OfflineAnswerPack 离线答问引擎（Intent→Context→Evidence→Action）：六爻「此刻解读」与速断改为先答子问 + 证据 + 决策 + 破局动作。意图/动作库覆盖事业（求职/晋升/转岗/创业等）、关系、财富、成长；可带入 Lab 档案。规格见 `docs/superpowers/specs/2026-07-27-mystic-engine-offline-answer-design.md`。
+
 ## v0.3.31 · 2026-07-27
 【板块：六爻·图鉴·氛围图】
 六十四卦图鉴氛围底图改为 R2 WebP（与本地 `assets/hexagram-cards/webp/` 同路径）；可用 `VITE_HEX_CDN_BASE` 覆盖基址。

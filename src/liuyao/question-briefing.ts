@@ -1,5 +1,5 @@
 /**
- * 结合所问的解答：卦名直译 + 拆题分答（并入现有此刻解读）
+ * 结合所问的解答：OfflineAnswerPack（Mystic Engine）驱动此刻解读
  */
 import type { CastResult } from './engine.ts';
 import { LINE_LABELS } from './hexagrams.ts';
@@ -7,24 +7,27 @@ import { getClassicCorpus } from './classic-corpus.ts';
 import { buildClassicCompendium } from './classic-compendium.ts';
 import { buildPatternSummary } from './pattern-summary.ts';
 import { yongTopicLabel } from './yong-focus.ts';
-import { buildDirectReading } from './direct-reading.ts';
+import {
+  buildOfflineAnswerPack,
+} from '../mystic-engine/build-pack.ts';
+import type { OfflineAnswerPack } from '../mystic-engine/types.ts';
+import { loadUseProfilePref } from '../life/profile-context.ts';
 
 export type BriefingBlock = {
   title: string;
   body: string;
-  /** 单独拎出的金句（引用卡） */
   quote?: string;
 };
 
 export type QuestionBriefing = {
   topicLabel: string;
-  /** 全文只出现一次的问题锚点 */
   questionLead: string;
   layer1: BriefingBlock;
   layer2: BriefingBlock;
   layer3: BriefingBlock;
   layer4: BriefingBlock;
   strategy: BriefingBlock;
+  pack: OfflineAnswerPack;
 };
 
 function escapeHtml(s: string): string {
@@ -84,50 +87,74 @@ function buildClassicNote(
   };
 }
 
-/** 生成结合所问的解答（直译判词结构） */
+function answersBody(pack: OfflineAnswerPack): string {
+  return pack.answers
+    .map((a, i) => {
+      const ev = a.evidence.map((e) => `· ${e.plain}`).join('\n');
+      return `${i + 1}. ${a.questionSlice}\n倾向：${a.lean}\n证据：\n${ev}`;
+    })
+    .join('\n\n');
+}
+
+function actionsBody(pack: OfflineAnswerPack): string {
+  const check = pack.checklist
+    .map((c, i) => `${i + 1}. ${c.title}：${c.body}`)
+    .join('\n');
+  return (
+    `【${pack.breakthrough.title}】\n${pack.breakthrough.body}` +
+    (check ? `\n\n还可同步：\n${check}` : '')
+  );
+}
+
+/** 生成结合所问的解答（OfflineAnswerPack） */
 export function buildQuestionBriefing(
   cast: CastResult,
   question = '',
   castAt = new Date(),
 ): QuestionBriefing {
   const topicLabel = yongTopicLabel(question);
-  const direct = buildDirectReading(cast, question);
+  const pack = buildOfflineAnswerPack({
+    question,
+    cast,
+    castAt,
+    useProfile: loadUseProfilePref(true),
+  });
 
-  const partBlock =
-    direct.partLeans.length > 1
-      ? '\n\n分问对照：\n' +
-        direct.partLeans.map((p, i) => `${i + 1}. ${p.part} → ${p.lean}`).join('\n')
-      : '';
+  const lead = cast.changed
+    ? `（基于${cast.primary.fullName}卦变${cast.changed.fullName}，结合你的问题）`
+    : `（基于${cast.primary.fullName}，结合你的问题）`;
+
+  const firstLean = pack.answers[0]?.lean ?? pack.decision;
 
   return {
     topicLabel,
-    questionLead: direct.frame,
+    questionLead: lead,
     layer1: {
-      title: '📌 核心判词',
-      body: '',
-      quote: direct.verdict,
+      title: '先答你的问题',
+      body: answersBody(pack),
+      quote: firstLean,
     },
     layer2: {
-      title: '解析',
-      body: direct.analysis + partBlock,
+      title: '决策参考',
+      body: pack.decision,
     },
     layer3: {
-      title: '⛳ 给你的最终决策参考',
-      body: direct.decision,
+      title: '破局动作',
+      body: actionsBody(pack),
     },
     layer4: {
-      title: '🧐 为什么这么判断',
-      body: `${direct.why}\n\n💡 接下来你要做的三件事：\n\n${direct.nextSteps}`,
+      title: '盘面辅读',
+      body: pack.boardExpand ?? '',
     },
     strategy: {
-      title: '📌 核心判词',
-      body: direct.verdict,
-      quote: direct.verdict,
+      title: '破局动作',
+      body: pack.breakthrough.body,
+      quote: pack.breakthrough.title,
     },
+    pack,
   };
 }
 
-/** 供渲染：在四层后附加古籍 */
 export function buildQuestionBriefingWithClassic(
   cast: CastResult,
   question = '',
@@ -146,31 +173,83 @@ function renderBlockHtml(block: BriefingBlock, extraClass = ''): string {
   return `
     <section class="ly-briefing-layer${extraClass}" data-briefing-section>
       <h4 class="ly-briefing-title">${escapeHtml(block.title)}</h4>
-      ${block.body.trim() ? `<div class="ly-briefing-body">${nlToBr(block.body)}</div>` : ''}
       ${
         block.quote
           ? `<blockquote class="ly-briefing-quote"><p>${escapeHtml(block.quote)}</p></blockquote>`
           : ''
       }
+      ${block.body.trim() ? `<div class="ly-briefing-body">${nlToBr(block.body)}</div>` : ''}
     </section>`;
 }
 
-export function renderQuestionBriefingHtml(b: QuestionBriefing, classic?: BriefingBlock): string {
+export function renderAnswerPackHtml(pack: OfflineAnswerPack, topicLabel: string, lead: string): string {
+  const answerSections = pack.answers
+    .map((a) => {
+      const ev = a.evidence
+        .map((e) => `<li data-fact="${escapeHtml(e.factKey)}">${escapeHtml(e.plain)}</li>`)
+        .join('');
+      return `
+        <article class="ly-pack-answer" data-intent="${escapeHtml(a.intentId)}">
+          <h5 class="ly-pack-q">${escapeHtml(a.questionSlice)}</h5>
+          <p class="ly-pack-lean"><strong>倾向：</strong>${escapeHtml(a.lean)}</p>
+          <ul class="ly-pack-evidence">${ev}</ul>
+        </article>`;
+    })
+    .join('');
+
+  const checks = pack.checklist
+    .map(
+      (c) =>
+        `<li><strong>${escapeHtml(c.title)}</strong> — ${escapeHtml(c.body)}</li>`,
+    )
+    .join('');
+
   return `
-    <article class="ly-question-briefing" data-question-briefing>
-      <p class="ly-briefing-kicker">${escapeHtml(b.questionLead)}</p>
-      <p class="ly-briefing-topic">本题焦点 · ${escapeHtml(b.topicLabel)}</p>
-      ${renderBlockHtml(b.layer1, ' is-verdict')}
-      ${renderBlockHtml(b.layer2)}
-      ${renderBlockHtml(b.layer3, ' is-actions')}
-      ${renderBlockHtml(b.layer4)}
+    <article class="ly-question-briefing ly-answer-pack" data-question-briefing data-answer-pack>
+      <p class="ly-briefing-kicker">${escapeHtml(lead)}</p>
+      <p class="ly-briefing-topic">本题焦点 · ${escapeHtml(topicLabel)}</p>
       ${
-        classic
-          ? `<details class="ly-briefing-more"><summary>${escapeHtml(classic.title)}</summary>${renderBlockHtml({ ...classic, title: '' })}</details>`
+        pack.contextUsed
+          ? `<p class="ly-pack-context">已带入档案上下文</p>`
+          : ''
+      }
+      <section class="ly-briefing-layer is-verdict" data-briefing-section>
+        <h4 class="ly-briefing-title">先答你的问题</h4>
+        ${answerSections}
+      </section>
+      <section class="ly-briefing-layer" data-briefing-section>
+        <h4 class="ly-briefing-title">决策参考</h4>
+        <div class="ly-briefing-body">${nlToBr(pack.decision)}</div>
+      </section>
+      <section class="ly-briefing-layer is-actions" data-briefing-section>
+        <h4 class="ly-briefing-title">破局动作</h4>
+        <blockquote class="ly-briefing-quote"><p>${escapeHtml(pack.breakthrough.title)}</p></blockquote>
+        <div class="ly-briefing-body">${nlToBr(pack.breakthrough.body)}</div>
+        ${checks ? `<ul class="ly-pack-checklist">${checks}</ul>` : ''}
+      </section>
+      ${
+        pack.boardExpand
+          ? `<details class="ly-briefing-more"><summary>盘面辅读</summary><div class="ly-briefing-body">${nlToBr(pack.boardExpand)}</div></details>`
           : ''
       }
     </article>
   `;
+}
+
+function renderBlockHtmlLegacy(block: BriefingBlock, extraClass = ''): string {
+  return renderBlockHtml(block, extraClass);
+}
+
+export function renderQuestionBriefingHtml(b: QuestionBriefing, classic?: BriefingBlock): string {
+  const lead = b.questionLead;
+  let html = renderAnswerPackHtml(b.pack, b.topicLabel, lead);
+  if (classic) {
+    html = html.replace(
+      '</article>',
+      `<details class="ly-briefing-more"><summary>${escapeHtml(classic.title)}</summary>${renderBlockHtmlLegacy({ ...classic, title: '' })}</details></article>`,
+    );
+  }
+  return html;
 }
 
 export function renderQuestionBriefingForCast(

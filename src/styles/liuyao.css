@@ -6773,12 +6773,56 @@ a.ly-derived-name:hover {
   gap: 12px;
 }
 
-/* 结合所问 · 四层解答 */
+/* 结合所问 · OfflineAnswerPack */
 .ly-question-briefing {
   margin: 0 0 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.ly-pack-answer {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 164, 91, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ly-pack-q {
+  margin: 0 0 6px;
+  font-size: 0.92rem;
+  color: var(--ly-ink, #f2ebe0);
+  font-weight: 650;
+}
+
+.ly-pack-lean {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(242, 235, 224, 0.92);
+}
+
+.ly-pack-evidence {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(242, 235, 224, 0.72);
+}
+
+.ly-pack-checklist {
+  margin: 10px 0 0;
+  padding-left: 1.1em;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: rgba(242, 235, 224, 0.85);
+}
+
+.ly-pack-context {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ly-gold, #c7a45b);
 }
 
 .ly-course-method {

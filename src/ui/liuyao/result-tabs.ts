@@ -31,7 +31,8 @@ import {
   renderPatternSummaryHtml,
 } from '../../liuyao/pattern-summary.ts';
 import { renderQuestionBriefingForCast } from '../../liuyao/question-briefing.ts';
-import { buildDirectReading } from '../../liuyao/direct-reading.ts';
+import { buildOfflineAnswerPack } from '../../mystic-engine/build-pack.ts';
+import { loadUseProfilePref } from '../../life/profile-context.ts';
 import { bindFollowupGestures } from '../../liuyao/followup-chat.ts';
 
 function escapeHtml(s: string): string {
@@ -118,9 +119,15 @@ export function mountLiuyaoResultTabs(
   let noteDraft = opts.initialNoteDraft ?? '';
 
   if (!learn) {
-    const direct = buildDirectReading(cast, question);
+    const pack = buildOfflineAnswerPack({
+      question,
+      cast,
+      castAt,
+      useProfile: loadUseProfilePref(true),
+    });
+    const gist = pack.answers[0]?.lean ?? pack.decision;
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: direct.verdict })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: gist })}
       ${renderQuickBoard(cast, castAt, { omitHeader: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
@@ -140,11 +147,17 @@ export function mountLiuyaoResultTabs(
       { id: 'reading', label: '此刻解读' },
       { id: 'teach', label: '六步学习' },
     ];
-    const direct = buildDirectReading(cast, question);
+    const pack = buildOfflineAnswerPack({
+      question,
+      cast,
+      castAt,
+      useProfile: loadUseProfilePref(true),
+    });
+    const gist = pack.answers[0]?.lean ?? pack.decision;
     const pattern = buildPatternSummary(cast, question, castAt);
 
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: direct.verdict })}
+      ${renderHexHero(cast, { castAt, askable: true, primaryGist: gist })}
       ${renderPatternSummaryHtml(pattern)}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
@@ -158,7 +171,7 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">结果：开头点明你的问题，后面直接读分析。分域与装卦细节在「解读笔记」。</p>
+          <p class="ly-guide-tip">先答子问 → 证据 → 决策 → 破局动作。分域与装卦细节在「解读笔记」。</p>
           ${renderQuestionBriefingForCast(cast, question, castAt)}
           <div class="ly-briefing-actions">
             <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>

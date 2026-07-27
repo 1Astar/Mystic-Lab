@@ -336,10 +336,8 @@ export function bindFollowupGestures(
 
     let startX = 0;
     let startY = 0;
-    let open = false;
 
     const setOpen = (v: boolean) => {
-      open = v;
       el.classList.toggle('is-swiped', v);
     };
 

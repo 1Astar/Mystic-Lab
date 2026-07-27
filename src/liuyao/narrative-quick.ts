@@ -7,7 +7,8 @@ import { buildReadingFacts, type ReadingFacts } from './reading-facts.ts';
 import { dressHexagram } from './najia.ts';
 import { siZhuFromDate, renderCastTimePlaque } from './ganzhi.ts';
 import { formatLiuqinShort } from './energy-lens.ts';
-import { buildDirectReading } from './direct-reading.ts';
+import { buildOfflineAnswerPack } from '../mystic-engine/build-pack.ts';
+import { loadUseProfilePref } from '../life/profile-context.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -104,7 +105,11 @@ export function renderQuickBoard(
 }
 
 function renderConclusionTab(cast: CastResult, question: string, facts: ReadingFacts): string {
-  const direct = buildDirectReading(cast, question);
+  const pack = buildOfflineAnswerPack({
+    question,
+    cast,
+    useProfile: loadUseProfilePref(true),
+  });
   const move =
     facts.changing.labels.length === 0
       ? '无动爻'
@@ -112,35 +117,51 @@ function renderConclusionTab(cast: CastResult, question: string, facts: ReadingF
   const arrow = facts.changed
     ? `「${facts.primary.keywords[0]}」→「${facts.changed.keywords[0]}」`
     : `「${facts.primary.keywords[0]}」`;
+  const lead = cast.changed
+    ? `（基于${cast.primary.fullName}卦变${cast.changed.fullName}，结合你的问题）`
+    : `（基于${cast.primary.fullName}，结合你的问题）`;
+  const gist = pack.answers[0]?.lean ?? pack.decision;
   const partHtml =
-    direct.partLeans.length > 1
-      ? `<ul class="ly-quick-parts">${direct.partLeans
+    pack.answers.length > 1
+      ? `<ul class="ly-quick-parts">${pack.answers
           .map(
-            (p) =>
-              `<li><strong>${escapeHtml(p.part)}</strong><span>${escapeHtml(p.lean)}</span></li>`,
+            (a) =>
+              `<li><strong>${escapeHtml(a.questionSlice)}</strong><span>${escapeHtml(a.lean)}</span></li>`,
           )
           .join('')}</ul>`
       : '';
   return `
     <section class="ly-result-panel">
       <h3>结论</h3>
-      <p class="ly-briefing-kicker">${escapeHtml(direct.frame)}</p>
-      <blockquote class="ly-briefing-quote ly-quick-verdict-quote"><p>${escapeHtml(direct.verdict)}</p></blockquote>
+      <p class="ly-briefing-kicker">${escapeHtml(lead)}</p>
+      <blockquote class="ly-briefing-quote ly-quick-verdict-quote"><p>${escapeHtml(gist)}</p></blockquote>
       <p class="ly-quick-tags">世应${escapeHtml(facts.shiYingRel.rel)} · ${escapeHtml(move)} · ${escapeHtml(arrow)}</p>
-      <div class="ly-quick-direct-body">${escapeHtml(direct.analysis).replace(/\n/g, '<br>')}</div>
       <h4 class="ly-quick-decision-h">决策参考</h4>
-      <p class="ly-guide-tip">${escapeHtml(direct.decision.split('\n\n')[0] ?? direct.decision)}</p>
+      <p class="ly-guide-tip">${escapeHtml(pack.decision)}</p>
       ${partHtml}
+      <h4 class="ly-quick-decision-h">破局动作</h4>
+      <p class="ly-guide-tip"><strong>${escapeHtml(pack.breakthrough.title)}</strong> — ${escapeHtml(pack.breakthrough.body)}</p>
     </section>
   `;
 }
 
 function renderCategoryTab(cast: CastResult, question: string, facts: ReadingFacts): string {
-  const direct = buildDirectReading(cast, question);
+  const pack = buildOfflineAnswerPack({
+    question,
+    cast,
+    useProfile: loadUseProfilePref(true),
+  });
   const luck = clip(facts.primary.gist, 48);
-  const career = facts.domain === 'career' ? clip(direct.verdict, 64) : clip(facts.sceneCareer, 40);
+  const career =
+    facts.domain === 'career'
+      ? clip(pack.answers[0]?.lean ?? pack.decision, 64)
+      : clip(facts.sceneCareer, 40);
   const love = clip(facts.sceneLove, 40);
-  const decision = clip(direct.decision.split('\n\n')[0] ?? direct.decision, 72);
+  const decision = clip(pack.decision, 72);
+  const steps = [
+    `【${pack.breakthrough.title}】${pack.breakthrough.body}`,
+    ...pack.checklist.map((c) => `【${c.title}】${c.body}`),
+  ].join('\n\n');
 
   const items: { label: string; text: string; hot?: boolean }[] = [
     { label: '运势', text: luck, hot: facts.domain === 'general' || facts.domain === 'life' },
@@ -163,8 +184,8 @@ function renderCategoryTab(cast: CastResult, question: string, facts: ReadingFac
           )
           .join('')}
       </ul>
-      <h4 class="ly-quick-decision-h">本周三步</h4>
-      <div class="ly-quick-direct-body">${escapeHtml(direct.nextSteps).replace(/\n/g, '<br>')}</div>
+      <h4 class="ly-quick-decision-h">破局与清单</h4>
+      <div class="ly-quick-direct-body">${escapeHtml(steps).replace(/\n/g, '<br>')}</div>
     </section>
   `;
 }
