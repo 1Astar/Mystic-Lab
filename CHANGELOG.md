@@ -10,6 +10,10 @@
 
 ---
 
+## v0.3.33 · 2026-07-28
+【板块：Lab·解读·Mystic Engine】【板块：六爻·结果·此刻解读】
+修复 `liuyao.css` 中缺失选择器的残缺规则，解除 Vercel/lightningcss 生产构建失败（导致线上仍停在旧版）。
+
 ## v0.3.32 · 2026-07-27
 【板块：Lab·解读·Mystic Engine】【板块：六爻·结果·离线答问】【板块：六爻·结果·此刻解读】【板块：六爻·结果·速断】
 OfflineAnswerPack 离线答问引擎（Intent→Context→Evidence→Action）：六爻「此刻解读」与速断改为先答子问 + 证据 + 决策 + 破局动作。意图/动作库覆盖事业（求职/晋升/转岗/创业等）、关系、财富、成长；可带入 Lab 档案。规格见 `docs/superpowers/specs/2026-07-27-mystic-engine-offline-answer-design.md`。
