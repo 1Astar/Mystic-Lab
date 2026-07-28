@@ -42,6 +42,17 @@ function nlToBr(s: string): string {
   return escapeHtml(s).replace(/\n/g, '<br>');
 }
 
+/** 决策参考：综合建议单独成段，避免一大坨 */
+function renderDecisionHtml(decision: string): string {
+  const m = decision.match(/^([\s\S]*?)\n综合建议[：:]\s*([\s\S]+)$/);
+  if (m) {
+    return `
+      <p class="ly-pack-body" data-briefing-section>${escapeHtml(m[1]!.trim())}</p>
+      <p class="ly-pack-body ly-pack-decision-rec" data-briefing-section><span class="ly-pack-label">综合建议</span>${escapeHtml(m[2]!.trim())}</p>`;
+  }
+  return `<p class="ly-pack-body" data-briefing-section>${nlToBr(decision)}</p>`;
+}
+
 function stripQuestionPrefix(text: string): string {
   return text
     .replace(/^就「[^」]+」而言[：:]\s*/, '')
@@ -184,23 +195,23 @@ function renderBlockHtml(block: BriefingBlock, extraClass = ''): string {
 
 export function renderAnswerPackHtml(pack: OfflineAnswerPack, topicLabel: string, lead: string): string {
   const answerSections = pack.answers
-    .map((a) => {
+    .map((a, i) => {
       const ev = a.evidence
         .map((e) => `<li data-fact="${escapeHtml(e.factKey)}">${escapeHtml(e.plain)}</li>`)
         .join('');
       return `
-        <article class="ly-pack-answer" data-intent="${escapeHtml(a.intentId)}">
-          <h5 class="ly-pack-q">${escapeHtml(a.questionSlice)}</h5>
-          <p class="ly-pack-lean"><strong>倾向：</strong>${escapeHtml(a.lean)}</p>
-          <ul class="ly-pack-evidence">${ev}</ul>
-        </article>`;
+        <div class="ly-pack-item" data-intent="${escapeHtml(a.intentId)}" data-briefing-section>
+          <p class="ly-pack-q"><span class="ly-pack-idx">${i + 1}</span>${escapeHtml(a.questionSlice)}</p>
+          <p class="ly-pack-lean"><span class="ly-pack-label">倾向</span>${escapeHtml(a.lean)}</p>
+          ${ev ? `<ul class="ly-pack-evidence">${ev}</ul>` : ''}
+        </div>`;
     })
     .join('');
 
   const checks = pack.checklist
     .map(
       (c) =>
-        `<li><strong>${escapeHtml(c.title)}</strong> — ${escapeHtml(c.body)}</li>`,
+        `<li><span class="ly-pack-label">${escapeHtml(c.title)}</span>${escapeHtml(c.body)}</li>`,
     )
     .join('');
 
@@ -213,23 +224,19 @@ export function renderAnswerPackHtml(pack: OfflineAnswerPack, topicLabel: string
           ? `<p class="ly-pack-context">已带入档案上下文</p>`
           : ''
       }
-      <section class="ly-briefing-layer is-verdict" data-briefing-section>
-        <h4 class="ly-briefing-title">先答你的问题</h4>
-        ${answerSections}
-      </section>
-      <section class="ly-briefing-layer" data-briefing-section>
-        <h4 class="ly-briefing-title">决策参考</h4>
-        <div class="ly-briefing-body">${nlToBr(pack.decision)}</div>
-      </section>
-      <section class="ly-briefing-layer is-actions" data-briefing-section>
-        <h4 class="ly-briefing-title">破局动作</h4>
-        <blockquote class="ly-briefing-quote"><p>${escapeHtml(pack.breakthrough.title)}</p></blockquote>
-        <div class="ly-briefing-body">${nlToBr(pack.breakthrough.body)}</div>
+      <p class="ly-pack-section">先答你的问题</p>
+      ${answerSections}
+      <p class="ly-pack-section">决策参考</p>
+      ${renderDecisionHtml(pack.decision)}
+      <p class="ly-pack-section">破局动作</p>
+      <div class="ly-pack-breakthrough" data-briefing-section>
+        <p class="ly-pack-bt-title">${escapeHtml(pack.breakthrough.title)}</p>
+        <p class="ly-pack-body">${nlToBr(pack.breakthrough.body)}</p>
         ${checks ? `<ul class="ly-pack-checklist">${checks}</ul>` : ''}
-      </section>
+      </div>
       ${
         pack.boardExpand
-          ? `<details class="ly-briefing-more"><summary>盘面辅读</summary><div class="ly-briefing-body">${nlToBr(pack.boardExpand)}</div></details>`
+          ? `<details class="ly-briefing-more"><summary>盘面辅读</summary><p class="ly-pack-body">${nlToBr(pack.boardExpand)}</p></details>`
           : ''
       }
     </article>

@@ -25,7 +25,7 @@ describe('learn-shell', () => {
     const cast = castSample();
     const html = renderLearnTeachPageHtml(cast, '他还会回来吗', new Date('2026-07-21'));
     expect(html).toMatch(/你问的是/);
-    expect(html).toMatch(/五步学习/);
+    expect(html).toMatch(/六步学习/);
     expect(html).not.toMatch(/点爻学爻/);
     expect(html).not.toMatch(/笔记与对照/);
     expect(html).not.toMatch(/data-learn-notes/);

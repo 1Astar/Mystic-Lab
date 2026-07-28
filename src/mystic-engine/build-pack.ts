@@ -19,7 +19,7 @@ export type BuildPackInput = {
 function buildDecision(packAnswers: OfflineAnswerPack['answers'], cast: CastResult): string {
   if (packAnswers.length >= 2) {
     const bits = packAnswers.map((a) => a.lean).join('；');
-    return `几件事绑在一起看：${bits} 综合建议：先做破局动作里那一件可验证的事，再用结果决定加码还是撤。`;
+    return `几件事绑在一起看：${bits}\n综合建议：先做破局动作里那一件可验证的事，再用结果决定加码还是撤。`;
   }
   if (packAnswers[0]) return packAnswers[0].lean;
   const to = cast.changed?.keywords[0] ?? cast.primary.keywords[0] ?? '';

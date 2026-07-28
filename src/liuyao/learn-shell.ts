@@ -131,7 +131,7 @@ export function renderLearnTeachPageHtml(
         </article>
       </header>
       <main class="ly-teach-main">
-        <p class="ly-teach-main-kicker">五步学习 · 边学边推演</p>
+        <p class="ly-teach-main-kicker">六步学习 · 边学边推演</p>
         ${renderLearnCourseHtml(cast, question, castAt)}
       </main>
     </div>
