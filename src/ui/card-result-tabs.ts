@@ -9,7 +9,10 @@ import {
   encounterPositionKind,
   encounterReflectPrompt,
   resolveEncounterGuidance,
-} from '../knowledge/encounter-guidance.ts';export type ResultTabId = 'reading' | 'visual' | 'codex' | 'encounter';
+} from '../knowledge/encounter-guidance.ts';
+import { polishReadingCopy } from '../interpretation/reading-polish.ts';
+
+export type ResultTabId = 'reading' | 'visual' | 'codex' | 'encounter';
 
 const TAB_LABELS: Record<ResultTabId, string> = {
   reading: '此刻解读',
@@ -33,10 +36,15 @@ function escapeHtml(text: string): string {
 }
 
 function formatParagraph(text: string): string {
-  return escapeHtml(text).replace(/\n/g, '<br>');
+  const polished = polishReadingCopy(text);
+  const lines = polished
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!lines.length) return '';
+  if (lines.length === 1) return escapeHtml(lines[0]!);
+  return lines.map((line) => `<span class="thread-line">${escapeHtml(line)}</span>`).join('');
 }
-
-
 
 export function renderCardHero(r: CardReading): string {
 
@@ -119,10 +127,10 @@ function renderQuestionAnswers(r: CardReading): string {
       (a, i) => `
       <article class="qa-answer-card">
         <h5 class="qa-answer-q"><span class="qa-answer-n">${i + 1}</span>${escapeHtml(a.question)}</h5>
-        <p class="qa-answer-insight"><span class="qa-answer-label">牌面洞察</span>${formatParagraph(a.insight)}</p>
+        <div class="qa-answer-insight"><span class="qa-answer-label">牌面洞察</span><div class="thread-prose">${formatParagraph(a.insight)}</div></div>
         ${
           a.action
-            ? `<p class="qa-answer-action"><span class="qa-answer-label">可执行</span>${formatParagraph(a.action)}</p>`
+            ? `<div class="qa-answer-action"><span class="qa-answer-label">可执行</span><div class="thread-prose">${formatParagraph(a.action)}</div></div>`
             : ''
         }
       </article>`,

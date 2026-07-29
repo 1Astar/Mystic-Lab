@@ -37,26 +37,38 @@ describe('direct-reading', () => {
     const q = '我要不要留在冠英？8月初要不要离职？转正能拿到8k吗？';
     const d = buildDirectReading(cast, q);
     expect(d.frame).toMatch(/风水涣/);
+    expect(d.frame).toMatch(/huàn/);
     expect(d.frame).toMatch(/巽为风/);
+    expect(d.frame).not.toMatch(/xùn/);
     expect(d.verdict).toMatch(/8k|心累|费劲/);
+    expect(d.analysis).toMatch(/本卦/);
+    expect(d.analysis).toMatch(/对应你的问题/);
+    expect(d.analysis).toMatch(/核心隐喻/);
     expect(d.analysis).toMatch(/涣/);
-    expect(d.analysis).toMatch(/巽|柔|反复/);
-    expect(d.decision).toMatch(/不建议|死磕|两手|机会/);
-    expect(d.nextSteps).toMatch(/红线|期限|准备|口风/);
+    expect(d.analysis).toMatch(/巽/);
+    expect(d.analysis).toMatch(/冠英|核心隐喻/);
+    expect(d.analysis.length).toBeGreaterThan(80);
+    expect(d.decision).toMatch(/不建议|死磕|机会/);
+    expect(d.nextSteps).toMatch(/红线|期限|口风|两手/);
+    expect(d.why).toMatch(/你的现状|物质根基|目标系统/);
+    expect(d.reassurance).toMatch(/不是生死判决|有主见/);
     expect(d.partLeans.length).toBeGreaterThanOrEqual(2);
   });
 });
 
 describe('question-briefing', () => {
-  it('uses OfflineAnswerPack section titles', () => {
+  it('uses OfflineAnswerPack verdict-first sections', () => {
     const cast = castHuanToXun();
     const q = '我要不要留在冠英？8月初要不要离职？转正能拿到8k吗？';
     const b = buildQuestionBriefing(cast, q, new Date('2026-07-24T14:56:00'));
     expect(b.questionLead).toMatch(/基于/);
-    expect(b.layer1.title).toMatch(/先答你的问题/);
+    expect(b.layer1.title).toMatch(/核心方向/);
+    expect(b.pack.verdict.headline).toMatch(/8k|心累|费劲/);
+    expect(b.pack.why.length).toBeGreaterThanOrEqual(2);
+    expect(b.pack.why[0]?.badgeTerm?.term ?? b.pack.why[0]?.gloss?.term).toBe('世爻');
     expect(b.pack.answers.length).toBeGreaterThanOrEqual(2);
-    expect(b.layer2.title).toMatch(/决策参考/);
-    expect(b.layer3.title).toMatch(/破局动作/);
+    expect(b.layer2.title).toMatch(/现状与转机/);
+    expect(b.layer3.title).toMatch(/具体动作/);
     expect(b.pack.breakthrough.body).not.toMatch(/只选一个可验证动作/);
   });
 
@@ -68,8 +80,20 @@ describe('question-briefing', () => {
       new Date('2026-07-24T14:56:00'),
     );
     expect(html).toMatch(/ly-question-briefing/);
-    expect(html).toMatch(/ly-answer-pack|先答你的问题|破局动作/);
-    expect(html).not.toMatch(/第一层/);
-    expect(html).not.toMatch(/现状与转折点/);
+    expect(html).toMatch(/【核心方向】/);
+    expect(html).toMatch(/【现状与转机】/);
+    expect(html).toMatch(/【具体动作】/);
+    expect(html).toMatch(/ly-layer-card/);
+    expect(html).toMatch(/ly-kw-tag|本卦/);
+    expect(html).toMatch(/你的现状|ly-why-hook/);
+    expect(html).toMatch(/ly-hex-hot|ly-term-hot|世爻|变卦/);
+    expect(html).toMatch(/data-hex-kind="changed"|大有|变卦/);
+    expect(html).toMatch(/心理定心丸|ly-layer-reassure/);
+    expect(html).toMatch(/ly-guide-chip|离职交接|求职复盘/);
+    expect(html).toMatch(/ly-classic-fold/);
+    expect(html).not.toMatch(/<details[^>]*ly-pack-reassure/);
+    expect(html).not.toMatch(/爻相细说/);
+    expect(html).not.toMatch(/为什么这么判断？/);
+    expect(html).toMatch(/盘面辅读|世在/);
   });
 });

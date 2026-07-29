@@ -18,13 +18,10 @@ function escapeHtml(s: string): string {
 }
 
 /**
- * 视觉层级：
- * - 『…』= 模型/规则标出的核心句 → 金色加粗
- * - 「不要/务必/先…」等结论口吻 → 金色加粗
- * - 标签后整句（注意/建议…）→ 金色加粗
+ * 行内高亮（不含换行）
  */
-function formatHighlight(text: string): string {
-  let escaped = escapeHtml(polishReadingCopy(text));
+function formatInlineHighlight(text: string): string {
+  let escaped = escapeHtml(text);
 
   escaped = escaped.replace(
     /『([^』]{2,80})』/g,
@@ -36,7 +33,6 @@ function formatHighlight(text: string): string {
     '<strong class="thread-em">$1$2</strong>',
   );
 
-  // 编号风险点：①②③ 或 1. 2. 整句标出
   escaped = escaped.replace(
     /([①②③④⑤][^①②③④⑤\n＜]{4,80})/g,
     '<strong class="thread-em thread-em--risk">$1</strong>',
@@ -47,7 +43,26 @@ function formatHighlight(text: string): string {
     '<strong class="thread-em">$1</strong>',
   );
 
-  return escaped.replace(/\n+/g, '<br/>');
+  escaped = escaped.replace(
+    /^((?:前期|中期|后期|前段|中段|中后段)[：:]|(?:第一步|第二步|第三步)[·・.：:])/,
+    '<strong class="thread-phase">$1</strong>',
+  );
+
+  return escaped;
+}
+
+/** 分类拆段 + 高亮；多行输出 thread-line */
+function formatHighlight(text: string): string {
+  const polished = polishReadingCopy(text);
+  const lines = polished
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!lines.length) return '';
+  if (lines.length === 1) return formatInlineHighlight(lines[0]!);
+  return lines
+    .map((line) => `<span class="thread-line">${formatInlineHighlight(line)}</span>`)
+    .join('');
 }
 
 function intentEmoji(intent: ThreadAnswer['intent']): string {
@@ -160,18 +175,6 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
             ? 'is-leave'
             : 'is-insight';
 
-  const jumpBtn =
-    a.cardIndexes.length === 1
-      ? `<button type="button" class="thread-hotspot-btn" data-peek="${a.cardIndexes[0]}">看这张牌详情</button>`
-      : a.cardIndexes.length > 1
-        ? `<div class="thread-hotspot-row">${a.cardIndexes
-            .map(
-              (i) =>
-                `<button type="button" class="thread-hotspot-btn" data-peek="${i}">看${escapeHtml(cards[i]?.cardName ?? '相关牌')}</button>`,
-            )
-            .join('')}</div>`
-        : '';
-
   return `
     <article class="thread-q-card ${tone}">
       <h4 class="thread-q-title">
@@ -185,22 +188,21 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
           <p class="thread-q-heading">${escapeHtml(a.heading)}</p>
           ${
             a.meaningMap
-              ? `<p class="thread-meaning"><span class="thread-label">牌意映射</span>${formatHighlight(a.meaningMap)}</p>`
-              : `<p class="thread-meaning"><span class="thread-label">牌意映射</span>${formatHighlight(
+              ? `<p class="thread-meaning"><span class="thread-label">牌意映射</span></p><div class="thread-prose">${formatHighlight(a.meaningMap)}</div>`
+              : `<p class="thread-meaning"><span class="thread-label">牌意映射</span></p><div class="thread-prose">${formatHighlight(
                   a.cardIndexes
                     .map((i) => cards[i])
                     .filter(Boolean)
                     .map((c) => `${c!.cardName}${c!.orientation === 'reversed' ? '逆位' : ''}：${(c!.keywords || []).slice(0, 3).join('、') || c!.cardName}`)
                     .join('；') || '结合本问绑定牌读。',
-                )}</p>`
+                )}</div>`
           }
-          <p class="thread-insight${a.intent === 'risk' ? ' is-risk-block' : ''}"><span class="thread-label${a.intent === 'risk' ? ' is-risk-label' : ''}">${intentLabel(a.intent)}</span>${formatHighlight(a.insight)}</p>
+          <div class="thread-insight${a.intent === 'risk' ? ' is-risk-block' : ''}"><span class="thread-label${a.intent === 'risk' ? ' is-risk-label' : ''}">${intentLabel(a.intent)}</span><div class="thread-prose">${formatHighlight(a.insight)}</div></div>
           ${
             a.action
-              ? `<p class="thread-action"><span class="thread-label">可执行</span>${formatHighlight(a.action)}</p>`
+              ? `<div class="thread-action"><span class="thread-label">可执行</span><div class="thread-prose">${formatHighlight(a.action)}</div></div>`
               : ''
           }
-          ${jumpBtn}
         </div>
       </div>
     </article>`;
@@ -221,7 +223,7 @@ export function renderQuestionThreadHtml(
       <p class="thread-empathy">${escapeHtml(polishReadingCopy(thread.empathyLead))}</p>
       <section class="thread-overall-card">
         <h3 class="thread-section-title">整盘结论</h3>
-        <p class="thread-overall-body">${formatHighlight(thread.overall)}</p>
+        <div class="thread-overall-body thread-prose">${formatHighlight(thread.overall)}</div>
       </section>
       ${renderCardStrip(cards)}
       <section class="thread-answers">
@@ -230,7 +232,7 @@ export function renderQuestionThreadHtml(
       </section>
       <section class="thread-oneliner-card">
         <h3 class="thread-section-title">一句话破局</h3>
-        <p class="thread-oneliner">${formatHighlight(thread.oneLiner)}</p>
+        <div class="thread-oneliner thread-prose">${formatHighlight(thread.oneLiner)}</div>
       </section>
       ${
         showBridge

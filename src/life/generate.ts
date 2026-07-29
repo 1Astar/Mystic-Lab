@@ -11,6 +11,7 @@ import type {
 import { buildTemplateForecast } from './forecast-templates.ts';
 import { buildTemplateSimulation } from './simulate-templates.ts';
 import { buildTemplateArchive, buildTemplatePortrait } from './templates.ts';
+import { withDerivedAge } from './age.ts';
 
 function stripFence(text: string): string {
   const trimmed = text.trim();
@@ -81,13 +82,14 @@ export function parseArchiveResponse(raw: string): Omit<FiveYearArchive, 'source
 }
 
 function profileBlock(profile: LifeProfileInput): string {
+  const p = withDerivedAge(profile);
   return [
-    `年龄：${profile.age.trim() || '未填'}`,
-    `职业：${profile.occupation.trim() || '未填'}`,
-    `城市：${profile.city.trim() || '未填'}`,
-    `出生：${[profile.birthYear, profile.birthMonth, profile.birthDay].filter(Boolean).join('-') || '未填'} ${profile.birthHour.trim()}`.trim(),
-    `出生地：${profile.birthPlace.trim() || '未填'}`,
-    `当前困惑：${profile.confusion.trim() || '未填'}`,
+    `年龄：${p.age.trim() || '未填'}`,
+    `职业：${p.occupation.trim() || '未填'}`,
+    `城市：${p.city.trim() || '未填'}`,
+    `出生：${[p.birthYear, p.birthMonth, p.birthDay].filter(Boolean).join('-') || '未填'} ${p.birthHour.trim()}`.trim(),
+    `出生地：${p.birthPlace.trim() || '未填'}`,
+    `当前困惑：${p.confusion.trim() || '未填'}`,
   ].join('\n');
 }
 

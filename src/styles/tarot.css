@@ -3359,10 +3359,29 @@ html.thread-peek-open .thread-q-visual-card {
 .thread-meaning,
 .thread-insight,
 .thread-action {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 0.84rem;
   line-height: 1.55;
   color: rgba(232, 220, 190, 0.92);
+}
+
+.thread-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.thread-line {
+  display: block;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.thread-phase {
+  color: #e8c56a;
+  font-weight: 700;
+  margin-right: 0.15em;
 }
 
 .thread-action {
@@ -3689,6 +3708,11 @@ html.thread-peek-open .thread-q-visual-card {
   font-size: 0.84rem;
   line-height: 1.55;
   color: rgba(232, 220, 190, 0.92);
+}
+
+.qa-answer-insight .thread-prose,
+.qa-answer-action .thread-prose {
+  margin-top: 6px;
 }
 
 .qa-answer-action {

@@ -24,6 +24,10 @@ function shiEvidence(cast: CastResult): EvidenceLine {
   return {
     factKey: 'shi',
     plain: `世爻在${label}${role ? `（${role}）` : ''}：你站在「自己在意的结果」这一侧，说明你很在乎这件事的落点。`,
+    gloss: {
+      term: '世爻',
+      gloss: '卦里代表「你自己」的那一爻——你的立场与在意的落点。',
+    },
   };
 }
 

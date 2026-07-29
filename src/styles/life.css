@@ -376,6 +376,64 @@
   font-size: 0.85rem;
 }
 
+.life-age-hint {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.72);
+}
+
+.life-age-hint strong {
+  color: #ffd6a6;
+  font-weight: 650;
+}
+
+.life-more {
+  margin: 0;
+  padding: 0 16px 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: rgba(16, 12, 28, 0.5);
+}
+
+.life-more > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 0;
+  color: #ffd6a6;
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  user-select: none;
+}
+
+.life-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.life-more > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  color: rgba(255, 214, 166, 0.7);
+  transition: transform 0.15s ease;
+}
+
+.life-more[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.life-more > summary span {
+  font-size: 0.75rem;
+  color: rgba(255, 230, 200, 0.45);
+  font-weight: 400;
+}
+
+.life-more-body {
+  padding: 0 0 14px;
+}
+
 .life-field {
   display: flex;
   flex-direction: column;

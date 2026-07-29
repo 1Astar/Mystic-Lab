@@ -32,6 +32,7 @@ import {
 } from '../../liuyao/pattern-summary.ts';
 import { renderQuestionBriefingForCast } from '../../liuyao/question-briefing.ts';
 import { buildOfflineAnswerPack } from '../../mystic-engine/build-pack.ts';
+import { bindAnswerPackGestures } from '../../mystic-engine/render-pack.ts';
 import { loadUseProfilePref } from '../../life/profile-context.ts';
 import { bindFollowupGestures } from '../../liuyao/followup-chat.ts';
 
@@ -78,7 +79,7 @@ export function renderPeerNoteFold(opts: {
         </div>
         ${
           learn
-            ? `<p class="ly-layer-guide">详细解读请点右侧「解读笔记」；这里可自由补充标签与一句结语。</p>`
+            ? `<p class="ly-layer-guide">详细装卦与卦象解析请点「卦象精读」；这里可自由补充标签与一句结语。</p>`
             : renderJournalPromptsHtml()
         }
         <textarea class="question-input ly-note-draft" rows="3" placeholder="${
@@ -171,11 +172,11 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">先答子问 → 证据 → 决策 → 破局动作。分域与装卦细节在「解读笔记」。</p>
+          <p class="ly-guide-tip">先看【核心方向】，再看病灶与动作；古籍旁注默认收起。</p>
           ${renderQuestionBriefingForCast(cast, question, castAt)}
           <div class="ly-briefing-actions">
             <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>
-              📖 打开解读笔记
+              📖 打开卦象精读
             </button>
             <button type="button" class="btn ly-briefing-to-course" data-goto-teach>
               想弄懂为什么 → 去六步学习
@@ -194,6 +195,7 @@ export function mountLiuyaoResultTabs(
   const layersApi = bindResultLayers(host, cast, question);
   bindYaoAskButtons(host, cast, question, castAt);
   bindFollowupGestures(host, { cast, question, castAt });
+  bindAnswerPackGestures(host, cast);
   if (learn) {
     bindQinDict(host);
     bindLearnTeachPage(host, cast, question, castAt);

@@ -1,5 +1,5 @@
 import type { CastResult } from './engine.ts';
-import { palaceStageOfHexagram } from './hexagrams.ts';
+import { LINE_LABELS, palaceStageOfHexagram } from './hexagrams.ts';
 import { dressHexagram, type LiuQin } from './najia.ts';
 import { siZhuFromDate } from './ganzhi.ts';
 import { buildReadingFacts } from './reading-facts.ts';
@@ -17,12 +17,14 @@ export type PatternChip = {
   open: PatternOpenTarget;
   /** 关联爻（0–5），便于专业排盘高亮 */
   yaoIndex?: number;
-  /** 小备注，如「官鬼（二世）」 */
+  /** 小备注（可选；不再复读八宫阶位） */
   note?: string;
 };
 
 export type PatternSummary = {
   chips: PatternChip[];
+  /** 八宫阶位一句（整卦属性，只写一次） */
+  palaceBrief?: string;
 };
 
 /** 六合卦（纳甲常用八个） */
@@ -32,25 +34,25 @@ const LIUHE_NAMES = new Set(['泰', '否', '损', '益', '既济', '未济', '�
 const LIUCHONG_NAMES = new Set(['乾', '坤', '震', '巽', '坎', '离', '艮', '兑']);
 
 const SHI_TIP: Record<LiuQin, string> = {
-  妻财: '简单说：钱、资源这件事贴着你——谈条件、进账有根，也要防被「口头承诺」糊弄。',
-  官鬼: '简单说：考核、规则、升职加薪压在你身上——你很在意结果，也容易被压力拖累。',
-  父母: '简单说：文书、信息、靠山贴着你——手续消息重要，也主操心牵挂。',
-  子孙: '简单说：破局点子、敢试的一小步在你这边——宜主动试，硬求官名时力稍弱。',
-  兄弟: '简单说：竞争、同辈、分利感贴着你——合作要防被分走，理财宜守。',
+  妻财: '钱、资源贴着你——谈条件、进账有根，也要防口头承诺。',
+  官鬼: '考核、规则、升职加薪压在你身上——在意结果，也易被压力拖累。',
+  父母: '文书、信息、靠山贴着你——手续消息重要，也主操心。',
+  子孙: '破局点子在你这边——宜主动试；硬求官名时力稍弱。',
+  兄弟: '竞争、同辈、分利感贴着你——合作要防被分走。',
 };
 
 const REL_TIP: Record<ShiYingRel, string> = {
-  比和: '简单说：你和外界节奏差不多——好协同，也防一起原地打转。',
-  相生: '简单说：你和公司/对方不是硬对着干，有借力空间；但仍要分清谁真帮你、谁卡着位置不松手。',
-  相克: '简单说：你和外界容易顶牛、互相牵制——先降温对齐事实，再谈条件。',
+  比和: '你和外界节奏差不多——好协同，也防一起原地打转。',
+  相生: '你和对方不是硬对着干，有借力空间；仍要分清谁真帮你。',
+  相克: '你和外界容易顶牛——先降温对齐事实，再谈条件。',
 };
 
 const MOVE_TIP: Record<LiuQin, string> = {
-  兄弟: '简单说：竞争或「分你一杯羹」的力量在动——防抢话权、口舌拉扯、把精力耗在无效内耗上。',
-  子孙: '简单说：破局力在动，适合试新；若你正求官求名，要防力气泄掉。',
-  妻财: '简单说：钱/资源这一层在动——进账或破耗都会更显眼，宜核对进出与书面条款。',
-  官鬼: '简单说：压力或目标层在动——对准具体事项（岗、钱、时间），少空慌。',
-  父母: '简单说：文书、信息这一层在动——手续与消息往往先变，宜盯书面答复。',
+  兄弟: '竞争或「分你一杯羹」在动——防抢话权、口舌内耗。',
+  子孙: '破局力在动，适合试新；求官求名时要防力气泄掉。',
+  妻财: '钱/资源这一层在动——进账或破耗更显眼，宜核对书面条款。',
+  官鬼: '压力或目标层在动——对准岗、钱、时间，少空慌。',
+  父母: '文书、信息在动——手续与消息往往先变，宜盯书面答复。',
 };
 
 function escapeHtml(s: string): string {
@@ -71,13 +73,6 @@ export function buildPatternSummary(
   const rows = dressHexagram(cast, siZhuFromDate(castAt).dayStem).rows;
   const shi = rows.find((r) => r.isShi);
   const stage = palaceStageOfHexagram(cast.primary.name);
-  /** 八宫阶位备注：二世 →「官鬼（二世卦）」 */
-  const stageNote = (qin: string) => {
-    if (!stage) return undefined;
-    const lab = stage.stageLabel;
-    if (lab === '本宫' || lab === '游魂' || lab === '归魂') return `${qin}（${lab}）`;
-    return `${qin}（${lab}卦）`;
-  };
   const chips: PatternChip[] = [];
 
   if (shi) {
@@ -88,7 +83,6 @@ export function buildPatternSummary(
       kind: 'shi',
       open: 'dress',
       yaoIndex: shi.index,
-      note: stageNote(shi.liuqin),
     });
   }
 
@@ -99,7 +93,6 @@ export function buildPatternSummary(
     kind: 'rel',
     open: 'dress',
     yaoIndex: shi?.index,
-    note: stageNote('世应'),
   });
 
   const movingByQin = new Map<LiuQin, number>();
@@ -114,7 +107,6 @@ export function buildPatternSummary(
       kind: 'move',
       open: 'dress',
       yaoIndex: idx,
-      note: stageNote(q),
     });
   }
 
@@ -123,7 +115,7 @@ export function buildPatternSummary(
     chips.push({
       id: 'struct-liuhe',
       label: '六合卦',
-      tip: '合局偏和合、牵绊，易成事也易纠缠；合作、感情常看这一层。',
+      tip: '合局偏和合、牵绊，易成事也易纠缠。',
       kind: 'struct',
       open: 'xiang',
     });
@@ -131,7 +123,7 @@ export function buildPatternSummary(
     chips.push({
       id: 'struct-liuchong',
       label: '六冲卦',
-      tip: '冲局偏动荡、离散，宜快不宜拖；拖久易散。',
+      tip: '冲局偏动荡、离散，宜快不宜拖。',
       kind: 'struct',
       open: 'xiang',
     });
@@ -141,7 +133,7 @@ export function buildPatternSummary(
     chips.push({
       id: 'struct-youhun',
       label: '游魂卦',
-      tip: '游魂主漂泊、未定；宜先找落脚点，再谈扩张。',
+      tip: '游魂主漂泊、未定；宜先找落脚点。',
       kind: 'struct',
       open: 'xiang',
     });
@@ -149,17 +141,22 @@ export function buildPatternSummary(
     chips.push({
       id: 'struct-guihun',
       label: '归魂卦',
-      tip: '归魂主回拢、归位；宜回收精力，把事收到可验证的一步。',
+      tip: '归魂主回拢、归位；宜把事收到可验证的一步。',
       kind: 'struct',
       open: 'xiang',
     });
   }
 
-  return { chips };
+  const palaceBrief = stage
+    ? `本卦属${stage.palace}宫「${stage.stageLabel}」· 世在${LINE_LABELS[stage.shiLine - 1]}。八宫阶位用来定「世」落在哪一爻，不是六亲本身。`
+    : undefined;
+
+  return { chips, palaceBrief };
 }
 
 export function renderPatternSummaryHtml(summary: PatternSummary): string {
   if (!summary.chips.length) return '';
+  const n = summary.chips.length;
   const chips = summary.chips
     .map((c) => {
       const yao =
@@ -176,17 +173,36 @@ export function renderPatternSummaryHtml(summary: PatternSummary): string {
         )}">
           <span class="ly-pattern-chip-label">${escapeHtml(c.label)}</span>
           ${note}
-          <span class="ly-pattern-chip-tip">${escapeHtml(c.tip)}</span>
+          <p class="ly-pattern-chip-tip"><span class="ly-pattern-chip-say">简单说</span>${escapeHtml(c.tip)}</p>
         </button>
       </li>`;
     })
     .join('');
 
   return `
-    <section class="ly-pattern-summary" data-pattern-summary aria-label="格局摘要">
-      <p class="ly-pattern-summary-kicker">格局摘要</p>
-      <p class="ly-pattern-summary-lead">这卦最扎眼的三件事（术语标签 · 下面是白话）</p>
-      <ul class="ly-pattern-chip-list">${chips}</ul>
-    </section>
+    <details class="ly-pattern-summary" data-pattern-summary>
+      <summary class="ly-pattern-summary-sum">
+        <span class="ly-pattern-summary-kicker">格局摘要</span>
+        <span class="ly-pattern-summary-hint">选读 · ${n} 条盘面亮点</span>
+      </summary>
+      <div class="ly-pattern-summary-body">
+        <div class="ly-pattern-primer">
+          <p class="ly-pattern-primer-title">先认三个词</p>
+          <ul class="ly-pattern-primer-list">
+            <li><strong>世</strong>：卦里代表「你」的那一爻。</li>
+            <li><strong>应</strong>：代表对方 / 公司 / 外界的那一爻。</li>
+            <li><strong>六亲</strong>（官鬼、兄弟等）：事类标签——官鬼≈规则/压力/考核，兄弟≈竞争/分利，妻财≈钱，父母≈文书信息，子孙≈破局点子。</li>
+          </ul>
+          <p class="ly-pattern-primer-why">为什么要看：先认清「你站哪、对方在哪、哪一类力量在动」，再读下面的白话亮点，就不会不明所以。</p>
+          ${
+            summary.palaceBrief
+              ? `<p class="ly-pattern-palace">${escapeHtml(summary.palaceBrief)}</p>`
+              : ''
+          }
+        </div>
+        <p class="ly-pattern-summary-lead">本卦最扎眼的几件事</p>
+        <ul class="ly-pattern-chip-list">${chips}</ul>
+      </div>
+    </details>
   `;
 }

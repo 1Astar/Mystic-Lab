@@ -117,7 +117,7 @@ function buildPrompt(req: LlmContextualRequest): string {
           question: '用户原问题原文',
           meaningMap: '牌意映射：这张牌是「关键词」的牌（必填）',
           insight:
-            '深度剖析或走势：直接回答这一条；路径问写前段/中后段；约 5–10 句',
+            '深度剖析或走势：直接回答这一条；路径问写前期/中期/后期并换行；约 5–10 句',
           action: '1–3条可执行行动',
         },
       ],
@@ -141,7 +141,7 @@ function buildPrompt(req: LlmContextualRequest): string {
     'overview 必须结合牌阵位置：若位置是「阻碍」，正位好牌也要读成卡点/风险（如理想化、情绪决策、信息核实不足），禁止写成顺风鼓励。',
     `本张位置强调：${card.position || '未知'}——${card.positionMeaning || '按该位功能解读'}。`,
     'questionAnswers：按用户子问题顺序；每条必须有 meaningMap + insight；指哪打哪；禁止复读牌义百科。',
-    'reason 写深度剖析；路径问写走势预测（须分前段/中后段）；风险问须标「情况：」「阻碍：」；建议写短中长期行动。',
+    'reason 写深度剖析；路径问写走势预测（须分前期/中期/后期且各起一行）；风险问须标「情况：」「阻碍：」；建议写短中长期行动。',
     '篇幅：路径/建议 insight 允许 6–12 句；其余 5–8 句。用『』标出一句最关键结论。',
     ...(card.topic === 'work' && parts.length >= 2 ? workThreadGoldStandardLines() : []),
     'action 必须具体可执行；不要空话；检查有无漏字错字（如「转化」勿写成「选择」）。',
@@ -215,7 +215,7 @@ function buildSpreadPrompt(req: LlmSpreadRequest): string {
           heading: '【牌名】的××',
           meaningMap: '牌意映射 + 点名情况/阻碍/建议位（1–2句）',
           insight:
-            '深度剖析或走势（leave 须前期/中期/后期；stay 写温水与画饼；risk ①②③；advice 休整→初心→体面；约 6–12 句）',
+            '深度剖析或走势（leave 须前期/中期/后期且各起一行；stay 写温水与画饼；risk ①②③各起一行；advice 休整→初心→体面；约 6–12 句）',
           action: '2–3条可执行行动',
         },
       ],
@@ -225,7 +225,7 @@ function buildSpreadPrompt(req: LlmSpreadRequest): string {
     '',
     '去重：overview 不复述各子问；各条 insight 互不复制；风险/建议只写交叉点。',
     '每条必须有 meaningMap + insight。',
-    'reason → 深度剖析（心累＞任务重）；leave_path → 前期/中期/后期；stay_path → 温水煮青蛙+理想化理由；risk → 情绪化/画饼/断崖撤退；advice → 休整→初心→体面过渡。',
+    'reason → 深度剖析（心累＞任务重）；leave_path → 前期/中期/后期（各起一行）；stay_path → 温水煮青蛙+理想化理由；risk → 情绪化/画饼/断崖撤退（①②③各起一行）；advice → 休整→初心→体面过渡。',
     'heading 示例：【宝剑四】的真相 / 【圣杯骑士】的试探与寻觅 / 【圣杯六】的温情与停滞 / 【A + B】的暗礁 / 整阵的行动策略。',
     '行动导向：用户要的是「该怎么办」，不是牌面教科书。',
     '每条 insight/action 用『』标出一句最关键结论；输出前自查漏字错字。',
@@ -285,7 +285,7 @@ export async function fetchContextualReading(
 ): Promise<string> {
   return chatCompletion(
     buildPrompt(req),
-    '你是精通心理学与职场的塔罗师。只输出合法 JSON。必须按用户子问题逐条回答；主题锁定时禁止恋爱套话；指哪打哪，行动导向；禁止复读牌义百科。逆位必须按逆位逻辑解读，禁止复述正位。路径问须分前段/中后段，insight 允许加长。',
+    '你是精通心理学与职场的塔罗师。只输出合法 JSON。必须按用户子问题逐条回答；主题锁定时禁止恋爱套话；指哪打哪，行动导向；禁止复读牌义百科。逆位必须按逆位逻辑解读，禁止复述正位。路径问须分前期/中期/后期且换行分隔，insight 允许加长。',
     settings,
     2800,
   );

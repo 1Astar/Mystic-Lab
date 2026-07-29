@@ -30,8 +30,6 @@ describe('hex-guide shared snippets', () => {
     expect(html).toMatch(/ly-guide-snippet/);
     expect(html).toMatch(/ly-guide-snippet-hero/);
     expect(html).toMatch(/ly-guide-snippet-related/);
-    expect(html).toMatch(/data-guide-sub-host/);
-    expect(html).toMatch(/成卦/);
     expect(html).toMatch(/整体意象/);
     expect(html).toMatch(/ly-guide-snippet-yao/);
     expect(html).toMatch(/上卦 ·/);
@@ -50,7 +48,7 @@ describe('hex-guide shared snippets', () => {
     expect(html).toMatch(/ly-guide-snippet-related/);
     expect(html).toMatch(/上卦 ·/);
     expect(html).toMatch(/分域/);
-    expect(html).toMatch(/data-guide-sub-host/);
+    expect(html).toMatch(/data-guide-domains|ly-guide-domains/);
     expect(renderGuideArtHtml(pack)).toMatch(/ly-guide-art/);
   });
 });

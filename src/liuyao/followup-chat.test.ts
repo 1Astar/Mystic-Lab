@@ -23,7 +23,9 @@ function castHuanToXun() {
 describe('followup-chat', () => {
   it('labels 涣→巽 as 风水涣变…', () => {
     const cast = castHuanToXun();
-    expect(hexChangeLabel(cast)).toMatch(/风水涣变/);
+    expect(hexChangeLabel(cast)).toMatch(/风水涣/);
+    expect(hexChangeLabel(cast)).toMatch(/变/);
+    expect(hexChangeLabel(cast)).toMatch(/huàn|巽/);
   });
 
   it('locks feminist career companion prompt with hex name', () => {
@@ -31,9 +33,11 @@ describe('followup-chat', () => {
     const q = '我要不要留在冠英？转正能拿到8k吗？';
     const sys = buildFollowupSystemPrompt(cast, q);
     expect(sys).toMatch(/你知道这个卦叫/);
-    expect(sys).toMatch(/女性主义/);
-    expect(sys).toMatch(/职业规划/);
+    expect(sys).toMatch(/女性主义|女性职场/);
+    expect(sys).toMatch(/职业规划|职场成长/);
     expect(sys).toMatch(/风水涣/);
+    expect(sys).toMatch(/hexagram_data|shi_line/);
+    expect(sys).toMatch(/四层/);
   });
 
   it('offers career presets with 8k / Offer / 拿捏', () => {

@@ -4,6 +4,9 @@
 import type { CastResult } from './engine.ts';
 import { detectSceneDomain } from './scene-map.ts';
 import { buildDirectReading } from './direct-reading.ts';
+import { buildCompactHexagramPayload } from './board-compact.ts';
+import { LIUYAO_COACH_SYSTEM, liuyaoCoachPersonaOneLiner } from './coach-prompt.ts';
+import { formatHexWithPinyin } from './hex-pinyin.ts';
 import { isAiConfigured, loadAiSettings } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 import { answerAndStoreAsk } from './ask-answer.ts';
@@ -18,31 +21,32 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 风水涣变巽 / 风水涣（无变） */
+/** 风水涣（huàn）变巽为风（xùn） */
 export function hexChangeLabel(cast: CastResult): string {
+  const primary = formatHexWithPinyin(cast.primary.name, cast.primary.fullName);
   if (cast.changed) {
-    const short =
-      cast.changed.fullName === cast.changed.name || cast.changed.name.length === 1
-        ? cast.changed.fullName
-        : cast.changed.name;
-    return `${cast.primary.fullName}变${short}`;
+    const changed = formatHexWithPinyin(cast.changed.name, cast.changed.fullName);
+    return `${primary}变${changed}`;
   }
-  return cast.primary.fullName;
+  return primary;
 }
 
-/** 定死的前置上下文（按本卦名注入） */
+/** 定死的前置上下文：教练人设 + 精简盘面 + 离线判词 */
 export function buildFollowupSystemPrompt(cast: CastResult, question: string): string {
   const label = hexChangeLabel(cast);
   const direct = buildDirectReading(cast, question);
+  const compact = buildCompactHexagramPayload(cast, question);
   return [
+    LIUYAO_COACH_SYSTEM,
+    '',
+    liuyaoCoachPersonaOneLiner(),
     `你知道这个卦叫「${label}」。`,
-    '你是一个懂女性主义、懂现代职业规划的陪读——不是算命摊判官，也不替用户做人生决定。',
-    '说话像靠谱朋友：先给可执行建议，再轻轻对照卦象；避免恐吓、宿命论、性别刻板印象。',
-    '若涉及去留/薪资/权力不对等：优先谈边界、书面确认、两手准备与身体感受，不鼓励为「忍」而自我消耗。',
     `用户原占问题：${question.trim() || '（未填写）'}`,
-    `本卦：${cast.primary.fullName}（${cast.primary.keywords.join('、')}）；变卦：${cast.changed?.fullName ?? '无'}（${cast.changed?.keywords.join('、') ?? '—'}）；动爻：${cast.changingIndexes.length ? cast.changingIndexes.map((i) => ['初', '二', '三', '四', '五', '上'][i] + '爻').join('、') : '无'}。`,
     `系统已给的核心判词：${direct.verdict}`,
-    '回答用「你」；150–280 字为宜；可分点；结尾可给一个很小的下一步。',
+    `核心隐喻：${direct.coreMetaphor}`,
+    '追问时仍按四层逻辑回答，但篇幅 150–280 字；用「你」；结尾给一个很小的下一步。',
+    '精简排盘 JSON（勿复述全文，只取相关）：',
+    JSON.stringify(compact),
   ].join('\n');
 }
 

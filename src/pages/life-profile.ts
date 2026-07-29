@@ -27,6 +27,7 @@ import {
   type PersonRelation,
 } from '../life/types.ts';
 import { SCENE_TAG_OPTIONS, normalizeSceneTags } from '../life/scene-tags.ts';
+import { deriveAgeFromBirth, effectiveAge } from '../life/age.ts';
 
 const OPEN_NEW_KEY = 'mystic-lab-profile-open-new';
 
@@ -41,36 +42,35 @@ function escapeHtml(s: string): string {
 function readForm(form: HTMLFormElement): {
   nickname: string;
   relation: PersonRelation;
-  gender: '' | 'female' | 'male';
   lifeTags: string[];
   profile: LifeProfileInput;
 } {
   const g = (name: string) =>
     (form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null)
       ?.value?.trim() ?? '';
-  const genderRaw = g('gender');
-  const gender = genderRaw === 'female' || genderRaw === 'male' ? genderRaw : '';
   const relationRaw = g('relation') as PersonRelation;
   const lifeTags = normalizeSceneTags(
     [...form.querySelectorAll<HTMLInputElement>('[data-life-tag]:checked')].map((el) => el.value),
   );
   const custom = g('lifeTagCustom');
   if (custom && !lifeTags.includes(custom)) lifeTags.push(custom.slice(0, 10));
+  const birthYear = g('birthYear');
+  const birthMonth = g('birthMonth');
+  const birthDay = g('birthDay');
   return {
     nickname: g('nickname').slice(0, 8) || '未命名',
     relation: Object.keys(PERSON_RELATION_LABELS).includes(relationRaw) ? relationRaw : 'friend',
-    gender,
     lifeTags: lifeTags.slice(0, 8),
     profile: {
-    age: g('age'),
-    occupation: g('occupation'),
-    city: g('city'),
-    birthYear: g('birthYear'),
-    birthMonth: g('birthMonth'),
-    birthDay: g('birthDay'),
-    birthHour: g('birthHour'),
-    birthPlace: g('birthPlace'),
-    confusion: g('confusion'),
+      age: deriveAgeFromBirth(birthYear, birthMonth, birthDay),
+      occupation: g('occupation'),
+      city: g('city'),
+      birthYear,
+      birthMonth,
+      birthDay,
+      birthHour: g('birthHour'),
+      birthPlace: g('birthPlace'),
+      confusion: g('confusion'),
     },
   };
 }
@@ -163,6 +163,10 @@ export function renderLifeProfile(root: HTMLElement): () => void {
       )
       .join('');
 
+    const ageNow = effectiveAge(p);
+    const moreOpen =
+      Boolean(p.occupation.trim() || p.city.trim() || p.confusion.trim() || p.birthPlace.trim() || p.lifeTags.length);
+
     body.innerHTML = `
       ${paintListHint()}
     <form class="life-form" id="life-profile-form">
@@ -172,46 +176,37 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           <label class="life-field"><span>关系</span>
             <select name="relation" ${p.id === SELF_PROFILE_ID && !isNew ? 'disabled' : ''}>${relOptions}</select>
           </label>
-          <label class="life-field"><span>性别</span>
-            <select name="gender">
-              <option value="" ${!p.gender ? 'selected' : ''}>不填</option>
-              <option value="female" ${p.gender === 'female' ? 'selected' : ''}>女生</option>
-              <option value="male" ${p.gender === 'male' ? 'selected' : ''}>男生</option>
-            </select>
-          </label>
-        </fieldset>
-
-        <fieldset class="life-fieldset">
-          <legend>长期标签（可选）</legend>
-          <div class="profile-life-tags">
-            ${SCENE_TAG_OPTIONS.map(
-              (t) => `
-              <label class="profile-life-tag${p.lifeTags.includes(t) ? ' is-on' : ''}">
-                <input type="checkbox" data-life-tag value="${t}" ${p.lifeTags.includes(t) ? 'checked' : ''} />
-                <span>#${t}</span>
-              </label>`,
-            ).join('')}
-          </div>
-          <label class="life-field life-field-full"><span>自定义标签</span><input name="lifeTagCustom" type="text" maxlength="10" placeholder="如 求职期" /></label>
-        </fieldset>
-
-      <fieldset class="life-fieldset">
-        <legend>当前人生状态</legend>
-        <label class="life-field"><span>年龄</span><input name="age" type="text" inputmode="numeric" placeholder="如 29" value="${escapeHtml(p.age)}" /></label>
-        <label class="life-field"><span>职业</span><input name="occupation" type="text" placeholder="如 产品经理" value="${escapeHtml(p.occupation)}" /></label>
-        <label class="life-field"><span>城市</span><input name="city" type="text" placeholder="如 上海" value="${escapeHtml(p.city)}" /></label>
-        <label class="life-field life-field-full">
-          <span>当前困惑</span>
-            <textarea name="confusion" rows="3" placeholder="例如：要不要离职？">${escapeHtml(p.confusion)}</textarea>
-        </label>
-      </fieldset>
-
-      <fieldset class="life-fieldset">
-          <legend>出生信息</legend>
-        <div id="life-birth-dt-slot" class="life-birth-row"></div>
-        <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
+          <div id="life-birth-dt-slot" class="life-birth-row"></div>
+          <p class="life-age-hint" data-age-hint>${
+            ageNow
+              ? `约 <strong>${escapeHtml(ageNow)}</strong> 岁 · 由出生日期自动推算`
+              : '填好出生日期后，年龄会自动推算'
+          }</p>
           <p class="life-footnote">出生信息也可在「八字」里填写。</p>
-      </fieldset>
+        </fieldset>
+
+        <details class="life-more"${moreOpen ? ' open' : ''}>
+          <summary>其他补充<span>职业 · 城市 · 困惑 · 标签</span></summary>
+          <div class="life-more-body">
+            <label class="life-field"><span>职业</span><input name="occupation" type="text" placeholder="如 产品经理" value="${escapeHtml(p.occupation)}" /></label>
+            <label class="life-field"><span>城市</span><input name="city" type="text" placeholder="如 上海" value="${escapeHtml(p.city)}" /></label>
+            <label class="life-field life-field-full">
+              <span>当前困惑</span>
+              <textarea name="confusion" rows="3" placeholder="例如：要不要离职？">${escapeHtml(p.confusion)}</textarea>
+            </label>
+            <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
+            <div class="profile-life-tags" style="margin-top:10px">
+              ${SCENE_TAG_OPTIONS.map(
+                (t) => `
+                <label class="profile-life-tag${p.lifeTags.includes(t) ? ' is-on' : ''}">
+                  <input type="checkbox" data-life-tag value="${t}" ${p.lifeTags.includes(t) ? 'checked' : ''} />
+                  <span>#${t}</span>
+                </label>`,
+              ).join('')}
+            </div>
+            <label class="life-field life-field-full"><span>自定义标签</span><input name="lifeTagCustom" type="text" maxlength="10" placeholder="如 求职期" /></label>
+          </div>
+        </details>
 
       <div class="life-form-actions">
           <button type="submit" class="life-btn-primary" id="life-save-btn">保存档案</button>
@@ -237,6 +232,14 @@ export function renderLifeProfile(root: HTMLElement): () => void {
     const statusEl = body.querySelector<HTMLElement>('#life-status')!;
     const portraitEl = body.querySelector<HTMLElement>('#life-portrait')!;
     const birthSlot = body.querySelector<HTMLElement>('#life-birth-dt-slot')!;
+    const ageHint = body.querySelector<HTMLElement>('[data-age-hint]')!;
+
+    function paintAgeHint(y: string, m: string, d: string): void {
+      const age = deriveAgeFromBirth(y, m, d);
+      ageHint.innerHTML = age
+        ? `约 <strong>${escapeHtml(age)}</strong> 岁 · 由出生日期自动推算`
+        : '填好出生日期后，年龄会自动推算';
+    }
 
   mountBirthDatetimeField({
     host: form,
@@ -245,6 +248,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
     initialMonth: p.birthMonth,
     initialDay: p.birthDay,
     initialHour: p.birthHour,
+    onChange: (fields) => paintAgeHint(fields.birthYear, fields.birthMonth, fields.birthDay),
   });
 
     form.querySelectorAll<HTMLInputElement>('[data-life-tag]').forEach((input) => {
@@ -328,7 +332,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           : p),
         nickname: data.nickname,
         relation: p.id === SELF_PROFILE_ID && !isNew ? 'self' : data.relation,
-        gender: data.gender,
+        gender: isNew ? '' : p.gender,
         lifeTags: data.lifeTags,
         ...data.profile,
       };
@@ -347,7 +351,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
       const profile = data.profile;
       if (!hasUsableProfile(profile)) {
       statusEl.hidden = false;
-      statusEl.textContent = '请至少填写年龄、职业、城市或困惑中的一项。';
+      statusEl.textContent = '请至少填写出生日期、职业、城市或困惑中的一项。';
       return;
     }
       const genBtn = body.querySelector<HTMLButtonElement>('#life-gen-btn')!;
@@ -359,7 +363,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           ...p,
           nickname: '自己',
           relation: 'self',
-          gender: data.gender,
+          gender: p.gender,
           lifeTags: data.lifeTags,
           ...profile,
         });

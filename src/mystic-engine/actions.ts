@@ -1,4 +1,5 @@
 import { pickCareerActions } from './packs/career-actions.ts';
+import { pickGeneralActions } from './packs/general-actions.ts';
 import { pickGrowthActions } from './packs/growth-actions.ts';
 import { pickRelationActions } from './packs/relation-actions.ts';
 import { pickWealthActions } from './packs/wealth-actions.ts';
@@ -20,7 +21,8 @@ export function pickActions(
     pickCareerActions(intent, tone, ctx) ??
     pickRelationActions(intent, tone, ctx) ??
     pickWealthActions(intent, tone, ctx) ??
-    pickGrowthActions(intent, tone, ctx) ?? {
+    pickGrowthActions(intent, tone, ctx) ??
+    pickGeneralActions(intent, tone, ctx) ?? {
       breakthrough: FALLBACK,
       checklist: [],
     }

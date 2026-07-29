@@ -45,6 +45,8 @@ export type IntentHit = {
 export type EvidenceLine = {
   factKey: string;
   plain: string;
+  /** 术语白话注，可折叠 */
+  gloss?: { term: string; gloss: string };
 };
 
 export type SceneAction = {
@@ -80,12 +82,54 @@ export type UserContext = {
   };
 };
 
+/** 首屏核心结论 */
+export type VerdictBlock = {
+  headline: string;
+  parse: string;
+  decision: string;
+};
+
+/** 为什么这么判断（一条）——结构化便于扫读 */
+export type WhyItem = {
+  /** 短标题，如「你的现状」 */
+  title: string;
+  /** 角标术语（点二字看释义），如「变卦」 */
+  badgeTerm?: { term: string; gloss: string };
+  /** 角标卦名（点开卦象精读） */
+  badgeHex?: { kind: 'primary' | 'changed'; name: string; label: string };
+  /** 角标补充，如「五爻」「无」 */
+  badgeNote?: string;
+  /** 一行钩子（最醒目） */
+  hook: string;
+  /** 要点列表 */
+  points?: string[];
+  /** 建议 */
+  tip?: string;
+  /** 兼容旧全文拼接 */
+  body: string;
+  /** @deprecated 改用 badgeTerm；保留兼容 */
+  gloss?: { term: string; gloss: string };
+  /** @deprecated 改用 badgeTerm / badgeHex / badgeNote */
+  badge?: string;
+};
+
 export type OfflineAnswerPack = {
   intents: IntentHit[];
   answers: AnswerBlock[];
+  /** @deprecated 兼容旧字段；与 verdict.decision 同步 */
   decision: string;
   breakthrough: SceneAction;
   checklist: SceneAction[];
   boardExpand?: string;
   contextUsed: boolean;
+  /** 首屏大字结论 */
+  verdict: VerdictBlock;
+  /** 推导：世/应/动 */
+  why: WhyItem[];
+  /** 第二层：能量与状态拆解（现代语） */
+  energy?: string;
+  /** 第四层：心理定心丸 */
+  reassurance?: string;
+  /** 一句话核心隐喻 */
+  coreMetaphor?: string;
 };

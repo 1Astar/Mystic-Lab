@@ -56,6 +56,20 @@ describe('actions', () => {
     expect(breakthrough.body).toMatch(/谈|标准|核对|沟通/);
     expect(breakthrough.body).toMatch(/产品经理/);
   });
+
+  it('timing / open_explore / anxiety get dedicated actions', () => {
+    const timing = pickActions('timing', 'soft', null);
+    expect(timing.breakthrough.title).toMatch(/窗口|截止|时机/);
+    expect(timing.checklist.length).toBeGreaterThan(0);
+
+    const open = pickActions('open_explore', 'neutral', null);
+    expect(open.breakthrough.id).toBe('open_explore-bt');
+    expect(open.breakthrough.body).not.toMatch(/^把你最想确认的一点写成一句话/);
+    expect(open.checklist.length).toBeGreaterThan(0);
+
+    const anxiety = pickActions('anxiety_decide', 'cut', null);
+    expect(anxiety.breakthrough.title).toMatch(/决定|拍板|事实/);
+  });
 });
 
 describe('buildOfflineAnswerPack', () => {
@@ -68,6 +82,15 @@ describe('buildOfflineAnswerPack', () => {
     });
     expect(pack.answers.length).toBeGreaterThanOrEqual(2);
     expect(pack.answers.every((a) => a.evidence.length >= 1)).toBe(true);
+    expect(pack.verdict.headline).toMatch(/8k|心累|费劲/);
+    expect(pack.verdict.parse).toMatch(/本卦|对应你的问题|核心隐喻/);
+    expect(pack.verdict.parse.length).toBeGreaterThan(80);
+    expect(pack.why.some((w) => /现状|世爻/.test(w.title) || w.badge?.includes('世爻'))).toBe(true);
+    expect(pack.why.some((w) => /转机|下一步|动爻/.test(w.title) || w.badge?.includes('动爻'))).toBe(true);
+    expect(pack.why.some((w) => /底气|变卦/.test(w.title) || w.badge?.includes('变卦'))).toBe(true);
+    expect(pack.energy).toBeUndefined();
+    expect(pack.reassurance).toMatch(/不是生死判决/);
+    expect(pack.why.some((w) => w.badgeTerm?.term === '世爻' || w.gloss?.term === '世爻')).toBe(true);
     expect(pack.breakthrough.body).not.toMatch(/只选一个可验证动作/);
     expect(pack.breakthrough.body.length).toBeGreaterThan(12);
     expect(pack.contextUsed).toBe(false);
@@ -83,5 +106,118 @@ describe('buildOfflineAnswerPack', () => {
     });
     expect(pack.breakthrough.body.length).toBeGreaterThan(12);
     expect(pack.answers.length).toBeGreaterThanOrEqual(1);
+    expect(pack.verdict.parse).toMatch(/夬|jué|大有/);
+    expect(pack.reassurance).toBeTruthy();
+    expect(pack.boardExpand).toMatch(/世在|本卦主调/);
+  });
+
+  it('love question why avoids career Offer talk', () => {
+    const cast = castHuanToXun();
+    const pack = buildOfflineAnswerPack({
+      question: '我们这段感情接下来怎么走？他还喜欢我吗？',
+      cast,
+      useProfile: false,
+    });
+    const whyText = pack.why.map((w) => w.body).join('\n');
+    expect(whyText).not.toMatch(/Offer|职场压力|职业生涯/);
+    expect(whyText).toMatch(/关系|落点|沟通|柔|疏通/);
+  });
+
+  it('open_explore pack is not bare FALLBACK', () => {
+    const hex = HEXAGRAMS.find((h) => h.name === '乾')!;
+    const lines = linesFromHexagram(hex);
+    const throws = lines.map((bit) =>
+      bit === 1
+        ? facesToThrow(['obverse', 'obverse', 'reverse'])
+        : facesToThrow(['obverse', 'reverse', 'reverse']),
+    ) as YaoThrow[];
+    const pack = buildOfflineAnswerPack({
+      question: '最近心里乱，想看看这件事整体怎么走？',
+      cast: buildCastFromThrows(throws, 'coin'),
+      useProfile: false,
+    });
+    expect(pack.intents.some((h) => h.id === 'open_explore' || h.id === 'anxiety_decide')).toBe(
+      true,
+    );
+    expect(pack.breakthrough.body.length).toBeGreaterThan(8);
+    expect(pack.breakthrough.title).not.toBe('本周一个可打勾动作');
+    expect(pack.breakthrough.title).toMatch(/锁一问|探针|探索|一句话/);
+    expect(pack.checklist.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('timing question yields window-oriented steps', () => {
+    const hex = HEXAGRAMS.find((h) => h.name === '需')!;
+    const lines = linesFromHexagram(hex);
+    const throws = lines.map((bit) =>
+      bit === 1
+        ? facesToThrow(['obverse', 'obverse', 'reverse'])
+        : facesToThrow(['obverse', 'reverse', 'reverse']),
+    ) as YaoThrow[];
+    const pack = buildOfflineAnswerPack({
+      question: '这件事什么时候比较合适动手？月底前有窗口吗？',
+      cast: buildCastFromThrows(throws, 'coin'),
+      useProfile: false,
+    });
+    expect(pack.intents.some((h) => h.id === 'timing')).toBe(true);
+    expect(pack.breakthrough.body + pack.checklist.map((c) => c.body).join('')).toMatch(
+      /窗口|截止|时机|Plan B|复盘/,
+    );
+  });
+
+  it('every hexagram yields a non-empty 4-layer pack', () => {
+    for (const hex of HEXAGRAMS) {
+      const lines = linesFromHexagram(hex);
+      const throws = lines.map((bit) =>
+        bit === 1
+          ? facesToThrow(['obverse', 'obverse', 'reverse'])
+          : facesToThrow(['obverse', 'reverse', 'reverse']),
+      ) as YaoThrow[];
+      const cast = buildCastFromThrows(throws, 'coin');
+      const pack = buildOfflineAnswerPack({
+        question: '这件事接下来怎么走？',
+        cast,
+        useProfile: false,
+      });
+      expect(pack.verdict.headline.length, hex.name).toBeGreaterThan(4);
+      expect(pack.verdict.parse.length, hex.name).toBeGreaterThan(20);
+      expect(pack.why.length, hex.name).toBeGreaterThanOrEqual(3);
+      expect(pack.breakthrough.body.length, hex.name).toBeGreaterThan(8);
+      expect(pack.reassurance.length, hex.name).toBeGreaterThan(8);
+    }
+  });
+});
+
+describe('detectTone by hex name', () => {
+  it('升 is open (not soft via 渐进)', () => {
+    const hex = HEXAGRAMS.find((h) => h.name === '升')!;
+    const lines = linesFromHexagram(hex);
+    const throws = lines.map((bit) =>
+      bit === 1
+        ? facesToThrow(['obverse', 'obverse', 'reverse'])
+        : facesToThrow(['obverse', 'reverse', 'reverse']),
+    ) as YaoThrow[];
+    expect(detectTone(buildCastFromThrows(throws, 'coin'))).toBe('open');
+  });
+
+  it('鼎 is open (not cut via 革新)', () => {
+    const hex = HEXAGRAMS.find((h) => h.name === '鼎')!;
+    const lines = linesFromHexagram(hex);
+    const throws = lines.map((bit) =>
+      bit === 1
+        ? facesToThrow(['obverse', 'obverse', 'reverse'])
+        : facesToThrow(['obverse', 'reverse', 'reverse']),
+    ) as YaoThrow[];
+    expect(detectTone(buildCastFromThrows(throws, 'coin'))).toBe('open');
+  });
+
+  it('讼 is hard (not soft via 沟通)', () => {
+    const hex = HEXAGRAMS.find((h) => h.name === '讼')!;
+    const lines = linesFromHexagram(hex);
+    const throws = lines.map((bit) =>
+      bit === 1
+        ? facesToThrow(['obverse', 'obverse', 'reverse'])
+        : facesToThrow(['obverse', 'reverse', 'reverse']),
+    ) as YaoThrow[];
+    expect(detectTone(buildCastFromThrows(throws, 'coin'))).toBe('hard');
   });
 });

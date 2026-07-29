@@ -10,6 +10,7 @@ import {
   saveLifeStore,
 } from '../life/storage.ts';
 import type { ParallelWorld } from '../life/types.ts';
+import { effectiveAge } from '../life/age.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -50,6 +51,10 @@ export function renderLifeParallel(root: HTMLElement): () => void {
 
   const me = store.profile;
   const portrait = store.portrait!;
+  const ageLabel = (() => {
+    const a = effectiveAge(me);
+    return a ? `${a}岁` : '年龄未填';
+  })();
 
   page.innerHTML = `
     <button type="button" class="back-link life-back">← 返回人生宇宙</button>
@@ -63,7 +68,7 @@ export function renderLifeParallel(root: HTMLElement): () => void {
     <section class="life-card life-now-card">
       <p class="life-card-kicker">现在的我</p>
       <h2>${escapeHtml(portrait.stageTitle)}</h2>
-      <p>${escapeHtml(me.occupation || '职业未填')} · ${escapeHtml(me.city || '城市未填')} · ${escapeHtml(me.age ? `${me.age}岁` : '年龄未填')}</p>
+      <p>${escapeHtml(me.occupation || '职业未填')} · ${escapeHtml(me.city || '城市未填')} · ${escapeHtml(ageLabel)}</p>
       <p class="life-card-body">${escapeHtml(me.confusion || portrait.stageSummary)}</p>
     </section>
 

@@ -1,12 +1,6 @@
 import type { CastResult } from '../liuyao/engine.ts';
 import type { IntentId, Tone } from './types.ts';
-import { toneBag } from './tone.ts';
-
-const SOFT = /涣|巽|渐|柔|渗|反复/;
-const FLOW = /涣|旅|未济|散|流动/;
-const HARD = /困|蹇|否|剥|坎|险/;
-const OPEN = /泰|同人|大有|升|晋|鼎|丰|既济/;
-const CUT = /夬|革|遁|退|决/;
+import { toneFlags } from './tone.ts';
 
 /** intent × tone → 有条件倾向句（非死刑） */
 export function leanForIntent(
@@ -14,12 +8,12 @@ export function leanForIntent(
   cast: CastResult,
   tone: Tone,
 ): string {
-  const bag = toneBag(cast);
-  const soft = tone === 'soft' || SOFT.test(bag);
-  const flow = tone === 'flow' || FLOW.test(bag);
-  const hard = tone === 'hard' || HARD.test(bag);
-  const open = tone === 'open' || OPEN.test(bag);
-  const cut = tone === 'cut' || CUT.test(bag);
+  const f = toneFlags(cast);
+  const soft = tone === 'soft' || f.soft;
+  const flow = tone === 'flow' || f.flow;
+  const hard = tone === 'hard' || f.hard;
+  const open = tone === 'open' || f.open;
+  const cut = tone === 'cut' || f.cut;
   const to = cast.changed?.keywords[0] ?? cast.primary.keywords[0] ?? cast.primary.name;
 
   switch (intent) {
@@ -112,9 +106,20 @@ export function leanForIntent(
     case 'timing':
       if (soft || flow) return '窗口偏「磨」不偏「冲」：给对方明确期限，逾期就按 Plan B。';
       if (cut) return '宜尽快定调，拖越久越耗。';
+      if (hard) return '时机未齐：先补最弱一环，再谈冲窗口。';
+      if (open) return '窗口可能已开：用可核对的事实对齐，再加码。';
       return '先定一个可核对的截止日期，再用事实决定加码还是撤。';
     case 'anxiety_decide':
+      if (soft || flow) return '纠结宜拆成可逆的一小步验证，忌求一次定终身。';
+      if (cut || open) return '给纠结设决定日，到期用清单拍板，少无限内耗。';
+      if (hard) return '先补最缺的那块事实，再谈要不要。';
+      return `纠结处宜用「${to}」的方式推进：先事实，后决定。`;
     case 'open_explore':
+      if (soft || flow) return '宜柔进探路：低成本试探，用回应质量决定加码。';
+      if (cut) return '开放也忌发散：先锁一问，推一个能打勾的动作。';
+      if (open) return '有聚拢窗口：做一件能被看见的事，用反馈校准。';
+      if (hard) return '先过最弱一环，再谈扩张与探索。';
+      return `本题核心宜用「${to}」的方式推进，少用蛮力；卦象是参考不是判决。`;
     default:
       return `本题核心宜用「${to}」的方式推进，少用蛮力；卦象是参考不是判决。`;
   }

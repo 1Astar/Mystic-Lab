@@ -89,7 +89,8 @@ describe('learn-course', () => {
     expect(html).not.toMatch(/ly-course-crumb-look/);
     expect(html).toMatch(/is-now/);
     expect(html).toMatch(/上一步/);
-    expect(html).toMatch(/解读笔记/);
+    expect(html).toMatch(/卦象精读/);
+    expect(html).not.toMatch(/解读笔记/);
     expect(html).not.toMatch(/ly-course-bookmark/);
     expect(html).not.toMatch(/data-learn-notes/);
     expect(html).toMatch(/本步注解对应|ly-course-yao-focus/);

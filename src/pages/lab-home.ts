@@ -14,56 +14,54 @@ import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 interface LabEntry {
   path: string;
   title: string;
-  /** 卡片上的一句话用途 */
   desc: string;
-  /** 短定位标签 */
   note?: string;
   emblem: MysticEmblemKind;
   comingSoon?: boolean;
 }
 
-/** 第一行塔罗 | 六爻；无单独档案卡片（改顶栏头像） */
-const SYSTEMS: LabEntry[] = [
+/** 各体系入口常驻 */
+const ALL_SYSTEMS: LabEntry[] = [
   {
     path: '/tarot',
     title: '塔罗',
-    desc: '关系、内心、选择',
-    note: '心理探索',
+    desc: '人与事：画面、张力、下一步',
+    note: '心理投射',
     emblem: 'tarot',
   },
   {
     path: '/liuyao',
     title: '六爻',
-    desc: '六爻叠合、动爻、世应',
-    note: '变化结构',
+    desc: '谈薪、offer、官司等具体事',
+    note: '细节与应期',
     emblem: 'hex',
   },
   {
     path: '/xiaoliuren',
     title: '小六壬',
-    desc: '今天明天顺不顺',
-    note: '时间趋势',
+    desc: '出门、面试、临时吉凶倾向',
+    note: '即时定向',
     emblem: 'star',
   },
   {
     path: '/meihua',
     title: '梅花易数',
-    desc: '一念一事，八卦取象',
-    note: '象与动念',
+    desc: '人品、一事一象，先定大方向',
+    note: '象与气机',
     emblem: 'plum',
   },
   {
     path: '/bazi',
     title: '八字',
-    desc: '四柱排盘 · 日主十神',
+    desc: '日主、十神、命盘结构',
     note: '命理结构',
     emblem: 'bazi',
   },
   {
     path: '/life',
     title: '人生宇宙',
-    desc: '平行 · 选择模拟 · 预测打卡',
-    note: '人生推演',
+    desc: '平行选择 · 人生推演',
+    note: '看自己的路',
     emblem: 'cosmos',
   },
 ];
@@ -72,7 +70,7 @@ const GLOBAL_ENTRIES: LabEntry[] = [
   {
     path: '/records',
     title: '我的旅程',
-    desc: '塔罗 · 小六壬 · 六爻 · 收藏 · 笔记',
+    desc: '各体系记录 · 收藏 · 笔记',
     emblem: 'heart',
   },
   {
@@ -112,6 +110,7 @@ function appendEntryCard(
 
   card.addEventListener('click', (e) => {
     e.preventDefault();
+    if (entry.comingSoon) return;
     navigate(entry.path);
   });
 
@@ -157,13 +156,14 @@ export function renderLabHome(root: HTMLElement): () => void {
     <header class="home-header">
       <p class="home-eyebrow">MYSTIC LAB</p>
       <h1 class="page-title">Mystic Lab</h1>
-      <p class="page-subtitle">选择一种方式，开始一次占问</p>
-      <button type="button" class="lab-guide-trigger">不知道从哪里开始？</button>
+      <p class="page-subtitle">答案不在牌里，在你心里。</p>
+      <button type="button" class="lab-guide-trigger">怎么选体系？</button>
     </header>
-    <section class="lab-section" aria-label="占问体系">
-      <h2 class="lab-section-label">占问体系</h2>
-      <div class="lab-systems"></div>
+
+    <section class="lab-section" aria-label="体系入口">
+      <div class="lab-systems" data-lab-systems></div>
     </section>
+
     <section class="lab-section" aria-label="全局入口">
       <h2 class="lab-section-label">全局</h2>
       <div class="lab-global"></div>
@@ -180,9 +180,9 @@ export function renderLabHome(root: HTMLElement): () => void {
   const aiHost = page.querySelector<HTMLElement>('[data-lab-ai-host]')!;
   mountLabHomeAiButton(aiHost);
 
-  const systems = page.querySelector<HTMLElement>('.lab-systems')!;
-  for (const entry of SYSTEMS) {
-    appendEntryCard(systems, entry, true);
+  const systemsHost = page.querySelector<HTMLElement>('[data-lab-systems]')!;
+  for (const entry of ALL_SYSTEMS) {
+    appendEntryCard(systemsHost, entry, true);
   }
 
   const global = page.querySelector<HTMLElement>('.lab-global')!;
