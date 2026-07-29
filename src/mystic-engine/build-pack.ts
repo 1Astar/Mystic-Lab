@@ -9,7 +9,8 @@ import { leanForIntent } from './lean.ts';
 import { detectTone } from './tone.ts';
 import { parseWeekActions } from './week-actions.ts';
 import { buildWhyItems } from './why.ts';
-import type { OfflineAnswerPack, SceneAction, UserContext } from './types.ts';
+import { buildScriptPlay } from './script-play.ts';
+import type { OfflineAnswerPack, SceneAction, UserContext, WhyItem } from './types.ts';
 
 export type BuildPackInput = {
   question: string;
@@ -21,7 +22,7 @@ export type BuildPackInput = {
 };
 
 /**
- * Mystic Engine 主入口：问题 → Intent → DirectReading 结论 → Evidence → Action → Pack
+ * Mystic Engine 主入口：场景×三指标 → 四段剧本；旧字段同步填充以兼容
  */
 export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack {
   const castAt = input.castAt ?? new Date();
@@ -33,6 +34,11 @@ export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack
       : resolveUserContext({ useProfile: input.useProfile });
 
   const direct = buildDirectReading(input.cast, input.question);
+  const script = buildScriptPlay({
+    question: input.question,
+    cast: input.cast,
+    castAt,
+  });
 
   const answers = intents.map((hit) => ({
     intentId: hit.id,
@@ -41,62 +47,64 @@ export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack
     evidence: mapEvidence(input.cast, hit.id, input.question, castAt),
   }));
 
-  // 若意图切片与 direct 分题不一致，用 lean 对齐展示；单意图时用 direct 的 partLeans 补强
-  if (answers.length === 0 && direct.partLeans.length) {
-    // intents 至少有 open_explore；detectIntents 总有结果
-  }
-
   const primaryIntent = intents[0]?.id ?? 'open_explore';
   const { breakthrough, checklist } = pickActions(primaryIntent, tone, ctx);
 
-  const salaryHit = intents.find(
-    (h) => h.id === 'salary_negotiate' || h.id === 'probation_convert',
-  );
-  const stayHit = intents.find(
-    (h) => h.id === 'quit_vs_stay' || h.id === 'quit_now',
-  );
-  let finalBt = breakthrough;
-  let finalCheck = checklist;
-  if (salaryHit) {
-    const sal = pickActions(salaryHit.id, tone, ctx);
-    finalBt = sal.breakthrough;
-    finalCheck = sal.checklist;
-    if (stayHit) {
-      const stay = pickActions(stayHit.id, tone, ctx);
-      finalCheck = [...finalCheck, ...stay.checklist].slice(0, 3);
-    }
-  } else if (stayHit) {
-    const stay = pickActions(stayHit.id, tone, ctx);
-    finalBt = stay.breakthrough;
-    finalCheck = stay.checklist;
+  const actionBeat = script.beats.find((b) => b.id === 'action');
+  const boundaryBeat = script.beats.find((b) => b.id === 'boundary');
+  const calmBeat = script.beats.find((b) => b.id === 'calm');
+  const truthBeat = script.beats.find((b) => b.id === 'truth');
+
+  const scriptBt: SceneAction = {
+    id: 'script-action',
+    title: actionBeat?.title ?? '具体动作',
+    body: actionBeat?.body ?? breakthrough.body,
+  };
+  const scriptBoundary: SceneAction = {
+    id: 'script-boundary',
+    title: boundaryBeat?.title ?? '底线',
+    body: boundaryBeat?.body ?? '',
+  };
+
+  const weekFromDirect = parseWeekActions(direct.nextSteps);
+  let weekActions: SceneAction[] = [scriptBt];
+  if (scriptBoundary.body) weekActions.push(scriptBoundary);
+  if (weekActions.length < 2 && weekFromDirect.length) {
+    weekActions = [...weekActions, ...weekFromDirect].slice(0, 3);
+  } else if (weekActions.length < 2 && checklist.length) {
+    weekActions = [...weekActions, ...checklist].slice(0, 3);
   }
 
-  // 优先用 DirectReading 的「本周三件事」（更贴问题）
-  const weekFromDirect = parseWeekActions(direct.nextSteps);
-  let weekActions: SceneAction[] = weekFromDirect;
-  if (weekActions.length === 0) {
-    weekActions = [finalBt, ...finalCheck];
-  } else if (weekActions.length < 3 && finalCheck.length) {
-    weekActions = [...weekActions, ...finalCheck].slice(0, 3);
-  }
+  const whyFromScript: WhyItem[] = [
+    {
+      title: '局势推演',
+      hook: truthBeat?.body.split('\n\n')[0] ?? script.headline,
+      points: (truthBeat?.body ?? '')
+        .split(/\n\n+/)
+        .slice(1)
+        .filter(Boolean),
+      tip: boundaryBeat?.body?.slice(0, 80),
+      body: truthBeat?.body ?? '',
+    },
+  ];
 
   return {
     intents,
     answers,
-    decision: direct.decision,
-    breakthrough: weekActions[0] ?? finalBt,
+    decision: boundaryBeat?.body ?? direct.decision,
+    breakthrough: weekActions[0] ?? scriptBt,
     checklist: weekActions.slice(1),
     boardExpand: buildBoardExpandText(input.cast, castAt),
     contextUsed: Boolean(ctx),
     verdict: {
-      headline: direct.verdict,
+      headline: script.headline,
       parse: direct.analysis,
-      decision: direct.decision,
+      decision: boundaryBeat?.body ?? direct.decision,
     },
-    why: buildWhyItems(input.cast, direct.domain, input.question, castAt),
-    // 爻相已并入 why，避免与能量块重复
+    why: whyFromScript.length && truthBeat ? whyFromScript : buildWhyItems(input.cast, direct.domain, input.question, castAt),
     energy: undefined,
-    reassurance: direct.reassurance,
+    reassurance: calmBeat?.body ?? direct.reassurance,
     coreMetaphor: direct.coreMetaphor,
+    script,
   };
 }

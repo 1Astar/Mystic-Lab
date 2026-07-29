@@ -74,14 +74,17 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
   const hasCoinNotes = Boolean(coinLabels?.some((c) => c));
   const kindW = hasKindLabels ? 48 : 0;
   const labelW = showTrigramLabels && !compact ? 56 : 0;
-  const cx = 60 + leftPad;
-  const w = 120 + labelW + leftPad + kindW + askW;
+  /** 右侧注解会加宽 SVG；左侧镜像等宽，使爻线落在 viewBox 正中（棋盘不偏左） */
+  const rightExtra = labelW + kindW + askW;
+  const leftExtra = Math.max(leftPad, rightExtra);
+  const cx = leftExtra + 60;
+  const w = leftExtra + 120 + rightExtra;
   /** 字背在爻线下方时，行距略加大，避免叠字 */
   const gap = compact ? (hasCoinNotes ? 22 : 14) : 18;
   const h = compact ? (hasCoinNotes ? 148 : 100) : 130;
   const startY = compact ? 12 : 14;
   const filled = revealedCount ?? lines.length;
-  const braceX = 118 + leftPad;
+  const braceX = leftExtra + 118;
 
   const inner = lines
     .map((bit, i) => {
@@ -126,7 +129,7 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         `;
       } else if (isShi || isYing) {
         const tags = [isShi ? '世' : '', isYing ? '应' : ''].filter(Boolean).join('/');
-        decor = `<text class="ly-yao-tag" x="${8 + leftPad}" y="${y + 4}">${tags}</text>`;
+        decor = `<text class="ly-yao-tag" x="${Math.max(2, leftExtra - 20)}" y="${y + 4}">${tags}</text>`;
       }
 
       if (highlightIndexes.includes(i) && !pending) {
@@ -179,7 +182,7 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
         ${hit}
         ${tapHit}
         ${askBtn}
-        ${!compact && !showTrigramLabels && !hasKindLabels ? `<text class="ly-yao-label" x="${108 + leftPad}" y="${y + 4}">${LINE_LABELS[i]}</text>` : ''}
+        ${!compact && !showTrigramLabels && !hasKindLabels ? `<text class="ly-yao-label" x="${leftExtra + 108}" y="${y + 4}">${LINE_LABELS[i]}</text>` : ''}
       </g>`;
     })
     .join('');

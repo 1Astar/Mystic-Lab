@@ -6900,6 +6900,31 @@ a.ly-derived-name:hover {
   gap: 10px;
 }
 
+/* 剧本：动作 / 底线微亮底框（操作区） */
+.ly-script-beat.is-ops {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(201, 168, 76, 0.32);
+}
+
+.ly-verdict-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.28);
+}
+
+.ly-script-hexmeta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(210, 200, 188, 0.62);
+  letter-spacing: 0.04em;
+}
+
+.ly-script-gold {
+  color: #e8c878;
+  font-weight: 700;
+}
+
 .ly-layer-head {
   display: flex;
   flex-direction: column;

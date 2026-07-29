@@ -172,7 +172,7 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">先看【核心方向】，再看病灶与动作；古籍旁注默认收起。</p>
+          <p class="ly-guide-tip">先看【卦象定调】与四段剧本；盘面术语在「盘面辅读」；古籍旁注默认收起。</p>
           ${renderQuestionBriefingForCast(cast, question, castAt)}
           <div class="ly-briefing-actions">
             <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>

@@ -129,30 +129,36 @@ export function buildQuestionBriefing(
       ? `（基于${formatHexWithPinyin(cast.primary.name, cast.primary.fullName)}卦变${formatHexWithPinyin(cast.changed.name, cast.changed.fullName)}，结合你的问题）`
       : `（基于${formatHexWithPinyin(cast.primary.name, cast.primary.fullName)}，结合你的问题）`);
 
+  const script = pack.script;
+  const calm = script?.beats.find((b) => b.id === 'calm');
+  const truth = script?.beats.find((b) => b.id === 'truth');
+  const action = script?.beats.find((b) => b.id === 'action');
+  const boundary = script?.beats.find((b) => b.id === 'boundary');
+
   return {
     topicLabel,
     questionLead: lead,
     layer1: {
-      title: '核心方向',
+      title: '卦象定调',
       body: pack.verdict.parse,
       quote: pack.verdict.headline,
     },
     layer2: {
-      title: '现状与转机',
-      body: whyBody(pack),
+      title: truth?.title ?? '现状真相',
+      body: truth?.body ?? whyBody(pack),
     },
     layer3: {
-      title: '具体动作',
-      body: weekBody(pack),
+      title: action?.title ?? '具体动作',
+      body: action ? action.body : weekBody(pack),
     },
     layer4: {
-      title: '心理定心丸',
-      body: pack.reassurance ?? '',
+      title: calm?.title ?? '给你的核心定心丸',
+      body: calm?.body ?? pack.reassurance ?? '',
     },
     strategy: {
-      title: pack.breakthrough.title,
-      body: pack.breakthrough.body,
-      quote: pack.breakthrough.title,
+      title: boundary?.title ?? pack.breakthrough.title,
+      body: boundary?.body ?? pack.breakthrough.body,
+      quote: pack.verdict.headline,
     },
     pack,
     cast,

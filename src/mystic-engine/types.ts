@@ -132,4 +132,6 @@ export type OfflineAnswerPack = {
   reassurance?: string;
   /** 一句话核心隐喻 */
   coreMetaphor?: string;
+  /** 剧本导演四段（优先渲染） */
+  script?: import('./script-play.ts').ScriptPlay;
 };

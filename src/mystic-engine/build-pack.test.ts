@@ -73,7 +73,7 @@ describe('actions', () => {
 });
 
 describe('buildOfflineAnswerPack', () => {
-  it('gold case: 8k + stay/leave yields multi-answer pack', () => {
+  it('gold case: 8k + stay/leave yields multi-answer script pack', () => {
     const cast = castHuanToXun();
     const pack = buildOfflineAnswerPack({
       question: '转正能不能拿到8k？我要不要留在冠英？8月初要不要离职？',
@@ -82,15 +82,13 @@ describe('buildOfflineAnswerPack', () => {
     });
     expect(pack.answers.length).toBeGreaterThanOrEqual(2);
     expect(pack.answers.every((a) => a.evidence.length >= 1)).toBe(true);
-    expect(pack.verdict.headline).toMatch(/8k|心累|费劲/);
+    expect(pack.script?.scene).toBe('quit_stay');
+    expect(pack.verdict.headline.length).toBeGreaterThan(8);
     expect(pack.verdict.parse).toMatch(/本卦|对应你的问题|核心隐喻/);
     expect(pack.verdict.parse.length).toBeGreaterThan(80);
-    expect(pack.why.some((w) => /现状|世爻/.test(w.title) || w.badge?.includes('世爻'))).toBe(true);
-    expect(pack.why.some((w) => /转机|下一步|动爻/.test(w.title) || w.badge?.includes('动爻'))).toBe(true);
-    expect(pack.why.some((w) => /底气|变卦/.test(w.title) || w.badge?.includes('变卦'))).toBe(true);
+    expect(pack.script?.beats).toHaveLength(4);
     expect(pack.energy).toBeUndefined();
-    expect(pack.reassurance).toMatch(/不是生死判决/);
-    expect(pack.why.some((w) => w.badgeTerm?.term === '世爻' || w.gloss?.term === '世爻')).toBe(true);
+    expect(pack.reassurance).toBeTruthy();
     expect(pack.breakthrough.body).not.toMatch(/只选一个可验证动作/);
     expect(pack.breakthrough.body.length).toBeGreaterThan(12);
     expect(pack.contextUsed).toBe(false);
@@ -120,7 +118,7 @@ describe('buildOfflineAnswerPack', () => {
     });
     const whyText = pack.why.map((w) => w.body).join('\n');
     expect(whyText).not.toMatch(/Offer|职场压力|职业生涯/);
-    expect(whyText).toMatch(/关系|落点|沟通|柔|疏通/);
+    expect(whyText).toMatch(/关系|落点|沟通|柔|疏通|矛盾/);
   });
 
   it('open_explore pack is not bare FALLBACK', () => {
@@ -141,7 +139,8 @@ describe('buildOfflineAnswerPack', () => {
     );
     expect(pack.breakthrough.body.length).toBeGreaterThan(8);
     expect(pack.breakthrough.title).not.toBe('本周一个可打勾动作');
-    expect(pack.breakthrough.title).toMatch(/锁一问|探针|探索|一句话/);
+    expect(pack.breakthrough.title).toMatch(/锁一问|探针|探索|一句话|具体动作/);
+    expect(pack.script?.beats).toHaveLength(4);
     expect(pack.checklist.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -180,9 +179,9 @@ describe('buildOfflineAnswerPack', () => {
       });
       expect(pack.verdict.headline.length, hex.name).toBeGreaterThan(4);
       expect(pack.verdict.parse.length, hex.name).toBeGreaterThan(20);
-      expect(pack.why.length, hex.name).toBeGreaterThanOrEqual(3);
+      expect(pack.script?.beats.length, hex.name).toBe(4);
       expect(pack.breakthrough.body.length, hex.name).toBeGreaterThan(8);
-      expect(pack.reassurance.length, hex.name).toBeGreaterThan(8);
+      expect(pack.reassurance!.length, hex.name).toBeGreaterThan(8);
     }
   });
 });
