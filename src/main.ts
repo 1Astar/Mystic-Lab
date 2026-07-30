@@ -1,96 +1,192 @@
 import './styles/global.css';
 import './styles/emblems.css';
 import './styles/module-themes.css';
-import './styles/tarot.css';
-import './styles/codex.css';
-import './styles/life.css';
-import './styles/bazi.css';
 import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
-import { renderCodex } from './pages/codex.ts';
-import { renderCodexFoolJourney } from './pages/codex-fool-journey.ts';
-import { renderCodexSuitNumbers } from './pages/codex-suit-numbers.ts';
-import { renderGlobalPlaceholder } from './pages/global-placeholder.ts';
-import { renderJournal } from './pages/journal.ts';
-import { renderJourney } from './pages/journey.ts';
 import { renderLabHome } from './pages/lab-home.ts';
-import { renderLifeForecast } from './pages/life-forecast.ts';
-import { renderLifeHome } from './pages/life-home.ts';
-import { renderLifeParallel } from './pages/life-parallel.ts';
-import { renderLifeProfile } from './pages/life-profile.ts';
-import { renderLifeSimulate } from './pages/life-simulate.ts';
-import { renderBaziHome } from './pages/bazi-home.ts';
-import { renderBaziChart } from './pages/bazi-chart.ts';
-import { renderMeihuaHome } from './pages/meihua-home.ts';
-import { renderLiuyaoHome } from './pages/liuyao-home.ts';
-import { renderLiuyaoReading } from './pages/liuyao-reading.ts';
-import { renderLiuyaoLearn } from './pages/liuyao-learn.ts';
-import { renderLiuyaoBagua } from './pages/liuyao-bagua.ts';
-import { renderLiuyaoHexagrams } from './pages/liuyao-hexagrams.ts';
-import { renderLiuyaoHexNotes } from './pages/liuyao-hex-notes.ts';
-import { renderLiuyaoConcepts } from './pages/liuyao-concepts.ts';
-import { renderLiuyaoLearnBoard } from './pages/liuyao-learn-board.ts';
-import { renderLiuyaoClassic } from './pages/liuyao-classic.ts';
-import { renderLiuyaoJournal } from './pages/liuyao-journal.ts';
-import { renderLiuyaoVault } from './pages/liuyao-vault.ts';
-import { renderLiuyaoGrowth } from './pages/liuyao-growth.ts';
-import { renderTarot } from './pages/tarot.ts';
-import { renderTarotHome } from './pages/tarot-home.ts';
-import './styles/xiaoliuren.css';
-import './styles/liuyao.css';
-import { renderXiaoliurenCodex } from './pages/xiaoliuren-codex.ts';
-import { renderXiaoliurenHourGuide } from './pages/xiaoliuren-hour-guide.ts';
-import { renderXiaoliurenJournal } from './pages/xiaoliuren-journal.ts';
-import { renderXiaoliurenReading } from './pages/xiaoliuren-reading.ts';
-import { renderXiaoliurenPalmJourney } from './pages/xiaoliuren-palm-journey.ts';
-import { renderXiaoliurenDepth } from './pages/xiaoliuren-depth.ts';
-import { renderXiaoliurenKungfu } from './pages/xiaoliuren-kungfu.ts';
-import { renderXiaoliurenHome } from './pages/xiaoliuren-home.ts';
-import { initRouter, navigate, registerRoute } from './router.ts';
+import { initRouter, navigate, registerRoute, type RouteHandler } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
 
+function lazy(
+  loader: () => Promise<{ default?: RouteHandler } | Record<string, unknown>>,
+  exportName: string,
+  styles: Array<() => Promise<unknown>> = [],
+): RouteHandler {
+  return async (root) => {
+    await Promise.all(styles.map((s) => s()));
+    const mod = await loader();
+    const renderFn = (mod as Record<string, unknown>)[exportName] as RouteHandler | undefined;
+    if (typeof renderFn !== 'function') {
+      throw new Error(`lazy route missing export: ${exportName}`);
+    }
+    return renderFn(root);
+  };
+}
+
+const tarotStyles = [
+  () => import('./styles/tarot.css'),
+  () => import('./styles/codex.css'),
+];
+const xiaoliurenStyles = [() => import('./styles/xiaoliuren.css')];
+const liuyaoStyles = [() => import('./styles/liuyao.css')];
+const lifeStyles = [() => import('./styles/life.css')];
+const baziStyles = [() => import('./styles/bazi.css')];
+
 registerRoute('/', renderLabHome);
-registerRoute('/tarot', renderTarotHome);
-registerRoute('/tarot/reading', renderTarot);
-registerRoute('/tarot/tujian', renderCodex);
-registerRoute('/tarot/tujian/fool-journey', renderCodexFoolJourney);
-registerRoute('/tarot/tujian/suit-numbers', renderCodexSuitNumbers);
-registerRoute('/journal', renderJournal);
-registerRoute('/xiaoliuren', renderXiaoliurenHome);
-registerRoute('/xiaoliuren/reading', renderXiaoliurenReading);
-registerRoute('/xiaoliuren/codex', renderXiaoliurenCodex);
-registerRoute('/xiaoliuren/journal', renderXiaoliurenJournal);
-registerRoute('/xiaoliuren/hour-guide', renderXiaoliurenHourGuide);
-registerRoute('/xiaoliuren/palm-journey', renderXiaoliurenPalmJourney);
-registerRoute('/xiaoliuren/depth', renderXiaoliurenDepth);
-registerRoute('/xiaoliuren/kungfu', renderXiaoliurenKungfu);
-registerRoute('/meihua', renderMeihuaHome);
-registerRoute('/bazi', renderBaziHome);
-registerRoute('/bazi/chart', renderBaziChart);
-registerRoute('/life', renderLifeHome);
-registerRoute('/profile', renderLifeProfile);
+
+registerRoute(
+  '/tarot',
+  lazy(() => import('./pages/tarot-home.ts'), 'renderTarotHome', tarotStyles),
+);
+registerRoute(
+  '/tarot/reading',
+  lazy(() => import('./pages/tarot.ts'), 'renderTarot', tarotStyles),
+);
+registerRoute(
+  '/tarot/tujian',
+  lazy(() => import('./pages/codex.ts'), 'renderCodex', tarotStyles),
+);
+registerRoute(
+  '/tarot/tujian/fool-journey',
+  lazy(() => import('./pages/codex-fool-journey.ts'), 'renderCodexFoolJourney', tarotStyles),
+);
+registerRoute(
+  '/tarot/tujian/suit-numbers',
+  lazy(() => import('./pages/codex-suit-numbers.ts'), 'renderCodexSuitNumbers', tarotStyles),
+);
+registerRoute(
+  '/journal',
+  lazy(() => import('./pages/journal.ts'), 'renderJournal', tarotStyles),
+);
+
+registerRoute(
+  '/xiaoliuren',
+  lazy(() => import('./pages/xiaoliuren-home.ts'), 'renderXiaoliurenHome', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/reading',
+  lazy(() => import('./pages/xiaoliuren-reading.ts'), 'renderXiaoliurenReading', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/codex',
+  lazy(() => import('./pages/xiaoliuren-codex.ts'), 'renderXiaoliurenCodex', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/journal',
+  lazy(() => import('./pages/xiaoliuren-journal.ts'), 'renderXiaoliurenJournal', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/hour-guide',
+  lazy(() => import('./pages/xiaoliuren-hour-guide.ts'), 'renderXiaoliurenHourGuide', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/palm-journey',
+  lazy(() => import('./pages/xiaoliuren-palm-journey.ts'), 'renderXiaoliurenPalmJourney', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/depth',
+  lazy(() => import('./pages/xiaoliuren-depth.ts'), 'renderXiaoliurenDepth', xiaoliurenStyles),
+);
+registerRoute(
+  '/xiaoliuren/kungfu',
+  lazy(() => import('./pages/xiaoliuren-kungfu.ts'), 'renderXiaoliurenKungfu', xiaoliurenStyles),
+);
+
+registerRoute(
+  '/meihua',
+  lazy(() => import('./pages/meihua-home.ts'), 'renderMeihuaHome'),
+);
+
+registerRoute(
+  '/bazi',
+  lazy(() => import('./pages/bazi-home.ts'), 'renderBaziHome', baziStyles),
+);
+registerRoute(
+  '/bazi/chart',
+  lazy(() => import('./pages/bazi-chart.ts'), 'renderBaziChart', baziStyles),
+);
+
+registerRoute(
+  '/life',
+  lazy(() => import('./pages/life-home.ts'), 'renderLifeHome', lifeStyles),
+);
+registerRoute(
+  '/profile',
+  lazy(() => import('./pages/life-profile.ts'), 'renderLifeProfile', lifeStyles),
+);
 registerRoute('/life/profile', () => {
   navigate('/profile');
 });
-registerRoute('/life/parallel', renderLifeParallel);
-registerRoute('/life/simulate', renderLifeSimulate);
-registerRoute('/life/forecast', renderLifeForecast);
-registerRoute('/liuyao', renderLiuyaoHome);
-registerRoute('/liuyao/reading', renderLiuyaoReading);
-registerRoute('/liuyao/learn', renderLiuyaoLearn);
-registerRoute('/liuyao/learn/board', renderLiuyaoLearnBoard);
-registerRoute('/liuyao/classic', renderLiuyaoClassic);
-registerRoute('/liuyao/bagua', renderLiuyaoBagua);
-registerRoute('/liuyao/hexagrams', renderLiuyaoHexagrams);
-registerRoute('/liuyao/hexagrams/notes', renderLiuyaoHexNotes);
-registerRoute('/liuyao/concepts', renderLiuyaoConcepts);
-registerRoute('/liuyao/journal', renderLiuyaoJournal);
-registerRoute('/liuyao/vault', renderLiuyaoVault);
-registerRoute('/liuyao/growth', renderLiuyaoGrowth);
-registerRoute('/records', renderJourney);
-registerRoute('/knowledge', (root) =>
-  renderGlobalPlaceholder(root, '知识库', '学习不同占问体系'),
+registerRoute(
+  '/life/parallel',
+  lazy(() => import('./pages/life-parallel.ts'), 'renderLifeParallel', lifeStyles),
 );
+registerRoute(
+  '/life/simulate',
+  lazy(() => import('./pages/life-simulate.ts'), 'renderLifeSimulate', lifeStyles),
+);
+registerRoute(
+  '/life/forecast',
+  lazy(() => import('./pages/life-forecast.ts'), 'renderLifeForecast', lifeStyles),
+);
+
+registerRoute(
+  '/liuyao',
+  lazy(() => import('./pages/liuyao-home.ts'), 'renderLiuyaoHome', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/reading',
+  lazy(() => import('./pages/liuyao-reading.ts'), 'renderLiuyaoReading', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/learn',
+  lazy(() => import('./pages/liuyao-learn.ts'), 'renderLiuyaoLearn', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/learn/board',
+  lazy(() => import('./pages/liuyao-learn-board.ts'), 'renderLiuyaoLearnBoard', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/classic',
+  lazy(() => import('./pages/liuyao-classic.ts'), 'renderLiuyaoClassic', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/bagua',
+  lazy(() => import('./pages/liuyao-bagua.ts'), 'renderLiuyaoBagua', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/hexagrams',
+  lazy(() => import('./pages/liuyao-hexagrams.ts'), 'renderLiuyaoHexagrams', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/hexagrams/notes',
+  lazy(() => import('./pages/liuyao-hex-notes.ts'), 'renderLiuyaoHexNotes', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/concepts',
+  lazy(() => import('./pages/liuyao-concepts.ts'), 'renderLiuyaoConcepts', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/journal',
+  lazy(() => import('./pages/liuyao-journal.ts'), 'renderLiuyaoJournal', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/vault',
+  lazy(() => import('./pages/liuyao-vault.ts'), 'renderLiuyaoVault', liuyaoStyles),
+);
+registerRoute(
+  '/liuyao/growth',
+  lazy(() => import('./pages/liuyao-growth.ts'), 'renderLiuyaoGrowth', liuyaoStyles),
+);
+
+registerRoute(
+  '/records',
+  lazy(() => import('./pages/journey.ts'), 'renderJourney'),
+);
+registerRoute('/knowledge', async (root) => {
+  const { renderGlobalPlaceholder } = await import('./pages/global-placeholder.ts');
+  return renderGlobalPlaceholder(root, '知识库', '学习不同占问体系');
+});
 
 // 旧路径兼容
 registerRoute('/codex', () => {
