@@ -11,12 +11,11 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
   plugins: [
-    ...(useHttps ? [basicSsl()] : []),
+    basicSsl(),
   ],
   server: {
     host: true,
     https: useHttps,
-    // 避免编辑器/agent 写文件未落盘时 Vite 热更新抢跑 → 空白
     watch: {
       awaitWriteFinish: {
         stabilityThreshold: 300,
