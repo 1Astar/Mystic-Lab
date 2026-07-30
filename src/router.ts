@@ -1,4 +1,6 @@
-export type RouteHandler = (root: HTMLElement) => void | Promise<void> | (() => void);
+export type RouteHandler = (
+  root: HTMLElement,
+) => void | (() => void) | Promise<void | (() => void)>;
 
 const routes = new Map<string, RouteHandler>();
 
