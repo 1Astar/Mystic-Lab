@@ -9,6 +9,13 @@ import {
   saveAiSettings,
   type AiSettings,
 } from '../ai/settings.ts';
+import {
+  friendlyQuotaCopy,
+  loadAiServiceMode,
+  saveAiServiceMode,
+  type AiServiceMode,
+} from '../ai/ai-mode.ts';
+import { isMysticAiEndpointReady } from '../ai/mystic-ai-client.ts';
 
 export function mountAiSettingsPanel(container: HTMLElement): void {
   const trigger = document.createElement('button');
@@ -40,7 +47,7 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
 
   let settings = loadAiSettings();
   let savedKey = settings.apiKey;
-  let savedStarSecret = settings.starPmCaptureSecret;
+  let serviceMode: AiServiceMode = loadAiServiceMode();
   let modelOptions = getFallbackModels(settings.providerId, settings.model);
   let modelsLoading = false;
   let modelsError = '';
@@ -54,10 +61,39 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
   overlay.setAttribute('aria-labelledby', 'ai-settings-modal-title');
 
   function renderStatus(): string {
-    if (isAiConfigured(settings)) {
-      return `<p class="ai-settings-status is-on">已启用 AI 解读 · ${escapeHtml(settings.model)}</p>`;
+    const quota = friendlyQuotaCopy(serviceMode);
+    if (serviceMode === 'mystic') {
+      const ready = isMysticAiEndpointReady();
+      return `<p class="ai-settings-status ${ready ? 'is-on' : ''}">Mystic AI · ${escapeHtml(quota.headline)}${
+        ready ? '' : ' · 接口即将开放'
+      }</p><p class="ai-hint">${escapeHtml(quota.detail)}</p>`;
     }
-    return `<p class="ai-settings-status">未配置时使用<strong>内置规则解读</strong>，占问、图鉴、手札均可正常使用。</p>`;
+    if (isAiConfigured(settings)) {
+      return `<p class="ai-settings-status is-on">使用我的 AI Key · ${escapeHtml(settings.model)}</p>`;
+    }
+    return `<p class="ai-settings-status">技术用户可填自己的 Key；普通用户可选 Mystic AI（免费体验 / 会员）。不配置也能用内置解读。</p>`;
+  }
+
+  function renderModeSwitch(): string {
+    return `
+      <div class="ai-field ai-mode-switch" role="radiogroup" aria-label="AI 模式">
+        <span class="ai-label">怎么用 AI</span>
+        <div class="ai-mode-chips">
+          <button type="button" class="ai-mode-chip ${serviceMode === 'mystic' ? 'is-active' : ''}" data-ai-mode="mystic">
+            使用 Mystic AI
+          </button>
+          <button type="button" class="ai-mode-chip ${serviceMode === 'byok' ? 'is-active' : ''}" data-ai-mode="byok">
+            使用我的 AI Key
+          </button>
+        </div>
+        <p class="ai-hint">${
+          serviceMode === 'mystic'
+            ? isMysticAiEndpointReady()
+              ? '一点就用：免费体验一次深度解读，之后还可追问。'
+              : '即将开放。开放前若你已有 Key，可临时改用「我的 AI Key」。'
+            : '自己配置接口与密钥，适合技术用户。'
+        }</p>
+      </div>`;
   }
 
   function renderProviderChips(): string {
@@ -105,9 +141,11 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
     return `
       <div class="ai-settings-status-wrap">${renderStatus()}</div>
       <form class="ai-settings-form" autocomplete="off">
+        ${renderModeSwitch()}
+        <div class="ai-byok-block" ${serviceMode === 'mystic' ? 'hidden' : ''}>
         <label class="ai-field ai-field-toggle">
           <input type="checkbox" name="enabled" ${settings.enabled ? 'checked' : ''} />
-          <span>启用 AI 解读（可选，不启用不影响使用）</span>
+          <span>启用我的 AI Key</span>
         </label>
         <div class="ai-field">
           <span class="ai-label">服务商</span>
@@ -124,18 +162,17 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
           <span class="ai-hint">${savedKey ? `已保存 ${escapeHtml(maskApiKey(savedKey))}，留空则保持不变` : '密钥仅保存在本机'}</span>
         </label>
         ${renderModelField()}
-        <div class="ai-field ai-starpm-block">
-          <span class="ai-label">问法反馈同步到 Star PM（可选）</span>
-          <input type="url" name="starPmBaseUrl" class="question-input" value="${escapeAttr(settings.starPmBaseUrl)}" placeholder="https://your-star-pm.vercel.app" />
-          <input type="password" name="starPmCaptureSecret" class="question-input" value="" placeholder="${savedStarSecret ? maskApiKey(savedStarSecret) : 'IDEAS_CAPTURE_SECRET'}" autocomplete="off" />
-          <span class="ai-hint">${savedStarSecret ? `已保存 ${escapeHtml(maskApiKey(savedStarSecret))}，留空保持不变。` : ''}不满意问法时写入随心而行收件箱；密钥仅本机。</span>
         </div>
         <div class="ai-settings-actions">
-          <button type="submit" class="btn btn-secondary btn-sm">保存配置</button>
-          <button type="button" class="btn btn-ghost btn-sm ai-test-api-btn" ${testLoading ? 'disabled' : ''}>
+          <button type="submit" class="btn btn-secondary btn-sm">保存</button>
+          ${
+            serviceMode === 'byok'
+              ? `<button type="button" class="btn btn-ghost btn-sm ai-test-api-btn" ${testLoading ? 'disabled' : ''}>
             ${testLoading ? '测试中…' : '测试连接'}
           </button>
-          <button type="button" class="btn btn-ghost btn-sm" data-clear>清除密钥</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-clear>清除密钥</button>`
+              : ''
+          }
         </div>
         ${testResult ? `<p class="ai-test-result ${testResult.ok ? 'is-ok' : 'is-err'}">${escapeHtml(testResult.text)}</p>` : ''}
         <p class="ai-save-msg" hidden></p>
@@ -148,8 +185,8 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
     <div class="ai-settings-modal-card">
       <header class="ai-settings-modal-header">
         <div>
-          <h2 id="ai-settings-modal-title" class="ai-settings-title">AI 解读（可选）</h2>
-          <p class="ai-settings-desc">支持 OpenAI 兼容接口。不配置也能完整使用；配置后「结合你的问题」会调用大模型。</p>
+          <h2 id="ai-settings-modal-title" class="ai-settings-title">让这卦更懂你</h2>
+          <p class="ai-settings-desc">普通用户一点就用；技术用户可接自己的 AI。不配置也能完整使用内置解读。</p>
         </div>
         <button type="button" class="ai-settings-modal-close" aria-label="关闭">×</button>
       </header>
@@ -165,7 +202,6 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
   function readFormSettings(form: HTMLFormElement): AiSettings {
     const fd = new FormData(form);
     const nextKey = String(fd.get('apiKey') ?? '').trim();
-    const nextStarSecret = String(fd.get('starPmCaptureSecret') ?? '').trim();
     const modelFromSelect = String(fd.get('model') ?? '').trim();
     const modelFromCustom = String(fd.get('modelCustom') ?? '').trim();
     return {
@@ -174,8 +210,6 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
       baseUrl: String(fd.get('baseUrl') ?? DEFAULT_AI_SETTINGS.baseUrl).trim() || DEFAULT_AI_SETTINGS.baseUrl,
       apiKey: nextKey || savedKey,
       model: modelFromCustom || modelFromSelect || DEFAULT_AI_SETTINGS.model,
-      starPmBaseUrl: String(fd.get('starPmBaseUrl') ?? '').trim(),
-      starPmCaptureSecret: nextStarSecret || savedStarSecret,
     };
   }
 
@@ -261,6 +295,14 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
       settings.model = modelCustom.value.trim();
     });
 
+    body.querySelectorAll<HTMLButtonElement>('[data-ai-mode]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        serviceMode = chip.dataset.aiMode === 'mystic' ? 'mystic' : 'byok';
+        saveAiServiceMode(serviceMode);
+        refreshForm();
+      });
+    });
+
     body.querySelectorAll<HTMLButtonElement>('.ai-provider-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         const id = chip.dataset.provider ?? 'openai';
@@ -306,20 +348,18 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
         return;
       }
       saveAiSettings(settings);
+      saveAiServiceMode(serviceMode);
       savedKey = settings.apiKey;
-      savedStarSecret = settings.starPmCaptureSecret;
-      (form.querySelector('[name="apiKey"]') as HTMLInputElement).value = '';
-      const starSecretInput = form.querySelector('[name="starPmCaptureSecret"]') as HTMLInputElement | null;
-      if (starSecretInput) starSecretInput.value = '';
+      const keyInput = form.querySelector('[name="apiKey"]') as HTMLInputElement | null;
+      if (keyInput) keyInput.value = '';
       statusWrap.innerHTML = renderStatus();
-      showMsg('已保存到本机');
+      showMsg('已保存');
       onSaved?.(settings);
     });
 
     body.querySelector('[data-clear]')?.addEventListener('click', () => {
       settings = { ...DEFAULT_AI_SETTINGS };
       savedKey = '';
-      savedStarSecret = '';
       modelOptions = getFallbackModels(settings.providerId);
       modelsError = '';
       testResult = null;

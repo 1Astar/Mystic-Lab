@@ -27,6 +27,7 @@ import {
   renderDeepCourseHtml,
   renderDeepNotesBlockHtml,
 } from './deep-course.ts';
+import { bindTermGloss, renderTermLabelHtml } from './term-gloss.ts';
 
 function renderSiZhuBar(sz: SiZhu, castAt?: Date): string {
   if (castAt) return renderCastTimePlaque(castAt, { compact: true });
@@ -168,30 +169,49 @@ export function renderHexHero(
     askable?: boolean;
     highlightIndexes?: number[];
     castAt?: Date;
-    /** 学习模式：用最终闭环一句话替换本卦旁 gist */
+    /**
+     * 对用户问题的一句话回应（来自剧本导演）。
+     * 有则置顶；本/变卦下方 gist 标成「卦名象意」，避免被当成答问。
+     */
+    answerLine?: string;
+    /** @deprecated 请用 answerLine；若无 answerLine 则仍可作为本卦旁说明 */
     primaryGist?: string;
   } = {},
 ): string {
-  const movingLabels =
+  const moveCore =
     cast.changingIndexes.length === 0
-      ? '无动爻'
-      : `动爻 ${cast.changingIndexes.map((i) => LINE_LABELS[i]!).join('、')}`;
+      ? renderTermLabelHtml('dong-yao', '无动爻', { askMark: true })
+      : `${renderTermLabelHtml('dong-yao', '动爻', { askMark: true })} ${cast.changingIndexes
+          .map((i) => LINE_LABELS[i]!)
+          .join('、')}`;
   const changedShi = cast.changed?.shiLine;
   const changedYing = changedShi ? yingLineOf(changedShi) : undefined;
   const askable = opts.askable ?? false;
   const highlightIndexes = opts.highlightIndexes ?? [];
   const castAt = opts.castAt ?? new Date();
-  const primaryGist = opts.primaryGist?.trim() || cast.primary.gist;
+  const answerLine = opts.answerLine?.trim() || opts.primaryGist?.trim() || '';
+  const primaryXiang = cast.primary.gist;
+  const changedXiang = cast.changed?.gist ?? '';
+
+  const answerBlock = answerLine
+    ? `<div class="ly-hex-hero-answer" data-briefing-section>
+        <p class="ly-hex-hero-answer-label">对你这个问题</p>
+        <p class="ly-hex-hero-answer-body">${formatClauseHtml(answerLine)}</p>
+      </div>`
+    : '';
 
   return `
     <header class="ly-hex-hero">
       ${renderCastTimePlaque(castAt)}
-      <p class="ly-hex-hero-meta">世${LINE_LABELS[cast.shiLine - 1]} · 应${LINE_LABELS[cast.yingLine - 1]} · ${movingLabels}${
-        askable ? ' · 点爻看旁注' : ''
-      }</p>
+      <p class="ly-hex-hero-meta">${renderTermLabelHtml('shi-yao', `世·我（${LINE_LABELS[cast.shiLine - 1]}）`, {
+        askMark: true,
+      })} · ${renderTermLabelHtml('ying-yao', `应·外（${LINE_LABELS[cast.yingLine - 1]}）`, {
+        askMark: true,
+      })} · ${moveCore}${askable ? ' · 点爻看旁注' : ''}</p>
+      ${answerBlock}
       <div class="ly-layer-pair ly-hex-hero-pair">
         <div class="ly-hex-hero-col ly-hex-inline-host" data-ask-hex>
-          <p class="ly-guide-label">本卦 · ${cast.primary.fullName}</p>
+          <p class="ly-guide-label">${renderTermLabelHtml('ben-gua', '本卦', { askMark: true })} · ${cast.primary.fullName}</p>
           ${renderHexagramSvg({
             lines: cast.primaryLines,
             shiLine: cast.shiLine,
@@ -202,10 +222,13 @@ export function renderHexHero(
             showAskButtons: askable,
             highlightIndexes,
           })}
-          <p class="ly-hex-hero-gist">${formatClauseHtml(primaryGist)}</p>
+          <p class="ly-hex-hero-gist-label">卦名象意 · 不等于回答</p>
+          <p class="ly-hex-hero-gist">${formatClauseHtml(primaryXiang)}</p>
         </div>
         <div class="ly-hex-hero-col">
-          <p class="ly-guide-label">变卦${cast.changed ? ` · ${cast.changed.fullName}` : ''}</p>
+          <p class="ly-guide-label">${renderTermLabelHtml('bian-gua', '变卦', { askMark: true })}${
+            cast.changed ? ` · ${cast.changed.fullName}` : ''
+          }</p>
           ${
             cast.changed
               ? `${renderHexagramSvg({
@@ -214,12 +237,12 @@ export function renderHexHero(
                   yingLine: changedYing,
                   changingIndexes: cast.changingIndexes,
                   showTrigramLabels: true,
-                })}<p class="ly-hex-hero-gist">${formatClauseHtml(cast.changed.gist)}</p>`
+                })}<p class="ly-hex-hero-gist-label">卦名象意 · 不等于回答</p><p class="ly-hex-hero-gist">${formatClauseHtml(changedXiang)}</p>`
               : '<p class="ly-guide-tip">无动则无变，时间轴停在本卦。</p>'
           }
         </div>
       </div>
-      <p class="ly-keywords ly-hex-hero-keywords">${cast.primary.keywords.join(' · ')}${
+      <p class="ly-keywords ly-hex-hero-keywords"><span class="ly-hex-hero-kw-label">关键词</span> ${cast.primary.keywords.join(' · ')}${
         cast.changed ? ` → ${cast.changed.keywords.join(' · ')}` : ''
       }</p>
       ${renderChangeHowHtml(cast)}
@@ -394,6 +417,8 @@ export function bindResultLayers(
 
   const deep = root.querySelector<HTMLElement>('[data-deep-panel]');
   if (deep) bindDeepPanel(deep, cast, question, castAt, refreshDeep);
+
+  bindTermGloss(root);
 
   return {
     getCastAt: () => castAt,

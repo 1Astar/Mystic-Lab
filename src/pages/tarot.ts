@@ -61,8 +61,8 @@ import {
   SPREADS,
   buildCustomPositions,
   buildLearningNote,
-  defaultCustomLabels,
   drawSpread,
+  freeCustomLabels,
   getTeachHint,
   resolveActiveSpread,
   setSessionCustomPositions,
@@ -109,7 +109,6 @@ export function renderTarot(root: HTMLElement): () => void {
   let state: TarotState = prefilledQuestion ? 'question' : 'landing';
   let question = prefilledQuestion;
   let spreadType: SpreadType = 'past-present-future';
-  let customLabels: string[] = defaultCustomLabels(3);
   let drawMode: DrawMode = defaultDrawMode(inputCaps);
   let motionEnabled = false;
   let questionCoach: QuestionCoachHandle | null = null;
@@ -487,54 +486,6 @@ export function renderTarot(root: HTMLElement): () => void {
         stage.innerHTML = `<h2 class="section-title">选择牌阵</h2><div class="spread-list" id="spread-list"></div>`;
         {
           const list = document.getElementById('spread-list')!;
-          const customEditorHost = document.createElement('div');
-          customEditorHost.className = 'custom-spread-editor';
-          customEditorHost.hidden = spreadType !== 'custom';
-
-          const renderCustomEditor = () => {
-            const count = customLabels.length;
-            customEditorHost.innerHTML = `
-              <p class="custom-spread-lead">选张数，并为每个位置起名（怎么摆由你定义）</p>
-              <div class="custom-spread-count" role="group" aria-label="抽牌张数">
-                <button type="button" class="btn btn-ghost btn-sm" data-count-dec aria-label="减少">−</button>
-                <span class="custom-spread-count-val">${count} 张</span>
-                <button type="button" class="btn btn-ghost btn-sm" data-count-inc aria-label="增加">+</button>
-              </div>
-              <ol class="custom-spread-positions">
-                ${customLabels
-                  .map(
-                    (label, i) => `
-                  <li>
-                    <label class="pre-reading-label" for="custom-pos-${i}">第 ${i + 1} 张</label>
-                    <input id="custom-pos-${i}" class="question-input custom-pos-input" type="text" maxlength="16" value="${escapePreReading(label)}" data-pos-index="${i}" />
-                  </li>`,
-                  )
-                  .join('')}
-              </ol>
-            `;
-            customEditorHost
-              .querySelector('[data-count-dec]')
-              ?.addEventListener('click', () => {
-                if (customLabels.length <= CUSTOM_SPREAD_MIN) return;
-                readCustomLabelsFromDom();
-                customLabels = customLabels.slice(0, -1);
-                renderCustomEditor();
-              });
-            customEditorHost
-              .querySelector('[data-count-inc]')
-              ?.addEventListener('click', () => {
-                if (customLabels.length >= CUSTOM_SPREAD_MAX) return;
-                readCustomLabelsFromDom();
-                customLabels = [...customLabels, `位置 ${customLabels.length + 1}`];
-                renderCustomEditor();
-              });
-          };
-
-          const readCustomLabelsFromDom = () => {
-            const inputs = customEditorHost.querySelectorAll<HTMLInputElement>('.custom-pos-input');
-            if (!inputs.length) return;
-            customLabels = [...inputs].map((el, i) => el.value.trim() || `位置 ${i + 1}`);
-          };
 
           const selectSpread = (type: SpreadType, wrap: HTMLElement) => {
             spreadType = type;
@@ -542,8 +493,6 @@ export function renderTarot(root: HTMLElement): () => void {
               el.classList.remove('is-selected');
             });
             wrap.classList.add('is-selected');
-            customEditorHost.hidden = type !== 'custom';
-            if (type === 'custom') renderCustomEditor();
           };
 
           for (const type of SPREAD_ORDER) {
@@ -576,22 +525,14 @@ export function renderTarot(root: HTMLElement): () => void {
             });
 
             card.append(btn, moreToggle, moreBox);
-            if (type === 'custom') {
-              card.appendChild(customEditorHost);
-              if (spreadType === 'custom') renderCustomEditor();
-            }
             list.appendChild(card);
           }
         }
         appendBtn('← 返回修改问题', () => setState('question'), 'btn btn-ghost');
         appendBtn('下一步 · 选择抽牌方式', () => {
           if (spreadType === 'custom') {
-            const inputs = stage.querySelectorAll<HTMLInputElement>('.custom-pos-input');
-            customLabels = [...inputs].map((el, i) => el.value.trim() || `位置 ${i + 1}`);
-            if (customLabels.length < CUSTOM_SPREAD_MIN) {
-              customLabels = defaultCustomLabels(3);
-            }
-            setSessionCustomPositions(buildCustomPositions(customLabels));
+            // 自由摆放：预留上限张数，抽够可提前翻开；不要求先填位置名
+            setSessionCustomPositions(buildCustomPositions(freeCustomLabels(CUSTOM_SPREAD_MAX)));
           } else {
             setSessionCustomPositions(null);
           }
@@ -705,6 +646,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
   function renderDrawStage(): void {
     renderBoardStage('draw');
+    appendCustomEarlyFinishIfReady();
   }
 
   function renderPlaceStage(): void {
@@ -714,6 +656,30 @@ export function renderTarot(root: HTMLElement): () => void {
       : { x: 50, y: 48 };
     renderBoardStage('place');
     syncPlaceAimUi();
+    appendCustomEarlyFinishIfReady();
+  }
+
+  /** 自定义：已摆 ≥ 最少张数时可提前结束，不必抽满上限 */
+  function appendCustomEarlyFinishIfReady(): void {
+    if (!isFreeArrangeSpread(spreadType)) return;
+    if (drawnCards.length < CUSTOM_SPREAD_MIN) return;
+    if (drawnCards.length >= cardPool.length) return;
+    appendBtn('抽够了，开始翻开', () => finishCustomEarly(), 'btn btn-ghost');
+  }
+
+  function finishCustomEarly(): void {
+    if (!isFreeArrangeSpread(spreadType)) return;
+    if (drawnCards.length < CUSTOM_SPREAD_MIN) return;
+    cardPool = drawnCards.map((c, i) => ({
+      ...c,
+      position: `第 ${i + 1} 张`,
+    }));
+    setSessionCustomPositions(
+      buildCustomPositions(cardPool.map((c) => c.position || `第 1 张`)),
+    );
+    boardPlacements = ensurePlacements(resolveActiveSpread(spreadType), boardPlacements);
+    revealedFlags = drawnCards.map(() => false);
+    setState('flip');
   }
 
   function allRevealed(): boolean {
@@ -751,10 +717,22 @@ export function renderTarot(root: HTMLElement): () => void {
     boardDragUnbind = null;
 
     const base = resolveActiveSpread(spreadType);
-    const needSlots = Math.max(base.positions.length, cardPool.length, currentIndex + 1);
+    const free = isFreeArrangeSpread(spreadType);
+    /** 自定义：阵位随已抽张数生长，不预先铺满空位 */
+    const needSlots = free
+      ? Math.min(
+          cardPool.length,
+          Math.max(
+            CUSTOM_SPREAD_MIN,
+            drawnCards.length,
+            currentIndex + 1,
+            phase === 'flip' ? drawnCards.length : 0,
+          ),
+        )
+      : Math.max(base.positions.length, cardPool.length, currentIndex + 1);
     const positions =
       needSlots <= base.positions.length
-        ? base.positions
+        ? base.positions.slice(0, needSlots)
         : [
             ...base.positions,
             ...Array.from({ length: needSlots - base.positions.length }, (_, i) => ({
@@ -771,7 +749,6 @@ export function renderTarot(root: HTMLElement): () => void {
     const spreadPos = spread.positions[currentIndex];
     const poolCard = cardPool[currentIndex];
     const posLabel = poolCard?.position ?? spreadPos?.label ?? `第 ${currentIndex + 1} 张`;
-    const free = isFreeArrangeSpread(spreadType);
     const revealedCount = revealedFlags.filter(Boolean).length;
 
     stage.innerHTML = renderDeckFanHTML();
@@ -807,7 +784,11 @@ export function renderTarot(root: HTMLElement): () => void {
       const progressHint =
         phase === 'flip'
           ? `<p class="tarot-hint">全盘 ${drawnCards.length} 张 · ${allRevealed() ? '已全部翻开' : `翻开中 ${revealedCount}/${drawnCards.length}`}</p>`
-          : `<p class="tarot-hint">第 ${currentIndex + 1}/${spread.positions.length} 张 · <strong>${posLabel}</strong></p>`;
+          : free
+            ? `<p class="tarot-hint">自由摆放 · 第 ${currentIndex + 1} 张${
+                drawnCards.length >= CUSTOM_SPREAD_MIN ? ' · 够了可提前翻开' : ` · 建议至少 ${CUSTOM_SPREAD_MIN} 张`
+              }</p>`
+            : `<p class="tarot-hint">第 ${currentIndex + 1}/${spread.positions.length} 张 · <strong>${posLabel}</strong></p>`;
 
       main.innerHTML = `
       ${drawMode === 'gesture' ? '<div id="camera-slot" class="camera-slot"></div>' : ''}
@@ -1686,8 +1667,8 @@ export function renderTarot(root: HTMLElement): () => void {
 
     hintBar.setProgress('抽牌成功');
     await wait(400);
-    // 手势模式：先摆阵；触屏/随心：直接落位后继续抽或进入全翻
-    if (drawMode === 'gesture') {
+    // 手势模式 / 自定义自由摆放：先摆阵；其余模式直接落位后继续
+    if (drawMode === 'gesture' || isFreeArrangeSpread(spreadType)) {
       setState('place');
     } else {
       advanceAfterPlaced();

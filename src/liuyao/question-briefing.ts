@@ -139,20 +139,20 @@ export function buildQuestionBriefing(
     topicLabel,
     questionLead: lead,
     layer1: {
-      title: '卦象定调',
+      title: '对你这个问题',
       body: pack.verdict.parse,
       quote: pack.verdict.headline,
     },
     layer2: {
-      title: truth?.title ?? '现状真相',
+      title: truth?.title ?? '就你的问题，盘面在说什么',
       body: truth?.body ?? whyBody(pack),
     },
     layer3: {
-      title: action?.title ?? '具体动作',
+      title: action?.title ?? '接下来可以做什么',
       body: action ? action.body : weekBody(pack),
     },
     layer4: {
-      title: calm?.title ?? '给你的核心定心丸',
+      title: calm?.title ?? '先松一口气',
       body: calm?.body ?? pack.reassurance ?? '',
     },
     strategy: {

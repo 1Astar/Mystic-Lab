@@ -82,7 +82,9 @@ describe('buildOfflineAnswerPack', () => {
     });
     expect(pack.answers.length).toBeGreaterThanOrEqual(2);
     expect(pack.answers.every((a) => a.evidence.length >= 1)).toBe(true);
-    expect(pack.script?.scene).toBe('quit_stay');
+    // 主意图按切片顺序：谈薪优先 → career；去留仍在 answers 里
+    expect(['career', 'quit_stay']).toContain(pack.script?.scene);
+    expect(pack.intents.some((h) => h.id === 'quit_vs_stay' || h.id === 'quit_now')).toBe(true);
     expect(pack.verdict.headline.length).toBeGreaterThan(8);
     expect(pack.verdict.parse).toMatch(/本卦|对应你的问题|核心隐喻/);
     expect(pack.verdict.parse.length).toBeGreaterThan(80);
@@ -139,7 +141,7 @@ describe('buildOfflineAnswerPack', () => {
     );
     expect(pack.breakthrough.body.length).toBeGreaterThan(8);
     expect(pack.breakthrough.title).not.toBe('本周一个可打勾动作');
-    expect(pack.breakthrough.title).toMatch(/锁一问|探针|探索|一句话|具体动作/);
+    expect(pack.breakthrough.title).toMatch(/锁一问|探针|探索|一句话|具体动作|接下来可以做什么/);
     expect(pack.script?.beats).toHaveLength(4);
     expect(pack.checklist.length).toBeGreaterThanOrEqual(1);
   });

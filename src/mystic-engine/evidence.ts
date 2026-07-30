@@ -1,7 +1,9 @@
 import type { CastResult } from '../liuyao/engine.ts';
 import { LINE_LABELS } from '../liuyao/hexagrams.ts';
-import { buildReadingFacts, LINE_ROLE } from '../liuyao/reading-facts.ts';
+import { LINE_ROLE } from '../liuyao/reading-facts.ts';
 import type { EvidenceLine, IntentId } from './types.ts';
+import { collectBoardSignals } from './board-signals.ts';
+import { mapConditionEvidence } from './fact-rules.ts';
 
 function primaryChangedEvidence(cast: CastResult): EvidenceLine {
   const from = cast.primary.keywords[0] ?? cast.primary.name;
@@ -40,50 +42,33 @@ function changingEvidence(cast: CastResult): EvidenceLine | null {
   };
 }
 
-/** 按意图挑选 2–4 条可回溯证据（只引用盘面已有事实） */
+/** 按意图 + 条件事实挑选可回溯证据 */
 export function mapEvidence(
   cast: CastResult,
   intentId: IntentId,
   question = '',
   castAt = new Date(),
 ): EvidenceLine[] {
-  const facts = buildReadingFacts(cast, question, castAt);
-  const lines: EvidenceLine[] = [primaryChangedEvidence(cast), shiEvidence(cast)];
+  const signals = collectBoardSignals({ question, cast, castAt, intentId });
+  const conditioned = mapConditionEvidence(signals).map((e) => ({
+    factKey: e.factKey,
+    plain: e.plain,
+  }));
+
+  const lines: EvidenceLine[] = [
+    primaryChangedEvidence(cast),
+    shiEvidence(cast),
+    ...conditioned,
+  ];
   const ch = changingEvidence(cast);
   if (ch) lines.push(ch);
 
-  if (facts.yong?.name) {
-    lines.push({
-      factKey: 'yong',
-      plain: `本题用神倾向「${facts.yong.name}」：${facts.yong.tip || facts.yong.why}`,
-    });
-  }
-
-  // 职场意图强调变卦方向感
-  if (
-    (intentId === 'salary_negotiate' ||
-      intentId === 'probation_convert' ||
-      intentId === 'quit_now' ||
-      intentId === 'quit_vs_stay' ||
-      intentId === 'job_search_window' ||
-      intentId === 'career_promote' ||
-      intentId === 'career_transfer' ||
-      intentId === 'career_startup' ||
-      intentId === 'wealth_income' ||
-      intentId === 'wealth_invest') &&
-    cast.changed
-  ) {
-    lines.push({
-      factKey: 'changed_gist',
-      plain: `变卦方向：「${cast.changed.gist}」——当决策参考，不是死刑判决。`,
-    });
-  }
-
-  // 去重 factKey，最多 4 条
   const seen = new Set<string>();
-  return lines.filter((e) => {
-    if (seen.has(e.factKey)) return false;
-    seen.add(e.factKey);
-    return true;
-  }).slice(0, 4);
+  return lines
+    .filter((e) => {
+      if (seen.has(e.factKey)) return false;
+      seen.add(e.factKey);
+      return true;
+    })
+    .slice(0, 5);
 }

@@ -390,19 +390,5 @@ export function bindFollowupGestures(
     });
   });
 
-  if (!root.querySelector('[data-follow-fab]')) {
-    const fab = document.createElement('button');
-    fab.type = 'button';
-    fab.className = 'ly-follow-fab';
-    fab.dataset.followFab = '1';
-    fab.textContent = '追问 AI';
-    fab.addEventListener('click', () => {
-      openFollowupChat({
-        cast: opts.cast,
-        question: opts.question,
-        castAt: opts.castAt,
-      });
-    });
-    root.appendChild(fab);
-  }
+  // 底部主 CTA 由 bindPersonalizeFab 挂载
 }

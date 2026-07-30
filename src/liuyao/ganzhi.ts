@@ -1,5 +1,6 @@
 ﻿import { Solar } from 'lunar-javascript';
 import { LIU_CHONG } from './yao-special.ts';
+import { renderTermLabelHtml } from './term-gloss.ts';
 
 export type SiZhu = {
   year: string;
@@ -86,14 +87,20 @@ export function renderCastTimePlaque(date: Date, opts?: { compact?: boolean }): 
       </div>
       ${
         sz.dayXunKong
-          ? `<p class="ly-time-plaque-meta">日空亡 ${escapeHtml(sz.dayXunKong)} · 日干 ${escapeHtml(sz.dayStem)}</p>`
+          ? `<p class="ly-time-plaque-meta">${renderTermLabelHtml('kong-wang', '日空亡', {
+              askMark: true,
+            })} ${escapeHtml(sz.dayXunKong)} · 日干 ${escapeHtml(sz.dayStem)}</p>`
           : `<p class="ly-time-plaque-meta">日干 ${escapeHtml(sz.dayStem)}</p>`
       }
       <p class="ly-time-plaque-chong">冲看这里：日支<strong>${escapeHtml(dayBr)}</strong>冲<strong>${escapeHtml(
         LIU_CHONG[dayBr] ?? '—',
-      )}</strong>（暗动）· 月支<strong>${escapeHtml(monthBr)}</strong>冲<strong>${escapeHtml(
-        LIU_CHONG[monthBr] ?? '—',
-      )}</strong>（月破）</p>
+      )}</strong>（${renderTermLabelHtml('an-dong', '暗动', { askMark: true })}）· 月支<strong>${escapeHtml(
+        monthBr,
+      )}</strong>冲<strong>${escapeHtml(LIU_CHONG[monthBr] ?? '—')}</strong>（${renderTermLabelHtml(
+        'yue-po',
+        '月破',
+        { askMark: true },
+      )}）</p>
     </aside>
   `;
 }

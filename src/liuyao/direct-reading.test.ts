@@ -62,14 +62,15 @@ describe('question-briefing', () => {
     const q = '我要不要留在冠英？8月初要不要离职？转正能拿到8k吗？';
     const b = buildQuestionBriefing(cast, q, new Date('2026-07-24T14:56:00'));
     expect(b.questionLead).toMatch(/基于/);
-    expect(b.layer1.title).toMatch(/卦象定调/);
+    expect(b.layer1.title).toMatch(/对你这个问题/);
     expect(b.pack.script?.beats).toHaveLength(4);
     expect(b.pack.verdict.headline.length).toBeGreaterThan(8);
     expect(b.pack.answers.length).toBeGreaterThanOrEqual(2);
-    expect(b.layer2.title).toMatch(/现状真相/);
-    expect(b.layer3.title).toMatch(/具体动作/);
-    expect(b.layer4.title).toMatch(/定心丸/);
+    expect(b.layer2.title).toMatch(/为何这样看|盘面在说什么|眼下/);
+    expect(b.layer3.title).toMatch(/接下来|具体动作/);
+    expect(b.layer4.title).toMatch(/松一口气|定心丸/);
     expect(b.pack.breakthrough.body).not.toMatch(/只选一个可验证动作/);
+    expect(b.pack.why.length).toBeGreaterThanOrEqual(2);
   });
 
   it('renders briefing with answer pack', () => {
@@ -80,12 +81,17 @@ describe('question-briefing', () => {
       new Date('2026-07-24T14:56:00'),
     );
     expect(html).toMatch(/ly-question-briefing/);
-    expect(html).toMatch(/卦象定调/);
-    expect(html).toMatch(/给你的核心定心丸|现状真相|具体动作|底线与防备/);
+    expect(html).toMatch(/核心方向/);
+    expect(html).toMatch(/对你这个问题/);
+    expect(html).toMatch(/现状与转机/);
+    expect(html).toMatch(/具体动作/);
+    expect(html).toMatch(/心理定心丸/);
+    expect(html).toMatch(/综合论断|为何这样看|什么时候该停/);
     expect(html).toMatch(/ly-layer-card/);
     expect(html).toMatch(/盘面辅读|世在/);
     expect(html).toMatch(/ly-classic-fold/);
     expect(html).not.toMatch(/爻相细说/);
     expect(html).not.toMatch(/为什么这么判断？/);
+    expect(html).not.toMatch(/四段剧本/);
   });
 });

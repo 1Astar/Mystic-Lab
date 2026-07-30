@@ -1,11 +1,10 @@
 /**
  * OfflineAnswerPack 共用渲染：此刻解读 + 速断
- * 优先四段剧本：定心丸 → 现状真相 → 具体动作 → 底线
+ * 主结构：核心方向 / 对你这个问题 / 综合论断 / 现状与转机 / 具体动作 / 心理定心丸
  */
 import type { CastResult } from '../liuyao/engine.ts';
 import { navigate } from '../router.ts';
 import type { OfflineAnswerPack } from './types.ts';
-import type { ScriptBeat } from './script-play.ts';
 import { escapeHtml, formatProseHtml } from './prose.ts';
 import { pickQuickGuideChips, QUICK_GUIDE_BY_ID } from './quick-guides.ts';
 
@@ -163,32 +162,55 @@ function layerHead(title: string, sub: string): string {
     </header>`;
 }
 
-function highlightComfortHtml(text: string, cast: CastResult | undefined): string {
-  const esc = escapeHtml(text);
-  const linked = cast ? linkifyHexInHtml(esc, cast) : esc;
-  // 抚慰金句：含「别急/不是你的/守住/气馁/自我怀疑」等整句加亮
-  return linked.replace(
-    /([^。！？\n]*?(?:别急|不要因此|不要自我怀疑|并非来自你|守住你的|不是你的能力|该停则停)[^。！？\n]*[。！？]?)/g,
-    '<strong class="ly-script-gold">$1</strong>',
-  );
-}
-
-function renderScriptBeat(
-  beat: ScriptBeat,
+function renderSynthesis(
+  script: NonNullable<OfflineAnswerPack['script']>,
   cast: CastResult | undefined,
 ): string {
-  const isOps = beat.id === 'action' || beat.id === 'boundary';
-  const body =
-    beat.id === 'calm'
-      ? `<div class="ly-pack-prose">${highlightComfortHtml(beat.body, cast)}</div>`
-      : formatLinkedProse(beat.body, cast);
-
+  const syn = script.synthesis;
+  if (!syn) return '';
+  const leanClass = `is-${syn.outcome.lean}`;
   return `
-    <section class="ly-layer-card ly-script-beat${isOps ? ' is-ops' : ''}" data-briefing-section data-script-beat="${beat.id}">
-      <header class="ly-layer-head">
-        <h3 class="ly-layer-title">${escapeHtml(beat.title)}</h3>
-      </header>
-      ${body}
+    <section class="ly-layer-card ly-script-synthesis" data-briefing-section data-script-synthesis>
+      ${layerHead('综合论断', '趋势参考 · 非绝对')}
+      <p class="ly-synthesis-lean ${leanClass}">${escapeHtml(syn.outcome.label)}</p>
+      <div class="ly-synthesis-lead">${formatLinkedProse(syn.outcome.text, cast)}</div>
+      <div class="ly-synthesis-block">
+        <h4 class="ly-synthesis-h">发展趋势</h4>
+        ${formatLinkedProse(syn.trend, cast)}
+      </div>
+      <div class="ly-synthesis-block">
+        <h4 class="ly-synthesis-h">应期推断</h4>
+        ${formatLinkedProse(syn.timing, cast)}
+      </div>
+      <details class="ly-synthesis-more">
+        <summary>展开具体细节（爻位 · 六亲 · 六神）</summary>
+        <div class="ly-synthesis-block">
+          <h4 class="ly-synthesis-h">具体细节</h4>
+          ${formatLinkedProse(syn.details, cast)}
+        </div>
+        <p class="ly-synthesis-note">${escapeHtml(syn.disclaimer)}</p>
+      </details>
+    </section>`;
+}
+
+/** 问题回应条：补充在核心方向之下，不替换旧卦象主调 */
+function renderQuestionAnswerStrip(
+  script: NonNullable<OfflineAnswerPack['script']>,
+  cast: CastResult | undefined,
+): string {
+  const truth = script.beats.find((b) => b.id === 'truth');
+  return `
+    <section class="ly-layer-card ly-question-answer" data-briefing-section data-layer="q-answer">
+      ${layerHead('对你这个问题', '一句话回应')}
+      <p class="ly-pack-headline ly-verdict-card">${escapeHtml(script.headline)}</p>
+      ${
+        truth?.body
+          ? `<details class="ly-truth-fold">
+              <summary>为何这样看（盘面信号）</summary>
+              <div class="ly-pack-prose">${formatLinkedProse(truth.body, cast)}</div>
+            </details>`
+          : ''
+      }
     </section>`;
 }
 
@@ -197,24 +219,21 @@ function renderScriptPlay(
   cast: CastResult | undefined,
 ): string {
   const script = pack.script;
-  if (!script) return '';
+  if (!script) {
+    return `${renderCoreLayer(pack, cast)}
+    ${renderPulseLayer(pack, cast)}
+    ${renderActionLayer(pack, cast)}
+    ${renderReassureLayer(pack, cast)}`;
+  }
 
-  const hexLine = cast
-    ? `<p class="ly-script-hexmeta">${escapeHtml(cast.primary.fullName)}${
-        cast.changed ? ` → ${escapeHtml(cast.changed.fullName)}` : ''
-      }</p>`
-    : '';
-
+  /** 样式以旧四层卡片为主；剧本/论断作补充层 */
   return `
-    <section class="ly-layer-card ly-script-verdict" data-briefing-section data-layer="verdict">
-      <header class="ly-layer-head">
-        <h3 class="ly-layer-title">卦象定调</h3>
-        <span class="ly-layer-sub">一句话结论</span>
-      </header>
-      ${hexLine}
-      <p class="ly-pack-headline ly-verdict-card">${escapeHtml(script.headline)}</p>
-    </section>
-    ${script.beats.map((b) => renderScriptBeat(b, cast)).join('')}`;
+    ${renderCoreLayer(pack, cast)}
+    ${renderQuestionAnswerStrip(script, cast)}
+    ${renderSynthesis(script, cast)}
+    ${renderPulseLayer(pack, cast)}
+    ${renderActionLayer(pack, cast)}
+    ${renderReassureLayer(pack, cast)}`;
 }
 
 function renderCoreLayer(
@@ -364,7 +383,7 @@ function renderWhyCard(
     fallbackLines.find((l) => l.startsWith('建议'))?.replace(/^建议[：:]\s*/, '') ||
     '';
   const tipHtml = tipText
-    ? `<p class="ly-why-tip"><span class="ly-why-tip-label">建议</span>${
+    ? `<p class="ly-why-tip"><span class="ly-why-tip-label">Mystic 建议</span>${
         cast ? linkifyHexInHtml(escapeHtml(tipText), cast) : escapeHtml(tipText)
       }</p>`
     : '';
@@ -508,14 +527,7 @@ export function renderAnswerPackHtml(
       ${topicLabel ? `<p class="ly-briefing-topic">${escapeHtml(topicLabel)}</p>` : ''}
       ${pack.contextUsed ? `<p class="ly-pack-context">已带入档案</p>` : ''}
 
-      ${
-        pack.script
-          ? renderScriptPlay(pack, cast)
-          : `${renderCoreLayer(pack, cast)}
-      ${renderPulseLayer(pack, cast)}
-      ${renderActionLayer(pack, cast)}
-      ${renderReassureLayer(pack, cast)}`
-      }
+      ${renderScriptPlay(pack, cast)}
       ${subAnswers}
 
       ${

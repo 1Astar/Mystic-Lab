@@ -128,8 +128,8 @@ export function renderHexagramSvg(opts: HexagramViewOptions): string {
           <text class="ly-yao-tag-strong ${isShi ? 'is-shi' : 'is-ying'}" x="2" y="${y + 4}">${isShi ? '世·我' : '应·外'}</text>
         `;
       } else if (isShi || isYing) {
-        const tags = [isShi ? '世' : '', isYing ? '应' : ''].filter(Boolean).join('/');
-        decor = `<text class="ly-yao-tag" x="${Math.max(2, leftExtra - 20)}" y="${y + 4}">${tags}</text>`;
+        const tags = [isShi ? '世·我' : '', isYing ? '应·外' : ''].filter(Boolean).join('/');
+        decor = `<text class="ly-yao-tag" x="${Math.max(2, leftExtra - 28)}" y="${y + 4}">${tags}</text>`;
       }
 
       if (highlightIndexes.includes(i) && !pending) {

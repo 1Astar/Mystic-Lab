@@ -6,10 +6,6 @@ export type AiSettings = {
   baseUrl: string;
   apiKey: string;
   model: string;
-  /** Star PM 根地址，用于问法反馈同步，如 https://xxx.vercel.app */
-  starPmBaseUrl: string;
-  /** Ideas capture secret，仅本机保存 */
-  starPmCaptureSecret: string;
 };
 
 const STORAGE_KEY = 'mystic-lab-ai-settings';
@@ -20,8 +16,6 @@ export const DEFAULT_AI_SETTINGS: AiSettings = {
   baseUrl: 'https://api.openai.com/v1',
   apiKey: '',
   model: 'gpt-4o-mini',
-  starPmBaseUrl: '',
-  starPmCaptureSecret: '',
 };
 
 export function loadAiSettings(): AiSettings {
@@ -37,8 +31,6 @@ export function loadAiSettings(): AiSettings {
       baseUrl,
       apiKey: parsed.apiKey ?? '',
       model: parsed.model?.trim() || DEFAULT_AI_SETTINGS.model,
-      starPmBaseUrl: parsed.starPmBaseUrl?.trim() || DEFAULT_AI_SETTINGS.starPmBaseUrl,
-      starPmCaptureSecret: parsed.starPmCaptureSecret ?? '',
     };
   } catch {
     return { ...DEFAULT_AI_SETTINGS };
@@ -51,10 +43,6 @@ export function saveAiSettings(settings: AiSettings): void {
 
 export function isAiConfigured(settings = loadAiSettings()): boolean {
   return settings.enabled && settings.apiKey.trim().length > 0;
-}
-
-export function isStarPmCaptureConfigured(settings = loadAiSettings()): boolean {
-  return settings.starPmBaseUrl.trim().length > 0 && settings.starPmCaptureSecret.trim().length > 0;
 }
 
 export function maskApiKey(key: string): string {
