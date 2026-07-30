@@ -4,7 +4,13 @@ import './styles/module-themes.css';
 import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
 import { renderLabHome } from './pages/lab-home.ts';
-import { initRouter, navigate, registerRoute, type RouteHandler } from './router.ts';
+import {
+  initRouter,
+  navigate,
+  paintRouteLoading,
+  registerRoute,
+  type RouteHandler,
+} from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
 
 function lazy(
@@ -13,12 +19,15 @@ function lazy(
   styles: Array<() => Promise<unknown>> = [],
 ): RouteHandler {
   return async (root) => {
+    paintRouteLoading(root);
     await Promise.all(styles.map((s) => s()));
     const mod = await loader();
     const renderFn = (mod as Record<string, unknown>)[exportName] as RouteHandler | undefined;
     if (typeof renderFn !== 'function') {
       throw new Error(`lazy route missing export: ${exportName}`);
     }
+    // 页面多用 appendChild，先清掉「载入中」占位
+    root.innerHTML = '';
     return renderFn(root);
   };
 }
