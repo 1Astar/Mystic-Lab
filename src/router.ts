@@ -10,29 +10,44 @@ export function navigate(path: string): void {
   if (path !== location.pathname) {
     history.pushState({}, '', path);
   }
-  render();
+  void render();
 }
 
 let cleanup: (() => void) | null = null;
+let renderSeq = 0;
 
-export function render(): void {
+function paintRouteLoading(root: HTMLElement): void {
+  root.innerHTML = `
+    <div class="page route-loading" style="padding:48px 24px;color:#e8e2d5;background:#08090d;min-height:100vh;display:grid;place-items:center;opacity:0.72;font-family:system-ui,sans-serif">
+      <p style="margin:0;font-size:0.9rem;letter-spacing:0.08em">载入中…</p>
+    </div>
+  `;
+}
+
+export async function render(): Promise<void> {
   const root = document.querySelector<HTMLElement>('#app');
   if (!root) return;
+
+  const seq = ++renderSeq;
 
   if (cleanup) {
     cleanup();
     cleanup = null;
   }
 
-  root.innerHTML = '';
   const path = location.pathname.replace(/\/$/, '') || '/';
   const handler = routes.get(path) ?? routes.get('/')!;
+
+  paintRouteLoading(root);
+
   try {
-    const result = handler(root);
+    const result = await handler(root);
+    if (seq !== renderSeq) return;
     if (typeof result === 'function') {
       cleanup = result;
     }
   } catch (err) {
+    if (seq !== renderSeq) return;
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[router]', path, err);
     root.innerHTML = `
@@ -48,8 +63,10 @@ export function render(): void {
 }
 
 export function initRouter(): void {
-  window.addEventListener('popstate', render);
-  render();
+  window.addEventListener('popstate', () => {
+    void render();
+  });
+  void render();
 }
 
 export function link(path: string): string {
