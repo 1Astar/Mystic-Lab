@@ -16,9 +16,10 @@ export function navigate(path: string): void {
 let cleanup: (() => void) | null = null;
 let renderSeq = 0;
 
-function paintRouteLoading(root: HTMLElement): void {
+/** 懒加载期间的占位；真正渲染前必须清掉（许多页面用 appendChild） */
+export function paintRouteLoading(root: HTMLElement): void {
   root.innerHTML = `
-    <div class="page route-loading" style="padding:48px 24px;color:#e8e2d5;background:#08090d;min-height:100vh;display:grid;place-items:center;opacity:0.72;font-family:system-ui,sans-serif">
+    <div class="page route-loading" style="padding:48px 24px;color:#e8e2d5;background:#08090d;min-height:40vh;display:grid;place-items:center;opacity:0.72;font-family:system-ui,sans-serif">
       <p style="margin:0;font-size:0.9rem;letter-spacing:0.08em">载入中…</p>
     </div>
   `;
@@ -35,10 +36,10 @@ export async function render(): Promise<void> {
     cleanup = null;
   }
 
+  // 与历史行为一致：先清空。同步页（如首页）直接 append；勿先画全屏「载入中」
+  root.innerHTML = '';
   const path = location.pathname.replace(/\/$/, '') || '/';
   const handler = routes.get(path) ?? routes.get('/')!;
-
-  paintRouteLoading(root);
 
   try {
     const result = await handler(root);
