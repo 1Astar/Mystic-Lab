@@ -7,6 +7,8 @@ import { formatSolarDateTime, solarToLunar, type LunarDate } from '../xiaoliuren
 import { buildPhaseTeach, renderPhaseTeachCard } from '../xiaoliuren/lesson-copy.ts';
 import { buildAiReading, buildProcessExplanation } from '../xiaoliuren/interpret.ts';
 import { saveXiaoliurenJournalEntry, updateXiaoliurenReflection } from '../xiaoliuren/journal.ts';
+import { draftFromXiaoliuren } from '../share/drafts.ts';
+import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { renderSixGodIcon, getSixGodByIndex, sixGodOneLiner } from '../xiaoliuren/six-gods.ts';
 import {
   bindProfileContextBar,
@@ -779,6 +781,36 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
             navigate('/xiaoliuren/journal');
           });
           actions.appendChild(journalBtn);
+
+          const inviteHost = document.createElement('div');
+          inviteHost.className = 'ms-invite-host';
+          mountInviteCompanionBar(inviteHost, {
+            unitLabel: '这次结果',
+            system: 'xiaoliuren',
+            draft: () => {
+              if (!lesson) {
+                return draftFromXiaoliuren({
+                  godName: '小六壬',
+                  question,
+                  summary: '',
+                  sections: [],
+                });
+              }
+              return draftFromXiaoliuren({
+                godName: lesson.result.name,
+                question,
+                summary: sixGodOneLiner(lesson.result),
+                gods: [lesson.result.name],
+                sections: [
+                  { heading: '传统含义', body: reading.meaning },
+                  { heading: '结合你的问题', body: reading.analysis },
+                  { heading: '现在更适合', body: reading.suggestion },
+                  { heading: '提醒', body: reading.reflection },
+                ],
+              });
+            },
+          });
+          actions.appendChild(inviteHost);
         }
 
         appendBtn('也用塔罗看一眼', () => {

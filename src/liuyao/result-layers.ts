@@ -176,8 +176,15 @@ export function renderHexHero(
     answerLine?: string;
     /** @deprecated 请用 answerLine；若无 answerLine 则仍可作为本卦旁说明 */
     primaryGist?: string;
+    /**
+     * afterReading：只出时间/世应/一句话，卦象图留给解读正文之后再画
+     * diagrams：只出本/变卦图 + 关键词（配合 afterReading）
+     * full：旧行为，一句话 + 卦象连在一起（默认）
+     */
+    part?: 'full' | 'chrome' | 'diagrams';
   } = {},
 ): string {
+  const part = opts.part ?? 'full';
   const moveCore =
     cast.changingIndexes.length === 0
       ? renderTermLabelHtml('dong-yao', '无动爻', { askMark: true })
@@ -200,15 +207,16 @@ export function renderHexHero(
       </div>`
     : '';
 
-  return `
-    <header class="ly-hex-hero">
+  const chrome = `
       ${renderCastTimePlaque(castAt)}
       <p class="ly-hex-hero-meta">${renderTermLabelHtml('shi-yao', `世·我（${LINE_LABELS[cast.shiLine - 1]}）`, {
         askMark: true,
       })} · ${renderTermLabelHtml('ying-yao', `应·外（${LINE_LABELS[cast.yingLine - 1]}）`, {
         askMark: true,
       })} · ${moveCore}${askable ? ' · 点爻看旁注' : ''}</p>
-      ${answerBlock}
+      ${answerBlock}`;
+
+  const diagrams = `
       <div class="ly-layer-pair ly-hex-hero-pair">
         <div class="ly-hex-hero-col ly-hex-inline-host" data-ask-hex>
           <p class="ly-guide-label">${renderTermLabelHtml('ben-gua', '本卦', { askMark: true })} · ${cast.primary.fullName}</p>
@@ -245,7 +253,18 @@ export function renderHexHero(
       <p class="ly-keywords ly-hex-hero-keywords"><span class="ly-hex-hero-kw-label">关键词</span> ${cast.primary.keywords.join(' · ')}${
         cast.changed ? ` → ${cast.changed.keywords.join(' · ')}` : ''
       }</p>
-      ${renderChangeHowHtml(cast)}
+      ${renderChangeHowHtml(cast)}`;
+
+  if (part === 'chrome') {
+    return `<header class="ly-hex-hero ly-hex-hero--chrome">${chrome}</header>`;
+  }
+  if (part === 'diagrams') {
+    return `<section class="ly-hex-hero ly-hex-hero--diagrams" aria-label="本卦与变卦">${diagrams}</section>`;
+  }
+  return `
+    <header class="ly-hex-hero">
+      ${chrome}
+      ${diagrams}
     </header>
   `;
 }

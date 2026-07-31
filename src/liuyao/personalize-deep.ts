@@ -92,7 +92,7 @@ function toast(msg: string): void {
   }, 1800);
 }
 
-/** 打开「贴合你」收集 + 深度解读 */
+/** 打开深度解读：补充情况 + 生成解读 + 可追问 */
 export function openPersonalizeDeep(opts: {
   cast: CastResult;
   question: string;
@@ -112,8 +112,8 @@ export function openPersonalizeDeep(opts: {
     <div class="ly-personalize-sheet" role="dialog" aria-modal="true" aria-labelledby="ly-p-title">
       <header class="ly-personalize-head">
         <div>
-          <p class="ly-personalize-kicker">✨ 更贴合你</p>
-          <h2 id="ly-p-title">补充一点情况</h2>
+          <p class="ly-personalize-kicker">✦ 深度解读</p>
+          <h2 id="ly-p-title">想让这卦更贴合你的实际情况？</h2>
         </div>
         <button type="button" class="ly-personalize-x" data-p-close aria-label="关闭">×</button>
       </header>
@@ -239,7 +239,7 @@ export function openPersonalizeDeep(opts: {
         aiSessionId: sessionId,
         initialAssistant: text,
       });
-      toast(opts.journalId ? '已写入手札 · 可继续追问' : friendlyQuotaCopy().headline);
+      toast(opts.journalId ? '深度解读已写入 · 可继续追问' : '深度解读已生成 · 可继续追问');
     } catch (err) {
       const msg = err instanceof Error ? err.message : '分析失败';
       status.textContent =
@@ -269,28 +269,30 @@ export function openPersonalizeDeep(opts: {
   requestAnimationFrame(() => modal.classList.add('is-open'));
 }
 
-/** 底部主 CTA：文案 + 按钮，对齐旧版「深度解读 | 问问AI」 */
+/** 结果页左侧 AI 入口（叠在分享下方，不占页底、不挡右上关闭） */
 export function bindPersonalizeFab(
   root: HTMLElement,
   opts: { cast: CastResult; question: string; castAt?: Date; journalId?: string | null },
 ): void {
   root.querySelector('[data-follow-fab]')?.remove();
   root.querySelector('[data-personalize-fab-wrap]')?.remove();
-  if (root.querySelector('[data-personalize-fab]')) return;
+  document.querySelectorAll('[data-ly-ai-fab]').forEach((el) => el.remove());
 
-  const wrap = document.createElement('div');
-  wrap.className = 'ly-personalize-cta-wrap';
-  wrap.dataset.personalizeFabWrap = '1';
-  wrap.innerHTML = `
-    <p class="ly-personalize-cta-lead">✨ 想让这次解读更贴合你的情况？</p>
-    <button type="button" class="ly-follow-fab ly-personalize-fab" data-personalize-fab>
-      深度解读 | 问问AI
-    </button>
-  `;
-  wrap.querySelector('[data-personalize-fab]')?.addEventListener('click', () => {
+  const hint = '想让这卦更贴合你的实际情况？';
+  const fab = document.createElement('button');
+  fab.type = 'button';
+  fab.className = 'ly-ai-side-fab';
+  fab.dataset.lyAiFab = '1';
+  fab.dataset.personalizeFab = '1';
+  fab.title = hint;
+  fab.setAttribute('aria-label', hint);
+  fab.innerHTML = `<span class="ly-ai-side-fab-ico" aria-hidden="true">✦</span><span>深度解读</span>`;
+  fab.addEventListener('click', () => {
     openPersonalizeDeep(opts);
   });
-  root.appendChild(wrap);
+
+  const app = document.querySelector('#app') || document.body;
+  app.appendChild(fab);
 }
 
 /** @deprecated 引导卡已改为底部按钮；保留空实现以免旧调用报错 */

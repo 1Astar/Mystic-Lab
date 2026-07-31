@@ -10,6 +10,8 @@ import {
   saveSimulation,
 } from '../life/storage.ts';
 import type { ChoiceSimulation } from '../life/types.ts';
+import { draftGeneric } from '../share/drafts.ts';
+import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -128,7 +130,30 @@ export function renderLifeSimulate(root: HTMLElement): () => void {
           ? `<p class="life-sim-foot">已标记一条轨迹。可以过几周回来对照：现实有没有朝这个方向滑动？</p>`
           : ''
       }
+      <div class="ms-invite-host" data-life-invite></div>
     `;
+
+    const inviteHost = resultEl.querySelector('[data-life-invite]');
+    if (inviteHost) {
+      mountInviteCompanionBar(inviteHost as HTMLElement, {
+        unitLabel: '这次推演',
+        system: 'life',
+        draft: () => {
+          const sections = sim.branches.map((b) => ({
+            heading: `${b.label} · ${b.title}`,
+            body: `${b.trajectory.join(' → ')}\n${b.note}`,
+          }));
+          return draftGeneric({
+            system: 'life',
+            headline: '选择模拟',
+            question: sim.question,
+            summary: sim.branches.map((b) => `${b.label}:${b.title}`).join(' · '),
+            sections,
+            label: sim.horizonLabel,
+          });
+        },
+      });
+    }
 
     resultEl.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((btn) => {
       btn.addEventListener('click', () => {

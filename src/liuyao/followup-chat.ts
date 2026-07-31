@@ -148,7 +148,7 @@ function toast(msg: string): void {
   }, 1600);
 }
 
-/** 打开追问聊天弹层 */
+/** 打开追问聊天弹层；若带 initialAssistant，则以「深度解读」为主，下方可继续追问 */
 export function openFollowupChat(opts: {
   cast: CastResult;
   question: string;
@@ -169,6 +169,8 @@ export function openFollowupChat(opts: {
   const system = buildFollowupSystemPrompt(cast, question);
   const presets = buildFollowupPresets(cast, question);
   const label = hexChangeLabel(cast);
+  const deepText = opts.initialAssistant?.trim() || '';
+  const isDeepMode = Boolean(deepText);
   const history: ChatTurn[] = [];
   let aiSessionId = opts.aiSessionId ?? null;
 
@@ -179,14 +181,25 @@ export function openFollowupChat(opts: {
     <div class="ly-follow-chat-sheet" role="dialog" aria-modal="true" aria-labelledby="ly-follow-title">
       <header class="ly-follow-chat-head">
         <div>
-          <p class="ly-follow-chat-kicker">追问陪读</p>
+          <p class="ly-follow-chat-kicker">${isDeepMode ? '深度解读' : '追问陪读'}</p>
           <h2 id="ly-follow-title">「${escapeHtml(label)}」</h2>
         </div>
         <button type="button" class="ly-follow-chat-x" data-follow-close aria-label="关闭">×</button>
       </header>
-      <p class="ly-follow-chat-persona">陪你把卦译回现实 · 坚定温柔</p>
+      <p class="ly-follow-chat-persona">${
+        isDeepMode
+          ? '先看完这一篇，有不清楚的再往下追问'
+          : '陪你把卦译回现实 · 坚定温柔'
+      }</p>
       ${
-        opts.seedContext && !opts.initialAssistant
+        isDeepMode
+          ? `<section class="ly-follow-deep" data-follow-deep>
+              <p class="ly-follow-deep-body">${escapeHtml(deepText).replace(/\n/g, '<br>')}</p>
+            </section>`
+          : ''
+      }
+      ${
+        opts.seedContext && !isDeepMode
           ? `<p class="ly-follow-seed-ctx">已附上选中内容：${escapeHtml(opts.seedContext.slice(0, 80))}${opts.seedContext.length > 80 ? '…' : ''}</p>`
           : ''
       }
@@ -198,16 +211,20 @@ export function openFollowupChat(opts: {
           )
           .join('')}
       </div>
-      <div class="ly-follow-messages" data-follow-messages></div>
+      <div class="ly-follow-messages" data-follow-messages ${isDeepMode ? 'data-follow-qa' : ''}></div>
       ${
         isAiConfigured()
           ? opts.journalId
-            ? '<p class="ly-follow-ai-hint">对话会写入本卦手札，可在记录里回看。</p>'
+            ? `<p class="ly-follow-ai-hint">${
+                isDeepMode ? '解读与追问都会写入本卦手札。' : '对话会写入本卦手札，可在记录里回看。'
+              }</p>`
             : ''
           : `<p class="ly-follow-ai-hint">未配置 AI 时用规则短答。<button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button></p>`
       }
       <form class="ly-follow-composer" data-follow-form>
-        <textarea class="question-input" data-follow-input rows="2" placeholder="继续追问…"></textarea>
+        <textarea class="question-input" data-follow-input rows="2" placeholder="${
+          isDeepMode ? '对这篇解读继续追问…' : '继续追问…'
+        }"></textarea>
         <button type="submit" class="btn ly-btn-gold" data-follow-send>发送</button>
       </form>
     </div>
@@ -219,7 +236,11 @@ export function openFollowupChat(opts: {
   const sendBtn = modal.querySelector<HTMLButtonElement>('[data-follow-send]')!;
 
   const paintMessages = () => {
-    messagesEl.innerHTML = history
+    // 深度解读正文已在上方专区，消息区只画追问回合
+    const visible = isDeepMode
+      ? history.filter((t, i) => !(i === 0 && t.role === 'assistant' && t.content === deepText))
+      : history;
+    messagesEl.innerHTML = visible
       .map(
         (t) => `
       <div class="ly-follow-bubble is-${t.role}">
@@ -227,6 +248,7 @@ export function openFollowupChat(opts: {
       </div>`,
       )
       .join('');
+    messagesEl.hidden = visible.length === 0;
     messagesEl.scrollTop = messagesEl.scrollHeight;
   };
 
@@ -240,8 +262,8 @@ export function openFollowupChat(opts: {
     if (sid) aiSessionId = sid;
   };
 
-  if (opts.initialAssistant?.trim()) {
-    history.push({ role: 'assistant', content: opts.initialAssistant.trim() });
+  if (deepText) {
+    history.push({ role: 'assistant', content: deepText });
   }
 
   const close = () => {
@@ -275,6 +297,7 @@ export function openFollowupChat(opts: {
     const thinking = document.createElement('div');
     thinking.className = 'ly-follow-bubble is-assistant is-thinking';
     thinking.innerHTML = '<p>陪读正在想…</p>';
+    messagesEl.hidden = false;
     messagesEl.appendChild(thinking);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 
@@ -336,7 +359,7 @@ export function openFollowupChat(opts: {
     modal.classList.add('is-open');
     paintMessages();
   });
-  if (opts.seedAsk && !opts.initialAssistant) void runAsk(opts.seedAsk);
+  if (opts.seedAsk && !isDeepMode) void runAsk(opts.seedAsk);
   else input.focus();
 }
 

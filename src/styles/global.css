@@ -1407,6 +1407,11 @@ body {
   opacity: 0.8;
 }
 
+.journey-continue-btn {
+  margin-top: 12px;
+  width: 100%;
+}
+
 .journey-empty-actions {
   display: flex;
   flex-direction: column;

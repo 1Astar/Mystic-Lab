@@ -73,13 +73,20 @@ export function mountEnvBanner(
   root: HTMLElement,
   opts?: { forCameraGesture?: boolean },
 ): void {
-  // 摄像头/手势相关提示只在抽牌仪式页展示，避免全站刷「去 Safari」
+  // 默认不挂环境横幅；摄像头提示请用 syncCameraGestureBanner
   if (!opts?.forCameraGesture) return;
+  syncCameraGestureBanner(root, true);
+}
+
+/** 仅在塔罗「手势抽卡」模式下展示去浏览器提示；切走即移除 */
+export function syncCameraGestureBanner(root: HTMLElement, enabled: boolean): void {
+  root.querySelectorAll('.env-banner[data-camera-gesture]').forEach((el) => el.remove());
+  if (!enabled) return;
   const env = detectBrowserEnv();
   const banner = createEnvBanner(env);
-  if (banner) {
-    root.prepend(banner);
-  }
+  if (!banner) return;
+  banner.dataset.cameraGesture = '1';
+  root.prepend(banner);
 }
 
 export async function copyPageLink(): Promise<boolean> {

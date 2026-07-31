@@ -500,7 +500,7 @@
 .ly-replay {
   position: fixed;
   inset: 0;
-  z-index: 320;
+  z-index: 500;
   opacity: 0;
   transition: opacity 0.22s ease;
   color: var(--ly-mist, #e8e2d5);
@@ -4650,6 +4650,16 @@ a.ly-derived-name:hover {
   background: transparent;
 }
 
+.ly-hex-hero--chrome {
+  margin-bottom: 10px;
+}
+
+.ly-hex-hero--diagrams {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .ly-hex-hero-meta {
   margin: 0 0 10px;
   text-align: center;
@@ -7841,6 +7851,27 @@ a.ly-derived-name:hover {
   margin-top: 4px;
 }
 
+.ly-briefing-to-course-link {
+  display: block;
+  margin-top: 6px;
+  text-align: center;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: rgba(199, 164, 91, 0.92);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 6px 4px;
+}
+
+.ly-briefing-to-course-link:hover,
+.ly-briefing-to-course-link:focus-visible {
+  color: #e8d7a8;
+}
+
 .ly-briefing-actions {
   display: flex;
   flex-direction: column;
@@ -7899,7 +7930,8 @@ a.ly-derived-name:hover {
 .ly-personalize-modal {
   position: fixed;
   inset: 0;
-  z-index: 400;
+  /* 高于结果复原浮层(.ly-replay:500)，否则填写层被结果盖住 */
+  z-index: 560;
   pointer-events: none;
 }
 
@@ -11404,19 +11436,52 @@ body.ly-yao-modal-open {
 }
 
 .ly-personalize-cta-wrap {
-  margin: 20px 4px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: stretch;
+  display: none;
 }
 
 .ly-personalize-cta-lead {
-  margin: 0;
-  text-align: center;
+  display: none;
+}
+
+.ly-follow-fab {
+  display: none;
+}
+
+/* 深度解读：紧挨分享左侧，同排右上 */
+.ly-ai-side-fab {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  right: calc(max(12px, env(safe-area-inset-right, 0px)) + 44px + 5.75rem);
+  left: auto;
+  z-index: 520;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 164, 91, 0.45);
+  background: rgba(18, 16, 24, 0.92);
+  color: #e8d7a8;
   font-size: 0.88rem;
-  letter-spacing: 0.04em;
-  color: rgba(232, 210, 160, 0.88);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.ly-ai-side-fab:active {
+  transform: scale(0.97);
+}
+.ly-ai-side-fab-ico {
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0.95;
+}
+
+/* 点牌弹窗打开时隐藏侧边入口，避免挡关闭 */
+html.thread-peek-open .ms-share-fab,
+html.thread-peek-open .ly-ai-side-fab {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .ly-truth-fold {
@@ -11439,26 +11504,6 @@ body.ly-yao-modal-open {
 
 .ly-truth-fold > summary::-webkit-details-marker {
   display: none;
-}
-
-.ly-follow-fab {
-  position: sticky;
-  bottom: 12px;
-  z-index: 5;
-  display: block;
-  width: calc(100% - 8px);
-  margin: 0 auto;
-  padding: 12px 16px;
-  border: 0;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.92rem;
-  letter-spacing: 0.08em;
-  line-height: 1.35;
-  color: #1a1208;
-  background: linear-gradient(135deg, #e8d2a0, #c98c48);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
 }
 
 .ly-personalize-actions {
@@ -11492,7 +11537,7 @@ body.ly-yao-modal-open {
   position: fixed;
   left: 50%;
   bottom: 88px;
-  z-index: 410;
+  z-index: 570;
   transform: translateX(-50%) translateY(8px);
   padding: 8px 14px;
   border-radius: 999px;
@@ -11513,7 +11558,8 @@ body.ly-yao-modal-open {
 .ly-follow-chat {
   position: fixed;
   inset: 0;
-  z-index: 400;
+  /* 与深度解读填写层同级，盖在结果复原之上 */
+  z-index: 560;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -11594,6 +11640,30 @@ body.ly-yao-modal-open {
   margin: 8px 0 0;
   font-size: 0.74rem;
   color: rgba(201, 168, 108, 0.7);
+}
+
+.ly-follow-deep {
+  margin-top: 14px;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  max-height: min(42vh, 420px);
+  overflow-y: auto;
+}
+
+.ly-follow-deep-body {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: #f0e6d2;
+  white-space: normal;
+}
+
+.ly-follow-messages[data-follow-qa]:not([hidden]) {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ly-follow-seed-ctx {

@@ -39,6 +39,9 @@ import {
   bindPersonalizeFab,
   bindPersonalizeGuide,
 } from '../../liuyao/personalize-deep.ts';
+import { draftFromLiuyao } from '../../share/drafts.ts';
+import { mountInviteCompanionBar } from '../../share/invite-bar.ts';
+import { loadLiuyaoJournal } from '../../liuyao/journal.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -46,6 +49,37 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function bindShareResultButton(
+  host: HTMLElement,
+  opts: {
+    cast: CastResult;
+    question: string;
+    castAt: Date;
+    journalId?: string | null;
+    reading: FourLayerReading;
+  },
+): void {
+  mountInviteCompanionBar(host, {
+    unitLabel: '这一卦',
+    system: 'liuyao',
+    draft: () => {
+      let aiText: string | undefined;
+      if (opts.journalId) {
+        const entry = loadLiuyaoJournal().find((e) => e.id === opts.journalId);
+        const deep = entry?.aiSessions?.find((s) => s.deepReading)?.deepReading;
+        if (deep) aiText = deep;
+      }
+      return draftFromLiuyao({
+        cast: opts.cast,
+        question: opts.question,
+        reading: opts.reading,
+        castAt: opts.castAt,
+        aiText,
+      });
+    },
+  });
 }
 
 function renderTagChips(selected: string[]): string {
@@ -184,9 +218,9 @@ export function mountLiuyaoResultTabs(
             <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>
               📖 打开卦象精读
             </button>
-            <button type="button" class="btn ly-briefing-to-course" data-goto-teach>
+            <a class="ly-briefing-to-course-link" href="#teach" data-goto-teach>
               想弄懂为什么 → 去六步学习
-            </button>
+            </a>
           </div>
         </div>
         <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
@@ -202,6 +236,8 @@ export function mountLiuyaoResultTabs(
   bindYaoAskButtons(host, cast, question, castAt);
   bindFollowupGestures(host, { cast, question, castAt, journalId });
   bindAnswerPackGestures(host, cast);
+  // 先挂分享，再挂深度解读：分享卸载不会误删深度入口
+  bindShareResultButton(host, { cast, question, castAt, journalId, reading: opts.reading });
   if (learn) {
     bindPersonalizeGuide(host, { cast, question, castAt, journalId });
     bindQinDict(host);
@@ -225,7 +261,8 @@ export function mountLiuyaoResultTabs(
   };
   paintTags();
 
-  host.querySelector('[data-goto-teach]')?.addEventListener('click', () => {
+  host.querySelector('[data-goto-teach]')?.addEventListener('click', (e) => {
+    e.preventDefault();
     host.querySelector<HTMLButtonElement>('.ly-result-tab[data-tab="teach"]')?.click();
     host.querySelector('[data-learn-course]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });

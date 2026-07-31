@@ -21,14 +21,14 @@ export function mountAiSettingsPanel(container: HTMLElement): void {
   const trigger = document.createElement('button');
   trigger.type = 'button';
   trigger.className = 'ai-settings-trigger';
-  trigger.setAttribute('aria-label', 'AI 解读配置');
+  trigger.setAttribute('aria-label', '深度解读配置');
 
   function updateTrigger(settings: AiSettings): void {
     const on = isAiConfigured(settings);
     trigger.classList.toggle('is-on', on);
     trigger.innerHTML = `
       <span class="ai-settings-trigger-dot" aria-hidden="true"></span>
-      <span class="ai-settings-trigger-label">AI 解读</span>
+      <span class="ai-settings-trigger-label">深度解读</span>
       <span class="ai-settings-trigger-hint">${on ? `已启用 · ${escapeHtml(settings.model)}` : '可选配置'}</span>
     `;
   }
@@ -344,7 +344,7 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
       e.preventDefault();
       settings = readFormSettings(form);
       if (settings.enabled && !settings.apiKey.trim()) {
-        showMsg('请填写 API Key，或先关闭「启用 AI 解读」', false);
+        showMsg('请填写 API Key，或先关闭「启用深度解读」', false);
         return;
       }
       saveAiSettings(settings);

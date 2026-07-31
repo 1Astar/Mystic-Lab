@@ -21,6 +21,8 @@ import {
 import { parseBirthParts } from '../bazi/parse-birth.ts';
 import { formatBirthBrief, hasBirthInfo, loadLifeStore } from '../life/storage.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
+import { draftFromBazi } from '../share/drafts.ts';
+import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -203,6 +205,31 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
     if (mode === 'natal') bindLiunian();
     if (mode === 'hepan') bindHepanForm();
+    page.querySelector('[data-bazi-invite]') &&
+      mountInviteCompanionBar(page.querySelector('[data-bazi-invite]')!, {
+        unitLabel: '这份排盘',
+        system: 'bazi',
+        draft: () => {
+          const pillarsLabel = chart.pillars
+            .filter((p) => !p.empty)
+            .map((p) => `${p.title}${p.stem}${p.branch}`)
+            .join(' · ');
+          return draftFromBazi({
+            dayMaster: chart.dayMaster,
+            pillarsLabel,
+            question: '四柱排盘',
+            summary: `日主 ${chart.dayMaster}${chart.dayMasterWx ? ` · ${chart.dayMasterWx}` : ''} · ${pillarsLabel}`,
+            sections: [
+              {
+                heading: '日主',
+                body: `${chart.dayMaster}${chart.dayMasterWx ? `（${chart.dayMasterWx}）` : ''}`,
+              },
+              { heading: '四柱', body: pillarsLabel },
+              { heading: '流年', body: String(chart.liunianYear) },
+            ],
+          });
+        },
+      });
   }
 
   function renderNatal(chart: BaziChart): string {
@@ -226,6 +253,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
       ${renderGrid(chart)}
       ${seasonBlock(chart)}
+      <div class="ms-invite-host bazi-share" data-bazi-invite></div>
     `;
   }
 

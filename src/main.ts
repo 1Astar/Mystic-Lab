@@ -3,6 +3,7 @@ import './styles/emblems.css';
 import './styles/module-themes.css';
 import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
+import './styles/share.css';
 import { renderLabHome } from './pages/lab-home.ts';
 import {
   initRouter,
@@ -12,6 +13,7 @@ import {
   type RouteHandler,
 } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
+import { syncShareOwnerRewards } from './share/sheet.ts';
 
 function lazy(
   loader: () => Promise<{ default?: RouteHandler } | Record<string, unknown>>,
@@ -190,7 +192,11 @@ registerRoute(
 
 registerRoute(
   '/records',
-  lazy(() => import('./pages/journey.ts'), 'renderJourney'),
+  lazy(() => import('./pages/journey.ts'), 'renderJourney', [
+    () => import('./styles/liuyao.css'),
+    () => import('./styles/xiaoliuren.css'),
+    () => import('./styles/tarot.css'),
+  ]),
 );
 registerRoute('/knowledge', async (root) => {
   const { renderGlobalPlaceholder } = await import('./pages/global-placeholder.ts');
@@ -222,6 +228,7 @@ registerRoute('/liu-yao', () => {
 
 initRouter();
 mountAppVersion();
+void syncShareOwnerRewards();
 
 function paintBootError(err: unknown): void {
   const root = document.querySelector<HTMLElement>('#app');

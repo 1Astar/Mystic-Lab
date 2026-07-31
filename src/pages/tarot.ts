@@ -35,6 +35,8 @@ import {
 import { resolveResumeFromStash } from '../journal/resume.ts';
 import { mergeReadingBackground } from '../life/profile-context.ts';
 import { navigate } from '../router.ts';
+import { draftFromTarot } from '../share/drafts.ts';
+import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
 import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
@@ -71,7 +73,7 @@ import {
   setSessionCustomPositions,
   type SpreadType,
 } from '../tarot/spreads.ts';
-import { mountEnvBanner } from '../ui/banner.ts';
+import { syncCameraGestureBanner } from '../ui/banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { createDebugPanel, isDebugMode } from '../ui/debug-panel.ts';
 import { createGestureHintBar, type RitualStep } from '../ui/gesture-hint-bar.ts';
@@ -155,7 +157,6 @@ export function renderTarot(root: HTMLElement): () => void {
 
   const page = document.createElement('div');
   page.className = 'page tarot-page';
-  mountEnvBanner(page, { forCameraGesture: true });
 
   const back = document.createElement('button');
   back.type = 'button';
@@ -183,6 +184,10 @@ export function renderTarot(root: HTMLElement): () => void {
   root.appendChild(page);
   attachPersonSwitcherToPage(page);
   document.body.appendChild(hintBar.el);
+
+  function syncGestureEnvBanner(): void {
+    syncCameraGestureBanner(page, drawMode === 'gesture');
+  }
 
   function ritualStep(): RitualStep | null {
     const ritualStates = ['ritual', 'shuffle', 'cut', 'draw', 'place', 'flip'] as const;
@@ -567,6 +572,7 @@ export function renderTarot(root: HTMLElement): () => void {
             if (opt.available) {
               item.addEventListener('click', () => {
                 drawMode = opt.mode;
+                syncGestureEnvBanner();
                 list.querySelectorAll('.draw-mode-option').forEach((el) => el.classList.remove('is-selected'));
                 item.classList.add('is-selected');
               });
@@ -575,6 +581,7 @@ export function renderTarot(root: HTMLElement): () => void {
           }
         }
         appendBtn('开始仪式', () => void startRitualWithMode());
+        syncGestureEnvBanner();
         break;
 
       case 'loading':
@@ -1265,12 +1272,26 @@ export function renderTarot(root: HTMLElement): () => void {
       questionRewrite?.open();
     });
 
-    const shareBtn = document.createElement('button');
-    shareBtn.type = 'button';
-    shareBtn.className = 'btn';
-    shareBtn.textContent = '保存心意卡片';
-    shareBtn.addEventListener('click', () => void downloadShareCard(drawnCards, reading!, question));
+    const inviteHost = document.createElement('div');
+    inviteHost.className = 'ms-invite-host';
+    mountInviteCompanionBar(inviteHost, {
+      unitLabel: '这次结果',
+      system: 'tarot',
+      draft: () =>
+        draftFromTarot({
+          cards: drawnCards,
+          reading: reading!,
+          question,
+        }),
+    });
 
+    const cardPngBtn = document.createElement('button');
+    cardPngBtn.type = 'button';
+    cardPngBtn.className = 'btn btn-ghost';
+    cardPngBtn.textContent = '保存心意卡片（旧版）';
+    cardPngBtn.addEventListener('click', () =>
+      void downloadShareCard(drawnCards, reading!, question),
+    );
     const codexBtn = document.createElement('button');
     codexBtn.type = 'button';
     codexBtn.className = 'btn btn-secondary';
@@ -1300,7 +1321,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
     const resultActions = document.createElement('div');
     resultActions.className = 'result-actions';
-    resultActions.append(shareBtn, codexBtn, journalBtn, crossBtn, retryBtn);
+    resultActions.append(cardPngBtn, codexBtn, journalBtn, crossBtn, retryBtn);
 
     if (supplementCount < MAX_SUPPLEMENT) {
       const theme = supplementThemeLabel(question);
@@ -1313,9 +1334,11 @@ export function renderTarot(root: HTMLElement): () => void {
       const hint = document.createElement('p');
       hint.className = 'supplement-guide-hint';
       hint.textContent = `如果还不够清晰，可针对【${theme}】再补一张`;
+    actions.appendChild(inviteHost);
     actions.appendChild(resultActions);
       actions.appendChild(hint);
     } else {
+      actions.appendChild(inviteHost);
       actions.appendChild(resultActions);
     }
 
@@ -1360,6 +1383,7 @@ export function renderTarot(root: HTMLElement): () => void {
     camera.stop();
     cameraOn = false;
     gestureFallback = !env.canUseGesture;
+    syncGestureEnvBanner();
     setState('landing');
   }
 
@@ -1388,6 +1412,7 @@ export function renderTarot(root: HTMLElement): () => void {
     camera.stop();
     cameraOn = false;
     gestureFallback = !env.canUseGesture;
+    syncGestureEnvBanner();
     setState(question ? 'spread' : 'question');
   }
 
@@ -1396,6 +1421,7 @@ export function renderTarot(root: HTMLElement): () => void {
     if (!selected?.available) {
       drawMode = defaultDrawMode(inputCaps);
     }
+    syncGestureEnvBanner();
 
     if (drawMode === 'gesture') {
       await beginGestureRitual();
@@ -1487,6 +1513,7 @@ export function renderTarot(root: HTMLElement): () => void {
   async function beginGestureRitual(): Promise<void> {
     if (env.shouldBlockCamera) {
       drawMode = 'touch';
+      syncGestureEnvBanner();
       cardPool = drawSpread(spreadType);
       gestureFallback = false;
       setState('ritual');
@@ -1497,6 +1524,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const camResult = await camera.start(cameraWrap);
     if (!camResult.ok) {
       drawMode = 'touch';
+      syncGestureEnvBanner();
       gestureFallback = false;
       cardPool = drawSpread(spreadType);
       setState('loading');
@@ -1900,6 +1928,7 @@ export function renderTarot(root: HTMLElement): () => void {
     revealedFlags = s.revealedFlags;
     reading = s.reading;
     drawMode = 'touch';
+    syncGestureEnvBanner();
     boardPlacements = ensurePlacements(resolveActiveSpread(spreadType), null);
     setState(s.readyForResult ? 'flip' : 'draw');
     hintBar.setProgress(

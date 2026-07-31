@@ -113,9 +113,12 @@ export function openXiaoliurenJournalReplay(
   host.querySelector('[data-xlr-replay]')?.remove();
   const overlay = document.createElement('div');
   overlay.dataset.xlrReplay = '';
-  mountXiaoliurenReadingReplay(overlay, entry, () => {
-    overlay.classList.remove('is-visible');
-    window.setTimeout(() => overlay.remove(), 220);
-  });
   host.appendChild(overlay);
+  void import('../styles/xiaoliuren.css').then(() => {
+    if (!overlay.isConnected) return;
+    mountXiaoliurenReadingReplay(overlay, entry, () => {
+      overlay.classList.remove('is-visible');
+      window.setTimeout(() => overlay.remove(), 220);
+    });
+  });
 }

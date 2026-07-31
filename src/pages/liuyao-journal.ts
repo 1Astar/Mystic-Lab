@@ -100,7 +100,7 @@ export function renderLiuyaoJournal(root: HTMLElement): void {
         <p class="ly-journal-summary">${entry.summary}</p>
         ${
           entry.aiSessions?.length
-            ? `<p class="ly-journal-ai-badge">含 AI 解读 · ${entry.aiSessions.length} 段</p>`
+            ? `<p class="ly-journal-ai-badge">含深度解读 · ${entry.aiSessions.length} 段</p>`
             : ''
         }
         <p class="ly-journal-open-hint">点击查看当时卦象与解读 →</p>

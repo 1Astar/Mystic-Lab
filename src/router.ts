@@ -41,6 +41,23 @@ export async function render(): Promise<void> {
   // 与历史行为一致：先清空。同步页（如首页）直接 append；勿先画全屏「载入中」
   root.innerHTML = '';
   const path = location.pathname.replace(/\/$/, '') || '/';
+
+  // 分享深页 /s/:id
+  if (path.startsWith('/s/')) {
+    const id = decodeURIComponent(path.slice(3));
+    const { renderShareView } = await import('./pages/share-view.ts');
+    try {
+      const result = await renderShareView(root, id);
+      if (seq !== renderSeq) return;
+      if (typeof result === 'function') cleanup = result;
+    } catch (err) {
+      if (seq !== renderSeq) return;
+      const msg = err instanceof Error ? err.message : String(err);
+      root.innerHTML = `<div class="page" style="padding:24px;color:#e8e2d5"><h1>分享页加载失败</h1><p>${msg}</p></div>`;
+    }
+    return;
+  }
+
   const handler = routes.get(path) ?? routes.get('/')!;
 
   try {

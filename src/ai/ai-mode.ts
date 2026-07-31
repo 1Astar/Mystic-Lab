@@ -1,20 +1,18 @@
 /**
- * AI 双模式 + 本地额度文案（去工具感）
- * Mystic 托管接口未就绪时：模式可存、额度可演示；真请求走 BYOK。
+ * AI 双模式 + 本地额度（免费深度/追问 + 分享赠送 bonusCredits）
  */
 export type AiServiceMode = 'byok' | 'mystic';
 
 export type AiQuotaState = {
-  /** 已用深度解读次数 */
   deepUsed: number;
-  /** 深度之后已用追问次数 */
   followUsed: number;
+  /** 分享奖励：深度或追问各扣 1 */
+  bonusCredits: number;
 };
 
 const MODE_KEY = 'mystic-lab-ai-service-mode';
 const QUOTA_KEY = 'mystic-lab-ai-quota-v1';
 
-/** 免费：1 次深度 + 2 次追问（Mystic 模式本地计数；BYOK 不限） */
 export const FREE_DEEP_LIMIT = 1;
 export const FREE_FOLLOW_LIMIT = 2;
 
@@ -34,45 +32,80 @@ export function saveAiServiceMode(mode: AiServiceMode): void {
 export function loadAiQuota(): AiQuotaState {
   try {
     const raw = localStorage.getItem(QUOTA_KEY);
-    if (!raw) return { deepUsed: 0, followUsed: 0 };
+    if (!raw) return { deepUsed: 0, followUsed: 0, bonusCredits: 0 };
     const p = JSON.parse(raw) as Partial<AiQuotaState>;
     return {
       deepUsed: Math.max(0, Number(p.deepUsed) || 0),
       followUsed: Math.max(0, Number(p.followUsed) || 0),
+      bonusCredits: Math.max(0, Number(p.bonusCredits) || 0),
     };
   } catch {
-    return { deepUsed: 0, followUsed: 0 };
+    return { deepUsed: 0, followUsed: 0, bonusCredits: 0 };
   }
 }
 
 export function saveAiQuota(state: AiQuotaState): void {
-  localStorage.setItem(QUOTA_KEY, JSON.stringify(state));
+  localStorage.setItem(
+    QUOTA_KEY,
+    JSON.stringify({
+      deepUsed: state.deepUsed,
+      followUsed: state.followUsed,
+      bonusCredits: state.bonusCredits ?? 0,
+    }),
+  );
+}
+
+/** 还剩多少次免费 AI（含分享赠送） */
+export function freeAiRemaining(quota = loadAiQuota()): number {
+  const deepLeft = Math.max(0, FREE_DEEP_LIMIT - quota.deepUsed);
+  const followLeft = Math.max(0, FREE_FOLLOW_LIMIT - quota.followUsed);
+  return deepLeft + followLeft + quota.bonusCredits;
+}
+
+export function grantBonusCredits(n: number): AiQuotaState {
+  const q = loadAiQuota();
+  const next = {
+    ...q,
+    bonusCredits: q.bonusCredits + Math.max(0, Math.floor(n)),
+  };
+  saveAiQuota(next);
+  return next;
+}
+
+function consumeBonusOr(record: () => AiQuotaState): AiQuotaState {
+  const q = loadAiQuota();
+  if (q.bonusCredits > 0) {
+    const next = { ...q, bonusCredits: q.bonusCredits - 1 };
+    saveAiQuota(next);
+    return next;
+  }
+  return record();
 }
 
 export function recordDeepUse(): AiQuotaState {
-  const q = loadAiQuota();
-  const next = { ...q, deepUsed: q.deepUsed + 1 };
-  saveAiQuota(next);
-  return next;
+  return consumeBonusOr(() => {
+    const q = loadAiQuota();
+    const next = { ...q, deepUsed: q.deepUsed + 1 };
+    saveAiQuota(next);
+    return next;
+  });
 }
 
 export function recordFollowUse(): AiQuotaState {
-  const q = loadAiQuota();
-  const next = { ...q, followUsed: q.followUsed + 1 };
-  saveAiQuota(next);
-  return next;
+  return consumeBonusOr(() => {
+    const q = loadAiQuota();
+    const next = { ...q, followUsed: q.followUsed + 1 };
+    saveAiQuota(next);
+    return next;
+  });
 }
 
 export type FriendlyQuotaCopy = {
-  /** 短引导，如「免费体验一次深度解读」 */
   headline: string;
-  /** 一句说明 */
   detail: string;
-  /** deep | follow | exhausted | byok */
-  phase: 'deep_free' | 'follow' | 'exhausted' | 'byok';
+  phase: 'deep_free' | 'follow' | 'exhausted' | 'byok' | 'bonus';
 };
 
-/** 禁止「今日剩余 N 次」式工具文案 */
 export function friendlyQuotaCopy(
   mode: AiServiceMode = loadAiServiceMode(),
   quota: AiQuotaState = loadAiQuota(),
@@ -91,25 +124,39 @@ export function friendlyQuotaCopy(
       detail: '第一次：让这卦结合你的经历与顾虑，重新分析一遍。',
     };
   }
-  const left = Math.max(0, FREE_FOLLOW_LIMIT - quota.followUsed);
-  if (left > 0) {
+  const followLeft = Math.max(0, FREE_FOLLOW_LIMIT - quota.followUsed);
+  if (followLeft > 0) {
     return {
       phase: 'follow',
-      headline: left === 2 ? '还可以继续追问 2 次' : `还可以继续追问 ${left} 次`,
+      headline:
+        followLeft === 2
+          ? '还可以继续追问 2 次'
+          : `还可以继续追问 ${followLeft} 次`,
       detail: '深度解读之后，把没问清的再问清楚。',
+    };
+  }
+  if (quota.bonusCredits > 0) {
+    return {
+      phase: 'bonus',
+      headline:
+        quota.bonusCredits === 1
+          ? '还有 1 次免费 AI（分享奖励）'
+          : `还有 ${quota.bonusCredits} 次免费 AI（分享奖励）`,
+      detail: '来自分享被打开，或你打开了别人的分享。',
     };
   }
   return {
     phase: 'exhausted',
     headline: '这轮免费体验用完了',
-    detail: '想继续的话，可用你自己的 AI，或之后开通 Mystic AI。',
+    detail: '分享结果给好友，对方打开后你也可再得次数；或用自己的 AI。',
   };
 }
 
 export function canUseMysticDeep(quota = loadAiQuota()): boolean {
-  return quota.deepUsed < FREE_DEEP_LIMIT;
+  return quota.bonusCredits > 0 || quota.deepUsed < FREE_DEEP_LIMIT;
 }
 
 export function canUseMysticFollow(quota = loadAiQuota()): boolean {
+  if (quota.bonusCredits > 0) return true;
   return quota.deepUsed >= FREE_DEEP_LIMIT && quota.followUsed < FREE_FOLLOW_LIMIT;
 }

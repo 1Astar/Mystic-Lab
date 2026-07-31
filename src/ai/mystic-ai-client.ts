@@ -1,7 +1,7 @@
 /**
  * Mystic AI 托管客户端
- * 就绪条件：构建时注入 VITE_MYSTIC_AI_URL（指向 /api/mystic 或完整代理基址）
- * 上游 Key 只放 Cloudflare Runtime / 本地 .env.local 的 MYSTIC_UPSTREAM_*，勿用 VITE_ 前缀。
+ * 浏览器只请求同源 `/api/mystic`；上游 Key 只在 Cloudflare / 本地 Vite 服务端。
+ * 禁止任何 VITE_*_KEY / VITE_*_TOKEN / VITE_*_SECRET。
  */
 export type MysticChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
@@ -10,11 +10,6 @@ export const MYSTIC_AI_BASE_URL = String(
 )
   .trim()
   .replace(/\/$/, '');
-
-/** 可选：与代理 MYSTIC_PROXY_SECRET 对齐；多数情况留空即可 */
-export const MYSTIC_AI_TOKEN = String(
-  import.meta.env.VITE_MYSTIC_AI_TOKEN || '',
-).trim();
 
 export function isMysticAiEndpointReady(): boolean {
   return Boolean(MYSTIC_AI_BASE_URL);
@@ -32,7 +27,6 @@ export async function mysticChatCompletions(input: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(MYSTIC_AI_TOKEN ? { Authorization: `Bearer ${MYSTIC_AI_TOKEN}` } : {}),
     },
     body: JSON.stringify({
       model: input.model || 'mystic-default',

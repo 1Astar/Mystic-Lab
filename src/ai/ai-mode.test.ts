@@ -24,13 +24,17 @@ beforeEach(() => {
     },
     clear: () => mem.clear(),
   });
-  saveAiQuota({ deepUsed: 0, followUsed: 0 });
+  saveAiQuota({ deepUsed: 0, followUsed: 0, bonusCredits: 0 });
   saveAiServiceMode('mystic');
 });
 
 describe('friendlyQuotaCopy', () => {
   it('首次：免费体验一次深度解读', () => {
-    const c = friendlyQuotaCopy('mystic', { deepUsed: 0, followUsed: 0 });
+    const c = friendlyQuotaCopy('mystic', {
+      deepUsed: 0,
+      followUsed: 0,
+      bonusCredits: 0,
+    });
     expect(c.phase).toBe('deep_free');
     expect(c.headline).toMatch(/免费体验一次深度解读/);
     expect(c.headline).not.toMatch(/剩余/);
@@ -40,6 +44,7 @@ describe('friendlyQuotaCopy', () => {
     const c = friendlyQuotaCopy('mystic', {
       deepUsed: FREE_DEEP_LIMIT,
       followUsed: 0,
+      bonusCredits: 0,
     });
     expect(c.phase).toBe('follow');
     expect(c.headline).toMatch(/还可以继续追问 2 次/);
@@ -50,6 +55,7 @@ describe('friendlyQuotaCopy', () => {
     const c = friendlyQuotaCopy('mystic', {
       deepUsed: FREE_DEEP_LIMIT,
       followUsed: FREE_FOLLOW_LIMIT,
+      bonusCredits: 0,
     });
     expect(c.phase).toBe('exhausted');
     expect(c.headline).not.toMatch(/剩余\d/);
@@ -60,5 +66,23 @@ describe('friendlyQuotaCopy', () => {
     expect(loadAiQuota().deepUsed).toBe(1);
     recordFollowUse();
     expect(loadAiQuota().followUsed).toBe(1);
+  });
+
+  it('bonus credits unlock after base exhausted', async () => {
+    const { grantBonusCredits, canUseMysticDeep, freeAiRemaining } = await import(
+      './ai-mode.ts'
+    );
+    saveAiQuota({
+      deepUsed: FREE_DEEP_LIMIT,
+      followUsed: FREE_FOLLOW_LIMIT,
+      bonusCredits: 0,
+    });
+    expect(canUseMysticDeep()).toBe(false);
+    grantBonusCredits(1);
+    expect(canUseMysticDeep()).toBe(true);
+    expect(freeAiRemaining()).toBe(1);
+    recordDeepUse();
+    expect(loadAiQuota().bonusCredits).toBe(0);
+    expect(loadAiQuota().deepUsed).toBe(FREE_DEEP_LIMIT);
   });
 });

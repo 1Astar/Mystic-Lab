@@ -1,6 +1,7 @@
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import pkg from './package.json';
+import { shareDevApi } from './scripts/share-dev-api.ts';
 
 /** 本地默认 HTTP，避免自签证书导致浏览器白屏。手机测摄像头：npm run dev:https */
 const useHttps = process.env.VITE_HTTPS === '1';
@@ -27,7 +28,6 @@ function mysticAiDevProxy(env: Record<string, string>): Plugin {
         const upstreamBase = (env.MYSTIC_UPSTREAM_URL || '').replace(/\/$/, '');
         const upstreamKey = (env.MYSTIC_UPSTREAM_KEY || '').trim();
         const upstreamModel = (env.MYSTIC_UPSTREAM_MODEL || 'deepseek-chat').trim();
-        const proxySecret = (env.MYSTIC_PROXY_SECRET || '').trim();
 
         if (!upstreamBase || !upstreamKey) {
           res.statusCode = 503;
@@ -36,22 +36,11 @@ function mysticAiDevProxy(env: Record<string, string>): Plugin {
             JSON.stringify({
               error: {
                 message:
-                  '本地未配置 MYSTIC_UPSTREAM_URL / MYSTIC_UPSTREAM_KEY（写在 .env.local）',
+                  '本地未配置 MYSTIC_UPSTREAM_URL / MYSTIC_UPSTREAM_KEY（写在 .env.local，勿用 VITE_ 前缀）',
               },
             }),
           );
           return;
-        }
-
-        if (proxySecret) {
-          const auth = req.headers.authorization || '';
-          const token = auth.replace(/^Bearer\s+/i, '').trim();
-          if (token !== proxySecret) {
-            res.statusCode = 401;
-            res.setHeader('Content-Type', 'application/json; charset=utf-8');
-            res.end(JSON.stringify({ error: { message: 'Unauthorized' } }));
-            return;
-          }
         }
 
         const chunks: Buffer[] = [];
@@ -113,6 +102,81 @@ function mysticAiDevProxy(env: Record<string, string>): Plugin {
   };
 }
 
+/** 本地 Star PM capture 代理：密钥只在 Node 进程，不进浏览器 */
+function starPmCaptureDevProxy(env: Record<string, string>): Plugin {
+  return {
+    name: 'star-pm-capture-dev-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/star-pm/capture', (req, res, next) => {
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 204;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+          res.end();
+          return;
+        }
+        if (req.method !== 'POST') {
+          next();
+          return;
+        }
+        const secret = (env.STAR_PM_CAPTURE_SECRET || '').trim();
+        const upstream =
+          (env.STAR_PM_CAPTURE_URL || '').trim() ||
+          'https://star-project-manage.vercel.app/api/ideas/capture';
+        if (!secret) {
+          res.statusCode = 503;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(
+            JSON.stringify({
+              error: {
+                message:
+                  '本地未配置 STAR_PM_CAPTURE_SECRET（.env.local，勿用 VITE_）',
+              },
+            }),
+          );
+          return;
+        }
+        const chunks: Buffer[] = [];
+        req.on('data', (c) => chunks.push(c));
+        req.on('end', () => {
+          void (async () => {
+            try {
+              const raw = Buffer.concat(chunks).toString('utf8');
+              const upstreamRes = await fetch(upstream, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-ideas-capture-secret': secret,
+                },
+                body: raw || '{}',
+              });
+              const text = await upstreamRes.text();
+              res.statusCode = upstreamRes.status;
+              res.setHeader(
+                'Content-Type',
+                upstreamRes.headers.get('Content-Type') ||
+                  'application/json; charset=utf-8',
+              );
+              res.end(text);
+            } catch (err) {
+              res.statusCode = 502;
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.end(
+                JSON.stringify({
+                  error: {
+                    message: err instanceof Error ? err.message : 'Upstream failed',
+                  },
+                }),
+              );
+            }
+          })();
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
@@ -123,6 +187,8 @@ export default defineConfig(({ mode }) => {
     plugins: [
       ...(useHttps ? [basicSsl()] : []),
       mysticAiDevProxy(env),
+      starPmCaptureDevProxy(env),
+      shareDevApi(),
     ],
     server: {
       host: true,
