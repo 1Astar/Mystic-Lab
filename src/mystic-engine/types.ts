@@ -91,7 +91,7 @@ export type VerdictBlock = {
 
 /** 为什么这么判断（一条）——结构化便于扫读 */
 export type WhyItem = {
-  /** 短标题，如「你的现状」 */
+  /** 短标题，如「眼下」「变在哪」「走向」 */
   title: string;
   /** 角标术语（点二字看释义），如「变卦」 */
   badgeTerm?: { term: string; gloss: string };

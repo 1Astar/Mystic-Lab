@@ -10,6 +10,7 @@ import { formatHexWithPinyin } from './hex-pinyin.ts';
 import { isAiConfigured, loadAiSettings } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 import { answerAndStoreAsk } from './ask-answer.ts';
+import { appendLiuyaoAiTurns } from './journal.ts';
 
 export type ChatTurn = { role: 'user' | 'assistant'; content: string };
 
@@ -42,9 +43,9 @@ export function buildFollowupSystemPrompt(cast: CastResult, question: string): s
     liuyaoCoachPersonaOneLiner(),
     `你知道这个卦叫「${label}」。`,
     `用户原占问题：${question.trim() || '（未填写）'}`,
-    `系统已给的核心判词：${direct.verdict}`,
+    `系统已给的核心判词（可参考，勿照抄）：${direct.verdict}`,
     `核心隐喻：${direct.coreMetaphor}`,
-    '追问时仍按四层逻辑回答，但篇幅 150–280 字；用「你」；结尾给一个很小的下一步。',
+    '追问时直接回答这一问：150–280 字，口语化，用「你」；结尾给一个很小的下一步。不要重复套固定四段标题。',
     '精简排盘 JSON（勿复述全文，只取相关）：',
     JSON.stringify(compact),
   ].join('\n');
@@ -152,8 +153,14 @@ export function openFollowupChat(opts: {
   cast: CastResult;
   question: string;
   castAt?: Date;
+  /** 手札 id：有则落库 */
+  journalId?: string | null;
+  /** 已有 AI session（深度解读后继续聊） */
+  aiSessionId?: string | null;
   seedAsk?: string;
   seedContext?: string;
+  /** 直接展示的深度解读（不另调模型） */
+  initialAssistant?: string;
 }): void {
   document.querySelector('.ly-follow-chat')?.remove();
 
@@ -163,6 +170,7 @@ export function openFollowupChat(opts: {
   const presets = buildFollowupPresets(cast, question);
   const label = hexChangeLabel(cast);
   const history: ChatTurn[] = [];
+  let aiSessionId = opts.aiSessionId ?? null;
 
   const modal = document.createElement('div');
   modal.className = 'ly-follow-chat';
@@ -176,9 +184,9 @@ export function openFollowupChat(opts: {
         </div>
         <button type="button" class="ly-follow-chat-x" data-follow-close aria-label="关闭">×</button>
       </header>
-      <p class="ly-follow-chat-persona">懂女性主义 · 懂现代职业规划 · 陪你把卦译回现实</p>
+      <p class="ly-follow-chat-persona">陪你把卦译回现实 · 坚定温柔</p>
       ${
-        opts.seedContext
+        opts.seedContext && !opts.initialAssistant
           ? `<p class="ly-follow-seed-ctx">已附上选中内容：${escapeHtml(opts.seedContext.slice(0, 80))}${opts.seedContext.length > 80 ? '…' : ''}</p>`
           : ''
       }
@@ -193,7 +201,9 @@ export function openFollowupChat(opts: {
       <div class="ly-follow-messages" data-follow-messages></div>
       ${
         isAiConfigured()
-          ? ''
+          ? opts.journalId
+            ? '<p class="ly-follow-ai-hint">对话会写入本卦手札，可在记录里回看。</p>'
+            : ''
           : `<p class="ly-follow-ai-hint">未配置 AI 时用规则短答。<button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button></p>`
       }
       <form class="ly-follow-composer" data-follow-form>
@@ -219,6 +229,20 @@ export function openFollowupChat(opts: {
       .join('');
     messagesEl.scrollTop = messagesEl.scrollHeight;
   };
+
+  const persistTurns = (turns: ChatTurn[]) => {
+    if (!opts.journalId || !turns.length) return;
+    const sid = appendLiuyaoAiTurns(
+      opts.journalId,
+      aiSessionId,
+      turns.map((t) => ({ role: t.role, content: t.content })),
+    );
+    if (sid) aiSessionId = sid;
+  };
+
+  if (opts.initialAssistant?.trim()) {
+    history.push({ role: 'assistant', content: opts.initialAssistant.trim() });
+  }
 
   const close = () => {
     modal.classList.remove('is-open');
@@ -279,6 +303,10 @@ export function openFollowupChat(opts: {
       }
       thinking.remove();
       history.push({ role: 'assistant', content: answer });
+      persistTurns([
+        { role: 'user', content: userAsk },
+        { role: 'assistant', content: answer },
+      ]);
       paintMessages();
     } catch (err) {
       thinking.remove();
@@ -304,8 +332,11 @@ export function openFollowupChat(opts: {
   });
 
   document.body.appendChild(modal);
-  requestAnimationFrame(() => modal.classList.add('is-open'));
-  if (opts.seedAsk) void runAsk(opts.seedAsk);
+  requestAnimationFrame(() => {
+    modal.classList.add('is-open');
+    paintMessages();
+  });
+  if (opts.seedAsk && !opts.initialAssistant) void runAsk(opts.seedAsk);
   else input.focus();
 }
 
@@ -316,7 +347,7 @@ function blockText(el: HTMLElement): string {
 /** 滑动露出「复制 / 追问」；也可点浮动按钮 */
 export function bindFollowupGestures(
   root: HTMLElement,
-  opts: { cast: CastResult; question: string; castAt?: Date },
+  opts: { cast: CastResult; question: string; castAt?: Date; journalId?: string | null },
 ): void {
   if (root.dataset.followBound === '1') return;
   root.dataset.followBound = '1';
@@ -384,6 +415,7 @@ export function bindFollowupGestures(
         cast: opts.cast,
         question: opts.question,
         castAt: opts.castAt,
+        journalId: opts.journalId,
         seedContext: ctx,
       });
       setOpen(false);

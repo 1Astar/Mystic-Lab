@@ -14,6 +14,40 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function renderAiSessionsHtml(entry: LiuyaoJournalEntry): string {
+  const sessions = entry.aiSessions ?? [];
+  if (!sessions.length) return '';
+  const blocks = sessions
+    .map((s) => {
+      const title = s.kind === 'deep' ? 'AI 深度解读' : 'AI 追问';
+      const body =
+        s.deepReading?.trim() ||
+        s.turns
+          .filter((t) => t.role === 'assistant')
+          .map((t) => t.content)
+          .join('\n\n') ||
+        '';
+      if (!body.trim()) return '';
+      const extra =
+        s.turns.length > 1
+          ? `<details class="ly-replay-ai-turns"><summary>追问记录（${s.turns.length} 条）</summary>${s.turns
+              .map(
+                (t) =>
+                  `<p class="ly-replay-ai-turn is-${t.role}"><strong>${
+                    t.role === 'user' ? '你' : '陪读'
+                  }</strong> · ${escapeHtml(t.content)}</p>`,
+              )
+              .join('')}</details>`
+          : '';
+      return `<section class="ly-replay-ai"><h4>${title}</h4><p class="ly-replay-pre">${escapeHtml(
+        body,
+      )}</p>${extra}</section>`;
+    })
+    .filter(Boolean)
+    .join('');
+  return blocks ? `<div class="ly-replay-ai-wrap">${blocks}</div>` : '';
+}
+
 function mountTextFallback(
   overlay: HTMLElement,
   entry: LiuyaoJournalEntry,
@@ -106,6 +140,7 @@ export function mountLiuyaoReadingReplay(
         }
       </header>
       <div class="ly-replay-result-host" data-ly-replay-host></div>
+      ${renderAiSessionsHtml(entry)}
       ${
         entry.reflection
           ? `<p class="ly-replay-reflection"><strong>当时感想</strong> · ${escapeHtml(entry.reflection)}</p>`
@@ -124,6 +159,7 @@ export function mountLiuyaoReadingReplay(
       castAt: new Date(entry.castAt ?? entry.createdAt),
       initialTags: entry.tags,
       initialNoteDraft: entry.reflection,
+      journalId: entry.id,
     });
   }
 

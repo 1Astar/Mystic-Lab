@@ -98,6 +98,11 @@ export function renderLiuyaoJournal(root: HTMLElement): void {
         <p class="ly-journal-meta">${journalMetaLine(entry)}</p>
         <p class="ly-journal-q">${entry.question || '（未填写问题）'}</p>
         <p class="ly-journal-summary">${entry.summary}</p>
+        ${
+          entry.aiSessions?.length
+            ? `<p class="ly-journal-ai-badge">含 AI 解读 · ${entry.aiSessions.length} 段</p>`
+            : ''
+        }
         <p class="ly-journal-open-hint">点击查看当时卦象与解读 →</p>
         <div class="ly-journal-tag-row">${tags || '<span class="ly-guide-tip">未打标签</span>'}</div>
         <div class="ly-note-tags ly-journal-tag-edit">

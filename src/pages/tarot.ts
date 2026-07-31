@@ -9,6 +9,8 @@ import {
 import { GestureBridge } from '../core/gesture-bridge.ts';
 import { createFallbackInput, type FallbackAction } from '../core/fallback-input.ts';
 import { createInterpretationProvider, readingCoversDrawn } from '../interpretation/llm-provider.ts';
+import { buildQuestionThread } from '../interpretation/question-thread.ts';
+import { polishReadingCopy } from '../interpretation/reading-polish.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { detectQuestionTheme, unlockSingleCard } from '../codex/collection.ts';
 import { buildIntuitionCompare } from '../knowledge/intuition-compare.ts';
@@ -20,6 +22,7 @@ import {
   type ChipGroup,
 } from '../knowledge/pre-reading-chips.ts';
 import { mountQuestionThread, openThreadCardPeek } from '../ui/question-thread-panel.ts';
+import { cardFaceImageHtml } from '../tarot/card-images.ts';
 import { mountReadingFeedbackPanel } from '../ui/reading-feedback-panel.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
@@ -152,7 +155,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
   const page = document.createElement('div');
   page.className = 'page tarot-page';
-  mountEnvBanner(page);
+  mountEnvBanner(page, { forCameraGesture: true });
 
   const back = document.createElement('button');
   back.type = 'button';
@@ -1116,7 +1119,7 @@ export function renderTarot(root: HTMLElement): () => void {
     actions.innerHTML = '';
     stage.innerHTML = `
       <h2 class="section-title">占问结果</h2>
-      <p class="tarot-hint">先看整盘串讲；点牌可看牌面热点与图鉴 · 新牌已收入图鉴</p>
+      <p class="tarot-hint">先看整盘；点牌可看牌面与图鉴 · 新牌已收入图鉴</p>
       <div class="result-panel" id="result-cards">
         <div id="reading-switch-panel"></div>
         <div class="learning-card">
@@ -1136,6 +1139,12 @@ export function renderTarot(root: HTMLElement): () => void {
     const paintPanel = (): void => {
       const panel = document.getElementById('reading-switch-panel');
       if (!panel) return;
+
+      // 旧手札 / 缺 thread 时现场补齐，避免落到干瘪的文字列表
+      if (!live.questionThread?.answers.length && question.trim()) {
+        const rebuilt = buildQuestionThread(live.cards, question, 'mock');
+        if (rebuilt) live.questionThread = rebuilt;
+      }
 
       const tip = live.userIntuition?.trim();
       const focusNote =
@@ -1160,6 +1169,34 @@ export function renderTarot(root: HTMLElement): () => void {
       };
       const mounted = mountQuestionThread(panel, live, openCard);
       if (!mounted) {
+        const jumpCards = live.cards
+          .map((c, i) => {
+            const orient = c.orientation === 'reversed' ? '逆位' : '正位';
+            const one =
+              c.interpretationLayers.answerTendency?.oneLiner?.trim() ||
+              c.interpretationLayers.standard.oneSentence;
+            const hot =
+              c.interpretationLayers.contextualSections?.find(
+                (s) =>
+                  s.title.includes('热点') ||
+                  s.title.includes('整体') ||
+                  s.title.includes('核心'),
+              )?.body;
+            const raw = (one || hot || '').trim();
+            const line = polishReadingCopy(raw).replace(/\s+/g, ' ').slice(0, 72);
+            const alt = `${c.cardName} · ${orient}`;
+            return `<button type="button" class="overall-card-jump" data-jump="${i}">
+              <span class="overall-face${c.orientation === 'reversed' ? ' is-reversed' : ''}">
+                ${cardFaceImageHtml(c.cardId, alt, 'overall-face-img')}
+              </span>
+              <span class="overall-copy">
+                <span class="overall-pos">${escapePreReading(c.position)} · ${orient}</span>
+                <strong class="overall-name">${escapePreReading(c.cardName)}</strong>
+                <span class="overall-line">${escapePreReading(line)}${line.length >= 72 ? '…' : ''}</span>
+              </span>
+            </button>`;
+          })
+          .join('');
         panel.innerHTML = `
           <div class="reading-overall">
             ${
@@ -1168,28 +1205,7 @@ export function renderTarot(root: HTMLElement): () => void {
                 : ''
             }
             <p class="result-summary">${escapePreReading(live.summary)}</p>
-            <div class="overall-jumps" role="list">
-              ${live.cards
-                .map((c, i) => {
-                  const one =
-                    c.interpretationLayers.answerTendency?.oneLiner?.trim() ||
-                    c.interpretationLayers.standard.oneSentence;
-                  const hot =
-                    c.interpretationLayers.contextualSections?.find(
-                      (s) =>
-                        s.title.includes('热点') ||
-                        s.title.includes('整体') ||
-                        s.title.includes('核心'),
-                    )?.body;
-                  const line = hot?.trim() || one;
-                  return `<button type="button" class="overall-card-jump" data-jump="${i}">
-                    <span class="overall-pos">${escapePreReading(c.position)}</span>
-                    <strong class="overall-name">${escapePreReading(c.cardName)}</strong>
-                    <span class="overall-line">${escapePreReading(line)}</span>
-                  </button>`;
-                })
-                .join('')}
-            </div>
+            <div class="overall-jumps" role="list">${jumpCards}</div>
           </div>`;
         panel.querySelectorAll<HTMLButtonElement>('.overall-card-jump').forEach((btn) => {
           btn.addEventListener('click', () => openCard(Number(btn.dataset.jump)));

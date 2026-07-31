@@ -31,6 +31,11 @@ export function polishReadingCopy(text: string): string {
   for (const [re, to] of FIXES) {
     out = out.replace(re, to);
   }
+  // 去掉误露出的写作指令 / prompt 套话
+  out = out.replace(/牌意必须落在这个位置功能上[，,]?禁止只背正位百科[。.]?/g, '');
+  out = out.replace(/禁止只背正位百科[。.]?/g, '');
+  out = out.replace(/不要复述整串子问题[。.]?/g, '');
+  out = out.replace(/勿当顺风解读[：:]?/g, '');
   // 去掉「关于【提问1】…【提问N】」整段复述
   out = out.replace(
     /关于(?:【提问\s*\d+】[^【]{0,80}){2,}[？?]?\s*[，,]?/g,

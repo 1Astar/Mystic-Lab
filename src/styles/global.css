@@ -886,6 +886,18 @@ body {
   color: #f0d878;
 }
 
+.env-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.env-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .env-banner button {
   flex-shrink: 0;
   padding: 4px 10px;
@@ -896,6 +908,25 @@ body {
   border: 0;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.env-banner-close {
+  width: 28px;
+  height: 28px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem !important;
+  line-height: 1;
+  background: transparent !important;
+  color: #f0d878 !important;
+  border: 1px solid rgba(240, 216, 120, 0.35) !important;
+  border-radius: 8px !important;
+}
+
+.env-banner-close:hover {
+  background: rgba(240, 216, 120, 0.12) !important;
 }
 
 .stars {
@@ -1021,7 +1052,7 @@ body {
 .ai-settings-modal {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  z-index: 420;
   display: flex;
   align-items: center;
   justify-content: center;

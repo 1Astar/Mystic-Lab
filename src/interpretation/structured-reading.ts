@@ -440,6 +440,30 @@ function isAdvicePosition(context: ReadingContext): boolean {
   );
 }
 
+function isPastPosition(context: ReadingContext): boolean {
+  return (
+    context.positionKey === 'past' ||
+    context.cardPosition === '过去' ||
+    (context.cardPosition?.includes('过去') ?? false)
+  );
+}
+
+function isPresentPosition(context: ReadingContext): boolean {
+  return (
+    context.positionKey === 'present' ||
+    context.cardPosition === '现在' ||
+    (context.cardPosition?.includes('现在') ?? false)
+  );
+}
+
+function isFuturePosition(context: ReadingContext): boolean {
+  return (
+    context.positionKey === 'future' ||
+    context.cardPosition === '未来' ||
+    (context.cardPosition?.includes('未来') ?? false)
+  );
+}
+
 /** 按牌阵位次解读本张牌：阻碍≠正位好牌的百科复述 */
 function buildPositionLensLead(
   context: ReadingContext,
@@ -472,11 +496,23 @@ function buildPositionLensLead(
     return `放在「建议」位读【${name}${orient}】：给出可调整方向，不是标准答案——围绕「${kw}」试一小步即可。`;
   }
 
-  if (context.cardPosition) {
-    return `放在「${context.cardPosition}」位读【${name}${orient}】：牌意必须落在这个位置功能上，禁止只背正位百科。`;
+  if (isPastPosition(context)) {
+    return `放在「过去」位读【${name}${orient}】：帮你看见这件事是怎么走到现在的——「${kw}」仍可能在影响今天。`;
   }
 
-  return `就本张【${name}${orient}】而言：先落点「${kw}」，再对照你的提问，不要复述整串子问题。`;
+  if (isPresentPosition(context)) {
+    return `放在「现在」位读【${name}${orient}】：照见此刻正在作用的力量（「${kw}」），比空想终局更值得先看清。`;
+  }
+
+  if (isFuturePosition(context)) {
+    return `放在「未来」位读【${name}${orient}】：若保持当下路径，「${kw}」最可能怎么展开——是方向感，不是定数。`;
+  }
+
+  if (context.cardPosition) {
+    return `放在「${context.cardPosition}」位读【${name}${orient}】：围绕「${kw}」对照你的提问，看这张牌在这一位上的提示。`;
+  }
+
+  return `就本张【${name}${orient}】而言：先落点「${kw}」，再对照你的提问。`;
 }
 
 /** 规则解读：热点总览 + 逐条问答 + 元素映射 + 行动（无需外接 AI） */

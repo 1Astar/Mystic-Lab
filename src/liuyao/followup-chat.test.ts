@@ -28,16 +28,16 @@ describe('followup-chat', () => {
     expect(hexChangeLabel(cast)).toMatch(/huàn|巽/);
   });
 
-  it('locks feminist career companion prompt with hex name', () => {
+  it('locks companion prompt with hex name, without rigid 四层 template', () => {
     const cast = castHuanToXun();
     const q = '我要不要留在冠英？转正能拿到8k吗？';
     const sys = buildFollowupSystemPrompt(cast, q);
     expect(sys).toMatch(/你知道这个卦叫/);
-    expect(sys).toMatch(/女性主义|女性职场/);
-    expect(sys).toMatch(/职业规划|职场成长/);
+    expect(sys).toMatch(/陪读|职场|现代/);
     expect(sys).toMatch(/风水涣/);
     expect(sys).toMatch(/hexagram_data|shi_line/);
-    expect(sys).toMatch(/四层/);
+    expect(sys).not.toMatch(/必须严格遵循/);
+    expect(sys).toMatch(/不要重复套固定四段|勿死板|灵活/);
   });
 
   it('offers career presets with 8k / Offer / 拿捏', () => {

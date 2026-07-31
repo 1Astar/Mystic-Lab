@@ -1,17 +1,20 @@
 /**
- * Mystic AI 托管客户端（接口占位）
- * 就绪条件：构建时注入 VITE_MYSTIC_AI_URL（OpenAI 兼容 /chat/completions）
+ * Mystic AI 托管客户端
+ * 就绪条件：构建时注入 VITE_MYSTIC_AI_URL（指向 /api/mystic 或完整代理基址）
+ * 上游 Key 只放 Cloudflare Runtime / 本地 .env.local 的 MYSTIC_UPSTREAM_*，勿用 VITE_ 前缀。
  */
 export type MysticChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
-export const MYSTIC_AI_BASE_URL = (
-  (import.meta.env.VITE_MYSTIC_AI_URL as string | undefined)?.trim() || ''
-).replace(/\/$/, '');
+export const MYSTIC_AI_BASE_URL = String(
+  import.meta.env.VITE_MYSTIC_AI_URL || '',
+)
+  .trim()
+  .replace(/\/$/, '');
 
-/** 可选：托管鉴权；未接时为空 */
-export const MYSTIC_AI_TOKEN = (
-  (import.meta.env.VITE_MYSTIC_AI_TOKEN as string | undefined)?.trim() || ''
-);
+/** 可选：与代理 MYSTIC_PROXY_SECRET 对齐；多数情况留空即可 */
+export const MYSTIC_AI_TOKEN = String(
+  import.meta.env.VITE_MYSTIC_AI_TOKEN || '',
+).trim();
 
 export function isMysticAiEndpointReady(): boolean {
   return Boolean(MYSTIC_AI_BASE_URL);

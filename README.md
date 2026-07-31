@@ -57,7 +57,11 @@ npm run dev:https
 
 打开 `https://电脑IP:5173`，首次需「高级 → 继续访问」信任自签名证书。
 
-上线部署到 Vercel 等会自带正式 HTTPS。
+上线部署到 Cloudflare Pages / Vercel 等会自带正式 HTTPS。
+
+### 免费给用户的 Mystic AI（产品方 Key）
+
+见 **[docs/ai/mystic-ai-setup.md](docs/ai/mystic-ai-setup.md)**：用 Pages Function 代理上游，浏览器不持有你的 Key。
 
 
 ## 构建

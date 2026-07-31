@@ -50,7 +50,7 @@ describe('direct-reading', () => {
     expect(d.analysis.length).toBeGreaterThan(80);
     expect(d.decision).toMatch(/不建议|死磕|机会/);
     expect(d.nextSteps).toMatch(/红线|期限|口风|两手/);
-    expect(d.why).toMatch(/你的现状|物质根基|目标系统/);
+    expect(d.why).toMatch(/眼下|变在哪|走向|物质根基|目标系统/);
     expect(d.reassurance).toMatch(/不是生死判决|有主见/);
     expect(d.partLeans.length).toBeGreaterThanOrEqual(2);
   });

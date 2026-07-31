@@ -440,21 +440,47 @@ function buildChangedImpact(primary: Hexagram, changed: Hexagram): string {
   return `本卦给你的主调是「${from}」（${primary.fullName}），变卦提醒你：事情可能滑向「${to}」（${changed.fullName}）。${trail}——变卦是方向感，不是一口吃成胖子的判决；先按变卦做可验证的一小步。`;
 }
 
-/** 本卦释义 + 多领域分域 + 变卦影响（笔记拓展） */
-export function buildHexExpandPack(cast: CastResult): HexExpandPack {
-  const { upper, lower } = upperLowerFromLines(cast.primaryLines);
-  const primary = cast.primary;
-  const tone = toneFromKeywords(primary);
+type HexExpandSide = 'primary' | 'changed';
+
+/** 单卦分域包（本卦或变卦） */
+export function buildHexExpandForHex(
+  hex: Hexagram,
+  lines: CastResult['primaryLines'],
+  side: HexExpandSide,
+  peer?: Hexagram | null,
+): HexExpandPack {
+  const { upper, lower } = upperLowerFromLines(lines);
+  const tone = toneFromKeywords(hex);
+  const title =
+    side === 'changed' ? `变卦【${hex.fullName}】` : `本卦【${hex.fullName}】`;
+  const changedImpact =
+    side === 'primary' && peer ? buildChangedImpact(hex, peer) : null;
 
   return {
-    primaryTitle: `本卦【${primary.fullName}】`,
-    coreBai: buildCoreBai(primary, upper.id, lower.id, upper.nature, lower.nature),
-    meta: buildMeta(primary, tone),
-    domains: buildDomains(primary, upper.id, lower.id),
-    changedImpact: cast.changed ? buildChangedImpact(primary, cast.changed) : null,
+    primaryTitle: title,
+    coreBai: buildCoreBai(hex, upper.id, lower.id, upper.nature, lower.nature),
+    meta: buildMeta(hex, tone),
+    domains: buildDomains(hex, upper.id, lower.id),
+    changedImpact,
     /** 兼容旧字段：工作/感情已并入分域卡 */
     sceneHtml: '',
   };
+}
+
+/** 本卦释义 + 多领域分域 + 变卦影响（笔记拓展） */
+export function buildHexExpandPack(cast: CastResult): HexExpandPack {
+  return buildHexExpandForHex(
+    cast.primary,
+    cast.primaryLines,
+    'primary',
+    cast.changed,
+  );
+}
+
+/** 变卦完整分域；无变则 null */
+export function buildChangedHexExpandPack(cast: CastResult): HexExpandPack | null {
+  if (!cast.changed) return null;
+  return buildHexExpandForHex(cast.changed, cast.changedLines, 'changed');
 }
 
 function renderOracleTags(domains: DomainOracle[]): string {
@@ -480,15 +506,26 @@ function renderDomainCardHtml(d: DomainOracle): string {
 
 /** 白话分域：每条 = 大标题 + 断语标签 + 解释（工作/感情已写全） */
 export function renderHexExpandBaiHtml(pack: HexExpandPack): string {
-  const changedBody = pack.changedImpact
-    ? `<p class="ly-hex-expand-body">${escapeHtml(pack.changedImpact)}</p>`
-    : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下结构看清。</p>`;
+  const isChanged = pack.primaryTitle.startsWith('变卦');
+  const changedSec = isChanged
+    ? `<section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">相对本卦</p>
+        <p class="ly-guide-tip">以上是变卦各域落点；切回本卦对照，看从哪滑到哪。</p>
+      </section>`
+    : `<section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">变卦方向</p>
+        ${
+          pack.changedImpact
+            ? `<p class="ly-hex-expand-body">${escapeHtml(pack.changedImpact)}</p>`
+            : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下结构看清。</p>`
+        }
+      </section>`;
 
   const allDomains = [...pack.meta, ...pack.domains];
   const cards = allDomains.map(renderDomainCardHtml).join('');
 
   return `
-    <article class="ly-hex-expand" data-hex-expand>
+    <article class="ly-hex-expand" data-hex-expand data-hex-side="${isChanged ? 'changed' : 'primary'}">
       <h4 class="ly-hex-expand-title">📜 · ${escapeHtml(pack.primaryTitle)}</h4>
       <section class="ly-hex-expand-sec">
         <p class="ly-hex-expand-sec-title">卦象核心释义</p>
@@ -500,10 +537,7 @@ export function renderHexExpandBaiHtml(pack: HexExpandPack): string {
           ${cards}
         </div>
       </section>
-      <section class="ly-hex-expand-sec">
-        <p class="ly-hex-expand-sec-title">变卦方向</p>
-        ${changedBody}
-      </section>
+      ${changedSec}
     </article>
   `;
 }

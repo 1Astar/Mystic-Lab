@@ -116,10 +116,13 @@ export function mountLiuyaoResultTabs(
     castAt?: Date;
     initialTags?: string[];
     initialNoteDraft?: string;
+    /** 手札 id：AI 解读落库 */
+    journalId?: string | null;
   },
 ): LiuyaoResultTabsApi {
   const { cast, question, learn } = opts;
   const castAt = opts.castAt ?? new Date();
+  const journalId = opts.journalId ?? null;
   let noteTags: string[] = [...(opts.initialTags ?? [])];
   let noteDraft = opts.initialNoteDraft ?? '';
 
@@ -197,14 +200,14 @@ export function mountLiuyaoResultTabs(
 
   const layersApi = bindResultLayers(host, cast, question);
   bindYaoAskButtons(host, cast, question, castAt);
-  bindFollowupGestures(host, { cast, question, castAt });
+  bindFollowupGestures(host, { cast, question, castAt, journalId });
   bindAnswerPackGestures(host, cast);
   if (learn) {
-    bindPersonalizeGuide(host, { cast, question, castAt });
+    bindPersonalizeGuide(host, { cast, question, castAt, journalId });
     bindQinDict(host);
     bindLearnTeachPage(host, cast, question, castAt);
   } else {
-    bindPersonalizeFab(host, { cast, question, castAt });
+    bindPersonalizeFab(host, { cast, question, castAt, journalId });
   }
 
   const tagsHost = host.querySelector<HTMLElement>('[data-note-tags]');

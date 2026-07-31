@@ -3,7 +3,7 @@
  * 底部按钮打开补充表单；可跳过直接分析，或填完再分析。
  */
 import type { CastResult } from './engine.ts';
-import { buildFollowupSystemPrompt, hexChangeLabel, openFollowupChat } from './followup-chat.ts';
+import { buildFollowupSystemPrompt, openFollowupChat } from './followup-chat.ts';
 import { buildOfflineAnswerPack } from '../mystic-engine/build-pack.ts';
 import {
   canUseMysticDeep,
@@ -17,6 +17,7 @@ import { resolveAiRunReady, runChatCompletion } from '../ai/chat-runner.ts';
 import { isAiConfigured } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 import { isMysticAiEndpointReady } from '../ai/mystic-ai-client.ts';
+import { saveLiuyaoAiDeepReading } from './journal.ts';
 
 export type PersonalContext = {
   experience: string;
@@ -54,11 +55,11 @@ function buildDeepPrompt(
     base,
     '',
     hasPersonal
-      ? '【深度贴合模式】用户补充了个人情况。必须结合经历、目标、已发生事件与顾虑重写判断，不要复述通用卦意百科。'
+      ? '【深度贴合】用户补充了个人情况。请结合经历、目标、已发生事件与顾虑来回应，不要复述通用卦意百科。'
       : '【快速分析】用户跳过了补充。基于原问题与盘面做一次清晰、可执行的重述，语气温暖。',
-    '结构：先直接回应问题 → 说明为什么 → 一个可执行下一步 → 什么时候该停。',
-    '禁止绝对吉凶判决；篇幅 280–420 字。',
-    `离线一句话定调（仅作参考）：${pack.verdict.headline}`,
+    '先直接回应她真正在问的事，再点出值得注意的变数，最后给一个明天就能做的一小步。',
+    '不要每次都套固定四段标题；口语化、分段自然即可。禁止绝对吉凶判决；约 280–420 字。',
+    `离线一句话定调（仅作参考，勿照抄）：${pack.verdict.headline}`,
   ].join('\n');
 
   const user = hasPersonal
@@ -96,6 +97,7 @@ export function openPersonalizeDeep(opts: {
   cast: CastResult;
   question: string;
   castAt?: Date;
+  journalId?: string | null;
 }): void {
   document.querySelector('.ly-personalize-modal')?.remove();
 
@@ -226,15 +228,18 @@ export function openPersonalizeDeep(opts: {
       );
       if (modeNow === 'mystic') recordDeepUse();
       close();
-      const label = hexChangeLabel(opts.cast);
+      const sessionId = opts.journalId
+        ? saveLiuyaoAiDeepReading(opts.journalId, text)
+        : null;
       openFollowupChat({
         cast: opts.cast,
         question: opts.question,
         castAt: opts.castAt,
-        seedAsk: '基于刚才的深度解读，我想再确认一点…',
-        seedContext: `【贴合你·深度解读｜${label}】\n${text}`,
+        journalId: opts.journalId,
+        aiSessionId: sessionId,
+        initialAssistant: text,
       });
-      toast(friendlyQuotaCopy().headline);
+      toast(opts.journalId ? '已写入手札 · 可继续追问' : friendlyQuotaCopy().headline);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '分析失败';
       status.textContent =
@@ -267,7 +272,7 @@ export function openPersonalizeDeep(opts: {
 /** 底部主 CTA：文案 + 按钮，对齐旧版「深度解读 | 问问AI」 */
 export function bindPersonalizeFab(
   root: HTMLElement,
-  opts: { cast: CastResult; question: string; castAt?: Date },
+  opts: { cast: CastResult; question: string; castAt?: Date; journalId?: string | null },
 ): void {
   root.querySelector('[data-follow-fab]')?.remove();
   root.querySelector('[data-personalize-fab-wrap]')?.remove();
@@ -295,7 +300,7 @@ export function renderPersonalizeGuideHtml(): string {
 
 export function bindPersonalizeGuide(
   host: HTMLElement,
-  opts: { cast: CastResult; question: string; castAt?: Date },
+  opts: { cast: CastResult; question: string; castAt?: Date; journalId?: string | null },
 ): void {
   bindPersonalizeFab(host, opts);
   host.querySelector('[data-personalize-open]')?.addEventListener('click', () => {

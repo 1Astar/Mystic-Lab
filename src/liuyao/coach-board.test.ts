@@ -40,9 +40,10 @@ describe('board-compact + coach-prompt', () => {
     expect(JSON.stringify(payload)).not.toMatch(/青龙|白虎/);
   });
 
-  it('coach system asks for 4 layers and modern language', () => {
-    expect(LIUYAO_COACH_SYSTEM).toMatch(/第一层/);
-    expect(LIUYAO_COACH_SYSTEM).toMatch(/禁用/);
+  it('coach system prefers flexible modern language over rigid layers', () => {
+    expect(LIUYAO_COACH_SYSTEM).toMatch(/勿死板|灵活/);
+    expect(LIUYAO_COACH_SYSTEM).toMatch(/禁忌/);
+    expect(LIUYAO_COACH_SYSTEM).toMatch(/白话/);
     const msg = buildLiuyaoCoachUserMessage(
       buildCompactHexagramPayload(castHuanToXun(), '要不要离职？'),
     );

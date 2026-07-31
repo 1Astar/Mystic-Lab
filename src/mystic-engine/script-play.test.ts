@@ -74,7 +74,7 @@ describe('script director · 渐→艮 面试金样', () => {
     expect(html).toMatch(/为何这样看|盘面信号/);
     expect(html).toMatch(/盘面辅读/);
     expect(html).toMatch(/ly-layer-card/);
-    expect(html).toMatch(/Mystic 建议|ly-why-tip/);
+    expect(html).toMatch(/眼下|变在哪|走向|ly-why-soft/);
     expect(play.synthesis.outcome.text).toMatch(/倾向|偏|参考|不是|走平|不宜|暂判/);
     expect(play.synthesis.outcome.text).not.toMatch(/就「/);
     expect(play.synthesis.disclaimer).toMatch(/不是绝对/);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildCastFromThrows, facesToThrow, type YaoThrow } from './engine.ts';
 import {
+  buildChangedHexExpandPack,
   buildHexExpandPack,
   renderHexExpandHtml,
   renderClassicDomainOraclesHtml,
@@ -68,6 +69,19 @@ describe('hex-expand', () => {
     expect(work?.modern).toMatch(/你这边偏|外面场偏/);
     expect(love?.modern).toMatch(/你这边偏|关系场偏/);
     expect(work?.classic.length).toBeGreaterThan(2);
+  });
+
+  it('变卦有独立完整分域包', () => {
+    const cast = castSample();
+    expect(cast.changed).toBeTruthy();
+    const changed = buildChangedHexExpandPack(cast);
+    expect(changed).toBeTruthy();
+    expect(changed!.primaryTitle).toMatch(new RegExp(`变卦【${cast.changed!.fullName}】`));
+    expect(changed!.domains.length).toBeGreaterThanOrEqual(15);
+    expect(changed!.changedImpact).toBeNull();
+    const html = renderHexExpandHtml(changed!);
+    expect(html).toMatch(/相对本卦/);
+    expect(html).not.toMatch(/变卦方向/);
   });
 });
 

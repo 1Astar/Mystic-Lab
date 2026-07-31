@@ -467,27 +467,30 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     `;
 
     const shell = stage.querySelector<HTMLElement>('[data-result-shell]')!;
-    resultTabsApi = mountLiuyaoResultTabs(shell, {
-      cast: result,
-      reading,
-      question,
-      learn,
-    });
-
     if (!journalSaved) {
       const entry = saveLiuyaoJournalEntry({
         question,
         cast: result,
         reading,
         changingLabels,
-        tags: resultTabsApi.getNoteTags(),
-        reflection: mergeReflection(resultTabsApi.getNoteDraft(), resultTabsApi.collectPrompts()),
-        castAt: resultTabsApi.getCastAt().toISOString(),
+        castAt: new Date().toISOString(),
         learnMode: learn,
       });
       journalId = entry.id;
       journalSaved = true;
       showMeetToast(result);
+    }
+
+    resultTabsApi = mountLiuyaoResultTabs(shell, {
+      cast: result,
+      reading,
+      question,
+      learn,
+      journalId,
+    });
+
+    if (journalId && resultTabsApi) {
+      updateLiuyaoTags(journalId, resultTabsApi.getNoteTags());
     }
 
     const noteFold = shell.querySelector('.ly-peer-note');

@@ -1,6 +1,7 @@
 import type { CastResult } from './engine.ts';
 import { buildHexGuidePack, renderGuideXiangSnippetHtml } from './hex-guide.ts';
 import {
+  buildChangedHexExpandPack,
   buildHexExpandPack,
   renderHexExpandBaiHtml,
 } from './hex-expand.ts';
@@ -60,18 +61,13 @@ export function renderLiushenNotesHtml(
   `;
 }
 
-function renderGuideHexSwitchHtml(cast: CastResult): string {
-  const primaryGuide = buildHexGuidePack(cast.primary);
+function renderGuaSideTabsHtml(
+  cast: CastResult,
+  ariaLabel: string,
+): string {
   const hasChanged = Boolean(cast.changed);
-  const changedGuide = cast.changed ? buildHexGuidePack(cast.changed) : null;
-
-  const changedPane = changedGuide
-    ? renderGuideXiangSnippetHtml(changedGuide, { linkToGuide: true })
-    : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下意象看清。</p>`;
-
   return `
-    <section class="ly-gua-switch ly-xiang-hex-switch" data-gua-switch data-xiang-hex-switch>
-      <div class="ly-gua-switch-tabs" role="tablist" aria-label="本卦 / 变卦意象切换">
+      <div class="ly-gua-switch-tabs" role="tablist" aria-label="${escapeHtml(ariaLabel)}">
         <button type="button" class="ly-gua-switch-tab is-active" data-gua-side="primary" role="tab" aria-selected="true">
           本卦 · ${escapeHtml(cast.primary.name)}
         </button>
@@ -80,9 +76,42 @@ function renderGuideHexSwitchHtml(cast: CastResult): string {
         }>
           变卦${hasChanged && cast.changed ? ` · ${escapeHtml(cast.changed.name)}` : ''}
         </button>
-      </div>
+      </div>`;
+}
+
+function renderGuideHexSwitchHtml(cast: CastResult): string {
+  const primaryGuide = buildHexGuidePack(cast.primary);
+  const changedGuide = cast.changed ? buildHexGuidePack(cast.changed) : null;
+
+  const changedPane = changedGuide
+    ? renderGuideXiangSnippetHtml(changedGuide, { linkToGuide: true })
+    : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下意象看清。</p>`;
+
+  return `
+    <section class="ly-gua-switch ly-xiang-hex-switch" data-gua-switch data-xiang-hex-switch>
+      ${renderGuaSideTabsHtml(cast, '本卦 / 变卦意象切换')}
       <div class="ly-gua-switch-pane is-active" data-gua-pane="primary" role="tabpanel">
         ${renderGuideXiangSnippetHtml(primaryGuide, { linkToGuide: true })}
+      </div>
+      <div class="ly-gua-switch-pane" data-gua-pane="changed" role="tabpanel" hidden>
+        ${changedPane}
+      </div>
+    </section>
+  `;
+}
+
+function renderDomainHexSwitchHtml(cast: CastResult): string {
+  const primaryPack = buildHexExpandPack(cast);
+  const changedPack = buildChangedHexExpandPack(cast);
+  const changedPane = changedPack
+    ? renderHexExpandBaiHtml(changedPack)
+    : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下分域看清。</p>`;
+
+  return `
+    <section class="ly-gua-switch ly-xiang-hex-switch" data-gua-switch data-xiang-hex-switch data-xiang-domain-switch>
+      ${renderGuaSideTabsHtml(cast, '本卦 / 变卦分域切换')}
+      <div class="ly-gua-switch-pane is-active" data-gua-pane="primary" role="tabpanel">
+        ${renderHexExpandBaiHtml(primaryPack)}
       </div>
       <div class="ly-gua-switch-pane" data-gua-pane="changed" role="tabpanel" hidden>
         ${changedPane}
@@ -97,8 +126,6 @@ export function renderXiangNotesPaneHtml(
   _question: string,
   _castAt = new Date(),
 ): string {
-  const pack = buildHexExpandPack(cast);
-
   const tabs = XIANG_SECS.map(
     (s, i) => `
       <button type="button" class="ly-xiang-rail-item${i === 0 ? ' is-active' : ''}" data-xiang-sec="${s.id}" role="tab" aria-selected="${i === 0}">
@@ -115,7 +142,7 @@ export function renderXiangNotesPaneHtml(
         ${renderGuideHexSwitchHtml(cast)}
       </div>
       <div class="ly-xiang-sec-pane" data-xiang-pane="domain" role="tabpanel" hidden>
-        ${renderHexExpandBaiHtml(pack)}
+        ${renderDomainHexSwitchHtml(cast)}
       </div>
     </div>
   `;
@@ -138,26 +165,32 @@ export function selectXiangSec(root: HTMLElement, id: XiangSec): void {
   });
 }
 
-/** 意象内切换本卦 / 变卦图鉴 */
+/** 意象 / 分域内切换本卦 / 变卦（两处分段同步） */
 export function selectXiangHexSide(root: HTMLElement, side: XiangHexSide): void {
   const host = root.matches('[data-xiang-notes]')
     ? root
     : root.querySelector<HTMLElement>('[data-xiang-notes]');
-  const sw = host?.querySelector<HTMLElement>('[data-xiang-hex-switch]');
-  if (!sw) return;
+  if (!host) return;
   const target = side === 'changed' ? 'changed' : 'primary';
-  const changedTab = sw.querySelector<HTMLButtonElement>('[data-gua-side="changed"]');
-  if (target === 'changed' && changedTab?.disabled) return;
+  const switches = host.querySelectorAll<HTMLElement>('[data-xiang-hex-switch]');
+  if (!switches.length) return;
 
-  sw.querySelectorAll('[data-gua-side]').forEach((el) => {
-    const on = (el as HTMLElement).dataset.guaSide === target;
-    el.classList.toggle('is-active', on);
-    el.setAttribute('aria-selected', String(on));
-  });
-  sw.querySelectorAll('[data-gua-pane]').forEach((pane) => {
-    const on = (pane as HTMLElement).dataset.guaPane === target;
-    pane.classList.toggle('is-active', on);
-    (pane as HTMLElement).hidden = !on;
+  const firstChanged = switches[0]!.querySelector<HTMLButtonElement>(
+    '[data-gua-side="changed"]',
+  );
+  if (target === 'changed' && firstChanged?.disabled) return;
+
+  switches.forEach((sw) => {
+    sw.querySelectorAll('[data-gua-side]').forEach((el) => {
+      const on = (el as HTMLElement).dataset.guaSide === target;
+      el.classList.toggle('is-active', on);
+      el.setAttribute('aria-selected', String(on));
+    });
+    sw.querySelectorAll('[data-gua-pane]').forEach((pane) => {
+      const on = (pane as HTMLElement).dataset.guaPane === target;
+      pane.classList.toggle('is-active', on);
+      (pane as HTMLElement).hidden = !on;
+    });
   });
 }
 

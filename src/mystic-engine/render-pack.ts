@@ -344,7 +344,7 @@ function renderWhyBadge(
 
 function renderWhyCard(
   w: import('./types.ts').WhyItem,
-  i: number,
+  _i: number,
   cast: CastResult | undefined,
 ): string {
   const title = cleanWhyTitle(w.title);
@@ -383,7 +383,7 @@ function renderWhyCard(
     fallbackLines.find((l) => l.startsWith('建议'))?.replace(/^建议[：:]\s*/, '') ||
     '';
   const tipHtml = tipText
-    ? `<p class="ly-why-tip"><span class="ly-why-tip-label">Mystic 建议</span>${
+    ? `<p class="ly-why-soft">${
         cast ? linkifyHexInHtml(escapeHtml(tipText), cast) : escapeHtml(tipText)
       }</p>`
     : '';
@@ -391,7 +391,6 @@ function renderWhyCard(
   return `
     <article class="ly-why-card">
       <header class="ly-why-card-head">
-        <span class="ly-why-num" aria-hidden="true">${i + 1}</span>
         <div class="ly-why-card-titles">
           <p class="ly-why-title">${
             cast ? linkifyHexInHtml(escapeHtml(title), cast) : escapeHtml(title)
@@ -414,7 +413,7 @@ function renderPulseLayer(
 
   return `
     <section class="ly-layer-card" data-briefing-section data-layer="pulse">
-      ${layerHead('现状与转机', '找病灶')}
+      ${layerHead('现状与转机', '贴着问题看')}
       <div class="ly-pack-yao-list">${items}</div>
     </section>`;
 }
