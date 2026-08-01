@@ -1,5 +1,6 @@
 import type { CastResult } from '../liuyao/engine.ts';
 import type { IntentId, Tone } from './types.ts';
+import { isMetaUxQuestion } from './meta-ux.ts';
 import { toneFlags } from './tone.ts';
 
 /** intent × tone → 有条件倾向句（非死刑） */
@@ -7,7 +8,11 @@ export function leanForIntent(
   intent: IntentId,
   cast: CastResult,
   tone: Tone,
+  questionSlice = '',
 ): string {
+  if (isMetaUxQuestion(questionSlice)) {
+    return '仪式感有，但不会只有空话：下面把卦意压成你能核对的几步。';
+  }
   const f = toneFlags(cast);
   const soft = tone === 'soft' || f.soft;
   const flow = tone === 'flow' || f.flow;

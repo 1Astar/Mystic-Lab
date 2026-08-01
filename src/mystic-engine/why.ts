@@ -4,6 +4,7 @@ import { getBoardLens, QIN_MODERN } from '../liuyao/board-lens.ts';
 import { fillVoiceTemplate, getHexVoice } from '../liuyao/hex-voice.ts';
 import type { LiuQin } from '../liuyao/najia.ts';
 import type { SceneDomain } from '../liuyao/scene-map.ts';
+import { isMetaUxQuestion } from './meta-ux.ts';
 import type { WhyItem } from './types.ts';
 import { toneFlags } from './tone.ts';
 
@@ -82,6 +83,39 @@ export function buildWhyItems(
   };
 
   const shiLine = `你这边（世）落在${lens.shi.position}，气质偏「${modernWithClassic(lens.shi.qin)}」。`;
+
+  if (isMetaUxQuestion(question)) {
+    return [
+      whyItem({
+        title: '眼下',
+        badgeTerm: shiGloss,
+        badgeNote: lens.shi.position,
+        hook: '你在试「整条流程好不好走」——这很正常。本卦气质只作背景，不拿来替你评价产品。',
+        points: [shiLine, '铜钱六次是仪式；结果页会先给定调与下一步。'],
+        tip: '先完整走完，再判断长不长。',
+      }),
+      whyItem({
+        title: '变在哪',
+        badgeTerm: dongGloss,
+        badgeNote: lens.moving.length ? lens.moving.join('、') : '静',
+        hook: '体验上的「转机」是：读完定调后，你能不能指出「今晚可做的一步」。',
+        points: ['术语能点开再看；不必首屏吞完所有干支。'],
+        tip: '觉得空，就点深度解读补背景。',
+      }),
+      whyItem({
+        title: '走向',
+        badgeTerm: bianGloss,
+        badgeNote: cast.changed ? '有变' : '暂稳',
+        hook: '好的首体验＝走得完 + 读得懂一句。卦名「跟随」在这里可译成：跟对节奏，而不是跟人。',
+        points: [
+          pVoice
+            ? `本卦偏「${frame}」——用来定节奏，不是叫你去「跟随对象」。`
+            : '把可核对的一小步做完，比空想终局更护自己。',
+        ],
+        tip: '以择时为底，跟对再动——指节奏，不是职场话术。',
+      }),
+    ];
+  }
 
   let statusHook: string;
   let statusTip: string | undefined;

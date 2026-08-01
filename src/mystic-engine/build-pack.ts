@@ -45,7 +45,7 @@ export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack
   const answers = intents.map((hit) => ({
     intentId: hit.id,
     questionSlice: hit.slice,
-    lean: leanForIntent(hit.id, input.cast, tone),
+    lean: leanForIntent(hit.id, input.cast, tone, hit.slice || input.question),
     evidence: mapEvidence(input.cast, hit.id, input.question, castAt),
   }));
 

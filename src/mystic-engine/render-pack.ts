@@ -378,10 +378,16 @@ function renderWhyCard(
         .join('')}</ul>`
     : '';
 
-  const tipText =
+  const tipRaw =
     tip ||
     fallbackLines.find((l) => l.startsWith('建议'))?.replace(/^建议[：:]\s*/, '') ||
     '';
+  /** 防历史拼接「。；」与误加「建议」前缀 */
+  const tipText = tipRaw
+    .replace(/^建议[：:]?\s*/, '')
+    .replace(/。；/g, '。')
+    .replace(/；+/g, '；')
+    .trim();
   const tipHtml = tipText
     ? `<p class="ly-why-soft">${
         cast ? linkifyHexInHtml(escapeHtml(tipText), cast) : escapeHtml(tipText)

@@ -30,7 +30,7 @@ export const LAB_SYSTEM_GUIDE: LabGuideItem[] = [
   },
   {
     focus: '看事：谈薪、offer、官司等具体事',
-    why: '细节与应期更清楚，适合郑重求问。',
+    why: '一事一问更清楚，适合郑重求问。',
     system: '六爻',
   },
   {
@@ -59,10 +59,10 @@ export const LAB_PICK_CARDS: Array<{
 }> = [
   {
     key: 'tarot',
-    metaphor: '镜子 · 心理投射',
+    metaphor: '镜子 · 看见画面',
     strength: '情感与关系，也能看一事一局的局势',
     forYou: '你想看见画面：自己、关系，或这事怎么走',
-    notFor: '别用来硬问「几月几号成」这类应期',
+    notFor: '别用来硬问「几月几号成」这类节点',
   },
   {
     key: 'xiaoliuren',
@@ -75,7 +75,7 @@ export const LAB_PICK_CARDS: Array<{
     key: 'liuyao',
     metaphor: '西医 · 精密定量',
     strength: '谈薪、offer、求财、官司等具体事',
-    forYou: '你较真，想要细节和大致时间',
+    forYou: '你较真，想一事细看、步骤可核对',
     notFor: '别问「我一生如何」这种大面',
   },
   {

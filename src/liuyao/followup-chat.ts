@@ -7,10 +7,24 @@ import { buildDirectReading } from './direct-reading.ts';
 import { buildCompactHexagramPayload } from './board-compact.ts';
 import { LIUYAO_COACH_SYSTEM, liuyaoCoachPersonaOneLiner } from './coach-prompt.ts';
 import { formatHexWithPinyin } from './hex-pinyin.ts';
-import { isAiConfigured, loadAiSettings } from '../ai/settings.ts';
+import {
+  canUseMysticFollow,
+  friendlyQuotaCopy,
+  loadAiServiceMode,
+  recordFollowUse,
+} from '../ai/ai-mode.ts';
+import { resolveAiRunReady, runChatCompletion } from '../ai/chat-runner.ts';
+import { isAiConfigured } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 import { answerAndStoreAsk } from './ask-answer.ts';
 import { appendLiuyaoAiTurns } from './journal.ts';
+import {
+  bindPersonalContextCard,
+  formatPersonalContextLines,
+  hasPersonalContext,
+  personalContextFieldsHtml,
+  readPersonalContextFrom,
+} from './personal-context.ts';
 
 export type ChatTurn = { role: 'user' | 'assistant'; content: string };
 
@@ -104,34 +118,27 @@ async function chatFollowup(
   history: ChatTurn[],
   userAsk: string,
 ): Promise<string> {
-  if (!isAiConfigured()) {
-    throw new Error('NO_AI');
-  }
-  const settings = loadAiSettings();
-  const baseUrl = settings.baseUrl.replace(/\/$/, '');
-  const messages = [
-    { role: 'system', content: system },
-    ...history.map((t) => ({ role: t.role, content: t.content })),
-    { role: 'user', content: userAsk },
-  ];
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${settings.apiKey.trim()}`,
-    },
-    body: JSON.stringify({
-      model: settings.model,
-      temperature: 0.55,
-      messages,
-    }),
+  const mode = loadAiServiceMode();
+  const ready = resolveAiRunReady({
+    kind: 'follow',
+    mysticFollowOk: canUseMysticFollow(),
   });
-  if (!res.ok) throw new Error(`AI 请求失败 (${res.status})`);
-  const data = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const text = data.choices?.[0]?.message?.content?.trim() ?? '';
-  if (!text) throw new Error('AI 返回为空');
+  if (!ready.ok) {
+    if (ready.reason === 'need_byok') throw new Error('NO_AI');
+    if (ready.reason === 'mystic_soon') {
+      throw new Error(friendlyQuotaCopy(mode).detail);
+    }
+    throw new Error(friendlyQuotaCopy(mode).headline);
+  }
+  const text = await runChatCompletion(
+    [
+      { role: 'system', content: system },
+      ...history.map((t) => ({ role: t.role, content: t.content })),
+      { role: 'user', content: userAsk },
+    ],
+    { temperature: 0.55 },
+  );
+  if (mode === 'mystic') recordFollowUse();
   return text;
 }
 
@@ -212,17 +219,33 @@ export function openFollowupChat(opts: {
           .join('')}
       </div>
       <div class="ly-follow-messages" data-follow-messages ${isDeepMode ? 'data-follow-qa' : ''}></div>
-      ${
-        isAiConfigured()
-          ? opts.journalId
-            ? `<p class="ly-follow-ai-hint">${
-                isDeepMode ? '解读与追问都会写入本卦手札。' : '对话会写入本卦手札，可在记录里回看。'
-              }</p>`
+      ${(() => {
+        const modeNow = loadAiServiceMode();
+        const modeHint =
+          modeNow === 'mystic'
+            ? `默认用 Mystic AI · ${friendlyQuotaCopy(modeNow).headline}`
+            : isAiConfigured()
+              ? '默认用你上次选的 AI Key'
+              : '请先配置 AI Key，或改选 Mystic AI';
+        const journalHint = opts.journalId
+          ? isDeepMode
+            ? '解读与追问都会写入本卦手札。'
+            : '对话会写入本卦手札，可在记录里回看。'
+          : '';
+        return `<p class="ly-follow-ai-hint">${escapeHtml(modeHint)}${
+          journalHint ? ` · ${escapeHtml(journalHint)}` : ''
+        }${
+          modeNow === 'byok' && !isAiConfigured()
+            ? ` <button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button>`
             : ''
-          : `<p class="ly-follow-ai-hint">未配置 AI 时用规则短答。<button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button></p>`
-      }
+        }</p>`;
+      })()}
+      <details class="ly-follow-ctx-fold" data-follow-ctx-fold>
+        <summary>补充情况（选填）· 灰字不用手删 · 点标签跳段</summary>
+        ${personalContextFieldsHtml('f')}
+      </details>
       <form class="ly-follow-composer" data-follow-form>
-        <textarea class="question-input" data-follow-input rows="2" placeholder="${
+        <textarea class="question-input ly-follow-ask" data-follow-input rows="2" placeholder="${
           isDeepMode ? '对这篇解读继续追问…' : '继续追问…'
         }"></textarea>
         <button type="submit" class="btn ly-btn-gold" data-follow-send>发送</button>
@@ -234,6 +257,7 @@ export function openFollowupChat(opts: {
   const input = modal.querySelector<HTMLTextAreaElement>('[data-follow-input]')!;
   const form = modal.querySelector<HTMLFormElement>('[data-follow-form]')!;
   const sendBtn = modal.querySelector<HTMLButtonElement>('[data-follow-send]')!;
+  const ctxHost = modal.querySelector<HTMLElement>('[data-follow-ctx-fold]')!;
 
   const paintMessages = () => {
     // 深度解读正文已在上方专区，消息区只画追问回合
@@ -283,9 +307,14 @@ export function openFollowupChat(opts: {
   const runAsk = async (raw: string) => {
     const userAsk = raw.trim();
     if (!userAsk) return;
-    const withCtx = seedOnce
+    const personal = readPersonalContextFrom(ctxHost, 'f');
+    const personalLines = formatPersonalContextLines(personal);
+    let withCtx = seedOnce
       ? `（对照这段解读：${seedOnce.slice(0, 200)}）\n${userAsk}`
       : userAsk;
+    if (hasPersonalContext(personal)) {
+      withCtx = `${withCtx}\n\n【我补充的情况】\n${personalLines.join('\n')}`;
+    }
     seedOnce = '';
 
     history.push({ role: 'user', content: userAsk });
@@ -303,26 +332,20 @@ export function openFollowupChat(opts: {
 
     try {
       let answer: string;
-      if (isAiConfigured()) {
-        try {
-          answer = await chatFollowup(system, history.slice(0, -1), withCtx);
-        } catch {
-          const fallback = await answerAndStoreAsk({
-            cast,
-            question,
-            userAsk: withCtx,
-            castAt,
-          });
-          answer = fallback.answer;
+      try {
+        answer = await chatFollowup(system, history.slice(0, -1), withCtx);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (msg === 'NO_AI' || /接上|配置|即将开放|额度|免费/.test(msg)) {
+          throw err;
         }
-      } else {
         const fallback = await answerAndStoreAsk({
           cast,
           question,
           userAsk: withCtx,
           castAt,
         });
-        answer = fallback.hint ? `${fallback.answer}\n\n（${fallback.hint}）` : fallback.answer;
+        answer = fallback.answer;
       }
       thinking.remove();
       history.push({ role: 'assistant', content: answer });
@@ -355,6 +378,7 @@ export function openFollowupChat(opts: {
   });
 
   document.body.appendChild(modal);
+  bindPersonalContextCard(modal);
   requestAnimationFrame(() => {
     modal.classList.add('is-open');
     paintMessages();

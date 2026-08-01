@@ -26,14 +26,14 @@ const ALL_SYSTEMS: LabEntry[] = [
     path: '/tarot',
     title: '塔罗',
     desc: '人与事：画面、张力、下一步',
-    note: '心理投射',
+    note: '看见画面',
     emblem: 'tarot',
   },
   {
     path: '/liuyao',
     title: '六爻',
     desc: '谈薪、offer、官司等具体事',
-    note: '细节与应期',
+    note: '一事细看',
     emblem: 'hex',
   },
   {

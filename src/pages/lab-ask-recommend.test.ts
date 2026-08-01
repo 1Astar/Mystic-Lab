@@ -11,7 +11,7 @@ describe('adviseSystemsForQuestion', () => {
     );
     expect(a.scene).toBe('relation');
     expect(a.options.map((o) => o.key)).toEqual(['tarot', 'meihua']);
-    expect(a.message).toContain('【塔罗】（心理投射）');
+    expect(a.message).toContain('【塔罗】（看见画面）');
     expect(a.message).toContain('【梅花易数】（关系气场）');
     expect(a.message).toMatch(/你想用哪个/);
   });
@@ -22,7 +22,7 @@ describe('adviseSystemsForQuestion', () => {
     );
     expect(a.scene).toBe('matter-offer');
     expect(a.options.map((o) => o.key)).toEqual(['liuyao', 'xiaoliuren']);
-    expect(a.message).toContain('【六爻】（具体事件细节）');
+    expect(a.message).toContain('【六爻】（一事细看）');
     expect(a.message).toContain('【小六壬】（即时吉凶）');
   });
 

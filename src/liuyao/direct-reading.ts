@@ -5,6 +5,7 @@
 import type { CastResult } from './engine.ts';
 import { detectSceneDomain, type SceneDomain } from './scene-map.ts';
 import { formatHexShortWithPinyin, formatHexWithPinyin, hexPinyin } from './hex-pinyin.ts';
+import { isMetaUxQuestion } from '../mystic-engine/meta-ux.ts';
 import { buildWhyItems } from '../mystic-engine/why.ts';
 import { toneFlags } from '../mystic-engine/tone.ts';
 import { fillVoiceTemplate, getHexVoice } from './hex-voice.ts';
@@ -159,7 +160,11 @@ function buildVerdict(
   cast: CastResult,
   _bag: string,
   hints: ReturnType<typeof extractHints>,
+  question: string,
 ): string {
+  if (isMetaUxQuestion(question)) {
+    return '流程有一点仪式感，但不会长到劝退；解读也会压成可核对的几步，不是只剩空话。';
+  }
   const soft = flags(cast).soft;
   const flow = flags(cast).flow;
   const to = cast.changed?.keywords[0] ?? cast.primary.keywords[0] ?? '';
@@ -234,7 +239,14 @@ function mapPrimaryToQuestion(
   domain: SceneDomain,
   parts: QuestionPart[],
   hints: ReturnType<typeof extractHints>,
+  question: string,
 ): string {
+  if (isMetaUxQuestion(question)) {
+    return (
+      '对应你的问题：起卦六步是仪式，不是考试；结果页先给定调与下一步，' +
+      '术语能点开再看——不会只甩一堆空话让你自己猜。'
+    );
+  }
   const leave = parts.some((p) => p.kind === 'leave');
   const stay = parts.some((p) => p.kind === 'stay');
   const salary = parts.some((p) => p.kind === 'salary');
@@ -265,7 +277,13 @@ function mapChangedToQuestion(
   _bag: string,
   parts: QuestionPart[],
   hints: ReturnType<typeof extractHints>,
+  question: string,
 ): string {
+  if (isMetaUxQuestion(question)) {
+    return cast.changed
+      ? '对应你的问题：有变卦时会多一层「走向」——仍是短句落地，不是再加一本天书。'
+      : '对应你的问题：无变时解读更短，先看清本卦主调与可做的一小步就够。';
+  }
   if (!cast.changed) return '无变卦：先把现状谈清，再谈翻盘。';
   const window =
     hints.deadline && /三个月|月底|月初/.test(hints.deadline)
@@ -291,16 +309,17 @@ function buildAnalysis(
   domain: SceneDomain,
   parts: QuestionPart[],
   hints: ReturnType<typeof extractHints>,
+  question: string,
 ): string {
   const pFull = hexLabel(cast.primary.name, cast.primary.fullName);
   const primaryBlock =
     `本卦【${pFull}】：代表${primaryMeaning(cast, bag)}。\n` +
-    mapPrimaryToQuestion(cast, bag, domain, parts, hints);
+    mapPrimaryToQuestion(cast, bag, domain, parts, hints, question);
 
   const changedBlock = cast.changed
     ? `\n\n变卦【${hexLabel(cast.changed.name, cast.changed.fullName)}】：代表${changedMeaning(cast, bag)}。\n` +
-      mapChangedToQuestion(cast, bag, parts, hints)
-    : `\n\n${mapChangedToQuestion(cast, bag, parts, hints)}`;
+      mapChangedToQuestion(cast, bag, parts, hints, question)
+    : `\n\n${mapChangedToQuestion(cast, bag, parts, hints, question)}`;
 
   return `${primaryBlock}${changedBlock}\n\n【核心隐喻】：${buildCoreMetaphorBody(cast, bag)}`;
 }
@@ -347,13 +366,30 @@ function buildCoreMetaphor(cast: CastResult, bag: string): string {
   return `核心隐喻：${buildCoreMetaphorBody(cast, bag)}`;
 }
 
+/** 决策底句：多行保留换行，禁止把已带句号的行用「；」硬拼成「。；」 */
+function formatDecisionLines(lines: string[]): string {
+  return lines
+    .map((l) => l.replace(/[。；;\s]+$/g, '').trim())
+    .filter(Boolean)
+    .map((l) => `${l}。`)
+    .join('\n');
+}
+
 function buildDecision(
   cast: CastResult,
   _bag: string,
   domain: SceneDomain,
   parts: QuestionPart[],
   hints: ReturnType<typeof extractHints>,
+  question: string,
 ): string {
+  if (isMetaUxQuestion(question)) {
+    return formatDecisionLines([
+      '先完整走完起卦，再判断「长不长」',
+      '解读先看定调与下一步，术语点开再读',
+      '若仍觉得空，用深度解读补你的实情',
+    ]);
+  }
   const soft = flags(cast).soft;
   const flow = flags(cast).flow;
   const hasStaySalary =
@@ -363,41 +399,49 @@ function buildDecision(
   const money = hints.moneyLabel;
 
   if (domain === 'career' && (soft || flow) && hasStaySalary) {
-    return (
-      `不建议为了${money === '你要的数字' ? '这个数字' : `这个 ${money}`}死磕留下。\n` +
-      `卦象建议「以柔顺方式渗入」：非要争，就准备打心理战。\n` +
-      `手头有其他选择时，把重心挪到找新机会（「${cast.primary.keywords[0] ?? '涣'}」也主流动）。`
-    );
+    return formatDecisionLines([
+      `不建议为了${money === '你要的数字' ? '这个数字' : `这个 ${money}`}死磕留下`,
+      '卦象建议「以柔顺方式渗入」：非要争，就准备打心理战',
+      `手头有其他选择时，把重心挪到找新机会（「${cast.primary.keywords[0] ?? cast.primary.name}」也主流动）`,
+    ]);
   }
   if (flags(cast).cut && flags(cast).open) {
-    return (
-      `支持果断行动：把交接与时间表写清，少拖。\n` +
-      `过渡期先保现金流与可接受底薪，弄清行情再抬期望。\n` +
-      `画饼与合同条款分开核对——丰盛要落在纸上。`
-    );
+    return formatDecisionLines([
+      '支持果断行动：把交接与时间表写清，少拖',
+      '过渡期先保现金流与可接受底薪，弄清行情再抬期望',
+      '画饼与合同条款分开核对——丰盛要落在纸上',
+    ]);
   }
   if (flow || soft) {
-    return (
-      `不宜硬刚。\n按「${way}」柔进、留后路。\n` +
-      `有更好选项时，敢于放弃原盘——你熬过这段拉扯，值得更好的落点。`
-    );
+    return formatDecisionLines([
+      '不宜硬刚',
+      `按「${way}」柔进、留后路`,
+      '有更好选项时，敢于放弃原盘——你熬过这段拉扯，值得更好的落点',
+    ]);
   }
   if (flags(cast).cut) {
-    return (
-      `宜尽早定调，少拖。\n该断则断，把精力留给下一局。\n` +
-      `相信你的直觉：身体已经在喊累时，就别再自我说服「再忍忍」。`
-    );
+    return formatDecisionLines([
+      '宜尽早定调，少拖',
+      '该断则断，把精力留给下一局',
+      '相信你的直觉：身体已经在喊累时，就别再自我说服「再忍忍」',
+    ]);
   }
   if (flags(cast).open) {
-    return `可以推进。\n用可验证的一小步换确定性。\n别空等承诺。`;
+    return formatDecisionLines([
+      '可以推进',
+      '用可验证的一小步换确定性',
+      '别空等承诺',
+    ]);
   }
   const voice = getHexVoice(cast.primary.name);
-  if (voice) return voice.decision;
-  return (
-    `以「${cast.primary.keywords[0]}」为底。\n` +
-    `有变则朝「${cast.changed?.keywords[0] ?? '更稳的一步'}」做小实验。\n` +
-    `忌情绪化梭哈。`
-  );
+  if (voice) {
+    return formatDecisionLines(voice.decision.split(/\n+/));
+  }
+  return formatDecisionLines([
+    `以「${cast.primary.keywords[0]}」为底`,
+    `有变则朝「${cast.changed?.keywords[0] ?? '更稳的一步'}」做小实验`,
+    '忌情绪化梭哈',
+  ]);
 }
 
 function buildWhyFromItems(
@@ -416,7 +460,15 @@ function buildNextSteps(
   domain: SceneDomain,
   parts: QuestionPart[],
   hints: ReturnType<typeof extractHints>,
+  question: string,
 ): string {
+  if (isMetaUxQuestion(question)) {
+    return (
+      `【扫定调】先读「核心方向」那一句，看自己是否对上感觉。\n\n` +
+      `【看下一步】翻到「具体动作」：只挑一条今晚能做的。\n\n` +
+      `【嫌空再补】仍觉得空，点「深度解读」补你的背景；术语按钮可点开再学。`
+    );
+  }
   const soft = flags(cast).soft || flags(cast).flow;
   const hasSalary = parts.some((p) => p.kind === 'salary');
   const careerish =
@@ -495,18 +547,29 @@ function buildNextSteps(
   );
 }
 
-function buildReassurance(cast: CastResult, _bag: string): string {
+function buildReassurance(cast: CastResult, _bag: string, question = ''): string {
   const softFlow = flags(cast).soft || flags(cast).flow;
-  const nameHint = cast.changed
-    ? `「${hexShort(cast.primary.name)}」→「${hexShort(cast.changed.name)}」`
-    : `「${hexShort(cast.primary.name)}」`;
+  const pName = hexShort(cast.primary.name);
+  const cName = cast.changed ? hexShort(cast.changed.name) : '';
+  const nameHint = cast.changed ? `「${pName}」→「${cName}」` : `「${pName}」`;
+  if (isMetaUxQuestion(question)) {
+    return (
+      `卦象是动态参考，不是生死判决。${nameHint}只是在描述节奏，不替你做人生决定。\n` +
+      `你愿意把整条流程走完，本身就已经在认真对待——别被「会不会太长 / 太空」吓退。\n` +
+      `术语能点开再看；先抓住定调与下一步就够。深呼吸，玩得下去才有后面的贴合。`
+    );
+  }
+  const softLine = cast.changed
+    ? `不要因为「${pName}」或「${cName}」的字面就恐惧沟通；它们只是提醒：过程会磨，你可以用清单、期限和 Plan B 把自己护住。\n`
+    : `不要因为「${pName}」的字面就吓自己；它只是提醒节奏：过程可能要磨，你可以用清单、期限和 Plan B 把自己护住。\n`;
+  const cutLine = `不要因为「${pName}」像决断就吓自己「是不是太狠」；果断也可以温柔——把边界写清，就是对自己的负责。\n`;
   return (
     `卦象是动态参考，不是生死判决。${nameHint}只是在描述节奏，不替你做人生决定。\n` +
     `你非常有主见——相信你的直觉与身体感受。\n` +
     (softFlow
-      ? '不要因为「涣」像散乱、「巽」像口舌拉扯，就恐惧沟通；它们只是提醒：过程会磨，你可以用清单、期限和 Plan B 把自己护住。\n'
+      ? softLine
       : flags(cast).cut
-        ? '不要因为「夬」像决断就吓自己「是不是太狠」；果断也可以温柔——把边界写清，就是对自己的负责。\n'
+        ? cutLine
         : '不要被单个传统词吓到；把它们翻译成「沟通成本 / 自我价值 / 物质根基」再行动。\n') +
     `深呼吸。熬过这段拉扯，你值得更清晰的落点。`
   );
@@ -532,14 +595,14 @@ export function buildDirectReading(cast: CastResult, question = ''): DirectReadi
 
   return {
     frame,
-    verdict: buildVerdict(parts, cast, bag, hints),
-    analysis: buildAnalysis(cast, bag, domain, parts, hints),
-    decision: buildDecision(cast, bag, domain, parts, hints),
+    verdict: buildVerdict(parts, cast, bag, hints, question),
+    analysis: buildAnalysis(cast, bag, domain, parts, hints, question),
+    decision: buildDecision(cast, bag, domain, parts, hints, question),
     why: buildWhyFromItems(cast, domain, question),
-    nextSteps: buildNextSteps(cast, bag, domain, parts, hints),
+    nextSteps: buildNextSteps(cast, bag, domain, parts, hints, question),
     /** 与「为什么」同文，避免两套骨架；Pack 只渲染 why，不再叠 energy */
     energy: buildWhyFromItems(cast, domain, question),
-    reassurance: buildReassurance(cast, bag),
+    reassurance: buildReassurance(cast, bag, question),
     coreMetaphor: buildCoreMetaphor(cast, bag),
     partLeans,
     domain,

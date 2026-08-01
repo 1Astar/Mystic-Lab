@@ -303,12 +303,18 @@ function waitForImages(root: HTMLElement): Promise<void> {
   ).then(() => undefined);
 }
 
-/** 跨域图鉴图转 data URL，保证 html-to-image 能画进 canvas */
-async function imageUrlToDataUrl(src: string): Promise<string> {
-  if (!src || src.startsWith('data:')) return src;
+/**
+ * 把图片转成 data URL，供 html-to-image 画进 canvas。
+ * CORS / 拉取失败时返回 undefined（调用方应省略该图，勿回退跨域 URL，否则整页导出失败）。
+ */
+export async function resolveCorsSafeImageSrc(
+  src: string | undefined | null,
+): Promise<string | undefined> {
+  if (!src) return undefined;
+  if (src.startsWith('data:')) return src;
   try {
     const res = await fetch(src, { mode: 'cors' });
-    if (!res.ok) return src;
+    if (!res.ok) return undefined;
     const blob = await res.blob();
     return await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -317,7 +323,7 @@ async function imageUrlToDataUrl(src: string): Promise<string> {
       reader.readAsDataURL(blob);
     });
   } catch {
-    return src;
+    return undefined;
   }
 }
 
@@ -325,16 +331,12 @@ async function withResolvedArt(snap: ShareCoverSnap): Promise<ShareCoverSnap> {
   if (snap.visual.kind !== 'liuyao') return snap;
   const v = snap.visual;
   const [primaryArtSrc, changedArtSrc] = await Promise.all([
-    v.primaryArtSrc ? imageUrlToDataUrl(v.primaryArtSrc) : Promise.resolve(undefined),
-    v.changedArtSrc ? imageUrlToDataUrl(v.changedArtSrc) : Promise.resolve(undefined),
+    resolveCorsSafeImageSrc(v.primaryArtSrc),
+    resolveCorsSafeImageSrc(v.changedArtSrc),
   ]);
   return {
     ...snap,
-    visual: {
-      ...v,
-      primaryArtSrc: primaryArtSrc || v.primaryArtSrc,
-      changedArtSrc: changedArtSrc || v.changedArtSrc,
-    },
+    visual: { ...v, primaryArtSrc, changedArtSrc },
   };
 }
 
@@ -358,6 +360,27 @@ async function withCoverHost<T>(
   }
 }
 
+function stripLiuyaoArt(snap: ShareCoverSnap): ShareCoverSnap {
+  if (snap.visual.kind !== 'liuyao') return snap;
+  return {
+    ...snap,
+    visual: {
+      ...snap.visual,
+      primaryArtSrc: undefined,
+      changedArtSrc: undefined,
+    },
+  };
+}
+
+async function toCoverPng(el: HTMLElement): Promise<string> {
+  return toPng(el, {
+    width: 1080,
+    height: 1920,
+    pixelRatio: 1,
+    cacheBust: true,
+  });
+}
+
 export async function renderShareCoverPngDataUrl(
   snap: ShareCoverSnap,
   deepUrl?: string,
@@ -367,17 +390,19 @@ export async function renderShareCoverPngDataUrl(
   const qrDataUrl = url
     ? snap.qrDataUrl || (await makeShareQrDataUrl(url))
     : snap.qrDataUrl;
-  return withCoverHost(
-    { ...snap, deepUrl: url || undefined, qrDataUrl },
-    face,
-    (el) =>
-      toPng(el, {
-        width: 1080,
-        height: 1920,
-        pixelRatio: 1,
-        cacheBust: true,
-      }),
-  );
+  const base = { ...snap, deepUrl: url || undefined, qrDataUrl };
+  try {
+    return await withCoverHost(base, face, toCoverPng);
+  } catch (err) {
+    /** 仍失败时去掉氛围图再试一次（只留卦爻 SVG） */
+    if (
+      base.visual.kind === 'liuyao' &&
+      (base.visual.primaryArtSrc || base.visual.changedArtSrc)
+    ) {
+      return withCoverHost(stripLiuyaoArt(base), face, toCoverPng);
+    }
+    throw err;
+  }
 }
 
 export async function renderShareCoverPair(

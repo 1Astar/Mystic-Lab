@@ -328,7 +328,11 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     stage.innerHTML = `
       <div class="ly-step ly-step-casting">
         <p class="ly-step-kicker">${kicker}</p>
-        <p class="ly-cast-hint-top">点击铜钱起卦 · 共六次成卦；</p>
+        ${
+          done
+            ? ''
+            : '<p class="ly-cast-hint-top">点击铜钱起卦 · 共六次成卦</p>'
+        }
         <h2 class="ly-step-title">${title}</h2>
         ${
           showYaoHints

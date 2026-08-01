@@ -21,7 +21,7 @@ export interface LabAskOption {
   key: LabSystemKey;
   path: string;
   title: string;
-  /** 括号里的短定位，如「心理投射」 */
+  /** 括号里的短定位，如「看见画面」 */
   lens: string;
 }
 
@@ -38,13 +38,13 @@ const CATALOG: Record<LabSystemKey, Omit<LabAskOption, 'lens'> & { lens: string 
       key: 'tarot',
       path: '/tarot',
       title: '塔罗',
-      lens: '心理投射',
+      lens: '看见画面',
     },
     liuyao: {
       key: 'liuyao',
       path: '/liuyao/reading',
       title: '六爻',
-      lens: '具体事件细节',
+      lens: '一事细看',
     },
     xiaoliuren: {
       key: 'xiaoliuren',
@@ -125,7 +125,7 @@ export function adviseSystemsForQuestion(question: string): LabAskAdvice {
 
   if (scene === 'relation') {
     const options = pick(['tarot', 'meihua'], {
-      tarot: '心理投射',
+      tarot: '看见画面',
       meihua: '关系气场',
     });
     return {
@@ -137,7 +137,7 @@ export function adviseSystemsForQuestion(question: string): LabAskAdvice {
 
   if (scene === 'matter-offer') {
     const options = pick(['liuyao', 'xiaoliuren'], {
-      liuyao: '具体事件细节',
+      liuyao: '一事细看',
       xiaoliuren: '即时吉凶',
     });
     return {
@@ -150,7 +150,7 @@ export function adviseSystemsForQuestion(question: string): LabAskAdvice {
   if (scene === 'matter-quick') {
     const options = pick(['xiaoliuren', 'liuyao'], {
       xiaoliuren: '即时吉凶',
-      liuyao: '具体事件细节',
+      liuyao: '一事细看',
     });
     return {
       scene,
@@ -179,7 +179,7 @@ export function adviseSystemsForQuestion(question: string): LabAskAdvice {
 
   if (scene === 'mixed') {
     const options = pick(['liuyao', 'tarot'], {
-      liuyao: '具体事件细节',
+      liuyao: '一事细看',
       tarot: '局势画面',
     });
     return {
@@ -190,8 +190,8 @@ export function adviseSystemsForQuestion(question: string): LabAskAdvice {
   }
 
   const options = pick(['tarot', 'liuyao'], {
-    tarot: '心理投射',
-    liuyao: '具体事件细节',
+    tarot: '看见画面',
+    liuyao: '一事细看',
   });
   return {
     scene: 'default',

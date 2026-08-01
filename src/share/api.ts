@@ -18,9 +18,27 @@ export async function createShareSnapshot(
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `分享创建失败 (${res.status})`);
+    throw new Error(parseShareApiError(text, res.status, '分享创建失败'));
   }
   return (await res.json()) as ShareSnapshot;
+}
+
+function parseShareApiError(text: string, status: number, fallback: string): string {
+  try {
+    const data = JSON.parse(text) as { error?: { message?: string }; message?: string };
+    const msg = data?.error?.message || data?.message;
+    if (msg) {
+      if (/SHARE_KV|未绑定/.test(msg)) {
+        return '分享服务未就绪（存储未绑定），请稍后再试';
+      }
+      return msg;
+    }
+  } catch {
+    /* plain text */
+  }
+  if (status === 503) return '分享服务暂时不可用，请稍后再试';
+  if (status === 400) return '分享内容不完整，请回到结果页再试一次';
+  return text?.trim().slice(0, 120) || `${fallback}（${status}）`;
 }
 
 export async function fetchShareSnapshot(id: string): Promise<ShareSnapshot | null> {

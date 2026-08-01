@@ -20,6 +20,16 @@ function castHuanToXun(): ReturnType<typeof buildCastFromThrows> {
   return buildCastFromThrows(throws, 'coin');
 }
 
+function castSui(): ReturnType<typeof buildCastFromThrows> {
+  const sui = HEXAGRAMS.find((h) => h.name === '随')!;
+  const lines = linesFromHexagram(sui);
+  const throws = lines.map((bit) => {
+    if (bit === 1) return facesToThrow(['obverse', 'obverse', 'reverse']);
+    return facesToThrow(['obverse', 'reverse', 'reverse']);
+  }) as YaoThrow[];
+  return buildCastFromThrows(throws, 'coin');
+}
+
 describe('direct-reading', () => {
   it('splits multi career questions', () => {
     const parts = splitQuestionParts(
@@ -53,6 +63,30 @@ describe('direct-reading', () => {
     expect(d.why).toMatch(/眼下|变在哪|走向|物质根基|目标系统/);
     expect(d.reassurance).toMatch(/不是生死判决|有主见/);
     expect(d.partLeans.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('reassurance uses cast hex names, not hardcoded 涣/巽', () => {
+    const cast = castSui();
+    expect(cast.primary.name).toBe('随');
+    const d = buildDirectReading(cast, '最近该怎么推进这件事');
+    expect(d.reassurance).toMatch(/随/);
+    expect(d.reassurance).not.toMatch(/「涣」|『涣』/);
+    expect(d.reassurance).not.toMatch(/「巽」|『巽』/);
+    expect(d.decision).not.toMatch(/。；/);
+  });
+
+  it('answers meta UX questions about flow/emptiness', () => {
+    const cast = castSui();
+    const q =
+      '作为一个刚来玩的用户：今晚把六爻起卦走完，我会不会觉得流程太长、解读又太空？';
+    const d = buildDirectReading(cast, q);
+    expect(d.verdict).toMatch(/流程|仪式|空话|可核对/);
+    expect(d.verdict).not.toMatch(/跟随对象/);
+    expect(d.analysis).toMatch(/仪式|定调|术语/);
+    expect(d.analysis).not.toMatch(/跟随对象|该跟谁/);
+    expect(d.nextSteps).toMatch(/扫定调|深度解读/);
+    expect(d.nextSteps).not.toMatch(/锁一问/);
+    expect(d.reassurance).toMatch(/太长|太空|术语/);
   });
 });
 

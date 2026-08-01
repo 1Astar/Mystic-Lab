@@ -7965,6 +7965,8 @@ a.ly-derived-name:hover {
   border: 1px solid rgba(201, 168, 76, 0.22);
   transform: translateY(110%);
   transition: transform 0.28s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
 }
 
 .ly-personalize-modal.is-open .ly-personalize-sheet {
@@ -8036,6 +8038,143 @@ a.ly-derived-name:hover {
   width: 100%;
   resize: vertical;
   min-height: 56px;
+}
+
+.ly-personalize-field-merged {
+  gap: 8px;
+}
+
+.ly-personalize-context-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 91, 0.34);
+  background:
+    linear-gradient(165deg, rgba(36, 42, 56, 0.98), rgba(18, 22, 32, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.ly-personalize-soft-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0;
+}
+
+.ly-personalize-soft-lead {
+  width: 100%;
+  font-size: 0.72rem;
+  color: rgba(180, 168, 148, 0.72);
+}
+
+.ly-personalize-soft-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(212, 196, 160, 0.88);
+  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: rgba(199, 164, 91, 0.08);
+  font: inherit;
+}
+
+.ly-personalize-soft-tag.is-tap {
+  cursor: pointer;
+}
+
+.ly-personalize-soft-tag.is-tap:active {
+  background: rgba(199, 164, 91, 0.2);
+}
+
+.ly-ctx-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-ctx-block {
+  padding: 8px 10px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: rgba(12, 16, 24, 0.35);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ly-ctx-block.is-focus {
+  border-color: rgba(199, 164, 91, 0.42);
+  background: rgba(16, 20, 30, 0.65);
+}
+
+.ly-ctx-label {
+  margin: 0 0 4px;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  color: rgba(232, 200, 120, 0.88);
+}
+
+.ly-ctx-edit {
+  min-height: 1.7em;
+  padding: 2px 0;
+  color: rgba(245, 232, 200, 0.94);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  outline: none;
+  caret-color: rgba(232, 200, 120, 0.95);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ly-ctx-edit.is-empty::before {
+  content: attr(data-placeholder);
+  color: rgba(180, 168, 148, 0.5);
+  pointer-events: none;
+}
+
+.ly-follow-ctx-fold {
+  margin: 10px 0 0;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: rgba(12, 16, 24, 0.55);
+  padding: 0 12px 12px;
+}
+
+.ly-follow-ctx-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 4px 8px;
+  font-size: 0.8rem;
+  color: rgba(212, 196, 160, 0.9);
+  letter-spacing: 0.02em;
+}
+
+.ly-follow-ctx-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ly-follow-ctx-fold > summary::before {
+  content: '▸ ';
+  color: rgba(199, 164, 91, 0.7);
+}
+
+.ly-follow-ctx-fold[open] > summary::before {
+  content: '▾ ';
+}
+
+.ly-follow-ctx-fold .ly-personalize-context-card {
+  margin-top: 4px;
+}
+
+.ly-follow-ask {
+  background: rgba(22, 28, 38, 0.95) !important;
+  border-color: rgba(199, 164, 91, 0.28) !important;
+  color: rgba(245, 232, 200, 0.92) !important;
 }
 
 .ly-personalize-status {
@@ -11599,6 +11738,59 @@ html.thread-peek-open .ly-ai-side-fab {
   box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.45);
   transform: translateY(110%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
+}
+
+/* 深度解读 / 追问弹层：暗色细滚动条，盖掉系统白条 */
+.ly-follow-chat-sheet::-webkit-scrollbar,
+.ly-follow-deep::-webkit-scrollbar,
+.ly-follow-messages::-webkit-scrollbar,
+.ly-follow-presets::-webkit-scrollbar,
+.ly-personalize-sheet::-webkit-scrollbar,
+.ly-personalize-context-one::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.ly-follow-chat-sheet::-webkit-scrollbar-track,
+.ly-follow-deep::-webkit-scrollbar-track,
+.ly-follow-messages::-webkit-scrollbar-track,
+.ly-follow-presets::-webkit-scrollbar-track,
+.ly-personalize-sheet::-webkit-scrollbar-track,
+.ly-personalize-context-one::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ly-follow-chat-sheet::-webkit-scrollbar-thumb,
+.ly-follow-deep::-webkit-scrollbar-thumb,
+.ly-follow-messages::-webkit-scrollbar-thumb,
+.ly-follow-presets::-webkit-scrollbar-thumb,
+.ly-personalize-sheet::-webkit-scrollbar-thumb,
+.ly-personalize-context-one::-webkit-scrollbar-thumb {
+  background: rgba(199, 164, 91, 0.32);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.ly-follow-chat-sheet::-webkit-scrollbar-thumb:hover,
+.ly-follow-deep::-webkit-scrollbar-thumb:hover,
+.ly-follow-messages::-webkit-scrollbar-thumb:hover,
+.ly-follow-presets::-webkit-scrollbar-thumb:hover,
+.ly-personalize-sheet::-webkit-scrollbar-thumb:hover,
+.ly-personalize-context-one::-webkit-scrollbar-thumb:hover {
+  background: rgba(199, 164, 91, 0.55);
+}
+
+.ly-follow-chat-sheet::-webkit-scrollbar-button,
+.ly-follow-deep::-webkit-scrollbar-button,
+.ly-follow-messages::-webkit-scrollbar-button,
+.ly-follow-presets::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .ly-follow-chat.is-open .ly-follow-chat-sheet {
@@ -11650,6 +11842,8 @@ html.thread-peek-open .ly-ai-side-fab {
   border: 1px solid rgba(199, 164, 91, 0.28);
   max-height: min(42vh, 420px);
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
 }
 
 .ly-follow-deep-body {
@@ -11684,6 +11878,8 @@ html.thread-peek-open .ly-ai-side-fab {
   margin-top: 12px;
   max-height: 28vh;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
 }
 
 .ly-follow-preset {
@@ -11712,6 +11908,8 @@ html.thread-peek-open .ly-ai-side-fab {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
 }
 
 .ly-follow-bubble {

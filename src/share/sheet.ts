@@ -37,6 +37,20 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function shareFailMessage(err: unknown): string {
+  if (!(err instanceof Error)) return '生成失败，请稍后再试';
+  const m = err.message || '';
+  if (/分享服务|SHARE_KV|存储未绑定|分享创建|分享内容不完整/.test(m)) return m;
+  if (/Failed to fetch|NetworkError|network|Load failed/i.test(m)) {
+    return '网络不通，分享图没生成成功，请检查网络后重试';
+  }
+  if (/SecurityError|Tainted|toDataURL|css rules|Attempting to parse/i.test(m)) {
+    return '出图失败（图片或样式受限）。请再试一次；仍失败请刷新页面';
+  }
+  if (m.length > 100) return '生成失败，请稍后再试';
+  return m || '生成失败，请稍后再试';
+}
+
 export async function syncShareOwnerRewards(): Promise<number> {
   try {
     const n = await redeemOwnerRewards(getOrCreateOwnerId());
@@ -251,7 +265,7 @@ export function openShareSheet(
     paintQ();
     if (snap) {
       void generate({ quiet: true }).catch((err) => {
-        setStatus(err instanceof Error ? err.message : '重绘失败');
+        setStatus(shareFailMessage(err));
       });
     }
   });
@@ -316,14 +330,14 @@ export function openShareSheet(
   goBtn.addEventListener('click', () => {
     void generate().catch((err) => {
       goBtn.disabled = false;
-      setStatus(err instanceof Error ? err.message : '生成失败');
+      setStatus(shareFailMessage(err));
     });
   });
 
   if (options.autoStart) {
     void generate().catch((err) => {
       goBtn.disabled = false;
-      setStatus(err instanceof Error ? err.message : '生成失败');
+      setStatus(shareFailMessage(err));
     });
   }
 }

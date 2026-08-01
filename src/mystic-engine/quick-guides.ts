@@ -32,7 +32,7 @@ const SALARY: QuickGuideChip = {
 
 const JOURNAL: QuickGuideChip = {
   id: 'journal',
-  label: '准备求职复盘',
+  label: '记入我的旅程',
   path: '/records',
   body: '打开「我的旅程」，记下这次问卦时的条件与底线，方便对照。',
 };

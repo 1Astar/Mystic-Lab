@@ -8,6 +8,7 @@ import { collectBoardSignals, type BoardSignals } from './board-signals.ts';
 import { buildTruthFromFacts } from './fact-rules.ts';
 import { buildActionAndBoundary } from './action-rules.ts';
 import { detectIntents } from './intent.ts';
+import { isMetaUxQuestion } from './meta-ux.ts';
 import type { IntentId } from './types.ts';
 import { sceneFromIntent, type ScriptScene } from './script-scene.ts';
 import { buildSynthesis, type ScriptSynthesis } from './synthesis.ts';
@@ -32,7 +33,10 @@ export type ScriptPlay = {
 export type { ScriptScene };
 export { sceneFromIntent };
 
-function buildCalm(s: BoardSignals): string {
+function buildCalm(s: BoardSignals, question: string): string {
+  if (isMetaUxQuestion(question)) {
+    return `先别急着给「太长 / 太空」下结论。六步铜钱是仪式，结果页会先给定调与下一步；术语能点开再看。你已经把问题问清楚了，下面按体验落地说。`;
+  }
   if (s.bareQuit) {
     return `先别急着给一个是/否。你已经扛得够辛苦了——可以先松一口气。下面会谈节奏、条件与底线，不是催你今天立刻交辞呈，也不是让你继续无意义地耗着。`;
   }
@@ -48,7 +52,10 @@ function buildCalm(s: BoardSignals): string {
   return `卦象是灯，不是判决书。先安住：你已经把问题问清楚了，下面会把象意、盘面信号与可执行下一步分开说，好让你心里有地儿落地。`;
 }
 
-function buildHeadline(s: BoardSignals): string {
+function buildHeadline(s: BoardSignals, question: string): string {
+  if (isMetaUxQuestion(question)) {
+    return `流程有仪式感，但不会劝退；解读也会压成可核对的几步——不是只剩「跟随对象」这类空话。先扫定调，再看下一步。`;
+  }
   if (s.bareQuit) {
     return `更支持先写清底线与期限，再决定是否裸辞——不是催你立刻交辞呈，也不是让你无限耗着。把「留下还能接受什么 / 什么情况必须走 / 最晚哪天决定」写成可核对的三行，再执行。`;
   }
@@ -64,8 +71,20 @@ function buildHeadline(s: BoardSignals): string {
     }
     return `先探温度，再谈复合叙事。一次清晰、低姿态的互动，比长篇复合剧本更有用。`;
   }
-  if (s.intentId === 'quit_vs_stay' || s.intentId === 'quit_now' || s.intentId === 'love_stay_leave') {
-    return `该停则停，守住边界比继续推进更重要；把去留写成可核对的条件。期限到就执行，留下或离开都要干净。`;
+  if (s.intentId === 'love_stay_leave') {
+    if (s.tugOfWar || s.pace === 'stop' || s.pace === 'slow_then_stop') {
+      return `关系宜先守住你的边界：写清「继续的条件 / 必须停的信号」，再决定加不加码。有温度再推进，没有就及时收回注意力。`;
+    }
+    return `先对齐一件可核对的事，再谈去留叙事；别用一次情绪摊牌定终身。`;
+  }
+  if (s.intentId === 'quit_vs_stay' || s.intentId === 'quit_now') {
+    if (s.tugOfWar || s.pace === 'slow_then_stop') {
+      return `去留还在拉扯：先写「留下还能接受什么 / 什么情况必须走 / 最晚哪天定」，用可核对事实换拍板，少空耗。`;
+    }
+    if (s.pace === 'stop' || s.yongWeak) {
+      return `更支持先守边界、写清去留条件再行动；期限到就执行，留下或离开都要干净。`;
+    }
+    return `去留宜写成可核对条件再动；期限到就执行。留下或离开都可以，关键是别拖成内耗。`;
   }
   if (s.timingAsk) {
     return `应期宜边验证边估窗口，不要先钉死一个日子。先做一个可打勾的动作，再用对方的回应日当近窗锚点。`;
@@ -94,10 +113,10 @@ export function buildScriptPlay(input: {
     intentId,
   });
   const scene = sceneFromIntent(intentId);
-  const calm = buildCalm(signals);
+  const calm = buildCalm(signals, input.question);
   const truth = buildTruthFromFacts(signals);
   const { action, boundary, ruleId } = buildActionAndBoundary(signals);
-  const headline = buildHeadline(signals);
+  const headline = buildHeadline(signals, input.question);
   const synthesis = buildSynthesis(signals, input.cast, castAt);
 
   return {

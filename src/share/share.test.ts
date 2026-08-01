@@ -87,6 +87,15 @@ describe('share cover visual', () => {
     expect(html).toContain('https://example.com/huan.webp');
   });
 
+  it('drops cross-origin art when CORS fetch fails (avoid canvas taint)', async () => {
+    const { resolveCorsSafeImageSrc } = await import('./cover.ts');
+    expect(await resolveCorsSafeImageSrc('data:image/png;base64,abc')).toBe(
+      'data:image/png;base64,abc',
+    );
+    expect(await resolveCorsSafeImageSrc('https://example.invalid/no-cors.webp')).toBeUndefined();
+    expect(await resolveCorsSafeImageSrc('')).toBeUndefined();
+  });
+
   it('renders tarot card images when cardId present', async () => {
     const { buildShareCoverInnerHtml } = await import('./cover.ts');
     const html = buildShareCoverInnerHtml({
