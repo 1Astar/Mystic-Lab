@@ -73,7 +73,7 @@ export function shareDevApi(): Plugin {
 
           if (req.method === 'POST' && parts.length === 0) {
             const body = JSON.parse((await readBody(req)) || '{}') as Partial<Snap>;
-            if (!body.ownerId || !body.system || !body.summary) {
+            if (!body.ownerId || !body.system || !(body.summary || body.headline)) {
               send(res, 400, { error: { message: 'invalid body' } });
               return;
             }

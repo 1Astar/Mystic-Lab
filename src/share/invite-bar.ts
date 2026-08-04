@@ -1,4 +1,4 @@
-import { openShareSheet, copyShareDeepLink, type ShareDraft } from './sheet.ts';
+import { openShareSheet, copyShareDeepLink, syncAddressBarToShare, type ShareDraft } from './sheet.ts';
 import type { ShareSystem } from './types.ts';
 
 export type InviteBarOpts = {
@@ -91,7 +91,7 @@ export function mountInviteCompanionBar(
     toast('正在生成可加次数的链接…');
     void copyShareDeepLink(opts.draft())
       .then((url) => {
-        toast('已复制：请发 /s/… 链接（不是地址栏）。朋友打开可加次数');
+        toast('已复制深链；地址栏也已换成 /s/…，直接发网址即可加次数');
         console.info('[share-link]', url);
       })
       .catch((err) => {
@@ -105,4 +105,9 @@ export function mountInviteCompanionBar(
 
   root.appendChild(fab);
   root.appendChild(linkFab);
+
+  // 静默把地址栏绑到 /s/…，复制网址也能加次数
+  void syncAddressBarToShare(opts.draft()).catch(() => {
+    /* 分享服务不可用时不打断结果页 */
+  });
 }

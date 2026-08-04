@@ -90,9 +90,19 @@ function shiShen(dayGan: string, otherGan: string): string {
   return table[dayGan + otherGan] || '—';
 }
 
+/** 日干相对他干的十神名 */
+export function stemTenGod(dayGan: string, otherGan: string): string {
+  return shiShen(dayGan, otherGan);
+}
+
 function hideGanOf(branch: string): string[] {
   const table = LunarUtil.ZHI_HIDE_GAN as Record<string, string[]>;
   return table[branch] ? [...table[branch]] : [];
+}
+
+/** 地支藏干列表 */
+export function branchHideStems(branch: string): string[] {
+  return hideGanOf(branch);
 }
 
 function hideGodsOf(dayGan: string, branch: string): string[] {

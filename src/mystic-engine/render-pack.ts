@@ -183,7 +183,7 @@ function renderSynthesis(
         ${formatLinkedProse(syn.timing, cast)}
       </div>
       <details class="ly-synthesis-more">
-        <summary>展开具体细节（爻位 · 六亲 · 六神）</summary>
+        <summary>${cast ? '展开具体细节（爻位 · 六亲 · 六神）' : '展开具体细节（结构 · 学习名）'}</summary>
         <div class="ly-synthesis-block">
           <h4 class="ly-synthesis-h">具体细节</h4>
           ${formatLinkedProse(syn.details, cast)}

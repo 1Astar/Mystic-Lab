@@ -21,6 +21,15 @@
   → DeepSeek / OpenAI
 ```
 
+**Vercel**（`mystic.starry-studio.cn` / `*.vercel.app`）：浏览器仍打同源 `/api/mystic`；Vercel Function **代理到** `mystic-lab.pages.dev`，复用 CF 上的 Key。
+
+| Vercel 变量 | 值 | 说明 |
+|-------------|-----|------|
+| `VITE_MYSTIC_AI_URL` | `/api/mystic` | Build 打进前端，打开 Mystic 模式（**必配**） |
+| `MYSTIC_UPSTREAM_BASE` | 可选，默认 `https://mystic-lab.pages.dev/api/mystic` | 代理目标 |
+
+**不要**在 Vercel 配 `MYSTIC_UPSTREAM_KEY`（密钥只放 Cloudflare Runtime · Encrypt）。
+
 反馈同步同理：
 
 ```

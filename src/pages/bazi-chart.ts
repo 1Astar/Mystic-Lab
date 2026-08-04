@@ -12,6 +12,12 @@ import {
 } from '../bazi/cast.ts';
 import { wuxingClass } from '../bazi/elements.ts';
 import {
+  LEARN_STEPS,
+  parseLearnStep,
+  TEN_GOD_PLAIN,
+  type LearnStepId,
+} from '../bazi/learn-steps.ts';
+import {
   EMPTY_PARTNER,
   loadPartner,
   partnerAsProfile,
@@ -19,7 +25,15 @@ import {
   type PartnerBirth,
 } from '../bazi/partner.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
-import { formatBirthBrief, hasBirthInfo, loadLifeStore } from '../life/storage.ts';
+import { mapBaziEvidence } from '../bazi/bazi-evidence.ts';
+import { buildBaziPortrait } from '../bazi/portrait-template.ts';
+import {
+  formatBirthBrief,
+  getActivePerson,
+  hasBirthInfo,
+  loadLifeStore,
+} from '../life/storage.ts';
+import type { EvidenceLine } from '../mystic-engine/types.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 import { draftFromBazi } from '../share/drafts.ts';
 import { mountInviteCompanionBar } from '../share/invite-bar.ts';
@@ -47,7 +61,12 @@ function shenshaLine(p: PillarCell): string {
   return `<div class="bazi-shensha">${p.shensha.map((s) => `<span>${escapeHtml(s)}</span>`).join('')}</div>`;
 }
 
-function renderGrid(chart: BaziChart, ariaLabel = '四柱排盘'): string {
+function renderGrid(
+  chart: BaziChart,
+  opts?: { ariaLabel?: string; compact?: boolean },
+): string {
+  const ariaLabel = opts?.ariaLabel ?? '四柱排盘';
+  const compact = opts?.compact ?? false;
   const cols = chart.pillars;
   const head = cols
     .map(
@@ -62,6 +81,40 @@ function renderGrid(chart: BaziChart, ariaLabel = '四柱排盘'): string {
       ${cols.map((p) => `<td class="bazi-col-${p.key}">${cell(p)}</td>`).join('')}
     </tr>`;
 
+  const coreRows = `
+    ${row('干神', (p) => `<span class="bazi-god">${escapeHtml(p.empty ? '—' : p.stemGod)}</span>`)}
+    ${row(
+      '天干',
+      (p) => `<span class="bazi-stem ${stemWxClass(p.stem)}">${escapeHtml(p.stem)}</span>`,
+      'bazi-row-main',
+    )}
+    ${row(
+      '地支',
+      (p) => `<span class="bazi-branch ${branchWxClass(p.branch)}">${escapeHtml(p.branch)}</span>`,
+      'bazi-row-main',
+    )}
+  `;
+
+  const proRows = compact
+    ? ''
+    : `
+    ${row('藏干', (p) => `<div class="bazi-hide-list">${hideLine(p)}</div>`)}
+    ${row(
+      '支神',
+      (p) =>
+        `<div class="bazi-zhishen">${
+          p.empty || p.hideGods.length === 0
+            ? '—'
+            : p.hideGods.map((g) => `<span>${escapeHtml(g)}</span>`).join('')
+        }</div>`,
+    )}
+    ${row('纳音', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.nayin)}</span>`)}
+    ${row('空亡', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.xunKong)}</span>`)}
+    ${row('地势', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.diShi)}</span>`)}
+    ${row('自坐', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.ziZuo)}</span>`)}
+    ${row('神煞', (p) => shenshaLine(p), 'bazi-row-shensha')}
+  `;
+
   return `
     <div class="bazi-grid-wrap">
       <table class="bazi-grid" aria-label="${escapeHtml(ariaLabel)}">
@@ -72,32 +125,8 @@ function renderGrid(chart: BaziChart, ariaLabel = '四柱排盘'): string {
           </tr>
         </thead>
         <tbody>
-          ${row('干神', (p) => `<span class="bazi-god">${escapeHtml(p.empty ? '—' : p.stemGod)}</span>`)}
-          ${row(
-            '天干',
-            (p) => `<span class="bazi-stem ${stemWxClass(p.stem)}">${escapeHtml(p.stem)}</span>`,
-            'bazi-row-main',
-          )}
-          ${row(
-            '地支',
-            (p) => `<span class="bazi-branch ${branchWxClass(p.branch)}">${escapeHtml(p.branch)}</span>`,
-            'bazi-row-main',
-          )}
-          ${row('藏干', (p) => `<div class="bazi-hide-list">${hideLine(p)}</div>`)}
-          ${row(
-            '支神',
-            (p) =>
-              `<div class="bazi-zhishen">${
-                p.empty || p.hideGods.length === 0
-                  ? '—'
-                  : p.hideGods.map((g) => `<span>${escapeHtml(g)}</span>`).join('')
-              }</div>`,
-          )}
-          ${row('纳音', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.nayin)}</span>`)}
-          ${row('空亡', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.xunKong)}</span>`)}
-          ${row('地势', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.diShi)}</span>`)}
-          ${row('自坐', (p) => `<span class="bazi-meta-cell">${escapeHtml(p.empty ? '—' : p.ziZuo)}</span>`)}
-          ${row('神煞', (p) => shenshaLine(p), 'bazi-row-shensha')}
+          ${coreRows}
+          ${proRows}
         </tbody>
       </table>
     </div>
@@ -127,16 +156,37 @@ function seasonBlock(chart: BaziChart): string {
   `;
 }
 
+function stepFromLocation(): LearnStepId {
+  try {
+    return parseLearnStep(new URL(location.href).searchParams.get('step'));
+  } catch {
+    return 2;
+  }
+}
+
+function setStepInUrl(step: LearnStepId): void {
+  try {
+    const u = new URL(location.href);
+    u.searchParams.set('step', String(step));
+    history.replaceState({}, '', `${u.pathname}${u.search}`);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function renderBaziChart(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
 
   const store = loadLifeStore();
+  const person = getActivePerson();
   const ready = hasBirthInfo(store.profile) && Boolean(store.profile.birthYear.trim());
 
   let liunianYear = new Date().getFullYear();
   let mode: 'natal' | 'hepan' = 'natal';
   let partner = loadPartner();
+  let learnStep = stepFromLocation();
+  let gridCompact = true;
 
   const page = document.createElement('div');
   page.className = 'page life-page bazi-chart-page';
@@ -145,10 +195,10 @@ export function renderBaziChart(root: HTMLElement): () => void {
   function paint(): void {
     if (!ready) {
       page.innerHTML = `
-        <button type="button" class="back-link life-back">← 返回八字</button>
+        <button type="button" class="back-link life-back">← 我的命盘</button>
         <header class="life-header">
           <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
-          <h1 class="page-title">四柱排盘</h1>
+          <h1 class="page-title">命盘解析</h1>
           <p class="page-subtitle">需要先填写出生年月日</p>
         </header>
         <section class="life-profile-gate">
@@ -166,9 +216,9 @@ export function renderBaziChart(root: HTMLElement): () => void {
     const selfResult = castBaziChart(store.profile, liunianYear);
     if ('error' in selfResult) {
       page.innerHTML = `
-        <button type="button" class="back-link life-back">← 返回八字</button>
+        <button type="button" class="back-link life-back">← 我的命盘</button>
         <header class="life-header">
-          <h1 class="page-title">四柱排盘</h1>
+          <h1 class="page-title">命盘解析</h1>
           <p class="page-subtitle">${escapeHtml(selfResult.error)}</p>
         </header>
         <button type="button" class="life-btn-primary" data-path="/bazi">回去改出生信息</button>
@@ -179,12 +229,12 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
     const chart = selfResult;
     page.innerHTML = `
-      <button type="button" class="back-link life-back">← 返回八字</button>
+      <button type="button" class="back-link life-back" data-path="/bazi/reading">← 我的命盘</button>
       <header class="life-header">
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
-        <p class="home-eyebrow">BAZI CHART</p>
-        <h1 class="page-title">四柱排盘</h1>
-        <p class="page-subtitle">日主 ${escapeHtml(chart.dayMaster)}${chart.dayMasterWx ? ` · ${escapeHtml(chart.dayMasterWx)}` : ''}</p>
+        <p class="home-eyebrow">BIRTH CODE · L2</p>
+        <h1 class="page-title">命盘解析</h1>
+        <p class="page-subtitle">认识自己的出生密码</p>
       </header>
 
       <nav class="bazi-mode-tabs" aria-label="盘面模式">
@@ -203,7 +253,10 @@ export function renderBaziChart(root: HTMLElement): () => void {
       });
     });
 
-    if (mode === 'natal') bindLiunian();
+    if (mode === 'natal') {
+      bindLiunian();
+      bindLearnSteps();
+    }
     if (mode === 'hepan') bindHepanForm();
     page.querySelector('[data-bazi-invite]') &&
       mountInviteCompanionBar(page.querySelector('[data-bazi-invite]')!, {
@@ -232,14 +285,119 @@ export function renderBaziChart(root: HTMLElement): () => void {
       });
   }
 
+  function renderLearnNav(): string {
+    return `
+      <nav class="bazi-learn-steps" aria-label="出生密码五步">
+        <p class="bazi-learn-lead">为什么这个时间形成这个命盘？</p>
+        <ol class="bazi-learn-list">
+          ${LEARN_STEPS.map(
+            (s) => `
+            <li>
+              <button type="button" class="bazi-learn-step ${learnStep === s.id ? 'is-active' : ''}" data-learn-step="${s.id}">
+                <span class="bazi-learn-num">${s.id}</span>
+                <span>${escapeHtml(s.label)}</span>
+              </button>
+            </li>`,
+          ).join('')}
+        </ol>
+      </nav>
+    `;
+  }
+
+  function renderStepBody(chart: BaziChart): string {
+    const portrait = buildBaziPortrait(chart, { gender: person.gender });
+    if (learnStep === 1) {
+      return `
+        <section class="bazi-learn-panel" aria-label="出生时间">
+          <h2 class="life-route-title">① 出生时间</h2>
+          <p>出生简记：${escapeHtml(formatBirthBrief(store.profile))}</p>
+          <p>钟表时刻：${escapeHtml(chart.clockLabel)}</p>
+          <p>真太阳时：${escapeHtml(chart.trueSolarLabel)}</p>
+          <p class="bazi-meta-note">${escapeHtml(chart.place.note)}</p>
+          <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">时辰不确定？去校准 ›</button>
+        </section>`;
+    }
+    if (learnStep === 2) {
+      return `
+        <section class="bazi-learn-panel" aria-label="四柱">
+          <h2 class="life-route-title">② 四柱</h2>
+          ${renderGrid(chart, { compact: gridCompact })}
+          <button type="button" class="life-btn-ghost" id="bazi-grid-toggle">
+            ${gridCompact ? '展开专业盘' : '收起专业盘'}
+          </button>
+        </section>`;
+    }
+    if (learnStep === 3) {
+      const wx = chart.dayMasterWx || '—';
+      const strength =
+        chart.season.find((s) => s.label === chart.dayMasterWx)?.strength ?? '休';
+      return `
+        <section class="bazi-learn-panel" aria-label="五行">
+          <h2 class="life-route-title">③ 五行</h2>
+          <p>日主气质关键词：${escapeHtml(portrait.keyword)}</p>
+          <p class="bazi-learn-note">学习名：日主属「${escapeHtml(wx)}」，月令强度「${escapeHtml(strength)}」（仅学习用）。</p>
+          ${seasonBlock(chart)}
+        </section>`;
+    }
+    if (learnStep === 4) {
+      const gods = chart.pillars
+        .filter((p) => !p.empty && p.key !== 'liunian')
+        .map((p) => {
+          const plain = TEN_GOD_PLAIN[p.stemGod] ?? '关系位';
+          return `<li><strong>${escapeHtml(p.title)}</strong> · 学习名「${escapeHtml(p.stemGod)}」→ ${escapeHtml(plain)}</li>`;
+        })
+        .join('');
+      return `
+        <section class="bazi-learn-panel" aria-label="十神">
+          <h2 class="life-route-title">④ 十神</h2>
+          <ul class="bazi-ten-god-list">${gods}</ul>
+          <p>事业倾向（白话）：${escapeHtml(portrait.career)}</p>
+          <p>关系模式（白话）：${escapeHtml(portrait.relationship)}</p>
+        </section>`;
+    }
+    const evidence = mapBaziEvidence(chart);
+    return `
+      <section class="bazi-learn-panel" aria-label="人生主题">
+        <h2 class="life-route-title">⑤ 人生主题</h2>
+        <ul class="bazi-theme-list">
+          ${portrait.themes
+            .map(
+              (t, i) =>
+                `<li><button type="button" class="bazi-theme-jump" data-learn-step="${i === 0 ? 3 : i === 1 ? 4 : 2}">${escapeHtml(t)}</button></li>`,
+            )
+            .join('')}
+        </ul>
+        ${renderEvidenceBlock(evidence)}
+      </section>`;
+  }
+
+  function renderEvidenceBlock(lines: EvidenceLine[]): string {
+    if (!lines.length) return '';
+    return `
+      <div class="bazi-evidence bazi-evidence-inline" aria-label="盘面依据">
+        <h3 class="life-route-title">盘面依据</h3>
+        <ol class="bazi-evidence-list">
+          ${lines
+            .map(
+              (e) => `
+            <li>
+              <p>${escapeHtml(e.plain)}</p>
+              ${
+                e.gloss
+                  ? `<details class="bazi-evidence-gloss"><summary>学习名 · ${escapeHtml(e.gloss.term)}</summary><p>${escapeHtml(e.gloss.gloss)}</p></details>`
+                  : ''
+              }
+            </li>`,
+            )
+            .join('')}
+        </ol>
+      </div>`;
+  }
+
   function renderNatal(chart: BaziChart): string {
     return `
-      <section class="bazi-meta" aria-label="排盘说明">
-        <p>出生简记：${escapeHtml(formatBirthBrief(store.profile))}</p>
-        <p>钟表时刻：${escapeHtml(chart.clockLabel)}</p>
-        <p>真太阳时：${escapeHtml(chart.trueSolarLabel)}</p>
-        <p class="bazi-meta-note">${escapeHtml(chart.place.note)}</p>
-      </section>
+      ${renderLearnNav()}
+      ${renderStepBody(chart)}
 
       <section class="bazi-liunian-bar" aria-label="流年切换">
         <button type="button" class="life-btn-ghost" id="bazi-year-prev" aria-label="上一年">←</button>
@@ -251,8 +409,6 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <button type="button" class="life-btn-ghost" id="bazi-year-now">今年</button>
       </section>
 
-      ${renderGrid(chart)}
-      ${seasonBlock(chart)}
       <div class="ms-invite-host bazi-share" data-bazi-invite></div>
     `;
   }
@@ -286,9 +442,9 @@ export function renderBaziChart(root: HTMLElement): () => void {
         };
         partnerBlock = `
           <h3 class="bazi-hepan-heading">自己 · ${escapeHtml(selfChart.dayMaster)}${selfChart.dayMasterWx}</h3>
-          ${renderGrid(selfNoLn, '自己四柱')}
+          ${renderGrid(selfNoLn, { ariaLabel: '自己四柱', compact: false })}
           <h3 class="bazi-hepan-heading">${escapeHtml(p.label || '对方')} · ${escapeHtml(partnerChart.dayMaster)}${partnerChart.dayMasterWx}</h3>
-          ${renderGrid(partnerChart, '对方四柱')}
+          ${renderGrid(partnerChart, { ariaLabel: '对方四柱', compact: false })}
         `;
       } else {
         partnerBlock = `<p class="life-status">${escapeHtml(partnerChart.error)}</p>`;
@@ -305,7 +461,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
           <legend>对方出生信息</legend>
           <label class="life-field life-field-full"><span>称呼</span><input name="label" type="text" placeholder="对方" value="${escapeHtml(p.label)}" /></label>
           <div id="bazi-partner-dt-slot" class="life-birth-row"></div>
-          <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="如 成都" value="${escapeHtml(p.birthPlace)}" /></label>
+          <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都" value="${escapeHtml(p.birthPlace)}" /></label>
         </fieldset>
         <div class="life-form-actions">
           <button type="submit" class="life-btn-primary">保存并合盘</button>
@@ -317,6 +473,20 @@ export function renderBaziChart(root: HTMLElement): () => void {
       ${compareBlock}
       ${partnerBlock}
     `;
+  }
+
+  function bindLearnSteps(): void {
+    page.querySelectorAll<HTMLButtonElement>('[data-learn-step]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        learnStep = parseLearnStep(btn.dataset.learnStep);
+        setStepInUrl(learnStep);
+        paint();
+      });
+    });
+    page.querySelector('#bazi-grid-toggle')?.addEventListener('click', () => {
+      gridCompact = !gridCompact;
+      paint();
+    });
   }
 
   function bindLiunian(): void {
@@ -387,8 +557,13 @@ export function renderBaziChart(root: HTMLElement): () => void {
   }
 
   function bindNav(): void {
-    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/bazi'));
+    page.querySelector('.life-back')?.addEventListener('click', (e) => {
+      const el = e.currentTarget as HTMLElement;
+      const path = el.dataset.path || '/bazi/reading';
+      navigate(path);
+    });
     page.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
+      if (el.classList.contains('life-back')) return;
       el.addEventListener('click', () => {
         const path = el.dataset.path;
         if (path) navigate(path);

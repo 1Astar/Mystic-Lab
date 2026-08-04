@@ -5,7 +5,8 @@ export type ShareSystem =
   | 'xiaoliuren'
   | 'bazi'
   | 'life'
-  | 'meihua';
+  | 'meihua'
+  | 'lab';
 
 export type ShareSection = {
   heading: string;

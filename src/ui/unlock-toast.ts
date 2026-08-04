@@ -1,6 +1,8 @@
 import type { UnlockResult } from '../codex/collection.ts';
 
-export function showUnlockToast(result: UnlockResult): void {
+export function showUnlockToast(
+  result: UnlockResult & { intoLabel?: string },
+): void {
   if (!result.isFirstTime) return;
 
   const existing = document.querySelector('.unlock-toast');
@@ -13,7 +15,7 @@ export function showUnlockToast(result: UnlockResult): void {
     <span class="unlock-toast-icon">✦</span>
     <div class="unlock-toast-text">
       <strong>你第一次遇见「${result.cardName}」</strong>
-      <span>已收入随心图鉴</span>
+      <span>${result.intoLabel ?? '已收入随心图鉴'}</span>
     </div>
   `;
 

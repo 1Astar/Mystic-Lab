@@ -124,3 +124,34 @@ export function shenshaForBranch(opts: {
 
   return [...new Set(out)];
 }
+
+/** 某天干作日干时，常见神煞落点提示（静态图鉴用） */
+export function shenshaHintsForStem(stem: string): string[] {
+  if (!stem || !TIAN_YI[stem]) return [];
+  const out: string[] = ['天乙贵人'];
+  if (WEN_CHANG[stem]) out.push('文昌');
+  if (LU[stem]) out.push('禄神');
+  if (YANG_REN[stem]) out.push('羊刃');
+  return out;
+}
+
+/** 某地支可能承载的神煞名（静态图鉴用，不依赖具体日干） */
+export function shenshaHintsForBranch(branch: string): string[] {
+  if (!branch || branch === '—') return [];
+  const out = new Set<string>();
+  for (const branches of Object.values(TIAN_YI)) {
+    if (branches.includes(branch)) out.add('天乙贵人');
+  }
+  if (Object.values(WEN_CHANG).includes(branch)) out.add('文昌');
+  if (Object.values(LU).includes(branch)) out.add('禄神');
+  if (Object.values(YANG_REN).includes(branch)) out.add('羊刃');
+  for (const g of SAN_HE_GROUPS) {
+    if (g.ma === branch) out.add('驿马');
+    if (g.tao === branch) out.add('桃花');
+    if (g.hua === branch) out.add('华盖');
+    if (g.jiang === branch) out.add('将星');
+  }
+  if (Object.values(HONG_LUAN).includes(branch)) out.add('红鸾');
+  if (Object.values(TIAN_XI).includes(branch)) out.add('天喜');
+  return [...out];
+}

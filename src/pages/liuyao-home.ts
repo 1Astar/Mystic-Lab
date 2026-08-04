@@ -10,6 +10,7 @@ import { mountEnvBanner } from '../ui/banner.ts';
 import { liuyaoPageBgStyle, renderLiuyaoHero } from '../ui/liuyao-hero.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
 import { mountPersonSwitcher } from '../ui/person-switcher.ts';
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 
 export function renderLiuyaoHome(root: HTMLElement): () => void {
   const journalCount = loadLiuyaoJournal().length;
@@ -51,10 +52,11 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
           <button type="button" class="ly-home-info-r" data-focus-toggle aria-expanded="false" aria-controls="ly-home-focus-pop" title="六爻定位说明">R</button>
         </h1>
         <div id="ly-home-focus-pop" class="ly-home-focus-pop" hidden role="note">
-          <p class="ly-home-focus-tag">变化结构</p>
-          <p class="ly-home-focus-body">六条爻怎么叠、哪条在动、世应（我/外界）怎么对上——重<strong>过程与结构</strong>。若要用「一事一象、八卦取象」看动念，可改用梅花（象与动念）。</p>
+          <p class="ly-home-focus-tag">${SYSTEM_POSITION.liuyao}</p>
+          <p class="ly-home-focus-body">六条爻怎么叠、哪条在动、世应（我/外界）怎么对上——重<strong>此刻这一事</strong>的过程与结构。若要用「一事一象、八卦取象」看动念，可改用梅花（象与动念）。</p>
         </div>
         <p class="ly-home-module">${isLearn ? '六爻 · 学习起卦' : '六爻 · 起卦'}</p>
+        <p class="ly-home-position">${SYSTEM_POSITION.liuyao}</p>
         <p class="ly-home-slogan">${
           isLearn
             ? '同一套起卦仪式；<br>标注会渗进摇钱、成爻与解卦的每一步。'

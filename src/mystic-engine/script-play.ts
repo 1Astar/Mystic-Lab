@@ -22,7 +22,8 @@ export type ScriptBeat = {
 export type ScriptPlay = {
   scene: ScriptScene;
   intentId: IntentId;
-  metrics: BoardSignals;
+  /** 六爻盘面信号；八字等体系可不填 */
+  metrics?: BoardSignals;
   headline: string;
   /** 解卦综合论断：吉凶成败 / 趋势 / 应期 / 细节 */
   synthesis: ScriptSynthesis;

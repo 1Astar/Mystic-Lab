@@ -1,3 +1,4 @@
+import { intentActionsPlain } from '../mystic-engine/intent-actions.ts';
 import type { SixGod } from './six-gods.ts';
 import { sixGodKeywordsLine } from './six-gods.ts';
 import {
@@ -44,9 +45,18 @@ function buildAnalysis(question: string, god: SixGod, type: QuestionType): strin
   return `${god.name}落课。就你的问题「${question.trim()}」来看：${domain}`;
 }
 
-function buildSuggestion(god: SixGod, type: QuestionType): string {
-  if (type.id === 'general') return god.action;
-  return `${god.action}（侧重：${type.focus}）`;
+function buildSuggestion(
+  question: string,
+  god: SixGod,
+  type: QuestionType,
+): string {
+  const q = question.trim();
+  if (!q) {
+    return type.id === 'general' ? god.action : `${god.action}（侧重：${type.focus}）`;
+  }
+  const plain = intentActionsPlain(q, { ctx: null });
+  if (type.id === 'general') return plain;
+  return `${plain}（侧重：${type.focus}）`;
 }
 
 export function buildAiReading(question: string, god: SixGod): AiReading {
@@ -58,7 +68,7 @@ export function buildAiReading(question: string, god: SixGod): AiReading {
     god: god.name,
     meaning: `${god.name}代表${sixGodKeywordsLine(god)}。${god.symbolism}`,
     analysis: buildAnalysis(q, god, type),
-    suggestion: buildSuggestion(god, type),
+    suggestion: buildSuggestion(q, god, type),
     reflection: god.warning[0] ?? god.misread,
     typeId: type.id,
     typeLabel: type.label,

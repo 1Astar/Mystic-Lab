@@ -9,6 +9,7 @@ import {
   SELF_PROFILE_ID,
   type PersonProfile,
 } from '../life/types.ts';
+import { openLabMeDrawer } from './lab-me-drawer.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -110,7 +111,6 @@ function openSheet(host: HTMLElement, options?: PersonSwitcherOptions): void {
     navigate('/profile');
   });
 
-  // 挂到最近的 page，避免被 overflow 裁切
   const page = host.closest('.page') ?? document.body;
   page.appendChild(sheet);
   requestAnimationFrame(() => sheet.classList.add('is-open'));
@@ -122,7 +122,7 @@ function paintTrigger(host: HTMLElement): void {
   if (!btn) return;
   if (btn.classList.contains('lab-avatar-btn')) {
     btn.textContent = person.nickname.slice(0, 1) || '我';
-    btn.setAttribute('aria-label', `当前档案：${person.nickname}，点击切换`);
+    btn.setAttribute('aria-label', `当前档案：${person.nickname}，点击打开`);
     btn.title = person.nickname;
     return;
   }
@@ -131,8 +131,7 @@ function paintTrigger(host: HTMLElement): void {
 }
 
 /**
- * 各板块右上角：当前人名 ▾ → 选这次问谁
- * host 建议为已有 topbar-actions 容器
+ * 各板块右上角：当前人名 ▾ → 选这次问谁（底部 sheet，模块内快速切换）
  */
 export function mountPersonSwitcher(
   host: HTMLElement,
@@ -156,7 +155,7 @@ export function mountPersonSwitcher(
   return { refresh: () => paintTrigger(host) };
 }
 
-/** 主页顶栏：头像切换档案 +「+」添加 */
+/** 主页顶栏：头像 → 左侧「我」抽屉（角色 · 旅程等） */
 export function mountPersonAvatarChrome(
   host: HTMLElement,
   options?: PersonSwitcherOptions,
@@ -168,21 +167,18 @@ export function mountPersonAvatarChrome(
   wrap.dataset.personSwitcher = '';
   wrap.innerHTML = `
     <button type="button" class="lab-avatar-btn" data-person-trigger></button>
-    <button type="button" class="lab-avatar-add" data-person-add aria-label="添加档案">+</button>
   `;
   host.appendChild(wrap);
   paintTrigger(host);
 
   wrap.querySelector('[data-person-trigger]')?.addEventListener('click', () => {
-    openSheet(host, options);
-  });
-  wrap.querySelector('[data-person-add]')?.addEventListener('click', () => {
-    try {
-      sessionStorage.setItem('mystic-lab-profile-open-new', '1');
-    } catch {
-      /* ignore */
-    }
-    navigate('/profile');
+    openLabMeDrawer(host, {
+      ...options,
+      onChange: (person) => {
+        paintTrigger(host);
+        options?.onChange?.(person);
+      },
+    });
   });
 
   return { refresh: () => paintTrigger(host) };

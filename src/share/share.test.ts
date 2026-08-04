@@ -164,4 +164,15 @@ describe('share cover visual', () => {
     expect(html).toContain('现状');
     expect(html).toContain('先看清边界');
   });
+
+  it('picks lab invite poster from pool', async () => {
+    const { LAB_INVITE_POSTER_PATHS, pickLabInvitePosterPath } = await import(
+      './cover.ts'
+    );
+    expect(LAB_INVITE_POSTER_PATHS.length).toBeGreaterThanOrEqual(3);
+    expect(pickLabInvitePosterPath(() => 0)).toBe(LAB_INVITE_POSTER_PATHS[0]);
+    expect(pickLabInvitePosterPath(() => 0.99)).toBe(
+      LAB_INVITE_POSTER_PATHS[LAB_INVITE_POSTER_PATHS.length - 1],
+    );
+  });
 });

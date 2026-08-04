@@ -165,7 +165,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
 
     const ageNow = effectiveAge(p);
     const moreOpen =
-      Boolean(p.occupation.trim() || p.city.trim() || p.confusion.trim() || p.birthPlace.trim() || p.lifeTags.length);
+      Boolean(p.occupation.trim() || p.city.trim() || p.confusion.trim() || p.lifeTags.length);
 
     body.innerHTML = `
       ${paintListHint()}
@@ -177,24 +177,24 @@ export function renderLifeProfile(root: HTMLElement): () => void {
             <select name="relation" ${p.id === SELF_PROFILE_ID && !isNew ? 'disabled' : ''}>${relOptions}</select>
           </label>
           <div id="life-birth-dt-slot" class="life-birth-row"></div>
+          <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都（可选，用于真太阳时粗校）" value="${escapeHtml(p.birthPlace)}" /></label>
           <p class="life-age-hint" data-age-hint>${
             ageNow
               ? `约 <strong>${escapeHtml(ageNow)}</strong> 岁 · 由出生日期自动推算`
               : '填好出生日期后，年龄会自动推算'
           }</p>
-          <p class="life-footnote">出生信息也可在「八字」里填写。</p>
+          <p class="life-footnote">出生信息与八字共用同一份档案，任一处填写即可，无需重复。</p>
         </fieldset>
 
         <details class="life-more"${moreOpen ? ' open' : ''}>
-          <summary>其他补充<span>职业 · 城市 · 困惑 · 标签</span></summary>
+          <summary>其他补充<span>职业 · 现居地 · 困惑 · 标签</span></summary>
           <div class="life-more-body">
             <label class="life-field"><span>职业</span><input name="occupation" type="text" placeholder="如 产品经理" value="${escapeHtml(p.occupation)}" /></label>
-            <label class="life-field"><span>城市</span><input name="city" type="text" placeholder="如 上海" value="${escapeHtml(p.city)}" /></label>
+            <label class="life-field"><span>现居地</span><input name="city" type="text" placeholder="如 上海" value="${escapeHtml(p.city)}" /></label>
             <label class="life-field life-field-full">
               <span>当前困惑</span>
               <textarea name="confusion" rows="3" placeholder="例如：要不要离职？">${escapeHtml(p.confusion)}</textarea>
             </label>
-            <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="可选" value="${escapeHtml(p.birthPlace)}" /></label>
             <div class="profile-life-tags" style="margin-top:10px">
               ${SCENE_TAG_OPTIONS.map(
                 (t) => `
@@ -351,7 +351,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
       const profile = data.profile;
       if (!hasUsableProfile(profile)) {
       statusEl.hidden = false;
-      statusEl.textContent = '请至少填写出生日期、职业、城市或困惑中的一项。';
+      statusEl.textContent = '请至少填写出生日期、职业、现居地或困惑中的一项。';
       return;
     }
       const genBtn = body.querySelector<HTMLButtonElement>('#life-gen-btn')!;

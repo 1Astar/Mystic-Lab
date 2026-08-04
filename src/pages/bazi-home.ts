@@ -6,11 +6,15 @@ import { createStarsLayer } from '../tarot/animations.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 import {
   formatBirthBrief,
+  getActivePerson,
   hasBirthInfo,
   loadLifeStore,
+  patchActivePerson,
   updateBirthFields,
 } from '../life/storage.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
+import { baziCodexProgress } from '../bazi/codex.ts';
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -29,56 +33,67 @@ function canCast(p: {
   return Boolean(parseBirthParts(p.birthYear, p.birthMonth, p.birthDay, p.birthHour));
 }
 
+/** 校准只需年月日（时辰待推） */
+function canRectify(p: {
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
+}): boolean {
+  return Boolean(parseBirthParts(p.birthYear, p.birthMonth, p.birthDay, ''));
+}
+
 export function renderBaziHome(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
 
   let store = loadLifeStore();
+  let person = getActivePerson();
   const p = store.profile;
   let castReady = canCast(p);
+  let dateReady = canRectify(p);
 
   const page = document.createElement('div');
   page.className = 'page life-page bazi-home-page';
   mountEnvBanner(page);
 
-  function renderEntries(): string {
+  function genderRadios(): string {
+    const g = person.gender;
     return `
-    <section class="life-route" aria-label="八字">
-      <nav class="life-entry-list" aria-label="功能">
-        <button type="button" class="life-entry ${castReady ? '' : 'is-soon'}" data-path="/bazi/chart" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
-          <span class="life-entry-icon" aria-hidden="true">🀄</span>
-          <span class="life-entry-text">
-            <strong>四柱排盘</strong>
-            <span>本命四柱 + 流年旁列</span>
-          </span>
-          ${castReady ? '<span class="life-entry-chevron" aria-hidden="true">›</span>' : '<em class="tag">需出生日期</em>'}
-        </button>
-        <button type="button" class="life-entry is-soon" disabled>
-          <span class="life-entry-icon" aria-hidden="true">五行</span>
-          <span class="life-entry-text">
-            <strong>日主与五行</strong>
-            <span>日干五行 · 旺衰倾向 · 喜用</span>
-          </span>
-          <em class="tag">即将开放</em>
-        </button>
-        <button type="button" class="life-entry is-soon" disabled>
-          <span class="life-entry-icon" aria-hidden="true">十神</span>
-          <span class="life-entry-text">
-            <strong>十神结构</strong>
-            <span>比劫食伤才官印</span>
-          </span>
-          <em class="tag">即将开放</em>
-        </button>
-        <button type="button" class="life-entry is-soon" disabled>
-          <span class="life-entry-icon" aria-hidden="true">📜</span>
-          <span class="life-entry-text">
-            <strong>八字手札</strong>
-            <span>排盘记录与对照笔记</span>
-          </span>
-          <em class="tag">即将开放</em>
-        </button>
-      </nav>
-    </section>`;
+      <fieldset class="life-fieldset bazi-gender-field">
+        <legend>性别（可选，微调关系措辞）</legend>
+        <div class="bazi-gender-row">
+          <label><input type="radio" name="gender" value="female" ${g === 'female' ? 'checked' : ''} /> 女</label>
+          <label><input type="radio" name="gender" value="male" ${g === 'male' ? 'checked' : ''} /> 男</label>
+          <label><input type="radio" name="gender" value="" ${!g ? 'checked' : ''} /> 暂不选</label>
+        </div>
+      </fieldset>`;
+  }
+
+  function renderEntries(): string {
+    const codex = baziCodexProgress();
+    return `
+    <nav class="bazi-home-nav" aria-label="八字入口">
+      <button type="button" class="bazi-home-link" data-path="/bazi/reading" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
+        <strong>我的命盘</strong>
+        <span>白话速读 · 认识自己</span>
+        ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
+      </button>
+      <button type="button" class="bazi-home-link" data-path="/bazi/chart" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
+        <strong>命盘解析</strong>
+        <span>出生密码五步 · 专业盘</span>
+        ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
+      </button>
+      <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/bazi/rectify" data-open="${dateReady ? '1' : '0'}" ${dateReady ? '' : 'disabled'}>
+        <strong>生时校准</strong>
+        <span>大事件反推时辰</span>
+        ${dateReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
+      </button>
+      <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
+        <strong>五行图鉴</strong>
+        <span>金木水火土 · 天干地支 · ${codex.collected}/${codex.total}</span>
+        <em aria-hidden="true">›</em>
+      </button>
+    </nav>`;
   }
 
   page.innerHTML = `
@@ -87,34 +102,36 @@ export function renderBaziHome(root: HTMLElement): () => void {
       <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
       <p class="home-eyebrow">MYSTIC LAB</p>
       <h1 class="page-title">八字</h1>
-      <p class="page-subtitle">四柱排盘 · 日主五行 · 十神叙事</p>
+      <p class="page-subtitle">${SYSTEM_POSITION.bazi}</p>
+      <p class="bazi-home-person">当前角色 · ${escapeHtml(person.nickname)}</p>
     </header>
 
-    <form class="life-form" id="bazi-birth-form" aria-label="出生信息">
+    <form class="life-form bazi-birth-form" id="bazi-birth-form" aria-label="出生信息">
       <fieldset class="life-fieldset">
         <legend>出生信息</legend>
+        <p class="life-footnote">写入「${escapeHtml(person.nickname)}」的档案，各体系共用，不必重复填写。</p>
         <p class="life-footnote" id="bazi-birth-sync" ${hasBirthInfo(p) ? '' : 'hidden'}>
           ${hasBirthInfo(p) ? `当前：${escapeHtml(formatBirthBrief(p))}` : ''}
         </p>
         <div id="bazi-birth-dt-slot" class="life-birth-row"></div>
-        <label class="life-field life-field-full"><span>出生地点</span><input name="birthPlace" type="text" placeholder="如 成都" value="${escapeHtml(p.birthPlace)}" /></label>
+        <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都" value="${escapeHtml(p.birthPlace)}" /></label>
       </fieldset>
+      ${genderRadios()}
       <div class="life-form-actions">
-        <button type="submit" class="life-btn-primary" id="bazi-birth-save">保存</button>
-        <button type="button" class="life-btn-ghost" data-path="/profile">打开档案 ›</button>
-        <button type="button" class="life-btn-primary" id="bazi-to-chart" data-path="/bazi/chart" ${castReady ? '' : 'disabled'}>去排盘 ›</button>
+        <button type="submit" class="life-btn-primary" id="bazi-birth-save">保存到档案</button>
+        <button type="button" class="life-btn-primary" id="bazi-to-reading" data-path="/bazi/reading" ${castReady ? '' : 'disabled'}>认识我的出生密码 ›</button>
       </div>
       <p class="life-status" id="bazi-birth-status" hidden></p>
     </form>
 
-    <div id="bazi-entries">${renderEntries()}</div>
+    <div id="bazi-entries" class="bazi-home-entries">${renderEntries()}</div>
   `;
 
   const form = page.querySelector<HTMLFormElement>('#bazi-birth-form')!;
   const statusEl = page.querySelector<HTMLElement>('#bazi-birth-status')!;
   const syncHint = page.querySelector<HTMLElement>('#bazi-birth-sync')!;
   const entriesEl = page.querySelector<HTMLElement>('#bazi-entries')!;
-  const toChart = page.querySelector<HTMLButtonElement>('#bazi-to-chart')!;
+  const toReading = page.querySelector<HTMLButtonElement>('#bazi-to-reading')!;
   const slot = page.querySelector<HTMLElement>('#bazi-birth-dt-slot')!;
 
   mountBirthDatetimeField({
@@ -128,7 +145,8 @@ export function renderBaziHome(root: HTMLElement): () => void {
 
   function refreshCastGate(): void {
     castReady = canCast(store.profile);
-    toChart.disabled = !castReady;
+    dateReady = canRectify(store.profile);
+    toReading.disabled = !castReady;
     entriesEl.innerHTML = renderEntries();
     bindPathClicks(entriesEl);
   }
@@ -163,18 +181,29 @@ export function renderBaziHome(root: HTMLElement): () => void {
       statusEl.textContent = '请先选择出生时间。';
       return;
     }
+    const checked = form.querySelector<HTMLInputElement>('input[name="gender"]:checked');
+    const genderRaw = checked?.value ?? '';
+    const gender =
+      genderRaw === 'female' || genderRaw === 'male' ? genderRaw : ('' as const);
     store = updateBirthFields(birth);
+    store = patchActivePerson({ gender });
+    person = getActivePerson();
     syncHint.hidden = false;
     syncHint.textContent = `当前：${formatBirthBrief(store.profile)}`;
     statusEl.hidden = false;
     statusEl.textContent = canCast(store.profile)
-      ? '已保存。'
-      : '已保存。排盘还需完整年月日。';
+      ? `已写入「${person.nickname}」的档案。`
+      : `已写入「${person.nickname}」的档案。排盘还需完整年月日。`;
     refreshCastGate();
   });
 
   root.appendChild(page);
-  attachPersonSwitcherToPage(page);
+  attachPersonSwitcherToPage(page, {
+    onChange: () => {
+      // 切换角色后整页重载，保证表单与摘要绑定新人
+      navigate('/bazi');
+    },
+  });
   return () => {
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();

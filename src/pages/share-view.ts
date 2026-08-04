@@ -23,11 +23,13 @@ function systemHome(system: string): string {
     case 'xiaoliuren':
       return '/xiaoliuren';
     case 'bazi':
-      return '/bazi';
+      return '/bazi/reading';
     case 'life':
       return '/life';
     case 'meihua':
       return '/meihua';
+    case 'lab':
+      return '/';
     default:
       return '/';
   }

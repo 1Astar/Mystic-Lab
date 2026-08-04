@@ -28,7 +28,7 @@ function renderCaseBlock(): string {
         <div><dt>问工作</dt><dd>${god.career}</dd></div>
         <div><dt>问旅行</dt><dd>${god.travel}</dd></div>
       </dl>
-      <button type="button" class="btn btn-ghost" data-go="/xiaoliuren/codex">看全部六神的多场景解释 →</button>
+      <button type="button" class="btn btn-ghost" data-go="/xiaoliuren/tujian">看全部六神的多场景解释 →</button>
     </section>
   `;
 }

@@ -10,6 +10,8 @@ import {
   type AiSettings,
 } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
+import { draftLabInvite } from '../share/drafts.ts';
+import { openShareSheet } from '../share/sheet.ts';
 import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 
 interface LabEntry {
@@ -21,21 +23,35 @@ interface LabEntry {
   comingSoon?: boolean;
 }
 
-/** 各体系入口常驻 */
+/** 各体系入口常驻：塔罗 → 六爻 → 八字 → 紫微 → 小六壬 → 梅花 */
 const ALL_SYSTEMS: LabEntry[] = [
   {
     path: '/tarot',
     title: '塔罗',
     desc: '人与事：画面、张力、下一步',
-    note: '看见画面',
+    note: SYSTEM_POSITION.tarot,
     emblem: 'tarot',
   },
   {
     path: '/liuyao',
     title: '六爻',
     desc: '谈薪、offer、官司等具体事',
-    note: '一事细看',
+    note: SYSTEM_POSITION.liuyao,
     emblem: 'hex',
+  },
+  {
+    path: '/bazi',
+    title: '八字',
+    desc: '日主、十神、命盘结构',
+    note: SYSTEM_POSITION.bazi,
+    emblem: 'bazi',
+  },
+  {
+    path: '/ziwei',
+    title: '紫微',
+    desc: '星曜图鉴 · 十年大限 · 人生地图',
+    note: SYSTEM_POSITION.ziwei,
+    emblem: 'cosmos',
   },
   {
     path: '/xiaoliuren',
@@ -50,43 +66,6 @@ const ALL_SYSTEMS: LabEntry[] = [
     desc: '人品、一事一象，先定大方向',
     note: '象与气机',
     emblem: 'plum',
-  },
-  {
-    path: '/bazi',
-    title: '八字',
-    desc: '日主、十神、命盘结构',
-    note: '命理结构',
-    emblem: 'bazi',
-  },
-  {
-    path: '/ziwei',
-    title: '紫微',
-    desc: '星曜图鉴 · 十年大限 · 人生地图',
-    note: SYSTEM_POSITION.ziwei,
-    emblem: 'cosmos',
-  },
-  {
-    path: '/life',
-    title: '人生宇宙',
-    desc: '平行选择 · 人生推演',
-    note: '看自己的路',
-    emblem: 'cosmos',
-  },
-];
-
-const GLOBAL_ENTRIES: LabEntry[] = [
-  {
-    path: '/records',
-    title: '我的旅程',
-    desc: '各体系记录 · 收藏 · 笔记',
-    emblem: 'heart',
-  },
-  {
-    path: '/knowledge',
-    title: '知识库',
-    desc: '学习不同占问体系',
-    emblem: 'tarot',
-    comingSoon: true,
   },
 ];
 
@@ -148,6 +127,28 @@ function mountLabHomeAiButton(host: HTMLElement): void {
   host.appendChild(btn);
 }
 
+/** 顶栏分享图标：打开邀请分享面板 */
+function mountLabHomeShareButton(host: HTMLElement): void {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lab-home-share-btn';
+  btn.setAttribute('aria-label', '邀请分享');
+  btn.title = '邀请同行';
+  btn.innerHTML = `
+    <svg class="lab-home-share-ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"/>
+      <circle cx="6" cy="12" r="3"/>
+      <circle cx="18" cy="19" r="3"/>
+      <path d="M8.6 13.5 15.4 17.5"/>
+      <path d="M15.4 6.5 8.6 10.5"/>
+    </svg>
+  `;
+  btn.addEventListener('click', () => {
+    openShareSheet(draftLabInvite(), { mode: 'invite', autoStart: true });
+  });
+  host.appendChild(btn);
+}
+
 export function renderLabHome(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
@@ -165,16 +166,13 @@ export function renderLabHome(root: HTMLElement): () => void {
       <p class="home-eyebrow">MYSTIC LAB</p>
       <h1 class="page-title">Mystic Lab</h1>
       <p class="page-subtitle">答案不在牌里，在你心里。</p>
-      <button type="button" class="lab-guide-trigger">怎么选体系？</button>
+      <div class="lab-home-cta-row">
+        <button type="button" class="lab-guide-trigger">怎么选体系？</button>
+      </div>
     </header>
 
     <section class="lab-section" aria-label="体系入口">
       <div class="lab-systems" data-lab-systems></div>
-    </section>
-
-    <section class="lab-section" aria-label="全局入口">
-      <h2 class="lab-section-label">全局</h2>
-      <div class="lab-global"></div>
     </section>
   `;
 
@@ -187,15 +185,11 @@ export function renderLabHome(root: HTMLElement): () => void {
 
   const aiHost = page.querySelector<HTMLElement>('[data-lab-ai-host]')!;
   mountLabHomeAiButton(aiHost);
+  mountLabHomeShareButton(aiHost);
 
   const systemsHost = page.querySelector<HTMLElement>('[data-lab-systems]')!;
   for (const entry of ALL_SYSTEMS) {
     appendEntryCard(systemsHost, entry, true);
-  }
-
-  const global = page.querySelector<HTMLElement>('.lab-global')!;
-  for (const entry of GLOBAL_ENTRIES) {
-    appendEntryCard(global, entry);
   }
 
   root.appendChild(page);
@@ -204,6 +198,7 @@ export function renderLabHome(root: HTMLElement): () => void {
     stars.remove();
     document.querySelector('.lab-guide-modal')?.remove();
     document.querySelector('.person-switch-sheet')?.remove();
+    document.querySelector('[data-lab-me-drawer]')?.remove();
     document.querySelector('.ai-settings-modal')?.remove();
   };
 }

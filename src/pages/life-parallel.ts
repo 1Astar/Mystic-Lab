@@ -68,7 +68,7 @@ export function renderLifeParallel(root: HTMLElement): () => void {
     <section class="life-card life-now-card">
       <p class="life-card-kicker">现在的我</p>
       <h2>${escapeHtml(portrait.stageTitle)}</h2>
-      <p>${escapeHtml(me.occupation || '职业未填')} · ${escapeHtml(me.city || '城市未填')} · ${escapeHtml(ageLabel)}</p>
+      <p>${escapeHtml(me.occupation || '职业未填')} · ${escapeHtml(me.city || '现居地未填')} · ${escapeHtml(ageLabel)}</p>
       <p class="life-card-body">${escapeHtml(me.confusion || portrait.stageSummary)}</p>
     </section>
 

@@ -1,5 +1,6 @@
 import { navigate } from '../router.ts';
 import { stashCrossAskQuestion } from '../journal/cross-ask.ts';
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 import {
   LAB_ASK_PLACEHOLDERS,
   adviseSystemsForQuestion,
@@ -59,7 +60,7 @@ export const LAB_PICK_CARDS: Array<{
 }> = [
   {
     key: 'tarot',
-    metaphor: '镜子 · 看见画面',
+    metaphor: SYSTEM_POSITION.tarot,
     strength: '情感与关系，也能看一事一局的局势',
     forYou: '你想看见画面：自己、关系，或这事怎么走',
     notFor: '别用来硬问「几月几号成」这类节点',
@@ -73,7 +74,7 @@ export const LAB_PICK_CARDS: Array<{
   },
   {
     key: 'liuyao',
-    metaphor: '西医 · 精密定量',
+    metaphor: SYSTEM_POSITION.liuyao,
     strength: '谈薪、offer、求财、官司等具体事',
     forYou: '你较真，想一事细看、步骤可核对',
     notFor: '别问「我一生如何」这种大面',

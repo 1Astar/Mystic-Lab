@@ -86,7 +86,7 @@ function profileBlock(profile: LifeProfileInput): string {
   return [
     `年龄：${p.age.trim() || '未填'}`,
     `职业：${p.occupation.trim() || '未填'}`,
-    `城市：${p.city.trim() || '未填'}`,
+    `现居地：${p.city.trim() || '未填'}`,
     `出生：${[p.birthYear, p.birthMonth, p.birthDay].filter(Boolean).join('-') || '未填'} ${p.birthHour.trim()}`.trim(),
     `出生地：${p.birthPlace.trim() || '未填'}`,
     `当前困惑：${p.confusion.trim() || '未填'}`,

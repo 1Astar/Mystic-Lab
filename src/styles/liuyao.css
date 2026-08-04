@@ -137,6 +137,13 @@
   margin: 0 0 10px;
 }
 
+.ly-home-position {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: rgba(232, 212, 168, 0.88);
+}
+
 .ly-home-slogan {
   margin: 0 auto 12px;
   max-width: 18em;

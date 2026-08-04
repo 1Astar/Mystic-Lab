@@ -196,6 +196,23 @@ export function updateBirthFields(
   return next;
 }
 
+/** 合并当前激活人任意字段（如性别） */
+export function patchActivePerson(
+  partial: Partial<Pick<PersonProfile, 'gender' | 'nickname'>>,
+): LifeStore {
+  const store = loadLifeStore();
+  const active = getPersonFromStore(store, store.activeProfileId) ?? store.profiles[0]!;
+  const nextPerson: PersonProfile = { ...active, ...partial };
+  if (partial.gender !== undefined) {
+    nextPerson.gender =
+      partial.gender === 'female' || partial.gender === 'male' ? partial.gender : '';
+  }
+  const profiles = store.profiles.map((p) => (p.id === active.id ? nextPerson : p));
+  const next = syncFlatProfile({ ...store, profiles });
+  saveLifeStore(next);
+  return next;
+}
+
 export function hasBirthInfo(profile: LifeProfileInput): boolean {
   return Boolean(
     profile.birthYear.trim() ||

@@ -41,7 +41,15 @@ const tarotStyles = [
 const xiaoliurenStyles = [() => import('./styles/xiaoliuren.css')];
 const liuyaoStyles = [() => import('./styles/liuyao.css')];
 const lifeStyles = [() => import('./styles/life.css')];
-const baziStyles = [() => import('./styles/bazi.css')];
+const baziStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/bazi.css'),
+];
+const baziReadingStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/bazi.css'),
+  () => import('./styles/liuyao.css'),
+];
 const ziweiStyles = [
   () => import('./styles/life.css'),
   () => import('./styles/bazi.css'),
@@ -84,9 +92,12 @@ registerRoute(
   lazy(() => import('./pages/xiaoliuren-reading.ts'), 'renderXiaoliurenReading', xiaoliurenStyles),
 );
 registerRoute(
-  '/xiaoliuren/codex',
+  '/xiaoliuren/tujian',
   lazy(() => import('./pages/xiaoliuren-codex.ts'), 'renderXiaoliurenCodex', xiaoliurenStyles),
 );
+registerRoute('/xiaoliuren/codex', () => {
+  navigate('/xiaoliuren/tujian');
+});
 registerRoute(
   '/xiaoliuren/journal',
   lazy(() => import('./pages/xiaoliuren-journal.ts'), 'renderXiaoliurenJournal', xiaoliurenStyles),
@@ -118,10 +129,28 @@ registerRoute(
   lazy(() => import('./pages/bazi-home.ts'), 'renderBaziHome', baziStyles),
 );
 registerRoute(
+  '/bazi/reading',
+  lazy(() => import('./pages/bazi-reading.ts'), 'renderBaziReading', baziReadingStyles),
+);
+registerRoute(
   '/bazi/chart',
   lazy(() => import('./pages/bazi-chart.ts'), 'renderBaziChart', baziStyles),
 );
-
+registerRoute(
+  '/bazi/rectify',
+  lazy(() => import('./pages/bazi-rectify.ts'), 'renderBaziRectify', baziStyles),
+);
+registerRoute(
+  '/bazi/rectify/result',
+  lazy(() => import('./pages/bazi-rectify-result.ts'), 'renderBaziRectifyResult', baziStyles),
+);
+registerRoute(
+  '/bazi/tujian',
+  lazy(() => import('./pages/bazi-codex.ts'), 'renderBaziCodex', baziStyles),
+);
+registerRoute('/bazi/codex', () => {
+  navigate('/bazi/tujian');
+});
 
 registerRoute(
   '/ziwei',
@@ -136,9 +165,13 @@ registerRoute(
   lazy(() => import('./pages/ziwei-reading.ts'), 'renderZiweiReading', ziweiStyles),
 );
 registerRoute(
-  '/ziwei/codex',
+  '/ziwei/tujian',
   lazy(() => import('./pages/ziwei-codex.ts'), 'renderZiweiCodex', ziweiStyles),
 );
+registerRoute('/ziwei/codex', () => {
+  const q = location.search || '';
+  navigate(`/ziwei/tujian${q}`);
+});
 
 registerRoute(
   '/life',

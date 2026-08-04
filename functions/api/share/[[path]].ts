@@ -107,7 +107,7 @@ export const onRequest = async (context: {
 
 async function createShare(request: Request, kv: KVNamespace): Promise<Response> {
   const body = (await request.json()) as Partial<ShareSnapshot>;
-  if (!body?.ownerId || !body.system || !body.summary) {
+  if (!body?.ownerId || !body.system || !(body.summary || body.headline)) {
     return json({ error: { message: 'invalid body' } }, 400);
   }
   const id = rid();

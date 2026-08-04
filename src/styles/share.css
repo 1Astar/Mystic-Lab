@@ -120,6 +120,37 @@
   gap: 8px;
   margin-top: 16px;
 }
+.ms-share-actions-top {
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+.ms-share-copy-btn {
+  appearance: none;
+  border: 1px solid rgba(199, 164, 91, 0.45);
+  background: rgba(199, 164, 91, 0.14);
+  color: #e8d7a8;
+  border-radius: 999px;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+.ms-share-copy-btn:hover {
+  border-color: rgba(199, 164, 91, 0.65);
+  background: rgba(199, 164, 91, 0.22);
+}
+.ms-share-copy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ms-share-copy-btn.is-copied {
+  border-color: rgba(120, 190, 140, 0.55);
+  color: #b8e0c0;
+}
+.ms-share-done .ms-share-copy-btn {
+  margin-top: 12px;
+  width: 100%;
+}
 .ms-share-copy-only {
   appearance: none;
   border: 1px solid rgba(199, 164, 91, 0.35);
@@ -736,6 +767,118 @@ html.thread-peek-open .ly-ai-side-fab {
   padding-top: 24px;
 }
 
+.ms-cover-lab-hero {
+  position: relative;
+  margin: 28px 0 8px;
+  padding: 36px 28px 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(232, 215, 168, 0.28);
+  background: radial-gradient(
+    ellipse at 50% 20%,
+    rgba(201, 168, 76, 0.18),
+    rgba(18, 14, 32, 0.35) 55%,
+    transparent 80%
+  );
+  text-align: center;
+  overflow: hidden;
+}
+.ms-cover-lab-glow {
+  position: absolute;
+  inset: -20% 10% auto;
+  height: 120px;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.35), transparent 70%);
+  pointer-events: none;
+}
+.ms-cover-lab-mark {
+  position: relative;
+  margin: 0 0 18px;
+  font-size: 64px;
+  line-height: 1;
+  color: #e8d7a8;
+  text-shadow: 0 0 28px rgba(201, 168, 76, 0.45);
+}
+.ms-cover-lab-chips {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 12px;
+}
+.ms-cover-lab-chips span {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 215, 168, 0.28);
+  background: rgba(12, 10, 20, 0.45);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  color: #f0e2c0;
+  font-family: system-ui, sans-serif;
+}
+.ms-cover-lab-summary {
+  margin: 18px 0 0;
+  font-size: 28px;
+  line-height: 1.55;
+  color: rgba(245, 239, 227, 0.82);
+  font-family: system-ui, sans-serif;
+}
+.ms-cover-inner.is-lab-invite .ms-cover-headline {
+  margin-top: 22px;
+  font-size: 48px;
+  line-height: 1.35;
+}
+
+/* 邀请海报满版 + 底部二维码码头 */
+.ms-cover-inner.is-lab-poster {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+.ms-cover-lab-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.ms-cover-lab-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 48px 56px 64px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(8, 6, 18, 0.55) 28%,
+    rgba(8, 6, 18, 0.92) 100%
+  );
+  box-sizing: border-box;
+}
+.ms-cover-inner.is-lab-poster .ms-cover-qr-row {
+  margin-top: 0;
+  padding-top: 0;
+}
+.ms-cover-inner.is-lab-poster .ms-cover-foot {
+  margin-top: 18px;
+  padding-top: 0;
+  opacity: 0.85;
+  color: rgba(245, 239, 227, 0.88);
+}
+.ms-cover-inner.is-lab-invite:not(.is-lab-poster) .ms-cover-qr-row {
+  margin-top: auto;
+  padding-top: 40px;
+}
+.ms-cover-inner.is-lab-invite:not(.is-lab-poster) .ms-cover-date {
+  margin-top: 20px;
+}
+.ms-cover-inner.is-lab-invite:not(.is-lab-poster) .ms-cover-foot {
+  margin-top: 12px;
+  padding-top: 8px;
+}
+
 /* 深页 */
 .ms-view {
   padding-bottom: 120px;
@@ -772,6 +915,9 @@ html.thread-peek-open .ly-ai-side-fab {
 .ms-view-cover .ms-cover-inner {
   padding: 8% 7%;
   transform: scale(1);
+}
+.ms-view-cover .ms-cover-inner.is-lab-poster {
+  padding: 0;
 }
 .ms-view-cover .ms-cover-brand {
   font-size: clamp(1.6rem, 7vw, 2.4rem);

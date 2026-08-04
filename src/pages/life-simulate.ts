@@ -66,7 +66,7 @@ export function renderLifeSimulate(root: HTMLElement): () => void {
 
     <section class="life-card life-now-card">
       <p class="life-card-kicker">现在的我</p>
-      <p>${escapeHtml(store.profile.occupation || '职业未填')} · ${escapeHtml(store.profile.city || '城市未填')}${store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''}</p>
+      <p>${escapeHtml(store.profile.occupation || '职业未填')} · ${escapeHtml(store.profile.city || '现居地未填')}${store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''}</p>
     </section>
 
     <form class="life-form" id="life-sim-form">

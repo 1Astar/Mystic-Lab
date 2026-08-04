@@ -1,3 +1,4 @@
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 import { getCollectedCount } from '../codex/collection.ts';
 import {
   listTarotDueForReview,
@@ -18,7 +19,7 @@ export function renderTarotHome(root: HTMLElement): () => void {
     eyebrow: 'MYSTIC LAB',
     title: '塔罗 Tarot',
     slogan: '答案不在牌里，在你心里。',
-    subtitle: '随心占问 · 随心图鉴 · 随心手札',
+    subtitle: SYSTEM_POSITION.tarot,
     showStars: true,
     showAiSettings: true,
     entries: [

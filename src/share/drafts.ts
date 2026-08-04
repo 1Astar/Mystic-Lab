@@ -204,6 +204,7 @@ export function draftGeneric(input: {
   summary: string;
   sections?: { heading: string; body: string }[];
   label?: string;
+  brandSlogan?: string;
 }): ShareDraft {
   return {
     system: input.system,
@@ -211,6 +212,33 @@ export function draftGeneric(input: {
     headline: input.headline,
     summary: input.summary.slice(0, 400),
     sections: input.sections ?? [{ heading: '摘要', body: input.summary }],
-    visual: { kind: input.system === 'life' ? 'life' : 'generic', label: input.label || input.headline },
+    visual: {
+      kind:
+        input.system === 'life'
+          ? 'life'
+          : input.system === 'lab'
+            ? 'generic'
+            : 'generic',
+      label: input.label || input.headline,
+    },
+    brandSlogan: input.brandSlogan,
   };
+}
+
+/** Lab 首页邀请：不带具体卦象 / 不问具体问题 */
+export function draftLabInvite(): ShareDraft {
+  return draftGeneric({
+    system: 'lab',
+    headline: '看见你心里的答案',
+    question: '',
+    summary: '探索内心的答案，遇见更好的自己。',
+    sections: [
+      {
+        heading: '送你一张探索邀请卡',
+        body: '我在「随心而行」等你。一起探索问题的答案，也遇见内心的光。',
+      },
+    ],
+    label: 'Mystic Lab',
+    brandSlogan: '答案不在牌里，在你心里。',
+  });
 }

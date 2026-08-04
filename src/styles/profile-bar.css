@@ -398,3 +398,230 @@
   color: #ffd6a6;
   font-weight: 600;
 }
+
+/* Lab「我」左侧抽屉：角色 + 旅程 / 知识库 / 人生宇宙 */
+.lab-me-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  display: flex;
+  justify-content: flex-start;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.lab-me-drawer.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lab-me-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 5, 12, 0.62);
+}
+
+.lab-me-drawer-panel {
+  position: relative;
+  z-index: 1;
+  width: min(340px, 88vw);
+  height: 100%;
+  overflow: auto;
+  padding: 20px 16px 28px;
+  box-sizing: border-box;
+  background: linear-gradient(165deg, rgba(24, 18, 36, 0.98), rgba(8, 8, 14, 0.99));
+  border-right: 1px solid rgba(255, 214, 166, 0.2);
+  transform: translateX(-18px);
+  transition: transform 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.lab-me-drawer.is-open .lab-me-drawer-panel {
+  transform: translateX(0);
+}
+
+.lab-me-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.lab-me-drawer-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: #ffd6a6;
+}
+
+.lab-me-drawer-head h3 {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+  font-family: var(--font-serif, Georgia, 'Songti SC', serif);
+}
+
+.lab-me-drawer-x {
+  border: none;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.7);
+  font-size: 1.35rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.lab-me-section h4 {
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 230, 200, 0.78);
+  font-weight: 600;
+}
+
+.lab-me-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.lab-me-add {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 214, 166, 0.35);
+  background: rgba(255, 214, 166, 0.08);
+  color: #ffd6a6;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lab-me-add:hover {
+  border-color: rgba(255, 214, 166, 0.65);
+  background: rgba(255, 214, 166, 0.14);
+}
+
+.lab-me-role-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lab-me-role {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.12);
+  background: rgba(16, 12, 28, 0.45);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lab-me-role.is-on {
+  border-color: rgba(255, 214, 166, 0.42);
+  background: rgba(40, 28, 64, 0.5);
+}
+
+.lab-me-role-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 214, 166, 0.16);
+  color: #ffd6a6;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.lab-me-role-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.lab-me-role-meta strong {
+  font-size: 0.92rem;
+}
+
+.lab-me-role-meta em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: rgba(255, 230, 200, 0.58);
+}
+
+.lab-me-role-check {
+  color: #ffd6a6;
+  font-size: 0.9rem;
+}
+
+.lab-me-manage {
+  margin-top: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 214, 166, 0.75);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lab-me-section-global {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lab-me-global {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab-me-global-link {
+  width: 100%;
+  text-align: left;
+  padding: 11px 4px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.88);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lab-me-global-link:hover:not(:disabled) {
+  color: #ffd6a6;
+}
+
+.lab-me-global-link.is-soon,
+.lab-me-global-link:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lab-me-global-link em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: rgba(255, 180, 160, 0.9);
+}

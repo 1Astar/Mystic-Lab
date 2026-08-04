@@ -248,13 +248,13 @@ export function renderZiweiReading(root: HTMLElement): () => void {
 
       <section class="ziwei-codex-cta">
         <p class="ziwei-codex-cta-copy">刚才你看到了内核中的【${escapeHtml(spot || '主星')}】，想深入了解它在神话里代表的性格，以及怎么驾驭它吗？</p>
-        <button type="button" class="life-btn-primary" data-path="/ziwei/codex?star=${encodeURIComponent(spot || '紫微')}">
+        <button type="button" class="life-btn-primary" data-path="/ziwei/tujian?star=${encodeURIComponent(spot || '紫微')}">
           去图鉴里看看 【${escapeHtml(spot || '主星')}】 ›
         </button>
       </section>
 
       <nav class="ziwei-reading-nav">
-        <button type="button" class="bazi-home-link" data-path="/ziwei/codex">
+        <button type="button" class="bazi-home-link" data-path="/ziwei/tujian">
           <strong>星曜图鉴</strong>
           <span>绝世主星 · 助阵辅星 · 四大化星</span>
           <em aria-hidden="true">›</em>

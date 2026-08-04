@@ -122,7 +122,7 @@ export function renderZiweiHome(root: HTMLElement): () => void {
       </section>
 
       <nav class="ziwei-home-nav" aria-label="紫微入口">
-        <button type="button" class="bazi-home-link" data-path="/ziwei/codex">
+        <button type="button" class="bazi-home-link" data-path="/ziwei/tujian">
           <strong>星曜图鉴</strong>
           <span>绝世主星 · 助阵 · 四化 · ${progress.collected}/${progress.total}</span>
           <em aria-hidden="true">›</em>

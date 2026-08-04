@@ -121,7 +121,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       page.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         detailId = '';
         try {
-          history.replaceState({}, '', '/ziwei/codex');
+          history.replaceState({}, '', '/ziwei/tujian');
         } catch {
           /* ignore */
         }
@@ -187,7 +187,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         const id = btn.dataset.openStar ?? '';
         detailId = id;
         try {
-          history.replaceState({}, '', `/ziwei/codex?star=${encodeURIComponent(id)}`);
+          history.replaceState({}, '', `/ziwei/tujian?star=${encodeURIComponent(id)}`);
         } catch {
           /* ignore */
         }

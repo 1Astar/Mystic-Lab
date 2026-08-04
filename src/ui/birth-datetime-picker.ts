@@ -17,6 +17,7 @@ import {
 } from '../bazi/birth-datetime.ts';
 
 const ITEM_H = 40;
+/** 视口 200、选中条居中：单侧垫高 (200-40)/2 = 80px（见 .birth-dt-wheel-pad）；只垫一块，勿重复 */
 const YEAR_MIN = 1900;
 const YEAR_MAX = 2100;
 
@@ -57,8 +58,18 @@ function buildMinuteOptions(): WheelOption[] {
   }));
 }
 
+/** 导出供单测：scrollTop ↔ 选项下标（垫高 80px 后） */
+export function wheelIndexFromScrollTop(scrollTop: number): number {
+  return Math.round(scrollTop / ITEM_H);
+}
+
+export function scrollTopForWheelIndex(idx: number): number {
+  return Math.max(0, idx) * ITEM_H;
+}
+
 function fillWheel(el: HTMLElement, options: WheelOption[], selected: number): void {
-  const pad = `<div class="birth-dt-wheel-pad" aria-hidden="true"></div>`.repeat(2);
+  // 单块 PAD_H 垫高；若写成两块 80px 会与 ITEM_H 读算错位 2 格（选 2003 却读成 2005）
+  const pad = `<div class="birth-dt-wheel-pad" aria-hidden="true"></div>`;
   el.innerHTML =
     pad +
     options
@@ -74,20 +85,20 @@ function fillWheel(el: HTMLElement, options: WheelOption[], selected: number): v
   );
   el.dataset.selected = String(options[idx]?.value ?? selected);
   requestAnimationFrame(() => {
-    el.scrollTop = idx * ITEM_H;
+    el.scrollTop = scrollTopForWheelIndex(idx);
   });
 }
 
 function readWheel(el: HTMLElement): number {
-  const idx = Math.round(el.scrollTop / ITEM_H);
+  const idx = wheelIndexFromScrollTop(el.scrollTop);
   const items = el.querySelectorAll<HTMLElement>('.birth-dt-wheel-item');
   const item = items[Math.min(items.length - 1, Math.max(0, idx))];
   return Number(item?.dataset.value ?? el.dataset.selected ?? 0);
 }
 
 function snapWheel(el: HTMLElement): number {
-  const idx = Math.round(el.scrollTop / ITEM_H);
-  el.scrollTop = idx * ITEM_H;
+  const idx = wheelIndexFromScrollTop(el.scrollTop);
+  el.scrollTop = scrollTopForWheelIndex(idx);
   const value = readWheel(el);
   el.dataset.selected = String(value);
   return value;

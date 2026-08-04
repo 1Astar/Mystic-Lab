@@ -50,7 +50,10 @@ function originAllowed(request: Request, env: Env): boolean {
       return (
         host === 'localhost' ||
         host === '127.0.0.1' ||
-        host.endsWith('.pages.dev')
+        host.endsWith('.pages.dev') ||
+        host.endsWith('.vercel.app') ||
+        host === 'mystic.starry-studio.cn' ||
+        host.endsWith('.starry-studio.cn')
       );
     } catch {
       return false;

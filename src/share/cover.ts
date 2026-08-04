@@ -21,7 +21,35 @@ export type ShareCoverSnap = Pick<
   aiText?: string;
   deepUrl?: string;
   qrDataUrl?: string;
+  /** Lab 邀请海报（已转 data URL 时供导出） */
+  invitePosterSrc?: string;
 };
+
+/** Lab 邀请氛围海报池（每次生成随机抽一张） */
+export const LAB_INVITE_POSTER_PATHS = [
+  '/share/lab-invite.png',
+  '/share/lab-invite-01.png',
+  '/share/lab-invite-02.png',
+  '/share/lab-invite-03.png',
+] as const;
+
+export function pickLabInvitePosterPath(rand: () => number = Math.random): string {
+  const n = LAB_INVITE_POSTER_PATHS.length;
+  const i = Math.floor(rand() * n);
+  return LAB_INVITE_POSTER_PATHS[((i % n) + n) % n]!;
+}
+
+function labInvitePosterUrl(path?: string): string {
+  const p = path || pickLabInvitePosterPath();
+  try {
+    if (typeof location !== 'undefined' && location.origin) {
+      return `${location.origin}${p}`;
+    }
+  } catch {
+    /* ignore */
+  }
+  return p;
+}
 
 function escapeHtml(s: string): string {
   return s
@@ -185,30 +213,66 @@ function systemLabelOf(system: string): string {
     bazi: '八字',
     life: '人生宇宙',
     meihua: '梅花',
+    lab: 'Mystic Lab',
   };
   return map[system] || 'Mystic Lab';
 }
 
+function isLabInvite(snap: ShareCoverSnap): boolean {
+  return snap.system === 'lab';
+}
+
+function labInviteVisual(posterSrc?: string): string {
+  if (posterSrc) {
+    return `<img class="ms-cover-lab-poster" src="${escapeHtml(posterSrc)}" alt="随心而行邀请" width="1080" height="1920" />`;
+  }
+  const chips = ['塔罗', '六爻', '八字', '紫微', '小六壬', '梅花'];
+  return `
+    <div class="ms-cover-lab-hero" aria-hidden="true">
+      <div class="ms-cover-lab-glow"></div>
+      <p class="ms-cover-lab-mark">✦</p>
+      <div class="ms-cover-lab-chips">
+        ${chips.map((c) => `<span>${escapeHtml(c)}</span>`).join('')}
+      </div>
+    </div>`;
+}
+
 function qrRow(snap: ShareCoverSnap): string {
+  const siteOnly = isLabInvite(snap);
   if (!snap.qrDataUrl) {
-    return `<p class="ms-cover-hint">扫码或点开链接 · 看完整解读</p>`;
+    return siteOnly
+      ? `<p class="ms-cover-hint">扫码或点开链接 · 进入网站</p>`
+      : `<p class="ms-cover-hint">扫码或点开链接 · 看完整解读</p>`;
   }
   return `<div class="ms-cover-qr-row">
     <img class="ms-cover-qr" src="${escapeHtml(snap.qrDataUrl)}" alt="扫码打开" width="240" height="240" />
     <div class="ms-cover-qr-meta">
-      <p class="ms-cover-qr-title">扫码看完整解读</p>
+      <p class="ms-cover-qr-title">${siteOnly ? '扫码打开网站' : '扫码看完整解读'}</p>
       <p class="ms-cover-qr-sub">随心而行 · Mystic Lab</p>
     </div>
   </div>`;
 }
 
 function frontInner(snap: ShareCoverSnap, date: string): string {
+  const lab = isLabInvite(snap);
+  if (lab) {
+    const hasPoster = Boolean(snap.invitePosterSrc);
+    return `
+    <div class="ms-cover-inner ms-cover-face-front is-lab-invite${hasPoster ? ' is-lab-poster' : ''}">
+      ${labInviteVisual(snap.invitePosterSrc)}
+      <div class="ms-cover-lab-dock">
+        ${qrRow(snap)}
+        <p class="ms-cover-foot">邀请朋友同行 一起探索内心世界</p>
+      </div>
+    </div>`;
+  }
+  const visual = visualBlock(snap.visual);
   return `
     <div class="ms-cover-inner ms-cover-face-front">
       <p class="ms-cover-brand">随心而行</p>
       <p class="ms-cover-sys">${systemLabelOf(snap.system)}</p>
       <p class="ms-cover-slogan">${escapeHtml(snap.brandSlogan || '答案不在牌里，在你心里。')}</p>
-      ${visualBlock(snap.visual)}
+      ${visual}
       <p class="ms-cover-headline${snap.system === 'tarot' ? ' is-conclusion' : ''}">${escapeHtml(snap.headline)}</p>
       ${snap.questionDisplay ? `<p class="ms-cover-q">「${escapeHtml(snap.questionDisplay)}」</p>` : ''}
       ${qrRow(snap)}
@@ -218,6 +282,28 @@ function frontInner(snap: ShareCoverSnap, date: string): string {
 }
 
 function backInner(snap: ShareCoverSnap, date: string): string {
+  if (isLabInvite(snap)) {
+    return `
+    <div class="ms-cover-inner ms-cover-face-back is-lab-invite">
+      <p class="ms-cover-brand">随心而行</p>
+      <p class="ms-cover-sys">Mystic Lab</p>
+      <p class="ms-cover-headline">${escapeHtml(snap.headline)}</p>
+      ${snap.summary?.trim() ? `<p class="ms-cover-lab-summary">${escapeHtml(snap.summary.trim())}</p>` : ''}
+      ${(snap.sections || [])
+        .slice(0, 3)
+        .map(
+          (s) => `
+      <section class="ms-cover-back-sec">
+        <h3>${escapeHtml(s.heading)}</h3>
+        <p>${escapeHtml(s.body).replace(/\n/g, '<br/>')}</p>
+      </section>`,
+        )
+        .join('')}
+      ${qrRow(snap)}
+      <p class="ms-cover-date">${escapeHtml(date)}</p>
+      <p class="ms-cover-foot">扫码进站 · 开始你的一问</p>
+    </div>`;
+  }
   const sections = (snap.sections || []).slice(0, 8);
   const body = sections.length
     ? sections
@@ -328,14 +414,19 @@ export async function resolveCorsSafeImageSrc(
 }
 
 async function withResolvedArt(snap: ShareCoverSnap): Promise<ShareCoverSnap> {
-  if (snap.visual.kind !== 'liuyao') return snap;
-  const v = snap.visual;
+  let next: ShareCoverSnap = snap;
+  if (snap.system === 'lab' && !snap.invitePosterSrc) {
+    const invitePosterSrc = await resolveCorsSafeImageSrc(labInvitePosterUrl());
+    if (invitePosterSrc) next = { ...next, invitePosterSrc };
+  }
+  if (next.visual.kind !== 'liuyao') return next;
+  const v = next.visual;
   const [primaryArtSrc, changedArtSrc] = await Promise.all([
     resolveCorsSafeImageSrc(v.primaryArtSrc),
     resolveCorsSafeImageSrc(v.changedArtSrc),
   ]);
   return {
-    ...snap,
+    ...next,
     visual: { ...v, primaryArtSrc, changedArtSrc },
   };
 }
@@ -381,16 +472,30 @@ async function toCoverPng(el: HTMLElement): Promise<string> {
   });
 }
 
+function qrTargetUrl(snap: ShareCoverSnap, deepUrl?: string): string {
+  if (snap.system === 'lab') {
+    try {
+      if (typeof location !== 'undefined' && location.origin) {
+        return `${location.origin}/`;
+      }
+    } catch {
+      /* ignore */
+    }
+    return deepUrl || snap.deepUrl || '';
+  }
+  return deepUrl || snap.deepUrl || '';
+}
+
 export async function renderShareCoverPngDataUrl(
   snap: ShareCoverSnap,
   deepUrl?: string,
   face: ShareCoverFace = 'front',
 ): Promise<string> {
-  const url = deepUrl || snap.deepUrl || '';
+  const url = qrTargetUrl(snap, deepUrl);
   const qrDataUrl = url
     ? snap.qrDataUrl || (await makeShareQrDataUrl(url))
     : snap.qrDataUrl;
-  const base = { ...snap, deepUrl: url || undefined, qrDataUrl };
+  const base = { ...snap, deepUrl: deepUrl || snap.deepUrl || undefined, qrDataUrl };
   try {
     return await withCoverHost(base, face, toCoverPng);
   } catch (err) {
@@ -409,12 +514,17 @@ export async function renderShareCoverPair(
   snap: ShareCoverSnap,
   deepUrl?: string,
 ): Promise<{ front: string; back: string; qrDataUrl?: string }> {
-  const url = deepUrl || snap.deepUrl || '';
-  const qrDataUrl = url ? await makeShareQrDataUrl(url) : snap.qrDataUrl;
-  const enriched = { ...snap, deepUrl: url || undefined, qrDataUrl };
+  const qrUrl = qrTargetUrl(snap, deepUrl);
+  const qrDataUrl = qrUrl ? await makeShareQrDataUrl(qrUrl) : snap.qrDataUrl;
+  let enriched: ShareCoverSnap = { ...snap, deepUrl: deepUrl || undefined, qrDataUrl };
+  // 同一次邀请正反面共用同一张随机海报
+  if (enriched.system === 'lab' && !enriched.invitePosterSrc) {
+    const invitePosterSrc = await resolveCorsSafeImageSrc(labInvitePosterUrl());
+    if (invitePosterSrc) enriched = { ...enriched, invitePosterSrc };
+  }
   const [front, back] = await Promise.all([
-    renderShareCoverPngDataUrl(enriched, url, 'front'),
-    renderShareCoverPngDataUrl(enriched, url, 'back'),
+    renderShareCoverPngDataUrl(enriched, deepUrl, 'front'),
+    renderShareCoverPngDataUrl(enriched, deepUrl, 'back'),
   ]);
   return { front, back, qrDataUrl };
 }

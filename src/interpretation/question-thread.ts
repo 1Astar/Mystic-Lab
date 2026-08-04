@@ -1,4 +1,5 @@
 import type { QuestionAnswer, QuestionTopic } from '../knowledge/types.ts';
+import { intentActionsPlain } from '../mystic-engine/intent-actions.ts';
 import type { CardReading } from './types.ts';
 import {
   classifySubQuestion,
@@ -188,17 +189,27 @@ function buildMockInsight(
         insight: work
           ? `${mockAdviceInsight(names)}${revNote ? ` ${revNote}` : ''}`
           : `先稳住状态，再谈大决定。把下一步缩成可验证的小行动。`,
-        action: work
-          ? '『先请假或断电休整几天；缓过来后，再定去留与交接节奏。』'
-          : '本周只改一件事，先验证再加码。',
+        // action 由 buildQuestionThread 用意图库回填
       };
     default:
       return {
         meaningMap,
         insight: `就这一问题，【${names}】落在「${primary.keywords.slice(0, 2).join('、') || primary.cardName}」——先看清局面，再谈下一步。`,
-        action: '把下一步缩成一个本周可验证的小动作。',
       };
   }
+}
+
+/** advice / general / 缺 action：用共享意图→动作库回填 */
+function fillActionFromIntent(
+  slice: string,
+  intent: SubQuestionIntent,
+  existing: string | undefined,
+  topic: QuestionTopic,
+): string | undefined {
+  if (intent === 'advice' || intent === 'general' || !existing?.trim()) {
+    return sanitizeTopicText(intentActionsPlain(slice, { ctx: null }), topic);
+  }
+  return sanitizeTopicText(existing, topic);
 }
 
 function empathyFor(topic: QuestionTopic, cards: CardReading[]): string {
@@ -243,9 +254,7 @@ export function buildQuestionThread(
         heading,
         meaningMap: sanitizeTopicText(meaningForCards(cards, indexes), topic) || undefined,
         insight: sanitizeTopicText(seeded.insight, topic),
-        action: seeded.action
-          ? sanitizeTopicText(seeded.action, topic)
-          : undefined,
+        action: fillActionFromIntent(part, intent, seeded.action, topic),
       };
     }
     const built = buildMockInsight(intent, cards, indexes, topic);
@@ -258,7 +267,7 @@ export function buildQuestionThread(
         ? sanitizeTopicText(built.meaningMap, topic)
         : undefined,
       insight: sanitizeTopicText(built.insight, topic),
-      action: built.action ? sanitizeTopicText(built.action, topic) : undefined,
+      action: fillActionFromIntent(part, intent, built.action, topic),
     };
   });
 

@@ -36,7 +36,7 @@ export const PALM_JOURNEY_CHAPTERS: PalmJourneyChapter[] = [
       '先建立印象，起课时才知道「落到哪一位」意味着什么。',
     ],
     practiceLabel: '打开六神图鉴',
-    practicePath: '/xiaoliuren/codex',
+    practicePath: '/xiaoliuren/tujian',
   },
   {
     id: 'lunar',
