@@ -80,7 +80,7 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
         </div>
       </main>
       <footer class="ly-home-footer">
-        <p>© Starry Product Lab · Mystic Lab</p>
+        <p>© Starry Studio · Mystic Lab</p>
       </footer>
     `;
 

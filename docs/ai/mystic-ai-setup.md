@@ -64,6 +64,9 @@ STAR_PM_CAPTURE_SECRET=你的StarPM收件密钥
 
 `/api/share` 需绑定 KV：`SHARE_KV`（或改用 D1）。本地 `npm run dev` 用内存，无需 KV。
 
+**Vercel**：`api/share/*` 代理到 Cloudflare Pages（默认 `https://mystic-lab.pages.dev/api/share`），复用已绑的 `SHARE_KV`。可选 Runtime 变量 `SHARE_UPSTREAM_BASE` 覆盖上游。  
+分享弹层「只复制链接」会先创建快照再复制 `/s/{id}`，朋友打开即可双方加次数（不必先出图）。
+
 ## 自检
 
 ```bash

@@ -139,6 +139,11 @@ export function openShareSheet(
       <p class="ms-share-status" data-ms-status hidden></p>
       <div class="ms-share-actions" data-ms-pre>
         <button type="button" class="btn ms-share-go" data-ms-go>${escapeHtml(copy.primary)}</button>
+        ${
+          mode === 'save'
+            ? ''
+            : `<button type="button" class="ms-share-copy-only" data-ms-copy-only>只复制链接（可加次数）</button>`
+        }
       </div>
       <div class="ms-share-done" data-ms-done hidden>
         <div class="ms-flip" data-ms-flip tabindex="0" role="button" aria-label="点一下翻转正反面">
@@ -168,6 +173,9 @@ export function openShareSheet(
   const frontImg = modal.querySelector('[data-ms-front]') as HTMLImageElement;
   const backImg = modal.querySelector('[data-ms-back]') as HTMLImageElement;
   const copyLinkEl = modal.querySelector('[data-ms-copy-link]') as HTMLElement;
+  const copyOnlyBtn = modal.querySelector(
+    '[data-ms-copy-only]',
+  ) as HTMLButtonElement | null;
   const goBtn = modal.querySelector('[data-ms-go]') as HTMLButtonElement;
   let snap: ShareSnapshot | null = null;
   let deepUrl = '';
@@ -195,26 +203,33 @@ export function openShareSheet(
     status.textContent = t;
   };
 
+  const buildCreateBody = (): ShareCreateBody => ({
+    ownerId: getOrCreateOwnerId(),
+    system: draft.system,
+    questionMasked: !showQuestion,
+    questionDisplay: questionDisplayOf(),
+    headline: draft.headline.slice(0, 80),
+    summary: draft.summary.slice(0, 400),
+    sections: draft.sections.slice(0, 12),
+    visual: draft.visual,
+    includeAi: includeAi && hasAi,
+    aiText: includeAi && hasAi ? draft.aiText : undefined,
+    brandSlogan:
+      mode === 'invite' ? '你的朋友邀请你看看近期状态' : draft.brandSlogan,
+  });
+
+  /** 只建快照拿深链（可加次数），不出图 */
+  const ensureDeepLink = async (): Promise<string> => {
+    snap = await createShareSnapshot(buildCreateBody());
+    deepUrl = shareDeepUrl(snap.id);
+    return deepUrl;
+  };
+
   const generate = async (opts?: { quiet?: boolean }) => {
     setStatus(opts?.quiet ? '正在按显示设置重绘…' : '正在生成正反面…');
     goBtn.disabled = true;
-    const body: ShareCreateBody = {
-      ownerId: getOrCreateOwnerId(),
-      system: draft.system,
-      questionMasked: !showQuestion,
-      questionDisplay: questionDisplayOf(),
-      headline: draft.headline.slice(0, 80),
-      summary: draft.summary.slice(0, 400),
-      sections: draft.sections.slice(0, 12),
-      visual: draft.visual,
-      includeAi: includeAi && hasAi,
-      aiText: includeAi && hasAi ? draft.aiText : undefined,
-      brandSlogan:
-        mode === 'invite'
-          ? '你的朋友邀请你看看近期状态'
-          : draft.brandSlogan,
-    };
-    snap = await createShareSnapshot(body);
+    if (copyOnlyBtn) copyOnlyBtn.disabled = true;
+    snap = await createShareSnapshot(buildCreateBody());
     deepUrl = shareDeepUrl(snap.id);
     const pair = await renderShareCoverPair(snap, deepUrl);
     frontUrl = pair.front;
@@ -228,12 +243,16 @@ export function openShareSheet(
 
     if (opts?.quiet) {
       setStatus(showQuestion ? '已显示问题并重绘分享图' : '已隐藏问题并重绘分享图');
+      goBtn.disabled = false;
+      if (copyOnlyBtn) copyOnlyBtn.disabled = false;
       return;
     }
 
     if (mode === 'save') {
       downloadCurrent();
       setStatus('已下载正面。点一下翻到背面，长按或再生成后可存解读面。');
+      goBtn.disabled = false;
+      if (copyOnlyBtn) copyOnlyBtn.disabled = false;
       return;
     }
 
@@ -265,6 +284,8 @@ export function openShareSheet(
     paintQ();
     if (snap) {
       void generate({ quiet: true }).catch((err) => {
+        goBtn.disabled = false;
+        if (copyOnlyBtn) copyOnlyBtn.disabled = false;
         setStatus(shareFailMessage(err));
       });
     }
@@ -273,29 +294,49 @@ export function openShareSheet(
     includeAi = (e.target as HTMLInputElement).checked;
   });
 
-  const copyLink = async () => {
-    if (!deepUrl) return;
+  const copyLink = async (opts?: { createIfNeeded?: boolean }) => {
     try {
+      if (!deepUrl && opts?.createIfNeeded) {
+        setStatus('正在生成可加次数的链接…');
+        if (copyOnlyBtn) copyOnlyBtn.disabled = true;
+        goBtn.disabled = true;
+        await ensureDeepLink();
+        goBtn.disabled = false;
+        if (copyOnlyBtn) copyOnlyBtn.disabled = false;
+      }
+      if (!deepUrl) return;
       await navigator.clipboard.writeText(deepUrl);
       copyLinkEl.textContent = '已复制';
       copyLinkEl.classList.add('is-copied');
-      setStatus('链接已复制');
+      if (copyOnlyBtn) copyOnlyBtn.textContent = '已复制链接';
+      setStatus('链接已复制：朋友打开并看一会儿，双方都可加次数');
       window.setTimeout(() => {
         copyLinkEl.textContent = '点一下复制链接';
         copyLinkEl.classList.remove('is-copied');
+        if (copyOnlyBtn) copyOnlyBtn.textContent = '只复制链接（可加次数）';
       }, 1800);
-    } catch {
-      setStatus('复制失败，请手动选中地址栏');
+    } catch (err) {
+      goBtn.disabled = false;
+      if (copyOnlyBtn) copyOnlyBtn.disabled = false;
+      setStatus(
+        err instanceof Error && /分享|网络|Failed/.test(err.message)
+          ? shareFailMessage(err)
+          : '复制失败，请手动选中地址栏',
+      );
     }
   };
 
+  copyOnlyBtn?.addEventListener('click', () => {
+    void copyLink({ createIfNeeded: true });
+  });
+
   copyLinkEl.addEventListener('click', () => {
-    void copyLink();
+    void copyLink({ createIfNeeded: true });
   });
   copyLinkEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      void copyLink();
+      void copyLink({ createIfNeeded: true });
     }
   });
 
@@ -330,6 +371,7 @@ export function openShareSheet(
   goBtn.addEventListener('click', () => {
     void generate().catch((err) => {
       goBtn.disabled = false;
+      if (copyOnlyBtn) copyOnlyBtn.disabled = false;
       setStatus(shareFailMessage(err));
     });
   });
@@ -337,6 +379,7 @@ export function openShareSheet(
   if (options.autoStart) {
     void generate().catch((err) => {
       goBtn.disabled = false;
+      if (copyOnlyBtn) copyOnlyBtn.disabled = false;
       setStatus(shareFailMessage(err));
     });
   }

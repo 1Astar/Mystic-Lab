@@ -89,7 +89,7 @@ export function openAiSettingsModal(onSaved?: (settings: AiSettings) => void): v
         <p class="ai-hint">${
           serviceMode === 'mystic'
             ? isMysticAiEndpointReady()
-              ? '一点就用：免费体验一次深度解读，之后还可追问。'
+              ? `一点就用：${friendlyQuotaCopy('mystic').headline}（深度与追问共用）。`
               : '即将开放。开放前若你已有 Key，可临时改用「我的 AI Key」。'
             : '自己配置接口与密钥，适合技术用户。'
         }</p>

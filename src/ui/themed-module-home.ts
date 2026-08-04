@@ -85,7 +85,7 @@ export function renderThemedModuleHome(root: HTMLElement, config: ThemedModuleCo
     <nav class="theme-entries" aria-label="模块入口"></nav>
     <footer class="theme-footer">
       <span class="theme-footer-mark" aria-hidden="true">${config.theme === 'meihua' ? '✿' : '☁'}</span>
-      <p>© Starry Product Lab · Mystic Lab</p>
+      <p>© Starry Studio · Mystic Lab</p>
     </footer>
   `;
 

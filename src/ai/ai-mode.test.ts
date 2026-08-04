@@ -29,36 +29,35 @@ beforeEach(() => {
 });
 
 describe('friendlyQuotaCopy', () => {
-  it('首次：免费体验一次深度解读', () => {
+  it('首次：统一显示剩余次数', () => {
     const c = friendlyQuotaCopy('mystic', {
       deepUsed: 0,
       followUsed: 0,
       bonusCredits: 0,
     });
     expect(c.phase).toBe('deep_free');
-    expect(c.headline).toMatch(/免费体验一次深度解读/);
-    expect(c.headline).not.toMatch(/剩余/);
+    expect(c.headline).toBe(`剩余 ${FREE_DEEP_LIMIT + FREE_FOLLOW_LIMIT} 次`);
+    expect(c.headline).not.toMatch(/深度解读|追问|分享奖励/);
   });
 
-  it('深度后：还可以继续追问', () => {
+  it('深度后：仍显示统一剩余次数', () => {
     const c = friendlyQuotaCopy('mystic', {
       deepUsed: FREE_DEEP_LIMIT,
       followUsed: 0,
       bonusCredits: 0,
     });
     expect(c.phase).toBe('follow');
-    expect(c.headline).toMatch(/还可以继续追问 2 次/);
-    expect(c.headline).not.toMatch(/今日/);
+    expect(c.headline).toBe(`剩余 ${FREE_FOLLOW_LIMIT} 次`);
   });
 
-  it('用尽后不说剩余次数', () => {
+  it('用尽后显示剩余 0 次', () => {
     const c = friendlyQuotaCopy('mystic', {
       deepUsed: FREE_DEEP_LIMIT,
       followUsed: FREE_FOLLOW_LIMIT,
       bonusCredits: 0,
     });
     expect(c.phase).toBe('exhausted');
-    expect(c.headline).not.toMatch(/剩余\d/);
+    expect(c.headline).toBe('剩余 0 次');
   });
 
   it('records quota locally', () => {
@@ -81,6 +80,7 @@ describe('friendlyQuotaCopy', () => {
     grantBonusCredits(1);
     expect(canUseMysticDeep()).toBe(true);
     expect(freeAiRemaining()).toBe(1);
+    expect(friendlyQuotaCopy('mystic').headline).toBe('剩余 1 次');
     recordDeepUse();
     expect(loadAiQuota().bonusCredits).toBe(0);
     expect(loadAiQuota().deepUsed).toBe(FREE_DEEP_LIMIT);

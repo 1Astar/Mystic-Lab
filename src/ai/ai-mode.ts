@@ -106,6 +106,11 @@ export type FriendlyQuotaCopy = {
   phase: 'deep_free' | 'follow' | 'exhausted' | 'byok' | 'bonus';
 };
 
+/** 统一剩余次数文案（深度 + 追问 + 分享奖励合计） */
+export function formatQuotaCounts(quota: AiQuotaState = loadAiQuota()): string {
+  return `剩余 ${freeAiRemaining(quota)} 次`;
+}
+
 export function friendlyQuotaCopy(
   mode: AiServiceMode = loadAiServiceMode(),
   quota: AiQuotaState = loadAiQuota(),
@@ -117,37 +122,36 @@ export function friendlyQuotaCopy(
       detail: '已接上你的接口：深度解读与追问都按你的配置走。',
     };
   }
-  if (quota.deepUsed < FREE_DEEP_LIMIT) {
+
+  const deepLeft = Math.max(0, FREE_DEEP_LIMIT - quota.deepUsed);
+  const followLeft = Math.max(0, FREE_FOLLOW_LIMIT - quota.followUsed);
+  const bonus = Math.max(0, quota.bonusCredits);
+  const headline = formatQuotaCounts(quota);
+
+  if (deepLeft > 0) {
     return {
       phase: 'deep_free',
-      headline: '免费体验一次深度解读',
-      detail: '第一次：让这卦结合你的经历与顾虑，重新分析一遍。',
+      headline,
+      detail: '深度解读与追问共用次数；用完可分享再得，或改用自己的 AI。',
     };
   }
-  const followLeft = Math.max(0, FREE_FOLLOW_LIMIT - quota.followUsed);
   if (followLeft > 0) {
     return {
       phase: 'follow',
-      headline:
-        followLeft === 2
-          ? '还可以继续追问 2 次'
-          : `还可以继续追问 ${followLeft} 次`,
-      detail: '深度解读之后，把没问清的再问清楚。',
+      headline,
+      detail: '深度解读与追问共用次数；用完可分享再得，或改用自己的 AI。',
     };
   }
-  if (quota.bonusCredits > 0) {
+  if (bonus > 0) {
     return {
       phase: 'bonus',
-      headline:
-        quota.bonusCredits === 1
-          ? '还有 1 次免费 AI（分享奖励）'
-          : `还有 ${quota.bonusCredits} 次免费 AI（分享奖励）`,
+      headline,
       detail: '来自分享被打开，或你打开了别人的分享。',
     };
   }
   return {
     phase: 'exhausted',
-    headline: '这轮免费体验用完了',
+    headline,
     detail: '分享结果给好友，对方打开后你也可再得次数；或用自己的 AI。',
   };
 }
