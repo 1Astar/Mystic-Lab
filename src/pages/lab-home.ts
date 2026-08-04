@@ -10,6 +10,7 @@ import {
   type AiSettings,
 } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 
 interface LabEntry {
   path: string;
@@ -56,6 +57,13 @@ const ALL_SYSTEMS: LabEntry[] = [
     desc: '日主、十神、命盘结构',
     note: '命理结构',
     emblem: 'bazi',
+  },
+  {
+    path: '/ziwei',
+    title: '紫微',
+    desc: '星曜图鉴 · 十年大限 · 人生地图',
+    note: SYSTEM_POSITION.ziwei,
+    emblem: 'cosmos',
   },
   {
     path: '/life',

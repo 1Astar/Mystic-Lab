@@ -42,6 +42,11 @@ const xiaoliurenStyles = [() => import('./styles/xiaoliuren.css')];
 const liuyaoStyles = [() => import('./styles/liuyao.css')];
 const lifeStyles = [() => import('./styles/life.css')];
 const baziStyles = [() => import('./styles/bazi.css')];
+const ziweiStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/bazi.css'),
+  () => import('./styles/ziwei.css'),
+];
 
 registerRoute('/', renderLabHome);
 
@@ -115,6 +120,24 @@ registerRoute(
 registerRoute(
   '/bazi/chart',
   lazy(() => import('./pages/bazi-chart.ts'), 'renderBaziChart', baziStyles),
+);
+
+
+registerRoute(
+  '/ziwei',
+  lazy(() => import('./pages/ziwei-home.ts'), 'renderZiweiHome', ziweiStyles),
+);
+registerRoute(
+  '/ziwei/loading',
+  lazy(() => import('./pages/ziwei-loading.ts'), 'renderZiweiLoading', ziweiStyles),
+);
+registerRoute(
+  '/ziwei/reading',
+  lazy(() => import('./pages/ziwei-reading.ts'), 'renderZiweiReading', ziweiStyles),
+);
+registerRoute(
+  '/ziwei/codex',
+  lazy(() => import('./pages/ziwei-codex.ts'), 'renderZiweiCodex', ziweiStyles),
 );
 
 registerRoute(
