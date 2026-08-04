@@ -324,6 +324,27 @@
 .ms-share-fab:active {
   transform: scale(0.97);
 }
+.ms-link-fab {
+  right: calc(max(12px, env(safe-area-inset-right, 0px)) + 44px + 88px);
+}
+.ms-link-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 900;
+  max-width: min(92vw, 360px);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(18, 16, 24, 0.94);
+  border: 1px solid rgba(199, 164, 91, 0.4);
+  color: #e8d7a8;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
 .ms-share-fab-ico {
   font-size: 0.95rem;
   line-height: 1;
@@ -332,6 +353,7 @@
 
 /* 点牌弹窗时一并藏掉（与 liuyao.css 双保险） */
 html.thread-peek-open .ms-share-fab,
+html.thread-peek-open .ms-link-fab,
 html.thread-peek-open .ly-ai-side-fab {
   opacity: 0;
   pointer-events: none;

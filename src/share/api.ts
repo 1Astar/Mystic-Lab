@@ -1,17 +1,34 @@
 import type { ShareClaimResult, ShareCreateBody, ShareSnapshot } from './types.ts';
 
-const BASE = String(import.meta.env.VITE_SHARE_API_URL || '/api/share')
-  .trim()
-  .replace(/\/$/, '');
+/** Cloudflare 已绑 SHARE_KV；Vercel 静态站本地 /api/share 常 404，默认回落到 CF */
+const CF_SHARE_API = 'https://mystic-lab.pages.dev/api/share';
+
+function resolveShareApiBase(): string {
+  const fromEnv = String(import.meta.env.VITE_SHARE_API_URL || '')
+    .trim()
+    .replace(/\/$/, '');
+  if (fromEnv) return fromEnv;
+  if (typeof location !== 'undefined') {
+    const host = location.hostname;
+    if (host.endsWith('.vercel.app') || host === 'vercel.app') {
+      return CF_SHARE_API;
+    }
+  }
+  return '/api/share';
+}
+
+function shareBase(): string {
+  return resolveShareApiBase();
+}
 
 export function shareApiReady(): boolean {
-  return Boolean(BASE);
+  return Boolean(shareBase());
 }
 
 export async function createShareSnapshot(
   body: ShareCreateBody,
 ): Promise<ShareSnapshot> {
-  const res = await fetch(BASE, {
+  const res = await fetch(shareBase(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -38,11 +55,14 @@ function parseShareApiError(text: string, status: number, fallback: string): str
   }
   if (status === 503) return '分享服务暂时不可用，请稍后再试';
   if (status === 400) return '分享内容不完整，请回到结果页再试一次';
+  if (status === 404) {
+    return '分享服务未部署（若在 Vercel，请稍后再试或改用 Cloudflare 站）';
+  }
   return text?.trim().slice(0, 120) || `${fallback}（${status}）`;
 }
 
 export async function fetchShareSnapshot(id: string): Promise<ShareSnapshot | null> {
-  const res = await fetch(`${BASE}/${encodeURIComponent(id)}`);
+  const res = await fetch(`${shareBase()}/${encodeURIComponent(id)}`);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`读取分享失败 (${res.status})`);
   return (await res.json()) as ShareSnapshot;
@@ -54,7 +74,7 @@ export async function claimShareReward(input: {
   ownerId: string;
   viewedMs: number;
 }): Promise<ShareClaimResult> {
-  const res = await fetch(`${BASE}/${encodeURIComponent(input.id)}/claim`, {
+  const res = await fetch(`${shareBase()}/${encodeURIComponent(input.id)}/claim`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -70,7 +90,7 @@ export async function claimShareReward(input: {
 }
 
 export async function redeemOwnerRewards(ownerId: string): Promise<number> {
-  const res = await fetch(`${BASE}/redeem`, {
+  const res = await fetch(`${shareBase()}/redeem`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ownerId }),

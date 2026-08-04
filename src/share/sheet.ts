@@ -29,6 +29,26 @@ export type ShareSheetOptions = {
   autoStart?: boolean;
 };
 
+/** 结果页一键：创建可加次数深链并复制（不出图） */
+export async function copyShareDeepLink(draft: ShareDraft): Promise<string> {
+  void syncShareOwnerRewards();
+  const snap = await createShareSnapshot({
+    ownerId: getOrCreateOwnerId(),
+    system: draft.system,
+    questionMasked: true,
+    questionDisplay: '',
+    headline: draft.headline.slice(0, 80),
+    summary: draft.summary.slice(0, 400),
+    sections: draft.sections.slice(0, 12),
+    visual: draft.visual,
+    includeAi: false,
+    brandSlogan: '你的朋友邀请你看看近期状态',
+  });
+  const url = shareDeepUrl(snap.id);
+  await navigator.clipboard.writeText(url);
+  return url;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
