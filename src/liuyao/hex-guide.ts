@@ -3,6 +3,7 @@
  */
 import type { Hexagram } from './hexagrams.ts';
 import {
+  HEXAGRAMS,
   LINE_LABELS,
   linesFromHexagram,
   palaceStageOfHexagram,
@@ -14,6 +15,17 @@ import { TRIGRAMS, hexagramNameWhy } from './trigrams.ts';
 import { renderDerivedHexSectionHtml } from './derived-hex.ts';
 import { bindTermGloss } from './term-gloss.ts';
 import { bindHexEncounterPanel, renderHexEncounterPanelHtml } from './hex-encounter.ts';
+import {
+  buildHexExpandForHex,
+  renderHexExpandBaiHtml,
+} from './hex-expand.ts';
+import { bindXiangNotesPane } from './xiang-notes-pane.ts';
+import {
+  bindDressArchive,
+  GUIDE_DRESS_SAMPLE_AT,
+  renderGuideDressArchiveHtml,
+} from './dress-archive.ts';
+import { castFromHexagram } from './engine.ts';
 
 export type GuideDomain = {
   id: string;
@@ -593,7 +605,7 @@ export function bindGuideDomainTabs(root: HTMLElement): void {
   });
 }
 
-/** 图鉴右侧笔记壳（与六爻解读笔记同构） */
+/** 图鉴右侧笔记壳（对齐解读「卦象精读」：卦象解析 / 专业排盘 / 古籍解析） */
 export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
   const yaoHtml = pack.yaos
     .map((y) => {
@@ -619,46 +631,45 @@ export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
     .join('');
 
   const sediment = loadHexSediment(pack.hex.name);
+  const lines = linesFromHexagram(pack.hex);
+  const expandPack = buildHexExpandForHex(pack.hex, lines, 'primary');
 
   return `
     <div class="ly-guide-notes" data-hex-guide-notes>
       <div class="ly-note-mini-tabs" role="tablist" aria-label="图鉴解读笔记">
-        <button type="button" class="ly-note-mini-tab is-active" data-guide-tab="domain" role="tab" aria-selected="true">卦象解析</button>
+        <button type="button" class="ly-note-mini-tab is-active" data-guide-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
+        <button type="button" class="ly-note-mini-tab" data-guide-tab="dress" role="tab" aria-selected="false">专业排盘</button>
+        <button type="button" class="ly-note-mini-tab" data-guide-tab="books" role="tab" aria-selected="false">古籍解析</button>
         <button type="button" class="ly-note-mini-tab" data-guide-tab="encounter" role="tab" aria-selected="false">我的相遇</button>
-        <button type="button" class="ly-note-mini-tab" data-guide-tab="yao" role="tab" aria-selected="false">爻辞解释</button>
-        <button type="button" class="ly-note-mini-tab" data-guide-tab="pro" role="tab" aria-selected="false">专业注解</button>
-        <button type="button" class="ly-note-mini-tab" data-guide-tab="classic" role="tab" aria-selected="false">传统详解</button>
         <button type="button" class="ly-note-mini-tab" data-guide-tab="sediment" role="tab" aria-selected="false">我的沉淀</button>
       </div>
       <div class="ly-note-mini-body">
-        <div class="ly-note-tab-panel is-active" data-guide-pane="domain">
-          <p class="ly-guide-tip">图鉴卡含意象与上下卦；下方是分域与互错综。</p>
-          ${renderGuideSnippetHeroHtml(pack)}
-          ${renderGuideDomainSectionHtml(pack)}
-          ${renderDerivedHexSectionHtml(pack.hex)}
-        </div>
-        <div class="ly-note-tab-panel" data-guide-pane="encounter" hidden>
-          ${renderHexEncounterPanelHtml(pack.hex, sediment)}
-        </div>
-        <div class="ly-note-tab-panel" data-guide-pane="yao" hidden>
-          <p class="ly-guide-tip">爻辞 · 初→上。世应已标（八宫默认位）。白话对照在古文下方。</p>
-          ${yaoHtml}
-        </div>
-        <div class="ly-note-tab-panel" data-guide-pane="pro" hidden>
-          <p class="ly-guide-tip">专业注解：对应六爻「专业排盘」——六神 / 用神 / 忌神。</p>
-          <div class="ly-classic-block">
-            <p class="ly-classic-zh"><span class="ly-classic-tag">宫位 / 世应</span>${escapeHtml(pack.pro.palace)}；应在${escapeHtml(LINE_LABELS[pack.pro.yingLine - 1]!)}</p>
+        <div class="ly-note-tab-panel is-active" data-guide-pane="xiang">
+          <div class="ly-xiang-notes" data-xiang-notes>
+            <nav class="ly-xiang-rail" role="tablist" aria-label="卦象解析分段">
+              <button type="button" class="ly-xiang-rail-item is-active" data-xiang-sec="guide" role="tab" aria-selected="true">
+                <span class="ly-xiang-rail-label">意象</span>
+              </button>
+              <button type="button" class="ly-xiang-rail-item" data-xiang-sec="domain" role="tab" aria-selected="false">
+                <span class="ly-xiang-rail-label">分域</span>
+              </button>
+            </nav>
+            <div class="ly-xiang-sec-pane is-active" data-xiang-pane="guide" role="tabpanel">
+              <p class="ly-guide-tip">图鉴意象与上下卦；互错综见卡下。</p>
+              ${renderGuideSnippetHeroHtml(pack)}
+              ${renderDerivedHexSectionHtml(pack.hex)}
+            </div>
+            <div class="ly-xiang-sec-pane" data-xiang-pane="domain" role="tabpanel" hidden>
+              <p class="ly-guide-tip">分域解说与解读卦象同构：标题 + 断语 + 白话。</p>
+              ${renderHexExpandBaiHtml(expandPack)}
+            </div>
           </div>
-          <div class="ly-classic-block">
-            <p class="ly-classic-zh"><span class="ly-classic-tag">六神</span>随起卦日干排布（青龙→朱雀→勾陈→螣蛇→白虎→玄武）。图鉴无某日，起卦后见完整装卦。</p>
-          </div>
-          <div class="ly-classic-block">
-            <p class="ly-classic-zh"><span class="ly-classic-tag">用神 / 原神 / 忌神</span>依所问人事而定（求财看妻财、问官看官鬼）。原神生用神，忌神克用神。</p>
-          </div>
-          <p class="ly-guide-tip">${escapeHtml(pack.pro.tip)}</p>
         </div>
-        <div class="ly-note-tab-panel" data-guide-pane="classic" hidden>
-          <p class="ly-guide-tip">传统详解：整卦卦辞 · 大象 · 增删。逐爻见「爻辞解释」。</p>
+        <div class="ly-note-tab-panel" data-guide-pane="dress" hidden>
+          ${renderGuideDressArchiveHtml(pack.hex)}
+        </div>
+        <div class="ly-note-tab-panel" data-guide-pane="books" hidden>
+          <p class="ly-guide-tip">古人怎么说：卦辞 · 大象 · 爻辞。生僻字先看白话；分域见「卦象解析」。</p>
           ${
             pack.classic.judgment
               ? `<div class="ly-classic-block">
@@ -681,6 +692,11 @@ export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
           </div>`
               : ''
           }
+          <p class="ly-layer-guide" style="margin-top:14px">爻辞 · 初→上</p>
+          ${yaoHtml}
+        </div>
+        <div class="ly-note-tab-panel" data-guide-pane="encounter" hidden>
+          ${renderHexEncounterPanelHtml(pack.hex, sediment)}
         </div>
         <div class="ly-note-tab-panel" data-guide-pane="sediment" hidden>
           <p class="ly-guide-tip">我的沉淀：对应六爻「个人沉淀」，仅存本机。</p>
@@ -718,6 +734,11 @@ export function bindHexGuideNotes(
   });
 
   bindGuideDomainTabs(root);
+  bindXiangNotesPane(root);
+  const hex = HEXAGRAMS.find((h) => h.name === hexName);
+  if (hex) {
+    bindDressArchive(root, castFromHexagram(hex), '', GUIDE_DRESS_SAMPLE_AT);
+  }
   bindTermGloss(root);
   bindHexEncounterPanel(root, {
     onSaveNote: (text) => saveHexSediment(hexName, text),

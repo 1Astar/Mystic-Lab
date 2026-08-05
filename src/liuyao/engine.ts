@@ -101,6 +101,25 @@ export function describeTrigramCombo(lines: LineBit[]): string {
   return `上${upper.id}${upper.symbol}（${upper.nature}）+ 下${lower.id}${lower.symbol}（${lower.nature}）`;
 }
 
+/** 由图鉴卦构造静态盘（无动爻），供图鉴「专业排盘」 */
+export function castFromHexagram(hex: Hexagram): CastResult {
+  const primaryLines = linesFromHexagram(hex);
+  const throws: YaoThrow[] = primaryLines.map((bit) => ({
+    coins: ['obverse', 'obverse', bit === 1 ? 'reverse' : 'obverse'],
+    sum: bit === 1 ? 7 : 8,
+    kind: bit === 1 ? '少阳' : '少阴',
+    bit,
+    changing: false,
+  }));
+  const cast = buildCastFromThrows(throws, 'random');
+  return {
+    ...cast,
+    primary: hex,
+    shiLine: hex.shiLine,
+    yingLine: yingLineOf(hex.shiLine),
+  };
+}
+
 export function lineBitLabel(bit: LineBit): string {
   return bit === 1 ? '阳 ━━━' : '阴 ━━ ━━';
 }

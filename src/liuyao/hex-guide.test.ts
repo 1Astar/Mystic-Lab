@@ -41,14 +41,24 @@ describe('hex-guide shared snippets', () => {
     expect(html.match(/整体意象/g)?.length).toBe(1);
   });
 
-  it('guide notes domain pane mirrors notes structure', () => {
+  it('guide notes mirrors reading shell: 意象/分域 + 专业排盘 + 古籍解析', () => {
     const pack = buildHexGuidePack(HEXAGRAMS[3]!);
     const html = renderHexGuideNotesHtml(pack);
+    expect(html).toMatch(/data-guide-tab="xiang"/);
+    expect(html).toMatch(/data-guide-tab="dress"/);
+    expect(html).toMatch(/data-guide-tab="books"/);
+    expect(html).toMatch(/data-xiang-sec="guide"/);
+    expect(html).toMatch(/data-xiang-sec="domain"/);
     expect(html).toMatch(/整体意象/);
     expect(html).toMatch(/ly-guide-snippet-related/);
     expect(html).toMatch(/上卦 ·/);
     expect(html).toMatch(/分域/);
-    expect(html).toMatch(/data-guide-domains|ly-guide-domains/);
+    expect(html).toMatch(/ly-domain-card|ly-hex-expand/);
+    expect(html).toMatch(/专业排盘/);
+    expect(html).toMatch(/古籍解析/);
+    expect(html).toMatch(/ly-dress-archive|装卦表/);
+    expect(html).not.toMatch(/data-guide-tab="yao"/);
+    expect(html).not.toMatch(/data-guide-tab="classic"/);
     expect(renderGuideArtHtml(pack)).toMatch(/ly-guide-art/);
   });
 });

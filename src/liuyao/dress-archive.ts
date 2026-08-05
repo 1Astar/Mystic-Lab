@@ -1,4 +1,6 @@
 import type { CastResult } from './engine.ts';
+import { castFromHexagram } from './engine.ts';
+import type { Hexagram } from './hexagrams.ts';
 import { dressHexagram, dressChangedHexagram, type YaoDress, type DressedHexagram } from './najia.ts';
 import { siZhuFromDate, renderDateChongBarHtml } from './ganzhi.ts';
 import { renderYaoCard } from './yao-card.ts';
@@ -213,11 +215,15 @@ export function renderDressArchiveHtml(
   cast: CastResult,
   castAt: Date,
   question = '',
+  opts?: { tip?: string },
 ): string {
   const statusPack = buildYongStatusPack(cast, question, castAt);
+  const tip =
+    opts?.tip ??
+    '本卦 / 变卦切换 · 点本卦一行看爻注解。表上「旺衰」只标用神/世/应/动。';
   return `
     <div class="ly-dress-archive is-lens-shen" data-dress-archive>
-      <p class="ly-guide-tip">本卦 / 变卦切换 · 点本卦一行看爻注解。表上「旺衰」只标用神/世/应/动。</p>
+      <p class="ly-guide-tip">${tip}</p>
       <p class="ly-layer-guide">装卦表</p>
       ${renderDressDualPlatesHtml(cast, castAt, statusPack)}
       ${renderDressLensHtml(cast, castAt, question, statusPack)}
@@ -225,6 +231,16 @@ export function renderDressArchiveHtml(
       ${renderYaoModalShellHtml()}
     </div>
   `;
+}
+
+/** 图鉴用：静态本卦 + 甲日示例六神（与解读专业排盘同构） */
+export const GUIDE_DRESS_SAMPLE_AT = new Date('2024-03-01T12:00:00+08:00');
+
+export function renderGuideDressArchiveHtml(hex: Hexagram): string {
+  const cast = castFromHexagram(hex);
+  return renderDressArchiveHtml(cast, GUIDE_DRESS_SAMPLE_AT, '', {
+    tip: '图鉴静态本卦（无动爻）。六神以<strong>甲日</strong>为例；点爻看注解。实占请用起卦日干。',
+  });
 }
 
 export function selectDressLens(root: HTMLElement, id: DressLens): void {

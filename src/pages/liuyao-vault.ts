@@ -1,11 +1,25 @@
 import { navigate } from '../router.ts';
 import {
+  HEXAGRAMS,
+  linesFromHexagram,
+  palaceOfHexagram,
+  type Hexagram,
+} from '../liuyao/hexagrams.ts';
+import { isHexFavorite } from '../liuyao/hex-favorites.ts';
+import {
+  buildHexGuidePack,
+  renderGuideArtHtml,
+} from '../liuyao/hex-guide.ts';
+import {
   buildVaultOverview,
   getLiuyaoJourneyInsights,
 } from '../liuyao/journey.ts';
 import { meetLineFor } from '../liuyao/vault.ts';
+import { TRIGRAM_ORDER, TRIGRAMS, type TrigramId } from '../liuyao/trigrams.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { liuyaoPageBgStyle } from '../ui/liuyao-hero.ts';
+
+type VaultFilter = 'all' | 'met' | 'favorite';
 
 function formatDate(iso: string): string {
   try {
@@ -27,14 +41,44 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 我的卦库总馆：收集概览 · 六爻旅程 · 图鉴入口 */
+function artHtml(h: Hexagram): string {
+  const pack = buildHexGuidePack(h);
+  return renderGuideArtHtml(pack, { className: 'ly-guide-art', alt: h.fullName });
+}
+
+/** 列表卡精简爻象（无标签） */
+function renderMiniYao(lines: number[]): string {
+  const topFirst = [...lines].reverse();
+  return `
+    <div class="ly-guide-yao-stack" aria-hidden="true">
+      ${topFirst
+        .map((bit, i) => {
+          const yang = bit === 1;
+          const tri = i < 3 ? 'is-upper-tri' : 'is-lower-tri';
+          return `
+          <div class="ly-guide-yao-row ${tri}${yang ? ' is-yang' : ' is-yin'}">
+            <span class="ly-guide-yao-ln"></span>
+          </div>`;
+        })
+        .join('')}
+      <div class="ly-guide-yao-seam" aria-hidden="true"></div>
+    </div>
+  `;
+}
+
+/** 我的卦库：概览 · 旅程 · 内嵌 64 卦（对标塔罗图鉴） */
 export function renderLiuyaoVault(root: HTMLElement): () => void {
   const snap = buildVaultOverview();
   const journey = getLiuyaoJourneyInsights(30);
+  const meetByName = new Map(snap.meets.map((m) => [m.name, m.count]));
   const page = document.createElement('div');
   page.className = 'page ly-vault-page';
   page.setAttribute('style', liuyaoPageBgStyle('learn'));
   mountEnvBanner(page);
+
+  let filter: VaultFilter = 'met';
+  let query = '';
+  let palace: TrigramId | 'all' = 'all';
 
   const pct = snap.total ? Math.round((snap.collected / snap.total) * 100) : 0;
   const palaceRows = snap.palaces
@@ -50,7 +94,7 @@ export function renderLiuyaoVault(root: HTMLElement): () => void {
     .join('');
 
   const journeyHtml = journey.empty
-    ? `<p class="ly-guide-tip">完成几次占问并保存后，这里会显示最近各宫出现趋势。</p>`
+    ? `<p class="ly-vault-journey-empty">完成几次占问后，这里会显示最近 30 次里各宫的出现趋势。</p>`
     : `
       <p class="ly-vault-journey-meta">最近 ${journey.readingCount} 次占问</p>
       <div class="ly-vault-trends">
@@ -106,38 +150,149 @@ export function renderLiuyaoVault(root: HTMLElement): () => void {
       }</p>
     </section>
 
-    <section class="ly-vault-panel">
-      <h2 class="ly-vault-panel-title">你的六爻旅程</h2>
+    <section class="ly-vault-journey" aria-label="你的六爻旅程">
+      <h3 class="ly-vault-journey-title">你的六爻旅程</h3>
       ${journeyHtml}
     </section>
 
-    <nav class="ly-vault-grid" aria-label="卦库分区">
-      <button type="button" class="ly-vault-card" data-path="/liuyao/hexagrams">
-        <span class="ly-vault-card-kicker">收集</span>
-        <strong>64卦图鉴</strong>
-        <p>点进单卦看 HEX CARD；右侧笔记含「我的相遇」。</p>
-      </button>
-      <button type="button" class="ly-vault-card" data-path="/liuyao/growth">
-        <span class="ly-vault-card-kicker">回看</span>
-        <strong>成长档案</strong>
-        <p>相遇排行与时间线，半年后再遇同一卦更有沉浸感。</p>
-      </button>
-      <button type="button" class="ly-vault-card" data-path="/liuyao/concepts">
-        <span class="ly-vault-card-kicker">进阶</span>
-        <strong>核心概念</strong>
-        <p>世应 · 六亲 · 动变 · 互错综。</p>
-      </button>
-    </nav>
+    <section class="ly-vault-codex" aria-label="六十四卦">
+      <div class="ly-vault-codex-bar">
+        <div class="ly-vault-tabs" role="tablist">
+          <button type="button" class="ly-vault-tab" data-f="met" role="tab">已遇</button>
+          <button type="button" class="ly-vault-tab" data-f="all" role="tab">全部</button>
+          <button type="button" class="ly-vault-tab" data-f="favorite" role="tab">收藏</button>
+        </div>
+        <div class="ly-vault-palace-chips" role="group" aria-label="八宫筛选" data-palace-chips hidden>
+          <button type="button" class="ly-vault-palace-chip is-active" data-palace="all">全部宫</button>
+          ${TRIGRAM_ORDER.map(
+            (id) =>
+              `<button type="button" class="ly-vault-palace-chip" data-palace="${id}">${id}宫·${TRIGRAMS[id].nature}</button>`,
+          ).join('')}
+        </div>
+        <label class="ly-vault-search">
+          <span class="visually-hidden">查找卦</span>
+          <input type="search" data-vault-q placeholder="查找：复 / 地雷复 / 归来" autocomplete="off" />
+        </label>
+      </div>
+      <p class="ly-vault-codex-meta" data-vault-meta></p>
+      <div class="ly-hex-grid is-visual" data-vault-grid></div>
+    </section>
+
     <p class="ly-vault-foot-link">
       <button type="button" class="ly-home-secondary" data-path="/liuyao/journal">查看每次起卦记录 ›</button>
     </p>
   `;
 
+  const gridHost = page.querySelector<HTMLElement>('[data-vault-grid]')!;
+  const metaEl = page.querySelector<HTMLElement>('[data-vault-meta]')!;
+  const searchInput = page.querySelector<HTMLInputElement>('[data-vault-q]')!;
+
+  function filtered(): Hexagram[] {
+    const q = query.trim().toLowerCase();
+    return HEXAGRAMS.filter((h) => {
+      const met = (meetByName.get(h.name) ?? 0) > 0;
+      if (filter === 'met' && !met) return false;
+      if (filter === 'favorite' && !isHexFavorite(h.name)) return false;
+      if (filter === 'all' && palace !== 'all') {
+        const p = palaceOfHexagram(h.name);
+        if (p !== palace) return false;
+      }
+      if (!q) return true;
+      const hay = `${h.name}${h.fullName}${h.keywords.join('')}${h.gist}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  function paintGrid(): void {
+    page.querySelectorAll<HTMLButtonElement>('.ly-vault-tab').forEach((btn) => {
+      const on = btn.dataset.f === filter;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    const palaceHost = page.querySelector<HTMLElement>('[data-palace-chips]');
+    if (palaceHost) {
+      const showPalace = filter === 'all';
+      palaceHost.hidden = !showPalace;
+      if (!showPalace && palace !== 'all') {
+        palace = 'all';
+      }
+      palaceHost.querySelectorAll<HTMLButtonElement>('[data-palace]').forEach((btn) => {
+        btn.classList.toggle('is-active', btn.dataset.palace === palace);
+      });
+    }
+
+    const rows = filtered();
+    const palaceLabel =
+      filter === 'all' && palace !== 'all'
+        ? ` · ${palace}宫·${TRIGRAMS[palace].nature}`
+        : '';
+    const baseMeta =
+      filter === 'met'
+        ? `已遇 ${rows.length} 卦`
+        : filter === 'favorite'
+          ? `收藏 ${rows.length} 卦`
+          : `共 ${rows.length} 卦`;
+    metaEl.textContent = `${baseMeta}${palaceLabel}`;
+
+    if (rows.length === 0) {
+      const empty =
+        filter === 'favorite'
+          ? '还没有收藏。点开一卦，右上角 ☆ 可收藏。'
+          : filter === 'met'
+            ? '还没有遇见的卦。去起一卦，图鉴会开始点亮。'
+            : query || palace !== 'all'
+              ? '没有匹配的卦，换个宫或关键词试试。'
+              : '图鉴空空如也。';
+      gridHost.innerHTML = `<div class="ly-vault-empty"><p>${escapeHtml(empty)}</p></div>`;
+      return;
+    }
+
+    gridHost.innerHTML = rows
+      .map((h) => {
+        const lines = linesFromHexagram(h) as number[];
+        const n = meetByName.get(h.name) ?? 0;
+        const metClass = n > 0 ? ' is-met' : ' is-locked';
+        const fav = isHexFavorite(h.name) ? ' is-fav' : '';
+        return `
+          <button type="button" class="ly-hex-card is-visual${metClass}${fav}" data-gua="${escapeHtml(h.name)}" aria-label="${escapeHtml(h.fullName)}">
+            <div class="ly-hex-card-art">${artHtml(h)}</div>
+            <div class="ly-hex-card-yao">${renderMiniYao(lines)}</div>
+            <span class="ly-hex-card-glyph">${escapeHtml(h.fullName)}</span>
+          </button>`;
+      })
+      .join('');
+
+    gridHost.querySelectorAll<HTMLButtonElement>('[data-gua]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        navigate(`/liuyao/hexagrams?gua=${encodeURIComponent(btn.dataset.gua!)}`);
+      });
+    });
+  }
+
   page.querySelector('[data-back]')?.addEventListener('click', () => navigate('/liuyao'));
   page.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
     el.addEventListener('click', () => navigate(el.dataset.path!));
   });
+  page.querySelectorAll<HTMLButtonElement>('.ly-vault-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filter = (btn.dataset.f as VaultFilter) || 'all';
+      paintGrid();
+    });
+  });
+  page.querySelectorAll<HTMLButtonElement>('[data-palace]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.palace;
+      palace = id === 'all' || !id ? 'all' : (id as TrigramId);
+      paintGrid();
+    });
+  });
+  searchInput.addEventListener('input', () => {
+    query = searchInput.value;
+    paintGrid();
+  });
 
+  paintGrid();
   root.appendChild(page);
   return () => {};
 }

@@ -29,7 +29,7 @@ export function renderHexEncounterPanelHtml(hex: Hexagram, sediment = ''): strin
 
   const history =
     list.length === 0
-      ? `<p class="ly-guide-tip">暂无历史占问。起卦后点「保存到我的卦象」，相遇会留在这里。</p>`
+      ? `<p class="ly-guide-tip">暂无历史占问。起卦并保存后，相遇次数与时间线会留在这里——半年后再遇同一卦，会更有沉浸感。</p>`
       : `<div class="ly-enc-list">${list
           .map(
             (e) => `

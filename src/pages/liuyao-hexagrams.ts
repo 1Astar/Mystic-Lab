@@ -15,6 +15,11 @@ import {
   renderHexGuideNotesHtml,
   type HexGuidePack,
 } from '../liuyao/hex-guide.ts';
+import {
+  hexFavButtonLabel,
+  isHexFavorite,
+  toggleHexFavorite,
+} from '../liuyao/hex-favorites.ts';
 import { getJournalEntryById } from '../liuyao/journey.ts';
 import { openLiuyaoEncounterReplay } from '../ui/liuyao-encounter-replay.ts';
 
@@ -66,6 +71,7 @@ function detailHtml(h: Hexagram, switchMeta: { index: number; total: number }): 
   const pack = buildHexGuidePack(h);
   const lines = linesFromHexagram(h) as number[];
   const swNum = `${String(switchMeta.index + 1).padStart(2, '0')} / ${String(switchMeta.total).padStart(2, '0')}`;
+  const favOn = isHexFavorite(h.name);
   // 与 atmosphere demo 一致：整卡 background-image 铺满，不嵌套另一层 aspect-ratio 图
   const bgAttr = pack.atmosphereSrc
     ? ` style="background-image:url('${pack.atmosphereSrc}')"`
@@ -88,6 +94,8 @@ function detailHtml(h: Hexagram, switchMeta: { index: number; total: number }): 
           <div class="ly-guide-card-veil"></div>
           <div class="ly-guide-card-motion" aria-hidden="true"></div>
 
+          <button type="button" class="ly-guide-card-fav${favOn ? ' is-on' : ''}" data-hex-fav aria-pressed="${favOn ? 'true' : 'false'}">${hexFavButtonLabel(favOn)}</button>
+
           <button type="button" class="ly-guide-dismiss" data-tri-dismiss aria-label="关闭注解"></button>
           <button type="button" class="ly-guide-zone is-upper" data-zone="upper" aria-label="查看上卦">
             <span class="ly-guide-zone-hint">点这里 · 上卦</span>
@@ -98,15 +106,15 @@ function detailHtml(h: Hexagram, switchMeta: { index: number; total: number }): 
 
           <div class="ly-guide-card-ui text-layer">
             <div class="ly-guide-brand">MYSTIC LAB · HEX CARD</div>
-            <h2 class="ly-guide-name">${h.name}</h2>
-            <p class="ly-guide-sub">${h.fullName} · 第${h.kingWen}卦</p>
+            <h2 class="ly-guide-name">${h.fullName}</h2>
+            <p class="ly-guide-sub">${h.name} · 第${h.kingWen}卦</p>
             <div class="ly-guide-chips is-shi">
               <span class="ly-guide-chip">世 · ${LINE_LABELS[pack.pro.shiLine - 1]}</span>
               <span class="ly-guide-chip is-ying">应 · ${LINE_LABELS[pack.pro.yingLine - 1]}</span>
             </div>
           </div>
 
-          <button type="button" class="ly-guide-mini-note" data-guide-notes data-open-tab="domain" title="打开解读笔记">笔记</button>
+          <button type="button" class="ly-guide-mini-note" data-guide-notes data-open-tab="xiang" title="打开解读笔记：卦象解析、专业排盘、古籍">笔记</button>
 
           <div class="ly-guide-mid text-layer">
             <div class="ly-guide-yao-host">
@@ -141,6 +149,13 @@ function detailHtml(h: Hexagram, switchMeta: { index: number; total: number }): 
         </div>
         <button type="button" class="ly-guide-sw-btn" data-guide-next aria-label="下一卦">›</button>
       </div>
+
+      <p class="ly-guide-notes-hint">
+        <button type="button" class="ly-guide-notes-cta" data-guide-notes data-open-tab="xiang">
+          打开笔记 · 查看详解 →
+        </button>
+        <span class="ly-guide-notes-sub">卦象解析 · 专业排盘 · 古籍解析 · 我的相遇</span>
+      </p>
     </article>
   `;
 }
@@ -194,7 +209,7 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
           <button type="button" class="ly-hex-card is-visual${metClass}" data-kw="${h.kingWen}" aria-label="${h.fullName}">
             <div class="ly-hex-card-art">${artHtml(h)}</div>
             <div class="ly-hex-card-yao">${renderCssYaoStack(pack, lines, { tags: false })}</div>
-            <span class="ly-hex-card-glyph">${h.name}</span>
+            <span class="ly-hex-card-glyph">${h.fullName}</span>
           </button>
         `;
           })
@@ -262,9 +277,19 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
             if (entry) openLiuyaoEncounterReplay(page, entry);
           },
         });
-        const openTab = tab && tab !== 'domain' ? tab : null;
+        const openTab = tab && tab !== 'xiang' ? tab : null;
         if (openTab) {
-          notesRoot.querySelector<HTMLButtonElement>(`[data-guide-tab="${openTab}"]`)?.click();
+          const legacy: Record<string, string> = {
+            domain: 'xiang',
+            yao: 'books',
+            classic: 'books',
+            pro: 'dress',
+          };
+          const mapped = legacy[openTab] ?? openTab;
+          notesRoot.querySelector<HTMLButtonElement>(`[data-guide-tab="${mapped}"]`)?.click();
+          if (tab === 'domain') {
+            notesRoot.querySelector<HTMLButtonElement>('[data-xiang-sec="domain"]')?.click();
+          }
         }
       }
     };
@@ -324,6 +349,15 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
       article?.classList.toggle('is-text-off', !textToggle.checked);
     });
 
+    const favBtn = stage.querySelector<HTMLButtonElement>('[data-hex-fav]');
+    favBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const on = toggleHexFavorite(h.name);
+      favBtn.classList.toggle('is-on', on);
+      favBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      favBtn.textContent = hexFavButtonLabel(on);
+    });
+
     stage.querySelectorAll<HTMLElement>('[data-zone]').forEach((el) => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -334,7 +368,7 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
     stage.querySelector('[data-tri-dismiss]')?.addEventListener('click', () => clearFocus());
     note?.addEventListener('click', (e) => e.stopPropagation());
 
-    card?.addEventListener('dblclick', () => openNotesDrawer('domain'));
+    card?.addEventListener('dblclick', () => openNotesDrawer('xiang'));
   }
 
   paintList();

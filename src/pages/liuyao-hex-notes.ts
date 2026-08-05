@@ -101,8 +101,17 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
         if (entry) openLiuyaoEncounterReplay(page, entry);
       },
     });
-    if (tab && tab !== 'domain') {
-      notes.querySelector<HTMLButtonElement>(`[data-guide-tab="${tab}"]`)?.click();
+    if (tab && tab !== 'xiang' && tab !== 'domain') {
+      const legacy: Record<string, string> = {
+        yao: 'books',
+        classic: 'books',
+        pro: 'dress',
+      };
+      const mapped = legacy[tab] ?? tab;
+      notes.querySelector<HTMLButtonElement>(`[data-guide-tab="${mapped}"]`)?.click();
+    } else if (tab === 'domain') {
+      // 旧深链「分域」→ 卦象解析内的分域轨
+      notes.querySelector<HTMLButtonElement>('[data-xiang-sec="domain"]')?.click();
     }
   }
 
