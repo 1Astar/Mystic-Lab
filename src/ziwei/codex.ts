@@ -126,3 +126,31 @@ export function connectionLine(_starId: string, palace?: string): string {
   if (!palace) return '这颗星尚未在你的盘中现身——或尚未点亮。';
   return `在你的命盘里，它落在「${palace}」：这就是它与你隐藏人格的连接。`;
 }
+
+/** 「我的相遇」摘要：点亮主星、强宫、已看过 */
+export function meetSummary(): {
+  unlockedCount: number;
+  majorIds: string[];
+  strongPalaces: string[];
+  viewedIds: string[];
+} {
+  const entries = listCodexEntries();
+  const unlockedCount = entries.length;
+  const majorIds = entries
+    .map((e) => e.starId)
+    .filter((id) => getStarLore(id)?.category === 'major');
+  const palaceCount = new Map<string, number>();
+  for (const e of entries) {
+    if (!e.lastPalace) continue;
+    palaceCount.set(e.lastPalace, (palaceCount.get(e.lastPalace) ?? 0) + 1);
+  }
+  const strongPalaces = [...palaceCount.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([name]) => name);
+  const viewedIds = [...entries]
+    .sort((a, b) => b.meetCount - a.meetCount)
+    .slice(0, 8)
+    .map((e) => e.starId);
+  return { unlockedCount, majorIds, strongPalaces, viewedIds };
+}

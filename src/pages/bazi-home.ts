@@ -89,7 +89,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
         ${dateReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
       </button>
       <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
-        <strong>五行图鉴</strong>
+        <strong>八字图鉴</strong>
         <span>金木水火土 · 天干地支 · ${codex.collected}/${codex.total}</span>
         <em aria-hidden="true">›</em>
       </button>
@@ -114,7 +114,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
           ${hasBirthInfo(p) ? `当前：${escapeHtml(formatBirthBrief(p))}` : ''}
         </p>
         <div id="bazi-birth-dt-slot" class="life-birth-row"></div>
-        <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都" value="${escapeHtml(p.birthPlace)}" /></label>
+        <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都（可选，用于真太阳时粗校）" value="${escapeHtml(p.birthPlace)}" /></label>
       </fieldset>
       ${genderRadios()}
       <div class="life-form-actions">

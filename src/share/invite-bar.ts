@@ -1,4 +1,4 @@
-import { openShareSheet, copyShareDeepLink, syncAddressBarToShare, type ShareDraft } from './sheet.ts';
+import { openShareSheet, syncAddressBarToShare, type ShareDraft } from './sheet.ts';
 import type { ShareSystem } from './types.ts';
 
 export type InviteBarOpts = {
@@ -20,15 +20,6 @@ export function clearSideActionFabs(): void {
     .forEach((el) => {
       el.remove();
     });
-}
-
-function toast(msg: string): void {
-  document.querySelector('.ms-link-toast')?.remove();
-  const el = document.createElement('div');
-  el.className = 'ms-link-toast';
-  el.textContent = msg;
-  document.body.appendChild(el);
-  window.setTimeout(() => el.remove(), 2600);
 }
 
 /**
@@ -80,33 +71,9 @@ export function mountInviteCompanionBar(
     openShareSheet(draft, { mode: 'share', autoStart: true });
   });
 
-  const linkFab = document.createElement('button');
-  linkFab.type = 'button';
-  linkFab.className = 'ms-share-fab ms-link-fab';
-  linkFab.dataset.msLinkFab = '1';
-  linkFab.setAttribute('aria-label', '复制可加次数的链接');
-  linkFab.innerHTML = `<span>链接</span>`;
-  linkFab.addEventListener('click', () => {
-    linkFab.disabled = true;
-    toast('正在生成可加次数的链接…');
-    void copyShareDeepLink(opts.draft())
-      .then((url) => {
-        toast('已复制深链；地址栏也已换成 /s/…，直接发网址即可加次数');
-        console.info('[share-link]', url);
-      })
-      .catch((err) => {
-        const msg = err instanceof Error ? err.message : '复制失败';
-        toast(msg);
-      })
-      .finally(() => {
-        linkFab.disabled = false;
-      });
-  });
-
   root.appendChild(fab);
-  root.appendChild(linkFab);
 
-  // 静默把地址栏绑到 /s/…，复制网址也能加次数
+  // 静默把地址栏绑到 /s/…，复制网址也能加次数（不再单独放「链接」按钮）
   void syncAddressBarToShare(opts.draft()).catch(() => {
     /* 分享服务不可用时不打断结果页 */
   });

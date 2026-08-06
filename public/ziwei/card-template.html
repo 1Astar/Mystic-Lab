@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>紫微星卡 · 风格母版</title>
+    <style>
+      :root {
+        --zw-void: #050308;
+        --zw-bronze-hi: #d4b56a;
+        --zw-ink: #e8e0d0;
+        --zw-muted: #8a8070;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Songti SC", "Noto Serif SC", "STSong", serif;
+        color: var(--zw-ink);
+        background:
+          radial-gradient(ellipse at 50% 0%, #120a1c 0%, transparent 50%),
+          var(--zw-void);
+        padding: 32px 20px 64px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-weight: 600;
+        font-size: 1.35rem;
+        letter-spacing: 0.12em;
+        text-align: center;
+      }
+
+      .sub {
+        margin: 0 0 28px;
+        text-align: center;
+        color: var(--zw-muted);
+        font-size: 0.9rem;
+        letter-spacing: 0.06em;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .col label {
+        font-size: 0.8rem;
+        letter-spacing: 0.16em;
+        color: var(--zw-bronze-hi);
+      }
+
+      /* —— 拉丝铜 / 暗金渐变金属光泽边框 · 竖卡 2:3 —— */
+      .zw-card {
+        --w: min(280px, 72vw);
+        width: var(--w);
+        aspect-ratio: 2 / 3;
+        position: relative;
+        border-radius: 10px;
+        padding: 11px;
+        /* 多层金属：主斜向拉丝感 + 微弱高光扫掠 */
+        background:
+          linear-gradient(
+            118deg,
+            rgba(255, 236, 190, 0.22) 0%,
+            transparent 18%,
+            transparent 42%,
+            rgba(255, 220, 150, 0.1) 58%,
+            transparent 72%,
+            rgba(180, 140, 70, 0.18) 100%
+          ),
+          repeating-linear-gradient(
+            105deg,
+            #e8c878 0px,
+            #a07838 1px,
+            #6a4a22 2px,
+            #c9a050 3px,
+            #4a3218 5px,
+            #8a6230 7px,
+            #d4b56a 8px,
+            #3a2410 11px
+          ),
+          linear-gradient(145deg, #dfc070 0%, #8a6230 28%, #2a1808 52%, #7a5428 78%, #e0c078 100%);
+        background-blend-mode: soft-light, normal, normal;
+        box-shadow:
+          0 0 0 1px rgba(18, 10, 4, 0.95),
+          0 18px 40px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 236, 190, 0.4),
+          inset 0 -2px 8px rgba(0, 0, 0, 0.5),
+          inset 1px 0 0 rgba(255, 220, 160, 0.12),
+          inset -1px 0 0 rgba(20, 10, 0, 0.35);
+      }
+
+      .zw-card::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border-radius: 7px;
+        border: 1px solid rgba(212, 181, 106, 0.28);
+        pointer-events: none;
+        box-shadow:
+          inset 0 0 0 1px rgba(30, 18, 6, 0.7),
+          inset 0 1px 0 rgba(255, 230, 170, 0.15);
+      }
+
+      /* 极弱金属扫光（静态渐变，非动画） */
+      .zw-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 10px;
+        pointer-events: none;
+        background: linear-gradient(
+          160deg,
+          rgba(255, 245, 210, 0.14) 0%,
+          transparent 28%,
+          transparent 62%,
+          rgba(40, 24, 8, 0.2) 100%
+        );
+        mix-blend-mode: soft-light;
+      }
+
+      .zw-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #030208;
+        border: 1px solid rgba(40, 28, 12, 0.95);
+      }
+
+      .zw-card-art {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 40%;
+      }
+
+      .zw-card-meta {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 28px 14px 14px;
+        background: linear-gradient(transparent, rgba(3, 2, 8, 0.94) 48%);
+        text-align: center;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .zw-card-meta strong {
+        display: block;
+        font-size: 1.05rem;
+        letter-spacing: 0.2em;
+        color: var(--zw-bronze-hi);
+      }
+
+      .zw-card-meta span {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        color: var(--zw-muted);
+      }
+
+      /* —— 尚未解锁：模糊剪影 + 问号，不露星名 —— */
+      .zw-card.is-locked .zw-card-art {
+        filter: brightness(0) saturate(0) blur(7px);
+        opacity: 0.45;
+        transform: scale(1.06);
+      }
+
+      .zw-card.is-locked .zw-mystery {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        z-index: 1;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse at 50% 42%,
+          rgba(12, 8, 20, 0.15),
+          rgba(3, 2, 8, 0.55) 70%
+        );
+      }
+
+      .zw-card.is-locked .zw-mystery-mark {
+        font-size: 3.4rem;
+        font-weight: 300;
+        line-height: 1;
+        color: rgba(212, 181, 106, 0.55);
+        text-shadow: 0 0 24px rgba(212, 181, 106, 0.15);
+        letter-spacing: 0;
+        margin-top: -8%;
+      }
+
+      .zw-card.is-locked .zw-card-meta strong {
+        font-size: 1.6rem;
+        letter-spacing: 0.08em;
+        color: rgba(212, 181, 106, 0.65);
+        font-weight: 400;
+      }
+
+      .zw-card.is-locked .zw-card-meta span {
+        color: rgba(154, 144, 128, 0.75);
+      }
+
+      /* —— 已解锁：呼吸流光 + 微粒子 —— */
+      .zw-card.is-lit .zw-card-inner::after {
+        content: "";
+        position: absolute;
+        inset: -20%;
+        background: radial-gradient(
+          circle at 50% 40%,
+          rgba(212, 181, 106, 0.2),
+          transparent 44%
+        );
+        animation: zw-breathe 3.6s ease-in-out infinite;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        z-index: 1;
+      }
+
+      .zw-card.is-lit {
+        box-shadow:
+          0 0 0 1px rgba(18, 10, 4, 0.95),
+          0 18px 40px rgba(0, 0, 0, 0.55),
+          0 0 28px rgba(212, 181, 106, 0.2),
+          inset 0 1px 0 rgba(255, 236, 190, 0.45),
+          inset 0 -2px 8px rgba(0, 0, 0, 0.5);
+      }
+
+      .zw-card.is-lit .zw-particles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .zw-card.is-lit .zw-particles i {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        border-radius: 50%;
+        background: var(--zw-bronze-hi);
+        opacity: 0;
+        box-shadow: 0 0 4px rgba(212, 181, 106, 0.8);
+        animation: zw-spark 4.8s linear infinite;
+      }
+
+      .zw-card.is-lit .zw-particles i:nth-child(1) {
+        left: 22%;
+        top: 28%;
+      }
+      .zw-card.is-lit .zw-particles i:nth-child(2) {
+        left: 68%;
+        top: 22%;
+        animation-delay: 1.1s;
+        background: #c45a6a;
+      }
+      .zw-card.is-lit .zw-particles i:nth-child(3) {
+        left: 40%;
+        top: 55%;
+        animation-delay: 2.2s;
+      }
+      .zw-card.is-lit .zw-particles i:nth-child(4) {
+        left: 78%;
+        top: 60%;
+        animation-delay: 3s;
+        background: #c45a6a;
+      }
+      .zw-card.is-lit .zw-particles i:nth-child(5) {
+        left: 18%;
+        top: 70%;
+        animation-delay: 0.7s;
+      }
+
+      @keyframes zw-breathe {
+        0%,
+        100% {
+          opacity: 0.35;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.75;
+          transform: scale(1.04);
+        }
+      }
+
+      @keyframes zw-spark {
+        0% {
+          opacity: 0;
+          transform: translateY(8px) scale(0.6);
+        }
+        20% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-28px) scale(1);
+        }
+      }
+
+      .notes {
+        max-width: 640px;
+        margin: 36px auto 0;
+        padding: 16px 18px;
+        border: 1px solid rgba(138, 106, 58, 0.35);
+        border-radius: 12px;
+        background: rgba(12, 8, 20, 0.65);
+        color: var(--zw-muted);
+        font-size: 0.88rem;
+        line-height: 1.65;
+      }
+
+      .notes code {
+        color: var(--zw-bronze-hi);
+        font-family: ui-monospace, monospace;
+        font-size: 0.82em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>星系档案 · 人格海报</h1>
+    <p class="sub">竖卡 · 山海经神兽 · 绝世主星 14/14</p>
+
+    <div class="row" id="gallery"></div>
+
+    <div class="notes">
+      <p>14 主星人格海报已齐 · CSS 青铜框统一 · 图内不画框</p>
+      <p>资产目录：<code>public/ziwei/stars/{星名}.webp</code>（运行时只用 webp）</p>
+      <p>预览：<code>/ziwei/card-template.html</code></p>
+    </div>
+
+    <script>
+      const STARS = [
+        ['紫微', '定盘 · 星核麒麟'],
+        ['天机', '智变 · 仪轨青鸟'],
+        ['太阳', '明亮 · 金光神鸟'],
+        ['武曲', '执行 · 白虎神兵'],
+        ['天同', '安乐 · 莲池灵兽'],
+        ['廉贞', '拉扯 · 笼中赤凤'],
+        ['天府', '托付 · 宝库守兽'],
+        ['太阴', '夜感 · 月池灵兽'],
+        ['贪狼', '引力 · 九尾狐影'],
+        ['巨门', '追问 · 衔卷玄蛇'],
+        ['天相', '体面 · 双螭托印'],
+        ['天梁', '荫护 · 华盖神龟'],
+        ['七杀', '开锋 · 裂空神兵'],
+        ['破军', '重组 · 碎星之门'],
+      ];
+      const root = document.getElementById('gallery');
+      root.innerHTML = STARS.map(
+        ([name, epithet]) => `
+        <div class="col">
+          <label>${name}</label>
+          <article class="zw-card is-lit">
+            <div class="zw-card-inner">
+              <img class="zw-card-art" src="./stars/${name}.webp" alt="${name}" />
+              <div class="zw-particles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="zw-card-meta"><strong>${name}</strong><span>${epithet}</span></div>
+            </div>
+          </article>
+        </div>`,
+      ).join('');
+    </script>
+  </body>
+</html>

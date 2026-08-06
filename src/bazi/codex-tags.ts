@@ -325,10 +325,6 @@ export function starCardIdsFromChart(chart: BaziChart): string[] {
       if (TEN_GOD_LORE[name]) ids.add(tengodCardId(name));
     } else if (SHENSHA_LORE[raw]) {
       ids.add(shenshaCardId(raw));
-      // 华盖与孤辰寡宿同属孤独系，点亮华盖时一并收入孤辰寡宿卡
-      if (raw === '华盖' && SHENSHA_LORE['孤辰寡宿']) {
-        ids.add(shenshaCardId('孤辰寡宿'));
-      }
     }
   }
   return [...ids];

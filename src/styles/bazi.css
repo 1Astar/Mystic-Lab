@@ -1167,12 +1167,38 @@
 }
 
 .bazi-codex-close {
-  float: right;
-  border: 0;
-  background: transparent;
-  color: rgba(255, 230, 200, 0.7);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  float: none;
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.45);
+  background: rgba(255, 214, 166, 0.14);
+  color: #fff6e8;
   font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.bazi-codex-close:hover,
+.bazi-codex-close:focus-visible {
+  background: rgba(255, 214, 166, 0.28);
+  border-color: rgba(255, 230, 180, 0.75);
+  outline: none;
+}
+
+.bazi-codex-close span {
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 .bazi-codex-remedy,
@@ -1479,6 +1505,30 @@
   height: 100%;
 }
 
+.bazi-art-card.has-cover .bazi-art-stage {
+  aspect-ratio: 3 / 4;
+}
+
+.bazi-art-cover {
+  position: absolute;
+  inset: 0;
+}
+
+.bazi-art-cover img,
+.bazi-enc-art .bazi-art-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bazi-enc-art .bazi-art-cover {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 .bazi-art-card strong {
   font-size: 1.05rem;
   padding: 0 4px;
@@ -1731,3 +1781,727 @@
 .bazi-ss-museum span {
   display: block;
 }
+
+/* —— 五行生克图 —— */
+.bazi-sk-map {
+  margin: 0 0 18px;
+  padding: 14px 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgba(255, 214, 166, 0.08), transparent 60%),
+    rgba(14, 12, 28, 0.72);
+}
+
+.bazi-sk-head {
+  margin-bottom: 6px;
+}
+
+.bazi-sk-svg {
+  display: block;
+  width: min(100%, 320px);
+  margin: 0 auto;
+  height: auto;
+}
+
+.bazi-sk-edge {
+  fill: none;
+  stroke-width: 1.4;
+  opacity: 0.7;
+}
+
+.bazi-sk-edge.is-sheng {
+  stroke: rgba(120, 210, 160, 0.75);
+}
+
+.bazi-sk-edge.is-ke {
+  stroke: rgba(230, 120, 100, 0.55);
+  stroke-dasharray: 3 3;
+}
+
+.bazi-sk-edge.is-mute {
+  opacity: 0.18;
+}
+
+.bazi-sk-edge.is-focus {
+  opacity: 1;
+  stroke-width: 2.2;
+}
+
+.bazi-sk-arrow.is-sheng {
+  fill: rgba(120, 210, 160, 0.85);
+}
+
+.bazi-sk-arrow.is-ke {
+  fill: rgba(230, 120, 100, 0.7);
+}
+
+.bazi-sk-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.bazi-sk-disk {
+  fill: rgba(24, 18, 40, 0.92);
+  stroke: rgba(255, 214, 166, 0.35);
+  stroke-width: 1.2;
+  pointer-events: none;
+}
+
+.bazi-sk-node.is-lit .bazi-sk-disk {
+  stroke: rgba(255, 230, 180, 0.85);
+  filter: drop-shadow(0 0 6px rgba(255, 200, 120, 0.45));
+}
+
+.bazi-sk-node.is-dim .bazi-sk-disk {
+  opacity: 0.45;
+}
+
+.bazi-sk-node.is-focus .bazi-sk-disk {
+  stroke: rgba(255, 230, 180, 0.95);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 10px rgba(255, 200, 120, 0.65));
+}
+
+.bazi-sk-node.is-related .bazi-sk-disk {
+  stroke: rgba(180, 220, 255, 0.75);
+}
+
+.bazi-sk-node.is-mute {
+  opacity: 0.28;
+}
+
+.bazi-sk-captions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.78);
+}
+
+.bazi-sk-captions p {
+  margin: 0;
+}
+
+.bazi-sk-map.is-compact {
+  margin: 0;
+  padding: 10px 8px;
+}
+
+.bazi-enc-section-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: rgba(255, 214, 166, 0.9);
+}
+
+.bazi-rel-star {
+  margin: 0;
+}
+
+.bazi-rel-star-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bazi-rel-star-center {
+  display: grid;
+  place-items: center;
+  min-height: 3.2rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.4);
+  background: rgba(255, 214, 166, 0.1);
+  font-size: 1.1rem;
+}
+
+.bazi-rel-star-arm {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(12, 10, 24, 0.45);
+}
+
+.bazi-rel-star-arm em {
+  display: block;
+  margin-bottom: 8px;
+  font-style: normal;
+  font-size: 0.78rem;
+  color: rgba(255, 214, 166, 0.75);
+}
+
+.bazi-rel-star-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bazi-sk-label {
+  fill: #fff6e8;
+  font-size: 11px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.bazi-sk-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-sk-legend .is-sheng::before,
+.bazi-sk-legend .is-ke::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.bazi-sk-legend .is-sheng::before {
+  background: rgba(120, 210, 160, 0.85);
+}
+
+.bazi-sk-legend .is-ke::before {
+  background: rgba(230, 120, 100, 0.7);
+  border-top: 1px dashed transparent;
+}
+
+/* —— 四屏百科详情 —— */
+.bazi-enc-sheet .bazi-enc-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(92vh, 720px);
+  padding-top: 12px;
+  overflow: hidden;
+}
+
+.bazi-enc-sheet .bazi-codex-close {
+  flex-shrink: 0;
+  order: -1;
+}
+
+.bazi-enc-tab-bar {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin: 4px 0 10px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(18, 14, 32, 0.94);
+  padding: 4px 0 8px;
+}
+
+.bazi-enc-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  background: rgba(12, 10, 24, 0.65);
+  color: rgba(255, 230, 200, 0.62);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.bazi-enc-tab.is-active {
+  color: #fff6e8;
+  border-color: rgba(255, 214, 166, 0.55);
+  box-shadow: 0 0 0 1px rgba(255, 214, 166, 0.18);
+}
+
+.bazi-enc-panels {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+.bazi-enc-pane {
+  padding: 4px 0 8px;
+}
+
+.bazi-enc-pane[hidden] {
+  display: none !important;
+}
+
+.bazi-enc-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  margin-bottom: 12px;
+}
+
+.bazi-enc-art.is-dim {
+  filter: grayscale(0.85) brightness(0.55);
+}
+
+.bazi-enc-ss-img {
+  width: min(100%, 220px);
+  border-radius: 12px;
+}
+
+.bazi-enc-glyph {
+  font-size: 3.2rem;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.bazi-enc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.bazi-enc-tag {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  font-size: 0.72rem;
+  color: rgba(255, 230, 200, 0.72);
+}
+
+.bazi-enc-title {
+  margin: 0 0 8px;
+  font-size: 1.65rem;
+  letter-spacing: 0.04em;
+}
+
+.bazi-enc-oneliner {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(255, 240, 220, 0.88);
+}
+
+.bazi-enc-section {
+  margin: 0 0 14px;
+}
+
+.bazi-enc-section h3 {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  color: rgba(255, 214, 166, 0.85);
+}
+
+.bazi-enc-section p {
+  margin: 0;
+  line-height: 1.55;
+  color: rgba(255, 230, 200, 0.82);
+}
+
+.bazi-enc-kw {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bazi-enc-kw span {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 214, 166, 0.08);
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  font-size: 0.78rem;
+}
+
+.bazi-enc-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  line-height: 1.55;
+  color: rgba(255, 230, 200, 0.82);
+}
+
+.bazi-enc-rel-block {
+  margin: 0 0 14px;
+}
+
+.bazi-enc-rel-block h4 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 214, 166, 0.85);
+}
+
+.bazi-enc-rel-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bazi-enc-rel-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.28);
+  background: rgba(255, 214, 166, 0.08);
+  color: #fff6e8;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.bazi-enc-teaser.is-dim {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+}
+
+.bazi-codex-tabs .bazi-codex-tab {
+  min-width: 5.5rem;
+}
+
+/* —— 生克图连线 —— */
+.bazi-rel-pair-list {
+  display: grid;
+  gap: 8px;
+}
+
+.bazi-rel-pair {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(12, 10, 24, 0.45);
+}
+
+.bazi-rel-node {
+  min-width: 2.2rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.35);
+  background: rgba(255, 214, 166, 0.1);
+  color: #fff6e8;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bazi-rel-edge {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 214, 166, 0.75);
+}
+
+.bazi-rel-pair.is-害 .bazi-rel-edge { color: rgba(200, 140, 180, 0.95); }
+.bazi-rel-pair.is-刑 .bazi-rel-edge { color: rgba(220, 160, 90, 0.95); }
+.bazi-rel-pair.is-三合 .bazi-rel-edge { color: rgba(140, 200, 220, 0.95); }
+
+.bazi-rel-pair.is-multi {
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+}
+
+.bazi-rel-multi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  grid-column: 1 / -1;
+}
+
+.bazi-rel-edge-dot {
+  opacity: 0.45;
+  padding: 0 2px;
+}
+
+.bazi-rel-pair.is-multi .bazi-rel-edge {
+  justify-self: start;
+}
+
+.bazi-art-tg-card .bazi-art-stage {
+  min-height: 7rem;
+}
+
+
+.bazi-rel-note {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-rel-fragment {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 214, 166, 0.14);
+}
+
+.bazi-rel-hit-list {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.bazi-rel-hit {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(12, 10, 24, 0.4);
+}
+
+.bazi-rel-hit-kind {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 214, 166, 0.65);
+}
+
+.bazi-rel-hit strong {
+  font-size: 0.9rem;
+}
+
+.bazi-rel-hit-peers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bazi-enc-struct-art {
+  margin: 0 0 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(8, 6, 18, 0.5);
+}
+
+.bazi-enc-struct-art .bazi-art-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.bazi-art-svg.is-archetype text {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+}
+
+.bazi-art-svg.is-cover {
+  opacity: 0.95;
+}
+
+.bazi-art-card.is-lit .bazi-art-stage {
+  box-shadow: inset 0 0 28px rgba(255, 214, 166, 0.06);
+}
+
+.bazi-art-card.is-dim .bazi-art-stage {
+  filter: grayscale(0.55) brightness(0.55);
+}
+
+/* —— 结构图 · 认知示意 —— */
+.bazi-enc-structure {
+  margin: 0;
+}
+
+.bazi-st-map {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background:
+    linear-gradient(180deg, rgba(40, 28, 18, 0.55), rgba(18, 14, 12, 0.35));
+}
+
+.bazi-st-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 214, 166, 0.55);
+}
+
+.bazi-st-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bazi-st-meta-chip {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: rgba(255, 236, 210, 0.78);
+  background: rgba(255, 214, 166, 0.06);
+  border: 1px solid rgba(255, 214, 166, 0.12);
+}
+
+.bazi-st-band {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bazi-st-band-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 214, 166, 0.62);
+}
+
+.bazi-st-band-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.bazi-st-band.is-top .bazi-st-band-chips {
+  justify-content: center;
+}
+
+.bazi-st-band.is-top .bazi-st-chip {
+  border-color: rgba(255, 214, 166, 0.28);
+  background: rgba(255, 214, 166, 0.1);
+  font-weight: 600;
+}
+
+.bazi-st-band.is-bottom .bazi-st-chip {
+  border-color: rgba(120, 180, 220, 0.35);
+  background: rgba(80, 140, 190, 0.12);
+  color: rgba(210, 235, 255, 0.92);
+}
+
+.bazi-st-chip {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: rgba(255, 240, 220, 0.9);
+  background: rgba(255, 214, 166, 0.07);
+  border: 1px solid rgba(255, 214, 166, 0.16);
+}
+
+.bazi-st-core {
+  display: grid;
+  gap: 10px;
+  align-items: center;
+  justify-items: center;
+}
+
+.bazi-st-core.is-gz {
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+}
+
+.bazi-st-core.is-gz .bazi-st-band.is-side {
+  width: 100%;
+}
+
+.bazi-st-core.is-gz .bazi-st-band.is-side .bazi-st-band-chips {
+  justify-content: flex-start;
+}
+
+.bazi-st-core.is-gz .bazi-st-band.is-side:last-child .bazi-st-band-chips {
+  justify-content: flex-end;
+}
+
+.bazi-st-core.is-role {
+  position: relative;
+  min-height: 140px;
+  padding: 28px 12px 36px;
+}
+
+.bazi-st-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 88px;
+  min-height: 88px;
+  padding: 12px 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 214, 166, 0.45);
+  background:
+    radial-gradient(circle at 40% 30%, rgba(255, 214, 166, 0.18), rgba(30, 22, 16, 0.85));
+  box-shadow: 0 0 0 6px rgba(255, 214, 166, 0.05);
+  z-index: 1;
+}
+
+.bazi-st-center strong {
+  font-size: 1.15rem;
+  color: #fff4e4;
+  letter-spacing: 0.04em;
+}
+
+.bazi-st-center em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: rgba(255, 214, 166, 0.65);
+}
+
+.bazi-st-orbit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+  max-width: 100%;
+}
+
+.bazi-st-chip.is-orbit {
+  border-radius: 999px;
+  font-size: 0.74rem;
+}
+
+.bazi-st-flow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.bazi-st-flow-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 214, 166, 0.1);
+  font-size: 0.8rem;
+  color: rgba(255, 236, 210, 0.88);
+}
+
+.bazi-st-flow-item em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: rgba(255, 214, 166, 0.55);
+  min-width: 2.4em;
+}
+
+.bazi-st-map-list {
+  margin: 0;
+  padding-left: 1.05rem;
+  line-height: 1.5;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.8);
+}
+
+.bazi-st-note {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(255, 230, 200, 0.62);
+}
+
+.bazi-st-band.is-kw .bazi-st-chip {
+  background: rgba(255, 214, 166, 0.05);
+}
+
+@media (max-width: 420px) {
+  .bazi-st-core.is-gz {
+    grid-template-columns: 1fr;
+  }
+
+  .bazi-st-core.is-gz .bazi-st-band.is-side .bazi-st-band-chips,
+  .bazi-st-core.is-gz .bazi-st-band.is-side:last-child .bazi-st-band-chips {
+    justify-content: center;
+  }
+}
+
+

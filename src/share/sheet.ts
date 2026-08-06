@@ -196,13 +196,6 @@ export function openShareSheet(
       </header>
       <p class="ms-share-lead">${escapeHtml(copy.lead)}</p>
       ${
-        mode === 'save'
-          ? ''
-          : `<div class="ms-share-actions ms-share-actions-top" data-ms-pre-link>
-        <button type="button" class="btn ms-share-copy-btn" data-ms-copy-only>复制邀请链接</button>
-      </div>`
-      }
-      ${
         isLabInvite
           ? ''
           : `<div class="ms-share-row">
@@ -231,7 +224,6 @@ export function openShareSheet(
           </div>
         </div>
         <p class="ms-share-hint" data-ms-flip-hint>点一下翻转 · 长按当前面保存</p>
-        <button type="button" class="btn ms-share-copy-btn" data-ms-copy-link>复制邀请链接</button>
       </div>
     </div>
   `;
@@ -246,10 +238,6 @@ export function openShareSheet(
   const flipHint = modal.querySelector('[data-ms-flip-hint]') as HTMLElement;
   const frontImg = modal.querySelector('[data-ms-front]') as HTMLImageElement;
   const backImg = modal.querySelector('[data-ms-back]') as HTMLImageElement;
-  const copyLinkEl = modal.querySelector('[data-ms-copy-link]') as HTMLElement | null;
-  const copyOnlyBtns = Array.from(
-    modal.querySelectorAll<HTMLButtonElement>('[data-ms-copy-only]'),
-  );
   const goBtn = modal.querySelector('[data-ms-go]') as HTMLButtonElement;
   let snap: ShareSnapshot | null = null;
   let deepUrl = '';
@@ -278,20 +266,8 @@ export function openShareSheet(
     status.textContent = t;
   };
 
-  const setCopyBusy = (busy: boolean) => {
+  const setBusy = (busy: boolean) => {
     goBtn.disabled = busy;
-    for (const btn of copyOnlyBtns) btn.disabled = busy;
-    if (copyLinkEl instanceof HTMLButtonElement) copyLinkEl.disabled = busy;
-  };
-
-  const setCopyLabels = (copied: boolean) => {
-    const top = copied ? '已复制链接' : '复制邀请链接';
-    const bottom = copied ? '已复制链接' : '复制邀请链接';
-    for (const btn of copyOnlyBtns) btn.textContent = top;
-    if (copyLinkEl) {
-      copyLinkEl.textContent = bottom;
-      copyLinkEl.classList.toggle('is-copied', copied);
-    }
   };
 
   const buildCreateBody = (): ShareCreateBody => ({
@@ -308,16 +284,9 @@ export function openShareSheet(
     brandSlogan: draft.brandSlogan || '答案不在牌里，在你心里。',
   });
 
-  /** 只建快照拿深链（可加次数），不出图 */
-  const ensureDeepLink = async (): Promise<string> => {
-    snap = await createShareSnapshot(buildCreateBody());
-    deepUrl = shareDeepUrl(snap.id);
-    return deepUrl;
-  };
-
   const generate = async (opts?: { quiet?: boolean }) => {
     setStatus(opts?.quiet ? '正在按显示设置重绘…' : '正在生成正反面…');
-    setCopyBusy(true);
+    setBusy(true);
     snap = await createShareSnapshot(buildCreateBody());
     deepUrl = shareDeepUrl(snap.id);
     try {
@@ -344,14 +313,14 @@ export function openShareSheet(
 
     if (opts?.quiet) {
       setStatus(showQuestion ? '已显示问题并重绘分享图' : '已隐藏问题并重绘分享图');
-      setCopyBusy(false);
+      setBusy(false);
       return;
     }
 
     if (mode === 'save') {
       downloadCurrent();
       setStatus('已下载正面。点一下翻到背面，长按或再生成后可存解读面。');
-      setCopyBusy(false);
+      setBusy(false);
       return;
     }
 
@@ -383,7 +352,7 @@ export function openShareSheet(
           : '点卡片翻转看解读；长按当前面保存发给朋友。',
       );
     }
-    setCopyBusy(false);
+    setBusy(false);
   };
 
   visBtn?.addEventListener('click', () => {
@@ -391,52 +360,13 @@ export function openShareSheet(
     paintQ();
     if (snap) {
       void generate({ quiet: true }).catch((err) => {
-        setCopyBusy(false);
+        setBusy(false);
         setStatus(shareFailMessage(err));
       });
     }
   });
   modal.querySelector('[data-ms-ai]')?.addEventListener('change', (e) => {
     includeAi = (e.target as HTMLInputElement).checked;
-  });
-
-  const copyLink = async (opts?: { createIfNeeded?: boolean }) => {
-    try {
-      if (!deepUrl && opts?.createIfNeeded) {
-        setStatus('正在生成邀请链接…');
-        setCopyBusy(true);
-        await ensureDeepLink();
-        setCopyBusy(false);
-      }
-      if (!deepUrl) return;
-      await navigator.clipboard.writeText(deepUrl);
-      setCopyLabels(true);
-      setStatus('链接已复制：朋友打开可进站并加次数');
-      window.setTimeout(() => setCopyLabels(false), 1800);
-    } catch (err) {
-      setCopyBusy(false);
-      setStatus(
-        err instanceof Error && /分享|网络|Failed/.test(err.message)
-          ? shareFailMessage(err)
-          : '复制失败，请手动选中地址栏',
-      );
-    }
-  };
-
-  for (const btn of copyOnlyBtns) {
-    btn.addEventListener('click', () => {
-      void copyLink({ createIfNeeded: true });
-    });
-  }
-
-  copyLinkEl?.addEventListener('click', () => {
-    void copyLink({ createIfNeeded: true });
-  });
-  copyLinkEl?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      void copyLink({ createIfNeeded: true });
-    }
   });
 
   const toggleFlip = () => {
@@ -473,14 +403,14 @@ export function openShareSheet(
 
   goBtn.addEventListener('click', () => {
     void generate().catch((err) => {
-      setCopyBusy(false);
+      setBusy(false);
       setStatus(shareFailMessage(err));
     });
   });
 
   if (options.autoStart) {
     void generate().catch((err) => {
-      setCopyBusy(false);
+      setBusy(false);
       setStatus(shareFailMessage(err));
     });
   }

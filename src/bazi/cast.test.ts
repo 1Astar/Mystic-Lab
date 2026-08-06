@@ -102,6 +102,52 @@ describe('shensha & zizuo', () => {
     expect(list).toContain('天乙贵人');
   });
 
+  it('marks 孤辰寡宿 from year branch (寅年 → 孤辰巳 / 寡宿丑)', () => {
+    expect(
+      shenshaForBranch({
+        branch: '巳',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).toContain('孤辰寡宿');
+    expect(
+      shenshaForBranch({
+        branch: '丑',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).toContain('孤辰寡宿');
+    expect(
+      shenshaForBranch({
+        branch: '午',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).not.toContain('孤辰寡宿');
+  });
+
+  it('marks 劫煞 from year sanhe (申子辰 → 劫煞在巳)', () => {
+    expect(
+      shenshaForBranch({
+        branch: '巳',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toContain('劫煞');
+    expect(
+      shenshaForBranch({
+        branch: '寅',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).not.toContain('劫煞');
+  });
+
   it('returns changsheng label', () => {
     expect(ziZuoOf('甲', '亥')).toMatch(/长生|沐浴|冠带|临官|帝旺|衰|病|死|墓|绝|胎|养/);
   });

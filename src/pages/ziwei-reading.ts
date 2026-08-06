@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -256,7 +256,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       <nav class="ziwei-reading-nav">
         <button type="button" class="bazi-home-link" data-path="/ziwei/tujian">
           <strong>星曜图鉴</strong>
-          <span>绝世主星 · 助阵辅星 · 四大化星</span>
+          <span>记住 TA · 本质 · 落宫 · 关系</span>
           <em aria-hidden="true">›</em>
         </button>
         <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/ziwei?edit=1">

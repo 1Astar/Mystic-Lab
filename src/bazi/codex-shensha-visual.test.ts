@@ -7,7 +7,7 @@ describe('shensha visuals', () => {
     const keys = ['天乙贵人', '桃花', '文昌', '驿马', '羊刃', '孤辰寡宿', '劫煞'];
     for (const k of keys) {
       const v = getShenshaVisual(k);
-      expect(v?.src).toMatch(/^\/bazi\/shensha\/.+\.png$/);
+      expect(v?.src).toMatch(/^\/bazi\/covers\/.+\.webp$/);
       expect(v?.motif.length).toBeGreaterThan(4);
       expect(v?.literal.length).toBeGreaterThan(2);
     }

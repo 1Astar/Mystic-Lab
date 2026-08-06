@@ -45,7 +45,7 @@ const RULES: Rule[] = [
     priority: 3,
   },
   {
-    names: ['华盖'],
+    names: ['华盖', '孤辰寡宿'],
     label: '孤独感来源',
     needsComfort: true,
     comfort:
@@ -65,6 +65,14 @@ const RULES: Rule[] = [
     needsComfort: false,
     comfort: '人缘与被看见的机会更活跃；分清滋养关系与消耗关系就好。',
     priority: 6,
+  },
+  {
+    names: ['劫煞'],
+    label: '骤雨警示',
+    needsComfort: true,
+    comfort:
+      '你的命盘带有【骤雨警示】的印记。它提醒你在关键节点留缓冲，而不是预告必然倒霉——拆步骤、别梭哈。',
+    priority: 7,
   },
 ];
 

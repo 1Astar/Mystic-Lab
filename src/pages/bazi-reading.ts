@@ -87,7 +87,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
       isFirstTime: true,
       count: unlocked.total,
       cardName: name,
-      intoLabel: '已收入五行图鉴',
+      intoLabel: '已收入八字图鉴',
     });
   }
 
@@ -275,7 +275,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
       <nav class="bazi-reading-nav" aria-label="图鉴">
         <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
-          <strong>五行图鉴</strong>
+          <strong>八字图鉴</strong>
           <span>偏旺 / 偏弱 / 缺 · 天干地支收集</span>
           <em aria-hidden="true">›</em>
         </button>

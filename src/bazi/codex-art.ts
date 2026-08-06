@@ -1,146 +1,338 @@
 import type { WuXing } from './elements.ts';
-import { stemsOfWuxing, type StemBranchLore } from './codex-lore.ts';
+import { type StemBranchLore } from './codex-lore.ts';
 
-/** 抽象插画 SVG：自然元素 / 流线轮廓，不写实人物与动物 */
+/**
+ * 记忆图 = 意象封面
+ * - 神秘、静谧、有秩序
+ * - 用「象」表达，图上不写解释文案
+ * - 名称 / 气质留给卡面标题与详情第一屏
+ */
 
 const WX_ACCENT: Record<WuXing, { a: string; b: string; c: string }> = {
-  木: { a: '#3d8f5a', b: '#7ec89a', c: '#1a3d28' },
-  火: { a: '#c45a3a', b: '#e8a070', c: '#4a1810' },
-  土: { a: '#a8844a', b: '#d4b87a', c: '#3d2e18' },
-  金: { a: '#c8c0a8', b: '#f0ead8', c: '#3a3830' },
-  水: { a: '#3a6ea5', b: '#7eb0d4', c: '#122038' },
+  木: { a: '#2f6b48', b: '#6aab84', c: '#0e1f16' },
+  火: { a: '#a84830', b: '#d4926a', c: '#2a100c' },
+  土: { a: '#8a6e3e', b: '#c4a66e', c: '#241a10' },
+  金: { a: '#a8a090', b: '#ddd6c4', c: '#1e1c18' },
+  水: { a: '#2f5a88', b: '#6a9cbc', c: '#0c1624' },
 };
 
 function svgWrap(inner: string, cls: string): string {
   return `<svg class="${cls}" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
 }
 
-/** 五行主卡：宏观气象 + 隐约子天干轮廓 */
-export function wuxingArtSvg(wx: WuXing): string {
+function veil(uid: string, col: string): string {
+  return `
+    <defs>
+      <radialGradient id="${uid}-veil" cx="50%" cy="42%" r="62%">
+        <stop offset="0%" stop-color="${col}" stop-opacity="0.22"/>
+        <stop offset="70%" stop-color="${col}" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="#050508" stop-opacity="0.55"/>
+      </radialGradient>
+      <linearGradient id="${uid}-floor" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#050508" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#050508" stop-opacity="0.45"/>
+      </linearGradient>
+    </defs>
+    <rect width="160" height="120" fill="url(#${uid}-veil)"/>
+    <rect width="160" height="120" fill="url(#${uid}-floor)"/>`;
+}
+
+/** 五行：宏观元素之象 */
+export function wuxingArtSvg(wx: WuXing, opts?: { uid?: string }): string {
   const col = WX_ACCENT[wx];
-  const kids = stemsOfWuxing(wx);
-  const ghostKids = kids
-    .map((k, i) => {
-      const x = 28 + i * 52;
-      return `<text x="${x}" y="108" text-anchor="middle" font-size="11" fill="${col.b}" opacity="0.22" font-family="serif">${k.id}</text>
-        <path d="M${x - 10} 92 Q${x} 78 ${x + 10} 92" fill="none" stroke="${col.b}" stroke-width="0.8" opacity="0.18"/>`;
-    })
-    .join('');
+  const uid = opts?.uid ?? `wx-${wx}`;
 
   const scenes: Record<WuXing, string> = {
     木: `
-      <defs>
-        <radialGradient id="g-mu" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="${col.b}" stop-opacity="0.35"/><stop offset="100%" stop-color="${col.c}" stop-opacity="0"/></radialGradient>
-      </defs>
-      <rect width="160" height="120" fill="url(#g-mu)"/>
-      <!-- 蕨类舒展漩涡 -->
-      <path d="M80 100 C60 90 48 70 52 48 C56 28 78 18 90 32 C98 42 92 58 78 62 C68 65 62 55 68 48" fill="none" stroke="${col.a}" stroke-width="2.2" stroke-linecap="round"/>
-      <path d="M78 62 C88 50 108 42 118 52" fill="none" stroke="${col.b}" stroke-width="1.4" opacity="0.85"/>
-      <path d="M68 48 C58 38 42 36 34 48" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.7"/>
-      <path d="M20 110 Q40 95 55 110 M90 110 Q110 92 130 108" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.35"/>
-      ${ghostKids}`,
+      ${veil(uid, col.c)}
+      <path d="M80 112 L80 28" stroke="${col.a}" stroke-width="2.6" stroke-linecap="round" opacity="0.9"/>
+      <path d="M80 62 L52 40 M80 50 L108 30 M80 42 L62 22 M80 42 L100 18" fill="none" stroke="${col.b}" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
+      <ellipse cx="80" cy="36" rx="34" ry="10" fill="none" stroke="${col.b}" stroke-width="0.8" opacity="0.2"/>
+      <path d="M18 112 Q50 100 80 112 Q110 100 142 112" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.28"/>`,
     火: `
-      <defs>
-        <radialGradient id="g-huo" cx="50%" cy="70%" r="55%"><stop offset="0%" stop-color="${col.b}" stop-opacity="0.4"/><stop offset="100%" stop-color="${col.c}" stop-opacity="0"/></radialGradient>
-      </defs>
-      <rect width="160" height="120" fill="url(#g-huo)"/>
-      <!-- 暗红木炭 + 火焰拉丝 -->
-      <path d="M48 95 L58 78 L70 92 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.2"/>
-      <path d="M72 98 L82 76 L94 94 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.2"/>
-      <path d="M98 96 L108 80 L118 94 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1"/>
-      <path d="M64 78 Q70 48 78 28 Q84 48 86 72" fill="none" stroke="${col.b}" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
-      <path d="M86 72 Q92 42 100 24 Q106 50 108 78" fill="none" stroke="${col.a}" stroke-width="1.4" opacity="0.75"/>
-      <path d="M50 70 Q55 40 62 30" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.45"/>
-      ${ghostKids}`,
+      ${veil(uid, col.c)}
+      <circle cx="80" cy="70" r="18" fill="${col.c}" stroke="${col.a}" stroke-width="1.2" opacity="0.85"/>
+      <circle cx="80" cy="70" r="7" fill="${col.b}" opacity="0.35"/>
+      ${[15, 55, 95, 135, 175, 215, 255, 295, 335]
+        .map((d) => {
+          const r = (d * Math.PI) / 180;
+          const len = d % 40 < 20 ? 36 : 28;
+          return `<line x1="${80 + Math.cos(r) * 22}" y1="${70 + Math.sin(r) * 22}" x2="${80 + Math.cos(r) * len}" y2="${70 + Math.sin(r) * len}" stroke="${col.b}" stroke-width="1.15" stroke-linecap="round" opacity="0.55"/>`;
+        })
+        .join('')}`,
     土: `
-      <defs>
-        <linearGradient id="g-tu" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col.c}" stop-opacity="0.2"/><stop offset="100%" stop-color="${col.a}" stop-opacity="0.15"/></linearGradient>
-      </defs>
-      <rect width="160" height="120" fill="url(#g-tu)"/>
-      <!-- 干涸开裂 + 沙丘层叠 -->
-      <path d="M10 70 Q40 55 80 68 Q120 82 150 60" fill="none" stroke="${col.b}" stroke-width="1.6" opacity="0.7"/>
-      <path d="M8 88 Q50 78 90 90 Q130 100 155 82" fill="none" stroke="${col.a}" stroke-width="2"/>
-      <path d="M40 50 L48 72 M70 42 L66 78 M95 48 L102 80 M120 55 L115 85" stroke="${col.b}" stroke-width="1" opacity="0.55"/>
-      <path d="M25 100 Q80 92 140 105" fill="none" stroke="${col.a}" stroke-width="1.2" opacity="0.4"/>
-      ${ghostKids}`,
+      ${veil(uid, col.c)}
+      <path d="M22 98 L52 52 L78 70 L108 40 L140 98 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.3" opacity="0.88"/>
+      <path d="M22 98 H140" stroke="${col.b}" stroke-width="1.1" opacity="0.55"/>
+      <path d="M36 98 V110 M60 98 V110 M84 98 V110 M108 98 V110" stroke="${col.b}" stroke-width="0.9" opacity="0.28"/>`,
     金: `
-      <defs>
-        <linearGradient id="g-jin" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="${col.c}" stop-opacity="0.5"/><stop offset="100%" stop-color="${col.b}" stop-opacity="0.25"/></linearGradient>
-      </defs>
-      <rect width="160" height="120" fill="url(#g-jin)"/>
-      <!-- 陨石金属片 + 刀锋纹理 -->
-      <path d="M45 78 L78 28 L118 72 L95 98 L55 95 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.5" opacity="0.85"/>
-      <path d="M62 70 L88 42 M70 82 L98 55 M78 90 L105 68" stroke="${col.b}" stroke-width="0.9" opacity="0.55"/>
-      <path d="M50 60 L70 35" stroke="${col.a}" stroke-width="1.2" opacity="0.4"/>
-      ${ghostKids}`,
+      ${veil(uid, col.c)}
+      <path d="M58 96 L82 34 L90 38 L72 96 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.25" opacity="0.9"/>
+      <path d="M108 78 L126 52 L136 60 L118 92 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.1" opacity="0.75"/>
+      <path d="M112 74 L128 56 M118 84 L132 66" stroke="${col.a}" stroke-width="0.8" opacity="0.35"/>`,
     水: `
-      <defs>
-        <radialGradient id="g-shui" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="${col.b}" stop-opacity="0.3"/><stop offset="100%" stop-color="${col.c}" stop-opacity="0"/></radialGradient>
-      </defs>
-      <rect width="160" height="120" fill="url(#g-shui)"/>
-      <!-- 涟漪 + 鹅卵石暗流 -->
-      <ellipse cx="55" cy="72" rx="14" ry="8" fill="${col.c}" stroke="${col.a}" stroke-width="1" opacity="0.8"/>
-      <ellipse cx="105" cy="78" rx="16" ry="9" fill="${col.c}" stroke="${col.a}" stroke-width="1" opacity="0.75"/>
-      <ellipse cx="80" cy="55" rx="28" ry="12" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.55"/>
-      <ellipse cx="80" cy="55" rx="42" ry="20" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.35"/>
-      <ellipse cx="80" cy="55" rx="55" ry="28" fill="none" stroke="${col.b}" stroke-width="0.8" opacity="0.22"/>
-      <path d="M40 88 Q80 70 120 90" fill="none" stroke="${col.b}" stroke-width="1.4" opacity="0.5"/>
-      ${ghostKids}`,
+      ${veil(uid, col.c)}
+      <path d="M18 48 Q48 78 42 108" fill="none" stroke="${col.a}" stroke-width="1.8" stroke-linecap="round" opacity="0.75"/>
+      <path d="M48 42 Q78 82 72 112" fill="none" stroke="${col.b}" stroke-width="1.5" opacity="0.65"/>
+      <path d="M82 44 Q108 84 112 112" fill="none" stroke="${col.a}" stroke-width="1.6" opacity="0.55"/>
+      <path d="M118 50 Q138 82 144 104" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.45"/>
+      <ellipse cx="84" cy="34" rx="42" ry="9" fill="${col.b}" opacity="0.08"/>`,
   };
 
-  return svgWrap(scenes[wx], 'bazi-art-svg bazi-art-wx');
+  return svgWrap(scenes[wx], 'bazi-art-svg bazi-art-wx is-cover');
 }
 
-/** 天干：天空自然力量；地支：大地实体流线（隐约兽形，不写实） */
-export function stemBranchArtSvg(item: StemBranchLore): string {
+/** 天干 / 地支记忆图 */
+export function stemBranchArtSvg(item: StemBranchLore, opts?: { uid?: string }): string {
   const col = WX_ACCENT[item.wuxing];
-  const scenes: Record<string, string> = {
-    甲: `<path d="M80 105 L80 35 M80 40 L55 70 M80 50 L105 75 M60 30 Q80 18 100 32" fill="none" stroke="${col.a}" stroke-width="2.2" stroke-linecap="round"/><path d="M70 28 Q80 12 90 28" fill="none" stroke="${col.b}" stroke-width="1.2"/>`,
-    乙: `<path d="M40 90 Q55 40 70 70 Q85 100 100 45 Q110 25 125 55" fill="none" stroke="${col.b}" stroke-width="1.8" stroke-linecap="round"/><path d="M55 55 Q65 35 75 50" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.7"/>`,
-    丙: `<circle cx="80" cy="48" r="16" fill="none" stroke="${col.b}" stroke-width="2"/><g stroke="${col.a}" stroke-width="1.4" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map((d) => {
-      const r = (d * Math.PI) / 180;
-      const x1 = 80 + Math.cos(r) * 22;
-      const y1 = 48 + Math.sin(r) * 22;
-      const x2 = 80 + Math.cos(r) * 42;
-      const y2 = 48 + Math.sin(r) * 42;
-      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
-    }).join('')}</g>`,
-    丁: `<path d="M80 95 L80 55" stroke="${col.a}" stroke-width="1.5"/><path d="M80 55 Q72 40 80 28 Q88 40 80 55" fill="${col.b}" opacity="0.55" stroke="${col.a}" stroke-width="1"/><circle cx="55" cy="35" r="1.5" fill="${col.b}" opacity="0.7"/><circle cx="105" cy="42" r="1.2" fill="${col.b}" opacity="0.5"/><circle cx="95" cy="28" r="1" fill="${col.b}" opacity="0.6"/>`,
-    戊: `<path d="M30 95 L45 40 L70 55 L95 28 L130 95 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.6" opacity="0.85"/><path d="M45 40 L70 55 L95 28" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.5"/>`,
-    己: `<path d="M20 70 Q50 55 80 68 Q110 82 140 65" fill="none" stroke="${col.a}" stroke-width="1.8"/><path d="M25 85 Q60 75 95 88 Q125 95 145 80" fill="none" stroke="${col.b}" stroke-width="1.3"/><path d="M40 60 L42 78 M70 58 L68 80 M100 62 L103 85" stroke="${col.b}" stroke-width="0.8" opacity="0.45"/>`,
-    庚: `<path d="M50 85 L70 35 L95 50 L110 30 L125 75 L90 95 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.5"/><path d="M70 35 L72 55 M95 50 L88 70" stroke="${col.a}" stroke-width="1" opacity="0.5"/>`,
-    辛: `<circle cx="70" cy="55" r="8" fill="none" stroke="${col.b}" stroke-width="1.4"/><circle cx="95" cy="48" r="5" fill="none" stroke="${col.a}" stroke-width="1.2"/><path d="M55 70 Q80 90 110 65" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.6"/><circle cx="80" cy="72" r="2" fill="${col.b}" opacity="0.7"/>`,
-    壬: `<path d="M20 40 Q50 70 40 95 Q70 50 90 85 Q110 40 140 75" fill="none" stroke="${col.a}" stroke-width="2.2" stroke-linecap="round"/><path d="M25 55 Q60 85 55 100" fill="none" stroke="${col.b}" stroke-width="1.3" opacity="0.6"/>`,
-    癸: `<ellipse cx="80" cy="70" rx="45" ry="18" fill="none" stroke="${col.a}" stroke-width="1.5" opacity="0.7"/><path d="M50 55 Q80 40 110 55" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.5"/><ellipse cx="95" cy="42" rx="10" ry="6" fill="${col.b}" opacity="0.25"/>`,
-    // 地支：流线轮廓隐约兽态
-    子: `<path d="M35 75 Q55 45 85 55 Q115 65 130 50" fill="none" stroke="${col.a}" stroke-width="2"/><path d="M50 80 Q70 95 100 78" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.6"/><ellipse cx="118" cy="48" rx="8" ry="5" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.45"/>`,
-    丑: `<path d="M40 90 L50 50 L80 45 L110 55 L120 90" fill="none" stroke="${col.a}" stroke-width="2"/><path d="M55 70 L105 75" stroke="${col.b}" stroke-width="1" opacity="0.5"/><path d="M60 50 Q70 35 85 48" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.4"/>`,
-    寅: `<path d="M30 70 Q60 30 90 55 Q120 80 145 40" fill="none" stroke="${col.a}" stroke-width="2.2" stroke-linecap="round"/><path d="M45 55 Q70 20 95 45" fill="none" stroke="${col.b}" stroke-width="1.3" opacity="0.55"/>`,
-    卯: `<path d="M70 95 L75 50" stroke="${col.a}" stroke-width="1.5"/><path d="M75 55 Q55 40 50 55 Q65 60 75 55 Q95 40 100 55 Q85 62 75 55" fill="none" stroke="${col.b}" stroke-width="1.6"/><circle cx="115" cy="35" r="10" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.45"/>`,
-    辰: `<path d="M25 60 Q50 80 80 65 Q110 45 140 70" fill="none" stroke="${col.a}" stroke-width="1.8"/><path d="M40 75 Q70 95 100 80" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.55"/><ellipse cx="70" cy="70" rx="12" ry="6" fill="${col.c}" opacity="0.35"/>`,
-    巳: `<ellipse cx="80" cy="70" rx="35" ry="14" fill="${col.c}" stroke="${col.a}" stroke-width="1.4" opacity="0.7"/><path d="M50 55 Q80 40 110 55" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.4"/><path d="M60 70 Q80 78 100 68" fill="none" stroke="${col.a}" stroke-width="0.8" opacity="0.5"/>`,
-    午: `<path d="M40 90 Q55 40 70 70 Q85 30 100 65 Q115 25 130 85" fill="none" stroke="${col.a}" stroke-width="2" stroke-linecap="round"/><path d="M55 50 Q70 20 80 45" fill="none" stroke="${col.b}" stroke-width="1.3" opacity="0.7"/>`,
-    未: `<path d="M25 85 Q50 60 80 70 Q110 80 140 55" fill="none" stroke="${col.a}" stroke-width="2"/><path d="M50 70 Q55 45 65 55 M90 72 Q100 48 110 58" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.6"/>`,
-    申: `<path d="M45 85 L95 30 L115 40 L70 95 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.5" opacity="0.85"/><path d="M95 30 L110 25" stroke="${col.a}" stroke-width="2" stroke-linecap="round"/>`,
-    酉: `<circle cx="80" cy="58" r="22" fill="none" stroke="${col.b}" stroke-width="1.6"/><circle cx="80" cy="58" r="3" fill="${col.a}"/><path d="M80 36 L80 42 M80 74 L80 80 M58 58 L64 58 M96 58 L102 58" stroke="${col.a}" stroke-width="1.2"/>`,
-    戌: `<path d="M35 90 L45 55 L80 45 L115 55 L125 90 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.6"/><path d="M45 55 L125 55" stroke="${col.b}" stroke-width="1" opacity="0.45"/><path d="M60 55 L60 90 M100 55 L100 90" stroke="${col.b}" stroke-width="1" opacity="0.35"/>`,
-    亥: `<path d="M25 45 Q50 75 45 100" fill="none" stroke="${col.a}" stroke-width="1.8" stroke-linecap="round"/><path d="M55 35 Q70 80 65 105" fill="none" stroke="${col.b}" stroke-width="1.5" opacity="0.75"/><path d="M85 40 Q95 85 100 105" fill="none" stroke="${col.a}" stroke-width="1.6"/><path d="M115 50 Q125 80 130 100" fill="none" stroke="${col.b}" stroke-width="1.3" opacity="0.65"/>`,
+  const uid = opts?.uid ?? `gz-${item.id}`;
+
+  if (item.kind === 'stem') {
+    const stemScenes: Record<string, string> = {
+      // 甲：高耸古树，破雾见天
+      甲: `
+        ${veil(uid, col.c)}
+        <ellipse cx="80" cy="28" rx="46" ry="12" fill="${col.b}" opacity="0.07"/>
+        <path d="M80 112 L80 26" stroke="${col.a}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M80 58 L48 36 M80 46 L112 24 M80 70 L56 54 M80 70 L104 54" fill="none" stroke="${col.b}" stroke-width="1.7" stroke-linecap="round" opacity="0.7"/>
+        <path d="M28 112 Q80 98 132 112" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.25"/>`,
+      // 乙：藤蔓花枝，柔韧攀附
+      乙: `
+        ${veil(uid, col.c)}
+        <path d="M36 108 Q48 50 68 78 Q88 108 108 42 Q122 22 138 58" fill="none" stroke="${col.b}" stroke-width="1.9" stroke-linecap="round" opacity="0.85"/>
+        <path d="M58 68 Q70 44 82 58 M98 62 Q110 38 122 52" fill="none" stroke="${col.a}" stroke-width="1.1" opacity="0.55"/>
+        <circle cx="108" cy="42" r="3" fill="${col.b}" opacity="0.35"/>
+        <circle cx="72" cy="74" r="2.2" fill="${col.b}" opacity="0.3"/>`,
+      // 丙：太阳 / 大火球外放
+      丙: `
+        ${veil(uid, col.c)}
+        <circle cx="80" cy="52" r="20" fill="${col.c}" stroke="${col.b}" stroke-width="1.6" opacity="0.9"/>
+        <circle cx="80" cy="52" r="8" fill="${col.b}" opacity="0.28"/>
+        ${[0, 45, 90, 135, 180, 225, 270, 315]
+          .map((d) => {
+            const r = (d * Math.PI) / 180;
+            return `<line x1="${80 + Math.cos(r) * 26}" y1="${52 + Math.sin(r) * 26}" x2="${80 + Math.cos(r) * 44}" y2="${52 + Math.sin(r) * 44}" stroke="${col.a}" stroke-width="1.35" stroke-linecap="round" opacity="0.55"/>`;
+          })
+          .join('')}`,
+      // 丁：烛火 / 夜灯内在光源
+      丁: `
+        ${veil(uid, col.c)}
+        <path d="M80 108 L80 62" stroke="${col.a}" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M80 62 Q70 46 80 30 Q90 46 80 62" fill="${col.b}" opacity="0.32" stroke="${col.a}" stroke-width="1.1"/>
+        <circle cx="80" cy="42" r="10" fill="${col.b}" opacity="0.1"/>
+        <circle cx="56" cy="36" r="1.2" fill="${col.b}" opacity="0.4"/>
+        <circle cx="104" cy="40" r="1" fill="${col.b}" opacity="0.3"/>`,
+      // 戊：高山厚载
+      戊: `
+        ${veil(uid, col.c)}
+        <path d="M20 104 L48 42 L76 60 L106 30 L144 104 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.4" opacity="0.9"/>
+        <path d="M20 104 H144" stroke="${col.b}" stroke-width="1.1" opacity="0.45"/>`,
+      // 己：田园层叠
+      己: `
+        ${veil(uid, col.c)}
+        <path d="M16 58 Q52 44 84 58 Q116 72 146 54" fill="none" stroke="${col.a}" stroke-width="1.6" opacity="0.75"/>
+        <path d="M18 78 Q56 66 92 80 Q122 90 146 74" fill="none" stroke="${col.b}" stroke-width="1.25" opacity="0.55"/>
+        <path d="M22 98 H140" stroke="${col.a}" stroke-width="1" opacity="0.35"/>
+        <path d="M42 58 V98 M74 60 V98 M106 62 V98" stroke="${col.b}" stroke-width="0.8" opacity="0.25"/>`,
+      // 庚：刀锋果断
+      庚: `
+        ${veil(uid, col.c)}
+        <path d="M52 100 L86 24 L96 30 L70 104 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.35" opacity="0.92"/>
+        <path d="M70 104 H102" stroke="${col.a}" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+        <path d="M86 24 L98 16" stroke="${col.a}" stroke-width="1.6" stroke-linecap="round" opacity="0.65"/>`,
+      // 辛：珠玉精致
+      辛: `
+        ${veil(uid, col.c)}
+        <circle cx="70" cy="58" r="14" fill="none" stroke="${col.b}" stroke-width="1.35" opacity="0.8"/>
+        <circle cx="100" cy="48" r="8" fill="none" stroke="${col.a}" stroke-width="1.15" opacity="0.7"/>
+        <circle cx="90" cy="74" r="4.5" fill="${col.b}" opacity="0.22"/>
+        <path d="M48 84 Q82 102 122 72" fill="none" stroke="${col.b}" stroke-width="0.9" opacity="0.35"/>`,
+      // 壬：江海吞吐
+      壬: `
+        ${veil(uid, col.c)}
+        <path d="M14 44 Q50 82 40 110" fill="none" stroke="${col.a}" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+        <path d="M44 38 Q82 86 74 112" fill="none" stroke="${col.b}" stroke-width="1.7" opacity="0.65"/>
+        <path d="M82 42 Q116 84 122 110" fill="none" stroke="${col.a}" stroke-width="1.8" opacity="0.55"/>
+        <path d="M116 50 Q140 84 148 102" fill="none" stroke="${col.b}" stroke-width="1.3" opacity="0.45"/>`,
+      // 癸：雨露渗透
+      癸: `
+        ${veil(uid, col.c)}
+        <path d="M58 26 Q52 48 60 64" fill="none" stroke="${col.b}" stroke-width="1.35" stroke-linecap="round" opacity="0.7"/>
+        <path d="M80 20 Q76 50 84 68" fill="none" stroke="${col.a}" stroke-width="1.5" opacity="0.75"/>
+        <path d="M102 28 Q106 52 98 66" fill="none" stroke="${col.b}" stroke-width="1.25" opacity="0.6"/>
+        <ellipse cx="80" cy="90" rx="46" ry="12" fill="none" stroke="${col.a}" stroke-width="1.15" opacity="0.45"/>
+        <ellipse cx="80" cy="90" rx="26" ry="7" fill="${col.b}" opacity="0.08"/>`,
+    };
+    const body =
+      stemScenes[item.id] ??
+      `${veil(uid, col.c)}<circle cx="80" cy="60" r="26" fill="none" stroke="${col.a}" stroke-width="1.3" opacity="0.5"/>`;
+    return svgWrap(body, 'bazi-art-svg bazi-art-stem is-cover');
+  }
+
+  // 地支：时空感、节气感（无文字）
+  const branchScenes: Record<string, string> = {
+    子: `
+      ${veil(uid, col.c)}
+      <circle cx="122" cy="30" r="6" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.35"/>
+      <circle cx="122" cy="30" r="1.6" fill="${col.b}" opacity="0.4"/>
+      <path d="M24 58 Q56 90 50 112" fill="none" stroke="${col.a}" stroke-width="1.7" opacity="0.65"/>
+      <path d="M58 52 Q88 94 92 114" fill="none" stroke="${col.b}" stroke-width="1.35" opacity="0.5"/>`,
+    丑: `
+      ${veil(uid, col.c)}
+      <path d="M34 86 H128 V108 H34 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.15" opacity="0.8"/>
+      <path d="M48 86 V68 H72 V86 M92 86 V60 H116 V86" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.55"/>`,
+    寅: `
+      ${veil(uid, col.c)}
+      <path d="M42 108 L56 52 L70 108 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.15" opacity="0.75"/>
+      <path d="M78 108 L96 34 L114 108 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.25" opacity="0.85"/>
+      <path d="M96 34 L96 20" stroke="${col.b}" stroke-width="1.3" stroke-linecap="round" opacity="0.55"/>`,
+    卯: `
+      ${veil(uid, col.c)}
+      <circle cx="124" cy="34" r="11" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.35"/>
+      <path d="M58 108 L62 56" stroke="${col.a}" stroke-width="1.7"/>
+      <path d="M62 72 Q44 56 40 70 Q54 74 62 72 Q84 52 90 72 Q74 78 62 72" fill="none" stroke="${col.b}" stroke-width="1.35" opacity="0.75"/>`,
+    辰: `
+      ${veil(uid, col.c)}
+      <ellipse cx="80" cy="74" rx="46" ry="20" fill="${col.c}" stroke="${col.a}" stroke-width="1.2" opacity="0.65"/>
+      <path d="M42 74 Q80 90 118 74" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.45"/>`,
+    巳: `
+      ${veil(uid, col.c)}
+      <path d="M58 100 L80 42 L102 100 Z" fill="none" stroke="${col.a}" stroke-width="1.35" opacity="0.7"/>
+      <path d="M80 42 Q72 58 80 74 Q88 58 80 42" fill="${col.b}" opacity="0.22" stroke="${col.b}" stroke-width="0.9"/>`,
+    午: `
+      ${veil(uid, col.c)}
+      <circle cx="80" cy="48" r="17" fill="${col.b}" opacity="0.22" stroke="${col.a}" stroke-width="1.4"/>
+      ${[0, 45, 90, 135, 180, 225, 270, 315]
+        .map((d) => {
+          const r = (d * Math.PI) / 180;
+          return `<line x1="${80 + Math.cos(r) * 22}" y1="${48 + Math.sin(r) * 22}" x2="${80 + Math.cos(r) * 38}" y2="${48 + Math.sin(r) * 38}" stroke="${col.b}" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>`;
+        })
+        .join('')}
+      <path d="M28 108 Q80 92 132 108" fill="none" stroke="${col.a}" stroke-width="1" opacity="0.28"/>`,
+    未: `
+      ${veil(uid, col.c)}
+      <path d="M20 72 Q56 56 90 72 Q120 84 144 66" fill="none" stroke="${col.a}" stroke-width="1.5" opacity="0.65"/>
+      <path d="M24 92 Q70 80 116 94 Q134 100 146 90" fill="none" stroke="${col.b}" stroke-width="1.15" opacity="0.45"/>
+      <ellipse cx="58" cy="58" rx="7" ry="4" fill="none" stroke="${col.b}" stroke-width="0.9" opacity="0.35"/>`,
+    申: `
+      ${veil(uid, col.c)}
+      <path d="M24 88 L144 56" stroke="${col.a}" stroke-width="1.7" stroke-linecap="round" opacity="0.7"/>
+      <path d="M24 98 L144 66" stroke="${col.b}" stroke-width="1" opacity="0.35" stroke-dasharray="3 3"/>
+      <path d="M96 40 L114 48 L104 68 Z" fill="${col.c}" stroke="${col.b}" stroke-width="1.1" opacity="0.75"/>`,
+    酉: `
+      ${veil(uid, col.c)}
+      <path d="M20 68 Q80 40 140 68" fill="none" stroke="${col.b}" stroke-width="1.2" opacity="0.35"/>
+      <circle cx="80" cy="74" r="18" fill="none" stroke="${col.a}" stroke-width="1.45" opacity="0.75"/>
+      <circle cx="80" cy="74" r="3.5" fill="${col.b}" opacity="0.35"/>
+      <path d="M112 46 Q132 54 142 68" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.45"/>`,
+    戌: `
+      ${veil(uid, col.c)}
+      <path d="M36 100 L46 52 L80 42 L114 52 L124 100 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.3" opacity="0.85"/>
+      <path d="M56 100 V62 H104 V100" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.5"/>`,
+    亥: `
+      ${veil(uid, col.c)}
+      <ellipse cx="80" cy="80" rx="50" ry="22" fill="${col.c}" stroke="${col.a}" stroke-width="1.15" opacity="0.5"/>
+      <path d="M42 80 Q80 96 118 80" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.45"/>
+      <circle cx="122" cy="30" r="4.5" fill="none" stroke="${col.b}" stroke-width="0.9" opacity="0.35"/>`,
   };
+  const body =
+    branchScenes[item.id] ??
+    `${veil(uid, col.c)}<circle cx="80" cy="60" r="26" fill="none" stroke="${col.a}" stroke-width="1.3" opacity="0.5"/>`;
+  return svgWrap(body, 'bazi-art-svg bazi-art-branch is-cover');
+}
 
-  const body = scenes[item.id] ?? `<circle cx="80" cy="60" r="28" fill="none" stroke="${col.a}" stroke-width="1.5"/>`;
-  const kindMark =
-    item.kind === 'stem'
-      ? `<text x="12" y="18" font-size="9" fill="${col.b}" opacity="0.35">天</text>`
-      : `<text x="12" y="18" font-size="9" fill="${col.b}" opacity="0.35">地</text>`;
+const TG_ACCENT = { a: '#9a7a4a', b: '#d4b888', c: '#16120e' };
 
-  return svgWrap(
-    `<rect width="160" height="120" fill="${col.c}" opacity="0.25"/>${kindMark}${body}`,
-    `bazi-art-svg bazi-art-${item.kind}`,
-  );
+/** 十神：人生角色之象（无文字） */
+export function tengodArtSvg(name: string, opts?: { uid?: string }): string {
+  const col = TG_ACCENT;
+  const uid = opts?.uid ?? `tg-${name}`;
+  const scenes: Record<string, string> = {
+    // 比肩：两圆并肩
+    比肩: `
+      ${veil(uid, col.c)}
+      <circle cx="56" cy="58" r="17" fill="none" stroke="${col.b}" stroke-width="1.45" opacity="0.75"/>
+      <circle cx="104" cy="58" r="17" fill="none" stroke="${col.b}" stroke-width="1.45" opacity="0.75"/>
+      <path d="M73 58 H87" stroke="${col.a}" stroke-width="1.6" opacity="0.55"/>`,
+    // 劫财：中心被拉扯
+    劫财: `
+      ${veil(uid, col.c)}
+      <circle cx="80" cy="58" r="16" fill="none" stroke="${col.b}" stroke-width="1.4" opacity="0.7"/>
+      <path d="M46 40 L68 56 L46 72 M114 40 L92 56 L114 72" fill="none" stroke="${col.a}" stroke-width="1.5" stroke-linecap="round" opacity="0.65"/>`,
+    // 食神：柔和输出
+    食神: `
+      ${veil(uid, col.c)}
+      <circle cx="80" cy="48" r="13" fill="none" stroke="${col.b}" stroke-width="1.3" opacity="0.7"/>
+      <path d="M80 61 Q56 86 46 104 M80 61 Q104 86 114 104" fill="none" stroke="${col.a}" stroke-width="1.35" stroke-linecap="round" opacity="0.6"/>`,
+    // 伤官：锋利突破
+    伤官: `
+      ${veil(uid, col.c)}
+      <path d="M58 100 L80 30 L102 100 Z" fill="none" stroke="${col.a}" stroke-width="1.45" opacity="0.75"/>
+      <path d="M80 30 L80 78" stroke="${col.b}" stroke-width="1.7" opacity="0.65"/>`,
+    // 正财：规整库藏
+    正财: `
+      ${veil(uid, col.c)}
+      <rect x="52" y="40" width="56" height="46" rx="3" fill="none" stroke="${col.b}" stroke-width="1.4" opacity="0.75"/>
+      <path d="M66 56 H94 M66 70 H94" stroke="${col.a}" stroke-width="1.15" opacity="0.5"/>`,
+    // 偏财：流动机会
+    偏财: `
+      ${veil(uid, col.c)}
+      <path d="M28 72 Q60 40 92 66 Q120 90 146 54" fill="none" stroke="${col.a}" stroke-width="1.7" stroke-linecap="round" opacity="0.7"/>
+      <circle cx="56" cy="56" r="4" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.55"/>
+      <circle cx="102" cy="74" r="4" fill="none" stroke="${col.b}" stroke-width="1.1" opacity="0.55"/>
+      <circle cx="132" cy="58" r="3.2" fill="none" stroke="${col.b}" stroke-width="1" opacity="0.45"/>`,
+    // 正官：台阶 / 印章 / 秩序
+    正官: `
+      ${veil(uid, col.c)}
+      <path d="M42 96 H118" stroke="${col.a}" stroke-width="1.3" opacity="0.45"/>
+      <path d="M50 84 H110" stroke="${col.a}" stroke-width="1.3" opacity="0.55"/>
+      <path d="M58 72 H102" stroke="${col.a}" stroke-width="1.3" opacity="0.65"/>
+      <rect x="68" y="38" width="24" height="28" fill="none" stroke="${col.b}" stroke-width="1.35" opacity="0.75"/>
+      <path d="M74 48 H86 M74 56 H86" stroke="${col.b}" stroke-width="0.9" opacity="0.45"/>`,
+    // 七杀：刀锋风压
+    七杀: `
+      ${veil(uid, col.c)}
+      <path d="M48 96 L80 28 L112 96 Z" fill="${col.c}" stroke="${col.a}" stroke-width="1.35" opacity="0.85"/>
+      <path d="M80 28 L80 78" stroke="${col.b}" stroke-width="1.9" opacity="0.7"/>
+      <path d="M36 52 H58 M102 52 H124" stroke="${col.b}" stroke-width="1" opacity="0.3"/>`,
+    // 正印：书卷 / 庇护
+    正印: `
+      ${veil(uid, col.c)}
+      <path d="M38 88 Q80 34 122 88" fill="none" stroke="${col.b}" stroke-width="1.6" opacity="0.65"/>
+      <circle cx="80" cy="72" r="13" fill="none" stroke="${col.a}" stroke-width="1.25" opacity="0.65"/>
+      <path d="M80 59 V48" stroke="${col.b}" stroke-width="1.2" opacity="0.5"/>`,
+    // 偏印：孤圈抽离
+    偏印: `
+      ${veil(uid, col.c)}
+      <circle cx="80" cy="56" r="20" fill="none" stroke="${col.b}" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.55"/>
+      <circle cx="80" cy="56" r="5.5" fill="${col.b}" opacity="0.28"/>
+      <path d="M40 100 Q80 80 120 100" fill="none" stroke="${col.a}" stroke-width="1.05" opacity="0.35"/>`,
+  };
+  const body =
+    scenes[name] ??
+    `${veil(uid, col.c)}<circle cx="80" cy="60" r="24" fill="none" stroke="${col.a}" stroke-width="1.3" opacity="0.5"/>`;
+  return svgWrap(body, 'bazi-art-svg bazi-art-tengod is-cover');
+}
+
+/** 结构屏缩小版（同记忆图语言） */
+export function structureArtFromLore(
+  lore:
+    | { kind: 'wuxing'; id: WuXing }
+    | StemBranchLore
+    | { kind: 'tengod'; name: string },
+): string {
+  if (lore.kind === 'wuxing') {
+    return `<div class="bazi-enc-struct-art">${wuxingArtSvg(lore.id, { uid: `st-wx-${lore.id}` })}</div>`;
+  }
+  if (lore.kind === 'tengod') {
+    return `<div class="bazi-enc-struct-art">${tengodArtSvg(lore.name, { uid: `st-tg-${lore.name}` })}</div>`;
+  }
+  return `<div class="bazi-enc-struct-art">${stemBranchArtSvg(lore, { uid: `st-gz-${lore.id}` })}</div>`;
 }
 
 export function artFrameHtml(opts: {
   lit: boolean;
+  /** SVG 或记忆封面 img HTML */
   svg: string;
   title: string;
   sub: string;
@@ -149,8 +341,9 @@ export function artFrameHtml(opts: {
   dataId: string;
 }): string {
   const { lit, svg, title, sub, badge, extraClass = '', dataId } = opts;
+  const hasCover = svg.includes('bazi-art-cover');
   return `
-    <button type="button" class="bazi-art-card ${extraClass} ${lit ? 'is-lit' : 'is-dim'}" data-codex-id="${dataId}">
+    <button type="button" class="bazi-art-card ${extraClass} ${lit ? 'is-lit' : 'is-dim'}${hasCover ? ' has-cover' : ''}" data-codex-id="${dataId}">
       <div class="bazi-art-stage">
         ${svg}
         ${lit ? '<span class="bazi-art-particles" aria-hidden="true"></span>' : '<span class="bazi-art-seal" aria-hidden="true"></span>'}

@@ -225,10 +225,10 @@ function buildSoulCombo(soulPalace: PalaceSnap): SoulCombo {
     line = `你的内核主星是【${lead}】。${leadLore?.trait ?? ''}单星坐镇时，性格主调更纯粹，也更容易把「${leadLore?.epithet ?? lead}」演到极致。`;
   } else if (lead === '紫微' && co.includes('破军')) {
     line =
-      '你的命宫是【紫微】，并且同宫有【破军】。紫微是帝王，破军是将军，这意味着你是一个极具开创精神、凡事亲力亲为的将相之才。你容易在颠覆旧事物的过程中获得巨大的成就感。';
+      '你的命宫是【紫微】同【破军】：定盘星带着敢拆敢立的锋芒——你既要主轴，又要开创。容易在颠覆旧结构、亲手重建的过程中获得巨大成就感。';
   } else if (lead === '贪狼' && co.includes('紫微')) {
     line =
-      '【紫微】与【贪狼】同宫：帝王坐镇却带着灵狐的欲望与交际——你既能定调全局，又天生会把场面玩热。注意欲与权的边界。';
+      '【紫微】与【贪狼】同宫：定盘核心带着社交引力与新鲜感——你既能定调全局，又天生会把场面玩热。注意欲与权的边界。';
   } else {
     const coNames = co.map((n) => `【${n}】`).join('、');
     const coHint = coLore

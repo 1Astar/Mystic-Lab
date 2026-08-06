@@ -52,12 +52,36 @@ const YANG_REN: Record<string, string> = {
   癸: '亥',
 };
 
-const SAN_HE_GROUPS: { members: string[]; ma: string; tao: string; hua: string; jiang: string }[] = [
-  { members: ['申', '子', '辰'], ma: '寅', tao: '酉', hua: '辰', jiang: '子' },
-  { members: ['寅', '午', '戌'], ma: '申', tao: '卯', hua: '戌', jiang: '午' },
-  { members: ['巳', '酉', '丑'], ma: '亥', tao: '午', hua: '丑', jiang: '酉' },
-  { members: ['亥', '卯', '未'], ma: '巳', tao: '子', hua: '未', jiang: '卯' },
+const SAN_HE_GROUPS: {
+  members: string[];
+  ma: string;
+  tao: string;
+  hua: string;
+  jiang: string;
+  /** 劫煞：三合局之对冲位 */
+  jie: string;
+}[] = [
+  { members: ['申', '子', '辰'], ma: '寅', tao: '酉', hua: '辰', jiang: '子', jie: '巳' },
+  { members: ['寅', '午', '戌'], ma: '申', tao: '卯', hua: '戌', jiang: '午', jie: '亥' },
+  { members: ['巳', '酉', '丑'], ma: '亥', tao: '午', hua: '丑', jiang: '酉', jie: '寅' },
+  { members: ['亥', '卯', '未'], ma: '巳', tao: '子', hua: '未', jiang: '卯', jie: '申' },
 ];
+
+/** 以年支起孤辰 / 寡宿；图鉴合并为「孤辰寡宿」 */
+const GU_CHEN_GUA_SU: Record<string, { gu: string; gua: string }> = {
+  寅: { gu: '巳', gua: '丑' },
+  卯: { gu: '巳', gua: '丑' },
+  辰: { gu: '巳', gua: '丑' },
+  巳: { gu: '申', gua: '辰' },
+  午: { gu: '申', gua: '辰' },
+  未: { gu: '申', gua: '辰' },
+  申: { gu: '亥', gua: '未' },
+  酉: { gu: '亥', gua: '未' },
+  戌: { gu: '亥', gua: '未' },
+  亥: { gu: '寅', gua: '戌' },
+  子: { gu: '寅', gua: '戌' },
+  丑: { gu: '寅', gua: '戌' },
+};
 
 const HONG_LUAN: Record<string, string> = {
   子: '卯',
@@ -119,8 +143,19 @@ export function shenshaForBranch(opts: {
     if (g.jiang === branch) out.push('将星');
   }
 
+  // 劫煞：传统多用年支三合起；日支同表作补充（与驿马等一致）
+  for (const base of [yearBranch, dayBranch]) {
+    const g = sanHeOf(base);
+    if (g && g.jie === branch) out.push('劫煞');
+  }
+
   if (HONG_LUAN[yearBranch] === branch) out.push('红鸾');
   if (TIAN_XI[yearBranch] === branch) out.push('天喜');
+
+  const guPair = GU_CHEN_GUA_SU[yearBranch];
+  if (guPair && (guPair.gu === branch || guPair.gua === branch)) {
+    out.push('孤辰寡宿');
+  }
 
   return [...new Set(out)];
 }
@@ -150,8 +185,12 @@ export function shenshaHintsForBranch(branch: string): string[] {
     if (g.tao === branch) out.add('桃花');
     if (g.hua === branch) out.add('华盖');
     if (g.jiang === branch) out.add('将星');
+    if (g.jie === branch) out.add('劫煞');
   }
   if (Object.values(HONG_LUAN).includes(branch)) out.add('红鸾');
   if (Object.values(TIAN_XI).includes(branch)) out.add('天喜');
+  for (const pair of Object.values(GU_CHEN_GUA_SU)) {
+    if (pair.gu === branch || pair.gua === branch) out.add('孤辰寡宿');
+  }
   return [...out];
 }
