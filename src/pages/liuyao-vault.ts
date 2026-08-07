@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import {
   HEXAGRAMS,
   linesFromHexagram,
@@ -66,7 +66,7 @@ function renderMiniYao(lines: number[]): string {
   `;
 }
 
-/** 我的卦库：概览 · 旅程 · 内嵌 64 卦（对标塔罗图鉴） */
+/** 我的卦库：概览 · 旅程 · 内嵌 64 卦（对标塔罗探索） */
 export function renderLiuyaoVault(root: HTMLElement): () => void {
   const snap = buildVaultOverview();
   const journey = getLiuyaoJourneyInsights(30);
@@ -240,10 +240,10 @@ export function renderLiuyaoVault(root: HTMLElement): () => void {
         filter === 'favorite'
           ? '还没有收藏。点开一卦，右上角 ☆ 可收藏。'
           : filter === 'met'
-            ? '还没有遇见的卦。去起一卦，图鉴会开始点亮。'
+            ? '还没有遇见的卦。去起一卦，探索会开始点亮。'
             : query || palace !== 'all'
               ? '没有匹配的卦，换个宫或关键词试试。'
-              : '图鉴空空如也。';
+              : '探索空空如也。';
       gridHost.innerHTML = `<div class="ly-vault-empty"><p>${escapeHtml(empty)}</p></div>`;
       return;
     }

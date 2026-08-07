@@ -1,4 +1,4 @@
-import {
+﻿import {
   formatClockTime,
   getChineseHour,
   sectorPointerAngle,
@@ -70,9 +70,9 @@ export function renderXiaoliurenHero(): string {
 
       ${renderXlrDivider('xlr-home-divider')}
 
-      <section class="xlr-home-gods xlr-home-panel xlr-stagger-item" style="--si:3" aria-label="六神图鉴">
-        <p class="xlr-home-panel-label">六神图鉴</p>
-        <p class="xlr-home-gods-hint">点下方「六神图鉴」看完整象征与用法</p>
+      <section class="xlr-home-gods xlr-home-panel xlr-stagger-item" style="--si:3" aria-label="六神探索">
+        <p class="xlr-home-panel-label">六神探索</p>
+        <p class="xlr-home-gods-hint">点下方「六神探索」看完整象征与用法</p>
         <div class="xlr-home-gods-row">
           ${SIX_GODS.map(
             (g, i) => `

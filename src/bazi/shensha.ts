@@ -67,7 +67,7 @@ const SAN_HE_GROUPS: {
   { members: ['亥', '卯', '未'], ma: '巳', tao: '子', hua: '未', jiang: '卯', jie: '申' },
 ];
 
-/** 以年支起孤辰 / 寡宿；图鉴合并为「孤辰寡宿」 */
+/** 以年支起孤辰 / 寡宿；探索合并为「孤辰寡宿」 */
 const GU_CHEN_GUA_SU: Record<string, { gu: string; gua: string }> = {
   寅: { gu: '巳', gua: '丑' },
   卯: { gu: '巳', gua: '丑' },
@@ -160,7 +160,7 @@ export function shenshaForBranch(opts: {
   return [...new Set(out)];
 }
 
-/** 某天干作日干时，常见神煞落点提示（静态图鉴用） */
+/** 某天干作日干时，常见神煞落点提示（静态探索用） */
 export function shenshaHintsForStem(stem: string): string[] {
   if (!stem || !TIAN_YI[stem]) return [];
   const out: string[] = ['天乙贵人'];
@@ -170,7 +170,7 @@ export function shenshaHintsForStem(stem: string): string[] {
   return out;
 }
 
-/** 某地支可能承载的神煞名（静态图鉴用，不依赖具体日干） */
+/** 某地支可能承载的神煞名（静态探索用，不依赖具体日干） */
 export function shenshaHintsForBranch(branch: string): string[] {
   if (!branch || branch === '—') return [];
   const out = new Set<string>();

@@ -31,18 +31,18 @@ describe('codex structure map', () => {
     expect(html).toContain('is-role');
   });
 
-  it('detail structure pane uses structure map not memory art reuse', () => {
+  it('detail express pane uses structure map not memory art reuse', () => {
     const html = renderBaziCodexDetailHtml('甲', {
       artHtml: '<svg class="memory-only"></svg>',
       lit: true,
     });
     expect(html).toContain('data-structure-map');
     expect(html).toContain('认知示意');
-    const structurePane = html.match(
-      /data-enc-pane="structure"[\s\S]*?(?=data-enc-pane="dimension")/,
+    const expressPane = html.match(
+      /data-enc-pane="express"[\s\S]*?(?=data-enc-pane="relation")/,
     )?.[0];
-    expect(structurePane).toBeTruthy();
-    expect(structurePane).toContain('data-structure-map');
-    expect(structurePane).not.toContain('memory-only');
+    expect(expressPane).toBeTruthy();
+    expect(expressPane).toContain('data-structure-map');
+    expect(expressPane).not.toContain('memory-only');
   });
 });

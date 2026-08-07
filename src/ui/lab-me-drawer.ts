@@ -6,6 +6,7 @@ import {
 } from '../life/storage.ts';
 import { PERSON_RELATION_LABELS, type PersonProfile } from '../life/types.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
+import { getTheme, setTheme, type LabTheme } from '../theme/theme.ts';
 import type { PersonSwitcherOptions } from './person-switcher.ts';
 
 function escapeHtml(s: string): string {
@@ -73,6 +74,7 @@ export function openLabMeDrawer(
 
   const active = getActivePerson();
   const people = listPersons();
+  const theme = getTheme();
 
   const drawer = document.createElement('div');
   drawer.className = 'lab-me-drawer';
@@ -85,7 +87,13 @@ export function openLabMeDrawer(
           <p class="lab-me-drawer-kicker">MYSTIC LAB</p>
           <h3>我</h3>
         </div>
-        <button type="button" class="lab-me-drawer-x" data-close aria-label="关闭">×</button>
+        <div class="lab-me-drawer-actions">
+          <div class="lab-theme-switch" role="group" aria-label="主题">
+            <button type="button" class="lab-theme-chip${theme === 'star' ? ' is-on' : ''}" data-theme-pick="star">星夜</button>
+            <button type="button" class="lab-theme-chip${theme === 'moon' ? ' is-on' : ''}" data-theme-pick="moon">月白</button>
+          </div>
+          <button type="button" class="lab-me-drawer-x" data-close aria-label="关闭">×</button>
+        </div>
       </header>
 
       <section class="lab-me-section" aria-label="选择角色">
@@ -134,6 +142,17 @@ export function openLabMeDrawer(
 
   drawer.querySelectorAll('[data-close]').forEach((el) => {
     el.addEventListener('click', finishClose);
+  });
+
+  drawer.querySelectorAll<HTMLButtonElement>('[data-theme-pick]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const pick = btn.dataset.themePick as LabTheme | undefined;
+      if (pick !== 'star' && pick !== 'moon') return;
+      setTheme(pick);
+      drawer.querySelectorAll<HTMLButtonElement>('[data-theme-pick]').forEach((b) => {
+        b.classList.toggle('is-on', b.dataset.themePick === pick);
+      });
+    });
   });
 
   drawer.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((btn) => {

@@ -1,4 +1,4 @@
-import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
+﻿import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 import { getCollectedCount } from '../codex/collection.ts';
 import {
   listTarotDueForReview,
@@ -33,7 +33,7 @@ export function renderTarotHome(root: HTMLElement): () => void {
       },
       {
         path: '/tarot/tujian',
-        title: '随心图鉴',
+        title: '随心探索',
         desc: '78 张牌 / 愚人之旅 / 牌组×数字',
         stat: () => `${getCollectedCount()} 张已收集`,
       },

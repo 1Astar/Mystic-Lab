@@ -55,8 +55,14 @@ function multiRow(members: string[], kind: string, note: string): string {
     </div>`;
 }
 
-/** 首页「生克图」Tab（含相生相克与合冲刑害） */
-export function renderRelationsAtlasHtml(): string {
+/** 首页「生克图」：合冲刑害；五行生克默认由 SVG 承担 */
+export function renderRelationsAtlasHtml(opts?: {
+  skipWuxingPairs?: boolean;
+  /** 地支环图已展示时，折叠区只留天干五合等 */
+  skipBranchPairLists?: boolean;
+}): string {
+  const skipWx = opts?.skipWuxingPairs !== false;
+  const skipBranch = opts?.skipBranchPairLists === true;
   const shengRows = WUXING_ORDER.map(
     (wx) =>
       pairRow(wx, SHENG_OF[wx], '生', `${wx}生${SHENG_OF[wx]}`, wx, SHENG_OF[wx]),
@@ -85,8 +91,9 @@ export function renderRelationsAtlasHtml(): string {
     multiRow(g.members, '三合', `${g.members.join('')}三合${g.result}`),
   ).join('');
 
-  return `
-    <p class="bazi-codex-hint">生克图 · 相生相克与合冲刑害 · 点节点跳进百科</p>
+  const wxSecs = skipWx
+    ? ''
+    : `
     <section class="bazi-gz-section bazi-rel-atlas-sec">
       <h2 class="bazi-codex-section-title">五行 · 相生</h2>
       <div class="bazi-rel-pair-list">${shengRows}</div>
@@ -94,7 +101,11 @@ export function renderRelationsAtlasHtml(): string {
     <section class="bazi-gz-section bazi-rel-atlas-sec">
       <h2 class="bazi-codex-section-title">五行 · 相克</h2>
       <div class="bazi-rel-pair-list">${keRows}</div>
-    </section>
+    </section>`;
+
+  const branchSecs = skipBranch
+    ? ''
+    : `
     <section class="bazi-gz-section bazi-rel-atlas-sec">
       <h2 class="bazi-codex-section-title">地支 · 六冲</h2>
       <div class="bazi-rel-pair-list">${chongRows}</div>
@@ -114,9 +125,18 @@ export function renderRelationsAtlasHtml(): string {
     <section class="bazi-gz-section bazi-rel-atlas-sec">
       <h2 class="bazi-codex-section-title">地支 · 三合</h2>
       <div class="bazi-rel-pair-list">${sanHeRows}</div>
-    </section>
+    </section>`;
+
+  return `
+    ${wxSecs}
+    ${branchSecs}
     <section class="bazi-gz-section bazi-rel-atlas-sec">
       <h2 class="bazi-codex-section-title">天干 · 五合</h2>
+      <p class="bazi-rel-atlas-lead">
+        <strong>五合</strong>是<strong>十天干</strong>的配对（不是地支）。
+        甲己、乙庚、丙辛、丁壬、戊癸各合化一气，常用来看关系黏合、性格调和。
+        与上方「地支六合」不是同一张表。
+      </p>
       <div class="bazi-rel-pair-list">${ganHeRows}</div>
     </section>`;
 }

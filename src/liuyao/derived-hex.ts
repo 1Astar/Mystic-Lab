@@ -84,7 +84,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 图鉴／笔记：互 · 错 · 综对照条（名词可点开释义） */
+/** 探索／笔记：互 · 错 · 综对照条（名词可点开释义） */
 export function renderDerivedHexSectionHtml(
   hex: Hexagram,
   opts?: { linkToGuide?: boolean },
@@ -94,7 +94,7 @@ export function renderDerivedHexSectionHtml(
 
   return `
     <section class="ly-derived" data-derived-hex data-hex="${escapeHtml(hex.name)}">
-      <p class="ly-guide-tip">本卦静态结构外的三种常见对照。点名词看释义；点卦名可进图鉴卡。</p>
+      <p class="ly-guide-tip">本卦静态结构外的三种常见对照。点名词看释义；点卦名可进探索卡。</p>
       <ul class="ly-derived-list">
         ${rows
           .map((d) => {

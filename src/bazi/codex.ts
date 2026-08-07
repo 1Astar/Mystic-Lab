@@ -5,13 +5,29 @@ import {
   WUXING_ORDER,
   type WuxingLore,
 } from './codex-lore.ts';
-import { metTagIdsFromChart, starCardIdsFromChart, ALL_STAR_CARDS, getStarCard } from './codex-tags.ts';
+import {
+  metTagIdsFromChart,
+  starCardIdsFromChart,
+  ALL_STAR_CARDS,
+  getStarCard,
+  shenshaCardId,
+} from './codex-tags.ts';
+import { SHENSHA_FEATURED } from './codex-shensha-tiers.ts';
 import type { WuXing } from './elements.ts';
 import { buildEnergyBalance } from './sense-energy.ts';
 
 const STORAGE_KEY = 'mystic-lab-bazi-codex';
 
-export type BaziCodexKind = 'wuxing' | 'stem' | 'branch' | 'shensha' | 'tengod';
+export type BaziCodexKind =
+  | 'wuxing'
+  | 'stem'
+  | 'branch'
+  | 'shensha'
+  | 'tengod'
+  | 'nayin'
+  | 'jiazi'
+  | 'relation'
+  | 'luck';
 
 export type BaziCodexEntry = {
   id: string;
@@ -205,7 +221,14 @@ export function baziCodexProgress(
       total: ALL_STEM_BRANCH.length,
     };
   }
-  if (kind === 'shensha' || kind === 'tengod') {
+  if (kind === 'shensha') {
+    const pool = SHENSHA_FEATURED.map((n) => shenshaCardId(n));
+    return {
+      collected: pool.filter((id) => unlocked.has(id)).length,
+      total: pool.length,
+    };
+  }
+  if (kind === 'tengod') {
     const pool = ALL_STAR_CARDS.filter((c) => c.kind === kind);
     return {
       collected: pool.filter((c) => unlocked.has(c.id)).length,

@@ -14,7 +14,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 「我的相遇」面板 HTML（图鉴笔记 / 右侧抽屉共用） */
+/** 「我的相遇」面板 HTML（探索笔记 / 右侧抽屉共用） */
 export function renderHexEncounterPanelHtml(hex: Hexagram, sediment = ''): string {
   const stat = getHexMeetStat(hex.name);
   const list = encountersForHex(hex.name);

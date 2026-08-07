@@ -182,9 +182,12 @@ function formatDt(d: Date): string {
 export function castBaziChart(
   profile: LifeProfileInput,
   liunianYear: number,
-  opts?: { includeLiunian?: boolean },
+  opts?: { includeLiunian?: boolean; gender?: '' | 'female' | 'male' },
 ): BaziChart | { error: string } {
   const includeLiunian = opts?.includeLiunian !== false;
+  const gender = opts?.gender ?? '';
+  const dayGodLabel =
+    gender === 'female' ? '女主' : gender === 'male' ? '男主' : '日主';
   const parts = parseBirthParts(
     profile.birthYear,
     profile.birthMonth,
@@ -268,7 +271,7 @@ export function castBaziChart(
       {
         key: 'day',
         title: '日柱',
-        stemGod: '日主',
+        stemGod: dayGodLabel,
         stem: d.stem,
         branch: d.branch,
         hideGan: [...ec.getDayHideGan()],

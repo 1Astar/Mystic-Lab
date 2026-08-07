@@ -1,5 +1,5 @@
 /**
- * 八字图鉴 · 记忆封面 Prompt 库
+ * 八字探索 · 记忆封面 Prompt 库
  * 风格：宇宙档案 / 神秘知识卡 / 象征记忆图
  */
 
@@ -70,11 +70,13 @@ Suitable visuals: archetypal role presence, strong identification ("this is a fa
 May use distant silhouette or implied figure without face close-up.
 Avoid: empty landscape only, pure badge emblems, pure material still-life.`,
 
-  shensha: `Category: Star / Shen Sha (星煞).
-Keywords: tag, added temperament, destiny footnote.
-Suitable visuals: badge, star sigil, amulet, small emblematic talisman card.
-Composition: compact centered emblem, like a collectible seal — not a wide landscape.
-Avoid: large scenic vistas, character drama, material-only abstracts.`,
+  shensha: `Category: Star / Shen Sha (星煞) — FEATURED BADGE only.
+Keywords: tag, destiny footnote, amulet.
+CRITICAL composition: a SINGLE small round badge / talisman floating in the CENTER.
+The emblem must occupy ONLY about 25–35% of the frame height.
+MOST of the canvas is empty deep indigo void with faint dust light — generous negative space.
+Looks like a collectible seal sticker on a dark card, NOT a landscape, NOT a large relic filling the frame.
+Avoid: mountains, rivers, wide scenery, oversized lanterns/objects, character drama.`,
 };
 
 /** 拼出可直接投模型的完整 prompt */
@@ -256,20 +258,20 @@ export const TENGOD_COVER_PROMPTS: CodexCoverPrompt[] = [
   { id: 'tg:劫财', kind: 'tengod', title: '劫财', slug: 'jiecai', accent: 'split gold', mood: 'sharing, rivalry, exchange — the contested self', metaphor: 'archetype of contested sharing / split paths', subject: 'Archetypal contested exchange: implied figures or presence where treasure-light splits into two paths. Feels like “my rivalrous / sharing face.” Relational tension of divide.', assetReady: true },
 ];
 
-/** 星煞：标签 / 附加气质 / 命运注脚 · 徽章护符小象征卡 */
+/** 星煞精品：真·小徽章（大留白）；劫煞为因子档，不占精品图 */
 export const SHENSHA_COVER_PROMPTS: CodexCoverPrompt[] = [
-  { id: 'ss:天乙贵人', kind: 'shensha', title: '天乙贵人', slug: 'tianyi', accent: 'warm lamp gold', mood: 'help in darkness — a protective footnote', metaphor: 'amulet-badge: ancient lantern seal of aid', subject: 'Compact amulet card: a small ancient copper lantern as a glowing talisman-badge centered on dark indigo, soft star-sigil rim. Destiny footnote of help — not a landscape.', assetReady: true },
-  { id: 'ss:文昌', kind: 'shensha', title: '文昌', slug: 'wenchang', accent: 'ink gold', mood: 'study, wit — scholarly tag', metaphor: 'amulet-badge: scroll-and-arrow seal of insight', subject: 'Compact emblem: dark-gold mini scroll crossed by a bronze insight arrow, framed like a scholarly seal-badge on midnight field. Tag of wit — small, iconic.', assetReady: true },
-  { id: 'ss:禄神', kind: 'shensha', title: '禄神', slug: 'lushen', accent: 'rice gold', mood: 'foundation, livelihood — basic-disk tag', metaphor: 'amulet-badge: grain vessel seal of livelihood', subject: 'Compact talisman: a small glowing grain vessel as livelihood badge, centered, soft gold rim on indigo. Footnote of foundation — emblematic, not scenic.', assetReady: true },
-  { id: 'ss:将星', kind: 'shensha', title: '将星', slug: 'jiangxing', accent: 'command gold', mood: 'leadership, backbone — command tag', metaphor: 'amulet-badge: command crest / star seal', subject: 'Compact command crest badge of light — star-sigil leadership seal centered. Destiny tag of backbone — heraldic miniature, not a fortress scene.', assetReady: true },
-  { id: 'ss:红鸾', kind: 'shensha', title: '红鸾', slug: 'hongluan', accent: 'soft rose gold', mood: 'joyful bond beginning — celebration tag', metaphor: 'amulet-badge: rose-gold bird seal of celebration', subject: 'Compact seal-badge: soft rose-gold bird emblem in a round amulet frame. Joyful affinity tag — small symbolic card.', assetReady: true },
-  { id: 'ss:天喜', kind: 'shensha', title: '天喜', slug: 'tianxi', accent: 'warm festive gold', mood: 'delight, atmosphere — festive tag', metaphor: 'amulet-badge: festive bloom seal', subject: 'Compact festive bloom seal as a warm gold amulet-badge. Delight footnote — emblem only, minimal field.', assetReady: true },
-  { id: 'ss:桃花', kind: 'shensha', title: '桃花', slug: 'taohua', accent: 'petal rose gold', mood: 'charm, affinity — attraction tag', metaphor: 'amulet-badge: bronze mirror with peach-blossom seal', subject: 'Compact charm badge: tiny bronze mirror with soft peach-blossom light as a round amulet. Attraction tag — not a garden vista.', assetReady: true },
-  { id: 'ss:羊刃', kind: 'shensha', title: '羊刃', slug: 'yangren', accent: 'cold blade silver', mood: 'fierce edge — burst tag', metaphor: 'amulet-badge: sheathed blade seal', subject: 'Compact blade-seal badge: a short blade leaving a miniature sheath, cold silver emblem on indigo. Fierce footnote — talisman scale.', assetReady: true },
-  { id: 'ss:华盖', kind: 'shensha', title: '华盖', slug: 'huagai', accent: 'violet silver', mood: 'solitude, spirit — canopy tag', metaphor: 'amulet-badge: spiritual canopy seal', subject: 'Compact canopy emblem: elegant spiritual parasol/canopy as a violet-silver seal-badge over quiet star mist. Solitude tag — small, iconic.', assetReady: true },
-  { id: 'ss:孤辰寡宿', kind: 'shensha', title: '孤辰寡宿', slug: 'guchen', accent: 'cold mist silver', mood: 'aloneness — introspection tag', metaphor: 'amulet-badge: lone stone on empty board seal', subject: 'Compact seal: a single stone on a tiny empty board inside an amulet frame, cold mist silver. Loneliness footnote — emblematic, not a wide boardroom scene.', assetReady: true },
-  { id: 'ss:驿马', kind: 'shensha', title: '驿马', slug: 'yima', accent: 'wind silver', mood: 'travel, change of place — motion tag', metaphor: 'amulet-badge: wind trail and hoofprint seal', subject: 'Compact travel seal: silver wind trails and a luminous hoofprint as a round motion-badge. Departure tag — not a full road landscape.', assetReady: true },
-  { id: 'ss:劫煞', kind: 'shensha', title: '劫煞', slug: 'jiesha', accent: 'storm iron', mood: 'sudden rupture — warning tag', metaphor: 'amulet-badge: broken balance seal in rain', subject: 'Compact warning badge: broken balance scales as a small iron seal under a hint of rain light. Sudden-rupture footnote — talisman, not a storm panorama.', assetReady: true },
+  { id: 'ss:天乙贵人', kind: 'shensha', title: '天乙贵人', slug: 'tianyi', accent: 'warm lamp gold', mood: 'protective help footnote', metaphor: 'tiny lantern amulet badge', subject: 'A tiny ancient copper lantern as a ROUND amulet badge only 30% of frame height, centered in vast empty midnight indigo. Soft gold glow inside the small lantern. No mountains, no river, no landscape.', assetReady: true },
+  { id: 'ss:文昌', kind: 'shensha', title: '文昌', slug: 'wenchang', accent: 'ink gold', mood: 'scholarly wit footnote', metaphor: 'tiny scroll-and-arrow seal', subject: 'A tiny dark-gold mini scroll crossed by a small bronze arrow, as a round scholarly seal-badge ~30% of frame, centered in empty indigo void. No desk scene, no landscape.', assetReady: true },
+  { id: 'ss:禄神', kind: 'shensha', title: '禄神', slug: 'lushen', accent: 'rice gold', mood: 'livelihood foundation footnote', metaphor: 'tiny grain-vessel badge', subject: 'A tiny glowing grain vessel as a round livelihood badge ~30% of frame height, centered in vast empty indigo. Soft gold rim only. No fields, no landscape.', assetReady: true },
+  { id: 'ss:将星', kind: 'shensha', title: '将星', slug: 'jiangxing', accent: 'command gold', mood: 'backbone command footnote', metaphor: 'tiny command crest badge', subject: 'A tiny command crest / star seal as a heraldic round badge ~30% of frame, centered in empty midnight void. No fortress, no army.', assetReady: true },
+  { id: 'ss:红鸾', kind: 'shensha', title: '红鸾', slug: 'hongluan', accent: 'soft rose gold', mood: 'joyful bond footnote', metaphor: 'tiny rose-gold bird seal', subject: 'A tiny rose-gold bird emblem inside a small round amulet frame ~30% of frame, centered in empty indigo. No garden vista.', assetReady: true },
+  { id: 'ss:天喜', kind: 'shensha', title: '天喜', slug: 'tianxi', accent: 'warm festive gold', mood: 'delight footnote', metaphor: 'tiny festive bloom seal', subject: 'A tiny festive bloom seal as a warm gold round badge ~30% of frame, centered in empty cosmic dark. Emblem only.', assetReady: true },
+  { id: 'ss:桃花', kind: 'shensha', title: '桃花', slug: 'taohua', accent: 'petal rose gold', mood: 'charm affinity footnote', metaphor: 'tiny mirror-and-blossom badge', subject: 'A tiny bronze mirror with a soft peach-blossom mark as a round charm badge ~30% of frame, centered in empty indigo. No garden.', assetReady: true },
+  { id: 'ss:羊刃', kind: 'shensha', title: '羊刃', slug: 'yangren', accent: 'cold blade silver', mood: 'fierce edge footnote', metaphor: 'tiny blade-seal badge', subject: 'A tiny short blade leaving a miniature sheath as a cold silver round seal ~30% of frame, centered in empty indigo. No stone platform landscape.', assetReady: true },
+  { id: 'ss:华盖', kind: 'shensha', title: '华盖', slug: 'huagai', accent: 'violet silver', mood: 'solitude spirit footnote', metaphor: 'tiny canopy parasol seal', subject: 'A tiny elegant spiritual canopy/parasol as a violet-silver round badge ~30% of frame, centered in empty star-dust void. No wide mist scenery.', assetReady: true },
+  { id: 'ss:孤辰寡宿', kind: 'shensha', title: '孤辰寡宿', slug: 'guchen', accent: 'cold mist silver', mood: 'aloneness footnote', metaphor: 'tiny lone-stone board seal', subject: 'A tiny single stone on a miniature empty board inside a small round amulet ~30% of frame, centered in empty cold indigo. Not a wide boardroom.', assetReady: true },
+  { id: 'ss:驿马', kind: 'shensha', title: '驿马', slug: 'yima', accent: 'wind silver', mood: 'travel motion footnote', metaphor: 'tiny hoofprint wind seal', subject: 'A tiny luminous hoofprint with silver wind trails as a round motion badge ~30% of frame, centered in empty indigo. No road landscape.', assetReady: true },
+  { id: 'ss:劫煞', kind: 'shensha', title: '劫煞', slug: 'jiesha', accent: 'storm iron', mood: 'warning factor tag', metaphor: 'text-factor only', subject: 'Not used for featured badge art.', assetReady: false },
 ];
 
 export const ALL_COVER_PROMPTS: CodexCoverPrompt[] = [

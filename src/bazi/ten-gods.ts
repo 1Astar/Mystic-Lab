@@ -12,7 +12,7 @@ const CATEGORY_MAP: Array<{ cat: TenGodCategory; labels: string[] }> = [
 
 export function categorizeTenGod(label: string): TenGodCategory | null {
   const t = label.trim();
-  if (!t || t === '日主' || t === '—') return null;
+  if (!t || t === '日主' || t === '女主' || t === '男主' || t === '—') return null;
   for (const row of CATEGORY_MAP) {
     if (row.labels.includes(t)) return row.cat;
   }
@@ -26,11 +26,11 @@ export function collectTenGodLabels(chart: BaziChart): string[] {
     if (p.empty || p.key === 'liunian') continue;
     if (p.key !== 'day') {
       const g = p.stemGod.trim();
-      if (g && g !== '日主' && g !== '—') out.push(g);
+      if (g && g !== '日主' && g !== '女主' && g !== '男主' && g !== '—') out.push(g);
     } else {
       for (const hg of p.hideGods) {
         const g = hg.trim();
-        if (g && g !== '日主' && g !== '—') out.push(g);
+        if (g && g !== '日主' && g !== '女主' && g !== '男主' && g !== '—') out.push(g);
       }
     }
   }

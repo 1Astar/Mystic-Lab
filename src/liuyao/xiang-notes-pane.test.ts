@@ -39,8 +39,8 @@ describe('xiang-notes-pane', () => {
     expect(html).toMatch(/data-gua-side="changed"/);
     expect(html).toMatch(new RegExp(`本卦 · ${cast.primary.name}`));
     expect(html).toMatch(new RegExp(`变卦 · ${cast.changed!.name}`));
-    expect(html).toMatch(new RegExp(`图鉴 · ${cast.primary.fullName}`));
-    expect(html).toMatch(new RegExp(`图鉴 · ${cast.changed!.fullName}`));
+    expect(html).toMatch(new RegExp(`探索 · ${cast.primary.fullName}`));
+    expect(html).toMatch(new RegExp(`探索 · ${cast.changed!.fullName}`));
   });
 
   it('分域也有本卦 / 变卦切换与完整变卦分域', () => {

@@ -33,6 +33,42 @@
   margin-bottom: 8px;
 }
 
+/* 体系顶栏下的模式切换：解读 / 盘面 */
+.lab-sys-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.lab-sys-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background: transparent;
+  color: rgba(255, 230, 200, 0.62);
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.lab-sys-tab.is-on {
+  color: #1a1220;
+  background: linear-gradient(120deg, #e0c48a, #c9a8e4);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.lab-sys-tab:hover:not(.is-on),
+.lab-sys-tab:focus-visible:not(.is-on) {
+  border-color: rgba(255, 214, 166, 0.45);
+  color: rgba(255, 240, 220, 0.9);
+  outline: none;
+}
+
 .life-ai-hint {
   margin: 8px 0 0;
   font-size: 0.78rem;
@@ -523,31 +559,33 @@
 }
 
 .life-card {
-  margin-top: 18px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
-  background:
-    linear-gradient(160deg, rgba(40, 28, 64, 0.55), rgba(12, 10, 24, 0.72));
+  margin-top: 28px;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--line-soft, var(--line));
+  padding-top: 28px;
+  background: transparent;
 }
 
 .life-card-kicker {
   margin: 0 0 6px;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
-  color: #ffd6a6;
+  color: var(--gold);
 }
 
 .life-card h2,
 .life-card h3 {
   margin: 0 0 8px;
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
+  color: var(--gold);
 }
 
 .life-card-body {
   margin: 0 0 12px;
-  line-height: 1.6;
-  color: rgba(255, 245, 230, 0.9);
+  line-height: 1.65;
+  color: var(--ink);
 }
 
 .life-chip-row {

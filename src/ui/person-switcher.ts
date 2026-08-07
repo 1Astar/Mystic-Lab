@@ -126,7 +126,7 @@ function paintTrigger(host: HTMLElement): void {
     btn.title = person.nickname;
     return;
   }
-  btn.textContent = `${person.nickname} ▾`;
+  btn.innerHTML = `<span class="person-switch-name">${escapeHtml(person.nickname)}</span><span class="person-switch-caret" aria-hidden="true">▾</span>`;
   btn.setAttribute('aria-label', `当前所问对象：${person.nickname}，点击切换`);
 }
 

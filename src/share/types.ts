@@ -24,7 +24,7 @@ export type ShareVisual =
       changingIndexes?: number[];
       shiLine?: number;
       yingLine?: number;
-      /** 图鉴氛围图 URL（可为 data URL） */
+      /** 探索氛围图 URL（可为 data URL） */
       primaryArtSrc?: string;
       changedArtSrc?: string;
     }

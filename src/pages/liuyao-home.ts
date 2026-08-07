@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { preloadLiuyaoCoins, preloadLiuyaoHero } from '../liuyao/assets.ts';
 import { loadLiuyaoJournal } from '../liuyao/journal.ts';
 import {
@@ -71,7 +71,7 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
           </button>
           <button type="button" class="ly-home-action is-ghost" data-path="/liuyao/vault">
             <span class="ly-home-action-title">我的卦库</span>
-            <span class="ly-home-action-sub">收集进度 · 六爻旅程 · 64卦图鉴</span>
+            <span class="ly-home-action-sub">收集进度 · 六爻旅程 · 64卦探索</span>
           </button>
           <button type="button" class="ly-home-action is-ghost" data-path="/liuyao/journal">
             <span class="ly-home-action-title">我的卦象${

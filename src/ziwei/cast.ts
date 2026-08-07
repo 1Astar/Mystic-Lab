@@ -35,7 +35,11 @@ function palaceSnap(p: {
   minorStars: Array<{ name: string; brightness?: string; mutagen?: string; type?: string }>;
   adjectiveStars?: Array<{ name: string; brightness?: string; mutagen?: string; type?: string }>;
   isEmpty?: () => boolean;
-  decadal?: { range?: [number, number] };
+  decadal?: {
+    range?: [number, number];
+    heavenlyStem?: string;
+    earthlyBranch?: string;
+  };
 }): PalaceSnap {
   const majors = (p.majorStars ?? []).map(starSnap);
   const minors = (p.minorStars ?? []).map(starSnap);
@@ -55,6 +59,10 @@ function palaceSnap(p: {
     adjectives,
     decadalRange:
       range && range.length === 2 ? [Number(range[0]), Number(range[1])] : undefined,
+    decadalStem: p.decadal?.heavenlyStem ? String(p.decadal.heavenlyStem) : undefined,
+    decadalBranch: p.decadal?.earthlyBranch
+      ? String(p.decadal.earthlyBranch)
+      : undefined,
   };
 }
 

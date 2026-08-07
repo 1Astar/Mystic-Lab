@@ -1,13 +1,13 @@
-/* 紫微 · 星系档案：深紫黑 / 夜蓝 / 暗金 */
+/* 紫微 · 叙事阅读：留白 / 字阶 / 竖线，少卡片 */
 
 .ziwei-page {
-  --zw-gold: #c9a84c;
-  --zw-violet: #7a8fd4;
-  --zw-ink: rgba(228, 232, 248, 0.94);
-  --zw-muted: rgba(176, 188, 220, 0.74);
-  --zw-panel: rgba(10, 14, 36, 0.78);
-  --zw-line: rgba(122, 143, 212, 0.28);
-  --zw-nebula: rgba(40, 48, 96, 0.45);
+  --zw-gold: var(--gold);
+  --zw-violet: var(--purple);
+  --zw-ink: var(--ink);
+  --zw-muted: var(--ink-muted);
+  --zw-panel: transparent;
+  --zw-line: var(--line);
+  --zw-nebula: transparent;
   color: var(--zw-ink);
   padding-bottom: 48px;
 }
@@ -35,13 +35,28 @@
 .ziwei-archive,
 .ziwei-headline,
 .ziwei-pillars,
-.ziwei-annual {
-  margin: 20px 0;
-  padding: 16px 16px 18px;
-  border: 1px solid var(--zw-line);
-  border-radius: 16px;
-  background: var(--zw-panel);
-  backdrop-filter: blur(8px);
+.ziwei-annual,
+.ziwei-combo,
+.ziwei-codex-cta,
+.ziwei-forecast,
+.ziwei-decade {
+  margin: 32px 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.ziwei-intent + .ziwei-archive,
+.ziwei-decade + .ziwei-combo,
+.ziwei-combo + .ziwei-headline,
+.ziwei-headline + .ziwei-pillars,
+.ziwei-pillars + .ziwei-annual,
+.ziwei-annual + .ziwei-forecast {
+  border-top: 1px solid var(--line-soft, var(--zw-line));
+  padding-top: 32px;
 }
 
 .ziwei-intent-row {
@@ -57,19 +72,22 @@
 
 .ziwei-intent-card {
   text-align: left;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(212, 181, 106, 0.2);
-  background: rgba(8, 6, 20, 0.55);
+  padding: 12px 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--zw-line);
+  background: transparent;
   color: inherit;
   cursor: pointer;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  min-height: 44px;
+  transition: color 0.2s ease;
 }
 
 .ziwei-intent-card strong {
   display: block;
   margin-bottom: 4px;
   font-size: 1rem;
+  color: var(--zw-gold);
 }
 
 .ziwei-intent-card span {
@@ -79,9 +97,9 @@
 }
 
 .ziwei-intent-card.is-on {
-  border-color: rgba(212, 181, 106, 0.7);
-  box-shadow: 0 0 0 1px rgba(212, 181, 106, 0.25), 0 0 24px rgba(155, 127, 212, 0.18);
-  transform: translateY(-1px);
+  border-color: var(--zw-gold);
+  box-shadow: none;
+  transform: none;
 }
 
 .ziwei-archive-brief {
@@ -199,8 +217,9 @@
 
 .ziwei-mode-tab {
   flex: 1;
+  min-height: 44px;
   padding: 10px 12px;
-  border-radius: 999px;
+  border-radius: 10px;
   border: 1px solid var(--zw-line);
   background: transparent;
   color: var(--zw-muted);
@@ -208,21 +227,15 @@
 }
 
 .ziwei-mode-tab.is-on {
-  color: #1a1028;
-  background: linear-gradient(120deg, #d4b56a, #c9a0e8);
-  border-color: transparent;
+  color: var(--zw-gold);
+  background: var(--gold-soft);
+  border-color: var(--zw-line);
   font-weight: 600;
 }
 
-.ziwei-combo,
-.ziwei-codex-cta,
-.ziwei-forecast,
-.ziwei-decade {
-  margin: 20px 0;
-  padding: 16px 16px 18px;
-  border: 1px solid var(--zw-line);
-  border-radius: 16px;
-  background: var(--zw-panel);
+.ziwei-mode-tab-chart {
+  border-color: rgba(201, 168, 76, 0.55);
+  color: var(--zw-gold);
 }
 
 .ziwei-combo-lead {
@@ -235,15 +248,20 @@
 .ziwei-combo-glyph {
   width: 56px;
   height: 56px;
+  flex-shrink: 0;
   border-radius: 50%;
   display: grid;
   place-items: center;
   font-family: var(--font-serif, Georgia, serif);
   font-size: 1.4rem;
   color: var(--zw-gold);
-  border: 1px solid rgba(212, 181, 106, 0.55);
-  box-shadow: 0 0 20px rgba(212, 181, 106, 0.25);
-  background: radial-gradient(circle at 40% 30%, rgba(212, 181, 106, 0.35), transparent 70%);
+  border: 1px solid var(--zw-line);
+  box-shadow: none;
+  background: var(--gold-soft);
+}
+
+.ziwei-combo-copy {
+  min-width: 0;
 }
 
 .ziwei-combo-name {
@@ -256,11 +274,11 @@
 .ziwei-combo-line {
   margin: 0;
   color: var(--zw-muted);
-  line-height: 1.65;
+  line-height: 1.7;
 }
 
 .ziwei-combo-line {
-  margin-top: 10px;
+  margin-top: 12px;
   color: var(--zw-ink);
 }
 
@@ -277,10 +295,17 @@
   letter-spacing: 0.04em;
 }
 
-.ziwei-decade-meta {
+.ziwei-decade-meta,
+.ziwei-mutagen-inline,
+.ziwei-annual-meta {
   margin: 0 0 12px;
   color: var(--zw-muted);
   font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.ziwei-mutagen-inline {
+  letter-spacing: 0.02em;
 }
 
 .ziwei-decade-fold {
@@ -290,10 +315,22 @@
   background: transparent;
 }
 
-.ziwei-forecast summary {
+.ziwei-forecast summary,
+.ziwei-decade-fold summary {
   cursor: pointer;
   color: var(--zw-gold);
   font-size: 0.95rem;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  list-style: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ziwei-forecast summary::-webkit-details-marker,
+.ziwei-decade-fold summary::-webkit-details-marker {
+  display: none;
 }
 
 .ziwei-forecast-body {
@@ -992,6 +1029,9 @@
 }
 
 .ziwei-drill-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   background: none;
   border: none;
   color: var(--zw-gold);
@@ -1003,7 +1043,7 @@
 }
 
 .ziwei-pillar {
-  border-top: 1px solid var(--zw-line);
+  border-top: 1px solid var(--line-soft, var(--zw-line));
 }
 
 .ziwei-pillar:first-of-type {
@@ -1017,6 +1057,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 0;
+  min-height: 44px;
   background: none;
   border: none;
   color: inherit;
@@ -1026,6 +1067,7 @@
 
 .ziwei-pillar-head strong {
   display: block;
+  color: var(--zw-gold);
 }
 
 .ziwei-pillar-head em {
@@ -1035,9 +1077,12 @@
 }
 
 .ziwei-pillar-body {
-  padding: 0 0 14px;
-  color: var(--zw-muted);
-  line-height: 1.65;
+  padding: 0 0 16px 14px;
+  margin: 0 0 4px;
+  border-left: 3px solid var(--zw-gold);
+  color: var(--zw-ink);
+  line-height: 1.7;
+  background: transparent;
 }
 
 .ziwei-pillar-body p {
@@ -1061,10 +1106,11 @@
 .ziwei-ask-input {
   flex: 1;
   min-width: 0;
+  min-height: 44px;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--zw-line);
-  background: rgba(8, 6, 20, 0.65);
+  background: var(--bg-panel);
   color: var(--zw-ink);
 }
 
@@ -1083,11 +1129,12 @@
 }
 
 .ziwei-comfort {
-  margin: 16px 0;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(212, 181, 106, 0.35);
-  background: linear-gradient(160deg, rgba(40, 28, 12, 0.55), rgba(18, 12, 36, 0.7));
+  margin: 28px 0;
+  padding: 0 0 0 14px;
+  border-radius: 0;
+  border: none;
+  border-left: 3px solid var(--zw-gold);
+  background: transparent;
 }
 
 .ziwei-comfort-tag {
@@ -1283,4 +1330,1939 @@
   color: var(--zw-muted);
   line-height: 1.55;
   font-size: 0.9rem;
+}
+
+/* —— 查看完整命盘入口 —— */
+.ziwei-open-chart {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 2px 10px;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  background:
+    linear-gradient(120deg, rgba(201, 168, 76, 0.12), rgba(80, 100, 180, 0.12)),
+    var(--zw-panel);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ziwei-open-chart strong {
+  grid-column: 1;
+  color: var(--zw-gold);
+  font-size: 0.98rem;
+}
+.ziwei-open-chart span {
+  grid-column: 1;
+  font-size: 0.78rem;
+  color: var(--zw-muted);
+}
+.ziwei-open-chart em {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  color: var(--zw-gold);
+  font-style: normal;
+  font-size: 1.2rem;
+}
+
+.ziwei-term-hot {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--zw-gold);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(201, 168, 76, 0.45);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ziwei-term-hot.is-lead {
+  font-size: inherit;
+  font-weight: 600;
+}
+.ziwei-term-hot.is-soft {
+  color: rgba(212, 181, 106, 0.75);
+  font-size: 0.85em;
+}
+.ziwei-combo-costars {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: var(--zw-muted);
+}
+
+/* —— 连续式紫微命盘（仪盘，非卡片墙） —— */
+.ziwei-plate {
+  margin: 0 0 16px;
+  width: 100%;
+  max-width: 100%;
+}
+.ziwei-plate-nav {
+  display: flex;
+  justify-content: center;
+  gap: 4px 18px;
+  margin: 0 0 10px;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.18);
+}
+.ziwei-plate-nav-item {
+  position: relative;
+  min-height: 44px;
+  padding: 8px 2px 10px;
+  border: 0;
+  background: none;
+  color: rgba(200, 190, 170, 0.55);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-nav-item.is-on {
+  color: #e8d5a0;
+}
+.ziwei-plate-nav-item.is-on::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 4px;
+  height: 1.5px;
+  background: rgba(212, 175, 80, 0.85);
+}
+.ziwei-plate-board {
+  padding: 0;
+  margin: 0 -14px 12px;
+  width: calc(100% + 28px);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ziwei-plate-board::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-plate-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* 行高随内容增高，避免正方形压扁导致星曜被裁 */
+  grid-template-rows: repeat(4, minmax(8rem, auto));
+  gap: 0;
+  width: 100%;
+  min-width: 24rem;
+  aspect-ratio: auto;
+  height: auto;
+  max-height: none;
+  margin-inline: auto;
+  border: 1px solid rgba(201, 168, 76, 0.38);
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(40, 32, 58, 0.35), transparent 55%),
+    #0c0a12;
+  box-shadow: none;
+}
+.ziwei-plate-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.ziwei-plate-rel {
+  fill: none;
+  stroke-width: 0.012;
+  stroke-opacity: 0.28;
+}
+.ziwei-plate-rel.is-sanhe {
+  stroke: rgba(130, 170, 200, 0.55);
+}
+.ziwei-plate-rel.is-dui {
+  stroke: rgba(160, 140, 190, 0.55);
+}
+.ziwei-plate-fly {
+  fill: none;
+  stroke-width: 0.016;
+  stroke-opacity: 0.32;
+}
+.ziwei-plate-fly.is-hua-禄 { stroke: rgba(90, 150, 120, 0.7); }
+.ziwei-plate-fly.is-hua-权 { stroke: rgba(140, 110, 160, 0.7); }
+.ziwei-plate-fly.is-hua-科 { stroke: rgba(100, 130, 180, 0.7); }
+.ziwei-plate-fly.is-hua-忌 { stroke: rgba(160, 100, 110, 0.65); }
+.ziwei-plate-dizhi {
+  stroke-width: 0.014;
+  stroke-opacity: 0.3;
+  fill: none;
+}
+.ziwei-plate-dizhi.is-冲 {
+  stroke: rgba(180, 110, 110, 0.4);
+  stroke-dasharray: 0.06 0.04;
+}
+.ziwei-plate-dizhi.is-合 {
+  stroke: rgba(110, 160, 130, 0.35);
+}
+.ziwei-plate-dizhi.is-刑 {
+  stroke: rgba(170, 140, 100, 0.35);
+  stroke-dasharray: 0.03 0.03;
+}
+
+/* 宫格：信息完整优先，不裁切星曜 */
+.ziwei-plate-cell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 2px;
+  min-width: 0;
+  min-height: 8rem;
+  margin: 0;
+  padding: 7px 5px 5px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  border-right: 1px solid rgba(180, 170, 140, 0.14);
+  border-bottom: 1px solid rgba(180, 170, 140, 0.14);
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.ziwei-plate-cell.is-soul {
+  background: rgba(201, 168, 76, 0.04);
+}
+.ziwei-plate-cell.is-body {
+  background: rgba(120, 100, 160, 0.05);
+}
+.ziwei-plate-cell.is-focus {
+  z-index: 2;
+  background: rgba(201, 168, 76, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 80, 0.55);
+}
+.ziwei-plate-cell.is-sanhe {
+  z-index: 2;
+  background: rgba(100, 150, 190, 0.07);
+}
+.ziwei-plate-cell.is-dui {
+  z-index: 2;
+  background: rgba(140, 120, 180, 0.08);
+}
+.ziwei-plate-cell.is-dim {
+  opacity: 0.38;
+}
+.ziwei-plate.is-selecting .ziwei-plate-cell.is-focus,
+.ziwei-plate.is-selecting .ziwei-plate-cell.is-sanhe,
+.ziwei-plate.is-selecting .ziwei-plate-cell.is-dui {
+  opacity: 1;
+}
+.ziwei-plate.is-picked .ziwei-plate-cell.is-focus {
+  opacity: 1;
+}
+
+.ziwei-plate-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ziwei-plate-star-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2px 3px;
+  min-width: 0;
+}
+.ziwei-plate-star-tags {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 1px;
+}
+.ziwei-plate-star {
+  flex: 0 0 auto;
+  min-width: max-content;
+  min-height: 24px;
+  padding: 1px 1px;
+  border: 0;
+  background: none;
+  color: rgba(232, 200, 120, 0.95);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-align: left;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-star.is-minor {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 20px;
+  padding: 0 1px;
+  font-size: 0.68rem;
+  font-weight: 450;
+  color: rgba(220, 210, 190, 0.82);
+  overflow: visible;
+  text-overflow: clip;
+}
+.ziwei-plate-minors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px 3px;
+  max-height: none;
+  overflow: visible;
+  opacity: 0.92;
+}
+.ziwei-plate-more {
+  min-height: 20px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: rgba(201, 168, 76, 0.7);
+  font-size: 0.64rem;
+  cursor: pointer;
+}
+
+/* 庙旺/四化：视觉小、热区靠 padding 撑开，不挤掉主星二字 */
+.ziwei-plate-status-hit {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  margin: -6px -2px;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-status-hit span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15em;
+  min-height: 1.15em;
+  padding: 1px 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.58rem;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+}
+.ziwei-plate-hua {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15em;
+  min-height: 1.15em;
+  margin: 0;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(80, 160, 120, 0.85);
+  color: #fff;
+  font-size: 0.58rem;
+  font-style: normal;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-hua.is-hua-权 { background: rgba(180, 80, 90, 0.85); }
+.ziwei-plate-hua.is-hua-科 { background: rgba(80, 120, 190, 0.85); }
+.ziwei-plate-hua.is-hua-忌 { background: rgba(50, 50, 60, 0.92); }
+
+.ziwei-plate-empty {
+  font-size: 0.65rem;
+  color: rgba(255, 230, 200, 0.3);
+  padding: 2px 1px;
+}
+.ziwei-plate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 2px;
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ziwei-plate-decadal {
+  width: 100%;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  color: rgba(201, 168, 76, 0.75);
+}
+.ziwei-plate-name {
+  min-height: 24px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: rgba(210, 140, 150, 0.95);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-gz {
+  font-size: 0.66rem;
+  color: rgba(180, 200, 255, 0.8);
+}
+
+.is-status-庙 { color: rgba(230, 195, 92, 0.95); }
+.is-status-旺 { color: rgba(126, 180, 200, 0.9); }
+.is-status-得,
+.is-status-利 { color: rgba(122, 150, 200, 0.85); }
+.is-status-平 { color: rgba(180, 168, 120, 0.8); }
+.is-status-不,
+.is-status-地,
+.is-status-陷 { color: rgba(150, 120, 170, 0.85); }
+
+/* 中央：本命档案（固定，不因选宫被替换） */
+.ziwei-plate-center {
+  position: relative;
+  z-index: 3;
+  grid-row: 2 / 4;
+  grid-column: 2 / 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 8px 10px;
+  border: 0;
+  border-right: 1px solid rgba(180, 170, 140, 0.14);
+  border-bottom: 1px solid rgba(180, 170, 140, 0.14);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(50, 40, 28, 0.45), transparent 70%),
+    rgba(10, 8, 16, 0.94);
+  text-align: center;
+}
+.ziwei-plate-center-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: rgba(212, 175, 80, 0.9);
+}
+.ziwei-plate-center-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: rgba(255, 236, 214, 0.95);
+}
+.ziwei-plate-center-ju {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: rgba(255, 214, 166, 0.98);
+  font: inherit;
+  font-size: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ziwei-plate-center-ju:hover,
+.ziwei-plate-center-ju:focus-visible {
+  color: #fff6e8;
+  outline: none;
+}
+.ziwei-plate-center-ju:active {
+  color: #fff6e8;
+}
+.ziwei-plate-center-birth {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: rgba(230, 220, 200, 0.82);
+}
+.ziwei-plate-center-meta {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(210, 200, 180, 0.82);
+}
+.ziwei-plate-center-meta span {
+  margin-right: 2px;
+  color: rgba(201, 168, 76, 0.65);
+}
+.ziwei-plate-center-meta.is-limit {
+  margin-top: 2px;
+  font-size: 0.58rem;
+  color: rgba(180, 200, 255, 0.7);
+}
+.ziwei-plate-center-hua-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+  max-width: 100%;
+}
+.ziwei-plate-center-hua {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  padding: 3px 6px 3px 7px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(80, 160, 120, 0.22);
+  color: rgba(255, 240, 220, 0.92);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-center-hua em {
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+.ziwei-plate-center-hua span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15em;
+  min-height: 1.15em;
+  padding: 0 2px;
+  border-radius: 3px;
+  background: rgba(80, 160, 120, 0.9);
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+.ziwei-plate-center-hua.is-hua-权 {
+  background: rgba(180, 80, 90, 0.2);
+}
+.ziwei-plate-center-hua.is-hua-权 span {
+  background: rgba(180, 80, 90, 0.9);
+}
+.ziwei-plate-center-hua.is-hua-科 {
+  background: rgba(80, 120, 190, 0.2);
+}
+.ziwei-plate-center-hua.is-hua-科 span {
+  background: rgba(80, 120, 190, 0.9);
+}
+.ziwei-plate-center-hua.is-hua-忌 {
+  background: rgba(50, 50, 60, 0.35);
+}
+.ziwei-plate-center-hua.is-hua-忌 span {
+  background: rgba(50, 50, 60, 0.95);
+}
+.ziwei-plate-detail-blurb {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(230, 220, 200, 0.82);
+}
+.ziwei-plate-dizhi-panel {
+  margin: 8px 0 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(12, 10, 22, 0.35);
+}
+.ziwei-plate-detail-row.is-dizhi span {
+  color: rgba(180, 150, 220, 0.85);
+}
+
+/* 四化：盘下单行文字 */
+.ziwei-plate-mutagen {
+  margin: 0 0 12px;
+  padding: 0 2px;
+  text-align: center;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: rgba(210, 200, 180, 0.72);
+  word-break: break-word;
+}
+.ziwei-plate-mutagen-label {
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: rgba(201, 168, 76, 0.55);
+}
+
+/* 底部解读：留白+分隔，无卡片框 */
+.ziwei-plate-detail {
+  margin: 0;
+  padding: 14px 2px 4px;
+  border-top: 1px solid rgba(201, 168, 76, 0.22);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+.ziwei-plate-detail-head {
+  margin-bottom: 8px;
+}
+.ziwei-plate-detail-kicker {
+  margin: 0 0 2px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.6);
+}
+.ziwei-plate-detail-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f0e0b8;
+}
+.ziwei-plate-detail-row {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(255, 236, 214, 0.88);
+}
+.ziwei-plate-detail-row span {
+  display: inline-block;
+  min-width: 2.6em;
+  margin-right: 8px;
+  color: rgba(200, 190, 170, 0.5);
+  font-size: 0.7rem;
+}
+.ziwei-plate-detail-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(200, 190, 170, 0.5);
+  line-height: 1.45;
+}
+.ziwei-plate-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 12px;
+}
+.ziwei-plate-text-btn {
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: rgba(170, 190, 230, 0.85);
+  font-size: 0.74rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-plate-text-btn.is-on {
+  color: #e8d5a0;
+  text-decoration-thickness: 1.5px;
+}
+
+@media (min-width: 720px) {
+  .ziwei-plate {
+    margin: 4px 0 24px;
+  }
+  .ziwei-plate-board {
+    margin: 0 0 12px;
+    width: 100%;
+    max-width: 880px;
+    margin-inline: auto;
+    overflow-x: visible;
+  }
+  .ziwei-plate-grid {
+    max-width: 880px;
+    min-width: 0;
+    grid-template-rows: repeat(4, minmax(9rem, auto));
+  }
+  .ziwei-plate-cell {
+    min-height: 9rem;
+    padding: 8px 6px 6px;
+  }
+  .ziwei-plate-star.is-major { font-size: 0.98rem; min-height: 26px; }
+  .ziwei-plate-star.is-minor { font-size: 0.74rem; }
+  .ziwei-plate-name { font-size: 0.84rem; }
+  .ziwei-plate-gz { font-size: 0.72rem; }
+  .ziwei-plate-decadal { font-size: 0.68rem; }
+  .ziwei-plate-center-title { font-size: 1.1rem; }
+  .ziwei-plate-center-birth { font-size: 0.8rem; }
+  .ziwei-plate-center-meta { font-size: 0.78rem; }
+  .ziwei-plate-center-hua em { font-size: 0.72rem; }
+  .ziwei-plate-mutagen { font-size: 0.82rem; }
+}
+
+.ziwei-plate-overlay-note {
+  margin: 0 2px 8px;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(200, 190, 170, 0.62);
+  letter-spacing: 0.02em;
+}
+
+/* —— 年度轨迹时间线 —— */
+.ziwei-year-track {
+  margin: 4px 0 18px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid rgba(201, 168, 76, 0.2);
+}
+.ziwei-year-track-head {
+  padding: 12px 2px 8px;
+}
+.ziwei-year-track-kicker {
+  margin: 0 0 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: rgba(201, 168, 76, 0.7);
+}
+.ziwei-year-track-hint {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-year-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 4px 2px 10px;
+  mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+}
+.ziwei-year-rail::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-year-chip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 72px;
+  min-height: 56px;
+  padding: 8px 10px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(200, 190, 170, 0.45);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.ziwei-year-chip-y {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.ziwei-year-chip-t {
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+.ziwei-year-chip.is-past {
+  color: rgba(180, 170, 150, 0.42);
+}
+.ziwei-year-chip.is-future {
+  color: rgba(180, 190, 210, 0.45);
+}
+.ziwei-year-chip.is-on {
+  color: #e8d5a0;
+}
+.ziwei-year-chip.is-on::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 2px;
+  height: 1.5px;
+  background: rgba(212, 175, 80, 0.85);
+}
+.ziwei-year-chip.is-on.is-present {
+  color: #f0e0b8;
+}
+.ziwei-year-expand {
+  margin: 0;
+  padding: 10px 2px 4px;
+  border-top: 1px solid rgba(180, 170, 140, 0.12);
+}
+.ziwei-year-expand-kicker {
+  margin: 0 0 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 76, 0.65);
+}
+.ziwei-year-expand.is-past .ziwei-year-expand-kicker {
+  color: rgba(180, 170, 150, 0.65);
+}
+.ziwei-year-expand.is-future .ziwei-year-expand-kicker {
+  color: rgba(160, 180, 210, 0.7);
+}
+.ziwei-year-expand-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f0e0b8;
+}
+.ziwei-year-expand-theme {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(255, 236, 214, 0.9);
+}
+.ziwei-year-expand-theme span {
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 0.68rem;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-year-block {
+  margin: 0 0 12px;
+}
+.ziwei-year-block h4 {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.72);
+}
+.ziwei-year-block p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: rgba(255, 236, 214, 0.9);
+}
+.ziwei-year-possibles {
+  margin: 0;
+  padding: 0 0 0 1em;
+  list-style: disc;
+  color: rgba(235, 225, 205, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+.ziwei-year-possibles li {
+  margin: 0 0 2px;
+}
+.ziwei-year-watch {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(230, 220, 200, 0.88);
+}
+.ziwei-year-expand-meta {
+  margin: 4px 0 8px;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: rgba(200, 190, 170, 0.62);
+  word-break: break-word;
+}
+.ziwei-year-expand-domains {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.ziwei-year-expand-domains li {
+  margin: 0 0 6px;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: rgba(235, 225, 205, 0.88);
+}
+.ziwei-year-expand-domains strong {
+  display: inline-block;
+  min-width: 2.6em;
+  margin-right: 8px;
+  font-weight: 600;
+  color: rgba(201, 168, 76, 0.75);
+  font-size: 0.7rem;
+}
+.ziwei-year-expand-possible-k {
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-year-expand-possibles {
+  margin: 0 0 10px;
+  padding-left: 1.1em;
+  color: rgba(230, 220, 200, 0.82);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+.ziwei-year-expand-note {
+  margin: 0;
+  font-size: 0.64rem;
+  color: rgba(180, 170, 150, 0.5);
+  line-height: 1.4;
+}
+.ziwei-year-why {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(170, 190, 230, 0.95);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ziwei-year-tabs {
+  display: flex;
+  gap: 16px;
+  margin: 4px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.16);
+}
+.ziwei-year-tab {
+  position: relative;
+  min-height: 40px;
+  padding: 6px 2px 10px;
+  border: 0;
+  background: none;
+  color: rgba(200, 190, 170, 0.48);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-year-tab.is-on {
+  color: #e8d5a0;
+}
+.ziwei-year-tab.is-on::after {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 2px;
+  height: 1.5px;
+  background: rgba(212, 175, 80, 0.85);
+}
+.ziwei-year-record-kicker {
+  margin: 0 0 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.55);
+}
+.ziwei-year-record-list {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.ziwei-year-record-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ziwei-year-record-item p {
+  margin: 0;
+  flex: 1;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(240, 230, 210, 0.9);
+}
+.ziwei-year-record-del {
+  flex: 0 0 auto;
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  background: none;
+  color: rgba(200, 190, 170, 0.5);
+  cursor: pointer;
+}
+.ziwei-year-record-empty {
+  margin: 0 0 8px;
+  padding: 8px 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: rgba(180, 170, 150, 0.5);
+  list-style: none;
+}
+.ziwei-year-record-form {
+  display: flex;
+  gap: 8px;
+}
+.ziwei-year-record-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 236, 214, 0.92);
+  font: inherit;
+  font-size: 0.76rem;
+}
+.ziwei-year-record-form button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: transparent;
+  color: #e8d5a0;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+/* —— 流年深度抽屉（仿六爻右侧笔记） —— */
+.ziwei-year-deep-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.ziwei-year-deep-drawer.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ziwei-year-deep-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.ziwei-year-deep-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(12, 14, 18, 0.98);
+  border-left: 1px solid rgba(201, 168, 76, 0.22);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+  transform: translateX(20px);
+  transition: transform 0.28s ease;
+}
+.ziwei-year-deep-drawer.is-visible .ziwei-year-deep-panel {
+  transform: translateX(0);
+}
+.ziwei-year-deep-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.14);
+}
+.ziwei-year-deep-kicker {
+  margin: 0 0 2px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 76, 0.65);
+}
+.ziwei-year-deep-head h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #e8d5a0;
+  letter-spacing: 0.04em;
+}
+.ziwei-year-deep-x {
+  min-width: 40px;
+  min-height: 40px;
+  border: 0;
+  background: none;
+  color: rgba(220, 210, 190, 0.7);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.ziwei-year-deep-body {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 14px 28px;
+  -webkit-overflow-scrolling: touch;
+}
+.ziwei-year-deep-sec {
+  margin: 0 0 18px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid rgba(180, 170, 140, 0.12);
+}
+.ziwei-year-deep-sec:last-child {
+  border-bottom: 0;
+}
+.ziwei-year-deep-sec h5 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: rgba(201, 168, 76, 0.85);
+  font-weight: 600;
+}
+.ziwei-year-deep-conclusion {
+  margin: 0 0 6px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: rgba(255, 236, 214, 0.95);
+}
+.ziwei-year-deep-tone {
+  margin: 0;
+  font-size: 0.68rem;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-year-deep-tip {
+  margin: 0 0 10px;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-year-deep-chain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ziwei-year-deep-step {
+  margin: 0;
+  padding: 0;
+}
+.ziwei-year-deep-arrow {
+  display: block;
+  margin: 2px 0 2px 10px;
+  color: rgba(201, 168, 76, 0.45);
+  font-size: 0.75rem;
+}
+.ziwei-year-deep-step-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px 10px;
+  border: 1px solid rgba(201, 168, 76, 0.16);
+  border-radius: 0;
+  background: rgba(201, 168, 76, 0.04);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-year-deep-step-btn strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+  color: #e8d5a0;
+}
+.ziwei-year-deep-step-btn span {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(220, 210, 190, 0.78);
+}
+.ziwei-year-deep-hua-list,
+.ziwei-year-deep-possibles,
+.ziwei-year-deep-events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ziwei-year-deep-hua-list li,
+.ziwei-year-deep-events li {
+  margin: 0 0 8px;
+}
+.ziwei-year-deep-hua {
+  display: block;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-year-deep-hua em {
+  display: inline-block;
+  margin-right: 6px;
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+.ziwei-year-deep-hua .is-hua-禄 { color: #6dca9a; }
+.ziwei-year-deep-hua .is-hua-权 { color: #c49ad4; }
+.ziwei-year-deep-hua .is-hua-科 { color: #8aade8; }
+.ziwei-year-deep-hua .is-hua-忌 { color: #e08a98; }
+.ziwei-year-deep-hua strong {
+  display: inline;
+  margin-right: 6px;
+  font-size: 0.78rem;
+  color: rgba(240, 224, 184, 0.92);
+}
+.ziwei-year-deep-hua span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: rgba(210, 200, 180, 0.72);
+}
+.ziwei-year-deep-possibles {
+  padding-left: 1.1em;
+  list-style: disc;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: rgba(230, 220, 200, 0.85);
+}
+.ziwei-year-deep-related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ziwei-year-deep-chip {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: transparent;
+  color: rgba(220, 210, 190, 0.85);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.ziwei-year-deep-events li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.76rem;
+  color: rgba(230, 220, 200, 0.88);
+}
+.ziwei-year-deep-del {
+  flex: 0 0 auto;
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  background: none;
+  color: rgba(200, 190, 170, 0.55);
+  cursor: pointer;
+}
+.ziwei-year-deep-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ziwei-year-deep-add input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 236, 214, 0.92);
+  font: inherit;
+  font-size: 0.78rem;
+}
+.ziwei-year-deep-add button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: transparent;
+  color: #e8d5a0;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+.ziwei-year-deep-muted {
+  font-size: 0.72rem;
+  color: rgba(180, 170, 150, 0.5);
+  list-style: none;
+}
+
+/* —— 运限：轻量文字横滑，非仪表盘卡片 —— */
+.ziwei-limit {
+  margin: 8px 0 24px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid rgba(201, 168, 76, 0.2);
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.ziwei-limit-head {
+  padding: 12px 2px 8px;
+}
+.ziwei-limit-kicker {
+  margin: 0 0 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: rgba(201, 168, 76, 0.65);
+}
+.ziwei-limit-summary {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(230, 220, 200, 0.72);
+  word-break: break-word;
+}
+.ziwei-limit-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  border: 0;
+  border-bottom: 1px solid rgba(180, 170, 140, 0.1);
+}
+.ziwei-limit-row.is-fold {
+  min-height: 44px;
+}
+.ziwei-limit-row.is-nested {
+  grid-template-columns: 1fr;
+  min-height: 0;
+  padding: 0 0 6px 36px;
+  border-bottom: 1px solid rgba(180, 170, 140, 0.1);
+}
+.ziwei-limit-row:last-child {
+  border-bottom: 0;
+}
+.ziwei-limit-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.7);
+  background: none;
+  border: 0;
+}
+.ziwei-limit-fold {
+  justify-self: start;
+  min-height: 40px;
+  margin: 0;
+  padding: 6px 2px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: rgba(230, 220, 200, 0.78);
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-limit-fold.is-open {
+  color: #e8d5a0;
+}
+.ziwei-limit-track {
+  display: flex;
+  gap: 2px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 0 4px;
+  mask-image: linear-gradient(90deg, transparent, #000 8px, #000 calc(100% - 8px), transparent);
+}
+.ziwei-limit-track::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-limit-chip {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 6px 2px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(200, 190, 170, 0.48);
+  font: inherit;
+  font-size: 0.74rem;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-limit-chip em {
+  display: block;
+  margin-top: 1px;
+  font-style: normal;
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(180, 170, 150, 0.45);
+}
+.ziwei-limit-chip.is-on {
+  color: #e8d5a0;
+  font-weight: 600;
+  background: none;
+  box-shadow: none;
+}
+.ziwei-limit-chip.is-on em {
+  color: rgba(212, 175, 80, 0.65);
+}
+.ziwei-limit-chip.is-on::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 2px;
+  height: 1.5px;
+  background: rgba(212, 175, 80, 0.85);
+}
+.ziwei-limit-chip:active {
+  color: rgba(232, 213, 160, 0.85);
+}
+
+.ziwei-plate-marks {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.45rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: rgba(201, 168, 76, 0.75);
+  pointer-events: none;
+}
+.ziwei-plate-cell.is-limit {
+  background: rgba(201, 168, 76, 0.045);
+}
+.ziwei-plate-mutagen-item {
+  display: inline;
+  margin: 0;
+  padding: 4px 0;
+  min-height: 32px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(201, 168, 76, 0.35);
+  text-underline-offset: 2px;
+}
+.ziwei-plate-mutagen-sep {
+  opacity: 0.55;
+}
+.ziwei-plate-center-meta.is-limit {
+  margin-top: 2px;
+  color: rgba(201, 168, 76, 0.75);
+}
+
+/* —— 学习解释抽屉 —— */
+.ziwei-learn-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.ziwei-learn-sheet.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ziwei-learn-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(4, 2, 12, 0.62);
+  cursor: pointer;
+}
+.ziwei-learn-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-height: min(58vh, 520px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px 18px 0 0;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-bottom: 0;
+  background: linear-gradient(180deg, #1a1528 0%, #100c1c 100%);
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.45);
+  transform: translateY(24px);
+  transition: transform 0.28s ease;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.ziwei-learn-sheet.is-half .ziwei-learn-panel {
+  max-height: min(58vh, 520px);
+}
+.ziwei-learn-sheet.is-visible .ziwei-learn-panel {
+  transform: translateY(0);
+}
+.ziwei-learn-handle {
+  width: 40px;
+  height: 4px;
+  margin: 10px auto 0;
+  border-radius: 999px;
+  background: rgba(255, 230, 200, 0.25);
+}
+.ziwei-learn-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px 8px;
+}
+.ziwei-learn-head h2 {
+  margin: 2px 0 0;
+  font-size: 1.15rem;
+  color: var(--zw-gold);
+}
+.ziwei-learn-sub {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--zw-muted);
+}
+.ziwei-learn-lead {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: rgba(255, 236, 214, 0.92);
+}
+.ziwei-learn-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(184, 168, 120, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-learn-status-k {
+  font-size: 0.78rem;
+  color: var(--zw-muted);
+  letter-spacing: 0.06em;
+}
+.ziwei-learn-status-v {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  color: rgba(255, 236, 214, 0.9);
+}
+.ziwei-learn-status-v em {
+  font-style: normal;
+  font-weight: 700;
+}
+.ziwei-learn-status-v i {
+  font-style: normal;
+  opacity: 0.5;
+}
+.ziwei-learn-fold {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ziwei-learn-fold summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.9);
+  list-style: none;
+}
+.ziwei-learn-fold summary::-webkit-details-marker { display: none; }
+.ziwei-learn-close {
+  align-self: flex-start;
+  border: 1px solid var(--zw-line);
+  background: none;
+  color: var(--zw-muted);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.ziwei-learn-scroll {
+  overflow: auto;
+  padding: 4px 16px 12px;
+  flex: 1;
+}
+.ziwei-learn-block {
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ziwei-learn-block h3 {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.9);
+}
+.ziwei-learn-body {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(255, 236, 214, 0.88);
+}
+.ziwei-learn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.ziwei-learn-chip {
+  padding: 10px 14px;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--zw-gold);
+  font-size: 0.82rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-learn-chip.is-cat-star { border-color: rgba(232, 200, 120, 0.55); color: #e8c878; }
+.ziwei-learn-chip.is-cat-palace { border-color: rgba(122, 159, 212, 0.55); color: #9bb6e0; }
+.ziwei-learn-chip.is-cat-status { border-color: rgba(184, 168, 120, 0.55); color: #c9b87a; }
+.ziwei-learn-chip.is-cat-structure { border-color: rgba(160, 140, 200, 0.55); color: #c4b0e0; }
+.ziwei-learn-chip.is-cat-mutagen { border-color: rgba(100, 170, 140, 0.55); color: #8dcfb0; }
+.ziwei-learn-chip.is-cat-limit { border-color: rgba(200, 140, 100, 0.55); color: #e0b090; }
+.ziwei-learn-cat.is-cat-star,
+.ziwei-learn-sheet.is-cat-star .ziwei-learn-cat { color: #e8c878; }
+.ziwei-learn-sheet.is-cat-palace .ziwei-learn-cat { color: #9bb6e0; }
+.ziwei-learn-sheet.is-cat-status .ziwei-learn-cat { color: #c9b87a; }
+.ziwei-learn-sheet.is-cat-structure .ziwei-learn-cat { color: #c4b0e0; }
+.ziwei-learn-sheet.is-cat-mutagen .ziwei-learn-cat { color: #8dcfb0; }
+.ziwei-learn-sheet.is-cat-limit .ziwei-learn-cat { color: #e0b090; }
+.ziwei-learn-map {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+.ziwei-learn-map-row {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  color: rgba(255, 236, 214, 0.88);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.ziwei-learn-map-row span {
+  flex-shrink: 0;
+  min-width: 2.5em;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+.ziwei-learn-map-row .is-self {
+  color: #e6c35c;
+  border-color: rgba(230, 195, 92, 0.45);
+}
+.ziwei-learn-map-row .is-sanhe {
+  color: #7a9fd4;
+  border-color: rgba(122, 159, 212, 0.45);
+}
+.ziwei-learn-map-row .is-dui {
+  color: #b090d0;
+  border-color: rgba(176, 144, 208, 0.45);
+}
+.ziwei-learn-map-note {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: var(--zw-muted);
+  line-height: 1.45;
+}
+.ziwei-learn-terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ziwei-learn-term {
+  font-size: 0.72rem;
+  color: var(--zw-muted);
+}
+.ziwei-learn-foot {
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(201, 168, 76, 0.2);
+}
+.ziwei-learn-foot .life-btn-primary {
+  width: 100%;
+  min-height: 48px;
+}
+
+@media (min-width: 720px) and (pointer: fine) {
+  .ziwei-learn-sheet { align-items: flex-end; padding: 0; }
+  .ziwei-learn-panel {
+    width: min(560px, 100%);
+    border-radius: 18px 18px 0 0;
+    border-bottom: 0;
+    max-height: min(62vh, 560px);
+    margin: 0 auto;
+  }
+}
+
+/* —— 运限时间梯：年主题 / 月推进 / 日当天 / 时当下 —— */
+.ziwei-time-ladder {
+  margin: 4px 0 24px;
+  padding: 0;
+  border-top: 1px solid rgba(201, 168, 76, 0.2);
+}
+.ziwei-tl-head {
+  padding: 12px 2px 6px;
+}
+.ziwei-tl-head-kicker {
+  margin: 0 0 2px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 76, 0.7);
+}
+.ziwei-tl-head-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-tl-levels {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 4px 0 10px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.14);
+}
+.ziwei-tl-levels::-webkit-scrollbar { display: none; }
+.ziwei-tl-level {
+  flex: 0 0 auto;
+  min-width: 4.6em;
+  padding: 10px 12px 12px;
+  border: 0;
+  background: none;
+  color: rgba(210, 200, 180, 0.55);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+}
+.ziwei-tl-level strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: inherit;
+}
+.ziwei-tl-level span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}
+.ziwei-tl-level.is-on {
+  color: #e8d5a0;
+}
+.ziwei-tl-level.is-on::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  background: #c9a84c;
+  border-radius: 1px;
+}
+.ziwei-tl-body {
+  padding: 4px 2px 8px;
+}
+.ziwei-tl-context {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  color: rgba(200, 190, 170, 0.55);
+}
+.ziwei-tl-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 0 10px;
+  margin-bottom: 4px;
+}
+.ziwei-tl-rail::-webkit-scrollbar { display: none; }
+.ziwei-tl-chip {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: rgba(210, 200, 180, 0.65);
+  font-size: 0.78rem;
+  cursor: pointer;
+  position: relative;
+}
+.ziwei-tl-chip em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+.ziwei-tl-chip.is-on {
+  color: #f0e0b8;
+}
+.ziwei-tl-chip.is-on::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 2px;
+  height: 2px;
+  background: #c9a84c;
+}
+.ziwei-tl-pane {
+  padding: 4px 0 8px;
+}
+.ziwei-tl-kicker {
+  margin: 0 0 2px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(201, 168, 76, 0.7);
+}
+.ziwei-tl-title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #f0e0b8;
+}
+.ziwei-tl-block {
+  margin: 0 0 14px;
+}
+.ziwei-tl-block h4 {
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  color: rgba(201, 168, 76, 0.65);
+}
+.ziwei-tl-theme {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffe8c8;
+  line-height: 1.4;
+}
+.ziwei-tl-theme-sub {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(230, 220, 200, 0.78);
+}
+.ziwei-tl-focus {
+  margin: 0 0 12px;
+  font-size: 0.84rem;
+  color: rgba(232, 213, 160, 0.9);
+}
+.ziwei-tl-domains {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+.ziwei-tl-domains li {
+  display: grid;
+  grid-template-columns: 3.2em 1fr;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(230, 220, 200, 0.85);
+}
+.ziwei-tl-domains strong {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(201, 168, 76, 0.75);
+}
+.ziwei-tl-list {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgba(230, 220, 200, 0.85);
+}
+.ziwei-tl-meta {
+  margin: 8px 0 10px;
+  font-size: 0.68rem;
+  color: rgba(200, 190, 170, 0.5);
+  line-height: 1.45;
+}
+.ziwei-tl-date-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: rgba(201, 168, 76, 0.65);
+}
+.ziwei-tl-date {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  border-radius: 8px;
+  background: rgba(12, 10, 22, 0.45);
+  color: #f0e0b8;
+  font-size: 0.9rem;
+}
+.ziwei-tl-shichen-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+.ziwei-tl-shichen {
+  min-width: 3.4em;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  border-radius: 999px;
+  background: rgba(12, 10, 22, 0.3);
+  color: rgba(210, 200, 180, 0.7);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+.ziwei-tl-shichen.is-on {
+  border-color: rgba(201, 168, 76, 0.55);
+  color: #f0e0b8;
+  background: rgba(201, 168, 76, 0.12);
+}
+.ziwei-tl-jump {
+  margin-top: 8px;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: rgba(170, 190, 230, 0.9);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ziwei-tl-month-under {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(201, 168, 76, 0.12);
 }

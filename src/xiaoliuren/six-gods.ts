@@ -2,7 +2,7 @@ export type SixGodId = 'da-an' | 'liu-lian' | 'su-xi' | 'chi-kou' | 'xiao-ji' | 
 
 export type SixGodTone = 'steady' | 'slow' | 'joy' | 'sharp' | 'small-luck' | 'empty';
 
-/** 小六壬知识库 · 六神条目（图鉴 / 解读 / 手札单源） */
+/** 小六壬知识库 · 六神条目（探索 / 解读 / 手札单源） */
 export type SixGod = {
   id: SixGodId;
   name: string;

@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { loadXiaoliurenJournal } from '../xiaoliuren/journal.ts';
 import {
   getPalmJourneyDoneCount,
@@ -51,7 +51,7 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
       </div>
 
       <nav class="xlr-home-links" aria-label="模块入口">
-        <a href="/xiaoliuren/tujian" data-path="/xiaoliuren/tujian">六神图鉴</a>
+        <a href="/xiaoliuren/tujian" data-path="/xiaoliuren/tujian">六神探索</a>
         <a href="/xiaoliuren/depth" data-path="/xiaoliuren/depth">深度理解</a>
         <a href="/xiaoliuren/kungfu" data-path="/xiaoliuren/kungfu">掌上功夫</a>
         <a href="/xiaoliuren/journal" data-path="/xiaoliuren/journal">手札${journalCount > 0 ? ` · ${journalCount}` : ''}</a>

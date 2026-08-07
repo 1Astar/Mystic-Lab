@@ -123,7 +123,7 @@ export function describeBranchRelations(branches: string[]): string[] {
   return lines;
 }
 
-/** 某地支相关的合冲刑害条目（图鉴对照用） */
+/** 某地支相关的合冲刑害条目（探索对照用） */
 export type BranchRelationHit = {
   kind: '合' | '冲' | '刑' | '害' | '三合';
   label: string;

@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { mysticEmblemHtml, type MysticEmblemKind } from '../ui/mystic-emblem.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
@@ -49,7 +49,7 @@ const ALL_SYSTEMS: LabEntry[] = [
   {
     path: '/ziwei',
     title: '紫微',
-    desc: '星曜图鉴 · 十年大限 · 人生地图',
+    desc: '星曜探索 · 十年大限 · 人生地图',
     note: SYSTEM_POSITION.ziwei,
     emblem: 'cosmos',
   },

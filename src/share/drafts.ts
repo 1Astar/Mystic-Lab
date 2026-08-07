@@ -197,6 +197,22 @@ export function draftFromBazi(input: {
   };
 }
 
+export function draftFromZiwei(input: {
+  headline: string;
+  question?: string;
+  summary: string;
+  sections?: { heading: string; body: string }[];
+}): ShareDraft {
+  return draftGeneric({
+    system: 'lab',
+    headline: input.headline,
+    question: input.question || '紫微命盘',
+    summary: input.summary,
+    sections: input.sections,
+    label: input.headline,
+  });
+}
+
 export function draftGeneric(input: {
   system: ShareDraft['system'];
   headline: string;

@@ -1,4 +1,4 @@
-import type { QuestionThread, ThreadAnswer } from '../interpretation/question-thread.ts';
+﻿import type { QuestionThread, ThreadAnswer } from '../interpretation/question-thread.ts';
 import type { CardReading, ReadingResult } from '../interpretation/types.ts';
 import { polishInsightFields, polishReadingCopy } from '../interpretation/reading-polish.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
@@ -209,7 +209,7 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
 }
 
 const BRIDGE_COPY =
-  '以上是针对你问题的专属解读。想看牌面热点或图鉴，点上方牌面即可打开。';
+  '以上是针对你问题的专属解读。想看牌面热点或探索，点上方牌面即可打开。';
 
 export function renderQuestionThreadHtml(
   thread: QuestionThread,

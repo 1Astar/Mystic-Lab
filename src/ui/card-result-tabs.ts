@@ -1,4 +1,4 @@
-import type { CardReading } from '../interpretation/types.ts';
+﻿import type { CardReading } from '../interpretation/types.ts';
 import { isAiConfigured } from '../ai/settings.ts';
 import { getVisualHotspots, getVisualOverview } from '../knowledge/registry.ts';
 import { getCardById } from '../tarot/deck.ts';
@@ -17,7 +17,7 @@ export type ResultTabId = 'reading' | 'visual' | 'codex' | 'encounter';
 const TAB_LABELS: Record<ResultTabId, string> = {
   reading: '此刻解读',
   visual: '看懂牌面',
-  codex: '牌义图鉴',
+  codex: '牌义探索',
   encounter: '我的相遇',
 };
 
@@ -141,7 +141,7 @@ function renderQuestionAnswers(r: CardReading): string {
         <h4 class="layer-tag">针对你的问题 ${contextualSourceDot(r)}</h4>
         <p class="layer-badge">指哪打哪 · 行动导向</p>
         ${cards}
-        <p class="qa-codex-hint">想了解牌面更详细的背景故事？切到「牌义图鉴」Tab</p>
+        <p class="qa-codex-hint">想了解牌面更详细的背景故事？切到「牌义探索」Tab</p>
       </section>`;
 }
 
@@ -304,7 +304,7 @@ function renderReadingTab(r: CardReading): string {
     .join('') ||
     (!overviewSection && contextualReading
       ? `<p class="reading-block-text">${formatParagraph(contextualReading)}</p>`
-      : `<p class="layer-badge">牌面元素映射 →「看懂牌面」；百科知识 →「牌义图鉴」</p>`);
+      : `<p class="layer-badge">牌面元素映射 →「看懂牌面」；百科知识 →「牌义探索」</p>`);
 
   const step3Body = adviceSections.length
     ? adviceSections
@@ -373,7 +373,7 @@ function renderReadingTab(r: CardReading): string {
         <ul class="reflect-list">${questions}</ul>
       </section>
       <button type="button" class="codex-story-cta" data-goto-tab="codex">
-        想学这张牌的百科与结构？切到【牌义图鉴】→
+        想学这张牌的百科与结构？切到【牌义探索】→
       </button>
     </div>`;
 }
@@ -424,7 +424,7 @@ function renderVisualTab(r: CardReading): string {
       <div class="result-tab-panel" data-panel="visual">
         ${hotspotAnswer || `<div class="result-empty"><p>这张牌的牌面热点还在整理中。</p></div>`}
         <button type="button" class="codex-story-cta" data-goto-tab="codex">
-          切到【牌义图鉴】看百科与结构 →
+          切到【牌义探索】看百科与结构 →
         </button>
       </div>`;
   }
@@ -474,7 +474,7 @@ function renderVisualTab(r: CardReading): string {
         <ul class="visual-elements-list">${elementList}</ul>
       </section>
       <button type="button" class="codex-story-cta" data-goto-tab="codex">
-        关键词 · 愚人之旅 / 牌组×数字 → 切到【牌义图鉴】
+        关键词 · 愚人之旅 / 牌组×数字 → 切到【牌义探索】
       </button>
     </div>`;
 }
@@ -524,7 +524,7 @@ function renderEncounterTab(r: CardReading): string {
       <div class="result-tab-panel" data-panel="encounter">
         <div class="result-empty">
           <p>尚未记录与这张牌的相遇。</p>
-          <p class="result-empty-sub">完成抽牌后，图鉴会自动收录。</p>
+          <p class="result-empty-sub">完成抽牌后，探索会自动收录。</p>
         </div>
       </div>`;
   }
@@ -597,7 +597,7 @@ function renderCodexTab(r: CardReading): string {
   // 同步渲染占位；mount 时用真实正文替换（避免循环依赖体积）
   return `
     <div class="result-tab-panel" data-panel="codex" data-codex-host="${escapeHtml(r.cardId)}">
-      <p class="codex-tab-loading">加载牌义图鉴…</p>
+      <p class="codex-tab-loading">加载牌义探索…</p>
     </div>`;
 }
 
@@ -639,12 +639,12 @@ export function mountCardResultTabs(
     void import('./codex-quick-sheet.ts').then(({ renderCodexKnowledgeBody }) => {
       host.innerHTML = `
         <section class="reading-layer-card codex-tab-card">
-          <h4 class="layer-tag">牌义图鉴 · 学会看牌</h4>
+          <h4 class="layer-tag">牌义探索 · 学会看牌</h4>
           ${renderCodexKnowledgeBody(current.cardId, {
             topic: current.topic,
             reversed: current.orientation === 'reversed',
           })}
-          <button type="button" class="btn btn-ghost codex-full-link" data-full-codex>打开完整图鉴</button>
+          <button type="button" class="btn btn-ghost codex-full-link" data-full-codex>打开完整探索</button>
         </section>`;
       host.querySelector('[data-full-codex]')?.addEventListener('click', () => {
         void import('../router.ts').then(({ navigate }) => navigate('/tarot/tujian'));

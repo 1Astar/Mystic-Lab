@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
 import {
   getAllEntries,
@@ -64,7 +64,7 @@ export function renderCodex(root: HTMLElement): void {
 
     body.innerHTML = `
       <header>
-        <h1 class="page-title">随心图鉴</h1>
+        <h1 class="page-title">随心探索</h1>
         <p class="page-subtitle">已收集的牌与卦 · 点开慢慢看懂</p>
       </header>
       <section class="codex-section-block">
@@ -138,7 +138,7 @@ export function renderCodex(root: HTMLElement): void {
         filter === 'favorite'
           ? {
               title: '还没有收藏的牌。',
-              sub: '在图鉴里点开已收集的牌，点「收藏此牌」即可加入这里。',
+              sub: '在探索里点开已收集的牌，点「收藏此牌」即可加入这里。',
             }
           : filter === 'collected'
             ? {
@@ -146,7 +146,7 @@ export function renderCodex(root: HTMLElement): void {
                 sub: '完成一次「随心占问」，抽到的牌会自动解锁到这里。',
               }
             : {
-                title: '图鉴空空如也。',
+                title: '探索空空如也。',
                 sub: '完成占问后，抽到的牌会出现在「已收集」里。',
               };
 

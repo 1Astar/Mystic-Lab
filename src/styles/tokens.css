@@ -1,23 +1,59 @@
-:root {
+/* 星夜（默认）· 暗色宇宙 */
+:root,
+html[data-theme='star'] {
   --bg-deep: #0b0b14;
-  --bg-panel: rgba(26, 18, 48, 0.92);
-  --bg-card: rgba(46, 27, 75, 0.95);
-  --ink: #ffffff;
-  --ink-muted: #bfa3ff;
-  --gold: #ffd6a6;
-  --gold-soft: rgba(255, 214, 166, 0.12);
-  --purple: #bfa3ff;
+  --bg-panel: rgba(26, 18, 48, 0.72);
+  --bg-card: rgba(46, 27, 75, 0.55);
+  --ink: #f4f0e8;
+  --ink-muted: #9aa6bc;
+  --gold: #e8d4a8;
+  --gold-soft: rgba(232, 212, 168, 0.12);
+  --purple: #9aa6bc;
   --purple-deep: #2e1b4b;
   --purple-mid: #1a1230;
-  --accent: #bfa3ff;
+  --accent: #9aa6bc;
   --warn: #e6b422;
   --warn-bg: rgba(230, 180, 34, 0.12);
   --danger: #e05c5c;
-  --line: rgba(191, 163, 255, 0.22);
-  --shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
+  --line: rgba(201, 168, 76, 0.22);
+  --line-soft: rgba(122, 143, 212, 0.22);
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
   --radius: 20px;
   --radius-sm: 12px;
   --page-width: 430px;
-  --font-sans: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  --font-serif: "Times New Roman", Georgia, serif;
+  --font-sans: 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+  --font-serif: 'Times New Roman', Georgia, serif;
+  --stars-opacity: 0.35;
+  --body-bg:
+    radial-gradient(circle at 85% 5%, rgba(122, 143, 212, 0.12), transparent 30%),
+    radial-gradient(circle at 10% 20%, rgba(201, 168, 76, 0.08), transparent 25%),
+    linear-gradient(165deg, #0a0e16, var(--bg-deep) 45%, #12101a);
+  --drawer-bg: linear-gradient(165deg, rgba(24, 18, 36, 0.98), rgba(8, 8, 14, 0.99));
+}
+
+/* 月白 · 米白宣纸 / 浅灰蓝字 / 暗金强调 */
+html[data-theme='moon'] {
+  --bg-deep: #f6f1e8;
+  --bg-panel: rgba(255, 252, 247, 0.72);
+  --bg-card: rgba(255, 255, 255, 0.55);
+  --ink: #2c3340;
+  --ink-muted: #6b778c;
+  --gold: #8a6d2f;
+  --gold-soft: rgba(138, 109, 47, 0.08);
+  --purple: #7a8499;
+  --purple-deep: #d9dde6;
+  --purple-mid: #ebe6dc;
+  --accent: #7a8499;
+  --warn: #a67c1a;
+  --warn-bg: rgba(166, 124, 26, 0.1);
+  --danger: #c45c5c;
+  --line: rgba(138, 109, 47, 0.18);
+  --line-soft: rgba(107, 119, 140, 0.2);
+  --shadow: 0 8px 24px rgba(44, 51, 64, 0.06);
+  --stars-opacity: 0;
+  --body-bg:
+    radial-gradient(circle at 90% 0%, rgba(138, 109, 47, 0.06), transparent 28%),
+    radial-gradient(circle at 8% 18%, rgba(122, 143, 212, 0.06), transparent 26%),
+    linear-gradient(165deg, #faf7f1, var(--bg-deep) 48%, #efe8dc);
+  --drawer-bg: linear-gradient(165deg, #faf7f1, #f0ebe2);
 }

@@ -31,3 +31,14 @@ export function memoryCoverHtml(id: string, fallbackSvg: string): string {
     <img src="${escapeHtml(src)}" alt="" loading="lazy" />
   </div>`;
 }
+
+/**
+ * 神煞详情 / 列表共用：顶上小圆徽章（非全幅大图）
+ */
+export function shenshaBadgeArtHtml(id: string, glyph = '煞'): string {
+  const src = getCodexCoverSrc(id);
+  const inner = src
+    ? `<div class="bazi-ss-badge-art" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" loading="lazy" /></div>`
+    : `<div class="bazi-ss-badge-glyph" aria-hidden="true">${escapeHtml(glyph)}</div>`;
+  return `<div class="bazi-ss-badge-stage bazi-enc-badge" data-cover-id="${escapeHtml(id)}">${inner}</div>`;
+}

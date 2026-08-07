@@ -4,6 +4,7 @@ import './styles/module-themes.css';
 import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
 import './styles/share.css';
+import { initTheme } from './theme/theme.ts';
 import { renderLabHome } from './pages/lab-home.ts';
 import {
   initRouter,
@@ -14,6 +15,8 @@ import {
 } from './router.ts';
 import { mountAppVersion } from './ui/app-version.ts';
 import { syncShareOwnerRewards } from './share/sheet.ts';
+
+initTheme();
 
 function lazy(
   loader: () => Promise<{ default?: RouteHandler } | Record<string, unknown>>,
@@ -163,6 +166,12 @@ registerRoute(
 registerRoute(
   '/ziwei/reading',
   lazy(() => import('./pages/ziwei-reading.ts'), 'renderZiweiReading', ziweiStyles),
+);
+registerRoute(
+  '/ziwei/chart',
+  () => {
+    navigate('/ziwei/reading?mode=chart');
+  },
 );
 registerRoute(
   '/ziwei/tujian',

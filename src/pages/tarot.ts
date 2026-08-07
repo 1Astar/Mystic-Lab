@@ -1,4 +1,4 @@
-import { detectBrowserEnv } from '../core/browser-env.ts';
+﻿import { detectBrowserEnv } from '../core/browser-env.ts';
 import { CameraService } from '../core/camera-service.ts';
 import {
   HeldGestureDetector,
@@ -552,7 +552,7 @@ export function renderTarot(root: HTMLElement): () => void {
       case 'modeSelect':
         stage.innerHTML = `
           <h2 class="section-title">选择你的抽牌方式</h2>
-          <p class="tarot-hint">根据设备为你准备了不同仪式，可随时在图鉴回看。</p>
+          <p class="tarot-hint">根据设备为你准备了不同仪式，可随时在探索回看。</p>
           <div class="draw-mode-list" id="draw-mode-list"></div>
         `;
         {
@@ -1126,7 +1126,7 @@ export function renderTarot(root: HTMLElement): () => void {
     actions.innerHTML = '';
     stage.innerHTML = `
       <h2 class="section-title">占问结果</h2>
-      <p class="tarot-hint">先看整盘；点牌可看牌面与图鉴 · 新牌已收入图鉴</p>
+      <p class="tarot-hint">先看整盘；点牌可看牌面与探索 · 新牌已收入探索</p>
       <div class="result-panel" id="result-cards">
         <div id="reading-switch-panel"></div>
         <div class="learning-card">
@@ -1295,7 +1295,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const codexBtn = document.createElement('button');
     codexBtn.type = 'button';
     codexBtn.className = 'btn btn-secondary';
-    codexBtn.textContent = '查看图鉴';
+    codexBtn.textContent = '查看探索';
     codexBtn.addEventListener('click', () => navigate('/tarot/tujian'));
 
     const journalBtn = document.createElement('button');
@@ -1821,8 +1821,8 @@ export function renderTarot(root: HTMLElement): () => void {
       summary:
         reading.summary ||
         (drawnCards.length === 1
-          ? `「${reading.cards[0]?.cardName ?? ''}」已加入你的图鉴。答案不在牌里，在你心里。`
-          : `「${reading.cards.map((c) => c.cardName).join('、')}」共同描绘这次占问的脉络。新牌已解锁图鉴，可随时回看。`),
+          ? `「${reading.cards[0]?.cardName ?? ''}」已加入你的探索。答案不在牌里，在你心里。`
+          : `「${reading.cards.map((c) => c.cardName).join('、')}」共同描绘这次占问的脉络。新牌已解锁探索，可随时回看。`),
     };
   }
 

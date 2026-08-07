@@ -60,7 +60,7 @@ describe('bazi codex', () => {
     }
   });
 
-  it('unlock 写入图鉴并可累计', () => {
+  it('unlock 写入探索并可累计', () => {
     const chart = castBaziChart(profile, 2026, { includeLiunian: false });
     expect('error' in chart).toBe(false);
     if ('error' in chart) return;

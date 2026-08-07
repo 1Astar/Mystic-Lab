@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import {
   HEXAGRAMS,
   hexagramByKingWen,
@@ -182,7 +182,7 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
   const vault = buildVaultSnapshot();
   const meetByName = new Map(vault.meets.map((m) => [m.name, m.count]));
   header.innerHTML = `
-    <h1 class="page-title">六十四卦图鉴</h1>
+    <h1 class="page-title">六十四卦探索</h1>
     <p class="page-subtitle">已遇见 ${vault.collected} / ${vault.total} 卦</p>
   `;
   page.append(header);
@@ -373,7 +373,7 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
 
   paintList();
 
-  // 笔记「打开图鉴」深链：?gua=乾 或 ?kw=1
+  // 笔记「打开探索」深链：?gua=乾 或 ?kw=1
   try {
     const q = new URLSearchParams(location.search);
     const byName = q.get('gua');

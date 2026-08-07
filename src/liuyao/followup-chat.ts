@@ -25,6 +25,7 @@ import {
   personalContextFieldsHtml,
   readPersonalContextFrom,
 } from './personal-context.ts';
+import { renderAskPanelHtml, bindAskPanel } from './ask-panel.ts';
 
 export type ChatTurn = { role: 'user' | 'assistant'; content: string };
 
@@ -168,6 +169,8 @@ export function openFollowupChat(opts: {
   seedContext?: string;
   /** 直接展示的深度解读（不另调模型） */
   initialAssistant?: string;
+  /** 打开时默认 Tab：深度解读 | 边看边问 */
+  initialTab?: 'deep' | 'ask';
 }): void {
   document.querySelector('.ly-follow-chat')?.remove();
 
@@ -178,6 +181,7 @@ export function openFollowupChat(opts: {
   const label = hexChangeLabel(cast);
   const deepText = opts.initialAssistant?.trim() || '';
   const isDeepMode = Boolean(deepText);
+  const startTab = opts.initialTab === 'ask' ? 'ask' : 'deep';
   const history: ChatTurn[] = [];
   let aiSessionId = opts.aiSessionId ?? null;
 
@@ -188,22 +192,30 @@ export function openFollowupChat(opts: {
     <div class="ly-follow-chat-sheet" role="dialog" aria-modal="true" aria-labelledby="ly-follow-title">
       <header class="ly-follow-chat-head">
         <div>
-          <p class="ly-follow-chat-kicker">${isDeepMode ? '深度解读' : '追问陪读'}</p>
+          <p class="ly-follow-chat-kicker">深度解读</p>
           <h2 id="ly-follow-title">「${escapeHtml(label)}」</h2>
         </div>
         <button type="button" class="ly-follow-chat-x" data-follow-close aria-label="关闭">×</button>
       </header>
+      <div class="ly-deep-sheet-tabs" role="tablist" aria-label="深度解读与边看边问">
+        <button type="button" class="ly-deep-sheet-tab${startTab === 'deep' ? ' is-on' : ''}" data-deep-tab="deep" role="tab" aria-selected="${startTab === 'deep'}">深度解读</button>
+        <button type="button" class="ly-deep-sheet-tab${startTab === 'ask' ? ' is-on' : ''}" data-deep-tab="ask" role="tab" aria-selected="${startTab === 'ask'}">边看边问</button>
+      </div>
+      <div class="ly-deep-sheet-pane" data-deep-pane="deep" ${startTab === 'ask' ? 'hidden' : ''}>
       <p class="ly-follow-chat-persona">${
         isDeepMode
-          ? '先看完这一篇，有不清楚的再往下追问'
-          : '陪你把卦译回现实 · 坚定温柔'
+          ? '先看完这一篇，有不清楚的再往下追问；概念题可切到「边看边问」'
+          : '陪你把卦译回现实 · 坚定温柔；常问概念请用「边看边问」'
       }</p>
       ${
         isDeepMode
           ? `<section class="ly-follow-deep" data-follow-deep>
               <p class="ly-follow-deep-body">${escapeHtml(deepText).replace(/\n/g, '<br>')}</p>
             </section>`
-          : ''
+          : `<section class="ly-follow-deep-empty">
+              <p>还没有深度解读。可先去「边看边问」查概念，或生成一篇贴合你的解读。</p>
+              <button type="button" class="btn ly-btn-gold btn-sm" data-follow-make-deep>生成深度解读</button>
+            </section>`
       }
       ${
         opts.seedContext && !isDeepMode
@@ -250,6 +262,10 @@ export function openFollowupChat(opts: {
         }"></textarea>
         <button type="submit" class="btn ly-btn-gold" data-follow-send>发送</button>
       </form>
+      </div>
+      <div class="ly-deep-sheet-pane ly-deep-ask-pane" data-deep-pane="ask" ${startTab === 'deep' ? 'hidden' : ''}>
+        ${renderAskPanelHtml(cast, question)}
+      </div>
     </div>
   `;
 
@@ -300,6 +316,17 @@ export function openFollowupChat(opts: {
   });
   modal.querySelector('[data-follow-ai-settings]')?.addEventListener('click', () => {
     openAiSettingsModal();
+  });
+  modal.querySelector('[data-follow-make-deep]')?.addEventListener('click', () => {
+    close();
+    void import('./personalize-deep.ts').then(({ openPersonalizeDeep }) => {
+      openPersonalizeDeep({
+        cast: opts.cast,
+        question: opts.question,
+        castAt: opts.castAt,
+        journalId: opts.journalId,
+      });
+    });
   });
 
   let seedOnce = opts.seedContext?.trim() || '';
@@ -379,12 +406,36 @@ export function openFollowupChat(opts: {
 
   document.body.appendChild(modal);
   bindPersonalContextCard(modal);
+  const askPane = modal.querySelector<HTMLElement>('[data-deep-pane="ask"]');
+  if (askPane) bindAskPanel(askPane, cast, question, castAt);
+
+  const setDeepTab = (tab: 'deep' | 'ask') => {
+    modal.querySelectorAll<HTMLButtonElement>('[data-deep-tab]').forEach((btn) => {
+      const on = btn.dataset.deepTab === tab;
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    modal.querySelectorAll<HTMLElement>('[data-deep-pane]').forEach((pane) => {
+      pane.hidden = pane.dataset.deepPane !== tab;
+    });
+  };
+
+  modal.querySelectorAll<HTMLButtonElement>('[data-deep-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.deepTab === 'ask' ? 'ask' : 'deep';
+      setDeepTab(tab);
+      if (tab === 'deep') input.focus();
+      else askPane?.querySelector<HTMLTextAreaElement>('[data-ask-input]')?.focus();
+    });
+  });
+
   requestAnimationFrame(() => {
     modal.classList.add('is-open');
     paintMessages();
   });
   if (opts.seedAsk && !isDeepMode) void runAsk(opts.seedAsk);
-  else input.focus();
+  else if (startTab === 'deep') input.focus();
+  else askPane?.querySelector<HTMLTextAreaElement>('[data-ask-input]')?.focus();
 }
 
 function blockText(el: HTMLElement): string {

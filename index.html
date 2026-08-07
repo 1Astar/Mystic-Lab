@@ -6,8 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content="Mystic Lab 随心而行 — 用手势完成塔罗抽牌、小六壬掐指与梅花易数起卦" />
     <title>Mystic Lab · 随心而行</title>
+    <script>
+      try {
+        var t = localStorage.getItem('mystic-lab-theme');
+        if (t === 'moon' || t === 'star') {
+          document.documentElement.dataset.theme = t;
+          document.documentElement.style.colorScheme = t === 'moon' ? 'light' : 'dark';
+        } else {
+          document.documentElement.dataset.theme = 'star';
+        }
+      } catch (e) {
+        document.documentElement.dataset.theme = 'star';
+      }
+    </script>
     <style>
-      html, body { margin: 0; min-height: 100%; background: #08090d; color: #e8e2d5; }
+      html, body { margin: 0; min-height: 100%; }
+      html[data-theme='star'], html:not([data-theme]) {
+        background: #0b0b14; color: #f4f0e8;
+      }
+      html[data-theme='moon'] {
+        background: #f6f1e8; color: #2c3340;
+      }
       #app:empty::before {
         content: '加载中…';
         display: block;

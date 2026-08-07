@@ -28,4 +28,6 @@ export const TEN_GOD_PLAIN: Record<string, string> = {
   比肩: '同侪并肩',
   劫财: '争夺与互换',
   日主: '你自己',
+  女主: '你自己',
+  男主: '你自己',
 };

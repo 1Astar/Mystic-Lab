@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
@@ -42,6 +42,14 @@ function canRectify(p: {
   return Boolean(parseBirthParts(p.birthYear, p.birthMonth, p.birthDay, ''));
 }
 
+function wantsEdit(): boolean {
+  try {
+    return new URLSearchParams(location.search).get('edit') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function renderBaziHome(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
@@ -49,8 +57,16 @@ export function renderBaziHome(root: HTMLElement): () => void {
   let store = loadLifeStore();
   let person = getActivePerson();
   const p = store.profile;
-  let castReady = canCast(p);
-  let dateReady = canRectify(p);
+
+  // 与紫微一致：人生宇宙档案已可排盘则直进命盘，不重复填表（?edit=1 强制改资料）
+  if (canCast(person) && !wantsEdit()) {
+    stars.remove();
+    navigate('/bazi/reading');
+    return () => {};
+  }
+
+  let castReady = canCast(person);
+  let dateReady = canRectify(person);
 
   const page = document.createElement('div');
   page.className = 'page life-page bazi-home-page';
@@ -89,7 +105,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
         ${dateReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
       </button>
       <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
-        <strong>八字图鉴</strong>
+        <strong>八字探索</strong>
         <span>金木水火土 · 天干地支 · ${codex.collected}/${codex.total}</span>
         <em aria-hidden="true">›</em>
       </button>
@@ -200,8 +216,8 @@ export function renderBaziHome(root: HTMLElement): () => void {
   root.appendChild(page);
   attachPersonSwitcherToPage(page, {
     onChange: () => {
-      // 切换角色后整页重载，保证表单与摘要绑定新人
-      navigate('/bazi');
+      // 切换角色：有资料直进排盘，否则留在表单
+      navigate(canCast(getActivePerson()) ? '/bazi/reading' : '/bazi?edit=1');
     },
   });
   return () => {

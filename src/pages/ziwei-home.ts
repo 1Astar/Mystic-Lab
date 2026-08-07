@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -83,7 +83,7 @@ export function renderZiweiHome(root: HTMLElement): () => void {
           </button>
           <button type="button" class="ziwei-intent-card ${intent === 'map' ? 'is-on' : ''}" data-intent="map">
             <strong>当下全局格局</strong>
-            <span>一张人生剧场地图</span>
+            <span>一张人生地图</span>
           </button>
         </div>
       </section>
@@ -123,7 +123,7 @@ export function renderZiweiHome(root: HTMLElement): () => void {
 
       <nav class="ziwei-home-nav" aria-label="紫微入口">
         <button type="button" class="bazi-home-link" data-path="/ziwei/tujian">
-          <strong>星曜图鉴</strong>
+          <strong>星曜探索</strong>
           <span>角色 · 场景 · 搭戏 · 相遇 · ${progress.collected}/${progress.total}</span>
           <em aria-hidden="true">›</em>
         </button>

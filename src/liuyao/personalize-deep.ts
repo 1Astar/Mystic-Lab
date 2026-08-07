@@ -6,6 +6,7 @@
 import type { CastResult } from './engine.ts';
 import { buildFollowupSystemPrompt, openFollowupChat } from './followup-chat.ts';
 import { buildOfflineAnswerPack } from '../mystic-engine/build-pack.ts';
+import { ICON_SPARK } from '../ui/lab-icons.ts';
 import {
   canUseMysticDeep,
   friendlyQuotaCopy,
@@ -118,7 +119,7 @@ export function openPersonalizeDeep(opts: {
     <div class="ly-personalize-sheet" role="dialog" aria-modal="true" aria-labelledby="ly-p-title">
       <header class="ly-personalize-head">
         <div>
-          <p class="ly-personalize-kicker">✦ 深度解读</p>
+          <p class="ly-personalize-kicker">深度解读</p>
           <h2 id="ly-p-title">想让这卦更贴合你的实际情况？</h2>
         </div>
         <button type="button" class="ly-personalize-x" data-p-close aria-label="关闭">×</button>
@@ -259,7 +260,7 @@ export function openPersonalizeDeep(opts: {
   });
 }
 
-/** 有深度解读则直接展示；否则打开补充表单 */
+/** 有深度解读则直接展示；否则打开悬浮窗（可先边看边问，再生成深度） */
 export function openDeepReadingEntry(opts: {
   cast: CastResult;
   question: string;
@@ -278,7 +279,13 @@ export function openDeepReadingEntry(opts: {
     });
     return;
   }
-  openPersonalizeDeep(opts);
+  openFollowupChat({
+    cast: opts.cast,
+    question: opts.question,
+    castAt: opts.castAt,
+    journalId: opts.journalId,
+    initialTab: 'ask',
+  });
 }
 
 /** 结果页右侧 AI 入口 */
@@ -296,12 +303,12 @@ export function bindPersonalizeFab(
     : '想让这卦更贴合你的实际情况？';
   const fab = document.createElement('button');
   fab.type = 'button';
-  fab.className = 'ly-ai-side-fab';
+  fab.className = 'ly-ai-side-fab is-icon';
   fab.dataset.lyAiFab = '1';
   fab.dataset.personalizeFab = '1';
   fab.title = hint;
   fab.setAttribute('aria-label', hint);
-  fab.innerHTML = `<span class="ly-ai-side-fab-ico" aria-hidden="true">✦</span><span>深度解读</span>`;
+  fab.innerHTML = ICON_SPARK;
   fab.addEventListener('click', () => {
     openDeepReadingEntry(opts);
   });

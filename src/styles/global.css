@@ -31,10 +31,7 @@ body {
 body {
   font-family: var(--font-sans);
   color: var(--ink);
-  background:
-    radial-gradient(circle at 85% 5%, rgba(155, 127, 212, 0.18), transparent 30%),
-    radial-gradient(circle at 10% 20%, rgba(201, 162, 39, 0.1), transparent 25%),
-    linear-gradient(165deg, #0a0e16, var(--bg-deep) 45%, #12101a);
+  background: var(--body-bg);
 }
 
 #app {
@@ -54,10 +51,10 @@ body {
   font-size: 1.65rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  background: linear-gradient(135deg, var(--gold), var(--purple));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gold);
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
 }
 
 .page-subtitle {
@@ -985,15 +982,20 @@ body {
   inset: 0;
   overflow: hidden;
   z-index: 0;
+  opacity: var(--stars-opacity, 0.35);
+}
+
+html[data-theme='moon'] .stars {
+  visibility: hidden;
 }
 
 .star {
   position: absolute;
   width: 2px;
   height: 2px;
-  background: #fff;
+  background: rgba(244, 240, 232, 0.55);
   border-radius: 50%;
-  opacity: 0.4;
+  opacity: 0.35;
   animation: twinkle 3s ease-in-out infinite;
 }
 

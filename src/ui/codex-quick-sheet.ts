@@ -1,4 +1,4 @@
-import { getCardRoleHint } from '../codex/card-role.ts';
+﻿import { getCardRoleHint } from '../codex/card-role.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
 import { formatCardNameZh } from '../tarot/card-names.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
@@ -40,14 +40,14 @@ export type CodexQuickSheetOptions = {
   reversed?: boolean;
 };
 
-/** 牌义图鉴正文（Tab / 抽屉共用）：上半常驻 + 下半折叠 */
+/** 牌义探索正文（Tab / 抽屉共用）：上半常驻 + 下半折叠 */
 export function renderCodexKnowledgeBody(
   deckId: string,
   options?: CodexQuickSheetOptions,
 ): string {
   const card = TAROT_DECK.find((c) => c.id === deckId);
   if (!card) {
-    return `<div class="result-empty"><p>未找到这张牌的图鉴资料。</p></div>`;
+    return `<div class="result-empty"><p>未找到这张牌的探索资料。</p></div>`;
   }
 
   const knowledge = resolveCardKnowledge(card);
@@ -146,7 +146,7 @@ export function openCodexQuickSheet(
       <header class="codex-quick-sheet-head">
         <div class="codex-quick-face">${cardFaceImageHtml(card.id, nameCn, 'codex-quick-img')}</div>
         <div>
-          <p class="codex-quick-kicker">牌义图鉴 · 知识大卡</p>
+          <p class="codex-quick-kicker">牌义探索 · 知识大卡</p>
           <h2 id="codex-quick-title" class="codex-quick-title">${escapeHtml(nameCn)}</h2>
         </div>
         <button type="button" class="codex-quick-close" aria-label="关闭" data-close>×</button>
@@ -155,7 +155,7 @@ export function openCodexQuickSheet(
         ${renderCodexKnowledgeBody(deckId, options)}
       </div>
       <footer class="codex-quick-sheet-foot">
-        <button type="button" class="btn btn-ghost" data-full>打开完整图鉴</button>
+        <button type="button" class="btn btn-ghost" data-full>打开完整探索</button>
         <button type="button" class="btn" data-close>继续看解读</button>
       </footer>
     </div>

@@ -37,7 +37,7 @@ describe('hex-guide shared snippets', () => {
     expect(html).toMatch(/分域/);
     expect(html).toMatch(/data-guide-domains/);
     expect(html).toMatch(/为什么叫/);
-    expect(html).toMatch(/六十四卦图鉴/);
+    expect(html).toMatch(/六十四卦探索/);
     expect(html.match(/整体意象/g)?.length).toBe(1);
   });
 

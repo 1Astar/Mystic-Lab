@@ -1,4 +1,4 @@
-/** 搭戏组合图鉴 · 星曜如何互相当对手戏 */
+/** 搭戏组合探索 · 星曜如何互相当对手戏 */
 export type ComboLore = {
   id: string;
   title: string;

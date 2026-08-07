@@ -55,7 +55,7 @@ export type PalaceHit = {
   line: string;
 };
 
-/** @deprecated 关系网内容迁到组合旅程；保留供降级 */
+/** @deprecated 关系网内容迁到星曜组合；保留供降级 */
 export type StarRelations = {
   synergy: string;
   tension: string;

@@ -12044,10 +12044,65 @@ body.ly-yao-modal-open {
 .ly-ai-side-fab:active {
   transform: scale(0.97);
 }
-.ly-ai-side-fab-ico {
-  font-size: 0.9rem;
-  line-height: 1;
-  opacity: 0.95;
+.ly-ai-side-fab.is-icon {
+  right: calc(max(12px, env(safe-area-inset-right, 0px)) + 44px + 3.25rem);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+  border-radius: 50%;
+}
+
+.ly-ai-side-fab.is-icon .ly-ai-side-fab-ico {
+  font-size: 1.05rem;
+}
+
+.ly-deep-sheet-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0 2px;
+}
+
+.ly-deep-sheet-tab {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background: transparent;
+  color: rgba(255, 230, 200, 0.65);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ly-deep-sheet-tab.is-on {
+  color: #1a1220;
+  background: linear-gradient(120deg, #e0c48a, #c9a8e4);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.ly-deep-ask-pane {
+  max-height: min(62vh, 520px);
+  overflow: auto;
+  padding-bottom: 8px;
+}
+
+.ly-follow-deep-empty {
+  margin: 0 0 14px;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 214, 166, 0.28);
+  background: rgba(18, 14, 28, 0.45);
+}
+
+.ly-follow-deep-empty p {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(255, 230, 200, 0.78);
 }
 
 /* 点牌弹窗打开时隐藏侧边入口，避免挡关闭 */

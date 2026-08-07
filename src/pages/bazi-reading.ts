@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -18,7 +18,6 @@ import {
   loadLifeStore,
 } from '../life/storage.ts';
 import { draftFromBazi } from '../share/drafts.ts';
-import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import {
   bindAnswerPackGestures,
   renderAnswerPackHtml,
@@ -27,6 +26,12 @@ import { unlockBaziCodexFromChart } from '../bazi/codex.ts';
 import { WUXING_LORE, stemBranchById } from '../bazi/codex-lore.ts';
 import { getStarCard } from '../bazi/codex-tags.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
+import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
+import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
+import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
+import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
+import { buildBaziPageFaq } from '../bazi/page-faq.ts';
 import { wuxingClass } from '../bazi/elements.ts';
 
 const Q_KEY = 'mystic.bazi.reading.q';
@@ -69,6 +74,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
   let question = loadQuestion();
   let unlockedOnce = false;
+  let disposeFloat: (() => void) | null = null;
 
   function maybeUnlockCodex(chart: Parameters<typeof unlockBaziCodexFromChart>[0]): void {
     if (unlockedOnce) return;
@@ -87,7 +93,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
       isFirstTime: true,
       count: unlocked.total,
       cardName: name,
-      intoLabel: '已收入八字图鉴',
+      intoLabel: '已收入八字探索',
     });
   }
 
@@ -105,7 +111,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
             <p class="life-card-kicker">还不能速读</p>
             <p class="life-gate-brief">回到八字首页填写出生信息。</p>
           </div>
-          <button type="button" class="life-btn-primary" data-path="/bazi">去填写</button>
+          <button type="button" class="life-btn-primary" data-path="/bazi?edit=1">去填写</button>
         </section>
       `;
       bindNav();
@@ -115,6 +121,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
     const yearNow = new Date().getFullYear();
     const chartResult = castBaziChart(store.profile, yearNow, {
       includeLiunian: true,
+      gender: person.gender,
     });
     if ('error' in chartResult) {
       page.innerHTML = `
@@ -123,7 +130,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
           <h1 class="page-title">我的命盘</h1>
           <p class="page-subtitle">${escapeHtml(chartResult.error)}</p>
         </header>
-        <button type="button" class="life-btn-primary" data-path="/bazi">回去改出生信息</button>
+        <button type="button" class="life-btn-primary" data-path="/bazi?edit=1">回去改出生信息</button>
       `;
       bindNav();
       return;
@@ -196,7 +203,8 @@ export function renderBaziReading(root: HTMLElement): () => void {
       : '';
 
     page.innerHTML = `
-      <button type="button" class="back-link life-back">← 返回八字</button>
+      <button type="button" class="back-link life-back">← Lab</button>
+      ${baziSysTabsHtml('reading')}
       <header class="life-header">
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <p class="home-eyebrow">MY BIRTH CODE</p>
@@ -265,7 +273,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
       <details class="bazi-origin-fold">
         <summary>
-          <span>📖 传统命理溯源</span>
+          <span>传统命理溯源</span>
           <em>点击展开</em>
         </summary>
         <div class="bazi-origin-body">
@@ -273,24 +281,56 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </div>
       </details>
 
-      <nav class="bazi-reading-nav" aria-label="图鉴">
-        <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
-          <strong>八字图鉴</strong>
-          <span>偏旺 / 偏弱 / 缺 · 天干地支收集</span>
-          <em aria-hidden="true">›</em>
-        </button>
-      </nav>
-
       <div class="bazi-reading-actions">
         <button type="button" class="life-btn-primary" data-path="/bazi/chart">想看为什么？进入命盘解析 ›</button>
-        <button type="button" class="life-btn-ghost" data-path="/bazi">改出生信息</button>
+        <button type="button" class="life-btn-ghost" data-path="/bazi?edit=1">改出生信息</button>
       </div>
-      <div class="ms-invite-host bazi-share" data-bazi-invite></div>
     `;
 
     bindNav();
     const packHost = page.querySelector<HTMLElement>('[data-bazi-pack]');
     if (packHost) bindAnswerPackGestures(packHost);
+
+    mountLabReadingTopbar(page, {
+      backPath: '/',
+      backLabel: '← Lab',
+    });
+
+    const shareDraft = () => {
+      const pillarsLabel = chartResult.pillars
+        .filter((p) => !p.empty)
+        .map((p) => `${p.title}${p.stem}${p.branch}`)
+        .join(' · ');
+      return draftFromBazi({
+        dayMaster: chartResult.dayMaster,
+        pillarsLabel,
+        question: question || '我的命盘速读',
+        summary: pack.verdict.headline,
+        sections: [{ heading: '定调', body: pack.verdict.headline }],
+      });
+    };
+
+    disposeFloat?.();
+    disposeFloat = mountLabFloatActions(page, {
+      tujianPath: '/bazi/tujian',
+      tujianLabel: '八字图鉴',
+      draftShare: shareDraft,
+      deepLabel: '深度解读',
+      onDeep: () => {
+        openLabDeepSheet({
+          system: 'bazi',
+          title: `${person.nickname || '我'}的命盘`,
+          initialTab: 'ask',
+          presets: buildBaziPageFaq(chartResult, { question }),
+          answerConcept: answerBaziConcept,
+          onMiss: (q) => {
+            void recordBaziConceptMiss(q);
+          },
+          deepHint: '结合你的出生密码与当下问题，做一次更贴合的解读。概念题请用「边看边问」。',
+          onDeep: () => navigate('/bazi/chart'),
+        });
+      },
+    });
 
     const qInput = page.querySelector<HTMLInputElement>('#bazi-reading-q');
     page.querySelector('#bazi-reading-ask-go')?.addEventListener('click', () => {
@@ -298,53 +338,11 @@ export function renderBaziReading(root: HTMLElement): () => void {
       saveQuestion(question);
       paint();
     });
-
-    const pillarsLabel = chartResult.pillars
-      .filter((p) => !p.empty)
-      .map((p) => `${p.title}${p.stem}${p.branch}`)
-      .join(' · ');
-    page.querySelector('[data-bazi-invite]') &&
-      mountInviteCompanionBar(page.querySelector('[data-bazi-invite]')!, {
-        unitLabel: '这份命盘',
-        system: 'bazi',
-        draft: () => {
-          const p = buildBaziAnswerPack({
-            question,
-            chart: chartResult,
-            gender: person.gender,
-          });
-          return draftFromBazi({
-            dayMaster: chartResult.dayMaster,
-            pillarsLabel,
-            question: question || '我的命盘速读',
-            summary: p.verdict.headline,
-            sections: [
-              { heading: '定调', body: p.verdict.headline },
-              { heading: '结论', body: p.decision },
-              {
-                heading: '盘面依据',
-                body: (p.answers[0]?.evidence ?? [])
-                  .map((e) => e.plain)
-                  .join('\n'),
-              },
-              {
-                heading: '本周动作',
-                body: [p.breakthrough, ...p.checklist]
-                  .map((a) => `${a.title}：${a.body}`)
-                  .join('\n'),
-              },
-              ...(p.reassurance
-                ? [{ heading: '定心丸', body: p.reassurance }]
-                : []),
-            ],
-          });
-        },
-      });
   }
 
   function bindNav(): void {
-    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/bazi'));
     page.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
+      if (el.classList.contains('life-back') || el.closest('.lab-reading-chrome')) return;
       el.addEventListener('click', () => {
         const path = el.dataset.path;
         if (path) navigate(path);
@@ -354,7 +352,11 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
   paint();
   root.appendChild(page);
+
   return () => {
     stars.remove();
+    disposeFloat?.();
+    document.querySelector('[data-lab-float-dock]')?.remove();
+    document.querySelector('.lab-deep-sheet')?.remove();
   };
 }

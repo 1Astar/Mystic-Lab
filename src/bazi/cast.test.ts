@@ -47,6 +47,24 @@ describe('castBaziChart', () => {
     expect(chart.pillars).toHaveLength(5);
   });
 
+  it('labels day stem god by gender', () => {
+    const base = {
+      ...EMPTY_PROFILE,
+      birthYear: '2005',
+      birthMonth: '12',
+      birthDay: '23',
+      birthHour: '8:37',
+      birthPlace: '北京',
+    };
+    const female = castBaziChart(base, 2025, { gender: 'female', includeLiunian: false });
+    const male = castBaziChart(base, 2025, { gender: 'male', includeLiunian: false });
+    expect('error' in female).toBe(false);
+    expect('error' in male).toBe(false);
+    if ('error' in female || 'error' in male) return;
+    expect(female.pillars.find((p) => p.key === 'day')?.stemGod).toBe('女主');
+    expect(male.pillars.find((p) => p.key === 'day')?.stemGod).toBe('男主');
+  });
+
   it('leaves hour empty when missing', () => {
     const chart = castBaziChart(
       {

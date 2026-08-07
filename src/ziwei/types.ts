@@ -21,6 +21,9 @@ export type PalaceSnap = {
   adjectives: StarSnap[];
   /** 虚岁大限起止，来自 iztro palace.decadal.range */
   decadalRange?: [number, number];
+  /** 大限天干地支 */
+  decadalStem?: string;
+  decadalBranch?: string;
 };
 
 export type PillarId = 'core' | 'career' | 'bond' | 'lesson';

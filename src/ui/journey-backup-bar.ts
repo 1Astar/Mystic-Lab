@@ -26,7 +26,7 @@ export function mountJourneyBackupBar(host: HTMLElement): void {
   bar.innerHTML = `
     <div class="journey-backup-copy">
       <h2>备份与恢复</h2>
-      <p>导出图鉴 + 各体系占问/手札/进度/档案 + AI 设置（含 API Key）。导入按 id 合并：不同记录保留双方，同 id 保留较新；AI 设置以备份为准。请妥善保管备份文件。</p>
+      <p>导出探索 + 各体系占问/手札/进度/档案 + AI 设置（含 API Key）。导入按 id 合并：不同记录保留双方，同 id 保留较新；AI 设置以备份为准。请妥善保管备份文件。</p>
     </div>
     <div class="journey-backup-actions">
       <button type="button" class="btn btn-secondary btn-sm" data-export>导出 JSON</button>

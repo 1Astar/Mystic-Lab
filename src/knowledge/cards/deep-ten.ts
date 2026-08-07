@@ -1,6 +1,6 @@
 import type { CardKnowledge } from '../types.ts';
 
-/** 十张深度解读牌库（图鉴 / 结果页共用） */
+/** 十张深度解读牌库（探索 / 结果页共用） */
 export const DEEP_TEN_KNOWLEDGE: CardKnowledge[] = [
   {
     id: 'pentacles_four',

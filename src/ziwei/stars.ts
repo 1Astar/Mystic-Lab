@@ -1,4 +1,4 @@
-/** 紫微星曜图鉴：绝世主星 / 助阵辅星 / 四大化星 · 性格收集向 */
+/** 紫微星曜探索：绝世主星 / 助阵辅星 / 四大化星 · 性格收集向 */
 
 export type StarCategory = 'major' | 'aux' | 'mutagen';
 
@@ -507,7 +507,7 @@ export function majorsByGroup(group: MajorGroup): StarCard[] {
   return MAJOR_STARS.filter((s) => s.majorGroup === group);
 }
 
-/** 生年四化名 → 图鉴卡 id */
+/** 生年四化名 → 探索卡 id */
 export function mutagenToCardId(mutagen: string): string | null {
   if (mutagen === '禄') return '化禄';
   if (mutagen === '权') return '化权';

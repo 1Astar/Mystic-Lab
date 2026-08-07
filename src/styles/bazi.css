@@ -50,7 +50,7 @@
 }
 
 .bazi-grid-wrap {
-  overflow-x: auto;
+  overflow-x: hidden;
   margin: 0 0 18px;
   border-radius: 14px;
   border: 1px solid rgba(255, 214, 166, 0.22);
@@ -61,23 +61,24 @@
 
 .bazi-grid {
   width: 100%;
-  min-width: 520px;
+  min-width: 0;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
 }
 
 .bazi-grid th,
 .bazi-grid td {
-  padding: 10px 6px;
+  padding: 8px 3px;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid rgba(255, 214, 166, 0.1);
+  word-break: break-word;
 }
 
 .bazi-grid thead th {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
   color: rgba(255, 230, 200, 0.7);
   font-weight: 500;
 }
@@ -92,10 +93,12 @@
 
 .bazi-grid .bazi-row-label,
 .bazi-grid tbody th {
-  width: 2.8rem;
+  width: 2.4rem;
+  padding-left: 6px;
+  padding-right: 2px;
   color: rgba(255, 230, 200, 0.55);
   font-weight: 500;
-  font-size: 0.7rem;
+  font-size: 0.74rem;
 }
 
 .bazi-col-liunian {
@@ -105,15 +108,43 @@
 .bazi-row-main .bazi-stem,
 .bazi-row-main .bazi-branch {
   display: inline-block;
-  font-size: 1.55rem;
+  font-size: clamp(1.28rem, 5.6vw, 1.6rem);
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.04em;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
 }
 
 .bazi-god {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   color: rgba(255, 230, 200, 0.82);
+}
+
+.bazi-term {
+  appearance: none;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bazi-term:hover,
+.bazi-term:focus-visible {
+  color: #ffe6c8;
+  outline: none;
+}
+
+.bazi-luck-gz .bazi-term {
+  text-decoration: none;
+}
+
+.bazi-luck-gz .bazi-term:hover,
+.bazi-luck-gz .bazi-term:focus-visible {
+  color: #ffe6c8;
 }
 
 .bazi-hide-list,
@@ -121,26 +152,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   line-height: 1.35;
 }
 
 .bazi-hide {
   display: inline-flex;
   align-items: baseline;
-  gap: 3px;
+  gap: 2px;
   font-weight: 600;
+  font-size: 0.8rem;
 }
 
 .bazi-hide small {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 400;
   color: rgba(255, 230, 200, 0.55);
 }
 
-.bazi-zhishen span {
+.bazi-zhishen .bazi-term {
   color: rgba(255, 230, 200, 0.7);
-  font-size: 0.7rem;
+  font-size: 0.76rem;
+}
+
+.bazi-meta-cell {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: rgba(255, 230, 200, 0.78);
 }
 
 .bazi-relations,
@@ -152,11 +190,187 @@
   background: rgba(18, 14, 32, 0.4);
 }
 
+.bazi-relations-line {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(255, 230, 200, 0.82);
+}
+
 .bazi-relations p {
   margin: 6px 0 0;
   font-size: 0.86rem;
   line-height: 1.5;
   color: rgba(255, 230, 200, 0.82);
+}
+
+.bazi-learn-fold {
+  margin: 18px 0 24px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  background: rgba(16, 12, 28, 0.4);
+  color: rgba(255, 230, 200, 0.78);
+}
+
+.bazi-learn-fold > summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffd6a6;
+  list-style: none;
+}
+
+.bazi-learn-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.bazi-luck {
+  margin: 0 0 18px;
+  padding: 12px 0 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.2);
+  background:
+    linear-gradient(180deg, rgba(36, 30, 24, 0.55), rgba(18, 14, 28, 0.72));
+}
+
+.bazi-luck-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 0 12px 10px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(255, 230, 200, 0.62);
+}
+
+.bazi-luck-meta p {
+  margin: 0;
+}
+
+.bazi-luck-meta span + span {
+  margin-left: 10px;
+}
+
+.bazi-luck-row {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: 0;
+  align-items: stretch;
+  border-top: 1px solid rgba(255, 214, 166, 0.1);
+}
+
+.bazi-luck-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 214, 166, 0.7);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.bazi-luck-scroller {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: 2px;
+}
+
+.bazi-luck-col {
+  flex: 0 0 auto;
+  min-width: 4.4rem;
+  max-width: 5.2rem;
+  margin: 0;
+  padding: 8px 6px;
+  border: 0;
+  border-right: 1px solid rgba(255, 214, 166, 0.08);
+  background: transparent;
+  color: rgba(255, 230, 200, 0.88);
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.bazi-luck-col:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.bazi-luck-col.is-current,
+.bazi-luck-col.is-selected {
+  background: rgba(255, 214, 166, 0.12);
+  color: #ffb4a8;
+}
+
+.bazi-luck-col.is-selected {
+  box-shadow: inset 0 0 0 1px rgba(255, 180, 120, 0.35);
+}
+
+.bazi-luck-year,
+.bazi-luck-jieqi {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.bazi-luck-age,
+.bazi-luck-date,
+.bazi-luck-xiao,
+.bazi-luck-empty {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.62rem;
+  color: rgba(255, 230, 200, 0.5);
+}
+
+.bazi-luck-col.is-current .bazi-luck-age,
+.bazi-luck-col.is-selected .bazi-luck-age,
+.bazi-luck-col.is-current .bazi-luck-xiao,
+.bazi-luck-col.is-selected .bazi-luck-xiao {
+  color: rgba(255, 180, 168, 0.75);
+}
+
+.bazi-luck-gz {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+.bazi-luck-gz b {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.bazi-luck-gz em {
+  font-style: normal;
+  font-size: 0.62rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-luck-col.is-current .bazi-luck-gz em,
+.bazi-luck-col.is-selected .bazi-luck-gz em {
+  color: rgba(255, 180, 168, 0.85);
+}
+
+.bazi-luck-note {
+  margin: 0;
+  padding: 10px 12px 12px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(255, 214, 166, 0.85);
+  border-top: 1px solid rgba(255, 214, 166, 0.1);
 }
 
 .bazi-season-row {
@@ -170,12 +384,21 @@
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
+  margin: 0;
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.22);
+  font: inherit;
   font-size: 0.78rem;
   color: rgba(255, 240, 220, 0.9);
+  cursor: pointer;
+}
+
+.bazi-season-chip:hover,
+.bazi-season-chip:focus-visible {
+  border-color: rgba(255, 214, 166, 0.45);
+  outline: none;
 }
 
 .bazi-season-chip b {
@@ -196,33 +419,75 @@
 .bazi-season-chip.wx-shui { border-color: rgba(110, 182, 255, 0.35); }
 
 .bazi-mode-tabs {
-  display: flex;
-  gap: 8px;
-  margin: 0 0 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 2px 0 18px;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background:
+    linear-gradient(180deg, rgba(28, 22, 36, 0.72), rgba(14, 12, 24, 0.55));
+  box-shadow: inset 0 1px 0 rgba(255, 230, 200, 0.04);
 }
 
 .bazi-mode-tab {
-  flex: 1;
+  appearance: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 48px;
   padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
-  background: rgba(18, 14, 32, 0.45);
-  color: rgba(255, 230, 200, 0.72);
-  font-size: 0.88rem;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.48);
+  font: inherit;
   cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bazi-mode-tab strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.bazi-mode-tab span {
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+  font-weight: 400;
 }
 
 .bazi-mode-tab.is-active {
-  border-color: rgba(201, 162, 39, 0.55);
-  background: rgba(201, 162, 39, 0.14);
   color: #ffe9c2;
-  font-weight: 600;
+  background:
+    linear-gradient(180deg, rgba(201, 162, 39, 0.22), rgba(201, 162, 39, 0.08));
+  box-shadow:
+    0 1px 0 rgba(255, 230, 200, 0.08),
+    inset 0 0 0 1px rgba(201, 162, 39, 0.28);
 }
 
-.bazi-meta-cell {
-  font-size: 0.72rem;
+.bazi-mode-tab.is-active span {
+  color: rgba(255, 214, 166, 0.72);
+  opacity: 1;
+}
+
+.bazi-mode-tab:hover:not(.is-active),
+.bazi-mode-tab:focus-visible:not(.is-active) {
   color: rgba(255, 230, 200, 0.78);
-  line-height: 1.35;
+  outline: none;
+}
+
+.bazi-mode-tab:focus-visible {
+  outline: 2px solid rgba(201, 162, 39, 0.45);
+  outline-offset: 1px;
 }
 
 .bazi-shensha {
@@ -232,10 +497,10 @@
   gap: 2px;
 }
 
-.bazi-shensha span {
-  font-size: 0.68rem;
+.bazi-shensha .bazi-term {
+  font-size: 0.76rem;
   color: rgba(255, 214, 166, 0.88);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .bazi-row-shensha td {
@@ -606,9 +871,10 @@
   column-gap: 12px;
   row-gap: 2px;
   width: 100%;
+  min-height: 44px;
   padding: 14px 2px;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--line-soft, var(--line));
   background: transparent;
   color: inherit;
   font: inherit;
@@ -626,7 +892,7 @@
   grid-column: 1;
   grid-row: 2;
   font-size: 0.8rem;
-  color: rgba(255, 230, 200, 0.58);
+  color: var(--ink-muted);
 }
 
 .bazi-home-link > em {
@@ -634,13 +900,13 @@
   grid-row: 1 / span 2;
   align-self: center;
   font-style: normal;
-  color: rgba(255, 214, 166, 0.7);
+  color: var(--gold);
   font-size: 1.15rem;
 }
 
 .bazi-home-link > em.tag {
   font-size: 0.72rem;
-  color: rgba(255, 180, 160, 0.9);
+  color: var(--warn);
 }
 
 .bazi-home-link:disabled {
@@ -650,11 +916,11 @@
 
 .bazi-home-link-soft strong {
   font-weight: 550;
-  color: rgba(255, 240, 220, 0.88);
+  color: var(--ink);
 }
 
 .bazi-home-link:hover:not(:disabled) strong {
-  color: #ffd6a6;
+  color: var(--gold);
 }
 
 /* L2 五步 */
@@ -988,8 +1254,8 @@
 }
 
 .bazi-wx-card.is-dim {
-  opacity: 0.48;
-  filter: grayscale(0.35);
+  opacity: 0.72;
+  filter: grayscale(0.12);
 }
 
 .bazi-wx-card:active {
@@ -1085,8 +1351,8 @@
 }
 
 .bazi-gz-card.is-dim {
-  opacity: 0.42;
-  filter: grayscale(0.4);
+  opacity: 0.72;
+  filter: grayscale(0.12);
 }
 
 .bazi-gz-card.is-lit {
@@ -1419,8 +1685,8 @@
 }
 
 .bazi-star-card.is-dim {
-  opacity: 0.45;
-  filter: grayscale(0.35);
+  opacity: 0.72;
+  filter: grayscale(0.12);
 }
 
 .bazi-star-glyph {
@@ -1725,6 +1991,278 @@
   box-shadow: 0 0 0 1px rgba(160, 190, 220, 0.35), 0 0 28px rgba(100, 140, 200, 0.16);
 }
 
+/* —— 神煞分档 · 小徽章 / 因子 / 更多 —— */
+.bazi-ss-tier-hint {
+  margin: -4px 0 10px;
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-codex-empty {
+  margin: 0;
+  padding: 12px 4px;
+  font-size: 0.85rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-ss-badge-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+}
+
+.bazi-ss-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #fff6e8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bazi-ss-row:hover,
+.bazi-ss-row:focus-visible {
+  background: rgba(255, 214, 166, 0.06);
+  outline: none;
+}
+
+/* 列表徽章：无黑底圆壳，只露资产里的小章（图本身多留空，放大裁切） */
+.bazi-ss-row .bazi-ss-badge-stage {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.bazi-ss-row .bazi-ss-badge-art img {
+  transform: scale(3.05);
+  transform-origin: center;
+}
+
+.bazi-ss-row-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.bazi-ss-row-text strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bazi-ss-row-text em {
+  font-style: normal;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  color: rgba(255, 230, 200, 0.58);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bazi-ss-row.is-dim {
+  opacity: 0.72;
+}
+
+.bazi-ss-row.is-dim .bazi-ss-badge-stage {
+  filter: grayscale(0.75) brightness(0.55);
+}
+
+.bazi-ss-row.is-warm.is-lit .bazi-ss-badge-stage {
+  filter: drop-shadow(0 0 7px rgba(255, 180, 100, 0.4));
+}
+
+.bazi-ss-row.is-cold.is-lit .bazi-ss-badge-stage {
+  filter: drop-shadow(0 0 7px rgba(140, 180, 230, 0.35));
+}
+
+/* 旧网格卡保留类名兜底（详情圆章仍用 stage） */
+.bazi-ss-badge-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bazi-ss-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff6e8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bazi-ss-badge-stage {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+}
+
+.bazi-ss-badge-art {
+  width: 100%;
+  height: 100%;
+}
+
+.bazi-ss-badge-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform: scale(3.05);
+  transform-origin: center;
+}
+
+.bazi-ss-badge-glyph {
+  font-size: 1rem;
+  color: rgba(255, 214, 166, 0.85);
+}
+
+.bazi-ss-badge strong {
+  font-size: 0.98rem;
+}
+
+.bazi-ss-badge em {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.58);
+}
+
+.bazi-ss-badge.is-dim {
+  opacity: 0.55;
+}
+
+.bazi-ss-badge.is-dim .bazi-ss-badge-stage {
+  filter: grayscale(0.7) brightness(0.55);
+}
+
+.bazi-ss-badge.is-warm.is-lit .bazi-ss-badge-stage {
+  filter: drop-shadow(0 0 7px rgba(255, 180, 100, 0.4));
+}
+
+.bazi-ss-badge.is-cold.is-lit .bazi-ss-badge-stage {
+  filter: drop-shadow(0 0 7px rgba(140, 180, 230, 0.35));
+}
+
+.bazi-ss-factor-list {
+  display: grid;
+  gap: 8px;
+}
+
+.bazi-ss-factor {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 12px 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 180, 120, 0.2);
+  background: rgba(28, 16, 12, 0.55);
+  color: #fff6e8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bazi-ss-factor-mark {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.bazi-ss-factor-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bazi-ss-factor-body strong {
+  font-size: 0.92rem;
+}
+
+.bazi-ss-factor-body em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: rgba(255, 214, 166, 0.7);
+}
+
+.bazi-ss-factor-body p {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(255, 230, 200, 0.72);
+}
+
+.bazi-ss-factor.is-dim {
+  opacity: 0.7;
+}
+
+.bazi-ss-more {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(0, 0, 0, 0.22);
+  padding: 8px 12px 10px;
+}
+
+.bazi-ss-more summary {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: rgba(255, 214, 166, 0.9);
+  padding: 6px 0;
+}
+
+.bazi-ss-more-list {
+  margin: 8px 0 4px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.bazi-ss-more-list li {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 214, 166, 0.08);
+}
+
+.bazi-ss-more-list strong {
+  font-size: 0.88rem;
+  color: #fff4e4;
+}
+
+.bazi-ss-more-list span {
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.62);
+  line-height: 1.4;
+}
+
 .bazi-ss-card.is-lit .bazi-ss-card-art img {
   animation: bazi-art-breathe 4.5s ease-in-out infinite;
 }
@@ -1797,96 +2335,920 @@
   margin-bottom: 6px;
 }
 
+.bazi-sk-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 12px;
+  align-items: center;
+}
+
 .bazi-sk-svg {
   display: block;
-  width: min(100%, 320px);
+  width: min(100%, 280px);
   margin: 0 auto;
   height: auto;
 }
 
-.bazi-sk-edge {
-  fill: none;
-  stroke-width: 1.4;
+.bazi-sk-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 4.6rem;
+}
+
+.bazi-sk-note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(12, 10, 22, 0.45);
+  color: rgba(255, 230, 200, 0.88);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bazi-sk-note b {
+  font-size: 0.85rem;
+}
+
+.bazi-sk-note em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-sk-note.is-strong em { color: #ffb4a8; }
+.bazi-sk-note.is-weak em { color: #9ec4ff; }
+.bazi-sk-note.is-miss em { color: #d4b56a; }
+.bazi-sk-note.is-flat em { color: rgba(255, 230, 200, 0.42); }
+
+@media (max-width: 380px) {
+  .bazi-sk-body {
+    grid-template-columns: 1fr;
+  }
+  .bazi-sk-notes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .bazi-sk-note {
+    flex: 1 1 calc(33% - 6px);
+  }
+}
+
+.bazi-codex-guide {
+  margin: 0 0 12px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(255, 214, 166, 0.78);
+}
+
+.bazi-codex-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.bazi-codex-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.bazi-codex-entry-grid.is-jiazi {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+@media (min-width: 720px) {
+  .bazi-codex-entry-grid.is-jiazi {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.bazi-jz-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 10px;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(18, 14, 32, 0.48);
+  color: rgba(255, 230, 200, 0.92);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  writing-mode: horizontal-tb;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.bazi-jz-chip strong {
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bazi-jz-ny {
+  font-size: 0.68rem;
+  color: rgba(255, 214, 166, 0.62);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bazi-jz-hit {
+  font-size: 0.62rem;
+  color: rgba(160, 210, 255, 0.85);
+  line-height: 1.3;
+}
+
+.bazi-jz-chip.is-soft {
+  opacity: 0.78;
+  border-color: rgba(255, 214, 166, 0.08);
+  background: rgba(18, 14, 32, 0.28);
+}
+
+.bazi-jz-chip.is-hit {
+  opacity: 1;
+  border-color: rgba(120, 190, 255, 0.35);
+  background: rgba(80, 140, 220, 0.12);
+}
+
+.bazi-mine-quick {
+  margin: 0 0 16px;
+}
+
+.bazi-codex-entry-grid.is-shensha {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 8px;
+}
+
+.bazi-codex-entry-grid.is-ss-atlas {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.bazi-codex-entry-grid.is-shensha .bazi-ss-row {
+  width: auto;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 214, 166, 0.12);
+  background: rgba(18, 14, 32, 0.42);
+}
+
+.bazi-codex-entry-grid.is-shensha .bazi-ss-row.is-soft {
+  opacity: 1;
+  border-color: rgba(140, 140, 150, 0.14);
+  background: rgba(28, 28, 34, 0.55);
+  color: rgba(180, 180, 190, 0.72);
+  filter: grayscale(0.92);
+}
+
+.bazi-codex-entry-grid.is-shensha .bazi-ss-row.is-soft .bazi-ss-badge-stage {
+  filter: grayscale(1) brightness(0.55) contrast(0.9);
   opacity: 0.7;
 }
 
+.bazi-codex-entry-grid.is-shensha .bazi-ss-row.is-soft .bazi-ss-row-text em {
+  color: rgba(160, 160, 170, 0.55);
+}
+
+.bazi-ss-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 10px;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  background: rgba(18, 14, 32, 0.45);
+  color: rgba(255, 230, 200, 0.92);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bazi-ss-chip strong {
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bazi-ss-chip em {
+  font-style: normal;
+  font-size: 0.66rem;
+  line-height: 1.35;
+  color: rgba(255, 230, 200, 0.55);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.bazi-ss-chip.is-soft {
+  opacity: 1;
+  border-color: rgba(140, 140, 150, 0.14);
+  background: rgba(28, 28, 34, 0.55);
+  color: rgba(170, 170, 180, 0.7);
+  filter: grayscale(0.95);
+}
+
+.bazi-ss-chip.is-soft strong {
+  color: rgba(160, 160, 170, 0.75);
+}
+
+.bazi-ss-chip.is-soft em {
+  color: rgba(140, 140, 150, 0.5);
+}
+
+.bazi-ss-chip.is-lit {
+  border-color: rgba(120, 190, 255, 0.28);
+  filter: none;
+}
+
+.bazi-codex-entry {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(18, 14, 32, 0.5);
+  color: rgba(255, 230, 200, 0.92);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bazi-codex-entry.is-card {
+  min-height: 72px;
+}
+
+.bazi-codex-thumb {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.28);
+  display: grid;
+  place-items: center;
+}
+
+.bazi-codex-thumb img,
+.bazi-codex-thumb svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bazi-codex-thumb.is-glyph {
+  font-size: 1.1rem;
+  color: rgba(255, 214, 166, 0.75);
+}
+
+.bazi-codex-entry-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.bazi-codex-entry strong {
+  font-size: 0.95rem;
+}
+
+.bazi-codex-meta {
+  font-size: 0.68rem;
+  color: rgba(255, 214, 166, 0.62);
+  letter-spacing: 0.02em;
+}
+
+.bazi-codex-entry em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-codex-presence {
+  font-size: 0.66rem;
+  color: rgba(160, 200, 255, 0.55);
+  margin-top: 2px;
+}
+
+.bazi-enc-chart-status {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 214, 166, 0.06);
+  border: 1px solid rgba(255, 214, 166, 0.12);
+  font-size: 0.85rem;
+  color: rgba(255, 230, 200, 0.78);
+}
+
+.bazi-enc-chart-status.is-on {
+  border-color: rgba(120, 190, 255, 0.28);
+  background: rgba(80, 140, 220, 0.1);
+  color: rgba(200, 230, 255, 0.92);
+}
+
+.bazi-enc-memory-line {
+  font-weight: 600;
+  color: rgba(255, 214, 166, 0.92);
+}
+
+.bazi-codex-entry.is-soft,
+.bazi-ss-row.is-soft,
+.bazi-sk-node.is-soft .bazi-sk-disk,
+.bazi-sk-node.is-soft .bazi-sk-rim {
+  opacity: 0.72;
+}
+
+.bazi-ss-row.is-soft {
+  opacity: 1;
+  color: rgba(170, 170, 180, 0.72);
+  filter: grayscale(0.9);
+}
+
+.bazi-ss-row.is-soft .bazi-ss-badge-stage {
+  filter: grayscale(1) brightness(0.55) contrast(0.9);
+  opacity: 0.7;
+}
+
+.bazi-ss-row.is-soft .bazi-ss-row-text em {
+  color: rgba(150, 150, 160, 0.55);
+}
+
+.bazi-sk-node.is-soft .bazi-sk-motif-wrap {
+  opacity: 0.9;
+}
+
+.bazi-codex-entry.is-soft {
+  opacity: 1;
+  border-color: rgba(140, 140, 150, 0.14);
+  background: rgba(28, 28, 34, 0.5);
+  color: rgba(170, 170, 180, 0.72);
+  filter: grayscale(0.9);
+}
+
+.bazi-codex-entry.is-soft .bazi-codex-meta,
+.bazi-codex-entry.is-soft em,
+.bazi-codex-entry.is-soft .bazi-codex-presence {
+  color: rgba(150, 150, 160, 0.5);
+}
+
+.bazi-codex-entry.is-soft .bazi-codex-thumb {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.75;
+}
+
+.bazi-sk-edge {
+  fill: none;
+  stroke-width: 1.5;
+  opacity: 0.72;
+}
+
 .bazi-sk-edge.is-sheng {
-  stroke: rgba(120, 210, 160, 0.75);
+  stroke: rgba(120, 210, 160, 0.8);
 }
 
 .bazi-sk-edge.is-ke {
   stroke: rgba(230, 120, 100, 0.55);
-  stroke-dasharray: 3 3;
+  stroke-dasharray: 3.5 3.5;
 }
 
 .bazi-sk-edge.is-mute {
-  opacity: 0.18;
+  opacity: 0.16;
 }
 
 .bazi-sk-edge.is-focus {
   opacity: 1;
-  stroke-width: 2.2;
+  stroke-width: 2.4;
 }
 
 .bazi-sk-arrow.is-sheng {
-  fill: rgba(120, 210, 160, 0.85);
+  fill: rgba(120, 210, 160, 0.9);
 }
 
 .bazi-sk-arrow.is-ke {
-  fill: rgba(230, 120, 100, 0.7);
+  fill: rgba(230, 120, 100, 0.75);
 }
 
 .bazi-sk-hit {
   fill: transparent;
   cursor: pointer;
+  pointer-events: all;
+}
+
+.bazi-sk-node {
+  cursor: pointer;
+  /* SVG <g tabindex> 默认焦点是矩形框；改用圆形光晕 */
+  outline: none;
+}
+
+.bazi-sk-node:focus,
+.bazi-sk-node:focus-visible {
+  outline: none;
+}
+
+.bazi-sk-node:focus-visible .bazi-sk-aura {
+  opacity: 1;
+  stroke-width: 1.85;
+}
+
+.bazi-sk-node:focus-visible .bazi-sk-rim {
+  stroke-width: 2;
+}
+
+.bazi-sk-aura {
+  fill: none;
+  stroke: rgba(255, 214, 166, 0.12);
+  stroke-width: 1;
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 .bazi-sk-disk {
-  fill: rgba(24, 18, 40, 0.92);
-  stroke: rgba(255, 214, 166, 0.35);
-  stroke-width: 1.2;
+  stroke: none;
   pointer-events: none;
 }
 
-.bazi-sk-node.is-lit .bazi-sk-disk {
-  stroke: rgba(255, 230, 180, 0.85);
-  filter: drop-shadow(0 0 6px rgba(255, 200, 120, 0.45));
+.bazi-sk-rim {
+  fill: none;
+  stroke: rgba(255, 214, 166, 0.32);
+  stroke-width: 1.15;
+  pointer-events: none;
 }
 
-.bazi-sk-node.is-dim .bazi-sk-disk {
-  opacity: 0.45;
+.bazi-sk-motif-wrap {
+  pointer-events: none;
 }
 
-.bazi-sk-node.is-focus .bazi-sk-disk {
-  stroke: rgba(255, 230, 180, 0.95);
+.bazi-sk-motif {
+  fill: none;
+  stroke: rgba(255, 240, 220, 0.55);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.bazi-sk-motif.is-fill {
+  fill: rgba(255, 240, 220, 0.14);
+}
+
+.bazi-sk-motif.is-ring {
+  fill: none;
+  stroke: rgba(255, 240, 220, 0.55);
+}
+
+.bazi-sk-motif.is-inner {
+  opacity: 0.72;
+  stroke-width: 1;
+}
+
+.bazi-sk-node.wx-mu .bazi-sk-rim { stroke: rgba(110, 210, 140, 0.55); }
+.bazi-sk-node.wx-huo .bazi-sk-rim { stroke: rgba(255, 130, 110, 0.55); }
+.bazi-sk-node.wx-tu .bazi-sk-rim { stroke: rgba(212, 181, 106, 0.55); }
+.bazi-sk-node.wx-jin .bazi-sk-rim { stroke: rgba(232, 213, 154, 0.55); }
+.bazi-sk-node.wx-shui .bazi-sk-rim { stroke: rgba(110, 182, 255, 0.55); }
+
+.bazi-sk-node.wx-mu .bazi-sk-aura { stroke: rgba(110, 210, 140, 0.22); }
+.bazi-sk-node.wx-huo .bazi-sk-aura { stroke: rgba(255, 130, 110, 0.22); }
+.bazi-sk-node.wx-tu .bazi-sk-aura { stroke: rgba(212, 181, 106, 0.22); }
+.bazi-sk-node.wx-jin .bazi-sk-aura { stroke: rgba(232, 213, 154, 0.2); }
+.bazi-sk-node.wx-shui .bazi-sk-aura { stroke: rgba(110, 182, 255, 0.22); }
+
+.bazi-sk-node.wx-mu .bazi-sk-motif { stroke: rgba(140, 230, 165, 0.85); }
+.bazi-sk-node.wx-huo .bazi-sk-motif { stroke: rgba(255, 160, 125, 0.9); }
+.bazi-sk-node.wx-huo .bazi-sk-motif.is-fill { fill: rgba(255, 110, 80, 0.28); }
+.bazi-sk-node.wx-tu .bazi-sk-motif { stroke: rgba(230, 200, 130, 0.85); }
+.bazi-sk-node.wx-tu .bazi-sk-motif.is-fill { fill: rgba(212, 181, 106, 0.22); }
+.bazi-sk-node.wx-jin .bazi-sk-motif { stroke: rgba(245, 225, 175, 0.9); }
+.bazi-sk-node.wx-shui .bazi-sk-motif { stroke: rgba(140, 200, 255, 0.92); }
+
+.bazi-sk-node.is-soft .bazi-sk-motif {
+  opacity: 0.85;
+}
+
+.bazi-sk-node.is-lit .bazi-sk-rim {
+  stroke-width: 1.4;
+}
+
+.bazi-sk-node.is-lit.wx-mu .bazi-sk-disk { filter: drop-shadow(0 0 5px rgba(110, 210, 140, 0.45)); }
+.bazi-sk-node.is-lit.wx-huo .bazi-sk-disk { filter: drop-shadow(0 0 5px rgba(255, 120, 90, 0.45)); }
+.bazi-sk-node.is-lit.wx-tu .bazi-sk-disk { filter: drop-shadow(0 0 5px rgba(212, 181, 106, 0.4)); }
+.bazi-sk-node.is-lit.wx-jin .bazi-sk-disk { filter: drop-shadow(0 0 5px rgba(232, 213, 154, 0.35)); }
+.bazi-sk-node.is-lit.wx-shui .bazi-sk-disk { filter: drop-shadow(0 0 5px rgba(110, 182, 255, 0.45)); }
+
+.bazi-sk-node.is-dim .bazi-sk-disk,
+.bazi-sk-node.is-dim .bazi-sk-rim,
+.bazi-sk-node.is-dim .bazi-sk-motif {
+  opacity: 0.5;
+}
+
+.bazi-sk-node.is-focus .bazi-sk-aura {
+  opacity: 1;
+  stroke-width: 1.6;
+}
+
+.bazi-sk-node.is-focus .bazi-sk-rim {
   stroke-width: 2;
-  filter: drop-shadow(0 0 10px rgba(255, 200, 120, 0.65));
 }
 
-.bazi-sk-node.is-related .bazi-sk-disk {
-  stroke: rgba(180, 220, 255, 0.75);
+.bazi-sk-node.is-focus.wx-mu .bazi-sk-disk { filter: drop-shadow(0 0 9px rgba(110, 210, 140, 0.65)); }
+.bazi-sk-node.is-focus.wx-huo .bazi-sk-disk { filter: drop-shadow(0 0 9px rgba(255, 120, 90, 0.65)); }
+.bazi-sk-node.is-focus.wx-tu .bazi-sk-disk { filter: drop-shadow(0 0 9px rgba(212, 181, 106, 0.6)); }
+.bazi-sk-node.is-focus.wx-jin .bazi-sk-disk { filter: drop-shadow(0 0 9px rgba(232, 213, 154, 0.55)); }
+.bazi-sk-node.is-focus.wx-shui .bazi-sk-disk { filter: drop-shadow(0 0 9px rgba(110, 182, 255, 0.65)); }
+
+.bazi-sk-node.is-related .bazi-sk-rim {
+  stroke-width: 1.5;
+  opacity: 0.95;
 }
 
 .bazi-sk-node.is-mute {
   opacity: 0.28;
 }
 
+.bazi-sk-label {
+  fill: #fff8ec;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(8, 6, 14, 0.55);
+  stroke-width: 2.5px;
+}
+
 .bazi-sk-captions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
-  margin-top: 10px;
-  font-size: 0.78rem;
+  display: block;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  background: rgba(18, 14, 32, 0.55);
+  font-size: 0.82rem;
   color: rgba(255, 230, 200, 0.78);
 }
 
+.bazi-sk-captions-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: rgba(255, 236, 210, 0.95);
+}
+
 .bazi-sk-captions p {
+  margin: 0 0 4px;
+}
+
+.bazi-sk-captions-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 6px;
+}
+
+.bazi-sk-caption-btn {
   margin: 0;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 166, 0.35);
+  background: rgba(255, 214, 166, 0.12);
+  color: #fff6e8;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.bazi-sk-caption-btn.is-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.55);
+}
+
+.bazi-sk-captions-hint,
+.bazi-sk-idle-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: rgba(255, 230, 200, 0.45);
+  line-height: 1.4;
+}
+
+.bazi-sk-idle-hint {
+  margin: 10px 0 0;
+  text-align: center;
 }
 
 .bazi-sk-map.is-compact {
   margin: 0;
   padding: 10px 8px;
+}
+
+/* —— 十二地支关系环 —— */
+.bazi-br-map {
+  margin: 0 0 18px;
+  padding: 14px 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 214, 166, 0.18);
+  background:
+    radial-gradient(70% 50% at 50% 40%, rgba(120, 160, 255, 0.06), transparent 65%),
+    rgba(14, 12, 28, 0.72);
+}
+
+.bazi-br-head {
+  margin-bottom: 8px;
+}
+
+.bazi-br-modes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 4px 0 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.bazi-br-mode {
+  margin: 0;
+  padding: 4px 0 6px;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: rgba(255, 230, 200, 0.48);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 560;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.bazi-br-mode:hover {
+  color: rgba(255, 236, 210, 0.82);
+}
+
+.bazi-br-mode.is-on {
+  border-color: transparent;
+  border-bottom-color: rgba(255, 214, 166, 0.75);
+  background: transparent;
+  color: #fff6e8;
+  font-weight: 650;
+}
+
+.bazi-br-mode:focus,
+.bazi-br-mode:focus-visible {
+  outline: none;
+}
+
+.bazi-br-svg {
+  display: block;
+  width: min(100%, 300px);
+  margin: 0 auto;
+  height: auto;
+}
+
+.bazi-br-rail {
+  fill: none;
+  stroke: rgba(255, 214, 166, 0.12);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  pointer-events: none;
+}
+
+.bazi-br-edge {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.bazi-br-edge.is-chong {
+  stroke-width: 1.7;
+  opacity: 0.9;
+}
+
+.bazi-br-edge.is-he {
+  stroke: rgba(120, 200, 170, 0.8);
+}
+
+.bazi-br-edge.is-hai {
+  stroke: rgba(200, 160, 90, 0.7);
+  stroke-dasharray: 4 3;
+}
+
+.bazi-br-edge.is-xing {
+  stroke: rgba(180, 130, 220, 0.7);
+}
+
+.bazi-br-edge.is-sanhe {
+  stroke: rgba(110, 170, 240, 0.55);
+  fill: rgba(110, 170, 240, 0.08);
+}
+
+.bazi-br-edge.is-fill {
+  stroke-width: 1.2;
+}
+
+.bazi-br-edge.is-self {
+  fill: none;
+  stroke-width: 1.4;
+}
+
+.bazi-br-edge-label {
+  font-size: 7px;
+  fill: rgba(255, 230, 200, 0.72);
+  pointer-events: none;
+}
+
+.bazi-br-edge-label.is-chong {
+  font-size: 6.5px;
+  font-weight: 600;
+}
+
+.bazi-br-node {
+  cursor: pointer;
+  outline: none;
+}
+
+.bazi-br-node:focus,
+.bazi-br-node:focus-visible {
+  outline: none;
+}
+
+.bazi-br-node:focus-visible .bazi-br-disk {
+  stroke: rgba(255, 214, 166, 0.9);
+  stroke-width: 1.7;
+}
+
+.bazi-br-disk {
+  fill: rgba(18, 14, 32, 0.92);
+  stroke: rgba(255, 214, 166, 0.35);
+  stroke-width: 1.2;
+  pointer-events: none;
+}
+
+.bazi-br-node.is-lit .bazi-br-disk {
+  stroke: rgba(255, 214, 166, 0.55);
+  filter: drop-shadow(0 0 4px rgba(255, 214, 166, 0.25));
+}
+
+.bazi-br-node.is-focus .bazi-br-disk {
+  stroke: rgba(255, 230, 180, 0.9);
+  stroke-width: 1.8;
+  fill: rgba(40, 32, 20, 0.95);
+}
+
+.bazi-br-node.is-related .bazi-br-disk {
+  stroke: rgba(140, 190, 255, 0.7);
+}
+
+.bazi-br-node.is-mute {
+  opacity: 0.28;
+}
+
+.bazi-br-label {
+  fill: #fff8ec;
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(8, 6, 14, 0.55);
+  stroke-width: 2px;
+}
+
+.bazi-br-hit {
+  fill: transparent;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.bazi-br-pairs {
+  margin: 10px 0 0;
+}
+
+.bazi-br-pairs-lead {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: rgba(255, 230, 200, 0.62);
+  line-height: 1.45;
+}
+
+.bazi-br-pair-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bazi-br-pair-grid.is-tri {
+  grid-template-columns: 1fr;
+}
+
+.bazi-br-pair-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: rgba(18, 14, 32, 0.45);
+  border-left: 3px solid var(--pair, rgba(255, 138, 122, 0.85));
+}
+
+.bazi-br-pair-card.is-he {
+  border-left-color: rgba(120, 210, 180, 0.85);
+}
+
+.bazi-br-pair-card.is-hai {
+  border-left-color: rgba(200, 160, 120, 0.85);
+}
+
+.bazi-br-pair-card.is-sanhe {
+  border-left-color: rgba(140, 180, 255, 0.85);
+  justify-content: space-between;
+}
+
+.bazi-br-pair-node {
+  margin: 0;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 214, 166, 0.22);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 236, 210, 0.95);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.bazi-br-pair-verb {
+  font-size: 0.72rem;
+  color: rgba(255, 214, 166, 0.7);
+  letter-spacing: 0.04em;
+}
+
+.bazi-br-pair-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: rgba(255, 230, 200, 0.75);
+  line-height: 1.55;
+}
+
+.bazi-rel-atlas-lead {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: rgba(255, 230, 200, 0.62);
+  line-height: 1.5;
+}
+
+.bazi-rel-atlas-more {
+  margin: 8px 0 0;
+  border: 1px solid rgba(255, 214, 166, 0.14);
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: rgba(10, 8, 18, 0.35);
+}
+
+.bazi-rel-atlas-more > summary {
+  cursor: pointer;
+  color: rgba(255, 230, 200, 0.72);
+  font-size: 0.85rem;
+  list-style: none;
+}
+
+.bazi-rel-atlas-more > summary::-webkit-details-marker {
+  display: none;
 }
 
 .bazi-enc-section-title {
@@ -1936,13 +3298,6 @@
   gap: 8px;
 }
 
-.bazi-sk-label {
-  fill: #fff6e8;
-  font-size: 11px;
-  font-weight: 600;
-  pointer-events: none;
-}
-
 .bazi-sk-legend {
   display: flex;
   justify-content: center;
@@ -1956,19 +3311,20 @@
 .bazi-sk-legend .is-ke::before {
   content: '';
   display: inline-block;
-  width: 14px;
-  height: 2px;
+  width: 18px;
+  height: 0;
   margin-right: 6px;
   vertical-align: middle;
+  border-top: 2px solid;
 }
 
 .bazi-sk-legend .is-sheng::before {
-  background: rgba(120, 210, 160, 0.85);
+  border-color: rgba(120, 210, 160, 0.9);
 }
 
 .bazi-sk-legend .is-ke::before {
-  background: rgba(230, 120, 100, 0.7);
-  border-top: 1px dashed transparent;
+  border-color: rgba(230, 120, 100, 0.75);
+  border-top-style: dashed;
 }
 
 /* —— 四屏百科详情 —— */
@@ -2039,8 +3395,34 @@
   margin-bottom: 12px;
 }
 
+.bazi-enc-art.is-badge {
+  min-height: 0;
+  margin-bottom: 16px;
+}
+
+.bazi-enc-art.is-badge .bazi-ss-badge-stage,
+.bazi-enc-badge {
+  width: 5.5rem;
+  height: 5.5rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.bazi-enc-memory.is-shensha {
+  text-align: center;
+}
+
+.bazi-enc-memory.is-shensha .bazi-enc-tags {
+  justify-content: center;
+}
+
 .bazi-enc-art.is-dim {
   filter: grayscale(0.85) brightness(0.55);
+}
+
+.bazi-enc-art.is-badge.is-dim {
+  filter: grayscale(0.55) brightness(0.65);
 }
 
 .bazi-enc-ss-img {
@@ -2147,8 +3529,8 @@
 }
 
 .bazi-enc-teaser.is-dim {
-  opacity: 0.55;
-  filter: grayscale(0.35);
+  opacity: 0.72;
+  filter: grayscale(0.1);
 }
 
 .bazi-codex-tabs .bazi-codex-tab {

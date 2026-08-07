@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -31,6 +31,7 @@ import {
   listCodexEntries,
   meetSummary,
 } from '../ziwei/codex.ts';
+import { ziweiSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -392,7 +393,7 @@ function renderJourneyLayer(): string {
     ? summary.next.status === 'partial'
       ? `下一站：继续集齐「${summary.next.combo.title}」（还差 ${summary.next.missingMembers.join('、')}）`
       : `下一站：去排盘遇见「${summary.next.combo.members[0]}」以开启「${summary.next.combo.title}」`
-    : '全部组合已点亮整组——你可以在搭戏图鉴里回看。';
+    : '全部组合已点亮整组——你可以在搭戏探索里回看。';
 
   const cards = steps
     .map((s) => {
@@ -538,7 +539,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderPalaceDetail(palaceId)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
       page.querySelector('[data-close-sub]')?.addEventListener('click', () => {
         palaceId = '';
         setUrl({ layer: 'palaces' });
@@ -552,7 +553,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderComboDetail(comboId)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
       page.querySelector('[data-close-sub]')?.addEventListener('click', () => {
         comboId = '';
         setUrl({ layer });
@@ -568,7 +569,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderDetail(detail, map, detailTab)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
       page.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         detailId = '';
         setUrl({ layer });
@@ -637,17 +638,24 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     }
 
     page.innerHTML = `
-      <button type="button" class="back-link life-back">← 返回紫微</button>
+      <button type="button" class="back-link life-back">← 返回命盘</button>
       <header class="life-header ziwei-header">
         <div class="life-header-emblem">${mysticEmblemHtml('cosmos', 'md')}</div>
         <h1 class="page-title">星系档案</h1>
         <p class="page-subtitle">角色卡 · 宫廷宇宙 · 关系网 · ${all.collected}/${all.total}</p>
       </header>
+      ${ziweiSysTabsHtml('reading')}
       <div class="ziwei-layer-tabs">${layerTabs}</div>
       ${body}
     `;
 
-    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
+    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+    page.querySelectorAll<HTMLElement>('.lab-sys-tabs [data-path]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const path = el.dataset.path;
+        if (path) navigate(path);
+      });
+    });
     page.querySelectorAll<HTMLButtonElement>('[data-layer]').forEach((btn) => {
       btn.addEventListener('click', () => {
         layer = (btn.dataset.layer as CodexLayer) || 'stars';

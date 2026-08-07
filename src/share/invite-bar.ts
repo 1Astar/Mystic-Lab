@@ -1,3 +1,4 @@
+import { ICON_SHARE } from '../ui/lab-icons.ts';
 import { openShareSheet, syncAddressBarToShare, type ShareDraft } from './sheet.ts';
 import type { ShareSystem } from './types.ts';
 
@@ -62,7 +63,8 @@ export function mountInviteCompanionBar(
   fab.dataset.msShareFab = '1';
   fab.dataset.shareSystem = resolvedSystem;
   fab.setAttribute('aria-label', resolvedSystem === 'tarot' ? '分享牌阵' : '分享');
-  fab.innerHTML = `<span class="ms-share-fab-ico" aria-hidden="true">↗</span><span>分享</span>`;
+  fab.title = resolvedSystem === 'tarot' ? '分享牌阵' : '分享';
+  fab.innerHTML = ICON_SHARE;
   fab.addEventListener('click', () => {
     const draft = opts.draft();
     if (draft.system !== resolvedSystem) {

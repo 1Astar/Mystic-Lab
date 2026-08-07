@@ -101,7 +101,7 @@ export function describeTrigramCombo(lines: LineBit[]): string {
   return `上${upper.id}${upper.symbol}（${upper.nature}）+ 下${lower.id}${lower.symbol}（${lower.nature}）`;
 }
 
-/** 由图鉴卦构造静态盘（无动爻），供图鉴「专业排盘」 */
+/** 由探索卦构造静态盘（无动爻），供探索「专业排盘」 */
 export function castFromHexagram(hex: Hexagram): CastResult {
   const primaryLines = linesFromHexagram(hex);
   const throws: YaoThrow[] = primaryLines.map((bit) => ({

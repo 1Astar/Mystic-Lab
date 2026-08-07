@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import {
   getContinuePalmChapter,
   getNextPalmChapter,
@@ -135,10 +135,10 @@ export function renderXiaoliurenPalmJourney(root: HTMLElement): () => void {
     el.innerHTML = `
       <p class="xlr-journey-celebrate-eyebrow">PALM JOURNEY</p>
       <h2>恭喜，你已经完成第一次掌上演算。</h2>
-      <p>Lv1–Lv6 已通关：识六神、看农历、找时辰、完成起课、理解结果、自己解释。接下来可以随时起课，或回图鉴加深印象。</p>
+      <p>Lv1–Lv6 已通关：识六神、看农历、找时辰、完成起课、理解结果、自己解释。接下来可以随时起课，或回探索加深印象。</p>
       <div class="xlr-journey-celebrate-actions">
         <button type="button" class="btn" data-go="/xiaoliuren/reading">再起一课</button>
-        <button type="button" class="btn btn-ghost" data-go="/xiaoliuren/tujian">六神图鉴</button>
+        <button type="button" class="btn btn-ghost" data-go="/xiaoliuren/tujian">六神探索</button>
       </div>
     `;
     el.querySelectorAll<HTMLElement>('[data-go]').forEach((btn) => {

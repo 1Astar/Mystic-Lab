@@ -35,7 +35,7 @@ export const PALM_JOURNEY_CHAPTERS: PalmJourneyChapter[] = [
       '不要只看吉凶：看关键词、象征、适合做什么、需要提醒什么。',
       '先建立印象，起课时才知道「落到哪一位」意味着什么。',
     ],
-    practiceLabel: '打开六神图鉴',
+    practiceLabel: '打开六神探索',
     practicePath: '/xiaoliuren/tujian',
   },
   {

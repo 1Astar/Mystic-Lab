@@ -233,13 +233,13 @@ export function renderDressArchiveHtml(
   `;
 }
 
-/** 图鉴用：静态本卦 + 甲日示例六神（与解读专业排盘同构） */
+/** 探索用：静态本卦 + 甲日示例六神（与解读专业排盘同构） */
 export const GUIDE_DRESS_SAMPLE_AT = new Date('2024-03-01T12:00:00+08:00');
 
 export function renderGuideDressArchiveHtml(hex: Hexagram): string {
   const cast = castFromHexagram(hex);
   return renderDressArchiveHtml(cast, GUIDE_DRESS_SAMPLE_AT, '', {
-    tip: '图鉴静态本卦（无动爻）。六神以<strong>甲日</strong>为例；点爻看注解。实占请用起卦日干。',
+    tip: '探索静态本卦（无动爻）。六神以<strong>甲日</strong>为例；点爻看注解。实占请用起卦日干。',
   });
 }
 

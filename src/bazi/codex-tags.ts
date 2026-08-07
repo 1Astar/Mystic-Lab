@@ -28,7 +28,7 @@ export type CodexTag = {
   met?: boolean;
 };
 
-/** 星煞 / 十神独立图鉴卡 */
+/** 星煞 / 十神独立探索卡 */
 export type StarCardLore = CodexTag & {
   /** 存储 id：ss:天乙贵人 / tg:正官 */
   id: string;
@@ -269,7 +269,7 @@ export function tenGodHintsForStemAsDayMaster(stem: string): string[] {
   for (const other of ALL_STEMS) {
     if (other === stem) continue;
     const g = stemTenGod(stem, other);
-    if (g && g !== '—' && g !== '日主') set.add(g);
+    if (g && g !== '—' && g !== '日主' && g !== '女主' && g !== '男主') set.add(g);
   }
   return [...set];
 }
@@ -286,7 +286,7 @@ export function tenGodHintsForBranch(branch: string): string[] {
   for (const hide of hides) {
     for (const day of ALL_STEMS) {
       const g = stemTenGod(day, hide);
-      if (!g || g === '—' || g === '日主') continue;
+      if (!g || g === '—' || g === '日主' || g === '女主' || g === '男主') continue;
       count.set(g, (count.get(g) ?? 0) + 1);
     }
   }
@@ -340,11 +340,11 @@ export function metTagIdsFromChart(chart: BaziChart): Set<string> {
     }
     if (p.key !== 'day') {
       const g = p.stemGod.trim();
-      if (g && g !== '—' && g !== '日主') met.add(`tg:${g}`);
+      if (g && g !== '—' && g !== '日主' && g !== '女主' && g !== '男主') met.add(`tg:${g}`);
     }
     for (const hg of p.hideGods || []) {
       const g = hg.trim();
-      if (g && g !== '—' && g !== '日主') met.add(`tg:${g}`);
+      if (g && g !== '—' && g !== '日主' && g !== '女主' && g !== '男主') met.add(`tg:${g}`);
     }
   }
   return met;

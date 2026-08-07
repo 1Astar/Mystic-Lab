@@ -1,5 +1,5 @@
 /**
- * 六十四卦图鉴：意象底图 + 分域映射 + 与六爻笔记同构的详解分区
+ * 六十四卦探索：意象底图 + 分域映射 + 与六爻笔记同构的详解分区
  */
 import type { Hexagram } from './hexagrams.ts';
 import {
@@ -251,7 +251,7 @@ function trigramWhy(nature: string, pos: 'upper' | 'lower'): string {
   return pos === 'upper' ? `${nature}在上——${hint}` : `${nature}在下——${hint}`;
 }
 
-/** 图鉴卡「整体意象」：优先用氛围诗句，否则回落到卦旨 */
+/** 探索卡「整体意象」：优先用氛围诗句，否则回落到卦旨 */
 const ATMOSPHERE_LINES: Record<number, string> = {
   1: '层层高空打开，一束光贯通——高、开、通、阳。',
   2: '厚实铺开，一切被温柔接住。',
@@ -369,7 +369,7 @@ export function buildHexGuidePack(hex: Hexagram): HexGuidePack {
         : `世在${LINE_LABELS[shi - 1]}`,
       shiLine: shi,
       yingLine: ying,
-      tip: '图鉴展示本卦静态结构。六神随日干起、用神/忌神依所问而定——完整生克见起卦后的「专业排盘」。',
+      tip: '探索展示本卦静态结构。六神随日干起、用神/忌神依所问而定——完整生克见起卦后的「专业排盘」。',
     },
   };
 }
@@ -398,7 +398,7 @@ export function saveHexSediment(name: string, text: string): void {
   }
 }
 
-/** 图鉴氛围图或程序化底 */
+/** 探索氛围图或程序化底 */
 export function renderGuideArtHtml(
   pack: HexGuidePack,
   opts?: { className?: string; alt?: string },
@@ -413,7 +413,7 @@ export function renderGuideArtHtml(
   )}" data-lower="${escapeHtml(pack.lowerNature)}" aria-hidden="true"></div>`;
 }
 
-/** 上/下卦代表 + 为何叠成此卦（笔记与图鉴共用） */
+/** 上/下卦代表 + 为何叠成此卦（笔记与探索共用） */
 export function renderGuideFormWhyHtml(pack: HexGuidePack): string {
   return `
     <div class="ly-guide-form-why" data-guide-form-why>
@@ -471,7 +471,7 @@ export function renderGuideDomainSectionHtml(pack: HexGuidePack): string {
 }
 
 /**
- * 笔记图鉴条：矮卡 = 氛围底 + 卦名/世应/爻线/意象 + 卡下相关上下卦说明
+ * 笔记探索条：矮卡 = 氛围底 + 卦名/世应/爻线/意象 + 卡下相关上下卦说明
  */
 function renderGuideSnippetHeroHtml(pack: HexGuidePack): string {
   const lines = linesFromHexagram(pack.hex);
@@ -553,7 +553,7 @@ function renderGuideSnippetHeroHtml(pack: HexGuidePack): string {
 }
 
 /**
- * 笔记「卦象解析」用的图鉴条：图鉴卡（含上下卦相关）+ 分域 + 互错综
+ * 笔记「卦象解析」用的探索条：探索卡（含上下卦相关）+ 分域 + 互错综
  */
 export function renderGuideXiangSnippetHtml(
   pack: HexGuidePack,
@@ -566,13 +566,13 @@ export function renderGuideXiangSnippetHtml(
           pack.hex.name,
         )}" data-path="/liuyao/hexagrams?gua=${encodeURIComponent(
           pack.hex.name,
-        )}">在六十四卦图鉴中打开「${escapeHtml(pack.hex.name)}」→</a></p>`;
+        )}">在六十四卦探索中打开「${escapeHtml(pack.hex.name)}」→</a></p>`;
 
   return `
     <section class="ly-guide-snippet${opts?.compactArt ? ' is-compact' : ''}" data-guide-snippet data-hex="${escapeHtml(
       pack.hex.name,
     )}">
-      <h4 class="ly-guide-snippet-title">图鉴 · ${escapeHtml(pack.hex.fullName)}</h4>
+      <h4 class="ly-guide-snippet-title">探索 · ${escapeHtml(pack.hex.fullName)}</h4>
       ${renderGuideSnippetHeroHtml(pack)}
       ${renderGuideDomainSectionHtml(pack)}
       ${renderDerivedHexSectionHtml(pack.hex)}
@@ -605,7 +605,7 @@ export function bindGuideDomainTabs(root: HTMLElement): void {
   });
 }
 
-/** 图鉴右侧笔记壳（对齐解读「卦象精读」：卦象解析 / 专业排盘 / 古籍解析） */
+/** 探索右侧笔记壳（对齐解读「卦象精读」：卦象解析 / 专业排盘 / 古籍解析） */
 export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
   const yaoHtml = pack.yaos
     .map((y) => {
@@ -636,7 +636,7 @@ export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
 
   return `
     <div class="ly-guide-notes" data-hex-guide-notes>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="图鉴解读笔记">
+      <div class="ly-note-mini-tabs" role="tablist" aria-label="探索解读笔记">
         <button type="button" class="ly-note-mini-tab is-active" data-guide-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
         <button type="button" class="ly-note-mini-tab" data-guide-tab="dress" role="tab" aria-selected="false">专业排盘</button>
         <button type="button" class="ly-note-mini-tab" data-guide-tab="books" role="tab" aria-selected="false">古籍解析</button>
@@ -655,7 +655,7 @@ export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
               </button>
             </nav>
             <div class="ly-xiang-sec-pane is-active" data-xiang-pane="guide" role="tabpanel">
-              <p class="ly-guide-tip">图鉴意象与上下卦；互错综见卡下。</p>
+              <p class="ly-guide-tip">探索意象与上下卦；互错综见卡下。</p>
               ${renderGuideSnippetHeroHtml(pack)}
               ${renderDerivedHexSectionHtml(pack.hex)}
             </div>

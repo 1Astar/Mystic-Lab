@@ -1,4 +1,4 @@
-/** 十二宫位图鉴 · 人生场景 */
+/** 十二宫位探索 · 人生场景 */
 export type PalaceLore = {
   id: string;
   title: string;

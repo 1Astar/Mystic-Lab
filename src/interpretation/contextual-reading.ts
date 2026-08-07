@@ -177,8 +177,8 @@ export function buildReadingResult(
   const summary =
     questionThread?.oneLiner ||
     (cards.length === 1
-      ? `「${names}」已加入你的图鉴。答案不在牌里，在你心里。`
-      : `「${names}」共同描绘这次占问的脉络。新牌已解锁图鉴，可随时回看。`);
+      ? `「${names}」已加入你的探索。答案不在牌里，在你心里。`
+      : `「${names}」共同描绘这次占问的脉络。新牌已解锁探索，可随时回看。`);
 
   return {
     cards: readings,

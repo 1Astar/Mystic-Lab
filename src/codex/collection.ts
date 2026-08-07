@@ -444,7 +444,7 @@ export function themeContextLine(
 }
 
 export function learnTipForCard(card: CardDefinition): string {
-  return `小提示：「${card.nameZh}」的关键词是 ${card.keywords.join(' / ')}。以后在图鉴里再遇见它，可以回想当时的问题与感受，会比背定义更有用。`;
+  return `小提示：「${card.nameZh}」的关键词是 ${card.keywords.join(' / ')}。以后在探索里再遇见它，可以回想当时的问题与感受，会比背定义更有用。`;
 }
 
 export function themeMeanings(card: CardDefinition): Record<QuestionTheme, string> {

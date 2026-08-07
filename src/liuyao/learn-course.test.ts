@@ -116,7 +116,7 @@ describe('learn-course', () => {
     expect(html).toMatch(/传统解卦全书/);
     expect(html).toMatch(/象曰/);
     expect(html).toMatch(/决策/);
-    expect(html).toMatch(/ly-guide-snippet|图鉴 ·/);
+    expect(html).toMatch(/ly-guide-snippet|探索 ·/);
     expect(html).toMatch(/分域解析|分域注解|传统断语|ly-domain-card/);
     expect(html).toMatch(/个人沉淀/);
     expect(html).toMatch(/实际落点|白话分域|ly-domain-card|分域解说/);

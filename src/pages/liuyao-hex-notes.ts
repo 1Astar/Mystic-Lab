@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { HEXAGRAMS, hexagramByKingWen } from '../liuyao/hexagrams.ts';
 import {
   bindHexGuideNotes,
@@ -22,7 +22,7 @@ function resolveHex() {
   return { hex, tab: byTab };
 }
 
-/** 图鉴解读笔记：整页（深链）；主入口仍是 HEX CARD 右侧抽屉 */
+/** 探索解读笔记：整页（深链）；主入口仍是 HEX CARD 右侧抽屉 */
 export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const page = document.createElement('div');
   page.className = 'page ly-hexagrams-page ly-hex-notes-page';
@@ -35,7 +35,7 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const back = document.createElement('button');
   back.type = 'button';
   back.className = 'back-link';
-  back.textContent = hex ? `← 返回「${hex.name}」图鉴卡` : '← 返回六十四卦图鉴';
+  back.textContent = hex ? `← 返回「${hex.name}」探索卡` : '← 返回六十四卦探索';
   back.addEventListener('click', () => {
     if (hex) {
       navigate(`/liuyao/hexagrams?gua=${encodeURIComponent(hex.name)}`);
@@ -51,8 +51,8 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
     empty.className = 'ly-hex-notes-empty';
     empty.innerHTML = `
       <h1 class="page-title">解读笔记</h1>
-      <p class="page-subtitle">未指定卦名。请从图鉴卡进入，或在地址加 ?gua=乾</p>
-      <button type="button" class="btn" data-go-list>打开六十四卦图鉴</button>
+      <p class="page-subtitle">未指定卦名。请从探索卡进入，或在地址加 ?gua=乾</p>
+      <button type="button" class="btn" data-go-list>打开六十四卦探索</button>
     `;
     empty.querySelector('[data-go-list]')?.addEventListener('click', () => {
       navigate('/liuyao/hexagrams');

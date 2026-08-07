@@ -189,6 +189,56 @@
   color: rgba(255, 230, 200, 0.45);
   scroll-snap-align: center;
   white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.birth-dt-wheel-item:hover {
+  color: rgba(255, 236, 214, 0.85);
+}
+
+.birth-dt-hint-desk {
+  display: none;
+}
+
+/* 桌面：居中弹层 + 可点选 + 显示细滚动条（手机滚轮在鼠标上很难对准） */
+@media (min-width: 720px) and (pointer: fine) {
+  .birth-dt-sheet {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .birth-dt-panel {
+    width: min(100%, 520px);
+    max-height: min(82vh, 560px);
+    border-radius: 18px;
+    border-bottom: 1px solid rgba(255, 214, 166, 0.22);
+    transform: translateY(12px) scale(0.98);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  .birth-dt-sheet.is-visible .birth-dt-panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .birth-dt-hint-desk {
+    display: block;
+  }
+
+  .birth-dt-wheel {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 214, 166, 0.35) transparent;
+  }
+
+  .birth-dt-wheel::-webkit-scrollbar {
+    display: block;
+    width: 5px;
+  }
+
+  .birth-dt-wheel::-webkit-scrollbar-thumb {
+    background: rgba(255, 214, 166, 0.35);
+    border-radius: 999px;
+  }
 }
 
 /* 档案页与全站暗色一致（勿再强制浅色底） */

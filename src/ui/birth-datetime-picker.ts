@@ -132,6 +132,7 @@ export function openBirthDatetimePicker(opts: OpenBirthDatetimePickerOptions): v
         <button type="button" class="birth-dt-tool birth-dt-tool-ok" data-birth-dt-ok>完成</button>
       </div>
       <p class="birth-dt-summary" id="birth-dt-summary"></p>
+      <p class="birth-dt-hint birth-dt-hint-desk">点击选项，或用滚轮逐格选择</p>
       <div class="birth-dt-wheels" aria-label="滑动选择">
         <div class="birth-dt-highlight" aria-hidden="true"></div>
         <div class="birth-dt-wheel" data-col="year"></div>
@@ -154,6 +155,7 @@ export function openBirthDatetimePicker(opts: OpenBirthDatetimePickerOptions): v
   const minuteEl = sheet.querySelector<HTMLElement>('[data-col="minute"]')!;
 
   const timers = new WeakMap<HTMLElement, number>();
+  const wheelAcc = new WeakMap<HTMLElement, number>();
 
   function syncSummary(): void {
     summaryEl.textContent = formatBirthDatetimeSummary(solar, mode);
@@ -231,33 +233,70 @@ export function openBirthDatetimePicker(opts: OpenBirthDatetimePickerOptions): v
     syncSummary();
   }
 
+  function onWheelSettled(el: HTMLElement): void {
+    snapWheel(el);
+    const col = el.dataset.col;
+    if (col === 'year') {
+      if (mode === 'lunar') {
+        lunar.year = readWheel(yearEl);
+        rebuildMonthWheel();
+        rebuildDayWheel();
+      } else {
+        solar.year = readWheel(yearEl);
+        rebuildDayWheel();
+      }
+    } else if (col === 'month') {
+      rebuildDayWheel();
+    }
+    applyFromWheels();
+  }
+
   function onWheelScroll(el: HTMLElement): void {
     const prev = timers.get(el);
     if (prev) window.clearTimeout(prev);
     timers.set(
       el,
       window.setTimeout(() => {
-        snapWheel(el);
-        const col = el.dataset.col;
-        if (col === 'year') {
-          if (mode === 'lunar') {
-            lunar.year = readWheel(yearEl);
-            rebuildMonthWheel();
-            rebuildDayWheel();
-          } else {
-            solar.year = readWheel(yearEl);
-            rebuildDayWheel();
-          }
-        } else if (col === 'month') {
-          rebuildDayWheel();
-        }
-        applyFromWheels();
+        onWheelSettled(el);
       }, 80),
     );
   }
 
+  function selectWheelIndex(el: HTMLElement, idx: number): void {
+    const items = el.querySelectorAll('.birth-dt-wheel-item');
+    const next = Math.max(0, Math.min(items.length - 1, idx));
+    el.scrollTop = scrollTopForWheelIndex(next);
+    onWheelSettled(el);
+  }
+
   [yearEl, monthEl, dayEl, hourEl, minuteEl].forEach((el) => {
     el.addEventListener('scroll', () => onWheelScroll(el), { passive: true });
+    // 桌面滚轮/触控板：按累积位移逐项步进，避免一次滑过目标
+    el.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.deltaY === 0) return;
+        e.preventDefault();
+        const nextAcc = (wheelAcc.get(el) ?? 0) + e.deltaY;
+        if (Math.abs(nextAcc) < ITEM_H) {
+          wheelAcc.set(el, nextAcc);
+          return;
+        }
+        const dir = nextAcc > 0 ? 1 : -1;
+        wheelAcc.set(el, 0);
+        selectWheelIndex(el, wheelIndexFromScrollTop(el.scrollTop) + dir);
+      },
+      { passive: false },
+    );
+    // 点击某一项直接选中（电脑上最直观）
+    el.addEventListener('click', (e) => {
+      const item = (e.target as HTMLElement | null)?.closest?.('.birth-dt-wheel-item');
+      if (!item || !el.contains(item)) return;
+      const items = [...el.querySelectorAll('.birth-dt-wheel-item')];
+      const idx = items.indexOf(item as Element);
+      if (idx < 0) return;
+      selectWheelIndex(el, idx);
+    });
   });
 
   sheet.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
