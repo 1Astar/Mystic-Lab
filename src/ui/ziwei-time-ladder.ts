@@ -15,19 +15,22 @@ import {
 } from '../ziwei/year-deep.ts';
 import {
   buildDayScope,
+  buildDecadeScope,
   buildHourScope,
   buildMonthScope,
   buildYearTrack,
   monthLabel,
   yearFamilyLine,
   yearThemeHeadline,
+  type DecadeScopeItem,
   type TimeScopeLevel,
   type YearTrackItem,
 } from '../ziwei/time-scope.ts';
 import type { PalaceSnap, ZiweiChartView } from '../ziwei/types.ts';
-import { openZiweiYearDeepDrawer } from './ziwei-year-deep-drawer.ts';
-
 type ExpandTab = 'read' | 'record';
+
+/** 流年横滑左右各扩几年（接近旧运限条） */
+const YEAR_RADIUS = 8;
 
 function escapeHtml(s: string): string {
   return s
@@ -65,6 +68,80 @@ function decadeChips(palaces: PalaceSnap[], selected?: string): string {
       </button>`;
     })
     .join('');
+}
+
+function yearRailHtml(items: YearTrackItem[], selected?: number): string {
+  return items
+    .map((it) => {
+      const on = it.year === selected ? 'is-on' : '';
+      return `
+        <button type="button" class="ziwei-year-chip is-${it.tense} ${on}" data-year="${it.year}" aria-pressed="${it.year === selected}">
+          <span class="ziwei-year-chip-y">${it.year}</span>
+          <span class="ziwei-year-chip-t">${escapeHtml(it.chipLabel)}</span>
+        </button>`;
+    })
+    .join('');
+}
+
+/** 级联一行：左侧标签 + 右侧横滑 */
+function cascadeRow(label: string, railInner: string, railClass = ''): string {
+  return `
+    <div class="ziwei-tl-row">
+      <span class="ziwei-tl-label">${escapeHtml(label)}</span>
+      <div class="ziwei-tl-rail ${railClass}">${railInner}</div>
+    </div>`;
+}
+
+function monthRailHtml(selected?: number): string {
+  return Array.from({ length: 12 }, (_, i) => i + 1)
+    .map(
+      (mth) =>
+        `<button type="button" class="ziwei-tl-chip ${selected === mth ? 'is-on' : ''}" data-month="${mth}" aria-pressed="${selected === mth}">${monthLabel(mth)}</button>`,
+    )
+    .join('');
+}
+
+function dayRailHtml(selected?: number): string {
+  return Array.from({ length: 28 }, (_, i) => i + 1)
+    .map(
+      (d) =>
+        `<button type="button" class="ziwei-tl-chip is-day ${selected === d ? 'is-on' : ''}" data-day="${d}" aria-pressed="${selected === d}">${d}日</button>`,
+    )
+    .join('');
+}
+
+function decadeReadHtml(item: DecadeScopeItem): string {
+  const possibles = item.possibles.map((p) => `<li>${escapeHtml(p)}</li>`).join('');
+  const age =
+    item.ageFrom && item.ageTo ? `虚岁 ${item.ageFrom}–${item.ageTo}` : '十年阶段';
+  return `
+    <div class="ziwei-tl-pane">
+      <p class="ziwei-tl-kicker">十年阶段</p>
+      <h3 class="ziwei-tl-title">大限 · ${escapeHtml(shortPalace(item.palace) || '—')}${
+        item.gz ? ` · ${escapeHtml(item.gz)}` : ''
+      }</h3>
+      <p class="ziwei-tl-focus">${escapeHtml(age)}</p>
+      <section class="ziwei-tl-block">
+        <h4>十年主题</h4>
+        <p class="ziwei-tl-theme">${escapeHtml(item.theme)}</p>
+        <p class="ziwei-tl-theme-sub">${escapeHtml(item.lead)}</p>
+      </section>
+      <p class="ziwei-tl-focus">重点领域：${escapeHtml(item.domains.join(' · '))}</p>
+      ${
+        item.majorStars.length
+          ? `<p class="ziwei-tl-meta">主场星｜${escapeHtml(item.majorStars.join(' · '))}</p>`
+          : ''
+      }
+      <section class="ziwei-tl-block">
+        <h4>可能表现</h4>
+        <ul class="ziwei-tl-list">${possibles}</ul>
+      </section>
+      <p class="ziwei-tl-meta">大限命｜${escapeHtml(shortPalace(item.palace) || '—')}${
+        item.mutagenLine ? `　四化｜${escapeHtml(item.mutagenLine)}` : ''
+      }</p>
+      <button type="button" class="ziwei-year-why" data-open-deep>为什么这样判断 ›</button>
+      <button type="button" class="ziwei-tl-jump" data-jump-year>进入流年看这一阶段 ›</button>
+    </div>`;
 }
 
 function yearReadHtml(item: YearTrackItem): string {
@@ -211,6 +288,12 @@ function recordsHtml(personId: string, year: number): string {
     </div>`;
 }
 
+
+export type ZiweiTimeLadderDeepCtx = {
+  level: TimeScopeLevel;
+  selection: LimitBoardSelection;
+};
+
 export type MountZiweiTimeLadderOpts = {
   person: PersonProfile;
   view: ZiweiChartView;
@@ -220,6 +303,8 @@ export type MountZiweiTimeLadderOpts = {
     sel: LimitBoardSelection,
     focus: TimeScopeLevel,
   ) => void;
+  /** 「为什么这样判断」→ 打开深度学习笔记抽屉 */
+  onOpenDeep?: (ctx: ZiweiTimeLadderDeepCtx) => void;
 };
 
 export type ZiweiTimeLadderHandle = {
@@ -247,11 +332,17 @@ export function mountZiweiTimeLadder(
     hour: opts.initial?.hour ?? getChineseHour(now).index,
   };
 
-  let yearItems = buildYearTrack({
-    person: opts.person,
-    birthYear: opts.birthYear,
-    centerYear: sel.year,
-  });
+  function rebuildYears(center = sel.year): void {
+    yearItems = buildYearTrack({
+      person: opts.person,
+      birthYear: opts.birthYear,
+      centerYear: center,
+      radius: YEAR_RADIUS,
+    });
+  }
+
+  let yearItems: YearTrackItem[] = [];
+  rebuildYears();
 
   function currentYear(): YearTrackItem | undefined {
     return yearItems.find((i) => i.year === sel.year) ?? yearItems[0];
@@ -261,90 +352,96 @@ export function mountZiweiTimeLadder(
     opts.onChange?.(sel, focus);
   }
 
+  function applyYear(y: number, focus: TimeScopeLevel = level, doEmit = true): void {
+    const year = Math.min(2100, Math.max(opts.birthYear, Math.floor(y)));
+    sel = { ...sel, year };
+    rebuildYears(year);
+    tab = 'read';
+    if (doEmit) emit(focus === 'decade' ? 'year' : focus);
+    paint();
+  }
+
   function openDeep(): void {
-    const item = currentYear();
-    if (!item) return;
-    openZiweiYearDeepDrawer({
-      view: opts.view,
-      person: opts.person,
-      item,
-      scope: {
-        level: level === 'decade' ? 'year' : level,
-        month: sel.month,
-        day: sel.day,
-        hour: sel.hour,
-      },
-    });
+    if (level === 'decade') {
+      const d = buildDecadeScope(
+        opts.person,
+        opts.view,
+        opts.birthYear,
+        sel.decadePalace || opts.view.soulPalace.name,
+      );
+      sel = { ...sel, year: d.midYear };
+      rebuildYears(d.midYear);
+    }
+    if (opts.onOpenDeep) {
+      opts.onOpenDeep({ level, selection: { ...sel } });
+      return;
+    }
   }
 
   function contentHtml(): string {
     const yItem = currentYear();
+    const decadeRail = decadeChips(opts.view.palaces, sel.decadePalace);
+    const yearRail = yearRailHtml(yearItems, sel.year);
+
     if (level === 'decade') {
+      const d = buildDecadeScope(
+        opts.person,
+        opts.view,
+        opts.birthYear,
+        sel.decadePalace || opts.view.soulPalace.name,
+      );
       return `
-        <div class="ziwei-tl-pane">
-          <p class="ziwei-tl-kicker">十年阶段</p>
-          <h3 class="ziwei-tl-title">大限 · ${escapeHtml(shortPalace(sel.decadePalace || '') || '—')}</h3>
-          <p class="ziwei-tl-theme-sub">大限看人生十年主场。点选下方大限后，盘面叠看该限；细读从流年进入。</p>
-          <div class="ziwei-tl-rail is-decade">${decadeChips(opts.view.palaces, sel.decadePalace)}</div>
-          <button type="button" class="ziwei-tl-jump" data-jump-year>进入流年看这一阶段 ›</button>
-        </div>`;
+        <div class="ziwei-tl-cascade" aria-label="大限">
+          ${cascadeRow('大限', decadeRail, 'is-decade')}
+        </div>
+        <div class="ziwei-tl-read">${decadeReadHtml(d)}</div>`;
     }
     if (level === 'month') {
       const m = buildMonthScope(opts.person, sel.year!, sel.month!);
-      const months = Array.from({ length: 12 }, (_, i) => i + 1)
-        .map(
-          (mth) =>
-            `<button type="button" class="ziwei-tl-chip ${sel.month === mth ? 'is-on' : ''}" data-month="${mth}" aria-pressed="${sel.month === mth}">${monthLabel(mth)}</button>`,
-        )
-        .join('');
       return `
-        <p class="ziwei-tl-context">${sel.year}年 · 选月看推进</p>
-        <div class="ziwei-tl-rail is-month">${months}</div>
-        ${monthReadHtml(sel.year!, m)}`;
+        <div class="ziwei-tl-cascade" aria-label="流年流月">
+          ${cascadeRow('流年', yearRail, 'is-year')}
+          ${cascadeRow('流月', monthRailHtml(sel.month), 'is-month')}
+        </div>
+        <div class="ziwei-tl-read">${monthReadHtml(sel.year!, m)}</div>`;
     }
     if (level === 'day') {
-      return dayReadHtml(
-        buildDayScope(opts.person, sel.year!, sel.month!, sel.day!),
-        opts.person.id,
-      );
+      return `
+        <div class="ziwei-tl-cascade" aria-label="流年流月流日">
+          ${cascadeRow('流年', yearRail, 'is-year')}
+          ${cascadeRow('流月', monthRailHtml(sel.month), 'is-month')}
+          ${cascadeRow('流日', dayRailHtml(sel.day), 'is-day')}
+        </div>
+        <div class="ziwei-tl-read">${dayReadHtml(
+          buildDayScope(opts.person, sel.year!, sel.month!, sel.day!),
+          opts.person.id,
+        )}</div>`;
     }
     if (level === 'hour') {
       return `
-        <p class="ziwei-tl-context">${sel.year}年${sel.month}月${sel.day}日 · 十二时辰</p>
-        ${hourReadHtml(buildHourScope(opts.person, sel.year!, sel.month!, sel.day!, sel.hour ?? 6))}`;
+        <div class="ziwei-tl-cascade" aria-label="流年流月流日">
+          ${cascadeRow('流年', yearRail, 'is-year')}
+          ${cascadeRow('流月', monthRailHtml(sel.month), 'is-month')}
+          ${cascadeRow('流日', dayRailHtml(sel.day), 'is-day')}
+        </div>
+        <div class="ziwei-tl-read">
+          <p class="ziwei-tl-context">${sel.year}年${sel.month}月${sel.day}日 · 十二时辰</p>
+          ${hourReadHtml(buildHourScope(opts.person, sel.year!, sel.month!, sel.day!, sel.hour ?? 6))}
+        </div>`;
     }
     if (!yItem) return '';
-    const chips = yearItems
-      .map((it) => {
-        const on = it.year === sel.year ? 'is-on' : '';
-        return `
-          <button type="button" class="ziwei-year-chip is-${it.tense} ${on}" data-year="${it.year}" aria-pressed="${it.year === sel.year}">
-            <span class="ziwei-year-chip-y">${it.year}</span>
-            <span class="ziwei-year-chip-t">${escapeHtml(it.chipLabel)}</span>
-          </button>`;
-      })
-      .join('');
-    const monthRail = Array.from({ length: 12 }, (_, i) => i + 1)
-      .map(
-        (mth) =>
-          `<button type="button" class="ziwei-tl-chip ${sel.month === mth ? 'is-on' : ''}" data-month="${mth}" aria-pressed="${sel.month === mth}">${monthLabel(mth)}</button>`,
-      )
-      .join('');
     return `
-      <div class="ziwei-tl-rail is-year" role="listbox" aria-label="年份">${chips}</div>
-      <div class="ziwei-year-tabs" role="tablist" aria-label="流年内容">
-        <button type="button" role="tab" class="ziwei-year-tab ${tab === 'read' ? 'is-on' : ''}" data-tab="read" aria-selected="${tab === 'read'}">当前时间内容</button>
-        <button type="button" role="tab" class="ziwei-year-tab ${tab === 'record' ? 'is-on' : ''}" data-tab="record" aria-selected="${tab === 'record'}">我的记录</button>
+      <div class="ziwei-tl-cascade" aria-label="大限流年">
+        ${cascadeRow('大限', decadeRail, 'is-decade')}
+        ${cascadeRow('流年', yearRail, 'is-year')}
       </div>
-      ${tab === 'read' ? yearReadHtml(yItem) : recordsHtml(opts.person.id, yItem.year)}
-      ${
-        tab === 'read'
-          ? `<div class="ziwei-tl-month-under">
-              <p class="ziwei-tl-context">${yItem.year}年 · 选月看推进</p>
-              <div class="ziwei-tl-rail is-month">${monthRail}</div>
-            </div>`
-          : ''
-      }`;
+      <div class="ziwei-tl-read">
+        <div class="ziwei-year-tabs" role="tablist" aria-label="流年内容">
+          <button type="button" role="tab" class="ziwei-year-tab ${tab === 'read' ? 'is-on' : ''}" data-tab="read" aria-selected="${tab === 'read'}">当前时间内容</button>
+          <button type="button" role="tab" class="ziwei-year-tab ${tab === 'record' ? 'is-on' : ''}" data-tab="record" aria-selected="${tab === 'record'}">我的记录</button>
+        </div>
+        ${tab === 'read' ? yearReadHtml(yItem) : recordsHtml(opts.person.id, yItem.year)}
+      </div>`;
   }
 
   function paint(): void {
@@ -358,10 +455,6 @@ export function mountZiweiTimeLadder(
 
     host.innerHTML = `
       <section class="ziwei-time-ladder" aria-label="运限时间梯">
-        <header class="ziwei-tl-head">
-          <p class="ziwei-tl-head-kicker">时间层级</p>
-          <p class="ziwei-tl-head-hint">年看主题 · 月看推进 · 日看当天 · 时看当下</p>
-        </header>
         <div class="ziwei-tl-levels" role="tablist">${levelTabs}</div>
         <div class="ziwei-tl-body">${contentHtml()}</div>
       </section>`;
@@ -377,16 +470,8 @@ export function mountZiweiTimeLadder(
 
     host.querySelectorAll<HTMLButtonElement>('[data-year]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const y = Number(btn.dataset.year);
-        sel = { ...sel, year: y };
-        yearItems = buildYearTrack({
-          person: opts.person,
-          birthYear: opts.birthYear,
-          centerYear: y,
-        });
-        tab = 'read';
-        emit('year');
-        paint();
+        if (level === 'decade') level = 'year';
+        applyYear(Number(btn.dataset.year), level === 'hour' ? 'day' : level);
       });
     });
 
@@ -394,7 +479,17 @@ export function mountZiweiTimeLadder(
       btn.addEventListener('click', () => {
         sel = { ...sel, month: Number(btn.dataset.month) };
         if (level === 'year') level = 'month';
-        emit('month');
+        const focus: TimeScopeLevel =
+          level === 'hour' ? 'hour' : level === 'day' ? 'day' : 'month';
+        emit(focus);
+        paint();
+      });
+    });
+
+    host.querySelectorAll<HTMLButtonElement>('[data-day]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        sel = { ...sel, day: Number(btn.dataset.day) };
+        emit(level === 'hour' ? 'hour' : 'day');
         paint();
       });
     });
@@ -415,13 +510,10 @@ export function mountZiweiTimeLadder(
         if (p?.decadalRange) {
           const mid = Math.round((p.decadalRange[0] + p.decadalRange[1]) / 2);
           sel = { ...sel, year: opts.birthYear + mid - 1 };
-          yearItems = buildYearTrack({
-            person: opts.person,
-            birthYear: opts.birthYear,
-            centerYear: sel.year,
-          });
+          rebuildYears(sel.year);
         }
-        emit('decade');
+        if (level === 'decade') emit('decade');
+        else emit('year');
         paint();
       });
     });
@@ -435,9 +527,14 @@ export function mountZiweiTimeLadder(
 
     host.querySelector('[data-open-deep]')?.addEventListener('click', openDeep);
     host.querySelector('[data-jump-year]')?.addEventListener('click', () => {
+      const d = buildDecadeScope(
+        opts.person,
+        opts.view,
+        opts.birthYear,
+        sel.decadePalace || opts.view.soulPalace.name,
+      );
       level = 'year';
-      emit('year');
-      paint();
+      applyYear(d.midYear, 'year');
     });
 
     const dayInput = host.querySelector<HTMLInputElement>('[data-day-input]');
@@ -447,11 +544,7 @@ export function mountZiweiTimeLadder(
       const [yy, mm, dd] = v.split('-').map(Number);
       if (!yy || !mm || !dd) return;
       sel = { ...sel, year: yy, month: mm, day: Math.min(dd, 28) };
-      yearItems = buildYearTrack({
-        person: opts.person,
-        birthYear: opts.birthYear,
-        centerYear: yy,
-      });
+      rebuildYears(yy);
       emit('day');
       paint();
     });
@@ -517,14 +610,7 @@ export function mountZiweiTimeLadder(
       paint();
     },
     setYear: (year: number, emitChange = true) => {
-      sel = { ...sel, year };
-      yearItems = buildYearTrack({
-        person: opts.person,
-        birthYear: opts.birthYear,
-        centerYear: year,
-      });
-      paint();
-      if (emitChange) emit('year');
+      applyYear(year, 'year', emitChange);
     },
     getSelection: () => ({ ...sel }),
     getLevel: () => level,

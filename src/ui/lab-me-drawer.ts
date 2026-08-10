@@ -34,10 +34,25 @@ function paintHostAvatar(host: HTMLElement, person: PersonProfile): void {
   trigger.setAttribute('aria-label', `当前档案：${person.nickname}，点击打开`);
 }
 
-const GLOBAL_LINKS: { path: string; label: string; soon?: boolean }[] = [
-  { path: '/records', label: '我的旅程' },
-  { path: '/life', label: '人生宇宙' },
-  { path: '/knowledge', label: '知识库', soon: true },
+type MeLink = {
+  path: string;
+  label: string;
+  desc: string;
+  soon?: boolean;
+};
+
+/** 新玩法（主分类，抽屉内直接展示） */
+const PLAY_LINKS: MeLink[] = [
+  { path: '/life', label: '人生宇宙', desc: '平行 · 选择 · 预测' },
+  { path: '/wardrobe', label: '八字衣橱', desc: '幸运色、个人风格、每日穿搭' },
+  { path: '/mirror', label: '双盘映照', desc: '八字 × 紫微对比' },
+  { path: '/bazi/reading', label: '八字画像', desc: '日主白话速读 · 认识自己' },
+];
+
+/** 旅程区 */
+const JOURNEY_LINKS: MeLink[] = [
+  { path: '/records', label: '我的旅程', desc: '各体系占问记录、收藏与回顾' },
+  { path: '/knowledge', label: '知识库', desc: '术语与图鉴合集', soon: true },
 ];
 
 function findDrawer(host: HTMLElement): HTMLElement | null {
@@ -65,7 +80,23 @@ function goAddPerson(host: HTMLElement): void {
   navigate('/profile');
 }
 
-/** Lab：点头像 → 左侧抽屉（角色 + 旅程 / 人生宇宙 / 知识库） */
+function linkButtons(links: MeLink[]): string {
+  return links
+    .map(
+      (l) => `
+      <button type="button" class="lab-me-global-link${l.soon ? ' is-soon' : ''}"
+        data-path="${escapeHtml(l.path)}" ${l.soon ? 'disabled' : ''}>
+        <span class="lab-me-global-copy">
+          <strong>${escapeHtml(l.label)}</strong>
+          <span class="lab-me-global-desc">${escapeHtml(l.desc)}</span>
+        </span>
+        ${l.soon ? '<em>即将</em>' : ''}
+      </button>`,
+    )
+    .join('');
+}
+
+/** Lab：点头像 → 左侧抽屉（角色 + 我的命理 / 新玩法 / 旅程） */
 export function openLabMeDrawer(
   host: HTMLElement,
   options?: PersonSwitcherOptions,
@@ -120,19 +151,31 @@ export function openLabMeDrawer(
             })
             .join('')}
         </ul>
-        <button type="button" class="lab-me-manage" data-manage>管理档案</button>
+        <div class="lab-me-archive-block">
+          <button type="button" class="lab-me-manage" data-manage>管理档案</button>
+          <button type="button" class="lab-me-rectify" data-rectify>
+            <span class="lab-me-global-copy">
+              <strong>生时校准</strong>
+              <span class="lab-me-global-desc">时辰不确定时，用大事件反推</span>
+            </span>
+          </button>
+        </div>
       </section>
 
-      <section class="lab-me-section lab-me-section-global" aria-label="更多">
+      <section class="lab-me-section lab-me-section-global" aria-label="新玩法">
+        <div class="lab-me-section-head">
+          <h4>新玩法</h4>
+        </div>
         <nav class="lab-me-global">
-          ${GLOBAL_LINKS.map(
-            (l) => `
-            <button type="button" class="lab-me-global-link${l.soon ? ' is-soon' : ''}"
-              data-path="${escapeHtml(l.path)}" ${l.soon ? 'disabled' : ''}>
-              ${escapeHtml(l.label)}
-              ${l.soon ? '<em>即将</em>' : ''}
-            </button>`,
-          ).join('')}
+          ${linkButtons(PLAY_LINKS)}
+        </nav>
+      </section>
+
+      <hr class="lab-me-divider" />
+
+      <section class="lab-me-section lab-me-section-global" aria-label="旅程">
+        <nav class="lab-me-global">
+          ${linkButtons(JOURNEY_LINKS)}
         </nav>
       </section>
     </aside>
@@ -180,6 +223,10 @@ export function openLabMeDrawer(
   drawer.querySelector('[data-manage]')?.addEventListener('click', () => {
     finishClose();
     navigate('/profile');
+  });
+  drawer.querySelector('[data-rectify]')?.addEventListener('click', () => {
+    finishClose();
+    navigate('/bazi/rectify');
   });
 
   drawer.querySelectorAll<HTMLButtonElement>('[data-path]').forEach((btn) => {

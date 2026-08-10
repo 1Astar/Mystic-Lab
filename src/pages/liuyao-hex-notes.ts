@@ -22,7 +22,7 @@ function resolveHex() {
   return { hex, tab: byTab };
 }
 
-/** 探索解读笔记：整页（深链）；主入口仍是 HEX CARD 右侧抽屉 */
+/** 探索深度学习：整页（深链）；主入口仍是 HEX CARD 右侧抽屉 */
 export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const page = document.createElement('div');
   page.className = 'page ly-hexagrams-page ly-hex-notes-page';
@@ -50,7 +50,7 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
     const empty = document.createElement('div');
     empty.className = 'ly-hex-notes-empty';
     empty.innerHTML = `
-      <h1 class="page-title">解读笔记</h1>
+      <h1 class="page-title">深度学习</h1>
       <p class="page-subtitle">未指定卦名。请从探索卡进入，或在地址加 ?gua=乾</p>
       <button type="button" class="btn" data-go-list>打开六十四卦探索</button>
     `;
@@ -66,7 +66,7 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const header = document.createElement('header');
   header.className = 'ly-codex-header ly-hex-notes-head';
   header.innerHTML = `
-    <p class="ly-guide-kicker">解读笔记 · 文王第 ${hex.kingWen} 卦</p>
+    <p class="ly-guide-kicker">深度学习 · 文王第 ${hex.kingWen} 卦</p>
     <h1 class="page-title">${hex.fullName}</h1>
     <p class="page-subtitle">${meetBannerForHex(hex)}</p>
   `;

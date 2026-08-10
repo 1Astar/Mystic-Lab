@@ -62,7 +62,8 @@ function emptyScores(): Record<WuXing, number> {
   return { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
 }
 
-function scoreChart(chart: BaziChart): Record<WuXing, number> {
+/** 五行构成分（月令旺衰 + 干支出现），供能量柱与调和色共用 */
+export function scoreChartWx(chart: BaziChart): Record<WuXing, number> {
   const scores = emptyScores();
   for (const row of chart.season) {
     scores[row.label] += STRENGTH_SCORE[row.strength] ?? 2;
@@ -81,7 +82,7 @@ function scoreChart(chart: BaziChart): Record<WuXing, number> {
  * 能量平衡：图形化数据 + 短板调频文案。规则模板，无术语表。
  */
 export function buildEnergyBalance(chart: BaziChart): EnergyBalance {
-  const raw = scoreChart(chart);
+  const raw = scoreChartWx(chart);
   const vals = ORDER.map((wx) => raw[wx]);
   const max = Math.max(...vals, 1);
   const min = Math.min(...vals);

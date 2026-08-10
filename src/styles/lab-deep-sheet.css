@@ -1,0 +1,294 @@
+/**
+ * 跨体系深度解读弹层（紫微/八字等不必先加载 liuyao.css）
+ * 近全高覆盖层，勿沉成页面底部文档流。
+ */
+
+.ly-follow-chat {
+  position: fixed;
+  inset: 0;
+  z-index: 560;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ly-follow-chat.is-open {
+  pointer-events: auto;
+}
+
+.ly-follow-chat-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(8, 10, 16, 0.58);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  cursor: pointer;
+}
+
+html[data-theme='moon'] .ly-follow-chat-backdrop {
+  background: rgba(42, 48, 60, 0.48);
+}
+
+.ly-follow-chat.is-open .ly-follow-chat-backdrop {
+  opacity: 1;
+}
+
+.ly-follow-chat-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(480px, 100%);
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-radius: 18px 18px 0 0;
+  background: var(--drawer-bg);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  transform: translateY(110%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  margin-top: auto;
+}
+
+.ly-follow-chat.is-open .ly-follow-chat-sheet {
+  transform: translateY(0);
+}
+
+.ly-follow-chat-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ly-follow-chat-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+}
+
+.ly-follow-chat-head h2 {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.ly-follow-chat-x {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Lab 深度解读：贴顶近全高 */
+.lab-deep-sheet.ly-follow-chat {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: max(6px, env(safe-area-inset-top, 0px));
+}
+
+.lab-deep-sheet .ly-follow-chat-sheet {
+  width: min(520px, 100%);
+  height: calc(100dvh - max(6px, env(safe-area-inset-top, 0px)));
+  max-height: none;
+  margin-top: 0;
+  margin-inline: auto;
+  border-radius: 16px 16px 0 0;
+  background: var(--drawer-bg);
+  border-color: var(--line);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.lab-deep-sheet .ly-follow-chat-kicker {
+  color: var(--gold);
+}
+
+.lab-deep-sheet .ly-follow-chat-head h2 {
+  color: var(--ink);
+}
+
+.ly-deep-sheet-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.ly-deep-sheet-tab {
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ly-deep-sheet-tab.is-on {
+  color: var(--gold);
+  background: var(--gold-soft);
+  border-color: var(--line);
+  font-weight: 600;
+}
+
+.ly-deep-sheet-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ly-deep-ask-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 8px;
+}
+
+.ly-ask-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ly-ask-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ly-ask-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ly-ask-ai-hint,
+.ly-layer-guide {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.ly-layer-guide {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.lab-deep-sheet .ly-ask-input,
+.lab-deep-sheet textarea.ly-ask-input,
+.lab-deep-sheet textarea.question-input {
+  width: 100%;
+  min-height: 7.5rem;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.lab-deep-sheet .ly-ask-input::placeholder,
+.lab-deep-sheet textarea.question-input::placeholder {
+  color: var(--ink-muted);
+}
+
+.lab-deep-sheet .ly-ask-input:focus,
+.lab-deep-sheet textarea.question-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+
+.lab-deep-sheet .ly-ask-send {
+  width: 100%;
+  margin-top: 10px;
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ly-faq-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 12px 0;
+  border: none;
+  border-top: 1px solid var(--line-soft, var(--line));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ly-ask-faq .ly-faq-link:first-child {
+  border-top: none;
+}
+
+.ly-faq-link-mark {
+  flex-shrink: 0;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.ly-faq-link-q {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.ly-faq-link:hover .ly-faq-link-q,
+.ly-faq-link:focus-visible .ly-faq-link-q {
+  color: var(--gold);
+}
+
+.ly-follow-deep-empty {
+  margin: 0 0 14px;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  border: 1px dashed var(--line);
+  background: var(--gold-soft);
+}
+
+.ly-follow-deep-empty p {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.lab-deep-sheet .ly-follow-deep-empty {
+  border-color: var(--line);
+  background: var(--gold-soft);
+}

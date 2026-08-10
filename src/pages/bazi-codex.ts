@@ -23,7 +23,8 @@ import {
   tengodArtSvg,
   wuxingArtSvg,
 } from '../bazi/codex-art.ts';
-import { memoryCoverHtml, getCodexCoverSrc, shenshaBadgeArtHtml } from '../bazi/codex-cover.ts';
+import { getCodexCoverSrc } from '../bazi/codex-cover.ts';
+import { codexDetailArtHtml } from '../bazi/codex-detail-art.ts';
 import { renderRelationsAtlasHtml } from '../bazi/codex-relations-atlas.ts';
 import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 import {
@@ -791,25 +792,7 @@ function renderTagChips(tags: CodexTag[], locked: boolean): string {
 }
 
 function detailArt(id: string): string {
-  if (WUXING_ORDER.includes(id as WuXing)) {
-    return memoryCoverHtml(id, wuxingArtSvg(id as WuXing, { uid: `det-wx-${id}` }));
-  }
-  const gz = [...STEM_LORE, ...BRANCH_LORE].find((x) => x.id === id);
-  if (gz) {
-    return memoryCoverHtml(id, stemBranchArtSvg(gz, { uid: `det-gz-${id}` }));
-  }
-  const star = getStarCard(id);
-  if (star) {
-    if (star.kind === 'tengod') {
-      return memoryCoverHtml(
-        id,
-        tengodArtSvg(star.name, { uid: `det-tg-${star.name}` }),
-      );
-    }
-    // 神煞：详情只顶小徽章，不做全幅大图
-    return shenshaBadgeArtHtml(id, star.glyph);
-  }
-  return '';
+  return codexDetailArtHtml(id);
 }
 
 function unlockHintFor(id: string, reason?: string): string {

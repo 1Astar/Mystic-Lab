@@ -33,7 +33,7 @@ export const SHENSHA_CATEGORIES: readonly ShenshaCategory[] = [
   '子女晚年类',
 ] as const;
 
-/** 神煞名录（骨架 ≥80；查法/排盘规则后续补） */
+/** 神煞名录（骨架 ≥80；天乙级全文 schema 已推广，精查法/排盘规则持续补） */
 export const SHENSHA_ATLAS: ReadonlyArray<{
   name: string;
   category: ShenshaCategory;
@@ -264,6 +264,11 @@ export function nayinId(name: string): string {
 
 export function jiaziId(gz: string): string {
   return `jz:${gz}`;
+}
+
+/** 某纳音对应的六十甲子（通常两对） */
+export function jiaziPairsOfNayin(name: string): string[] {
+  return listSixtyJiazi().filter((gz) => nayinOf(gz) === name);
 }
 
 /** 构建骨架词条表（不覆盖已有完整百科） */

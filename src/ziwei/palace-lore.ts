@@ -9,6 +9,10 @@ export type PalaceLore = {
   strongWhen: string;
   watchOut: string;
   oppositeHint: string;
+  /** 常见表现（加厚） */
+  commonLooks?: string;
+  /** 落星后怎么看（加厚） */
+  afterStars?: string;
 };
 
 export const PALACE_LORE: PalaceLore[] = [
@@ -22,6 +26,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '主星清、吉化会照：自我认同稳，行动与人设一致。',
     watchOut: '空象或化忌：容易飘、靠环境定义自己，要主动写「我是谁」实验。',
     oppositeHint: '对宫迁移：内在我 vs 外面世界如何看见我。',
+    commonLooks: '出场方式稳定或飘、自我介绍一句话是否说得清、重大选择是否「像自己」。',
+    afterStars: '先读命宫主星人格海报，再看对宫迁移如何折射外界评价，三合财帛/官禄看资源与事业如何托住「我是谁」。',
   },
   {
     id: '兄弟',
@@ -33,6 +39,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '吉星同宫：兄弟/朋友缘实质，能互相抬。',
     watchOut: '煞忌：同辈口舌或资源争夺；把「竞争」改成「分工」。',
     oppositeHint: '对宫奴仆：近友 vs 更广的协作圈。',
+    commonLooks: '同学同事手足间的互助/较劲、早期结盟方式、平级信任度。',
+    afterStars: '主星定「怎么相处」；辅煞定摩擦或贵人浓度。对宫交友圈放大或稀释近友。',
   },
   {
     id: '夫妻',
@@ -44,6 +52,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '桃花与禄权得宜：关系有热度也有结构。',
     watchOut: '忌与空：纠缠或抽离；把期待说成可核对的约定。',
     oppositeHint: '对宫官禄：爱与事业是否互相抢戏。',
+    commonLooks: '恋爱节奏快慢、承诺方式、吸引力类型、分手/复合模式。',
+    afterStars: '主星=亲密惯性；桃花煞忌=热度与刺。务必对照官禄：事业是否在抢戏。',
   },
   {
     id: '子女',
@@ -55,6 +65,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '文星桃花：创作欲与表达欲旺。',
     watchOut: '耗忌：创作易半途；先交付最小成品再迭代。',
     oppositeHint: '对宫田宅：创造冲动 vs 安稳根基。',
+    commonLooks: '项目开工率、作品完成度、与晚辈/徒弟关系、表达欲高低。',
+    afterStars: '当「作品宫」读往往比只当子女更实用；对宫田宅问你有没有根据地承接创造。',
   },
   {
     id: '财帛',
@@ -66,6 +78,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '财星与禄：进账路径清晰。',
     watchOut: '破耗忌：赚得快漏得也快；先建蓄水池。',
     oppositeHint: '对宫福德：外财 vs 内心是否真满足。',
+    commonLooks: '收入结构、存钱难度、投资偏好、为钱焦虑的时刻。',
+    afterStars: '主星=赚钱手法；化禄/武曲等加重进账戏。对宫福德：钱赚到了心是否安。',
   },
   {
     id: '疾厄',
@@ -77,6 +91,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '吉护：恢复力强，知道何时停。',
     watchOut: '煞忌：过劳与情绪淤积；把休息当成技能。',
     oppositeHint: '对宫父母：自我照料 vs 权威期待。',
+    commonLooks: '睡眠、情绪出口、小毛病信号、压力躯体化。',
+    afterStars: '不恐吓治病；当「负荷仪表盘」。天使/天伤等杂曜只作色调，主星定怎么扛。',
   },
   {
     id: '迁移',
@@ -88,6 +104,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '马星与吉：外出有收获、有贵人。',
     watchOut: '空劫：漂而无根；外出要有「回得来」的锚。',
     oppositeHint: '对宫命宫：外面的我 vs 内核的我。',
+    commonLooks: '出差旅居、公开形象、换环境后的能量涨跌。',
+    afterStars: '命宫对宫：外面评价是否扭曲自我。天马/驿马类加重「在路上」。',
   },
   {
     id: '仆役',
@@ -99,6 +117,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '贵人辅弼：圈子能托事。',
     watchOut: '煞忌：小人或无效社交；精简名单。',
     oppositeHint: '对宫兄弟：广人脉 vs 近伙伴。',
+    commonLooks: '同事朋友密度、求助是否有人应、社交后是充电还是耗电。',
+    afterStars: '左辅右弼天魁钺加重贵人；煞忌提醒名单审计。对宫兄弟区分近友与广人脉。',
   },
   {
     id: '官禄',
@@ -110,6 +130,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '官禄主星有力：轨道清楚。',
     watchOut: '变动煞：频繁换轨；每次换要写清「为何换」。',
     oppositeHint: '对宫夫妻：事业与亲密是否互耗。',
+    commonLooks: '职称路径、工作热情周期、换工作频率、被看见的专业标签。',
+    afterStars: '主星=职业气质；化权科加重升迁/名声。对宫夫妻问爱是否被事业挤爆。',
   },
   {
     id: '田宅',
@@ -121,6 +143,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '府库之星：有可守的家底。',
     watchOut: '破耗：安稳被掏空；先守现金流再谈置产。',
     oppositeHint: '对宫子女：安稳 vs 创造冲动。',
+    commonLooks: '搬家频率、置产意愿、家里是否能休息、资产配置稳健度。',
+    afterStars: '天府禄存等加重库；破耗提醒别掏空根据地。对宫子女：安稳是否压抑创造。',
   },
   {
     id: '福德',
@@ -132,6 +156,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '福星：精神账户常有盈余。',
     watchOut: '忌耗：娱乐变麻醉；快乐要可复盘。',
     oppositeHint: '对宫财帛：内心满足 vs 外在进账。',
+    commonLooks: '休闲方式、精神内耗、有钱没钱时心情差在哪。',
+    afterStars: '天同太阴福星类加重精神账户；对宫财帛校准「赚到了是否快乐」。',
   },
   {
     id: '父母',
@@ -143,6 +169,8 @@ export const PALACE_LORE: PalaceLore[] = [
     strongWhen: '荫贵：有可依靠的支持系统。',
     watchOut: '煞忌：权威冲突或规则内化成自我苛责。',
     oppositeHint: '对宫疾厄：外在规则 vs 身心负荷。',
+    commonLooks: '与父母上司关系、对「应该」的敏感、求助是否羞耻。',
+    afterStars: '天梁天相等加重荫护/规矩；对宫疾厄看规则是否压出身心信号。',
   },
 ];
 

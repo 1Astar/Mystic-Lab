@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -22,10 +22,9 @@ import {
 } from '../ui/ziwei-time-ladder.ts';
 import { resolveHoroscopeLimits } from '../ziwei/horoscope-limits.ts';
 import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
-import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
-import { answerZiweiConcept, recordZiweiConceptMiss } from '../ziwei/concept-ask.ts';
-import { buildZiweiPageFaq } from '../ziwei/page-faq.ts';
+import { openZiweiNotesSheet } from '../ui/ziwei-notes-sheet.ts';
+import { openZiweiDeepReadingEntry } from '../ziwei/personalize-deep.ts';
 import { draftFromZiwei } from '../share/drafts.ts';
 
 function escapeHtml(s: string): string {
@@ -73,7 +72,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
 
-  const person = getActivePerson();
+  let person = getActivePerson();
   const intent = loadZiweiIntent();
   let question = loadZiweiQuestion();
   let mode: ViewMode = queryMode();
@@ -123,11 +122,31 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       backLabel: '← Lab',
       tujianPath: '/ziwei/tujian',
       tujianLabel: '探索',
+      person: {
+        onChange: () => paint(),
+      },
     });
     disposeFloat?.();
     disposeFloat = mountLabFloatActions(page, {
       tujianPath: '/ziwei/tujian',
       tujianLabel: '星曜探索',
+      notesSystem: 'ziwei',
+      notesContext: latestView?.theater.headline,
+      notesLabel: '深度学习',
+      onNotes: () => {
+        const v = latestView;
+        if (!v) return;
+        const birthYear = Number(person.birthYear) || new Date().getFullYear() - 25;
+        openZiweiNotesSheet({
+          view: v,
+          person: getActivePerson(),
+          birthYear,
+          selection: unmountLadder?.getSelection(),
+          level: unmountLadder?.getLevel() ?? 'year',
+          initialTab: 'reason',
+          context: v.theater.headline,
+        });
+      },
       draftShare: () => {
         const v = latestView;
         if (!v) return null;
@@ -147,21 +166,11 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       onDeep: () => {
         const v = latestView;
         if (!v) return;
-        openLabDeepSheet({
-          system: 'ziwei',
-          title: `${person.nickname || '我'}的命盘`,
-          initialTab: 'ask',
-          presets: buildZiweiPageFaq(v, { question }),
-          answerConcept: answerZiweiConcept,
-          onMiss: (q) => {
-            void recordZiweiConceptMiss(q);
-          },
-          deepHint: '结合十二宫与当下问题，做一次更贴合的解读。概念题请用「边看边问」。',
-          onDeep: () => {
-            mode = 'chart';
-            setModeUrl(mode);
-            paint();
-          },
+        openZiweiDeepReadingEntry({
+          view: v,
+          person: getActivePerson(),
+          question,
+          initialTab: 'deep',
         });
       },
     });
@@ -356,6 +365,33 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         <button type="button" class="ziwei-drill-link" data-drill-id="soul">专业口径（传统） ›</button>
       </section>
 
+      ${
+        t.shenshaHighlights.length
+          ? `<section class="ziwei-shensha-deep" aria-label="神煞重点">
+        <p class="ziwei-kicker">神煞重点 · 深度再筛</p>
+        <p class="ziwei-codex-hint">全盘神煞很多；这里只挑最值得先看的几条，并挂到人生四要素与流年。完整名录在图鉴。</p>
+        <ul class="ziwei-shensha-deep-list">
+          ${t.shenshaHighlights
+            .map(
+              (h) => `
+            <li>
+              <div class="ziwei-shensha-deep-head">
+                <button type="button" class="ziwei-term-hot" data-learn-star="${escapeHtml(h.name)}" data-learn-palace="${escapeHtml(h.palace)}">${escapeHtml(h.name)} · ${escapeHtml(h.epithet)}</button>
+                <span class="ziwei-shensha-deep-tags">${(h.pillarLabels ?? [])
+                  .map((lab) => `<em>${escapeHtml(lab)}</em>`)
+                  .join('')}${h.annualHook ? '<em class="is-year">流年</em>' : ''}</span>
+              </div>
+              <p class="ziwei-shensha-deep-line">${escapeHtml(h.line)}</p>
+              <p class="ziwei-shensha-deep-body">${escapeHtml(h.body)}</p>
+              ${h.annualHook ? `<p class="ziwei-shensha-deep-year">${escapeHtml(h.annualHook)}</p>` : ''}
+            </li>`,
+            )
+            .join('')}
+        </ul>
+      </section>`
+          : ''
+      }
+
       <section class="ziwei-pillars" aria-label="人生四要素">
         <p class="ziwei-kicker">人生四要素</p>
         ${pillarsHtml}
@@ -370,6 +406,11 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         </div>
         <p class="ziwei-annual-q">就「${escapeHtml(annual.question)}」</p>
         <p class="ziwei-annual-advice">${escapeHtml(annual.advice)}</p>
+        ${
+          annual.shenshaLine
+            ? `<p class="ziwei-annual-shensha"><strong>神煞叠读</strong> ${escapeHtml(annual.shenshaLine)}</p>`
+            : ''
+        }
         <p class="ziwei-mutagen-inline">${escapeHtml(annual.mutagenLine)}</p>
         <button type="button" class="ziwei-drill-link" data-drill-id="annual">流年传统四化 ›</button>
       </section>
@@ -382,9 +423,14 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       ${comfortHtml}
 
       <nav class="ziwei-reading-nav">
+        <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/bazi/rectify">
+          <strong>觉得不准？试试生时校准</strong>
+          <span>用大事件反推更贴近的时辰</span>
+          <em aria-hidden="true">›</em>
+        </button>
         <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/ziwei?edit=1">
           <strong>出生信息</strong>
-          <span>改生辰 · 出生地 · 性别</span>
+          <span>改生辰 · 精度 · 出生地 · 性别</span>
           <em aria-hidden="true">›</em>
         </button>
       </nav>
@@ -446,8 +492,8 @@ export function renderZiweiReading(root: HTMLElement): () => void {
 
     if (host) {
       unmountPlate = mountZiweiPlate(host, view, {
-        initialPalace:
-          focus.palace ?? view.theater.decade.palaceName ?? view.soulPalace.name,
+        /* 仅深链带宫位时预选；默认不点宫、不画三方线 */
+        initialPalace: focus.palace || undefined,
       });
     }
     if (ladderHost) {
@@ -457,12 +503,24 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         birthYear,
         initial: { year: bootYear },
         onChange: (_sel, scope) => {
-          applyOverlay(scope, true);
+          /* 切流年只叠角标，不自动选宫画线 */
+          applyOverlay(scope, false);
+        },
+        onOpenDeep: (ctx) => {
+          openZiweiNotesSheet({
+            view,
+            person: getActivePerson(),
+            birthYear,
+            selection: ctx.selection,
+            level: ctx.level,
+            initialTab: 'reason',
+            context: view.theater.headline,
+          });
         },
       });
     }
-    // 首屏叠看当前流年：有 URL 宫位时只打角标不抢选中
-    applyOverlay('year', !(focus.palace || focus.star));
+    // 首屏叠看当前流年：只打角标，不抢选中
+    applyOverlay('year', false);
     if (focus.star) {
       openZiweiLearnSheet({
         view,
@@ -473,6 +531,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
   }
 
   function paint(): void {
+    person = getActivePerson();
     const next = castZiweiChart(person, {
       intent,
       year: new Date().getFullYear(),
@@ -497,6 +556,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
     document.querySelector('[data-lab-float-dock]')?.remove();
     document.querySelector('[data-lab-deep-fab]')?.remove();
     document.querySelector('.lab-deep-sheet')?.remove();
+    document.querySelector('.lab-notes-sheet')?.remove();
     stars.remove();
   };
 }

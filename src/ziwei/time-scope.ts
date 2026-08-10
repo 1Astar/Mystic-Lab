@@ -4,6 +4,7 @@
 import { CHINESE_HOURS } from '../xiaoliuren/chinese-hour.ts';
 import type { PersonProfile } from '../life/types.ts';
 import { resolveHoroscopeLimits } from './horoscope-limits.ts';
+import type { ZiweiChartView } from './types.ts';
 import {
   buildYearTrack,
   type YearTense,
@@ -11,6 +12,21 @@ import {
 } from './year-track.ts';
 
 export type TimeScopeLevel = 'decade' | 'year' | 'month' | 'day' | 'hour';
+
+export type DecadeScopeItem = {
+  palace: string;
+  ageFrom: number;
+  ageTo: number;
+  gz: string;
+  theme: string;
+  lead: string;
+  domains: string[];
+  possibles: string[];
+  mutagenLine: string;
+  majorStars: string[];
+  /** 该限中段对应公历年，便于叠盘与深度抽屉 */
+  midYear: number;
+};
 
 export type MonthScopeItem = {
   year: number;
@@ -182,8 +198,95 @@ function tenseOf(year: number, nowYear: number): YearTense {
   return 'present';
 }
 
+const DECADE_THEME: Record<string, string> = {
+  命: '重塑自我',
+  兄弟: '同辈协作',
+  夫妻: '亲密关系',
+  子女: '创造与表达',
+  财帛: '搞钱与资源',
+  疾厄: '身心边界',
+  迁移: '出走与视野',
+  仆役: '人脉与协作',
+  交友: '人脉与协作',
+  官禄: '事业舞台',
+  田宅: '根基与资产',
+  福德: '内心满足',
+  父母: '出处与权威',
+};
+
+const DECADE_POSSIBLES: Record<string, string[]> = {
+  命: ['对自己的角色重新定义', '人生主轴议题反复出现', '对外形象或自我叙事调整'],
+  兄弟: ['同辈协作网络变重要', '通过他人获得机会或压力', '更在意群体中的位置'],
+  夫妻: ['亲密边界需要重谈', '一对一关系成为十年功课', '承诺与期待更敏感'],
+  子女: ['创造表达欲持续增强', '想把想法做成可见成果', '晚辈/作品相关事务浮现'],
+  财帛: ['资源进出成为长期议题', '对安全感与值不值更敏感', '收支节奏被反复校准'],
+  疾厄: ['身心负荷需要长期管理', '节奏与边界成为功课', '作息健康被反复提醒'],
+  迁移: ['外出变动与视野拓展', '生活半径可能变化', '环境切换带来新刺激'],
+  仆役: ['人脉协作被长期调用', '朋友圈带来机会与消耗', '更依赖他人推进'],
+  交友: ['人脉协作被长期调用', '朋友圈带来机会与消耗', '更依赖他人推进'],
+  官禄: ['事业舞台成为十年主线', '职业路径反复校准', '角色感与责任加重'],
+  田宅: ['家与根基相关安排', '资产与安全感议题醒目', '居住/根基变动可能出现'],
+  福德: ['内心满足需要长期补给', '精神消耗与恢复是课题', '更在意过得开不开心'],
+  父母: ['出处规则长辈议题', '权威关系需要重新定位', '对靠谁听谁更敏感'],
+};
+
 export function monthLabel(month: number): string {
   return MONTH_LABELS[Math.min(12, Math.max(1, month)) - 1] ?? `${month}月`;
+}
+
+export function buildDecadeScope(
+  person: PersonProfile,
+  view: ZiweiChartView,
+  birthYear: number,
+  palaceName: string,
+): DecadeScopeItem {
+  const palace =
+    view.palaces.find(
+      (p) => p.name === palaceName || shortPalace(p.name) === shortPalace(palaceName),
+    ) ?? view.palaces.find((p) => p.decadalRange) ?? view.soulPalace;
+  const ageFrom = palace.decadalRange?.[0] ?? 0;
+  const ageTo = palace.decadalRange?.[1] ?? 0;
+  const midAge = ageFrom && ageTo ? Math.round((ageFrom + ageTo) / 2) : 30;
+  const midYear = birthYear + midAge - 1;
+  const snap = resolveHoroscopeLimits(person, {
+    year: midYear,
+    month: 6,
+    day: 15,
+    hour: 6,
+  });
+  const key = keyOf(palace.name);
+  const theme = DECADE_THEME[key] ?? (palace.name ? '人生主场' : '酝酿中');
+  const theater = view.theater.decade;
+  const useTheater =
+    theater.palaceName &&
+    (theater.palaceName === palace.name ||
+      shortPalace(theater.palaceName) === shortPalace(palace.name));
+  const majorStars = palace.majors.map((s) => s.name);
+  const starHint =
+    majorStars.length > 0
+      ? majorStars.map((n) => `「${n}」`).join('、')
+      : '空象（更看大限四化）';
+  const lead = useTheater
+    ? theater.lead
+    : ageFrom
+      ? `这十年主场在「${theme}」（约虚岁 ${ageFrom}–${ageTo}）。大限由 ${starHint} 定调——先对准这条线，再用流年做微调。`
+      : '大限尚未清晰起运时，先养身体与安全感；起运后课题线会更清楚。';
+
+  return {
+    palace: palace.name,
+    ageFrom: useTheater ? theater.ageFrom : ageFrom,
+    ageTo: useTheater ? theater.ageTo : ageTo,
+    gz: `${palace.decadalStem ?? ''}${palace.decadalBranch ?? ''}` || snap?.decadeGZ || '',
+    theme: useTheater ? theater.theme : theme,
+    lead,
+    domains: PALACE_DOMAIN[key] ?? ['十年', '主场'],
+    possibles: (DECADE_POSSIBLES[key] ?? ['十年主线议题反复出现', '节奏需要长期校准']).slice(0, 3),
+    mutagenLine: useTheater
+      ? theater.mutagenLine.replace(/、/g, ' · ')
+      : snap?.decadeMutagenLine || '',
+    majorStars: useTheater ? theater.majorStars : majorStars,
+    midYear,
+  };
 }
 
 export function buildMonthScope(

@@ -51,7 +51,7 @@ body {
   font-size: 1.65rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
@@ -89,8 +89,8 @@ body {
   padding: 18px 20px;
   text-align: left;
   text-decoration: none;
-  color: inherit;
-  background: var(--bg-panel);
+  color: var(--ink);
+  background: var(--surface-1);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -99,13 +99,17 @@ body {
 }
 
 .entry-card:hover {
-  border-color: rgba(201, 162, 39, 0.45);
+  border-color: var(--gold);
   transform: translateY(-2px);
 }
 
 .entry-card h2 {
   font-size: 1.05rem;
   font-weight: 600;
+  color: var(--gold);
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
 }
 
 .entry-card p {
@@ -141,20 +145,6 @@ body {
   text-align: left;
 }
 
-.lab-guide-trigger {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--gold);
-  font-size: 0.84rem;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  cursor: pointer;
-  opacity: 0.9;
-}
-
 .lab-home-cta-row {
   display: flex;
   flex-wrap: wrap;
@@ -170,20 +160,24 @@ body {
 
 .lab-guide-trigger {
   appearance: none;
+  display: inline-block;
+  margin-top: 12px;
   border: 0;
   background: transparent;
-  color: rgba(232, 215, 168, 0.85);
+  color: var(--gold);
   border-radius: 0;
   padding: 0.2rem 0;
   font-size: 0.84rem;
+  font-weight: 600;
   letter-spacing: 0.04em;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
+  opacity: 1;
 }
 
 .lab-guide-trigger:hover {
-  opacity: 1;
+  color: var(--ink);
 }
 
 .lab-guide-modal {
@@ -303,7 +297,7 @@ body {
   font-size: 0.98rem;
   line-height: 1.45;
   font-weight: 650;
-  color: rgba(245, 239, 230, 0.95);
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
 
@@ -311,7 +305,7 @@ body {
   flex: 0 0 auto;
   font-size: 0.92rem;
   font-weight: 700;
-  color: rgba(201, 168, 76, 0.95);
+  color: var(--gold-ink, var(--gold));
   white-space: nowrap;
 }
 
@@ -514,11 +508,11 @@ body {
   overflow: hidden;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(201, 168, 76, 0.35);
+  border: 1px solid var(--line);
   background:
-    radial-gradient(120% 90% at 18% 0%, rgba(255, 236, 180, 0.12), transparent 42%),
-    rgba(18, 14, 28, 0.55);
-  box-shadow: 0 0 18px rgba(201, 168, 76, 0.08);
+    radial-gradient(120% 90% at 18% 0%, var(--gold-soft), transparent 42%),
+    var(--surface-1);
+  box-shadow: none;
 }
 
 .lab-ask-sparkles {
@@ -574,9 +568,9 @@ body {
   margin: 0;
   padding: 12px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(8, 6, 14, 0.55);
-  color: rgba(245, 232, 200, 0.98);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
   font: inherit;
   font-size: 0.95rem;
   line-height: 1.35;
@@ -585,12 +579,12 @@ body {
 }
 
 .lab-ask-input::placeholder {
-  color: rgba(210, 200, 188, 0.55);
+  color: var(--ink-muted);
 }
 
 .lab-ask-input:focus {
-  border-color: rgba(201, 168, 76, 0.65);
-  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.14);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
 }
 
 .lab-ask-submit {
@@ -717,26 +711,43 @@ body {
 }
 
 .lab-avatar-btn {
+  position: relative;
   width: 40px;
   height: 40px;
   padding: 0;
   border-radius: 50%;
-  border: 1.5px solid rgba(201, 168, 76, 0.55);
+  border: 1.5px solid color-mix(in srgb, var(--gold) 72%, var(--line));
   background:
-    radial-gradient(circle at 30% 25%, rgba(255, 230, 180, 0.22), transparent 55%),
-    rgba(28, 22, 40, 0.9);
+    radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--gold) 42%, transparent), transparent 55%),
+    linear-gradient(155deg, var(--surface-1), var(--surface-2));
   color: var(--gold);
-  font-size: 0.95rem;
-  font-weight: 650;
-  letter-spacing: 0;
+  font-family: var(--font-serif), 'Songti SC', 'STSong', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   cursor: pointer;
   line-height: 1;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--gold) 14%, transparent);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s, color 0.2s;
+}
+
+.lab-avatar-btn::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+  pointer-events: none;
 }
 
 .lab-avatar-btn:hover {
-  border-color: rgba(201, 168, 76, 0.85);
-  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 
 .lab-avatar-add {
@@ -744,8 +755,8 @@ body {
   height: 34px;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  background: var(--gold-soft);
   color: var(--ink-muted);
   font-size: 1.15rem;
   font-weight: 400;
@@ -755,9 +766,9 @@ body {
 }
 
 .lab-avatar-add:hover {
-  border-color: rgba(201, 168, 76, 0.45);
+  border-color: var(--gold);
   color: var(--gold);
-  background: rgba(201, 168, 76, 0.08);
+  background: var(--gold-soft);
 }
 
 .lab-home-ai-btn {
@@ -765,12 +776,13 @@ body {
   align-items: center;
   gap: 6px;
   min-width: 40px;
+  min-height: 34px;
   height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--ink-muted);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
   font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.06em;
@@ -779,13 +791,14 @@ body {
 }
 
 .lab-home-ai-btn:hover {
-  border-color: rgba(201, 168, 76, 0.45);
-  color: var(--ink);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 .lab-home-ai-btn.is-on {
-  border-color: rgba(201, 168, 76, 0.55);
+  border-color: var(--gold);
   color: var(--gold);
+  background: var(--gold-soft);
 }
 
 .lab-home-ai-dot {
@@ -798,7 +811,7 @@ body {
 
 .lab-home-ai-btn.is-on .lab-home-ai-dot {
   background: var(--gold);
-  box-shadow: 0 0 6px rgba(201, 168, 76, 0.55);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
 .lab-home-share-btn {
@@ -809,19 +822,21 @@ body {
   height: 34px;
   padding: 0;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(18, 14, 32, 0.55);
-  color: var(--ink-muted);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--gold);
   cursor: pointer;
 }
 
 .lab-home-share-btn:hover {
-  border-color: rgba(201, 168, 76, 0.45);
-  color: var(--ink);
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold);
 }
 
 .lab-home-share-ico {
   display: block;
+  color: inherit;
 }
 
 .lab-systems {
@@ -861,7 +876,7 @@ body {
   padding: 2px 8px;
   font-size: 0.68rem;
   border-radius: 999px;
-  background: rgba(201, 162, 39, 0.12);
+  background: var(--gold-soft);
   color: var(--gold);
 }
 
@@ -1019,14 +1034,15 @@ html[data-theme='moon'] .stars {
   padding: 4px 10px;
   font-size: 0.62rem;
   letter-spacing: 0.04em;
-  color: rgba(191, 163, 255, 0.45);
+  color: var(--ink-muted);
+  opacity: 0.85;
   pointer-events: none;
   user-select: none;
   text-align: center;
 }
 
 .app-version-copy {
-  color: rgba(191, 163, 255, 0.55);
+  color: var(--ink-muted);
 }
 
 .app-version-sep {
@@ -1034,7 +1050,7 @@ html[data-theme='moon'] .stars {
 }
 
 .app-version-num {
-  color: rgba(255, 214, 166, 0.55);
+  color: var(--gold);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1058,21 +1074,22 @@ html[data-theme='moon'] .stars {
   padding: 6px 12px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--ink-muted);
+  background: var(--surface-1);
+  color: var(--ink);
   font-size: 0.78rem;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 
 .ai-settings-trigger:hover {
-  border-color: rgba(201, 168, 76, 0.45);
-  color: var(--ink);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 .ai-settings-trigger.is-on {
-  border-color: rgba(201, 168, 76, 0.55);
+  border-color: var(--gold);
   color: var(--gold);
+  background: var(--gold-soft);
 }
 
 .ai-settings-trigger-dot {
@@ -1085,7 +1102,7 @@ html[data-theme='moon'] .stars {
 
 .ai-settings-trigger.is-on .ai-settings-trigger-dot {
   background: var(--gold);
-  box-shadow: 0 0 8px rgba(201, 168, 76, 0.6);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--gold) 50%, transparent);
 }
 
 .ai-settings-trigger-label {
@@ -1098,7 +1115,7 @@ html[data-theme='moon'] .stars {
 }
 
 .ai-settings-trigger.is-on .ai-settings-trigger-hint {
-  color: rgba(201, 168, 76, 0.75);
+  color: var(--gold);
 }
 
 .ai-settings-modal {

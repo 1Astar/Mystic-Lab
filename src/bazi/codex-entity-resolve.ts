@@ -76,11 +76,15 @@ export function resolveCodexEntityId(raw: string): string | null {
   return null;
 }
 
+export type CodexDepth = 'atlas' | 'chart' | 'deep';
+
 export type CodexDepthSummary = {
   entityId: string;
   title: string;
   chartBrief: string;
   atlasBrief: string;
+  /** 第三层：四柱 + 大运流年个性化 */
+  deepBrief: string;
   hit: boolean;
 };
 
@@ -123,8 +127,18 @@ export function buildCodexDepthSummary(
     title: entry.title,
     chartBrief,
     atlasBrief,
+    deepBrief: link.deepBrief,
     hit: true,
   };
+}
+
+function pickDepthAnswer(
+  sum: CodexDepthSummary,
+  depth: CodexDepth,
+): string {
+  if (depth === 'deep') return sum.deepBrief;
+  if (depth === 'chart') return sum.chartBrief;
+  return sum.atlasBrief;
 }
 
 /** 给 concept-ask / peek：优先图鉴实体 */
@@ -133,10 +147,11 @@ export function answerFromCodexEntity(
   opts?: {
     chart?: BaziChart | null;
     luck?: LuckCycles | null;
-    depth?: 'chart' | 'atlas';
+    depth?: CodexDepth;
   },
 ): { answer: string; hit: boolean; entityId?: string } {
-  const depth = opts?.depth ?? (opts?.chart ? 'chart' : 'atlas');
+  const depth: CodexDepth =
+    opts?.depth ?? (opts?.chart ? 'chart' : 'atlas');
   const sum = buildCodexDepthSummary(
     term,
     opts?.chart ?? null,
@@ -147,9 +162,9 @@ export function answerFromCodexEntity(
     const stage = norm(term);
     if (isChangShengStage(stage)) {
       const answer =
-        depth === 'chart' || opts?.chart
-          ? changShengChartBrief(stage, opts?.chart ?? null)
-          : `${stage}：十二长生之一：${CHANG_SHENG_GLOSS[stage]}`;
+        depth === 'atlas' && !opts?.chart
+          ? `${stage}：十二长生之一：${CHANG_SHENG_GLOSS[stage]}`
+          : changShengChartBrief(stage, opts?.chart ?? null);
       return { hit: true, answer };
     }
     return { answer: '', hit: false };
@@ -157,6 +172,6 @@ export function answerFromCodexEntity(
   return {
     hit: true,
     entityId: sum.entityId,
-    answer: depth === 'chart' ? sum.chartBrief : sum.atlasBrief,
+    answer: pickDepthAnswer(sum, depth),
   };
 }

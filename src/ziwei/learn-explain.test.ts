@@ -72,9 +72,16 @@ describe('learn-explain', () => {
     expect(palace.relationMap?.self).toMatch(/夫妻/);
     expect(palace.relationMap?.sanhe.length).toBe(2);
 
-    const struct = buildLearnExplain(view, { kind: 'structure', term: '三方四正' });
+    const struct = buildLearnExplain(view, {
+      kind: 'structure',
+      term: '三方四正',
+      palaceName: '命宫',
+    });
     expect(struct.category).toBe('structure');
     expect(struct.oneLiner).toMatch(/三合|对宫/);
+    expect(struct.inChart).toMatch(/官禄|财帛/);
+    expect(struct.inChart).toMatch(/迁移|对宫/);
+    expect(struct.relationMap?.note).toMatch(/官禄|财帛|迁移/);
   });
 
   it('maps 12 earthly branches onto plate grid', () => {
@@ -96,5 +103,95 @@ describe('learn-explain', () => {
     if ('error' in view) return;
     const flow = collectMutagenFlow(view.palaces);
     expect(Array.isArray(flow)).toBe(true);
+  });
+
+  it('explains 四化 with chart star mapping and impact', () => {
+    const person = createSelfPerson({
+      ...EMPTY_PROFILE,
+      birthYear: '2003',
+      birthMonth: '2',
+      birthDay: '11',
+      birthHour: '20:00',
+    });
+    person.gender = 'female';
+    const view = castZiweiChart(person, { intent: 'map', year: 2026 });
+    if ('error' in view) return;
+    const flow = collectMutagenFlow(view.palaces);
+    expect(flow.length).toBeGreaterThan(0);
+
+    const sihua = buildLearnExplain(view, { kind: 'mutagen', term: '四化' });
+    expect(sihua.oneLiner).toMatch(/化禄|化权|化科|化忌/);
+    expect(sihua.inChart).toMatch(/生年四化|四化徽章/);
+    expect(sihua.mutagenMap?.length).toBeGreaterThan(0);
+    for (const f of flow) {
+      expect(sihua.mutagenMap?.some((m) => m.star === f.star)).toBe(true);
+    }
+
+    const first = flow[0]!;
+    const one = buildLearnExplain(view, {
+      kind: 'mutagen',
+      term: `化${first.mutagen}`,
+    });
+    expect(one.mutagenMap?.[0]?.star).toBe(first.star);
+    expect(one.mutagenMap?.[0]?.effect.length).toBeGreaterThan(4);
+  });
+
+  it('explains plate 神煞 / 十二神 via shensha lore', () => {
+    const person = createSelfPerson({
+      ...EMPTY_PROFILE,
+      birthYear: '2003',
+      birthMonth: '2',
+      birthDay: '11',
+      birthHour: '20:00',
+    });
+    person.gender = 'female';
+    const view = castZiweiChart(person, { intent: 'map', year: 2026 });
+    if ('error' in view) return;
+
+    const tianguan = buildLearnExplain(view, { kind: 'star', starName: '天官' });
+    expect(tianguan.oneLiner).toMatch(/官贵|名位/);
+    expect(tianguan.traditional).not.toMatch(/尚未收录/);
+
+    const seriesName = view.palaces.find((p) => p.series?.length)?.series?.[0]?.name;
+    expect(seriesName).toBeTruthy();
+    if (seriesName) {
+      const series = buildLearnExplain(view, { kind: 'star', starName: seriesName });
+      expect(series.oneLiner.length).toBeGreaterThan(4);
+      expect(series.traditional.length).toBeGreaterThan(8);
+    }
+  });
+
+  it('explains 地支关系 with chart branch map and impact', () => {
+    const person = createSelfPerson({
+      ...EMPTY_PROFILE,
+      birthYear: '2003',
+      birthMonth: '2',
+      birthDay: '11',
+      birthHour: '20:00',
+    });
+    person.gender = 'female';
+    const view = castZiweiChart(person, { intent: 'map', year: 2026 });
+    if ('error' in view) return;
+
+    const dizhi = buildLearnExplain(view, {
+      kind: 'structure',
+      term: '地支关系',
+      palaceName: view.soulPalace.name,
+    });
+    expect(dizhi.oneLiner).toMatch(/冲|合|刑/);
+    expect(dizhi.branchMap?.length).toBeGreaterThan(0);
+    expect(dizhi.branchMap?.some((r) => r.kind === '冲')).toBe(true);
+    expect(dizhi.inChart).toMatch(/地支关系|冲\/合\/刑/);
+    for (const row of dizhi.branchMap ?? []) {
+      expect(row.effect.length).toBeGreaterThan(4);
+      expect(row.label.length).toBeGreaterThan(1);
+    }
+
+    const chong = buildLearnExplain(view, {
+      kind: 'structure',
+      term: '六冲',
+      palaceName: view.soulPalace.name,
+    });
+    expect(chong.branchMap?.every((r) => r.kind === '冲')).toBe(true);
   });
 });

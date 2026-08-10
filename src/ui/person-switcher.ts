@@ -3,11 +3,14 @@ import {
   getActivePerson,
   listPersons,
   setActivePersonId,
+  upsertPerson,
 } from '../life/storage.ts';
 import {
   PERSON_RELATION_LABELS,
   SELF_PROFILE_ID,
+  createEmptyPerson,
   type PersonProfile,
+  type PersonRelation,
 } from '../life/types.ts';
 import { openLabMeDrawer } from './lab-me-drawer.ts';
 
@@ -24,38 +27,55 @@ export type PersonSwitcherOptions = {
   onChange?: (person: PersonProfile) => void;
 };
 
-function findPersonSheet(host: HTMLElement): HTMLElement | null {
-  const page = host.closest('.page') ?? document.body;
-  return (
-    page.querySelector<HTMLElement>('[data-person-sheet]') ??
-    document.querySelector<HTMLElement>('[data-person-sheet]')
-  );
+type AddableRelation = Exclude<PersonRelation, 'self'>;
+
+const ADDABLE_RELATIONS: AddableRelation[] = [
+  'family',
+  'partner',
+  'friend',
+  'client',
+  'other',
+];
+
+function findDropdown(host: HTMLElement): HTMLElement | null {
+  return host.querySelector<HTMLElement>('[data-person-sheet]');
 }
 
-function closeSheet(host: HTMLElement): void {
-  const sheet = findPersonSheet(host);
-  if (!sheet) return;
-  sheet.classList.remove('is-open');
-  window.setTimeout(() => sheet.remove(), 220);
+function closeDropdown(host: HTMLElement): void {
+  const drop = findDropdown(host);
+  if (!drop) return;
+  drop.classList.remove('is-open');
+  drop.hidden = true;
+  host.querySelector('.person-switcher')?.classList.remove('is-open');
+  host
+    .querySelector<HTMLButtonElement>('[data-person-trigger]')
+    ?.setAttribute('aria-expanded', 'false');
+  document.querySelector('[data-person-drop-backdrop]')?.remove();
 }
 
-function openSheet(host: HTMLElement, options?: PersonSwitcherOptions): void {
-  findPersonSheet(host)?.remove();
+function relationOptionsHtml(selected: AddableRelation = 'friend'): string {
+  return ADDABLE_RELATIONS.map(
+    (r) =>
+      `<option value="${r}"${r === selected ? ' selected' : ''}>${escapeHtml(PERSON_RELATION_LABELS[r])}</option>`,
+  ).join('');
+}
+
+function paintListView(
+  drop: HTMLElement,
+  host: HTMLElement,
+  options?: PersonSwitcherOptions,
+): void {
   const active = getActivePerson();
   const people = listPersons();
 
-  const sheet = document.createElement('div');
-  sheet.className = 'person-switch-sheet';
-  sheet.dataset.personSheet = '';
-  sheet.innerHTML = `
-    <div class="person-switch-backdrop" data-close></div>
-    <div class="person-switch-panel" role="dialog" aria-label="选择这次问谁">
+  drop.innerHTML = `
+    <div class="person-switch-drop-inner" role="dialog" aria-label="选择这次问谁">
       <header class="person-switch-head">
         <div>
           <p class="person-switch-kicker">这次问谁</p>
-          <h3>档案</h3>
+          <h3>切换档案</h3>
         </div>
-        <button type="button" class="person-switch-x" data-close aria-label="关闭">×</button>
+        <button type="button" class="person-switch-add-btn" data-add aria-label="添加他人" title="添加他人">+</button>
       </header>
       <ul class="person-switch-list">
         ${people
@@ -77,43 +97,124 @@ function openSheet(host: HTMLElement, options?: PersonSwitcherOptions): void {
           .join('')}
       </ul>
       <div class="person-switch-actions">
-        <button type="button" class="btn btn-ghost btn-sm" data-manage>管理档案</button>
-        <button type="button" class="btn btn-sm" data-add>添加他人</button>
+        <button type="button" class="person-switch-manage" data-add>+ 添加他人</button>
+        <button type="button" class="person-switch-manage is-ghost" data-manage>管理</button>
       </div>
     </div>
   `;
 
-  const finishClose = () => closeSheet(host);
-  sheet.querySelectorAll('[data-close]').forEach((el) => {
-    el.addEventListener('click', finishClose);
+  bindDropdownChrome(drop, host, options);
+}
+
+function paintAddView(
+  drop: HTMLElement,
+  host: HTMLElement,
+  options?: PersonSwitcherOptions,
+): void {
+  drop.innerHTML = `
+    <div class="person-switch-drop-inner" role="dialog" aria-label="添加他人">
+      <header class="person-switch-head">
+        <div>
+          <p class="person-switch-kicker">新建档案</p>
+          <h3>添加他人</h3>
+        </div>
+        <button type="button" class="person-switch-x" data-back-list aria-label="返回列表">×</button>
+      </header>
+      <form class="person-switch-add-form" data-add-form>
+        <label class="person-switch-field">
+          <span>怎么称呼</span>
+          <input name="nickname" type="text" maxlength="8" placeholder="如：豆豆" required autocomplete="nickname" />
+        </label>
+        <label class="person-switch-field">
+          <span>关系</span>
+          <select name="relation">${relationOptionsHtml('friend')}</select>
+        </label>
+        <p class="person-switch-add-hint">出生等信息可稍后在「管理」补全。</p>
+        <div class="person-switch-actions">
+          <button type="button" class="person-switch-manage" data-back-list>返回</button>
+          <button type="submit" class="person-switch-submit">添加并切换</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  drop.querySelectorAll('[data-back-list]').forEach((el) => {
+    el.addEventListener('click', () => paintListView(drop, host, options));
   });
-  sheet.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((btn) => {
+
+  const form = drop.querySelector<HTMLFormElement>('[data-add-form]');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const nickname = String(fd.get('nickname') ?? '').trim().slice(0, 8);
+    if (!nickname) return;
+    const relationRaw = String(fd.get('relation') ?? 'friend') as AddableRelation;
+    const relation: AddableRelation = ADDABLE_RELATIONS.includes(relationRaw)
+      ? relationRaw
+      : 'friend';
+    const person = createEmptyPerson({ nickname, relation });
+    upsertPerson(person);
+    setActivePersonId(person.id);
+    paintTrigger(host);
+    options?.onChange?.(person);
+    closeDropdown(host);
+  });
+
+  requestAnimationFrame(() => {
+    form?.querySelector<HTMLInputElement>('input[name="nickname"]')?.focus();
+  });
+}
+
+function bindDropdownChrome(
+  drop: HTMLElement,
+  host: HTMLElement,
+  options?: PersonSwitcherOptions,
+): void {
+  drop.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.pick!;
       const store = setActivePersonId(id);
       const person = store.profiles.find((p) => p.id === id)!;
       paintTrigger(host);
       options?.onChange?.(person);
-      finishClose();
+      closeDropdown(host);
     });
   });
-  sheet.querySelector('[data-manage]')?.addEventListener('click', () => {
-    finishClose();
+  drop.querySelectorAll('[data-add]').forEach((el) => {
+    el.addEventListener('click', () => paintAddView(drop, host, options));
+  });
+  drop.querySelector('[data-manage]')?.addEventListener('click', () => {
+    closeDropdown(host);
     navigate('/profile');
   });
-  sheet.querySelector('[data-add]')?.addEventListener('click', () => {
-    finishClose();
-    try {
-      sessionStorage.setItem('mystic-lab-profile-open-new', '1');
-    } catch {
-      /* ignore */
-    }
-    navigate('/profile');
-  });
+}
 
-  const page = host.closest('.page') ?? document.body;
-  page.appendChild(sheet);
-  requestAnimationFrame(() => sheet.classList.add('is-open'));
+function ensureBackdrop(host: HTMLElement): void {
+  document.querySelector('[data-person-drop-backdrop]')?.remove();
+  const backdrop = document.createElement('button');
+  backdrop.type = 'button';
+  backdrop.className = 'person-switch-drop-backdrop';
+  backdrop.dataset.personDropBackdrop = '';
+  backdrop.setAttribute('aria-label', '关闭档案切换');
+  backdrop.addEventListener('click', () => closeDropdown(host));
+  (document.querySelector('#app') || document.body).appendChild(backdrop);
+}
+
+function openDropdown(host: HTMLElement, options?: PersonSwitcherOptions): void {
+  const wrap = host.querySelector<HTMLElement>('.person-switcher');
+  const drop = findDropdown(host);
+  if (!wrap || !drop) return;
+
+  if (drop.classList.contains('is-open')) {
+    closeDropdown(host);
+    return;
+  }
+
+  paintListView(drop, host, options);
+  drop.hidden = false;
+  wrap.classList.add('is-open');
+  ensureBackdrop(host);
+  requestAnimationFrame(() => drop.classList.add('is-open'));
 }
 
 function paintTrigger(host: HTMLElement): void {
@@ -131,28 +232,41 @@ function paintTrigger(host: HTMLElement): void {
 }
 
 /**
- * 各板块右上角：当前人名 ▾ → 选这次问谁（底部 sheet，模块内快速切换）
+ * 顶栏居中：当前人名 ▾ → 下拉切换 / 添加他人
  */
 export function mountPersonSwitcher(
   host: HTMLElement,
   options?: PersonSwitcherOptions,
 ): { refresh: () => void } {
   host.querySelector('[data-person-switcher]')?.remove();
+  document.querySelector('[data-person-drop-backdrop]')?.remove();
 
   const wrap = document.createElement('div');
   wrap.className = 'person-switcher';
   wrap.dataset.personSwitcher = '';
   wrap.innerHTML = `
-    <button type="button" class="person-switch-trigger" data-person-trigger></button>
+    <button type="button" class="person-switch-trigger" data-person-trigger aria-haspopup="listbox" aria-expanded="false"></button>
+    <div class="person-switch-dropdown" data-person-sheet hidden></div>
   `;
   host.prepend(wrap);
   paintTrigger(host);
 
-  wrap.querySelector('[data-person-trigger]')?.addEventListener('click', () => {
-    openSheet(host, options);
+  const trigger = wrap.querySelector<HTMLButtonElement>('[data-person-trigger]');
+  trigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openDropdown(host, options);
+    const drop = findDropdown(host);
+    trigger.setAttribute(
+      'aria-expanded',
+      drop?.classList.contains('is-open') ? 'true' : 'false',
+    );
   });
 
-  return { refresh: () => paintTrigger(host) };
+  return {
+    refresh: () => {
+      paintTrigger(host);
+    },
+  };
 }
 
 /** 主页顶栏：头像 → 左侧「我」抽屉（角色 · 旅程等） */

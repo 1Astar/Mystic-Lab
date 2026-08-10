@@ -79,12 +79,25 @@ describe('bazi encyclopedia', () => {
       expect(html).toContain(`data-enc-tab="${pane}"`);
       expect(html).toContain(`data-enc-pane="${pane}"`);
     }
+    expect(html).not.toContain('data-enc-tab="schools"');
     expect(html).toContain('甲木');
     expect(html).toContain('生克');
     expect(html).toContain('命盘');
     expect(html).toContain('水滋养');
     expect(html).toContain('data-shengke-map');
     expect(html).toMatch(/data-enc-pane="express"[^>]*hidden/);
+  });
+
+  it('神煞详情含「他派差异」Tab', () => {
+    const html = renderBaziCodexDetailHtml('ss:天乙贵人', {
+      artHtml: '<span></span>',
+      lit: true,
+      chartLink: buildChartLinkReport('ss:天乙贵人', null),
+    });
+    expect(html).toContain('data-enc-tab="schools"');
+    expect(html).toContain('他派差异');
+    expect(html).toContain('本产品查法');
+    expect(html).toMatch(/日干|年干/);
   });
 
   it('shengke map renders five nodes and edges', () => {
@@ -95,8 +108,105 @@ describe('bazi encyclopedia', () => {
     }
   });
 
-  it('shensha shell reminds usage boundary', () => {
+  it('天乙贵人 dossier 接近甲木级：查法表 + 使用边界 + 四柱', () => {
     const d = buildCodexDossier('ss:天乙贵人')!;
     expect(d.chartRole).toMatch(/辅助|不能脱离/);
+    expect(d.season).toMatch(/丑|未/);
+    expect(d.combos.some((c) => c.note.includes('甲') && c.note.includes('丑'))).toBe(true);
+    expect(d.imbalance).toMatch(/单独|懈怠|误读/);
+    expect(d.pillarMeaning.day).toMatch(/日柱/);
+    expect(d.memory).toMatch(/天乙/);
+  });
+
+  it('精品神煞 dossier 均有查法表与使用边界', () => {
+    const samples = [
+      { id: 'ss:文昌', season: /巳|午/, memory: /文昌/ },
+      { id: 'ss:羊刃', season: /卯|寅/, memory: /羊刃/ },
+      { id: 'ss:华盖', season: /辰|戌|丑|未/, memory: /华盖/ },
+      { id: 'ss:驿马', season: /寅|申|巳|亥/, memory: /驿马/ },
+      { id: 'ss:桃花', season: /酉|卯|午|子/, memory: /桃花/ },
+      { id: 'ss:将星', season: /子|午|酉|卯/, memory: /将星/ },
+      { id: 'ss:红鸾', season: /年支/, memory: /红鸾/ },
+      { id: 'ss:天喜', season: /年支/, memory: /天喜/ },
+      { id: 'ss:禄神', season: /寅|卯/, memory: /禄/ },
+      { id: 'ss:孤辰寡宿', season: /孤辰|寡宿/, memory: /孤辰/ },
+      { id: 'ss:劫煞', season: /巳|亥|寅|申/, memory: /劫煞/ },
+    ] as const;
+    for (const s of samples) {
+      const d = buildCodexDossier(s.id)!;
+      expect(d.chartRole, s.id).toMatch(/辅助|不能脱离/);
+      expect(d.season, s.id).toMatch(s.season);
+      expect(d.combos.length, s.id).toBeGreaterThanOrEqual(3);
+      expect(d.pillarMeaning.day, s.id).toMatch(/日柱/);
+      expect(d.memory, s.id).toMatch(s.memory);
+    }
+  });
+
+  it('MORE 名录神煞 dossier 达天乙模板（查法+边界+四柱）', () => {
+    const samples = [
+      { id: 'ss:天德', season: /寅月|丁/, memory: /天德/ },
+      { id: 'ss:月德', season: /天干丙|寅午戌/, memory: /月德/ },
+      { id: 'ss:福星', season: /寅|子/, memory: /福星/ },
+      { id: 'ss:咸池', season: /酉|卯|午|子/, memory: /咸池/ },
+      { id: 'ss:金舆', season: /辰/, memory: /金舆/ },
+      { id: 'ss:天厨', season: /巳/, memory: /天厨/ },
+      { id: 'ss:灾煞', season: /午|子|卯|酉/, memory: /灾煞/ },
+      { id: 'ss:亡神', season: /亥|巳|申|寅/, memory: /亡神/ },
+      { id: 'ss:白虎', season: /年支/, memory: /白虎/ },
+      { id: 'ss:吊客', season: /年支/, memory: /吊客/ },
+      { id: 'ss:天哭', season: /年支/, memory: /天哭/ },
+      { id: 'ss:天虚', season: /年支/, memory: /天虚/ },
+      { id: 'ss:破碎', season: /酉|巳|丑/, memory: /破碎/ },
+    ] as const;
+    for (const s of samples) {
+      const d = buildCodexDossier(s.id)!;
+      expect(d, s.id).toBeTruthy();
+      expect(d.chartRole, s.id).toMatch(/辅助|不能脱离/);
+      expect(d.season, s.id).toMatch(s.season);
+      expect(d.combos.length, s.id).toBeGreaterThanOrEqual(3);
+      expect(d.pillarMeaning.day, s.id).toMatch(/日柱/);
+      expect(d.memory, s.id).toMatch(s.memory);
+      expect(d.imbalance, s.id).toMatch(/单独|恐吓|误读|懈怠|躺平|沉溺|硬/);
+    }
+  });
+
+  it('乙木 dossier 加深到接近甲木级字段', () => {
+    const d = buildCodexDossier('乙')!;
+    expect(d.whatIs).toMatch(/藤萝|柔韧/);
+    expect(d.likes.length).toBeGreaterThanOrEqual(2);
+    expect(d.dislikes.length).toBeGreaterThanOrEqual(2);
+    expect(d.pillarMeaning.year).toMatch(/年柱/);
+    expect(d.combos.some((c) => c.peer.includes('庚'))).toBe(true);
+    expect(d.memory).toMatch(/乙木/);
+  });
+
+  it('纳音 dossier 达可用百科：画面+甲子对+边界', () => {
+    const d = buildCodexDossier(nayinId('海中金'))!;
+    expect(d.whatIs).toMatch(/海中金|深海/);
+    expect(d.season).toMatch(/甲子|乙丑/);
+    expect(d.chartRole).toMatch(/辅助|不能脱离|纳音/);
+    expect(d.combos.some((c) => c.peer === '甲子')).toBe(true);
+    expect(d.memory).toMatch(/海中金/);
+    expect(d.pillarMeaning.day).toMatch(/日柱/);
+  });
+
+  it('甲子 dossier 拆干支纳音三层', () => {
+    const d = buildCodexDossier(jiaziId('甲子'))!;
+    expect(d.whatIs).toMatch(/甲子|海中金/);
+    expect(d.combos.some((c) => c.peer === '甲')).toBe(true);
+    expect(d.combos.some((c) => c.peer === '子')).toBe(true);
+    expect(d.combos.some((c) => c.peer.includes('海中金') || c.note.includes('海中金'))).toBe(true);
+    expect(d.chartRole).toMatch(/干支|纳音|不能脱离/);
+    expect(d.memory).toMatch(/甲子/);
+    expect(d.coreKeyword).toMatch(/海中金/);
+  });
+
+  it('三十纳音均有 lore 且 dossier 非骨架占位', () => {
+    for (const n of NAYIN_ATLAS) {
+      const d = buildCodexDossier(nayinId(n.name))!;
+      expect(d.season, n.name).not.toMatch(/骨架条目/);
+      expect(d.likes.length, n.name).toBeGreaterThanOrEqual(2);
+      expect(d.memory, n.name).toMatch(/纳音|勿单断|画面/);
+    }
   });
 });

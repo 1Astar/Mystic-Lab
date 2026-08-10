@@ -1,6 +1,8 @@
 import { astro } from 'iztro';
 import type { PersonProfile } from '../life/types.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
+import { resolveBirthPlaceLng } from '../bazi/cities.ts';
+import { toTrueSolarDate } from '../bazi/true-solar.ts';
 import { clockToTimeIndex, TIME_INDEX_LABELS } from './time-index.ts';
 import { isMajorStar } from './stars.ts';
 import { buildTheater } from './narrative.ts';
@@ -34,6 +36,10 @@ function palaceSnap(p: {
   majorStars: Array<{ name: string; brightness?: string; mutagen?: string; type?: string }>;
   minorStars: Array<{ name: string; brightness?: string; mutagen?: string; type?: string }>;
   adjectiveStars?: Array<{ name: string; brightness?: string; mutagen?: string; type?: string }>;
+  changsheng12?: string;
+  boshi12?: string;
+  jiangqian12?: string;
+  suiqian12?: string;
   isEmpty?: () => boolean;
   decadal?: {
     range?: [number, number];
@@ -44,6 +50,11 @@ function palaceSnap(p: {
   const majors = (p.majorStars ?? []).map(starSnap);
   const minors = (p.minorStars ?? []).map(starSnap);
   const adjectives = (p.adjectiveStars ?? []).map(starSnap);
+  const series: NonNullable<PalaceSnap['series']> = [];
+  if (p.changsheng12) series.push({ kind: 'changsheng', name: String(p.changsheng12) });
+  if (p.boshi12) series.push({ kind: 'boshi', name: String(p.boshi12) });
+  if (p.jiangqian12) series.push({ kind: 'jiangqian', name: String(p.jiangqian12) });
+  if (p.suiqian12) series.push({ kind: 'suiqian', name: String(p.suiqian12) });
   const empty =
     typeof p.isEmpty === 'function' ? Boolean(p.isEmpty()) : majors.length === 0;
   const range = p.decadal?.range;
@@ -57,6 +68,7 @@ function palaceSnap(p: {
     majors,
     minors,
     adjectives,
+    series: series.length ? series : undefined,
     decadalRange:
       range && range.length === 2 ? [Number(range[0]), Number(range[1])] : undefined,
     decadalStem: p.decadal?.heavenlyStem ? String(p.decadal.heavenlyStem) : undefined,
@@ -73,6 +85,11 @@ export function genderToIztro(gender: '' | 'female' | 'male'): '男' | '女' | n
 }
 
 export type CastError = { error: string };
+
+function formatDt(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export function castZiweiChart(
   person: PersonProfile,
@@ -92,10 +109,30 @@ export function castZiweiChart(
     return { error: '紫微排盘需要性别（阴阳顺逆），请先在档案里选择' };
   }
 
-  const timeIndex = parts.hasHour
-    ? clockToTimeIndex(parts.hour, parts.minute)
-    : 6; // 未填时辰：取午时中位，结果页会标注
-  const solarDate = `${parts.year}-${parts.month}-${parts.day}`;
+  const place = resolveBirthPlaceLng(person.birthPlace);
+  const clock = new Date(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hasHour ? parts.hour : 12,
+    parts.hasHour ? parts.minute : 0,
+    0,
+  );
+  if (Number.isNaN(clock.getTime())) {
+    return { error: '出生日期无效，请检查年月日' };
+  }
+
+  // 与八字同一套：经度差 + 均时差 → 真太阳时进盘
+  const trueSolar = toTrueSolarDate(clock, place.lng);
+  const castYear = trueSolar.getFullYear();
+  const castMonth = trueSolar.getMonth() + 1;
+  const castDay = trueSolar.getDate();
+  const castHour = trueSolar.getHours();
+  const castMinute = trueSolar.getMinutes();
+
+  const timeIndex = parts.hasHour ? clockToTimeIndex(castHour, castMinute) : 6;
+  const solarDate = `${castYear}-${castMonth}-${castDay}`;
+  const clockSolarDate = `${parts.year}-${parts.month}-${parts.day}`;
   const astrolabe = astro.bySolar(solarDate, timeIndex, gender, true, 'zh-CN');
 
   const palaces = (astrolabe.palaces ?? []).map((p) => palaceSnap(p));
@@ -124,11 +161,19 @@ export function castZiweiChart(
     astrolabe,
   });
 
+  const clockLabel = parts.hasHour ? formatDt(clock) : `${clockSolarDate} · 时辰未填`;
+  const trueSolarLabel = parts.hasHour
+    ? formatDt(trueSolar)
+    : `${solarDate} · 时辰未填（暂按午时）`;
+
   return {
     solarDate,
     timeLabel: parts.hasHour
       ? TIME_INDEX_LABELS[timeIndex] ?? parts.hourLabel
       : '时辰未填（暂按午时）',
+    clockLabel,
+    trueSolarLabel,
+    placeNote: place.note,
     genderLabel: gender,
     soul: String(astrolabe.soul ?? ''),
     body: String(astrolabe.body ?? ''),

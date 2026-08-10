@@ -12,6 +12,8 @@ import {
   type WuXing,
 } from './elements.ts';
 import type { LuckCycles } from './luck-cycles.ts';
+import { nayinOf } from './pillar-meta.ts';
+import { shenshaForBranch } from './shensha.ts';
 import { getStarCard } from './codex-tags.ts';
 
 const SHENG: WuXing[] = ['木', '火', '土', '金', '水'];
@@ -54,6 +56,8 @@ export type ChartLinkReport = {
   };
   dayMasterImpact: string;
   luckTrigger: string;
+  /** 第三层：四柱落点释义 + 大运流年个性化（同源 dossier） */
+  deepBrief: string;
   dossierHint: string;
 };
 
@@ -273,6 +277,43 @@ function dayMasterImpactOf(chart: BaziChart, id: string): string {
   return '神煞对日主的影响，宜结合落柱喜忌，不作单一定论。';
 }
 
+function yearPillar(chart: BaziChart): PillarCell | undefined {
+  return natal(chart).find((c) => c.key === 'year');
+}
+
+function monthBranchOf(chart: BaziChart): string {
+  return natal(chart).find((c) => c.key === 'month')?.branch || '';
+}
+
+function dayGzOf(chart: BaziChart): string {
+  const day = natal(chart).find((c) => c.key === 'day');
+  if (day) return `${day.stem}${day.branch}`;
+  return `${chart.dayMaster}${chart.dayBranch}`;
+}
+
+function luckShenshaOn(
+  chart: BaziChart,
+  stem: string,
+  branch: string,
+  name: string,
+): boolean {
+  const year = yearPillar(chart);
+  const list = shenshaForBranch({
+    branch,
+    stem,
+    dayStem: chart.dayMaster,
+    yearBranch: chart.yearBranch,
+    dayBranch: chart.dayBranch,
+    monthBranch: monthBranchOf(chart),
+    yearStem: year?.stem || '',
+    yearNayin: year?.nayin || '',
+    dayGz: dayGzOf(chart),
+  });
+  return list.some(
+    (s) => s === name || s.includes(name) || name.includes(s),
+  );
+}
+
 function luckTriggerOf(
   chart: BaziChart,
   id: string,
@@ -286,32 +327,126 @@ function luckTriggerOf(
   const bits: string[] = [];
 
   const touch = (stem: string, branch: string, label: string) => {
-    if (entry.kind === 'stem' && (stem === entry.id)) bits.push(`${label}天干触发`);
+    if (!stem || !branch) return;
+    if (entry.kind === 'stem' && stem === entry.id) bits.push(`${label}天干触发`);
     if (entry.kind === 'branch' && branch === entry.id) bits.push(`${label}地支触发`);
     if (entry.kind === 'wuxing') {
       const wx = entry.id as WuXing;
-      if (STEM_WUXING[stem] === wx || BRANCH_WUXING[branch] === wx) bits.push(`${label}五行触发`);
+      if (STEM_WUXING[stem] === wx || BRANCH_WUXING[branch] === wx) {
+        bits.push(`${label}五行触发`);
+      }
     }
     if (entry.kind === 'tengod') {
       const name = getStarCard(id)?.name || entry.title;
       if (stemTenGod(chart.dayMaster, stem) === name) bits.push(`${label}十神触发`);
     }
     if (entry.kind === 'shensha') {
-      /* 神煞流年触发需另表；此处提示落点 */
+      const name = getStarCard(id)?.name || entry.title;
+      if (luckShenshaOn(chart, stem, branch, name)) bits.push(`${label}神煞触发`);
+    }
+    if (entry.kind === 'nayin') {
+      if (nayinOf(`${stem}${branch}`) === entry.title) bits.push(`${label}纳音触发`);
+    }
+    if (entry.kind === 'jiazi') {
+      if (`${stem}${branch}` === entry.title) bits.push(`${label}干支触发`);
     }
   };
 
   if (curDu) touch(curDu.stem, curDu.branch, `当前大运${curDu.ganZhi}`);
-  if (curLn) touch(curLn.stem, curLn.branch, `流年${curLn.year}`);
+  if (curLn) touch(curLn.stem, curLn.branch, `流年${curLn.year}${curLn.ganZhi}`);
 
   // 原局流年柱
   const lnPillar = chart.pillars.find((p) => p.key === 'liunian' && !p.empty);
   if (lnPillar) touch(lnPillar.stem, lnPillar.branch, '盘面流年柱');
 
+  const frame = `当前大运 ${curDu?.ganZhi || '—'}（${curDu ? `${curDu.startYear}–${curDu.endYear}` : '—'}）· 流年 ${curLn ? `${curLn.year}${curLn.ganZhi}` : '—'}`;
   if (!bits.length) {
-    return `当前大运 ${curDu?.ganZhi || '—'} · 流年 ${curLn?.year || '—'}：未直接触发本词条。`;
+    return `${frame}：未直接触发本词条；仍可按原局落点与喜忌看趋势，不作单断。`;
   }
-  return bits.join('；') + '。';
+  return `${frame}。触发：${bits.join('；')}。`;
+}
+
+const PILLAR_MEANING_KEY: Record<string, keyof CodexDossier['pillarMeaning']> = {
+  year: 'year',
+  month: 'month',
+  day: 'day',
+  hour: 'hour',
+};
+
+/** 第三层：四柱释义 + 运程触发 + dossier 个性化（禁止另写第二套百科） */
+export function buildDeepBrief(
+  id: string,
+  chart: BaziChart | null,
+  _luck: LuckCycles | null,
+  link: Omit<ChartLinkReport, 'deepBrief' | 'dossierHint'> & {
+    dossierHint?: string;
+  },
+  dossier: CodexDossier | null,
+): string {
+  const entry = getBaziEncyclopedia(id);
+  const d = dossier ?? buildCodexDossier(id);
+  if (!entry || !d) return '';
+
+  if (!chart) {
+    return [
+      `【深度解析 · ${entry.title}】`,
+      '排盘并排出大运流年后，这里会按你的四柱落点与当前运程写个性化说明。',
+      d.memory,
+      entry.kind === 'shensha'
+        ? '使用边界：神煞只作辅助，不能脱离日主强弱、格局、十神和大运单独判断。'
+        : '',
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+  }
+
+  const pillarBlocks: string[] = [];
+  for (const h of link.hits) {
+    const mk = PILLAR_MEANING_KEY[h.key];
+    const meaning = mk ? d.pillarMeaning[mk] : '';
+    pillarBlocks.push(
+      [
+        `${h.title}（${h.stage}）：${h.how}`,
+        meaning ? `落点释义：${meaning}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    );
+  }
+
+  const triggered = /触发/.test(link.luckTrigger) && !/未直接触发/.test(link.luckTrigger);
+  const expressBits = [
+    triggered ? `运程窗口偏开：${d.positive}` : '',
+    link.present ? `原局可见时的气质：${d.personality}` : '',
+    !link.present && !triggered
+      ? '原局未坐落且运程未直接触发：先当知识卡学；合会或换运时再对照。'
+      : '',
+  ].filter(Boolean);
+
+  const boundary =
+    entry.kind === 'shensha'
+      ? '使用边界：神煞只作辅助，不能脱离日主强弱、格局、十神和大运单独判断。'
+      : '';
+
+  return [
+    `【深度解析 · ${entry.title}】`,
+    link.summary,
+    pillarBlocks.length
+      ? `【四柱落点】\n${pillarBlocks.join('\n\n')}`
+      : '【四柱落点】\n原局四柱未直接坐落本词条。',
+    link.dayMasterImpact !== '—'
+      ? `【对日主】\n${link.dayMasterImpact}`
+      : '',
+    link.strength.note !== '—'
+      ? `【得令·得地·得势】\n${link.strength.note}`
+      : '',
+    `【大运·流年】\n${link.luckTrigger}`,
+    expressBits.length ? `【个性化】\n${expressBits.join('\n')}` : '',
+    d.chartRole ? `【命盘作用】\n${d.chartRole}` : '',
+    boundary,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 export function buildChartLinkReport(
@@ -322,17 +457,21 @@ export function buildChartLinkReport(
 ): ChartLinkReport {
   const d = dossier ?? buildCodexDossier(id);
   if (!chart) {
-    return {
+    const empty = {
       present: false,
       summary: '填写出生信息并排盘后，这里会显示它在你命盘里的位置与作用。',
-      hits: [],
-      stageNotes: [],
-      peerRelations: [],
-      shengKe: [],
+      hits: [] as ChartLinkHit[],
+      stageNotes: [] as string[],
+      peerRelations: [] as string[],
+      shengKe: [] as string[],
       strength: { deLing: null, deDi: null, deShi: null, note: '—' },
       dayMasterImpact: '—',
       luckTrigger: '—',
       dossierHint: d?.chartRole || '',
+    };
+    return {
+      ...empty,
+      deepBrief: buildDeepBrief(id, null, luck, empty, d),
     };
   }
 
@@ -364,7 +503,7 @@ export function buildChartLinkReport(
     ? `在你的命盘中出现于：${hits.map((h) => h.title).join('、')}。`
     : '原局四柱未直接出现此词条（仍可作知识卡学习；流年大运或合会时可能触发）。';
 
-  return {
+  const base = {
     present,
     summary,
     hits,
@@ -375,6 +514,10 @@ export function buildChartLinkReport(
     dayMasterImpact,
     luckTrigger,
     dossierHint: d?.chartRole || '',
+  };
+  return {
+    ...base,
+    deepBrief: buildDeepBrief(id, chart, luck, base, d),
   };
 }
 

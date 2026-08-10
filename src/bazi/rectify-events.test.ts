@@ -10,8 +10,9 @@ import {
 
 describe('rectify-events', () => {
   it('exposes typed labels', () => {
+    expect(EVENT_TYPE_LABELS.job_in).toBeTruthy();
+    expect(EVENT_TYPE_LABELS.enroll).toBeTruthy();
     expect(EVENT_TYPE_LABELS.career).toBeTruthy();
-    expect(EVENT_TYPE_LABELS.study).toBeTruthy();
   });
 
   it('parses year and clamps', () => {
@@ -20,25 +21,28 @@ describe('rectify-events', () => {
     expect(parseEventYear('')).toBe(null);
   });
 
-  it('normalizes event fields', () => {
+  it('normalizes event fields and precision slack', () => {
     const e = normalizeEvent({
       id: 'x',
       year: 2018,
-      type: 'career',
+      type: 'job_in',
       note: '  换工作  ',
-      yearSlack: 1,
+      yearSlack: 0,
+      precision: 'year',
     });
     expect(e.note).toBe('换工作');
     expect(e.yearSlack).toBe(1);
+    expect(e.precision).toBe('year');
   });
 
-  it('requires at least 3 valid events to score', () => {
+  it('requires at least 3 valid events to score by default', () => {
     const a = createEmptyEvent();
     const b = { ...createEmptyEvent(), year: 2018, type: 'career' as const };
     const c = { ...createEmptyEvent(), year: 2020, type: 'move' as const };
     const d = { ...createEmptyEvent(), year: 2021, type: 'relation' as const };
     expect(eventsReadyForScore([a, b, c])).toBe(false);
     expect(eventsReadyForScore([b, c, d])).toBe(true);
+    expect(eventsReadyForScore([b], 'ongoing')).toBe(true);
   });
 
   it('rejects invalid type', () => {

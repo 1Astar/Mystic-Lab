@@ -4,6 +4,7 @@ import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
+import { mountBirthTimeMetaField } from '../ui/birth-time-meta-field.ts';
 import {
   formatBirthBrief,
   getActivePerson,
@@ -33,15 +34,6 @@ function canCast(p: {
   return Boolean(parseBirthParts(p.birthYear, p.birthMonth, p.birthDay, p.birthHour));
 }
 
-/** 校准只需年月日（时辰待推） */
-function canRectify(p: {
-  birthYear: string;
-  birthMonth: string;
-  birthDay: string;
-}): boolean {
-  return Boolean(parseBirthParts(p.birthYear, p.birthMonth, p.birthDay, ''));
-}
-
 function wantsEdit(): boolean {
   try {
     return new URLSearchParams(location.search).get('edit') === '1';
@@ -66,7 +58,6 @@ export function renderBaziHome(root: HTMLElement): () => void {
   }
 
   let castReady = canCast(person);
-  let dateReady = canRectify(person);
 
   const page = document.createElement('div');
   page.className = 'page life-page bazi-home-page';
@@ -99,11 +90,6 @@ export function renderBaziHome(root: HTMLElement): () => void {
         <span>出生密码五步 · 专业盘</span>
         ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
       </button>
-      <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/bazi/rectify" data-open="${dateReady ? '1' : '0'}" ${dateReady ? '' : 'disabled'}>
-        <strong>生时校准</strong>
-        <span>大事件反推时辰</span>
-        ${dateReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
-      </button>
       <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
         <strong>八字探索</strong>
         <span>金木水火土 · 天干地支 · ${codex.collected}/${codex.total}</span>
@@ -130,7 +116,8 @@ export function renderBaziHome(root: HTMLElement): () => void {
           ${hasBirthInfo(p) ? `当前：${escapeHtml(formatBirthBrief(p))}` : ''}
         </p>
         <div id="bazi-birth-dt-slot" class="life-birth-row"></div>
-        <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都（可选，用于真太阳时粗校）" value="${escapeHtml(p.birthPlace)}" /></label>
+        <div id="bazi-birth-meta-slot"></div>
+        <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都（用于真太阳时）" value="${escapeHtml(p.birthPlace)}" /></label>
       </fieldset>
       ${genderRadios()}
       <div class="life-form-actions">
@@ -159,9 +146,36 @@ export function renderBaziHome(root: HTMLElement): () => void {
     initialHour: p.birthHour,
   });
 
+  const metaSlot = page.querySelector<HTMLElement>('#bazi-birth-meta-slot');
+  let metaGet = () => ({
+    birthTimeAccuracy: person.birthTimeAccuracy ?? ('' as const),
+    birthTimeSource: person.birthTimeSource ?? ('' as const),
+  });
+  if (metaSlot) {
+    const metaApi = mountBirthTimeMetaField({
+      host: metaSlot,
+      initial: {
+        birthTimeAccuracy: person.birthTimeAccuracy,
+        birthTimeSource: person.birthTimeSource,
+      },
+      onChange: (meta) => {
+        updateBirthFields({
+          birthYear: store.profile.birthYear,
+          birthMonth: store.profile.birthMonth,
+          birthDay: store.profile.birthDay,
+          birthHour: store.profile.birthHour,
+          birthPlace: store.profile.birthPlace,
+          ...meta,
+        });
+        store = loadLifeStore();
+        person = getActivePerson();
+      },
+    });
+    metaGet = metaApi.getValue;
+  }
+
   function refreshCastGate(): void {
     castReady = canCast(store.profile);
-    dateReady = canRectify(store.profile);
     toReading.disabled = !castReady;
     entriesEl.innerHTML = renderEntries();
     bindPathClicks(entriesEl);
@@ -191,6 +205,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
       birthDay: g('birthDay'),
       birthHour: g('birthHour'),
       birthPlace: g('birthPlace'),
+      ...metaGet(),
     };
     if (!birth.birthYear && !birth.birthMonth && !birth.birthDay) {
       statusEl.hidden = false;

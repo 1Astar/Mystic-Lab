@@ -6,6 +6,8 @@ export type { BaziEncyclopediaEntry, CodexDetailPane, CodexRelLink } from './cod
 export {
   CODEX_DETAIL_LABELS,
   CODEX_DETAIL_PANES,
+  CODEX_SHENSHA_DETAIL_PANES,
+  codexDetailPanesFor,
 } from './codex-encyclopedia-types.ts';
 
 /** 核心完整词条优先，骨架壳不覆盖已有正文 */

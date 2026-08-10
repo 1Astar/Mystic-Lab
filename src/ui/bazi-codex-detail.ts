@@ -1,7 +1,7 @@
 import {
   CODEX_DETAIL_LABELS,
-  CODEX_DETAIL_PANES,
   getBaziEncyclopedia,
+  codexDetailPanesFor,
   type CodexDetailPane,
 } from '../bazi/codex-encyclopedia.ts';
 import { isBaziCodexUnlocked } from '../bazi/codex.ts';
@@ -71,16 +71,36 @@ function renderChartPane(link: ChartLinkReport | null | undefined, lit: boolean)
   const role = link.dossierHint
     ? section('命盘中的实际作用', `<p>${escapeHtml(link.dossierHint)}</p>`)
     : '';
+  const deep = link.deepBrief
+    ? section(
+        '深度解析 · 四柱与运程',
+        `<p class="bazi-enc-deep">${escapeHtml(link.deepBrief).replace(/\n/g, '<br>')}</p>`,
+      )
+    : '';
 
-  const body = `${status}${stages}${peers}${sk}${strength}${impact}${luck}${role}`;
+  const body = `${status}${stages}${peers}${sk}${strength}${impact}${luck}${role}${deep}`;
   if (!lit) {
     return `<p class="bazi-codex-locked">点亮后展开完整命盘关联。</p><div class="bazi-enc-teaser is-dim">${status}${strength}${impact}</div>`;
   }
   return body;
 }
 
+function renderSchoolDiffPane(
+  dossier: ReturnType<typeof buildCodexDossier>,
+): string {
+  const sd = dossier?.schoolDiff;
+  if (!sd) {
+    return `<p class="bazi-codex-hint">本词条暂无他派差异说明。</p>`;
+  }
+  return `
+    ${section('本产品查法', `<p>${escapeHtml(sd.productMethod)}</p>`)}
+    ${section('他派常见差异', bullets(sd.otherSchools))}
+    ${section('阅读提醒', `<p>${escapeHtml(sd.note)}</p>`)}
+  `;
+}
+
 /**
- * 八字图鉴四屏：基础 / 表现 / 生克 / 命盘
+ * 八字图鉴四屏：基础 / 表现 / 生克 / 命盘（神煞加「他派差异」）
  */
 export function renderBaziCodexDetailHtml(
   id: string,
@@ -130,7 +150,7 @@ export function renderBaziCodexDetailHtml(
         .join('')}</ul>`
     : '';
 
-  const panes: Record<CodexDetailPane, string> = {
+  const panes: Partial<Record<CodexDetailPane, string>> = {
     basics: `
       <div class="bazi-enc-memory${entry.kind === 'shensha' ? ' is-shensha' : ''}">
         <div class="bazi-enc-art ${entry.kind === 'shensha' ? 'is-badge' : ''} ${lit ? 'is-lit' : 'is-dim'}">${opts.artHtml}${lit || entry.kind === 'shensha' ? '' : '<span class="bazi-art-seal"></span>'}</div>
@@ -171,7 +191,10 @@ export function renderBaziCodexDetailHtml(
       opts.chartLink ?? buildChartLinkReport(id, null, null, dossier),
       lit,
     ),
+    schools: bodyOrTeaser(renderSchoolDiffPane(dossier)),
   };
+
+  const tabPanes = codexDetailPanesFor(entry.kind);
 
   return `
     <div class="bazi-codex-sheet bazi-enc-sheet" role="dialog" aria-modal="true">
@@ -180,18 +203,22 @@ export function renderBaziCodexDetailHtml(
           <span aria-hidden="true">✕</span> 关闭
         </button>
         <div class="bazi-enc-tab-bar" role="tablist">
-          ${CODEX_DETAIL_PANES.map(
-            (p, i) =>
-              `<button type="button" class="bazi-enc-tab${i === 0 ? ' is-active' : ''}" role="tab" data-enc-tab="${p}" aria-selected="${i === 0}">${CODEX_DETAIL_LABELS[p]}</button>`,
-          ).join('')}
+          ${tabPanes
+            .map(
+              (p, i) =>
+                `<button type="button" class="bazi-enc-tab${i === 0 ? ' is-active' : ''}" role="tab" data-enc-tab="${p}" aria-selected="${i === 0}">${CODEX_DETAIL_LABELS[p]}</button>`,
+            )
+            .join('')}
         </div>
         <div class="bazi-enc-panels" data-enc-panels>
-          ${CODEX_DETAIL_PANES.map(
-            (p, i) =>
-              `<section class="bazi-enc-pane" data-enc-pane="${p}" role="tabpanel" ${i === 0 ? '' : 'hidden'}>
-                ${panes[p]}
+          ${tabPanes
+            .map(
+              (p, i) =>
+                `<section class="bazi-enc-pane" data-enc-pane="${p}" role="tabpanel" ${i === 0 ? '' : 'hidden'}>
+                ${panes[p] ?? ''}
               </section>`,
-          ).join('')}
+            )
+            .join('')}
         </div>
       </div>
     </div>`;

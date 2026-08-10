@@ -114,7 +114,7 @@ function detailHtml(h: Hexagram, switchMeta: { index: number; total: number }): 
             </div>
           </div>
 
-          <button type="button" class="ly-guide-mini-note" data-guide-notes data-open-tab="xiang" title="打开解读笔记：卦象解析、专业排盘、古籍">笔记</button>
+          <button type="button" class="ly-guide-mini-note" data-guide-notes data-open-tab="xiang" title="打开深度学习：卦象解析、专业排盘、古籍">深度学习</button>
 
           <div class="ly-guide-mid text-layer">
             <div class="ly-guide-yao-host">
@@ -257,7 +257,7 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
         <div class="ly-guide-drawer-backdrop" data-drawer-close></div>
         <div class="ly-guide-drawer-panel">
           <header class="ly-guide-drawer-head">
-            <h4>${h.fullName} · 解读笔记</h4>
+            <h4>${h.fullName} · 深度学习</h4>
             <button type="button" class="ly-course-drawer-x" data-drawer-close aria-label="关闭">×</button>
           </header>
           <div class="ly-guide-drawer-body" data-drawer-notes>

@@ -3,6 +3,11 @@ import { isAiConfigured } from '../ai/settings.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
+import { mountBirthTimeMetaField } from '../ui/birth-time-meta-field.ts';
+import {
+  normalizeBirthTimeAccuracy,
+  normalizeBirthTimeSource,
+} from '../life/birth-time-meta.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { generatePortrait } from '../life/generate.ts';
 import {
@@ -43,6 +48,7 @@ function readForm(form: HTMLFormElement): {
   nickname: string;
   relation: PersonRelation;
   lifeTags: string[];
+  gender: '' | 'female' | 'male';
   profile: LifeProfileInput;
 } {
   const g = (name: string) =>
@@ -57,10 +63,14 @@ function readForm(form: HTMLFormElement): {
   const birthYear = g('birthYear');
   const birthMonth = g('birthMonth');
   const birthDay = g('birthDay');
+  const genderRaw = g('gender');
+  const gender =
+    genderRaw === 'female' || genderRaw === 'male' ? genderRaw : ('' as const);
   return {
     nickname: g('nickname').slice(0, 8) || '未命名',
     relation: Object.keys(PERSON_RELATION_LABELS).includes(relationRaw) ? relationRaw : 'friend',
     lifeTags: lifeTags.slice(0, 8),
+    gender,
     profile: {
       age: deriveAgeFromBirth(birthYear, birthMonth, birthDay),
       occupation: g('occupation'),
@@ -70,6 +80,8 @@ function readForm(form: HTMLFormElement): {
       birthDay,
       birthHour: g('birthHour'),
       birthPlace: g('birthPlace'),
+      birthTimeAccuracy: normalizeBirthTimeAccuracy(g('birthTimeAccuracy')),
+      birthTimeSource: normalizeBirthTimeSource(g('birthTimeSource')),
       confusion: g('confusion'),
     },
   };
@@ -177,7 +189,18 @@ export function renderLifeProfile(root: HTMLElement): () => void {
             <select name="relation" ${p.id === SELF_PROFILE_ID && !isNew ? 'disabled' : ''}>${relOptions}</select>
           </label>
           <div id="life-birth-dt-slot" class="life-birth-row"></div>
-          <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都（可选，用于真太阳时粗校）" value="${escapeHtml(p.birthPlace)}" /></label>
+          <input type="hidden" name="birthTimeAccuracy" value="${escapeHtml(p.birthTimeAccuracy ?? '')}" />
+          <input type="hidden" name="birthTimeSource" value="${escapeHtml(p.birthTimeSource ?? '')}" />
+          <div id="life-birth-meta-slot"></div>
+          <label class="life-field life-field-full"><span>出生地</span><input name="birthPlace" type="text" placeholder="如 成都（用于真太阳时）" value="${escapeHtml(p.birthPlace)}" /></label>
+          <fieldset class="life-fieldset bazi-gender-field" style="margin-top:10px;border:none;padding:0">
+            <legend style="padding:0;margin:0 0 8px;font-size:0.85rem;color:var(--ink-muted)">性别（紫微 / 双盘需要）</legend>
+            <div class="bazi-gender-row">
+              <label><input type="radio" name="gender" value="female" ${p.gender === 'female' ? 'checked' : ''} /> 女</label>
+              <label><input type="radio" name="gender" value="male" ${p.gender === 'male' ? 'checked' : ''} /> 男</label>
+              <label><input type="radio" name="gender" value="" ${!p.gender ? 'checked' : ''} /> 暂不选</label>
+            </div>
+          </fieldset>
           <p class="life-age-hint" data-age-hint>${
             ageNow
               ? `约 <strong>${escapeHtml(ageNow)}</strong> 岁 · 由出生日期自动推算`
@@ -185,6 +208,20 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           }</p>
           <p class="life-footnote">出生信息与八字共用同一份档案，任一处填写即可，无需重复。</p>
         </fieldset>
+
+        ${
+          !isNew
+            ? `<section class="profile-rectify-block" aria-label="生时校准">
+          <button type="button" class="birth-meta-rectify" data-open-rectify>
+            <span>
+              <strong>生时校准</strong>
+              <em>出生时辰不确定时，用入学、入职、恋爱等大事件反推</em>
+            </span>
+            <i aria-hidden="true">›</i>
+          </button>
+        </section>`
+            : ''
+        }
 
         <details class="life-more"${moreOpen ? ' open' : ''}>
           <summary>其他补充<span>职业 · 现居地 · 困惑 · 标签</span></summary>
@@ -251,6 +288,23 @@ export function renderLifeProfile(root: HTMLElement): () => void {
     onChange: (fields) => paintAgeHint(fields.birthYear, fields.birthMonth, fields.birthDay),
   });
 
+  const metaSlot = body.querySelector<HTMLElement>('#life-birth-meta-slot');
+  if (metaSlot) {
+    mountBirthTimeMetaField({
+      host: metaSlot,
+      initial: {
+        birthTimeAccuracy: p.birthTimeAccuracy,
+        birthTimeSource: p.birthTimeSource,
+      },
+      onChange: (meta) => {
+        const a = form.elements.namedItem('birthTimeAccuracy') as HTMLInputElement | null;
+        const s = form.elements.namedItem('birthTimeSource') as HTMLInputElement | null;
+        if (a) a.value = meta.birthTimeAccuracy;
+        if (s) s.value = meta.birthTimeSource;
+      },
+    });
+  }
+
     form.querySelectorAll<HTMLInputElement>('[data-life-tag]').forEach((input) => {
       input.addEventListener('change', () => {
         input.closest('.profile-life-tag')?.classList.toggle('is-on', input.checked);
@@ -261,6 +315,9 @@ export function renderLifeProfile(root: HTMLElement): () => void {
       creatingNew = true;
       editingId = null;
       paint();
+    });
+    body.querySelector('[data-open-rectify]')?.addEventListener('click', () => {
+      navigate('/bazi/rectify');
     });
     body.querySelectorAll<HTMLButtonElement>('[data-edit-person]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -332,7 +389,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           : p),
         nickname: data.nickname,
         relation: p.id === SELF_PROFILE_ID && !isNew ? 'self' : data.relation,
-        gender: isNew ? '' : p.gender,
+        gender: data.gender,
         lifeTags: data.lifeTags,
         ...data.profile,
       };
@@ -363,7 +420,7 @@ export function renderLifeProfile(root: HTMLElement): () => void {
           ...p,
           nickname: '自己',
           relation: 'self',
-          gender: p.gender,
+          gender: data.gender,
           lifeTags: data.lifeTags,
           ...profile,
         });

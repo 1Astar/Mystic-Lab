@@ -10,7 +10,18 @@ import {
   type BaziChart,
   type PillarCell,
 } from '../bazi/cast.ts';
-import { wuxingClass } from '../bazi/elements.ts';
+import {
+  applyBaziChartAura,
+  clearBaziChartAura,
+} from '../bazi/page-aura.ts';
+import {
+  buildDoubaoPortraitPrompt,
+  resolveHarmonizeTint,
+} from '../bazi/harmonize-tint.ts';
+import {
+  nayinWxClass,
+  wuxingClass,
+} from '../bazi/elements.ts';
 import {
   LEARN_STEPS,
   parseLearnStep,
@@ -46,9 +57,11 @@ import type { EvidenceLine } from '../mystic-engine/types.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 import { draftFromBazi } from '../share/drafts.ts';
 import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
-import { answerFromCodexEntity, resolveCodexEntityId } from '../bazi/codex-entity-resolve.ts';
+import { answerFromCodexEntity } from '../bazi/codex-entity-resolve.ts';
+import { openBaziCodexPopup } from '../ui/bazi-codex-popup.ts';
 import { openLabConceptPeek } from '../ui/lab-concept-peek.ts';
 import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
 import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
@@ -73,11 +86,28 @@ function hideLine(p: PillarCell): string {
   return p.hideGan
     .map((g, i) => {
       const god = p.hideGods[i] ?? '';
-      return `<span class="bazi-hide ${stemWxClass(g)}">${termBtn(g, stemWxClass(g))}${
-        god ? termBtn(god, '', `<small>${escapeHtml(god)}</small>`) : ''
+      const wx = stemWxClass(g);
+      return `<span class="bazi-hide ${wx}">${termBtn(g, wx)}${
+        god
+          ? termBtn(god, wx, `<small class="${wx}">${escapeHtml(god)}</small>`)
+          : ''
       }</span>`;
     })
     .join('');
+}
+
+/** 空亡「戌亥」：整词可点，支字各自上色 */
+function xunKongTerm(xk: string): string {
+  if (!xk || xk === '—') return '—';
+  const inner = [...xk]
+    .map((c) => {
+      const cls = branchWxClass(c);
+      return cls
+        ? `<span class="${cls}">${escapeHtml(c)}</span>`
+        : escapeHtml(c);
+    })
+    .join('');
+  return termBtn(xk, 'bazi-meta-cell', inner);
 }
 
 function shenshaLine(p: PillarCell): string {
@@ -109,7 +139,11 @@ function renderGrid(
     </tr>`;
 
   const coreRows = `
-    ${row('干神', (p) => (p.empty ? '—' : termBtn(p.stemGod, 'bazi-god')))}
+    ${row('干神', (p) =>
+      p.empty
+        ? '—'
+        : termBtn(p.stemGod, `bazi-god ${stemWxClass(p.stem)}`),
+    )}
     ${row(
       '天干',
       (p) => (p.empty ? '—' : termBtn(p.stem, `bazi-stem ${stemWxClass(p.stem)}`)),
@@ -130,11 +164,18 @@ function renderGrid(
         `<div class="bazi-zhishen">${
           p.empty || p.hideGods.length === 0
             ? '—'
-            : p.hideGods.map((g) => termBtn(g)).join('')
+            : p.hideGods
+                .map((g, i) => {
+                  const hide = p.hideGan[i] ?? '';
+                  return termBtn(g, stemWxClass(hide));
+                })
+                .join('')
         }</div>`,
     )}
-    ${row('纳音', (p) => (p.empty ? '—' : termBtn(p.nayin, 'bazi-meta-cell')))}
-    ${row('空亡', (p) => (p.empty ? '—' : termBtn(p.xunKong, 'bazi-meta-cell')))}
+    ${row('纳音', (p) =>
+      p.empty ? '—' : termBtn(p.nayin, `bazi-meta-cell ${nayinWxClass(p.nayin)}`),
+    )}
+    ${row('空亡', (p) => (p.empty ? '—' : xunKongTerm(p.xunKong)))}
     ${row('地势', (p) => (p.empty ? '—' : termBtn(p.diShi, 'bazi-meta-cell')))}
     ${row('自坐', (p) => (p.empty ? '—' : termBtn(p.ziZuo, 'bazi-meta-cell')))}
     ${row('神煞', (p) => shenshaLine(p), 'bazi-row-shensha')}
@@ -176,8 +217,10 @@ function shortGod(god: string): string {
 
 function godPair(stem: string, stemGod: string, branch: string, branchGod: string): string {
   if (!stem) return '—';
-  return `<span class="bazi-luck-gz">${termBtn(stem, stemWxClass(stem), `<b class="${stemWxClass(stem)}">${escapeHtml(stem)}</b>`)}<em>${escapeHtml(shortGod(stemGod))}</em></span>
-    <span class="bazi-luck-gz">${termBtn(branch, branchWxClass(branch), `<b class="${branchWxClass(branch)}">${escapeHtml(branch)}</b>`)}<em>${escapeHtml(shortGod(branchGod))}</em></span>`;
+  const sw = stemWxClass(stem);
+  const bw = branchWxClass(branch);
+  return `<span class="bazi-luck-gz">${termBtn(stem, sw, `<b class="${sw}">${escapeHtml(stem)}</b>`)}<em class="${sw}">${escapeHtml(shortGod(stemGod))}</em></span>
+    <span class="bazi-luck-gz">${termBtn(branch, bw, `<b class="${bw}">${escapeHtml(branch)}</b>`)}<em class="${bw}">${escapeHtml(shortGod(branchGod))}</em></span>`;
 }
 
 function seasonBlock(chart: BaziChart): string {
@@ -201,18 +244,26 @@ function seasonBlock(chart: BaziChart): string {
   `;
 }
 
+const TONGXIAN_HINT =
+  '童限是起运前的幼年段，尚未进入干支大运，因此没有天干、地支与十神可解析——不是漏算。正式大运从右侧起运后的第一柱开始；上方「起运」时间标明何时交运。';
+
 function renderDayunCol(c: DayunColumn): string {
   const ageLabel =
     c.startAge === c.endAge ? `${c.startAge}岁` : `${c.startAge}~${c.endAge}岁`;
-  return `
-    <button type="button" class="bazi-luck-col ${c.current ? 'is-current' : ''}" data-luck-year="${c.startYear}" ${c.empty ? 'disabled' : ''}>
+  if (c.empty) {
+    return `
+    <button type="button" class="bazi-luck-col is-tongxian ${c.current ? 'is-current' : ''}" data-luck-tongxian="1" title="${escapeHtml(TONGXIAN_HINT)}" aria-label="童限：起运前无干支大运，点按查看说明">
       <span class="bazi-luck-year">${c.startYear}</span>
       <span class="bazi-luck-age">${escapeHtml(ageLabel)}</span>
-      ${
-        c.empty
-          ? '<span class="bazi-luck-empty">童限</span>'
-          : godPair(c.stem, c.stemGod, c.branch, c.branchGod)
-      }
+      <span class="bazi-luck-empty">童限</span>
+      <span class="bazi-luck-empty-hint">起运前 · 无干支</span>
+    </button>`;
+  }
+  return `
+    <button type="button" class="bazi-luck-col ${c.current ? 'is-current' : ''}" data-luck-year="${c.startYear}">
+      <span class="bazi-luck-year">${c.startYear}</span>
+      <span class="bazi-luck-age">${escapeHtml(ageLabel)}</span>
+      ${godPair(c.stem, c.stemGod, c.branch, c.branchGod)}
     </button>`;
 }
 
@@ -242,6 +293,7 @@ function renderLuckBoard(luck: LuckCycles, selectedLiuyue: number | null): strin
   const yueNote = yue
     ? `流月 · ${yue.jieQi}${yue.dateLabel ? `（${yue.dateLabel}）` : ''} · ${yue.ganZhi}${yue.stemGod ? `（${yue.stemGod}）` : ''}`
     : '';
+  const hasTongxian = luck.dayun.some((d) => d.empty);
   return `
     <section class="bazi-luck" aria-label="大运流年流月">
       <header class="bazi-luck-meta">
@@ -258,6 +310,11 @@ function renderLuckBoard(luck: LuckCycles, selectedLiuyue: number | null): strin
           ${luck.dayun.map(renderDayunCol).join('')}
         </div>
       </div>
+      ${
+        hasTongxian
+          ? `<p class="bazi-luck-note bazi-luck-tongxian-note">童限：起运前的幼年段，尚无干支大运，故没有天干地支与十神解析（不是漏算）。点「童限」格可看说明；正式大运从右侧起运后开始。</p>`
+          : ''
+      }
 
       <div class="bazi-luck-row" aria-label="流年小运">
         <div class="bazi-luck-label" aria-hidden="true">流年小运</div>
@@ -321,6 +378,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
     person = getActivePerson();
 
     if (!ready()) {
+      clearBaziChartAura(page);
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 我的命盘</button>
         <header class="life-header">
@@ -344,6 +402,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
       gender: person.gender,
     });
     if ('error' in selfResult) {
+      clearBaziChartAura(page);
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 我的命盘</button>
         <header class="life-header">
@@ -357,6 +416,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
     }
 
     const chart = selfResult;
+    applyBaziChartAura(page, chart);
     page.innerHTML = `
       <button type="button" class="back-link life-back">← Lab</button>
       ${baziSysTabsHtml('chart')}
@@ -400,6 +460,8 @@ export function renderBaziChart(root: HTMLElement): () => void {
 
     disposeFloat = mountLabFloatActions(page, {
       tujianPath: '/bazi/tujian',
+      notesLabel: '深度学习',
+      onNotes: () => openLearnNotes(chart),
       draftShare: () => {
         const pillarsLabel = natalPillars(chart)
           .filter((p) => !p.empty)
@@ -416,20 +478,8 @@ export function renderBaziChart(root: HTMLElement): () => void {
           ],
         });
       },
-      onDeep: () => {
-        openLabDeepSheet({
-          system: 'bazi',
-          title: `${person.nickname || '我'}的命盘`,
-          initialTab: 'ask',
-          presets: buildBaziPageFaq(chart),
-          answerConcept: answerBaziConcept,
-          onMiss: (q) => {
-            void recordBaziConceptMiss(q);
-          },
-          deepHint: '结合四柱与当前流年，做一次更贴合的解读。概念题请用「边看边问」。',
-          onDeep: () => navigate('/bazi/reading'),
-        });
-      },
+      onDeep: () => openDeepSheet(chart, { initialTab: 'deep' }),
+      deepLabel: '深度解读',
     });
 
     page.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
@@ -439,67 +489,142 @@ export function renderBaziChart(root: HTMLElement): () => void {
       });
     });
 
-    bindTerms(chart, buildLuckCycles(store.profile, person.gender, liunianYear));
+    bindTerms(chart, buildLuckCycles(store.profile, person.gender, liunianYear), page);
+
+    page.querySelector('[data-copy-portrait]')?.addEventListener('click', () => {
+      const prompt = buildDoubaoPortraitPrompt(chart);
+      const btn = page.querySelector<HTMLButtonElement>('[data-copy-portrait]');
+      void navigator.clipboard.writeText(prompt).then(
+        () => {
+          if (btn) {
+            const prev = btn.textContent;
+            btn.textContent = '已复制，去豆包粘贴';
+            window.setTimeout(() => {
+              if (btn) btn.textContent = prev || '复制八字生图提示词';
+            }, 1800);
+          }
+        },
+        () => {
+          window.prompt('复制以下提示词到豆包：', prompt);
+        },
+      );
+    });
 
     if (mode === 'natal') {
       bindLiunian();
       bindLuck();
-      bindLearnSteps();
       scrollLuckIntoView();
     }
     if (mode === 'hepan') bindHepanForm();
   }
 
-  function bindTerms(chart: BaziChart, luck: LuckCycles | null): void {
-    const openAsk = (term: string) => {
-      openLabDeepSheet({
-        system: 'bazi',
-        title: `${person.nickname || '我'}的命盘`,
-        initialTab: 'ask',
-        seedQuery: term,
-        presets: buildBaziPageFaq(chart),
-        answerConcept: answerBaziConcept,
-        onMiss: (q) => {
-          void recordBaziConceptMiss(q);
-        },
-        deepHint: '结合四柱与当前流年，做一次更贴合的解读。',
-        onDeep: () => navigate('/bazi/reading'),
+  function renderLearnBlock(chart: BaziChart): string {
+    return `
+      <div class="bazi-deep-learn">
+        <header class="bazi-deep-learn-head">
+          <h3>出生密码五步</h3>
+          <p>为什么这个时间形成这个命盘？</p>
+        </header>
+        ${renderLearnNav()}
+        ${renderStepBody(chart)}
+        <div class="bazi-deep-learn-actions">
+          <button type="button" class="btn ly-btn-gold btn-sm" data-deep-reading>看整盘速读</button>
+        </div>
+      </div>`;
+  }
+
+  function bindLearnHost(host: HTMLElement, chart: BaziChart): void {
+    const luck = buildLuckCycles(store.profile, person.gender, liunianYear);
+    const paintLearn = () => {
+      host.innerHTML = renderLearnBlock(chart);
+      host.querySelectorAll<HTMLButtonElement>('[data-learn-step]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          learnStep = parseLearnStep(btn.dataset.learnStep);
+          setStepInUrl(learnStep);
+          paintLearn();
+        });
       });
+      host.querySelector('[data-deep-reading]')?.addEventListener('click', () => {
+        navigate('/bazi/reading');
+      });
+      host.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const path = el.dataset.path;
+          if (path) navigate(path);
+        });
+      });
+      bindTerms(chart, luck, host);
+    };
+    paintLearn();
+  }
+
+  /** 笔按钮：自己的深度学习（出生密码五步 + 笔记） */
+  function openLearnNotes(chart: BaziChart): void {
+    openLabNotesSheet({
+      system: 'bazi',
+      context: `${chart.dayMaster}${chart.dayMasterWx ? ` · ${chart.dayMasterWx}` : ''} · 出生密码`,
+      bodyHtml: '<div class="bazi-deep-learn-mount"></div>',
+      onBodyReady: (body) => {
+        const mount = body.querySelector<HTMLElement>('.bazi-deep-learn-mount') ?? body;
+        bindLearnHost(mount, chart);
+      },
+    });
+  }
+
+  function openDeepSheet(
+    chart: BaziChart,
+    opts?: { initialTab?: 'deep' | 'ask'; seedQuery?: string },
+  ): void {
+    const luck = buildLuckCycles(store.profile, person.gender, liunianYear);
+
+    openLabDeepSheet({
+      system: 'bazi',
+      title: `${person.nickname || '我'}的命盘`,
+      initialTab: opts?.initialTab ?? 'ask',
+      seedQuery: opts?.seedQuery,
+      deepTabLabel: '深度解读',
+      deepHint: '结合你的出生密码与当下问题，做一次更贴合的解读。概念题请用「边看边问」。',
+      presets: buildBaziPageFaq(chart),
+      answerConcept: (q) => {
+        const from = answerFromCodexEntity(q, { chart, luck, depth: 'chart' });
+        if (from.hit) return { answer: from.answer, hit: true };
+        return answerBaziConcept(q);
+      },
+      answerDeep: (q) => {
+        const from = answerFromCodexEntity(q, { chart, luck, depth: 'deep' });
+        if (from.hit) return { answer: from.answer, hit: true };
+        return { answer: '', hit: false };
+      },
+      onMiss: (q) => {
+        void recordBaziConceptMiss(q);
+      },
+      onDeep: () => navigate('/bazi/reading'),
+    });
+  }
+
+  function bindTerms(
+    chart: BaziChart,
+    luck: LuckCycles | null,
+    root: ParentNode = page,
+  ): void {
+    const openAsk = (term: string) => {
+      openDeepSheet(chart, { initialTab: 'ask', seedQuery: term });
     };
 
-    page.querySelectorAll<HTMLElement>('[data-bazi-term]').forEach((el) => {
+    root.querySelectorAll<HTMLElement>('[data-bazi-term]').forEach((el) => {
       const open = (ev: Event) => {
         ev.preventDefault();
         ev.stopPropagation();
         const term = el.getAttribute('data-bazi-term')?.trim() ?? '';
         if (!term) return;
-        openLabConceptPeek({
+        openBaziCodexPopup({
           term,
-          answerConcept: (q) => {
-            const from = answerFromCodexEntity(q, {
-              chart,
-              luck,
-              depth: 'chart',
-            });
-            if (from.hit) return { answer: from.answer, hit: true };
-            return answerBaziConcept(q);
-          },
+          chart,
+          luck,
+          onOpenAsk: openAsk,
           onMiss: (q) => {
             void recordBaziConceptMiss(q);
           },
-          onOpenAsk: openAsk,
-          onOpenAtlas: (t) => {
-            const id = resolveCodexEntityId(t);
-            if (id) {
-              try {
-                sessionStorage.setItem('mystic-lab-open-codex-id', id);
-              } catch {
-                /* ignore */
-              }
-            }
-            navigate('/bazi/tujian');
-          },
-          sourceHint: '图鉴知识库 · 命盘相关摘要',
         });
       };
       el.addEventListener('click', open);
@@ -512,7 +637,6 @@ export function renderBaziChart(root: HTMLElement): () => void {
   function renderLearnNav(): string {
     return `
       <nav class="bazi-learn-steps" aria-label="出生密码五步">
-        <p class="bazi-learn-lead">为什么这个时间形成这个命盘？</p>
         <ol class="bazi-learn-list">
           ${LEARN_STEPS.map(
             (s) => `
@@ -615,10 +739,32 @@ export function renderBaziChart(root: HTMLElement): () => void {
       </div>`;
   }
 
+  function temperamentBlock(chart: BaziChart): string {
+    const tint = resolveHarmonizeTint(chart);
+    return `
+      <section class="bazi-temperament" aria-label="命盘气质">
+        <div class="bazi-temperament-head">
+          <p class="bazi-temperament-kicker">命盘气质</p>
+          <button type="button" class="bazi-temperament-btn" data-copy-portrait>复制八字生图提示词</button>
+        </div>
+        <h2 class="bazi-temperament-title">${escapeHtml(tint.temperament)}</h2>
+        <p class="bazi-temperament-mood">${escapeHtml(tint.mood)}</p>
+        <p class="bazi-temperament-sub">${escapeHtml(tint.temperamentSub)}</p>
+        ${
+          tint.accentReason
+            ? `<p class="bazi-temperament-accent">${escapeHtml(tint.accentReason)}</p>`
+            : ''
+        }
+      </section>
+    `;
+  }
+
   function renderNatal(chart: BaziChart): string {
     const jieqi = birthJieqiNote(store.profile);
     const luck = buildLuckCycles(store.profile, person.gender, liunianYear);
     return `
+      ${temperamentBlock(chart)}
+
       <section class="bazi-meta bazi-natal-meta" aria-label="出生节气">
         <p>${jieqi ? escapeHtml(jieqi) : escapeHtml(formatBirthBrief(store.profile))}</p>
         <p class="bazi-meta-note">真太阳时 ${escapeHtml(chart.trueSolarLabel)} · ${escapeHtml(chart.place.note)}</p>
@@ -639,11 +785,6 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <button type="button" class="life-btn-ghost" id="bazi-year-now">今年</button>
       </section>
 
-      <details class="bazi-learn-fold">
-        <summary>出生密码五步（学习）</summary>
-        ${renderLearnNav()}
-        ${renderStepBody(chart)}
-      </details>
     `;
   }
 
@@ -709,17 +850,27 @@ export function renderBaziChart(root: HTMLElement): () => void {
     `;
   }
 
-  function bindLearnSteps(): void {
-    page.querySelectorAll<HTMLButtonElement>('[data-learn-step]').forEach((btn) => {
+  function bindLuck(): void {
+    page.querySelectorAll<HTMLButtonElement>('[data-luck-tongxian]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        learnStep = parseLearnStep(btn.dataset.learnStep);
-        setStepInUrl(learnStep);
-        paint();
+        openLabConceptPeek({
+          term: '童限',
+          tabs: [
+            {
+              id: 'why',
+              label: '为什么没有解析',
+              body: TONGXIAN_HINT,
+            },
+            {
+              id: 'how',
+              label: '怎么看',
+              body: '看大运行上方的「起运」时间：交运之后，右侧各柱才有干支与十神。童限阶段仍以原局四柱与成长环境为主，不必用大运干支硬套。',
+            },
+          ],
+          sourceHint: '运程说明 · 本地',
+        });
       });
     });
-  }
-
-  function bindLuck(): void {
     page.querySelectorAll<HTMLButtonElement>('[data-luck-year]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const n = Number(btn.dataset.luckYear);
@@ -834,9 +985,12 @@ export function renderBaziChart(root: HTMLElement): () => void {
   paint();
   root.appendChild(page);
   return () => {
+    clearBaziChartAura(page);
     disposeFloat?.();
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();
     document.querySelector('[data-lab-float-dock]')?.remove();
+    document.querySelector('.lab-deep-sheet')?.remove();
+    document.querySelector('.lab-notes-sheet')?.remove();
   };
 }

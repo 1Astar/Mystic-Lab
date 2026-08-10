@@ -1,14 +1,14 @@
-/* 八字排盘盘面 */
+/* 八字排盘盘面 —— 直接吃全局 token（勿硬编码奶油/泥色，懒加载会盖掉 theme-reading） */
 
 .bazi-chart-page .bazi-meta {
   margin: 0 0 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(18, 14, 32, 0.55);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 6%);
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(255, 230, 200, 0.78);
+  color: var(--surface-ink);
 }
 
 .bazi-chart-page .bazi-meta p {
@@ -16,7 +16,7 @@
 }
 
 .bazi-chart-page .bazi-meta-note {
-  color: #ffd6a6;
+  color: var(--gold);
 }
 
 .bazi-liunian-bar {
@@ -33,9 +33,9 @@
   gap: 8px;
   padding: 6px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background: rgba(20, 16, 36, 0.55);
-  color: rgba(255, 230, 200, 0.85);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--surface-ink);
   font-size: 0.82rem;
 }
 
@@ -43,7 +43,7 @@
   width: 5.2rem;
   border: 0;
   background: transparent;
-  color: #fff6e8;
+  color: var(--ink);
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
@@ -53,10 +53,12 @@
   overflow-x: hidden;
   margin: 0 0 18px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
+  border: none;
   background:
-    linear-gradient(180deg, rgba(42, 34, 28, 0.72), rgba(22, 18, 32, 0.78));
-  box-shadow: inset 0 1px 0 rgba(255, 230, 200, 0.06);
+    radial-gradient(ellipse at 50% 0%, var(--chart-bg-glow), transparent 55%),
+    color-mix(in srgb, var(--chart-bg) 88%, var(--ink) 5%);
+  box-shadow: none;
+  color: var(--surface-ink);
 }
 
 .bazi-grid {
@@ -72,14 +74,14 @@
   padding: 8px 3px;
   text-align: center;
   vertical-align: middle;
-  border-bottom: 1px solid rgba(255, 214, 166, 0.1);
+  border-bottom: 1px solid var(--chart-cell-line);
   word-break: break-word;
 }
 
 .bazi-grid thead th {
   font-size: 0.76rem;
   letter-spacing: 0.04em;
-  color: rgba(255, 230, 200, 0.7);
+  color: var(--surface-muted);
   font-weight: 500;
 }
 
@@ -87,7 +89,7 @@
   display: block;
   margin-top: 2px;
   font-style: normal;
-  color: #ffd6a6;
+  color: var(--gold);
   letter-spacing: 0;
 }
 
@@ -96,27 +98,51 @@
   width: 2.4rem;
   padding-left: 6px;
   padding-right: 2px;
-  color: rgba(255, 230, 200, 0.55);
+  color: var(--surface-muted);
   font-weight: 500;
   font-size: 0.74rem;
 }
 
 .bazi-col-liunian {
-  background: rgba(201, 162, 39, 0.08);
+  background: var(--gold-soft);
 }
 
 .bazi-row-main .bazi-stem,
 .bazi-row-main .bazi-branch {
   display: inline-block;
   font-size: clamp(1.28rem, 5.6vw, 1.6rem);
-  font-weight: 700;
+  font-weight: 650;
   line-height: 1.15;
   letter-spacing: 0.02em;
 }
 
+/* 月白：天干地支略掺墨色，减硬亮感 */
+html[data-theme='moon'] .bazi-row-main .bazi-stem.wx-mu,
+html[data-theme='moon'] .bazi-row-main .bazi-branch.wx-mu {
+  color: color-mix(in srgb, var(--wx-mu) 82%, var(--ink)) !important;
+}
+html[data-theme='moon'] .bazi-row-main .bazi-stem.wx-huo,
+html[data-theme='moon'] .bazi-row-main .bazi-branch.wx-huo {
+  color: color-mix(in srgb, var(--wx-huo) 82%, var(--ink)) !important;
+}
+html[data-theme='moon'] .bazi-row-main .bazi-stem.wx-tu,
+html[data-theme='moon'] .bazi-row-main .bazi-branch.wx-tu {
+  color: color-mix(in srgb, var(--wx-tu) 82%, var(--ink)) !important;
+}
+html[data-theme='moon'] .bazi-row-main .bazi-stem.wx-jin,
+html[data-theme='moon'] .bazi-row-main .bazi-branch.wx-jin {
+  /* 少掺墨，保住金色 */
+  color: color-mix(in srgb, var(--wx-jin) 92%, var(--ink)) !important;
+}
+html[data-theme='moon'] .bazi-row-main .bazi-stem.wx-shui,
+html[data-theme='moon'] .bazi-row-main .bazi-branch.wx-shui {
+  /* 少掺墨，保住蓝色 */
+  color: color-mix(in srgb, var(--wx-shui) 94%, var(--ink)) !important;
+}
+
 .bazi-god {
   font-size: 0.8rem;
-  color: rgba(255, 230, 200, 0.82);
+  color: var(--surface-ink);
 }
 
 .bazi-term {
@@ -134,7 +160,7 @@
 
 .bazi-term:hover,
 .bazi-term:focus-visible {
-  color: #ffe6c8;
+  color: var(--gold);
   outline: none;
 }
 
@@ -144,7 +170,7 @@
 
 .bazi-luck-gz .bazi-term:hover,
 .bazi-luck-gz .bazi-term:focus-visible {
-  color: #ffe6c8;
+  color: var(--gold);
 }
 
 .bazi-hide-list,
@@ -167,18 +193,18 @@
 .bazi-hide small {
   font-size: 0.7rem;
   font-weight: 400;
-  color: rgba(255, 230, 200, 0.55);
+  color: var(--surface-muted);
 }
 
 .bazi-zhishen .bazi-term {
-  color: rgba(255, 230, 200, 0.7);
+  color: var(--surface-ink);
   font-size: 0.76rem;
 }
 
 .bazi-meta-cell {
   font-size: 0.76rem;
   line-height: 1.4;
-  color: rgba(255, 230, 200, 0.78);
+  color: var(--surface-ink);
 }
 
 .bazi-relations,
@@ -186,52 +212,96 @@
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.16);
-  background: rgba(18, 14, 32, 0.4);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
 }
 
 .bazi-relations-line {
   margin: 0;
   font-size: 0.82rem;
   line-height: 1.5;
-  color: rgba(255, 230, 200, 0.82);
+  color: var(--surface-ink);
 }
 
 .bazi-relations p {
   margin: 6px 0 0;
   font-size: 0.86rem;
   line-height: 1.5;
-  color: rgba(255, 230, 200, 0.82);
+  color: var(--surface-ink);
 }
 
-.bazi-learn-fold {
-  margin: 18px 0 24px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.18);
-  background: rgba(16, 12, 28, 0.4);
-  color: rgba(255, 230, 200, 0.78);
+/* 出生密码五步：挂在「深度学习」笔记抽屉（笔按钮） */
+.lab-notes-custom {
+  margin: 0 0 12px;
 }
 
-.bazi-learn-fold > summary {
+.lab-notes-pad {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.lab-notes-pad > summary {
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #ffd6a6;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--gold-ink, var(--gold));
   list-style: none;
 }
 
-.bazi-learn-fold > summary::-webkit-details-marker {
+.lab-notes-pad > summary::-webkit-details-marker {
   display: none;
+}
+
+.lab-notes-pad[open] > summary {
+  margin-bottom: 10px;
+}
+
+.lab-notes-input.is-compact {
+  min-height: 8rem;
+}
+
+.bazi-deep-learn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.bazi-deep-learn-head h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--gold, #c9a84c);
+}
+
+.bazi-deep-learn-head p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted, rgba(255, 230, 200, 0.65));
+}
+
+.bazi-deep-learn .bazi-learn-panel {
+  margin: 0;
+}
+
+.bazi-deep-learn .bazi-grid-wrap {
+  overflow-x: auto;
+}
+
+.bazi-deep-learn-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
 }
 
 .bazi-luck {
   margin: 0 0 18px;
-  padding: 12px 0 4px;
+  padding: 10px 0 6px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background:
-    linear-gradient(180deg, rgba(36, 30, 24, 0.55), rgba(18, 14, 28, 0.72));
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--ink) 7%);
+  overflow: hidden;
 }
 
 .bazi-luck-meta {
@@ -242,7 +312,7 @@
   padding: 0 12px 10px;
   font-size: 0.72rem;
   line-height: 1.45;
-  color: rgba(255, 230, 200, 0.62);
+  color: var(--surface-muted);
 }
 
 .bazi-luck-meta p {
@@ -255,10 +325,17 @@
 
 .bazi-luck-row {
   display: grid;
-  grid-template-columns: 1.6rem 1fr;
+  grid-template-columns: 1.55rem 1fr;
   gap: 0;
   align-items: stretch;
-  border-top: 1px solid rgba(255, 214, 166, 0.1);
+  border-top: none;
+  margin-top: 2px;
+}
+
+.bazi-luck-row + .bazi-luck-row {
+  margin-top: 4px;
+  padding-top: 4px;
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 .bazi-luck-label {
@@ -270,48 +347,79 @@
   padding: 8px 0;
   font-size: 0.7rem;
   letter-spacing: 0.12em;
-  color: rgba(255, 214, 166, 0.7);
-  background: rgba(0, 0, 0, 0.18);
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
 }
 
 .bazi-luck-scroller {
   display: flex;
-  gap: 0;
+  gap: 4px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
-  padding-bottom: 2px;
+  padding: 4px 10px 10px 6px;
+  mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 14px), transparent);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--gold) 55%, var(--ink-muted)) transparent;
+}
+
+.bazi-luck-scroller::-webkit-scrollbar {
+  height: 5px;
+}
+
+.bazi-luck-scroller::-webkit-scrollbar-track {
+  margin: 0 10px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border-radius: 999px;
+}
+
+.bazi-luck-scroller::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--gold) 45%, var(--ink-muted));
+  border-radius: 999px;
+}
+
+.bazi-luck-scroller::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .bazi-luck-col {
   flex: 0 0 auto;
-  min-width: 4.4rem;
-  max-width: 5.2rem;
+  min-width: 4.5rem;
+  max-width: 5.4rem;
   margin: 0;
-  padding: 8px 6px;
-  border: 0;
-  border-right: 1px solid rgba(255, 214, 166, 0.08);
-  background: transparent;
-  color: rgba(255, 230, 200, 0.88);
+  padding: 8px 7px 9px;
+  border: none;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-1) 55%, transparent);
+  color: var(--surface-ink);
   text-align: center;
   font: inherit;
   cursor: pointer;
   scroll-snap-align: start;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
 .bazi-luck-col:disabled {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: default;
+}
+
+.bazi-luck-col:hover:not(:disabled):not(.is-selected) {
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-1));
 }
 
 .bazi-luck-col.is-current,
 .bazi-luck-col.is-selected {
-  background: rgba(255, 214, 166, 0.12);
-  color: #ffb4a8;
+  background: color-mix(in srgb, var(--gold) 18%, var(--surface-2));
+  color: var(--ink);
+  box-shadow: none;
 }
 
 .bazi-luck-col.is-selected {
-  box-shadow: inset 0 0 0 1px rgba(255, 180, 120, 0.35);
+  background: color-mix(in srgb, var(--bazi-aura-ink-flow, var(--gold)) 16%, var(--surface-2));
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--bazi-aura-ink-flow, var(--gold)) 70%, transparent);
 }
 
 .bazi-luck-year,
@@ -329,14 +437,32 @@
   display: block;
   margin-top: 2px;
   font-size: 0.62rem;
-  color: rgba(255, 230, 200, 0.5);
+  color: var(--surface-muted);
+}
+
+.bazi-luck-empty-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.58rem;
+  line-height: 1.35;
+  color: var(--surface-muted);
+  opacity: 0.9;
+}
+
+.bazi-luck-col.is-tongxian {
+  cursor: help;
+}
+
+.bazi-luck-note.bazi-luck-tongxian-note {
+  color: var(--surface-muted);
+  border-top: 1px solid var(--line-soft);
 }
 
 .bazi-luck-col.is-current .bazi-luck-age,
 .bazi-luck-col.is-selected .bazi-luck-age,
 .bazi-luck-col.is-current .bazi-luck-xiao,
 .bazi-luck-col.is-selected .bazi-luck-xiao {
-  color: rgba(255, 180, 168, 0.75);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-luck-gz {
@@ -356,12 +482,12 @@
 .bazi-luck-gz em {
   font-style: normal;
   font-size: 0.62rem;
-  color: rgba(255, 230, 200, 0.55);
+  color: var(--surface-muted);
 }
 
 .bazi-luck-col.is-current .bazi-luck-gz em,
 .bazi-luck-col.is-selected .bazi-luck-gz em {
-  color: rgba(255, 180, 168, 0.85);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-luck-note {
@@ -369,8 +495,8 @@
   padding: 10px 12px 12px;
   font-size: 0.78rem;
   line-height: 1.45;
-  color: rgba(255, 214, 166, 0.85);
-  border-top: 1px solid rgba(255, 214, 166, 0.1);
+  color: var(--gold-ink, var(--gold));
+  border-top: none;
 }
 
 .bazi-season-row {
@@ -387,17 +513,17 @@
   margin: 0;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
   font: inherit;
   font-size: 0.78rem;
-  color: rgba(255, 240, 220, 0.9);
+  color: var(--surface-ink);
   cursor: pointer;
 }
 
 .bazi-season-chip:hover,
 .bazi-season-chip:focus-visible {
-  border-color: rgba(255, 214, 166, 0.45);
+  border-color: var(--gold);
   outline: none;
 }
 
@@ -406,17 +532,361 @@
 }
 
 /* 五行色 */
-.wx-mu { color: #7dcf8a !important; }
-.wx-huo { color: #ff7a6e !important; }
-.wx-tu { color: #d4b56a !important; }
-.wx-jin { color: #e8d59a !important; }
-.wx-shui { color: #6eb6ff !important; }
+.wx-mu { color: var(--wx-mu) !important; }
+.wx-huo { color: var(--wx-huo) !important; }
+.wx-tu { color: var(--wx-tu) !important; }
+.wx-jin { color: var(--wx-jin) !important; }
+.wx-shui { color: var(--wx-shui) !important; }
 
-.bazi-season-chip.wx-mu { border-color: rgba(125, 207, 138, 0.35); }
-.bazi-season-chip.wx-huo { border-color: rgba(255, 122, 110, 0.35); }
-.bazi-season-chip.wx-tu { border-color: rgba(212, 181, 106, 0.35); }
-.bazi-season-chip.wx-jin { border-color: rgba(232, 213, 154, 0.35); }
-.bazi-season-chip.wx-shui { border-color: rgba(110, 182, 255, 0.35); }
+.bazi-season-chip.wx-mu { border-color: color-mix(in srgb, var(--wx-mu) 45%, transparent); }
+.bazi-season-chip.wx-huo { border-color: color-mix(in srgb, var(--wx-huo) 45%, transparent); }
+.bazi-season-chip.wx-tu { border-color: color-mix(in srgb, var(--wx-tu) 45%, transparent); }
+.bazi-season-chip.wx-jin { border-color: color-mix(in srgb, var(--wx-jin) 45%, transparent); }
+.bazi-season-chip.wx-shui { border-color: color-mix(in srgb, var(--wx-shui) 45%, transparent); }
+
+.bazi-luck-gz em.wx-mu,
+.bazi-luck-gz em.wx-huo,
+.bazi-luck-gz em.wx-tu,
+.bazi-luck-gz em.wx-jin,
+.bazi-luck-gz em.wx-shui {
+  font-style: normal;
+}
+
+/* 八字页氛围：只染本页强调色 + 淡底光（构成 + 调和 + 流年轻混） */
+.bazi-reading-page,
+.bazi-chart-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.bazi-reading-page[data-bazi-wx],
+.bazi-chart-page[data-bazi-wx] {
+  --bazi-skin-line: color-mix(
+    in srgb,
+    var(--bazi-aura-ink) 14%,
+    var(--bazi-aura-ink-flow, transparent) 10%,
+    var(--line)
+  );
+  --bazi-skin-gold: color-mix(
+    in srgb,
+    var(--bazi-aura-ink) 18%,
+    var(--bazi-aura-ink-flow, var(--bazi-aura-ink)) 12%,
+    var(--gold)
+  );
+  --bazi-skin-soft: color-mix(
+    in srgb,
+    var(--bazi-aura-ink) 8%,
+    var(--bazi-aura-ink-flow, transparent) 6%,
+    var(--gold-soft)
+  );
+  transition: --bazi-skin-line 0.4s ease;
+}
+
+.bazi-reading-page[data-bazi-wx]::before,
+.bazi-chart-page[data-bazi-wx]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* 深色底感：低饱和构成色双晕 + 调和点缀 + 流年轻晕 */
+  background:
+    radial-gradient(ellipse 78% 42% at 22% -6%, var(--bazi-aura) 0%, transparent 60%),
+    radial-gradient(ellipse 72% 40% at 82% -4%, var(--bazi-aura-2, transparent) 0%, transparent 58%),
+    radial-gradient(circle at 50% 88%, var(--bazi-aura-accent, transparent) 0%, transparent 42%),
+    radial-gradient(ellipse 55% 36% at 70% 58%, var(--bazi-aura-flow, transparent) 0%, transparent 62%),
+    radial-gradient(circle at 88% 22%, color-mix(in srgb, var(--bazi-aura-ink) 9%, transparent), transparent 30%),
+    radial-gradient(circle at 12% 70%, color-mix(in srgb, var(--bazi-aura-ink-2, var(--bazi-aura-ink)) 7%, transparent), transparent 32%);
+  transition: opacity 0.45s ease;
+}
+
+/* 轻量粒子：构成色 + 流年色小点，不抢正文 */
+.bazi-reading-page[data-bazi-wx]::after,
+.bazi-chart-page[data-bazi-wx]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(1.2px 1.2px at 18% 22%, color-mix(in srgb, var(--bazi-aura-ink) 55%, transparent), transparent),
+    radial-gradient(1px 1px at 72% 18%, color-mix(in srgb, var(--bazi-aura-ink-flow, var(--bazi-aura-ink-2, var(--bazi-aura-ink))) 50%, transparent), transparent),
+    radial-gradient(1.4px 1.4px at 42% 64%, color-mix(in srgb, var(--bazi-aura-ink-2, var(--bazi-aura-ink)) 40%, transparent), transparent),
+    radial-gradient(1px 1px at 86% 48%, color-mix(in srgb, var(--bazi-aura-ink-flow, var(--bazi-aura-ink)) 45%, transparent), transparent),
+    radial-gradient(1.1px 1.1px at 28% 78%, color-mix(in srgb, var(--bazi-aura-ink) 35%, transparent), transparent),
+    radial-gradient(1px 1px at 58% 36%, color-mix(in srgb, var(--bazi-aura-ink-accent, var(--bazi-aura-ink)) 30%, transparent), transparent);
+  animation: bazi-skin-drift 9s ease-in-out infinite;
+}
+
+@keyframes bazi-skin-drift {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.62;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bazi-reading-page[data-bazi-wx]::after,
+  .bazi-chart-page[data-bazi-wx]::after {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
+/* 气质 / 节气 / 盘面：无框线，靠略深底面分层 */
+.bazi-chart-page[data-bazi-wx] .bazi-meta,
+.bazi-chart-page[data-bazi-wx] .bazi-temperament,
+.bazi-chart-page[data-bazi-wx] .bazi-grid-wrap {
+  border: none;
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-year-field,
+.bazi-chart-page[data-bazi-wx] .bazi-mode-tab {
+  border-color: var(--bazi-skin-line);
+}
+
+/* 解读卡：无框线，靠底面分层（勿再画黑线） */
+.bazi-reading-page[data-bazi-wx] .bazi-reading-ask,
+.bazi-reading-page[data-bazi-wx] .bazi-reading-card,
+.bazi-reading-page[data-bazi-wx] .bazi-reading-keyword {
+  border: none;
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-grid-wrap {
+  background:
+    radial-gradient(ellipse at 50% 0%, var(--bazi-aura-flow, var(--chart-bg-glow)), transparent 55%),
+    radial-gradient(ellipse at 18% 100%, var(--bazi-aura) 0%, transparent 50%),
+    color-mix(in srgb, var(--chart-bg) 82%, var(--bazi-aura-ink) 8%);
+  box-shadow: none;
+  transition: background 0.4s ease;
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-col-liunian {
+  background: color-mix(in srgb, var(--bazi-aura-ink-flow, var(--gold)) 12%, var(--gold-soft));
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--bazi-aura-ink-flow, transparent) 14%, transparent);
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-row-main td:not(.bazi-row-label) {
+  box-shadow: none;
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-mode-tab.is-active {
+  border-color: var(--bazi-skin-gold);
+  background: var(--bazi-skin-soft);
+}
+
+.bazi-chart-page[data-bazi-wx] .life-btn-primary,
+.bazi-reading-page[data-bazi-wx] .life-btn-primary {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--bazi-aura-ink) 35%, var(--gold)),
+    color-mix(in srgb, var(--bazi-aura-ink-flow, var(--bazi-aura-ink-2, var(--bazi-aura-ink))) 28%, var(--gold)) 55%,
+    color-mix(in srgb, var(--bazi-aura-ink-2, var(--bazi-aura-ink)) 22%, var(--purple))
+  );
+  border: 1px solid color-mix(in srgb, var(--bazi-aura-ink-flow, var(--bazi-aura-ink)) 25%, transparent);
+}
+
+.bazi-chart-page[data-bazi-wx] .life-btn-ghost,
+.bazi-reading-page[data-bazi-wx] .life-btn-ghost {
+  border-color: var(--bazi-skin-line);
+  color: color-mix(in srgb, var(--bazi-aura-ink) 35%, var(--ink));
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-temperament-btn {
+  border: none;
+  color: color-mix(in srgb, var(--bazi-aura-ink) 35%, var(--ink));
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-luck {
+  background: color-mix(
+    in srgb,
+    var(--surface-2) 72%,
+    var(--bazi-aura-ink) 8%,
+    var(--ink) 4%
+  );
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-luck-col.is-selected,
+.bazi-chart-page[data-bazi-wx] .bazi-luck-col.is-current {
+  border: none;
+  background: color-mix(in srgb, var(--bazi-aura-ink-flow, var(--bazi-aura-ink)) 18%, var(--surface-2));
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--bazi-aura-ink-flow, var(--gold)) 75%, transparent);
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-luck-scroller {
+  scrollbar-color: color-mix(in srgb, var(--bazi-aura-ink-flow, var(--gold)) 50%, var(--ink-muted)) transparent;
+}
+
+.bazi-chart-page[data-bazi-wx] .bazi-luck-scroller::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--bazi-aura-ink-flow, var(--gold)) 48%, var(--ink-muted));
+}
+
+/* 命盘气质条 */
+.bazi-temperament {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: none;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--bazi-aura-ink, var(--gold)) 18%, var(--surface-2)),
+      color-mix(in srgb, var(--bazi-aura-ink-2, var(--bazi-aura-ink, var(--gold))) 12%, var(--surface-2))
+    );
+  color: var(--ink);
+}
+
+.bazi-temperament-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.bazi-temperament-kicker {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-ink, var(--gold));
+  padding-top: 6px;
+}
+
+.bazi-temperament-title {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.bazi-temperament-mood {
+  margin: 6px 0 0;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+.bazi-temperament-sub {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+.bazi-temperament-accent {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--bazi-aura-ink-accent, var(--gold-ink)) 70%, var(--ink));
+}
+
+.bazi-temperament-btn {
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: none;
+  background: color-mix(in srgb, var(--surface-1) 70%, var(--ink) 4%);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bazi-temperament-btn:hover {
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-1));
+  color: var(--gold-ink, var(--gold));
+}
+
+.bazi-reading-page[data-bazi-wx] > *,
+.bazi-chart-page[data-bazi-wx] > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bazi-reading-page[data-bazi-wx='mu'],
+.bazi-chart-page[data-bazi-wx='mu'] {
+  --bazi-aura: color-mix(in srgb, var(--wx-mu) 16%, transparent);
+  --bazi-aura-2: transparent;
+  --bazi-aura-ink: var(--wx-mu);
+  --bazi-aura-ink-2: var(--wx-mu);
+  --gold: color-mix(in srgb, var(--wx-mu) 16%, var(--gold));
+  --gold-soft: color-mix(in srgb, var(--wx-mu) 8%, transparent);
+  --accent: color-mix(in srgb, var(--wx-mu) 12%, var(--accent));
+  --line: color-mix(in srgb, var(--wx-mu) 10%, var(--line));
+}
+
+.bazi-reading-page[data-bazi-wx='huo'],
+.bazi-chart-page[data-bazi-wx='huo'] {
+  --bazi-aura: color-mix(in srgb, var(--wx-huo) 16%, transparent);
+  --bazi-aura-2: transparent;
+  --bazi-aura-ink: var(--wx-huo);
+  --bazi-aura-ink-2: var(--wx-huo);
+  --gold: color-mix(in srgb, var(--wx-huo) 14%, var(--gold));
+  --gold-soft: color-mix(in srgb, var(--wx-huo) 8%, transparent);
+  --accent: color-mix(in srgb, var(--wx-huo) 12%, var(--accent));
+  --line: color-mix(in srgb, var(--wx-huo) 10%, var(--line));
+}
+
+.bazi-reading-page[data-bazi-wx='tu'],
+.bazi-chart-page[data-bazi-wx='tu'] {
+  --bazi-aura: color-mix(in srgb, var(--wx-tu) 16%, transparent);
+  --bazi-aura-2: transparent;
+  --bazi-aura-ink: var(--wx-tu);
+  --bazi-aura-ink-2: var(--wx-tu);
+  --gold: color-mix(in srgb, var(--wx-tu) 14%, var(--gold));
+  --gold-soft: color-mix(in srgb, var(--wx-tu) 8%, transparent);
+  --accent: color-mix(in srgb, var(--wx-tu) 12%, var(--accent));
+  --line: color-mix(in srgb, var(--wx-tu) 10%, var(--line));
+}
+
+.bazi-reading-page[data-bazi-wx='jin'],
+.bazi-chart-page[data-bazi-wx='jin'] {
+  --bazi-aura: color-mix(in srgb, var(--wx-jin) 16%, transparent);
+  --bazi-aura-2: transparent;
+  --bazi-aura-ink: var(--wx-jin);
+  --bazi-aura-ink-2: var(--wx-jin);
+  --gold: color-mix(in srgb, var(--wx-jin) 16%, var(--gold));
+  --gold-soft: color-mix(in srgb, var(--wx-jin) 8%, transparent);
+  --accent: color-mix(in srgb, var(--wx-jin) 12%, var(--accent));
+  --line: color-mix(in srgb, var(--wx-jin) 10%, var(--line));
+}
+
+.bazi-reading-page[data-bazi-wx='shui'],
+.bazi-chart-page[data-bazi-wx='shui'] {
+  --bazi-aura: color-mix(in srgb, var(--wx-shui) 16%, transparent);
+  --bazi-aura-2: transparent;
+  --bazi-aura-ink: var(--wx-shui);
+  --bazi-aura-ink-2: var(--wx-shui);
+  --gold: color-mix(in srgb, var(--wx-shui) 12%, var(--gold));
+  --gold-soft: color-mix(in srgb, var(--wx-shui) 8%, transparent);
+  --accent: color-mix(in srgb, var(--wx-shui) 12%, var(--accent));
+  --line: color-mix(in srgb, var(--wx-shui) 10%, var(--line));
+}
+
+/* 有次色时：线色略掺第二色 */
+.bazi-reading-page[data-bazi-wx2],
+.bazi-chart-page[data-bazi-wx2] {
+  --line: color-mix(in srgb, var(--bazi-aura-ink-2) 8%, var(--line));
+  --gold-soft: color-mix(in srgb, var(--bazi-aura-ink) 6%, var(--bazi-aura-ink-2) 5%, transparent);
+}
+
+/* 月白：氛围再淡一档，避免整页被染色过头 */
+html[data-theme='moon'] .bazi-reading-page[data-bazi-wx],
+html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
+  --gold: color-mix(in srgb, var(--bazi-aura-ink) 10%, #c9a84c);
+  --gold-soft: color-mix(in srgb, var(--bazi-aura-ink) 5%, transparent);
+  --accent: color-mix(in srgb, var(--bazi-aura-ink) 8%, #7a8499);
+  --line: color-mix(in srgb, var(--bazi-aura-ink) 6%, rgba(201, 168, 76, 0.28));
+}
 
 .bazi-mode-tabs {
   display: grid;
@@ -425,10 +895,9 @@
   margin: 2px 0 18px;
   padding: 4px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.14);
-  background:
-    linear-gradient(180deg, rgba(28, 22, 36, 0.72), rgba(14, 12, 24, 0.55));
-  box-shadow: inset 0 1px 0 rgba(255, 230, 200, 0.04);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  box-shadow: none;
 }
 
 .bazi-mode-tab {
@@ -444,7 +913,7 @@
   border: 0;
   border-radius: 11px;
   background: transparent;
-  color: rgba(255, 230, 200, 0.48);
+  color: var(--ink-muted);
   font: inherit;
   cursor: pointer;
   transition: color 0.18s ease, background 0.18s ease;
@@ -461,32 +930,29 @@
 .bazi-mode-tab span {
   font-size: 0.62rem;
   letter-spacing: 0.04em;
-  opacity: 0.75;
+  opacity: 0.85;
   font-weight: 400;
 }
 
 .bazi-mode-tab.is-active {
-  color: #ffe9c2;
-  background:
-    linear-gradient(180deg, rgba(201, 162, 39, 0.22), rgba(201, 162, 39, 0.08));
-  box-shadow:
-    0 1px 0 rgba(255, 230, 200, 0.08),
-    inset 0 0 0 1px rgba(201, 162, 39, 0.28);
+  color: var(--gold);
+  background: var(--gold-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 45%, var(--line));
 }
 
 .bazi-mode-tab.is-active span {
-  color: rgba(255, 214, 166, 0.72);
+  color: var(--gold);
   opacity: 1;
 }
 
 .bazi-mode-tab:hover:not(.is-active),
 .bazi-mode-tab:focus-visible:not(.is-active) {
-  color: rgba(255, 230, 200, 0.78);
+  color: var(--ink);
   outline: none;
 }
 
 .bazi-mode-tab:focus-visible {
-  outline: 2px solid rgba(201, 162, 39, 0.45);
+  outline: 2px solid color-mix(in srgb, var(--gold) 55%, transparent);
   outline-offset: 1px;
 }
 
@@ -499,8 +965,13 @@
 
 .bazi-shensha .bazi-term {
   font-size: 0.76rem;
-  color: rgba(255, 214, 166, 0.88);
+  color: var(--surface-ink);
   line-height: 1.35;
+}
+
+.bazi-shensha .bazi-term:hover,
+.bazi-shensha .bazi-term:focus-visible {
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-row-shensha td {
@@ -511,7 +982,7 @@
   margin: 16px 0 8px;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #ffe9c2;
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-hepan-compare {
@@ -526,11 +997,11 @@
   margin: 6px 0 0;
   font-size: 0.86rem;
   line-height: 1.5;
-  color: rgba(255, 230, 200, 0.85);
+  color: var(--surface-ink);
 }
 
 .bazi-hepan-day {
-  color: rgba(255, 214, 166, 0.9) !important;
+  color: var(--gold-ink, var(--gold)) !important;
 }
 
 .bazi-partner-form {
@@ -542,23 +1013,24 @@
   margin: 0 0 16px;
   padding: 16px 14px 18px;
   border-radius: 16px;
-  border: 1px solid rgba(201, 168, 76, 0.28);
+  border: 1px solid var(--line);
   background:
-    radial-gradient(ellipse at 12% 0%, rgba(201, 168, 76, 0.08), transparent 45%),
-    rgba(14, 12, 28, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(255, 214, 166, 0.04);
+    radial-gradient(ellipse at 12% 0%, var(--gold-soft), transparent 45%),
+    var(--surface-1);
+  box-shadow: none;
+  color: var(--surface-ink);
 }
 
 .bazi-sense-insight {
   padding: 20px 16px 22px;
-  border-color: rgba(201, 168, 76, 0.4);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
 }
 
 .bazi-insight-hook {
   margin: 0 0 12px;
   font-size: 1.05rem;
   line-height: 1.55;
-  color: #ffe8c8;
+  color: var(--ink);
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
   font-weight: 600;
 }
@@ -579,34 +1051,34 @@
   display: inline-flex;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(201, 168, 76, 0.4);
-  background: rgba(201, 168, 76, 0.1);
-  color: #ffd6a6;
+  border: 1px solid var(--line);
+  background: var(--gold-soft);
+  color: var(--gold);
   font-size: 0.82rem;
 }
 
 .bazi-mark-chip.is-soft {
-  border-color: rgba(160, 180, 220, 0.4);
-  background: rgba(90, 120, 180, 0.12);
-  color: #c8d8f0;
+  border-color: var(--line-soft);
+  background: color-mix(in srgb, var(--chart-gz) 12%, transparent);
+  color: var(--chart-gz);
 }
 
 .bazi-mark-comfort {
   margin: 0 0 8px;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: rgba(255, 230, 200, 0.82);
+  color: var(--surface-ink);
 }
 
 .bazi-mark-comfort.is-gentle {
-  color: rgba(255, 230, 200, 0.65);
+  color: var(--surface-muted);
 }
 
 .bazi-origin-fold {
   margin: 0 0 18px;
   border-radius: 14px;
-  border: 1px solid rgba(201, 168, 76, 0.22);
-  background: rgba(10, 8, 20, 0.65);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
   overflow: hidden;
 }
 
@@ -618,7 +1090,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 14px 16px;
-  color: rgba(255, 214, 166, 0.92);
+  color: var(--gold);
   font-size: 0.92rem;
 }
 
@@ -629,7 +1101,7 @@
 .bazi-origin-fold summary em {
   font-style: normal;
   font-size: 0.75rem;
-  color: rgba(255, 230, 200, 0.5);
+  color: var(--surface-muted);
 }
 
 .bazi-origin-fold[open] summary em::after {
@@ -642,28 +1114,28 @@
 
 .bazi-origin-body {
   padding: 0 16px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--line-soft);
 }
 
 .bazi-origin-body p {
   margin: 12px 0 0;
   font-size: 0.82rem;
   line-height: 1.6;
-  color: rgba(255, 230, 200, 0.72);
+  color: var(--surface-muted);
 }
 
 .bazi-sense-kicker {
   margin: 0 0 6px;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
-  color: rgba(255, 214, 166, 0.75);
+  color: var(--gold);
 }
 
 .bazi-sense-title {
   margin: 0 0 8px;
   font-size: 1.12rem;
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
-  color: #fff6e8;
+  color: var(--ink);
   font-weight: 650;
   line-height: 1.35;
 }
@@ -671,14 +1143,14 @@
 .bazi-sense-tag {
   margin: 0 0 10px;
   font-size: 0.88rem;
-  color: rgba(255, 214, 166, 0.9);
+  color: var(--gold);
 }
 
 .bazi-sense-body {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: rgba(255, 230, 200, 0.88);
+  color: var(--surface-ink);
 }
 
 .bazi-sense-remedy,
@@ -686,7 +1158,7 @@
   margin: 12px 0 0;
   font-size: 0.86rem;
   line-height: 1.55;
-  color: rgba(255, 220, 180, 0.9);
+  color: var(--surface-ink);
 }
 
 .bazi-sense-weather {
@@ -694,17 +1166,17 @@
   display: inline-block;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 166, 0.35);
-  background: rgba(255, 214, 166, 0.1);
+  border: 1px solid var(--line);
+  background: var(--gold-soft);
   font-size: 0.88rem;
-  color: #ffd6a6;
+  color: var(--gold);
 }
 
 .bazi-sense-decade {
   margin: 10px 0 0;
   font-size: 0.8rem;
   line-height: 1.5;
-  color: rgba(255, 230, 200, 0.58);
+  color: var(--surface-muted);
 }
 
 .bazi-energy-bars {
@@ -723,13 +1195,13 @@
 
 .bazi-energy-label {
   font-size: 0.82rem;
-  color: rgba(255, 230, 200, 0.85);
+  color: var(--surface-ink);
 }
 
 .bazi-energy-track {
   height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   overflow: hidden;
 }
 
@@ -768,11 +1240,11 @@
   margin: 0 0 16px;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background: linear-gradient(135deg, rgba(72, 48, 28, 0.55), rgba(28, 22, 40, 0.7));
+  border: none;
+  background: var(--gold-soft);
   font-size: 1.05rem;
   line-height: 1.55;
-  color: #fff6e8;
+  color: var(--ink);
   font-weight: 600;
 }
 
@@ -785,15 +1257,15 @@
 .bazi-reading-card {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.18);
-  background: rgba(18, 14, 32, 0.5);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
 }
 
 .bazi-reading-card h2 {
   margin: 0 0 6px;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: rgba(255, 214, 166, 0.85);
+  color: var(--gold-ink, var(--gold));
   font-weight: 600;
 }
 
@@ -801,15 +1273,15 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.55;
-  color: rgba(255, 230, 200, 0.88);
+  color: var(--surface-ink, var(--ink));
 }
 
 .bazi-reading-ask {
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(20, 16, 36, 0.45);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
 }
 
 .bazi-reading-actions {
@@ -931,7 +1403,7 @@
 .bazi-learn-lead {
   margin: 0 0 10px;
   font-size: 0.86rem;
-  color: rgba(255, 214, 166, 0.9);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-learn-list {
@@ -949,17 +1421,17 @@
   gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background: rgba(20, 16, 36, 0.55);
-  color: rgba(255, 230, 200, 0.78);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-muted);
   font-size: 0.75rem;
   cursor: pointer;
 }
 
 .bazi-learn-step.is-active {
-  border-color: rgba(255, 214, 166, 0.55);
-  background: rgba(201, 162, 39, 0.18);
-  color: #fff6e8;
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
 }
 
 .bazi-learn-num {
@@ -969,7 +1441,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 214, 166, 0.2);
+  background: color-mix(in srgb, var(--gold) 22%, transparent);
+  color: inherit;
   font-size: 0.7rem;
 }
 
@@ -977,20 +1450,33 @@
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(18, 14, 32, 0.5);
-  color: rgba(255, 230, 200, 0.88);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
   font-size: 0.88rem;
   line-height: 1.55;
 }
 
+.bazi-learn-panel .life-route-title {
+  color: var(--ink);
+}
+
 .bazi-learn-panel p {
   margin: 0 0 8px;
+  color: var(--ink);
 }
 
 .bazi-learn-note {
   font-size: 0.78rem;
-  color: rgba(255, 214, 166, 0.7) !important;
+  color: var(--ink-muted) !important;
+}
+
+.bazi-deep-learn-head h3 {
+  color: var(--gold-ink, var(--gold));
+}
+
+.bazi-deep-learn-head p {
+  color: var(--ink-muted);
 }
 
 .bazi-ten-god-list,
@@ -1003,7 +1489,7 @@
   background: none;
   border: 0;
   padding: 0;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
   text-decoration: underline;
   cursor: pointer;
   font: inherit;
@@ -1015,8 +1501,9 @@
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
-  background: rgba(18, 14, 32, 0.52);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
 }
 
 .bazi-evidence-list {
@@ -1032,24 +1519,24 @@
   margin: 0;
   font-size: 0.88rem;
   line-height: 1.55;
-  color: rgba(255, 230, 200, 0.88);
+  color: var(--ink);
 }
 
 .bazi-evidence-gloss {
   margin-top: 4px;
   font-size: 0.76rem;
-  color: rgba(255, 214, 166, 0.75);
+  color: var(--ink-muted);
 }
 
 .bazi-evidence-gloss summary {
   cursor: pointer;
-  color: rgba(255, 214, 166, 0.9);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-evidence-gloss p {
   margin: 4px 0 0;
   font-size: 0.76rem;
-  color: rgba(255, 230, 200, 0.7);
+  color: var(--ink-muted);
 }
 
 /* 生时校准 */
@@ -1161,8 +1648,30 @@
   margin: 0 0 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(20, 16, 36, 0.45);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--surface-ink);
+}
+
+.bazi-reading-ask .life-route-title {
+  color: var(--ink);
+}
+
+.bazi-reading-ask .life-field > span {
+  color: var(--ink-muted);
+}
+
+.bazi-reading-ask .life-btn-ghost {
+  color: var(--gold-ink);
+  border: none;
+  background: var(--gold-soft);
+}
+
+.bazi-reading-ask .life-btn-ghost:hover,
+.bazi-reading-ask .life-btn-ghost:focus-visible {
+  color: var(--ink);
+  border: none;
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--ink) 6%);
 }
 
 .bazi-reading-actions {
@@ -1214,7 +1723,7 @@
 .bazi-codex-hint {
   margin: 0 0 12px;
   font-size: 0.82rem;
-  color: rgba(255, 230, 200, 0.62);
+  color: var(--ink-muted);
 }
 
 .bazi-wx-grid {
@@ -1393,11 +1902,10 @@
   overflow: auto;
   padding: 18px 18px 22px;
   border-radius: 14px 14px 18px 18px;
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background:
-    linear-gradient(180deg, rgba(42, 34, 28, 0.95), rgba(16, 12, 28, 0.96));
-  color: rgba(255, 240, 220, 0.92);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  border: none;
+  background: var(--drawer-bg);
+  color: var(--ink);
+  box-shadow: var(--shadow);
 }
 
 .bazi-codex-panel h2 {
@@ -1413,7 +1921,7 @@
 
 .bazi-codex-kicker,
 .bazi-codex-epithet {
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
   font-size: 0.78rem;
   letter-spacing: 0.08em;
 }
@@ -1421,14 +1929,14 @@
 .bazi-codex-reason {
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(255, 214, 166, 0.1);
-  color: #ffe6c8;
+  background: var(--gold-soft);
+  color: var(--ink);
   font-size: 0.85rem !important;
 }
 
 .bazi-codex-muted,
 .bazi-codex-locked {
-  color: rgba(255, 230, 200, 0.62) !important;
+  color: var(--ink-muted) !important;
   font-size: 0.85rem !important;
 }
 
@@ -1444,21 +1952,20 @@
   margin: 0 0 8px;
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 166, 0.45);
-  background: rgba(255, 214, 166, 0.14);
-  color: #fff6e8;
+  border: none;
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: none;
 }
 
 .bazi-codex-close:hover,
 .bazi-codex-close:focus-visible {
-  background: rgba(255, 214, 166, 0.28);
-  border-color: rgba(255, 230, 180, 0.75);
+  background: color-mix(in srgb, var(--gold) 28%, transparent);
   outline: none;
 }
 
@@ -2664,21 +3171,20 @@
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(255, 214, 166, 0.06);
-  border: 1px solid rgba(255, 214, 166, 0.12);
+  background: var(--surface-2);
+  border: none;
   font-size: 0.85rem;
-  color: rgba(255, 230, 200, 0.78);
+  color: var(--ink-muted);
 }
 
 .bazi-enc-chart-status.is-on {
-  border-color: rgba(120, 190, 255, 0.28);
-  background: rgba(80, 140, 220, 0.1);
-  color: rgba(200, 230, 255, 0.92);
+  background: var(--gold-soft);
+  color: var(--ink);
 }
 
 .bazi-enc-memory-line {
   font-weight: 600;
-  color: rgba(255, 214, 166, 0.92);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-codex-entry.is-soft,
@@ -3254,7 +3760,7 @@
 .bazi-enc-section-title {
   margin: 0 0 4px;
   font-size: 0.95rem;
-  color: rgba(255, 214, 166, 0.9);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-rel-star {
@@ -3272,16 +3778,17 @@
   place-items: center;
   min-height: 3.2rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.4);
-  background: rgba(255, 214, 166, 0.1);
+  border: none;
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
   font-size: 1.1rem;
 }
 
 .bazi-rel-star-arm {
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.16);
-  background: rgba(12, 10, 24, 0.45);
+  border: none;
+  background: var(--surface-2);
 }
 
 .bazi-rel-star-arm em {
@@ -3289,7 +3796,7 @@
   margin-bottom: 8px;
   font-style: normal;
   font-size: 0.78rem;
-  color: rgba(255, 214, 166, 0.75);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-rel-star-chips {
@@ -3304,7 +3811,7 @@
   gap: 16px;
   margin-top: 4px;
   font-size: 0.72rem;
-  color: rgba(255, 230, 200, 0.55);
+  color: var(--ink-muted);
 }
 
 .bazi-sk-legend .is-sheng::before,
@@ -3349,7 +3856,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: rgba(18, 14, 32, 0.94);
+  background: var(--drawer-bg);
   padding: 4px 0 8px;
 }
 
@@ -3358,18 +3865,18 @@
   min-width: 0;
   padding: 8px 4px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 214, 166, 0.18);
-  background: rgba(12, 10, 24, 0.65);
-  color: rgba(255, 230, 200, 0.62);
+  border: none;
+  background: var(--surface-2);
+  color: var(--ink-muted);
   font: inherit;
   font-size: 0.78rem;
   cursor: pointer;
 }
 
 .bazi-enc-tab.is-active {
-  color: #fff6e8;
-  border-color: rgba(255, 214, 166, 0.55);
-  box-shadow: 0 0 0 1px rgba(255, 214, 166, 0.18);
+  color: var(--gold-ink, var(--ink));
+  background: var(--gold-soft);
+  box-shadow: none;
 }
 
 .bazi-enc-panels {
@@ -3446,22 +3953,24 @@
 .bazi-enc-tag {
   padding: 3px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
+  border: none;
+  background: var(--surface-2);
   font-size: 0.72rem;
-  color: rgba(255, 230, 200, 0.72);
+  color: var(--ink-muted);
 }
 
 .bazi-enc-title {
   margin: 0 0 8px;
   font-size: 1.65rem;
   letter-spacing: 0.04em;
+  color: var(--ink);
 }
 
 .bazi-enc-oneliner {
   margin: 0 0 14px;
   font-size: 0.95rem;
   line-height: 1.55;
-  color: rgba(255, 240, 220, 0.88);
+  color: var(--ink);
 }
 
 .bazi-enc-section {
@@ -3471,13 +3980,13 @@
 .bazi-enc-section h3 {
   margin: 0 0 6px;
   font-size: 0.88rem;
-  color: rgba(255, 214, 166, 0.85);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-enc-section p {
   margin: 0;
   line-height: 1.55;
-  color: rgba(255, 230, 200, 0.82);
+  color: var(--ink);
 }
 
 .bazi-enc-kw {
@@ -3489,16 +3998,17 @@
 .bazi-enc-kw span {
   padding: 4px 10px;
   border-radius: 8px;
-  background: rgba(255, 214, 166, 0.08);
-  border: 1px solid rgba(255, 214, 166, 0.16);
+  background: var(--surface-2);
+  border: none;
   font-size: 0.78rem;
+  color: var(--ink-muted);
 }
 
 .bazi-enc-list {
   margin: 0;
   padding-left: 1.1rem;
   line-height: 1.55;
-  color: rgba(255, 230, 200, 0.82);
+  color: var(--ink);
 }
 
 .bazi-enc-rel-block {
@@ -3508,7 +4018,7 @@
 .bazi-enc-rel-block h4 {
   margin: 0 0 8px;
   font-size: 0.85rem;
-  color: rgba(255, 214, 166, 0.85);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-enc-rel-row {
@@ -3520,9 +4030,9 @@
 .bazi-enc-rel-chip {
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background: rgba(255, 214, 166, 0.08);
-  color: #fff6e8;
+  border: none;
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
@@ -3550,17 +4060,17 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.16);
-  background: rgba(12, 10, 24, 0.45);
+  border: none;
+  background: var(--surface-2);
 }
 
 .bazi-rel-node {
   min-width: 2.2rem;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 166, 0.35);
-  background: rgba(255, 214, 166, 0.1);
-  color: #fff6e8;
+  border: none;
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -3569,7 +4079,7 @@
 .bazi-rel-edge {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  color: rgba(255, 214, 166, 0.75);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-rel-pair.is-害 .bazi-rel-edge { color: rgba(200, 140, 180, 0.95); }
@@ -3606,13 +4116,13 @@
 .bazi-rel-note {
   font-style: normal;
   font-size: 0.75rem;
-  color: rgba(255, 230, 200, 0.55);
+  color: var(--ink-muted);
 }
 
 .bazi-rel-fragment {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 214, 166, 0.14);
+  border-top: 1px solid var(--line);
 }
 
 .bazi-rel-hit-list {
@@ -3626,14 +4136,15 @@
   gap: 6px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.14);
-  background: rgba(12, 10, 24, 0.4);
+  border: none;
+  background: var(--surface-2);
+  color: var(--ink);
 }
 
 .bazi-rel-hit-kind {
   font-size: 0.68rem;
   letter-spacing: 0.1em;
-  color: rgba(255, 214, 166, 0.65);
+  color: var(--gold-ink, var(--gold));
 }
 
 .bazi-rel-hit strong {
@@ -3650,8 +4161,8 @@
   margin: 0 0 10px;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(255, 214, 166, 0.14);
-  background: rgba(8, 6, 18, 0.5);
+  border: none;
+  background: var(--surface-2);
 }
 
 .bazi-enc-struct-art .bazi-art-svg {
@@ -3884,6 +4395,121 @@
   .bazi-st-core.is-gz .bazi-st-band.is-side:last-child .bazi-st-band-chips {
     justify-content: center;
   }
+}
+
+/* —— 主题收尾：出生密码五步 / 深度弹层 / 详细释义百科（盖过奶油硬编码） —— */
+.bazi-deep-learn,
+.bazi-learn-panel,
+.bazi-evidence {
+  color: var(--ink);
+}
+
+.bazi-learn-step {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-muted);
+}
+
+.bazi-learn-step.is-active {
+  background: var(--gold-soft);
+  border-color: var(--gold);
+  color: var(--gold-ink, var(--ink));
+}
+
+.bazi-learn-panel,
+.bazi-evidence {
+  background: var(--surface-1);
+  border-color: var(--line);
+}
+
+.bazi-learn-panel p,
+.bazi-evidence-list p,
+.bazi-ten-god-list,
+.bazi-theme-list {
+  color: var(--ink);
+}
+
+.bazi-learn-note,
+.bazi-deep-learn-head p,
+.bazi-evidence-gloss,
+.bazi-evidence-gloss p {
+  color: var(--ink-muted);
+}
+
+.bazi-deep-learn-head h3,
+.bazi-theme-jump,
+.bazi-evidence-gloss summary,
+.bazi-learn-lead {
+  color: var(--gold-ink, var(--gold));
+}
+
+/* 详细释义 / 图鉴百科弹层 */
+.lab-codex-popup-dialog,
+.bazi-enc-sheet .bazi-codex-panel,
+.bazi-enc-sheet .bazi-enc-panel {
+  color: var(--ink);
+}
+
+.bazi-enc-deep,
+.bazi-enc-glyph {
+  color: var(--ink);
+}
+
+.bazi-st-map {
+  border: none;
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.bazi-st-hint,
+.bazi-st-band-label,
+.bazi-st-note,
+.bazi-st-center em,
+.bazi-st-flow-item em {
+  color: var(--ink-muted);
+}
+
+.bazi-st-meta-chip,
+.bazi-st-chip {
+  border: none;
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+.bazi-st-band.is-top .bazi-st-chip {
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
+}
+
+.bazi-st-band.is-bottom .bazi-st-chip {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--ink);
+}
+
+.bazi-st-center {
+  border: none;
+  background: var(--gold-soft);
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.bazi-st-center strong {
+  color: var(--gold-ink, var(--ink));
+}
+
+.bazi-st-flow-item {
+  border: none;
+  background: var(--surface-1);
+  color: var(--ink);
+}
+
+.bazi-st-map-list {
+  color: var(--ink);
+}
+
+.bazi-st-band.is-kw .bazi-st-chip {
+  background: var(--surface-1);
+  color: var(--ink-muted);
 }
 
 

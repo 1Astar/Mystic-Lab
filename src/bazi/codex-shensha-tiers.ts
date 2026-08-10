@@ -32,7 +32,7 @@ export const SHENSHA_TAG: readonly string[] = [
 ] as const;
 
 /**
- * 更多神煞 · 名录（现阶段多数尚未排盘计算 / 无独立百科）
+ * 更多神煞 · 名录（排盘计算已覆盖；百科多为骨架，详情可点）
  * 只展示名 + 一句释义入口文案
  */
 export const SHENSHA_MORE: readonly ShenShaMoreEntry[] = [

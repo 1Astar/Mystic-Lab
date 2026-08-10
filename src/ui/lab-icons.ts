@@ -12,6 +12,14 @@ export const ICON_EXPLORE_SCROLL = `
   <path d="M9 7.5h6M9 11h6M9 14.5h3.5"/>
 </svg>`.trim();
 
+/** 小精装书：图鉴入口 */
+export const ICON_BOOK = `
+<svg class="lab-ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M5 4.8h11.2a1.8 1.8 0 0 1 1.8 1.8v11.8a1.8 1.8 0 0 1-1.8 1.8H5.9A1.9 1.9 0 0 1 4 18.5V6.6A1.8 1.8 0 0 1 5.8 4.8Z"/>
+  <path d="M8 4.8v15.4"/>
+  <path d="M11.2 9h4.2M11.2 12.2h4.2M11.2 15.4h2.6"/>
+</svg>`.trim();
+
 export const ICON_SHARE = `
 <svg class="lab-ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="18" cy="5" r="2.75"/>
@@ -26,4 +34,11 @@ export const ICON_SPARK = `
 <svg class="lab-ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
   <path d="M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/>
   <circle cx="12" cy="12" r="2.2"/>
+</svg>`.trim();
+
+/** 笔（深度学习入口） */
+export const ICON_NOTE = `
+<svg class="lab-ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 20h9"/>
+  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
 </svg>`.trim();

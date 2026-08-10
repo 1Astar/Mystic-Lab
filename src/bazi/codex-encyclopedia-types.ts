@@ -1,7 +1,14 @@
 import type { BaziCodexKind } from './codex.ts';
+import type { ShenshaSchoolDiff } from './codex-shensha-school-diff.ts';
 
-export type CodexDetailPane = 'basics' | 'express' | 'relation' | 'chart';
+export type CodexDetailPane =
+  | 'basics'
+  | 'express'
+  | 'relation'
+  | 'chart'
+  | 'schools';
 
+/** 四屏基础；神煞另加「他派差异」 */
 export const CODEX_DETAIL_PANES: CodexDetailPane[] = [
   'basics',
   'express',
@@ -9,12 +16,24 @@ export const CODEX_DETAIL_PANES: CodexDetailPane[] = [
   'chart',
 ];
 
+export const CODEX_SHENSHA_DETAIL_PANES: CodexDetailPane[] = [
+  ...CODEX_DETAIL_PANES,
+  'schools',
+];
+
 export const CODEX_DETAIL_LABELS: Record<CodexDetailPane, string> = {
   basics: '基础',
   express: '表现',
   relation: '生克',
   chart: '命盘',
+  schools: '他派差异',
 };
+
+export function codexDetailPanesFor(
+  kind: BaziCodexKind | string,
+): CodexDetailPane[] {
+  return kind === 'shensha' ? CODEX_SHENSHA_DETAIL_PANES : CODEX_DETAIL_PANES;
+}
 
 export type CodexRelLink = {
   id: string;
@@ -81,4 +100,6 @@ export type CodexDossier = {
   };
   /** 卡片核心词（短） */
   coreKeyword: string;
+  /** 神煞：本产品查法 + 他派差异；非神煞可缺省 */
+  schoolDiff?: ShenshaSchoolDiff;
 };

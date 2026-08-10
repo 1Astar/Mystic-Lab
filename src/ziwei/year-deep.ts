@@ -242,6 +242,9 @@ export function buildYearDeepPack(
   else if (item.chipLabel === '职业调整') {
     conclusion = '职业方向会成为今年的重要议题。';
   }
+  if (level === 'decade') {
+    conclusion = `这十年主场在「${item.chipLabel || shortPalace(decadePalace) || '大限'}」。大限是长镜头，流年是短镜头。`;
+  }
   if (level === 'month') conclusion = `在年度主轴下，本月重点看${shortPalace(monthPalace) || '推进'}。`;
   if (level === 'day') conclusion = `今日重点看${shortPalace(dayPalace) || '当天'}，适合短决策与对照记录。`;
   if (level === 'hour') conclusion = `此刻看${shortPalace(hourPalace) || '时辰'}，当作时机提示，不必写成人生判决。`;

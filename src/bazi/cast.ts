@@ -78,6 +78,7 @@ type EightCharLike = {
   getDayGan: () => string;
   getDayZhi: () => string;
   getYearZhi: () => string;
+  getMonthZhi?: () => string;
 };
 
 function splitGz(gz: string): { stem: string; branch: string } {
@@ -129,18 +130,29 @@ function emptyPillar(key: PillarCell['key'], title: string): PillarCell {
 
 function decorateShensha(
   pillar: PillarCell,
-  dayStem: string,
-  yearBranch: string,
-  dayBranch: string,
+  ctx: {
+    dayStem: string;
+    yearBranch: string;
+    dayBranch: string;
+    monthBranch: string;
+    yearStem: string;
+    yearNayin: string;
+    dayGz: string;
+  },
 ): PillarCell {
   if (pillar.empty) return pillar;
   return {
     ...pillar,
     shensha: shenshaForBranch({
       branch: pillar.branch,
-      dayStem,
-      yearBranch,
-      dayBranch,
+      stem: pillar.stem,
+      dayStem: ctx.dayStem,
+      yearBranch: ctx.yearBranch,
+      dayBranch: ctx.dayBranch,
+      monthBranch: ctx.monthBranch,
+      yearStem: ctx.yearStem,
+      yearNayin: ctx.yearNayin,
+      dayGz: ctx.dayGz,
     }),
   };
 }
@@ -148,8 +160,14 @@ function decorateShensha(
 function liunianPillar(
   dayGan: string,
   year: number,
-  yearBranch: string,
-  dayBranch: string,
+  ctx: {
+    yearBranch: string;
+    dayBranch: string;
+    monthBranch: string;
+    yearStem: string;
+    yearNayin: string;
+    dayGz: string;
+  },
 ): PillarCell {
   const lunar = Solar.fromYmdHms(year, 6, 15, 12, 0, 0).getLunar();
   const gz =
@@ -171,7 +189,7 @@ function liunianPillar(
     ziZuo: ziZuoOf(stem, branch),
     shensha: [],
   };
-  return decorateShensha(cell, dayGan, yearBranch, dayBranch);
+  return decorateShensha(cell, { ...ctx, dayStem: dayGan });
 }
 
 function formatDt(d: Date): string {
@@ -227,6 +245,17 @@ export function castBaziChart(
   const m = splitGz(monthGz);
   const d = splitGz(dayGz);
   const t = splitGz(timeGz);
+  const monthBranch = ec.getMonthZhi?.() || m.branch;
+  const yearNayin = ec.getYearNaYin();
+  const shenshaCtx = {
+    dayStem: dayGan,
+    yearBranch,
+    dayBranch,
+    monthBranch,
+    yearStem: y.stem,
+    yearNayin,
+    dayGz: `${d.stem}${d.branch}`,
+  };
 
   let pillars: PillarCell[] = [
     decorateShensha(
@@ -238,15 +267,13 @@ export function castBaziChart(
         branch: y.branch,
         hideGan: [...ec.getYearHideGan()],
         hideGods: [...ec.getYearShiShenZhi()],
-        nayin: ec.getYearNaYin(),
+        nayin: yearNayin,
         xunKong: ec.getYearXunKong(),
         diShi: ec.getYearDiShi(),
         ziZuo: ziZuoOf(y.stem, y.branch),
         shensha: [],
       },
-      dayGan,
-      yearBranch,
-      dayBranch,
+      shenshaCtx,
     ),
     decorateShensha(
       {
@@ -263,9 +290,7 @@ export function castBaziChart(
         ziZuo: ziZuoOf(m.stem, m.branch),
         shensha: [],
       },
-      dayGan,
-      yearBranch,
-      dayBranch,
+      shenshaCtx,
     ),
     decorateShensha(
       {
@@ -282,9 +307,7 @@ export function castBaziChart(
         ziZuo: ziZuoOf(d.stem, d.branch),
         shensha: [],
       },
-      dayGan,
-      yearBranch,
-      dayBranch,
+      shenshaCtx,
     ),
   ];
 
@@ -305,9 +328,7 @@ export function castBaziChart(
           ziZuo: ziZuoOf(t.stem, t.branch),
           shensha: [],
         },
-        dayGan,
-        yearBranch,
-        dayBranch,
+        shenshaCtx,
       ),
     );
   } else {
@@ -315,7 +336,7 @@ export function castBaziChart(
   }
 
   if (includeLiunian) {
-    pillars.push(liunianPillar(dayGan, liunianYear, yearBranch, dayBranch));
+    pillars.push(liunianPillar(dayGan, liunianYear, shenshaCtx));
   }
 
   const relationBranches = pillars.filter((p) => !p.empty).map((p) => p.branch);

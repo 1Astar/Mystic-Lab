@@ -57,5 +57,8 @@ describe('ziwei cast', () => {
     expect(r.theater.decade.started).toBe(true);
     expect(r.theater.decade.ageTo).toBeGreaterThan(r.theater.decade.ageFrom);
     expect(r.soulPalace.name).toBe('命宫');
+    expect(r.clockLabel.length).toBeGreaterThan(8);
+    expect(r.trueSolarLabel.length).toBeGreaterThan(8);
+    expect(r.placeNote.length).toBeGreaterThan(4);
   });
 });

@@ -1,5 +1,5 @@
 /**
- * 流年深度解析：右侧抽屉（仿六爻解读笔记）
+ * 流年深度解析：右侧抽屉 + 可内嵌正文（仿六爻深度学习）
  */
 import type { PersonProfile } from '../life/types.ts';
 import {
@@ -33,15 +33,21 @@ function possiblesHeader(tense: YearDeepPack['tense']): string {
   return '可能表现';
 }
 
-function renderBody(pack: YearDeepPack, events: string[]): string {
+/** 推演正文（抽屉与「深度学习」Tab 共用） */
+export function renderYearDeepBodyHtml(
+  pack: YearDeepPack,
+  events: string[],
+  opts: { showVerify?: boolean } = {},
+): string {
+  const showVerify = opts.showVerify !== false;
   const chain = pack.chain
     .map(
       (step, i) => `
       <li class="ziwei-year-deep-step">
         ${i > 0 ? '<span class="ziwei-year-deep-arrow" aria-hidden="true">↓</span>' : ''}
         <button type="button" class="ziwei-year-deep-step-btn" data-chain-idx="${i}">
-          <strong>${escapeHtml(step.title)}</strong>
-          <span>${escapeHtml(step.detail)}</span>
+          <strong class="ziwei-year-deep-step-title">${escapeHtml(step.title)}</strong>
+          <span class="ziwei-year-deep-step-detail">${escapeHtml(step.detail)}</span>
         </button>
       </li>`,
     )
@@ -54,8 +60,8 @@ function renderBody(pack: YearDeepPack, events: string[]): string {
         <li>
           <button type="button" class="ziwei-year-deep-hua" data-hua="${escapeHtml(m.kind)}" data-star="${escapeHtml(m.star)}">
             <em class="is-hua-${escapeHtml(m.kind)}">化${escapeHtml(m.kind)}</em>
-            <strong>${escapeHtml(m.star)}${m.palace ? ` · ${escapeHtml(shortPalace(m.palace))}` : ''}</strong>
-            <span>${escapeHtml(m.text)}</span>
+            <strong class="ziwei-year-deep-hua-star">${escapeHtml(m.star)}${m.palace ? ` · ${escapeHtml(shortPalace(m.palace))}` : ''}</strong>
+            <span class="ziwei-year-deep-hua-text">${escapeHtml(m.text)}</span>
           </button>
         </li>`,
         )
@@ -80,6 +86,18 @@ function renderBody(pack: YearDeepPack, events: string[]): string {
         )
         .join('')
     : '<li class="ziwei-year-deep-muted">尚未记录。写下一件真实发生过的事，用来对照推演。</li>';
+
+  const verifySec = showVerify
+    ? `<section class="ziwei-year-deep-sec">
+      <h5>五、验证记录</h5>
+      <p class="ziwei-year-deep-tip">与「我的记录」同步。实际发生：</p>
+      <ul class="ziwei-year-deep-events" data-events>${eventList}</ul>
+      <form class="ziwei-year-deep-add" data-add-form>
+        <input type="text" name="event" maxlength="80" placeholder="添加事件（例如：换了工作内容）" autocomplete="off" />
+        <button type="submit">添加</button>
+      </form>
+    </section>`
+    : '';
 
   return `
     <section class="ziwei-year-deep-sec">
@@ -113,16 +131,68 @@ function renderBody(pack: YearDeepPack, events: string[]): string {
       <div class="ziwei-year-deep-related">${related}</div>
     </section>
 
-    <section class="ziwei-year-deep-sec">
-      <h5>五、验证记录</h5>
-      <p class="ziwei-year-deep-tip">与下方「我的记录」同步。实际发生：</p>
-      <ul class="ziwei-year-deep-events" data-events>${eventList}</ul>
-      <form class="ziwei-year-deep-add" data-add-form>
-        <input type="text" name="event" maxlength="80" placeholder="添加事件（例如：换了工作内容）" autocomplete="off" />
-        <button type="submit">添加</button>
-      </form>
-    </section>
+    ${verifySec}
   `;
+}
+
+export type BindYearDeepBodyOpts = {
+  root: ParentNode;
+  pack: YearDeepPack;
+  view: ZiweiChartView;
+  personId: string;
+  /** 事件变更后重绘（Tab 内用） */
+  onRepaint?: () => void;
+};
+
+export function bindYearDeepBody(opts: BindYearDeepBodyOpts): void {
+  const { root, pack, view, personId, onRepaint } = opts;
+
+  const openTerm = (focus: LearnFocus): void => {
+    openZiweiLearnSheet({
+      view,
+      focus,
+      onOpenChart: () => undefined,
+    });
+  };
+
+  root.querySelectorAll<HTMLButtonElement>('[data-chain-idx]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.chainIdx);
+      const step = pack.chain[idx];
+      if (step?.focus) openTerm(step.focus);
+    });
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('[data-hua]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      openTerm({
+        kind: 'mutagen',
+        term: `化${btn.dataset.hua ?? ''}`,
+        starName: btn.dataset.star,
+      });
+    });
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('[data-palace]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      openTerm({ kind: 'palace', palaceName: btn.dataset.palace });
+    });
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('[data-del]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      removeYearVerifyEvent(personId, pack.year, Number(btn.dataset.del));
+      onRepaint?.();
+    });
+  });
+
+  root.querySelector<HTMLFormElement>('[data-add-form]')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const input = form.elements.namedItem('event') as HTMLInputElement | null;
+    addYearVerifyEvent(personId, pack.year, input?.value ?? '');
+    onRepaint?.();
+  });
 }
 
 export type OpenZiweiYearDeepOpts = {
@@ -153,6 +223,7 @@ export function openZiweiYearDeepDrawer(opts: OpenZiweiYearDeepOpts): void {
   drawer.setAttribute('aria-label', `${pack.year}年${titleLevel}推演`);
 
   function paint(): void {
+    events = listYearVerifyEvents(opts.person.id, pack.year);
     drawer.innerHTML = `
       <div class="ziwei-year-deep-backdrop" data-deep-close></div>
       <div class="ziwei-year-deep-panel">
@@ -163,59 +234,19 @@ export function openZiweiYearDeepDrawer(opts: OpenZiweiYearDeepOpts): void {
           </div>
           <button type="button" class="ziwei-year-deep-x" data-deep-close aria-label="关闭">×</button>
         </header>
-        <div class="ziwei-year-deep-body">${renderBody(pack, events)}</div>
+        <div class="ziwei-year-deep-body">${renderYearDeepBodyHtml(pack, events)}</div>
       </div>`;
 
     drawer.querySelectorAll('[data-deep-close]').forEach((el) => {
       el.addEventListener('click', close);
     });
 
-    drawer.querySelectorAll<HTMLButtonElement>('[data-chain-idx]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.chainIdx);
-        const step = pack.chain[idx];
-        if (step?.focus) openTerm(step.focus);
-      });
-    });
-
-    drawer.querySelectorAll<HTMLButtonElement>('[data-hua]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        openTerm({
-          kind: 'mutagen',
-          term: `化${btn.dataset.hua ?? ''}`,
-          starName: btn.dataset.star,
-        });
-      });
-    });
-
-    drawer.querySelectorAll<HTMLButtonElement>('[data-palace]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        openTerm({ kind: 'palace', palaceName: btn.dataset.palace });
-      });
-    });
-
-    drawer.querySelectorAll<HTMLButtonElement>('[data-del]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        events = removeYearVerifyEvent(opts.person.id, pack.year, Number(btn.dataset.del));
-        paint();
-      });
-    });
-
-    drawer.querySelector<HTMLFormElement>('[data-add-form]')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const form = e.currentTarget as HTMLFormElement;
-      const input = form.elements.namedItem('event') as HTMLInputElement | null;
-      const text = input?.value ?? '';
-      events = addYearVerifyEvent(opts.person.id, pack.year, text);
-      paint();
-    });
-  }
-
-  function openTerm(focus: LearnFocus): void {
-    openZiweiLearnSheet({
+    bindYearDeepBody({
+      root: drawer,
+      pack,
       view: opts.view,
-      focus,
-      onOpenChart: () => undefined,
+      personId: opts.person.id,
+      onRepaint: paint,
     });
   }
 

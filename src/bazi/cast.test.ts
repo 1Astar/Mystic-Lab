@@ -166,6 +166,100 @@ describe('shensha & zizuo', () => {
     ).not.toContain('劫煞');
   });
 
+  it('marks 天德/月德 from month branch (need stem)', () => {
+    // 寅月天德见丁；月德见丙
+    expect(
+      shenshaForBranch({
+        branch: '子',
+        stem: '丁',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '子',
+        monthBranch: '寅',
+      }),
+    ).toContain('天德');
+    expect(
+      shenshaForBranch({
+        branch: '申',
+        stem: '甲',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '子',
+        monthBranch: '卯',
+      }),
+    ).toContain('天德');
+    expect(
+      shenshaForBranch({
+        branch: '午',
+        stem: '丙',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '子',
+        monthBranch: '寅',
+      }),
+    ).toContain('月德');
+  });
+
+  it('marks MORE list stars: 金舆/咸池/灾煞/亡神/白虎/吊客/破碎', () => {
+    expect(
+      shenshaForBranch({
+        branch: '辰',
+        dayStem: '甲',
+        yearBranch: '酉',
+        dayBranch: '子',
+      }),
+    ).toContain('金舆');
+    expect(
+      shenshaForBranch({
+        branch: '酉',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toEqual(expect.arrayContaining(['桃花', '咸池']));
+    expect(
+      shenshaForBranch({
+        branch: '午',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toContain('灾煞');
+    expect(
+      shenshaForBranch({
+        branch: '亥',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toContain('亡神');
+    // 午年：白虎寅(+8)、吊客辰(-2)
+    expect(
+      shenshaForBranch({
+        branch: '寅',
+        dayStem: '甲',
+        yearBranch: '午',
+        dayBranch: '子',
+      }),
+    ).toContain('白虎');
+    expect(
+      shenshaForBranch({
+        branch: '辰',
+        dayStem: '甲',
+        yearBranch: '午',
+        dayBranch: '子',
+      }),
+    ).toContain('吊客');
+    expect(
+      shenshaForBranch({
+        branch: '酉',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).toContain('破碎');
+  });
+
   it('returns changsheng label', () => {
     expect(ziZuoOf('甲', '亥')).toMatch(/长生|沐浴|冠带|临官|帝旺|衰|病|死|墓|绝|胎|养/);
   });

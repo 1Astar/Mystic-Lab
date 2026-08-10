@@ -197,7 +197,8 @@ export function renderLabHome(root: HTMLElement): () => void {
   return () => {
     stars.remove();
     document.querySelector('.lab-guide-modal')?.remove();
-    document.querySelector('.person-switch-sheet')?.remove();
+    document.querySelector('.person-switch-dropdown')?.remove();
+    document.querySelector('[data-person-drop-backdrop]')?.remove();
     document.querySelector('[data-lab-me-drawer]')?.remove();
     document.querySelector('.ai-settings-modal')?.remove();
   };

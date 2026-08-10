@@ -636,7 +636,7 @@ export function renderHexGuideNotesHtml(pack: HexGuidePack): string {
 
   return `
     <div class="ly-guide-notes" data-hex-guide-notes>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="探索解读笔记">
+      <div class="ly-note-mini-tabs" role="tablist" aria-label="探索深度学习">
         <button type="button" class="ly-note-mini-tab is-active" data-guide-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
         <button type="button" class="ly-note-mini-tab" data-guide-tab="dress" role="tab" aria-selected="false">专业排盘</button>
         <button type="button" class="ly-note-mini-tab" data-guide-tab="books" role="tab" aria-selected="false">古籍解析</button>

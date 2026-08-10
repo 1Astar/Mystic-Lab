@@ -4,6 +4,8 @@ import './styles/module-themes.css';
 import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
 import './styles/share.css';
+/** 最后加载：保证主题阅读面覆盖硬编码色 */
+import './styles/theme-reading.css';
 import { initTheme } from './theme/theme.ts';
 import { renderLabHome } from './pages/lab-home.ts';
 import {
@@ -181,6 +183,23 @@ registerRoute('/ziwei/codex', () => {
   const q = location.search || '';
   navigate(`/ziwei/tujian${q}`);
 });
+
+const mirrorStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/mirror.css'),
+];
+registerRoute(
+  '/mirror',
+  lazy(() => import('./pages/mirror-home.ts'), 'renderMirrorHome', mirrorStyles),
+);
+registerRoute(
+  '/mirror/theme',
+  lazy(() => import('./pages/mirror-theme.ts'), 'renderMirrorTheme', mirrorStyles),
+);
+registerRoute(
+  '/wardrobe',
+  lazy(() => import('./pages/wardrobe-home.ts'), 'renderWardrobeHome', mirrorStyles),
+);
 
 registerRoute(
   '/life',

@@ -19,6 +19,11 @@ export type PalaceSnap = {
   majors: StarSnap[];
   minors: StarSnap[];
   adjectives: StarSnap[];
+  /**
+   * 长生 / 博士 / 将前 / 岁前 十二神（每宫各一）
+   * 盘面可点开释义
+   */
+  series?: Array<{ kind: 'changsheng' | 'boshi' | 'jiangqian' | 'suiqian'; name: string }>;
   /** 虚岁大限起止，来自 iztro palace.decadal.range */
   decadalRange?: [number, number];
   /** 大限天干地支 */
@@ -51,6 +56,8 @@ export type AnnualAdvice = {
   advice: string;
   traditional: string;
   forecastGuide: string;
+  /** 神煞叠读（流年） */
+  shenshaLine?: string;
 };
 
 export type SoulCombo = {
@@ -79,6 +86,21 @@ export type DecadeAdvice = {
   traditional: string;
 };
 
+export type DeepShenshaNote = {
+  name: string;
+  palace: string;
+  epithet: string;
+  /** 一句落点摘要 */
+  line: string;
+  /** 加厚正文 */
+  body: string;
+  /** 挂到哪些人生四要素 */
+  pillarIds: PillarId[];
+  pillarLabels: string[];
+  /** 与流年焦点相关时的加一句 */
+  annualHook?: string;
+};
+
 export type ZiweiTheater = {
   headline: string;
   pillars: TheaterPillar[];
@@ -88,11 +110,19 @@ export type ZiweiTheater = {
   litMajorStars: MajorStarId[];
   soulCombo: SoulCombo;
   spotlightStar: string;
+  /** 深度再筛：最值得讲的几条神煞 */
+  shenshaHighlights: DeepShenshaNote[];
 };
 
 export type ZiweiChartView = {
   solarDate: string;
   timeLabel: string;
+  /** 钟表时刻 YYYY-M-D H:MM */
+  clockLabel: string;
+  /** 真太阳时 YYYY-M-D H:MM */
+  trueSolarLabel: string;
+  /** 出生地解析说明 */
+  placeNote: string;
   genderLabel: string;
   soul: string;
   body: string;

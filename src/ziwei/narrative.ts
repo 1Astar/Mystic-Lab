@@ -1,8 +1,15 @@
 import { getStarLore, isMajorStar, type MajorStarId } from './stars.ts';
+import {
+  buildDeepShenshaNotes,
+  formatAnnualShenshaLine,
+  formatShenshaForPillarBody,
+  shenshaNotesForPillar,
+} from './shensha-deep.ts';
 import type {
   AnnualAdvice,
   ComfortNote,
   DecadeAdvice,
+  DeepShenshaNote,
   PalaceSnap,
   SoulCombo,
   TheaterPillar,
@@ -127,6 +134,7 @@ function narrativeForPalace(p: PalaceSnap | undefined, role: string): string {
 function buildPillar(
   def: (typeof PILLAR_DEFS)[number],
   palaces: PalaceSnap[],
+  shenshaNotes: DeepShenshaNote[] = [],
 ): TheaterPillar {
   const resolved = def.palaceNames.map((n) => ({
     key: n,
@@ -159,6 +167,11 @@ function buildPillar(
       )
       .join('\n\n');
   }
+
+  const shenshaBlock = formatShenshaForPillarBody(
+    shenshaNotesForPillar(shenshaNotes, def.id, 2),
+  );
+  if (shenshaBlock) body = `${body}\n\n${shenshaBlock}`;
 
   const traditional = resolved
     .map(({ key, palace }) => {
@@ -281,6 +294,7 @@ export function buildAnnual(opts: {
   nextYearDateStr: string;
   astrolabe: { horoscope: (date: string) => { yearly?: HoroscopeYearly } };
   palaces: PalaceSnap[];
+  shenshaNotes?: DeepShenshaNote[];
 }): AnnualAdvice {
   const yearly = opts.astrolabe.horoscope(opts.dateStr).yearly;
   const nextY = opts.astrolabe.horoscope(opts.nextYearDateStr).yearly;
@@ -326,6 +340,8 @@ export function buildAnnual(opts: {
   if (luStar) advice += `流年禄在${luStar}，那里更容易有实质推进。`;
   if (jiStar) advice += `流年忌在${jiStar}，那里适合复盘，不适合硬刚。`;
 
+  const shenshaLine = formatAnnualShenshaLine(opts.shenshaNotes ?? []);
+
   const nextMut = nextY?.mutagen ?? [];
   const nextLine =
     nextMut.length > 0
@@ -355,8 +371,12 @@ export function buildAnnual(opts: {
       `流年：${opts.year}（${yearly?.heavenlyStem ?? ''}${yearly?.earthlyBranch ?? ''}）`,
       `四化：${mutagenLine}`,
       `关注：${focus.join('、') || '—'}`,
-    ].join('\n'),
+      shenshaLine ? `神煞叠读：${shenshaLine}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n'),
     forecastGuide,
+    shenshaLine: shenshaLine || undefined,
   };
 }
 
@@ -465,7 +485,37 @@ export function buildTheater(opts: {
     };
   };
 }): ZiweiTheater {
-  const pillars = PILLAR_DEFS.map((d) => buildPillar(d, opts.palaces));
+  const yearlyPreview = opts.astrolabe.horoscope(opts.horoscopeDate).yearly;
+  const yearFocus: string[] = [];
+  for (const starName of yearlyPreview?.mutagen ?? []) {
+    const hit = opts.palaces.find(
+      (p) =>
+        p.majors.some((s) => s.name === starName) ||
+        p.minors.some((s) => s.name === starName),
+    );
+    if (hit && !yearFocus.includes(hit.name)) yearFocus.push(hit.name);
+  }
+  const yearSoulPalace = yearlyPreview?.palaceNames?.[4];
+  if (yearSoulPalace && !yearFocus.includes(yearSoulPalace)) {
+    yearFocus.unshift(yearSoulPalace);
+  }
+
+  const shenshaHighlights = buildDeepShenshaNotes(
+    {
+      palaces: opts.palaces,
+      soulPalace: opts.soulPalace,
+      bodyPalace: opts.bodyPalace,
+    },
+    {
+      limit: 5,
+      focusPalaces: yearFocus,
+      yearSoulPalace,
+    },
+  );
+
+  const pillars = PILLAR_DEFS.map((d) =>
+    buildPillar(d, opts.palaces, shenshaHighlights),
+  );
   const headline = buildHeadline({
     soulPalace: opts.soulPalace,
     bodyPalace: opts.bodyPalace,
@@ -479,6 +529,7 @@ export function buildTheater(opts: {
     nextYearDateStr: `${opts.year + 1}-6-15`,
     astrolabe: opts.astrolabe,
     palaces: opts.palaces,
+    shenshaNotes: shenshaHighlights,
   });
   const decade = buildDecade({
     dateStr: opts.horoscopeDate,
@@ -509,5 +560,6 @@ export function buildTheater(opts: {
     litMajorStars: [...lit],
     soulCombo,
     spotlightStar,
+    shenshaHighlights,
   };
 }

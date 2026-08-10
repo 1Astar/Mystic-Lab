@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -12,6 +12,7 @@ import {
 } from '../life/storage.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
 import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
+import { mountBirthTimeMetaField } from '../ui/birth-time-meta-field.ts';
 import { codexProgress } from '../ziwei/codex.ts';
 import {
   loadZiweiIntent,
@@ -96,13 +97,14 @@ export function renderZiweiHome(root: HTMLElement): () => void {
             : ''
         }
         <div id="ziwei-birth-dt-slot" class="life-birth-row"></div>
+        <div id="ziwei-birth-meta-slot"></div>
         <label class="life-field life-field-full">
           <span>出生地</span>
           <input
             name="birthPlace"
             id="ziwei-birth-place"
             type="text"
-            placeholder="如 成都（可选）"
+            placeholder="如 成都（用于真太阳时）"
             value="${escapeHtml(person.birthPlace)}"
           />
         </label>
@@ -159,6 +161,29 @@ export function renderZiweiHome(root: HTMLElement): () => void {
         }
       },
     });
+
+    const metaSlot = page.querySelector<HTMLElement>('#ziwei-birth-meta-slot');
+    if (metaSlot) {
+      mountBirthTimeMetaField({
+        host: metaSlot,
+        initial: {
+          birthTimeAccuracy: person.birthTimeAccuracy,
+          birthTimeSource: person.birthTimeSource,
+        },
+        onChange: (meta) => {
+          updateBirthFields({
+            birthYear: person.birthYear,
+            birthMonth: person.birthMonth,
+            birthDay: person.birthDay,
+            birthHour: person.birthHour,
+            birthPlace: person.birthPlace,
+            birthTimeAccuracy: meta.birthTimeAccuracy,
+            birthTimeSource: meta.birthTimeSource,
+          });
+          person = getActivePerson();
+        },
+      });
+    }
 
     page.querySelector('#ziwei-birth-place')?.addEventListener('change', () => {
       const place =

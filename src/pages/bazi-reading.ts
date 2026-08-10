@@ -32,6 +32,7 @@ import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
 import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
 import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
 import { buildBaziPageFaq } from '../bazi/page-faq.ts';
+import { applyBaziChartAura, clearBaziChartAura } from '../bazi/page-aura.ts';
 import { wuxingClass } from '../bazi/elements.ts';
 
 const Q_KEY = 'mystic.bazi.reading.q';
@@ -64,10 +65,6 @@ export function renderBaziReading(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
 
-  const store = loadLifeStore();
-  const person = getActivePerson();
-  const ready = hasBirthInfo(store.profile) && Boolean(store.profile.birthYear.trim());
-
   const page = document.createElement('div');
   page.className = 'page life-page bazi-reading-page';
   mountEnvBanner(page);
@@ -98,7 +95,12 @@ export function renderBaziReading(root: HTMLElement): () => void {
   }
 
   function paint(): void {
+    const store = loadLifeStore();
+    const person = getActivePerson();
+    const ready = hasBirthInfo(store.profile) && Boolean(store.profile.birthYear.trim());
+
     if (!ready) {
+      clearBaziChartAura(page);
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 返回八字</button>
         <header class="life-header">
@@ -115,6 +117,11 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </section>
       `;
       bindNav();
+      mountLabReadingTopbar(page, {
+        backPath: '/',
+        backLabel: '← Lab',
+        person: { onChange: () => paint() },
+      });
       return;
     }
 
@@ -124,6 +131,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
       gender: person.gender,
     });
     if ('error' in chartResult) {
+      clearBaziChartAura(page);
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 返回八字</button>
         <header class="life-header">
@@ -136,6 +144,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
       return;
     }
 
+    applyBaziChartAura(page, chartResult);
     const portrait = buildBaziPortrait(chartResult, {
       gender: person.gender,
     });
@@ -283,6 +292,11 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
       <div class="bazi-reading-actions">
         <button type="button" class="life-btn-primary" data-path="/bazi/chart">想看为什么？进入命盘解析 ›</button>
+        <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/bazi/rectify">
+          <strong>觉得不准？试试生时校准</strong>
+          <span>用大事件反推更贴近的时辰</span>
+          <em aria-hidden="true">›</em>
+        </button>
         <button type="button" class="life-btn-ghost" data-path="/bazi?edit=1">改出生信息</button>
       </div>
     `;
@@ -294,6 +308,9 @@ export function renderBaziReading(root: HTMLElement): () => void {
     mountLabReadingTopbar(page, {
       backPath: '/',
       backLabel: '← Lab',
+      person: {
+        onChange: () => paint(),
+      },
     });
 
     const shareDraft = () => {
@@ -315,11 +332,14 @@ export function renderBaziReading(root: HTMLElement): () => void {
       tujianPath: '/bazi/tujian',
       tujianLabel: '八字图鉴',
       draftShare: shareDraft,
+      notesSystem: 'bazi',
+      notesContext: pack.verdict.headline,
+      notesLabel: '深度学习',
       deepLabel: '深度解读',
       onDeep: () => {
         openLabDeepSheet({
           system: 'bazi',
-          title: `${person.nickname || '我'}的命盘`,
+          title: `${getActivePerson().nickname || '我'}的命盘`,
           initialTab: 'ask',
           presets: buildBaziPageFaq(chartResult, { question }),
           answerConcept: answerBaziConcept,
@@ -354,9 +374,11 @@ export function renderBaziReading(root: HTMLElement): () => void {
   root.appendChild(page);
 
   return () => {
+    clearBaziChartAura(page);
     stars.remove();
     disposeFloat?.();
     document.querySelector('[data-lab-float-dock]')?.remove();
     document.querySelector('.lab-deep-sheet')?.remove();
+    document.querySelector('.lab-notes-sheet')?.remove();
   };
 }

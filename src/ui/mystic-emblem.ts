@@ -1,72 +1,104 @@
 export type MysticEmblemKind = 'heart' | 'tarot' | 'star' | 'plum' | 'hex' | 'cosmos' | 'bazi';
 
+/** 统一色：主金 + 透明度层次，跟主题走 */
+const G = 'var(--emblem-gold, #e0b86a)';
+const SW = 'var(--emblem-stroke, 2)';
+
 const HEART_SVG = (uid: string) => `
   <svg class="mystic-emblem-svg mystic-heart-shape" viewBox="0 0 100 100" aria-hidden="true">
     <defs>
       <linearGradient id="${uid}-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#ffd6a6"/>
-        <stop offset="45%" stop-color="#e8a0c8"/>
-        <stop offset="100%" stop-color="#9b7fd4"/>
+        <stop offset="0%" stop-color="${G}" stop-opacity="1"/>
+        <stop offset="100%" stop-color="${G}" stop-opacity="0.55"/>
       </linearGradient>
-      <filter id="${uid}-glow">
-        <feGaussianBlur stdDeviation="2" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
     </defs>
-    <path filter="url(#${uid}-glow)" fill="url(#${uid}-grad)" d="M50 88 C22 62 8 42 22 24 C32 14 44 22 50 30 C56 22 68 14 78 24 C92 42 78 62 50 88 Z"/>
+    <path fill="url(#${uid}-grad)" d="M50 88 C22 62 8 42 22 24 C32 14 44 22 50 30 C56 22 68 14 78 24 C92 42 78 62 50 88 Z"/>
   </svg>`;
 
+/** 塔罗 · 叠放卡牌 */
+const TAROT_SVG = `
+  <svg class="mystic-emblem-svg" viewBox="0 0 100 100" aria-hidden="true">
+    <g fill="none" stroke="${G}" stroke-width="${SW}" stroke-linejoin="round">
+      <rect x="18" y="22" width="38" height="56" rx="4" transform="rotate(-14 37 50)" opacity="0.55"/>
+      <rect x="32" y="18" width="38" height="56" rx="4" transform="rotate(8 51 46)" opacity="0.75"/>
+      <rect x="40" y="20" width="38" height="56" rx="4"/>
+    </g>
+    <path fill="${G}" d="M59 40 L62.2 46.5 L69.5 47.2 L64 52 L65.5 59.2 L59 55.5 L52.5 59.2 L54 52 L48.5 47.2 L55.8 46.5 Z"/>
+  </svg>`;
+
+/** 小六壬 · 掐指之手 */
 const STAR_SVG = `
   <svg class="mystic-emblem-svg" viewBox="0 0 100 100" aria-hidden="true">
-    <polygon fill="none" stroke="#ffd6a6" stroke-width="2"
-      points="50,8 58,38 90,38 64,56 74,88 50,68 26,88 36,56 10,38 42,38"/>
-    <circle cx="50" cy="50" r="6" fill="#ffd6a6" opacity="0.9"/>
+    <g fill="none" stroke="${G}" stroke-width="${SW}" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M38 58 C34 48 36 36 42 30 C45 26 49 28 50 34 L50 52"/>
+      <path d="M50 48 C50 34 52 22 56 20 C60 18 62 24 62 32 L62 52"/>
+      <path d="M62 50 C64 36 68 24 72 24 C76 24 78 30 76 40 L70 58"/>
+      <path d="M36 58 C28 56 24 62 26 70 C30 82 42 88 56 86 C68 84 78 76 78 64 L76 58"/>
+      <path d="M34 62 C30 68 32 76 38 78"/>
+    </g>
+    <circle cx="52" cy="66" r="5" fill="none" stroke="${G}" stroke-width="${SW}"/>
+    <circle cx="52" cy="66" r="2" fill="${G}"/>
   </svg>`;
 
+/** 梅花 · 五瓣梅花 */
 const PLUM_SVG = `
   <svg class="mystic-emblem-svg" viewBox="0 0 100 100" aria-hidden="true">
-    <circle cx="50" cy="52" r="14" fill="none" stroke="#ffd6a6" stroke-width="1.5"/>
-    <path fill="#ffd6a6" opacity="0.15" d="M50 18 C38 30 28 42 32 58 C36 72 50 78 50 78 C50 78 64 72 68 58 C72 42 62 30 50 18 Z"/>
-    <circle cx="50" cy="50" r="5" fill="#ffd6a6"/>
-    <path fill="none" stroke="#ffd6a6" stroke-width="1.2" d="M50 64 L50 82 M42 70 L50 82 L58 70"/>
+    <g fill="${G}" fill-opacity="0.18" stroke="${G}" stroke-width="${SW}">
+      <ellipse cx="50" cy="28" rx="12" ry="14"/>
+      <ellipse cx="72" cy="42" rx="12" ry="14" transform="rotate(72 72 42)"/>
+      <ellipse cx="64" cy="68" rx="12" ry="14" transform="rotate(144 64 68)"/>
+      <ellipse cx="36" cy="68" rx="12" ry="14" transform="rotate(-144 36 68)"/>
+      <ellipse cx="28" cy="42" rx="12" ry="14" transform="rotate(-72 28 42)"/>
+    </g>
+    <circle cx="50" cy="50" r="8" fill="${G}"/>
+    <circle cx="50" cy="50" r="3.5" fill="none" stroke="${G}" stroke-width="1.2" opacity="0.5"/>
   </svg>`;
 
-const TAROT_INNER = `
-  <div class="mystic-tarot-core">
-    <span class="mystic-tarot-symbol">✦</span>
-    <div class="mystic-tarot-shimmer"></div>
-  </div>`;
-
+/** 六爻 · 铜钱（方孔钱） */
 const HEX_SVG = `
-  <svg class="mystic-emblem-svg mystic-hex-lines" viewBox="0 0 48 56" aria-hidden="true">
-    <line x1="8" y1="6" x2="40" y2="6"/>
-    <line x1="8" y1="16" x2="22" y2="16"/><line x1="26" y1="16" x2="40" y2="16"/>
-    <line x1="8" y1="26" x2="40" y2="26"/>
-    <line x1="8" y1="36" x2="22" y2="36"/><line x1="26" y1="36" x2="40" y2="36"/>
-    <line x1="8" y1="46" x2="40" y2="46"/>
+  <svg class="mystic-emblem-svg mystic-hex-coin" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="34" fill="none" stroke="${G}" stroke-width="${SW}"/>
+    <circle cx="50" cy="50" r="28" fill="none" stroke="${G}" stroke-width="1.2" opacity="0.45"/>
+    <rect x="40" y="40" width="20" height="20" rx="1.5" fill="none" stroke="${G}" stroke-width="${SW}"/>
+    <g fill="${G}" opacity="0.85">
+      <circle cx="50" cy="24" r="2.2"/>
+      <circle cx="76" cy="50" r="2.2"/>
+      <circle cx="50" cy="76" r="2.2"/>
+      <circle cx="24" cy="50" r="2.2"/>
+    </g>
   </svg>`;
 
+/** 紫微 · 星系盘（主星 + 轨道） */
 const COSMOS_SVG = `
   <svg class="mystic-emblem-svg" viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="50" cy="50" rx="34" ry="18" fill="none" stroke="#ffd6a6" stroke-width="1.2" opacity="0.7"/>
-    <ellipse cx="50" cy="50" rx="18" ry="34" fill="none" stroke="#9b7fd4" stroke-width="1.2" opacity="0.75"/>
-    <circle cx="50" cy="50" r="7" fill="#ffd6a6" opacity="0.95"/>
-    <circle cx="78" cy="42" r="3" fill="#e8b4d0"/>
-    <circle cx="28" cy="62" r="2.5" fill="#ffd6a6"/>
-    <circle cx="62" cy="78" r="2" fill="#c9e0ff"/>
+    <circle cx="50" cy="50" r="32" fill="none" stroke="${G}" stroke-width="1.3" opacity="0.4"/>
+    <ellipse cx="50" cy="50" rx="30" ry="14" fill="none" stroke="${G}" stroke-width="${SW}" transform="rotate(-20 50 50)"/>
+    <ellipse cx="50" cy="50" rx="14" ry="28" fill="none" stroke="${G}" stroke-width="1.5" opacity="0.7" transform="rotate(25 50 50)"/>
+    <circle cx="50" cy="50" r="6" fill="${G}"/>
+    <circle cx="74" cy="42" r="3.5" fill="${G}" opacity="0.9"/>
+    <circle cx="30" cy="60" r="2.8" fill="${G}" opacity="0.75"/>
+    <circle cx="58" cy="76" r="2.2" fill="${G}" opacity="0.65"/>
   </svg>`;
 
-/** 四柱示意 */
+/** 八字 · 四柱简牍 */
 const BAZI_SVG = `
   <svg class="mystic-emblem-svg" viewBox="0 0 100 100" aria-hidden="true">
-    <rect x="14" y="22" width="16" height="56" rx="3" fill="none" stroke="#ffd6a6" stroke-width="1.5"/>
-    <rect x="34" y="22" width="16" height="56" rx="3" fill="none" stroke="#e8b4d0" stroke-width="1.5"/>
-    <rect x="54" y="22" width="16" height="56" rx="3" fill="none" stroke="#9b7fd4" stroke-width="1.5"/>
-    <rect x="74" y="22" width="16" height="56" rx="3" fill="none" stroke="#ffd6a6" stroke-width="1.5" opacity="0.85"/>
-    <circle cx="22" cy="50" r="3" fill="#ffd6a6"/>
-    <circle cx="42" cy="50" r="3" fill="#e8b4d0"/>
-    <circle cx="62" cy="50" r="3" fill="#9b7fd4"/>
-    <circle cx="82" cy="50" r="3" fill="#ffd6a6" opacity="0.85"/>
+    <g fill="none" stroke="${G}" stroke-width="${SW}" stroke-linejoin="round">
+      <rect x="14" y="20" width="15" height="60" rx="3"/>
+      <rect x="33" y="20" width="15" height="60" rx="3"/>
+      <rect x="52" y="20" width="15" height="60" rx="3"/>
+      <rect x="71" y="20" width="15" height="60" rx="3"/>
+    </g>
+    <g fill="${G}">
+      <rect x="17" y="30" width="9" height="3" rx="1" opacity="0.85"/>
+      <rect x="36" y="30" width="9" height="3" rx="1" opacity="0.7"/>
+      <rect x="55" y="30" width="9" height="3" rx="1" opacity="0.85"/>
+      <rect x="74" y="30" width="9" height="3" rx="1" opacity="0.7"/>
+      <rect x="17" y="42" width="9" height="3" rx="1" opacity="0.55"/>
+      <rect x="36" y="42" width="9" height="3" rx="1" opacity="0.85"/>
+      <rect x="55" y="42" width="9" height="3" rx="1" opacity="0.55"/>
+      <rect x="74" y="42" width="9" height="3" rx="1" opacity="0.85"/>
+    </g>
   </svg>`;
 
 let emblemUid = 0;
@@ -78,17 +110,24 @@ function nextUid(): string {
 
 function innerFor(kind: MysticEmblemKind): string {
   switch (kind) {
-    case 'heart': return HEART_SVG(nextUid());
-    case 'star': return STAR_SVG;
-    case 'plum': return PLUM_SVG;
-    case 'tarot': return TAROT_INNER;
-    case 'hex': return HEX_SVG;
-    case 'cosmos': return COSMOS_SVG;
-    case 'bazi': return BAZI_SVG;
+    case 'heart':
+      return HEART_SVG(nextUid());
+    case 'star':
+      return STAR_SVG;
+    case 'plum':
+      return PLUM_SVG;
+    case 'tarot':
+      return TAROT_SVG;
+    case 'hex':
+      return HEX_SVG;
+    case 'cosmos':
+      return COSMOS_SVG;
+    case 'bazi':
+      return BAZI_SVG;
   }
 }
 
-/** 返回装饰 emblem HTML（心 / 塔罗 / 星 / 梅花 / 六爻 / 宇宙 / 八字） */
+/** 返回装饰 emblem HTML（心 / 塔罗牌 / 手 / 梅花 / 铜钱 / 星系 / 四柱） */
 export function mysticEmblemHtml(kind: MysticEmblemKind, size: 'sm' | 'md' | 'lg' = 'md'): string {
   const pulse = kind === 'heart' ? ' mystic-emblem-pulse' : '';
   return `

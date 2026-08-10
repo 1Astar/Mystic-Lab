@@ -7,6 +7,9 @@ import { TERM_CATEGORY_CLASS } from '../ziwei/term-glossary.ts';
 import type { ZiweiChartView } from '../ziwei/types.ts';
 import { navigate } from '../router.ts';
 
+/** 当前释义弹窗的 Escape 监听，切换词条时 abort 防泄漏 */
+let learnSheetEsc: AbortController | null = null;
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -90,10 +93,10 @@ function starPanelHtml(
         <pre class="ziwei-learn-body">${escapeHtml(model.inChart)}</pre>
       </section>
       ${statusRow}
-      <details class="ziwei-learn-fold">
-        <summary>传统含义</summary>
-        <pre class="ziwei-learn-body">${escapeHtml(model.traditional || '（暂无）')}</pre>
-      </details>
+      <section class="ziwei-learn-block is-layer-2">
+        <h3>传统含义</h3>
+        <pre class="ziwei-learn-body">${escapeHtml(model.traditional || '（本星暂无展开传统释义）')}</pre>
+      </section>
       <section class="ziwei-learn-block is-layer-explore">
         <h3>相关探索</h3>
         <div class="ziwei-learn-chips">${model.related.map(relatedChip).join('') || '<span class="ziwei-learn-term">暂无</span>'}</div>
@@ -111,6 +114,44 @@ function defaultPanelHtml(
         <p class="ziwei-learn-map-row"><span class="is-dui">对宫</span>${escapeHtml(model.relationMap.opposite)}</p>
         <p class="ziwei-learn-map-note">${escapeHtml(model.relationMap.note)}</p>
       </div>`
+    : '';
+
+  const mutagenHtml = model.mutagenMap?.length
+    ? `<ul class="ziwei-learn-mutagen-map" aria-label="本盘四化对照">
+        ${model.mutagenMap
+          .map((row) => {
+            const starFocus = `data-learn-kind="star" data-learn-star="${escapeHtml(row.star)}"`;
+            return `<li class="ziwei-learn-mutagen-row">
+              <button type="button" class="ziwei-learn-mutagen-label is-${escapeHtml(row.label)}" data-learn-kind="mutagen" data-learn-term="${escapeHtml(row.label)}">${escapeHtml(row.label)}</button>
+              <div class="ziwei-learn-mutagen-meta">
+                <button type="button" class="ziwei-learn-mutagen-star" ${starFocus}>${escapeHtml(row.star)}</button>
+                <span class="ziwei-learn-mutagen-palace">${escapeHtml(row.palace)}</span>
+              </div>
+              <p class="ziwei-learn-mutagen-effect">${escapeHtml(row.effect)}</p>
+            </li>`;
+          })
+          .join('')}
+      </ul>`
+    : '';
+
+  const branchHtml = model.branchMap?.length
+    ? `<ul class="ziwei-learn-mutagen-map ziwei-learn-branch-map" aria-label="本宫地支关系对照">
+        ${model.branchMap
+          .map((row) => {
+            const kindTerm =
+              row.kind === '冲' ? '六冲' : row.kind === '合' ? '六合' : '刑';
+            return `<li class="ziwei-learn-mutagen-row">
+              <button type="button" class="ziwei-learn-mutagen-label is-branch-${escapeHtml(row.kind)}" data-learn-kind="structure" data-learn-term="${escapeHtml(kindTerm)}" data-learn-palace="${escapeHtml(row.fromPalace)}">${escapeHtml(row.label)}</button>
+              <div class="ziwei-learn-mutagen-meta">
+                <button type="button" class="ziwei-learn-mutagen-star" data-learn-kind="palace" data-learn-palace="${escapeHtml(row.fromPalace)}">${escapeHtml(row.from)}</button>
+                <span class="ziwei-learn-mutagen-palace">→</span>
+                <button type="button" class="ziwei-learn-mutagen-star" data-learn-kind="palace" data-learn-palace="${escapeHtml(row.toPalace)}">${escapeHtml(row.to)}</button>
+              </div>
+              <p class="ziwei-learn-mutagen-effect">${escapeHtml(row.effect)}</p>
+            </li>`;
+          })
+          .join('')}
+      </ul>`
     : '';
 
   return `
@@ -131,6 +172,8 @@ function defaultPanelHtml(
       <section class="ziwei-learn-block is-layer-3">
         <h3>在你的命盘里</h3>
         <pre class="ziwei-learn-body">${escapeHtml(model.inChart)}</pre>
+        ${mutagenHtml}
+        ${branchHtml}
         ${relationHtml}
       </section>
       <section class="ziwei-learn-block is-layer-4">
@@ -143,14 +186,17 @@ function defaultPanelHtml(
 /** 底部半屏学习抽屉：点哪里解释从哪里出；抽屉内继续探索 */
 export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
   document.querySelector('.ziwei-learn-sheet')?.remove();
+  learnSheetEsc?.abort();
+  learnSheetEsc = new AbortController();
 
   const model = buildLearnExplain(opts.view, opts.focus);
   opts.onFocusChange?.(opts.focus);
 
   const sheet = document.createElement('div');
-  sheet.className = `ziwei-learn-sheet is-half ${TERM_CATEGORY_CLASS[model.category]}`;
+  sheet.className = `ziwei-learn-sheet is-modal ${TERM_CATEGORY_CLASS[model.category]}`;
   sheet.setAttribute('role', 'dialog');
   sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-label', model.title);
 
   const body =
     model.category === 'star' ? starPanelHtml(model) : defaultPanelHtml(model);
@@ -158,9 +204,9 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
   sheet.innerHTML = `
     <button type="button" class="ziwei-learn-backdrop" data-learn-close aria-label="关闭"></button>
     <aside class="ziwei-learn-panel">
-      <div class="ziwei-learn-handle" aria-hidden="true"></div>
       ${body}
       <footer class="ziwei-learn-foot">
+        <button type="button" class="life-btn-ghost" data-learn-close>关闭</button>
         <button type="button" class="life-btn-primary" data-learn-chart>回到盘面看关系 ›</button>
       </footer>
     </aside>
@@ -171,12 +217,21 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
 
   const close = (): void => {
     sheet.classList.remove('is-visible');
+    learnSheetEsc?.abort();
+    learnSheetEsc = null;
     opts.onClose?.();
-    window.setTimeout(() => sheet.remove(), 280);
+    window.setTimeout(() => sheet.remove(), 240);
   };
 
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key === 'Escape') close();
+    },
+    { signal: learnSheetEsc.signal },
+  );
+
   const reopen = (focus: LearnFocus): void => {
-    // 同抽屉内切换，不闪关；直接重建
     openZiweiLearnSheet({ ...opts, focus });
   };
 
@@ -185,7 +240,9 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
   });
 
   sheet
-    .querySelectorAll<HTMLButtonElement>('.ziwei-learn-chip, .ziwei-learn-status-row')
+    .querySelectorAll<HTMLButtonElement>(
+      '.ziwei-learn-chip, .ziwei-learn-status-row, .ziwei-learn-mutagen-label, .ziwei-learn-mutagen-star',
+    )
     .forEach((btn) => {
       btn.addEventListener('click', () => {
         const focus = focusFromDataset(btn);
