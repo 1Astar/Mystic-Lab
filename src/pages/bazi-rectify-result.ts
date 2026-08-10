@@ -152,8 +152,6 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
         <ol class="bazi-rectify-rank">
           ${ranked
             .map((r, i) => {
-              const fbFor = (evId: string) =>
-                draft!.feedback[feedbackKey(r.candidate.branch, evId)] ?? '';
               return `
               <li class="bazi-rectify-rank-item ${i === 0 ? 'is-top' : ''}" data-branch="${escapeHtml(r.candidate.branch)}">
                 <h3>${i + 1}. ${escapeHtml(r.candidate.label)} · ${r.confidencePct}%</h3>
