@@ -4,6 +4,7 @@ import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 import { getActivePerson } from '../life/storage.ts';
+import { loadRectifyAdoption } from '../bazi/rectify-adoption.ts';
 import { castZiweiChart } from '../ziwei/cast.ts';
 import { collectUnlockIdsFromPalaces, unlockStarsFromChart } from '../ziwei/codex.ts';
 import { getStarLore } from '../ziwei/stars.ts';
@@ -341,6 +342,20 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         <p class="page-subtitle">${SYSTEM_POSITION.ziwei} · ${escapeHtml(view.fiveElementsClass)}</p>
         <button type="button" class="ziwei-edit-birth" id="ziwei-edit-birth">改出生信息</button>
       </header>
+
+      ${(() => {
+        const ad = loadRectifyAdoption();
+        if (!ad) return '';
+        const alts = ad.alternatives
+          .slice(0, 2)
+          .map((a) => `${a.branch}时 ${a.confidencePct}%`)
+          .join(' · ');
+        return `<aside class="bazi-rectify-adopt-banner" aria-label="暂定时辰">
+          <p><strong>当前采用：${escapeHtml(ad.label)}</strong> · 可信度${escapeHtml(ad.confidenceLabel)}（${ad.confidencePct}%）</p>
+          ${alts ? `<p>可选候选：${escapeHtml(alts)}</p>` : ''}
+          <p><button type="button" class="life-btn-ghost" data-path="/bazi/rectify">重新校准 ›</button></p>
+        </aside>`;
+      })()}
 
       ${decadeSectionHtml(view)}
 

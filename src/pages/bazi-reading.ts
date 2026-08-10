@@ -17,6 +17,7 @@ import {
   hasBirthInfo,
   loadLifeStore,
 } from '../life/storage.ts';
+import { loadRectifyAdoption } from '../bazi/rectify-adoption.ts';
 import { draftFromBazi } from '../share/drafts.ts';
 import {
   bindAnswerPackGestures,
@@ -220,6 +221,20 @@ export function renderBaziReading(root: HTMLElement): () => void {
         <h1 class="page-title">我的命盘</h1>
         <p class="page-subtitle">${SYSTEM_POSITION.bazi}</p>
       </header>
+
+      ${(() => {
+        const ad = loadRectifyAdoption();
+        if (!ad) return '';
+        const alts = ad.alternatives
+          .slice(0, 2)
+          .map((a) => `${a.branch}时 ${a.confidencePct}%`)
+          .join(' · ');
+        return `<aside class="bazi-rectify-adopt-banner" aria-label="暂定时辰">
+          <p><strong>当前采用：${escapeHtml(ad.label)}</strong> · 可信度${escapeHtml(ad.confidenceLabel)}（${ad.confidencePct}%）</p>
+          ${alts ? `<p>可选候选：${escapeHtml(alts)}</p>` : ''}
+          <p><button type="button" class="life-btn-ghost" data-path="/bazi/rectify">重新校准 ›</button></p>
+        </aside>`;
+      })()}
 
       <section class="bazi-sense-block bazi-sense-insight" aria-label="现实感悟">
         <p class="bazi-sense-kicker">✨ 你的现实感悟</p>
