@@ -1,6 +1,20 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/api/share",
+      "destination": "https://mystic-lab.pages.dev/api/share"
+    },
+    {
+      "source": "/api/share/:path*",
+      "destination": "https://mystic-lab.pages.dev/api/share/:path*"
+    },
+    {
+      "source": "/api/mystic/:path*",
+      "destination": "https://mystic-lab.pages.dev/api/mystic/:path*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
