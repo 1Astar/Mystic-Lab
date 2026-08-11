@@ -166,13 +166,83 @@ describe('share cover visual', () => {
   });
 
   it('picks lab invite poster from pool', async () => {
-    const { LAB_INVITE_POSTER_PATHS, pickLabInvitePosterPath } = await import(
-      './cover.ts'
-    );
-    expect(LAB_INVITE_POSTER_PATHS.length).toBeGreaterThanOrEqual(3);
+    const {
+      LAB_INVITE_POSTER_PATHS,
+      SYSTEM_SHARE_POSTER_PATHS,
+      pickLabInvitePosterPath,
+    } = await import('./cover.ts');
+    expect(LAB_INVITE_POSTER_PATHS.length).toBeGreaterThanOrEqual(2);
     expect(pickLabInvitePosterPath(() => 0)).toBe(LAB_INVITE_POSTER_PATHS[0]);
     expect(pickLabInvitePosterPath(() => 0.99)).toBe(
       LAB_INVITE_POSTER_PATHS[LAB_INVITE_POSTER_PATHS.length - 1],
     );
+    for (const p of SYSTEM_SHARE_POSTER_PATHS) {
+      expect(LAB_INVITE_POSTER_PATHS as readonly string[]).not.toContain(p);
+    }
+  });
+
+  it('home lab invite does not pin a system poster', async () => {
+    const { draftLabInvite } = await import('./drafts.ts');
+    const draft = draftLabInvite();
+    expect(draft.system).toBe('lab');
+    expect(draft.invitePosterPath).toBeUndefined();
+  });
+
+  it('ziwei draft pins dedicated share poster', async () => {
+    const { draftFromZiwei } = await import('./drafts.ts');
+    const { ZIWEI_SHARE_POSTER_PATH } = await import('./cover.ts');
+    const draft = draftFromZiwei({
+      headline: '命宫 · 紫微',
+      summary: '五行局 · 命宫紫微',
+    });
+    expect(draft.invitePosterPath).toBe(ZIWEI_SHARE_POSTER_PATH);
+    expect(ZIWEI_SHARE_POSTER_PATH).toBe('/share/ziwei-invite.png');
+  });
+
+  it('bazi draft pins dedicated share poster', async () => {
+    const { draftFromBazi } = await import('./drafts.ts');
+    const { BAZI_SHARE_POSTER_PATH } = await import('./cover.ts');
+    const draft = draftFromBazi({
+      dayMaster: '甲木',
+      pillarsLabel: '甲子 丙寅 戊辰 庚午',
+      summary: '日主甲木',
+    });
+    expect(draft.system).toBe('bazi');
+    expect(draft.invitePosterPath).toBe(BAZI_SHARE_POSTER_PATH);
+    expect(BAZI_SHARE_POSTER_PATH).toBe('/share/bazi-invite.png');
+  });
+
+  it('tarot draft pins dedicated share poster', async () => {
+    const { draftFromTarot } = await import('./drafts.ts');
+    const { TAROT_SHARE_POSTER_PATH } = await import('./cover.ts');
+    const { TAROT_DECK } = await import('../tarot/deck.ts');
+    const card = TAROT_DECK[0]!;
+    const draft = draftFromTarot({
+      cards: [{ card, reversed: false, position: '现状' }],
+      reading: {
+        summary: '先稳住再看',
+        cards: [],
+      } as never,
+      question: '测一事',
+    });
+    expect(draft.invitePosterPath).toBe(TAROT_SHARE_POSTER_PATH);
+    expect(TAROT_SHARE_POSTER_PATH).toBe('/share/tarot-invite.png');
+  });
+
+  it('liuyao draft pins dedicated share poster', async () => {
+    const { LIUYAO_SHARE_POSTER_PATH } = await import('./cover.ts');
+    const hex = HEXAGRAMS.find((h) => h.name === '乾')!;
+    const lines = linesFromHexagram(hex);
+    const throws = lines.map((bit) =>
+      bit === 1
+        ? facesToThrow(['obverse', 'obverse', 'reverse'])
+        : facesToThrow(['obverse', 'reverse', 'reverse']),
+    ) as YaoThrow[];
+    const draft = draftFromLiuyao({
+      cast: buildCastFromThrows(throws, 'coin'),
+      question: '测一事',
+    });
+    expect(draft.invitePosterPath).toBe(LIUYAO_SHARE_POSTER_PATH);
+    expect(LIUYAO_SHARE_POSTER_PATH).toBe('/share/liuyao-invite.png');
   });
 });

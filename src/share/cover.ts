@@ -21,16 +21,41 @@ export type ShareCoverSnap = Pick<
   aiText?: string;
   deepUrl?: string;
   qrDataUrl?: string;
+  /** 指定海报路径（如紫微）；优先于邀请池随机 */
+  invitePosterPath?: string;
   /** Lab 邀请海报（已转 data URL 时供导出） */
   invitePosterSrc?: string;
 };
 
-/** Lab 邀请氛围海报池（每次生成随机抽一张） */
+/**
+ * 主页「邀请分享」海报池：每次随机一张。
+ * 只放 Lab 通用图；各板块专用图（紫微/八字/六爻/塔罗）不得入池。
+ * lab-invite-01 已划给塔罗专用（tarot-invite），故不在此列。
+ */
 export const LAB_INVITE_POSTER_PATHS = [
   '/share/lab-invite.png',
-  '/share/lab-invite-01.png',
   '/share/lab-invite-02.png',
   '/share/lab-invite-03.png',
+] as const;
+
+/** 紫微分享 / 图鉴固定海报（不进主页随机池） */
+export const ZIWEI_SHARE_POSTER_PATH = '/share/ziwei-invite.png';
+
+/** 八字分享 / 图鉴固定海报（不进主页随机池） */
+export const BAZI_SHARE_POSTER_PATH = '/share/bazi-invite.png';
+
+/** 六爻分享固定海报（不进主页随机池） */
+export const LIUYAO_SHARE_POSTER_PATH = '/share/liuyao-invite.png';
+
+/** 塔罗分享固定海报（不进主页随机池；源自原 lab-invite-01） */
+export const TAROT_SHARE_POSTER_PATH = '/share/tarot-invite.png';
+
+/** 板块专用海报（主页邀请不得抽到） */
+export const SYSTEM_SHARE_POSTER_PATHS = [
+  ZIWEI_SHARE_POSTER_PATH,
+  BAZI_SHARE_POSTER_PATH,
+  LIUYAO_SHARE_POSTER_PATH,
+  TAROT_SHARE_POSTER_PATH,
 ] as const;
 
 export function pickLabInvitePosterPath(rand: () => number = Math.random): string {
@@ -222,9 +247,14 @@ function isLabInvite(snap: ShareCoverSnap): boolean {
   return snap.system === 'lab';
 }
 
+/** Lab 邀请，或已解析出满版海报（紫微 / 八字等） */
+function usesPosterFront(snap: ShareCoverSnap): boolean {
+  return isLabInvite(snap) || Boolean(snap.invitePosterSrc);
+}
+
 function labInviteVisual(posterSrc?: string): string {
   if (posterSrc) {
-    return `<img class="ms-cover-lab-poster" src="${escapeHtml(posterSrc)}" alt="随心而行邀请" width="1080" height="1920" />`;
+    return `<img class="ms-cover-lab-poster" src="${escapeHtml(posterSrc)}" alt="随心而行分享" width="1080" height="1920" />`;
   }
   const chips = ['塔罗', '六爻', '八字', '紫微', '小六壬', '梅花'];
   return `
@@ -254,15 +284,17 @@ function qrRow(snap: ShareCoverSnap): string {
 }
 
 function frontInner(snap: ShareCoverSnap, date: string): string {
-  const lab = isLabInvite(snap);
-  if (lab) {
+  if (usesPosterFront(snap)) {
     const hasPoster = Boolean(snap.invitePosterSrc);
+    const foot = isLabInvite(snap)
+      ? '邀请朋友同行 一起探索内心世界'
+      : '点开可翻转 · 背面是完整解读';
     return `
     <div class="ms-cover-inner ms-cover-face-front is-lab-invite${hasPoster ? ' is-lab-poster' : ''}">
       ${labInviteVisual(snap.invitePosterSrc)}
       <div class="ms-cover-lab-dock">
         ${qrRow(snap)}
-        <p class="ms-cover-foot">邀请朋友同行 一起探索内心世界</p>
+        <p class="ms-cover-foot">${escapeHtml(foot)}</p>
       </div>
     </div>`;
   }
@@ -415,8 +447,10 @@ export async function resolveCorsSafeImageSrc(
 
 async function withResolvedArt(snap: ShareCoverSnap): Promise<ShareCoverSnap> {
   let next: ShareCoverSnap = snap;
-  if (snap.system === 'lab' && !snap.invitePosterSrc) {
-    const invitePosterSrc = await resolveCorsSafeImageSrc(labInvitePosterUrl());
+  if (!snap.invitePosterSrc && (snap.system === 'lab' || snap.invitePosterPath)) {
+    const invitePosterSrc = await resolveCorsSafeImageSrc(
+      labInvitePosterUrl(snap.invitePosterPath),
+    );
     if (invitePosterSrc) next = { ...next, invitePosterSrc };
   }
   if (next.visual.kind !== 'liuyao') return next;
@@ -517,9 +551,11 @@ export async function renderShareCoverPair(
   const qrUrl = qrTargetUrl(snap, deepUrl);
   const qrDataUrl = qrUrl ? await makeShareQrDataUrl(qrUrl) : snap.qrDataUrl;
   let enriched: ShareCoverSnap = { ...snap, deepUrl: deepUrl || undefined, qrDataUrl };
-  // 同一次邀请正反面共用同一张随机海报
-  if (enriched.system === 'lab' && !enriched.invitePosterSrc) {
-    const invitePosterSrc = await resolveCorsSafeImageSrc(labInvitePosterUrl());
+  // 同一次出图正反面共用同一张海报（指定路径或 Lab 随机池）
+  if (!enriched.invitePosterSrc && (enriched.system === 'lab' || enriched.invitePosterPath)) {
+    const invitePosterSrc = await resolveCorsSafeImageSrc(
+      labInvitePosterUrl(enriched.invitePosterPath),
+    );
     if (invitePosterSrc) enriched = { ...enriched, invitePosterSrc };
   }
   const [front, back] = await Promise.all([

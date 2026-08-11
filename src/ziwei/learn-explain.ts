@@ -5,8 +5,7 @@
 import { COMBO_LORE } from './combo-lore.ts';
 import { getPalaceLore } from './palace-lore.ts';
 import { sanfangSizheng, branchLinksForPalace } from './palace-relations.ts';
-import { getMinorStarLore } from './minor-star-lore.ts';
-import { getShenshaLore } from './shensha-lore.ts';
+import { resolveDecoStarLore } from './shensha-resolve.ts';
 import { getStarProfile } from './star-profiles.ts';
 import { getStarLore, mutagenToCardId } from './stars.ts';
 import {
@@ -77,6 +76,8 @@ export type LearnExplain = {
     toPalace: string;
     effect: string;
   }>;
+  /** 神煞等：跳图鉴同源条目 */
+  atlasHint?: { path: string; label: string };
 };
 
 function palaceKey(name: string): string {
@@ -459,9 +460,7 @@ function buildStarExplain(
 ): LearnExplain {
   const profile = getStarProfile(starName);
   const lore = getStarLore(starName);
-  const minor = getMinorStarLore(starName);
-  const shensha = getShenshaLore(starName);
-  const deco = minor ?? shensha;
+  const deco = resolveDecoStarLore(starName);
   const palace =
     (palaceName ? findPalace(view, palaceName) : undefined) ??
     findStarPalace(view, starName);
@@ -477,10 +476,11 @@ function buildStarExplain(
   const traditional = lore
     ? `${lore.portrait}\n${lore.trait}`
     : profile?.metaphor ||
-      (minor?.traditional ??
-        (shensha
-          ? `${shensha.traditional}\n\n何时用：${shensha.when}`
-          : '')) ||
+      (deco
+        ? deco.when
+          ? `${deco.traditional}\n\n何时用：${deco.when}`
+          : deco.traditional
+        : '') ||
       '本星为盘面神煞/杂曜，图鉴正在补全。先看落宫主题与同宫主星，再把它当细部色调。';
 
   let inChart = `盘面尚未定位到「${starName}」的落宫。`;
@@ -493,11 +493,12 @@ function buildStarExplain(
     );
     const palaceLore = getPalaceLore(palace.name);
     if (deco && !profile && !lore) {
-      const tag = minor ? `杂曜·${minor.epithet}` : `神煞·${shensha!.epithet}`;
+      const tag =
+        deco.kind === 'minor' ? `杂曜·${deco.epithet}` : `神煞·${deco.epithet}`;
       inChart = `${starName}（${tag}）落在${palace.name}${
         palaceLore?.hint ? `「${palaceLore.hint}」` : ''
       }。力轻于主星，先读同宫主星与三方四正，再叠这层色调。`;
-      if (shensha?.when) inChart += `\n语境：${shensha.when}。`;
+      if (deco.when) inChart += `\n语境：${deco.when}。`;
     } else {
       inChart = `${starName}落入${palace.name}，说明「${
         profile?.keywords.slice(0, 3).join('、') || oneLiner.replace(/^[^：]*：/, '').slice(0, 24)
@@ -539,6 +540,12 @@ function buildStarExplain(
     inChart,
     related,
     elementLabel,
+    atlasHint: deco?.shenshaId
+      ? {
+          path: `/ziwei/tujian?bucket=shensha&shensha=${encodeURIComponent(deco.shenshaId)}`,
+          label: '打开图鉴同源条目',
+        }
+      : undefined,
     statusLink: status
       ? {
           status,

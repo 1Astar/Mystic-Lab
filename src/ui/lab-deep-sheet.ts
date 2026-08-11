@@ -11,7 +11,15 @@ import {
   type LabConceptTab,
 } from './lab-concept-peek.ts';
 
-export type LabDeepSystem = 'bazi' | 'ziwei';
+export type LabDeepSystem = 'bazi' | 'ziwei' | 'liuyao' | 'tarot' | 'xiaoliuren';
+
+const DEEP_FALLBACK_PATH: Record<LabDeepSystem, string> = {
+  bazi: '/bazi/chart',
+  ziwei: '/ziwei/reading?mode=chart',
+  liuyao: '/liuyao/reading',
+  tarot: '/tarot/reading',
+  xiaoliuren: '/xiaoliuren/reading',
+};
 
 export type LabAskPreset = {
   q: string;
@@ -207,7 +215,7 @@ export function openLabDeepSheet(opts: LabDeepSheetOpts): void {
               `<p class="ly-deep-para">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`,
           )
           .join('')}
-        <button type="button" class="btn ly-btn-gold btn-sm" data-deep-whole>看整盘速读</button>
+        <button type="button" class="btn ly-btn-gold btn-sm" data-deep-whole>去命盘解读</button>
       </section>`;
     pane.hidden = false;
     modal.querySelectorAll<HTMLButtonElement>('[data-deep-tab]').forEach((b) => {
@@ -222,7 +230,7 @@ export function openLabDeepSheet(opts: LabDeepSheetOpts): void {
         return;
       }
       close();
-      navigate(opts.system === 'bazi' ? '/bazi/reading' : '/ziwei/chart');
+      navigate(DEEP_FALLBACK_PATH[opts.system]);
     });
   };
 
@@ -240,7 +248,7 @@ export function openLabDeepSheet(opts: LabDeepSheetOpts): void {
       return;
     }
     close();
-    navigate(opts.system === 'bazi' ? '/bazi/chart' : '/ziwei/chart');
+    navigate(DEEP_FALLBACK_PATH[opts.system]);
   });
 
   const send = () => {

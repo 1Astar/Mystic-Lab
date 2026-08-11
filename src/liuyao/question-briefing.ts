@@ -23,6 +23,8 @@ export type BriefingBlock = {
 export type QuestionBriefing = {
   topicLabel: string;
   questionLead: string;
+  /** 用户原问句（可空） */
+  question: string;
   layer1: BriefingBlock;
   layer2: BriefingBlock;
   layer3: BriefingBlock;
@@ -138,6 +140,7 @@ export function buildQuestionBriefing(
   return {
     topicLabel,
     questionLead: lead,
+    question: question.trim(),
     layer1: {
       title: '对你这个问题',
       body: pack.verdict.parse,
@@ -190,6 +193,7 @@ export function renderQuestionBriefingHtml(b: QuestionBriefing, classic?: Briefi
     lead: b.questionLead,
     classicHtml,
     cast: b.cast,
+    question: b.question,
   });
 }
 

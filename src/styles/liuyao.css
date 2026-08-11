@@ -7542,8 +7542,8 @@ a.ly-derived-name:hover {
 .ly-synthesis-more {
   margin: 2px 0 0;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-2));
   padding: 0 12px 10px;
 }
 
@@ -7553,7 +7553,7 @@ a.ly-derived-name:hover {
   padding: 10px 0 6px;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: rgba(201, 168, 76, 0.75);
+  color: var(--gold-ink, var(--gold));
   user-select: none;
 }
 
@@ -7562,11 +7562,12 @@ a.ly-derived-name:hover {
 }
 
 .ly-synthesis-more[open] > summary {
-  color: rgba(232, 200, 120, 0.9);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--gold-ink, var(--gold));
+  border-bottom: 1px solid var(--line);
   margin-bottom: 6px;
 }
 
+/* lean 标签跟主题 token：星夜浅字 / 月白深字，避免宣纸底浅绿看不见 */
 .ly-synthesis-lean {
   margin: 0;
   display: inline-flex;
@@ -7575,27 +7576,28 @@ a.ly-derived-name:hover {
   border-radius: 999px;
   font-size: 0.75rem;
   letter-spacing: 0.06em;
-  border: 1px solid rgba(201, 168, 76, 0.35);
-  color: #e8c878;
-  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid color-mix(in srgb, var(--gold) 42%, transparent);
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-2));
 }
 
 .ly-synthesis-lean.is-favorable {
-  border-color: rgba(120, 180, 130, 0.45);
-  color: #b8d9b4;
-  background: rgba(80, 140, 100, 0.12);
+  border-color: color-mix(in srgb, var(--wx-mu) 55%, transparent);
+  color: var(--wx-mu);
+  background: color-mix(in srgb, var(--wx-mu) 16%, var(--surface-2));
 }
 
 .ly-synthesis-lean.is-blocked {
-  border-color: rgba(200, 120, 100, 0.45);
-  color: #e0b0a0;
-  background: rgba(140, 70, 50, 0.12);
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface-2));
 }
 
 .ly-synthesis-lean.is-mixed,
 .ly-synthesis-lean.is-neutral {
-  border-color: rgba(180, 170, 150, 0.4);
-  color: #d2c8b8;
+  border-color: color-mix(in srgb, var(--ink-muted) 40%, transparent);
+  color: var(--ink-muted);
+  background: color-mix(in srgb, var(--ink-muted) 10%, var(--surface-2));
 }
 
 .ly-synthesis-block {
@@ -7825,6 +7827,7 @@ a.ly-derived-name:hover {
 
 .ly-why-badge .ly-term-mark {
   margin-right: 0;
+  color: var(--gold-ink);
 }
 
 .ly-why-badge .ly-term-tip {
@@ -7965,7 +7968,7 @@ a.ly-derived-name:hover {
 .ly-term-mark {
   display: inline;
   margin-right: 0.25em;
-  color: rgba(232, 213, 163, 0.95);
+  color: var(--gold-ink);
   font-weight: 650;
 }
 
@@ -9252,7 +9255,7 @@ a.ly-derived-name:hover {
 .ly-ask-flag {
   margin: 6px 0 0;
   font-size: 0.72rem;
-  color: rgba(232, 180, 120, 0.9);
+  color: var(--warn, var(--gold-ink));
 }
 
 .ly-course-drawer-panel .ly-dress-table-compact {
@@ -12266,8 +12269,8 @@ html.thread-peek-open .ly-ai-side-fab {
 .ly-truth-fold {
   margin-top: 8px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-2));
   padding: 0 12px 10px;
 }
 
@@ -12277,7 +12280,7 @@ html.thread-peek-open .ly-ai-side-fab {
   padding: 10px 0 6px;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: rgba(201, 168, 76, 0.75);
+  color: var(--gold-ink, var(--gold));
   user-select: none;
 }
 
@@ -12663,7 +12666,8 @@ html.thread-peek-open .ly-ai-side-fab {
 .ly-role-tag,
 .ly-guide-chip,
 .ly-hex-hot,
-.ly-term-hot {
+.ly-term-hot,
+.ly-term-mark {
   color: var(--gold-ink);
 }
 

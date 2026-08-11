@@ -238,8 +238,12 @@
   color: var(--ink-muted);
 }
 .ms-share-link-tap {
+  display: block;
   margin: 14px auto 0;
   max-width: 90%;
+  padding: 0;
+  border: 0;
+  background: none;
   text-align: center;
   font-size: 0.9rem;
   color: var(--gold);
@@ -249,9 +253,17 @@
   text-underline-offset: 4px;
   user-select: none;
 }
+.ms-share-link-tap:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
 .ms-share-link-tap.is-copied {
   color: color-mix(in srgb, #78be8c 70%, var(--ink));
   text-decoration: none;
+}
+.ms-share-copy-btn.is-copied {
+  border-color: color-mix(in srgb, #78be8c 55%, transparent);
+  color: color-mix(in srgb, #78be8c 75%, var(--ink));
 }
 .ms-share-link-label {
   font-size: 0.78rem;

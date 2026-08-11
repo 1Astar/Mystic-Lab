@@ -1,5 +1,6 @@
 import { stashCrossAskQuestion, takeCrossAskQuestion } from '../journal/cross-ask.ts';
 import { navigate } from '../router.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 import { wait, prefersReducedMotion } from '../tarot/animations.ts';
 import { computeLesson, type LessonResult } from '../xiaoliuren/engine.ts';
 import { getChineseHour, sectorPointerAngle, formatClockTime, formatHourMemory } from '../xiaoliuren/chinese-hour.ts';
@@ -126,6 +127,11 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   page.append(back, stage, drawerHost, actions);
   root.appendChild(page);
   attachPersonSwitcherToPage(page);
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'xiaoliuren',
+    surface: 'reading',
+    tujianPath: '/xiaoliuren/tujian',
+  });
 
   const isLearn = () => lessonMode === 'learn';
   const isPractice = () => lessonMode === 'practice';
@@ -833,6 +839,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
 
   render();
   return () => {
+    disposeFloat();
     document.body.classList.remove('xlr-huangli-lock');
   };
 }

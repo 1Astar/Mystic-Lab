@@ -1,3 +1,5 @@
+import { clearLabFloatDock } from './ui/lab-float-actions.ts';
+
 export type RouteHandler = (
   root: HTMLElement,
 ) => void | (() => void) | Promise<void | (() => void)>;
@@ -37,6 +39,7 @@ export async function render(): Promise<void> {
     cleanup();
     cleanup = null;
   }
+  clearLabFloatDock();
 
   // 与历史行为一致：先清空。同步页（如首页）直接 append；勿先画全屏「载入中」
   root.innerHTML = '';

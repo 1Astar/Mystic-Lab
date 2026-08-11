@@ -322,8 +322,9 @@ export const GLOSSARY: GlossaryEntry[] = [
     category: 'limit',
     name: '流月',
     shortMeaning: '月份尺度的激活：把流年课题拆成更短窗口。',
-    traditional: '流月在专业排盘中用于细看时机，产品后续会加深。',
-    relatedTerms: ['流年', '大限'],
+    traditional:
+      '流月看当月干支、流月命宫与流月四化，叠在本命与流年之上读。宜推进处看化禄，宜复盘处看化忌；是短窗口，不是十年判决。',
+    relatedTerms: ['流年', '大限', '四化', '运限四化'],
   },
 ];
 

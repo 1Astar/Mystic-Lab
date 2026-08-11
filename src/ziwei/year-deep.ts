@@ -5,6 +5,11 @@
 import type { PersonProfile } from '../life/types.ts';
 import type { LearnFocus } from './learn-explain.ts';
 import { resolveHoroscopeLimits } from './horoscope-limits.ts';
+import {
+  formatMutagenWithPalaces,
+  mutagenKindHint,
+  parseMutagenLine,
+} from './mutagen-format.ts';
 import { sanfangSizheng } from './palace-relations.ts';
 import type { TimeScopeLevel } from './time-scope.ts';
 import type { ZiweiChartView } from './types.ts';
@@ -37,6 +42,9 @@ export type YearDeepPack = {
   /** 当前推演层级，默认流年 */
   level?: TimeScopeLevel;
   levelLabel?: string;
+  /** 流月层额外：月干支与月四化 */
+  monthGZ?: string;
+  monthMutagenLine?: string;
 };
 
 const HUA_TEXT: Record<string, string> = {
@@ -80,14 +88,24 @@ function starPalace(view: ZiweiChartView, star: string): string {
   return hit?.name ?? '';
 }
 
-function parseMutagenLine(line: string): Array<{ star: string; kind: string }> {
-  return line
-    .split(' · ')
-    .map((chunk) => {
-      const m = chunk.trim().match(/^(.+)化([禄权科忌])$/);
-      return m ? { star: m[1]!, kind: m[2]! } : null;
+function explainMutagenStars(
+  view: ZiweiChartView,
+  stars: string[],
+): YearMutagenExplain[] {
+  const labels = ['禄', '权', '科', '忌'] as const;
+  return stars
+    .map((star, i) => {
+      const kind = labels[i];
+      if (!kind) return null;
+      const palace = starPalace(view, star);
+      return {
+        kind,
+        star,
+        palace,
+        text: HUA_TEXT[kind] ?? mutagenKindHint(kind),
+      };
     })
-    .filter((x): x is { star: string; kind: string } => Boolean(x));
+    .filter((x): x is YearMutagenExplain => Boolean(x));
 }
 
 export type ScopeDeepOpts = {
@@ -135,17 +153,23 @@ export function buildYearDeepPack(
   const opposite = rel.opposite?.name ?? '';
 
   const mutas = parseMutagenLine(item.yearMutagenLine || snap?.yearMutagenLine || '');
-  const mutagen: YearMutagenExplain[] = mutas.map((m) => {
-    const palace = starPalace(view, m.star);
+  const mutagenFromLine: YearMutagenExplain[] = mutas.map((m) => {
+    const palace = m.palace || starPalace(view, m.star);
     return {
-      kind: m.kind as YearMutagenExplain['kind'],
+      kind: m.kind,
       star: m.star,
       palace,
       text: HUA_TEXT[m.kind] ?? '',
     };
   });
+  const mutagenYear =
+    mutagenFromLine.length > 0
+      ? mutagenFromLine
+      : explainMutagenStars(view, snap?.yearMutagen ?? []);
+  const mutagenMonth = explainMutagenStars(view, snap?.monthMutagen ?? []);
+  const mutagen = level === 'month' && mutagenMonth.length ? mutagenMonth : mutagenYear;
 
-  const fliesIntoFocus = mutagen.filter(
+  const fliesIntoFocus = mutagenYear.filter(
     (m) => m.palace && shortPalace(m.palace) === shortPalace(natalFocus),
   );
 
@@ -164,17 +188,22 @@ export function buildYearDeepPack(
     },
     {
       title: `流年命宫落入${shortPalace(yearPalace) || '—'}`,
-      detail: `${item.year} 年（${item.gz || '—'}）的流年命宫落点。`,
+      detail: `${item.year} 年（${item.gz || snap?.yearGZ || '—'}）的流年命宫落点。`,
       focus: { kind: 'palace', palaceName: yearPalace },
     },
   ];
 
-  if (mutagen.length) {
+  if (mutagenYear.length) {
     chain.push({
       title: '流年四化',
-      detail: mutagen
-        .map((m) => `${m.star}化${m.kind}${m.palace ? `→${shortPalace(m.palace)}` : ''}`)
-        .join(' · '),
+      detail:
+        formatMutagenWithPalaces(
+          mutagenYear.map((m) => m.star),
+          view.palaces,
+        ) ||
+        mutagenYear
+          .map((m) => `${m.star}化${m.kind}${m.palace ? `→${shortPalace(m.palace)}` : ''}`)
+          .join(' · '),
       focus: { kind: 'mutagen', term: '四化' },
     });
   }
@@ -200,9 +229,29 @@ export function buildYearDeepPack(
   if (level === 'month' || level === 'day' || level === 'hour') {
     chain.push({
       title: `流月落入${shortPalace(monthPalace) || '—'}`,
-      detail: `${item.year}年${month}月的推进主场。`,
+      detail: [
+        `${item.year}年${month}月`,
+        snap?.monthGZ ? `干支「${snap.monthGZ}」` : '',
+        '的推进主场。',
+      ]
+        .filter(Boolean)
+        .join(''),
       focus: { kind: 'palace', palaceName: monthPalace },
     });
+    if (mutagenMonth.length) {
+      chain.push({
+        title: '流月四化',
+        detail:
+          formatMutagenWithPalaces(
+            mutagenMonth.map((m) => m.star),
+            view.palaces,
+          ) ||
+          mutagenMonth
+            .map((m) => `${m.star}化${m.kind}${m.palace ? `→${shortPalace(m.palace)}` : ''}`)
+            .join(' · '),
+        focus: { kind: 'mutagen', term: '运限四化' },
+      });
+    }
   }
   if (level === 'day' || level === 'hour') {
     chain.push({
@@ -227,7 +276,8 @@ export function buildYearDeepPack(
         yearPalace,
         opposite,
         ...sanhe,
-        ...mutagen.map((m) => m.palace),
+        ...mutagenYear.map((m) => m.palace),
+        ...mutagenMonth.map((m) => m.palace),
         ...(level !== 'year' && level !== 'decade' ? [monthPalace] : []),
         ...(level === 'day' || level === 'hour' ? [dayPalace] : []),
         ...(level === 'hour' ? [hourPalace] : []),
@@ -245,7 +295,14 @@ export function buildYearDeepPack(
   if (level === 'decade') {
     conclusion = `这十年主场在「${item.chipLabel || shortPalace(decadePalace) || '大限'}」。大限是长镜头，流年是短镜头。`;
   }
-  if (level === 'month') conclusion = `在年度主轴下，本月重点看${shortPalace(monthPalace) || '推进'}。`;
+  if (level === 'month') {
+    const ji = mutagenMonth.find((m) => m.kind === '忌');
+    const lu = mutagenMonth.find((m) => m.kind === '禄');
+    conclusion = `在年度主轴下，本月重点看${shortPalace(monthPalace) || '推进'}`;
+    if (lu) conclusion += `；化禄在${lu.star}可主动推进`;
+    if (ji) conclusion += `；化忌在${ji.star}宜复盘少硬刚`;
+    conclusion += '。流月是短窗口，不必一次梭哈。';
+  }
   if (level === 'day') conclusion = `今日重点看${shortPalace(dayPalace) || '当天'}，适合短决策与对照记录。`;
   if (level === 'hour') conclusion = `此刻看${shortPalace(hourPalace) || '时辰'}，当作时机提示，不必写成人生判决。`;
 
@@ -262,6 +319,8 @@ export function buildYearDeepPack(
     relatedPalaces: related,
     level,
     levelLabel: levelLabelOf(level),
+    monthGZ: snap?.monthGZ,
+    monthMutagenLine: snap?.monthMutagenLine,
   };
 }
 

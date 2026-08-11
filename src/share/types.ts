@@ -79,6 +79,8 @@ export type ShareSnapshot = {
   includeAi: boolean;
   aiText?: string;
   brandSlogan?: string;
+  /** Lab 系封面指定海报路径（如紫微固定图）；缺省则从邀请池随机 */
+  invitePosterPath?: string;
 };
 
 export type ShareCreateBody = Omit<ShareSnapshot, 'id' | 'createdAt'> & {

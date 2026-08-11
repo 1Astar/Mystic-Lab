@@ -16,6 +16,88 @@
   color: var(--zw-muted);
 }
 
+.ziwei-awaken-progress {
+  display: block;
+  width: 100%;
+  margin: 10px 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 181, 106, 0.35);
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(212, 181, 106, 0.14), transparent 55%),
+    rgba(20, 16, 28, 0.35);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.ziwei-awaken-progress-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+.ziwei-awaken-progress-meta strong {
+  font-size: 0.92rem;
+  color: #f0e2c0;
+}
+.ziwei-awaken-progress-meta span {
+  font-size: 0.74rem;
+  color: var(--zw-muted);
+}
+.ziwei-awaken-progress-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.ziwei-awaken-progress-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d4b56a, #c9a0e8);
+}
+
+.ziwei-craft-ach-block {
+  margin: 12px 0 18px;
+}
+.ziwei-craft-ach-block h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+.ziwei-craft-ach-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.ziwei-craft-ach {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 180, 140, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+}
+.ziwei-craft-ach.is-complete {
+  border-color: rgba(212, 181, 106, 0.5);
+}
+.ziwei-craft-ach.is-locked {
+  opacity: 0.65;
+}
+.ziwei-craft-ach-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.ziwei-craft-ach-head span {
+  font-size: 0.72rem;
+  color: rgba(212, 181, 106, 0.9);
+}
+.ziwei-craft-ach p {
+  margin: 0 0 4px;
+  font-size: 0.84rem;
+  color: var(--zw-ink);
+}
+
 .ziwei-home-person,
 .ziwei-kicker {
   font-size: 0.78rem;
@@ -57,49 +139,6 @@
 .ziwei-annual + .ziwei-forecast {
   border-top: 1px solid var(--line-soft, var(--zw-line));
   padding-top: 32px;
-}
-
-.ziwei-intent-row {
-  display: grid;
-  gap: 10px;
-}
-
-@media (min-width: 640px) {
-  .ziwei-intent-row {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.ziwei-intent-card {
-  text-align: left;
-  padding: 12px 0;
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid var(--zw-line);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  min-height: 44px;
-  transition: color 0.2s ease;
-}
-
-.ziwei-intent-card strong {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 1rem;
-  color: var(--zw-gold);
-}
-
-.ziwei-intent-card span {
-  color: var(--zw-muted);
-  font-size: 0.85rem;
-  line-height: 1.45;
-}
-
-.ziwei-intent-card.is-on {
-  border-color: var(--zw-gold);
-  box-shadow: none;
-  transform: none;
 }
 
 .ziwei-archive-brief {
@@ -236,6 +275,77 @@
 .ziwei-mode-tab-chart {
   border-color: rgba(201, 168, 76, 0.55);
   color: var(--zw-gold);
+}
+
+/* 人生地图分区 Tab · 跟紫微主题金/墨色，不用冷灰蓝 muted */
+.ziwei-theater-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  padding: 8px 0;
+  background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+.ziwei-theater-tab {
+  min-height: 48px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  border: 1px solid var(--zw-line);
+  background: transparent;
+  color: color-mix(in srgb, var(--zw-ink) 62%, var(--zw-gold) 38%);
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.ziwei-theater-tab strong {
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: inherit;
+}
+.ziwei-theater-tab span {
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--zw-ink) 45%, var(--zw-gold) 55%);
+  opacity: 0.9;
+}
+.ziwei-theater-tab.is-on {
+  color: var(--gold-ink, var(--zw-gold));
+  background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--zw-gold) 50%, var(--zw-line));
+}
+.ziwei-theater-tab.is-on span {
+  color: color-mix(in srgb, var(--gold-ink, var(--zw-gold)) 75%, var(--zw-ink));
+}
+html[data-theme='moon'] .ziwei-theater-tab {
+  color: color-mix(in srgb, var(--ink) 70%, var(--gold-ink, var(--gold)) 30%);
+}
+html[data-theme='moon'] .ziwei-theater-tab span {
+  color: color-mix(in srgb, var(--ink-muted) 55%, var(--gold-ink, var(--gold)) 45%);
+}
+html[data-theme='moon'] .ziwei-theater-tab.is-on {
+  color: var(--gold-ink, var(--gold));
+}
+.ziwei-theater-pane[hidden] {
+  display: none !important;
+}
+.ziwei-theater-pane > section:first-child,
+.ziwei-theater-pane > .ziwei-decade:first-child {
+  margin-top: 0;
+}
+
+.ziwei-theater-ladder {
+  margin-top: 22px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft, var(--zw-line));
+}
+.ziwei-theater-ladder .ziwei-codex-hint {
+  margin-bottom: 12px;
 }
 
 .ziwei-combo-lead {
@@ -982,11 +1092,15 @@
   text-align: center;
 }
 
+/* 二级小 tab：轻量分段，刻意不像上方大 tab 卡片 */
 .ziwei-codex-tabs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(4.8rem, 1fr));
-  gap: 8px;
-  margin: 8px 0 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 14px;
+  padding: 4px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
 }
 
 /* 特色入口：定盘 / 智变 / 组合旅程 / 我的相遇 */
@@ -1118,29 +1232,36 @@
 }
 
 .ziwei-codex-tab {
-  padding: 10px 8px;
-  border-radius: 12px;
-  border: none;
-  background: color-mix(in srgb, var(--surface-2) 88%, var(--ink) 5%);
+  flex: 0 1 auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--ink-muted);
   cursor: pointer;
-  font-size: 0.85rem;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
 }
 
 .ziwei-codex-tab em {
-  display: block;
-  margin-top: 2px;
+  display: inline;
+  margin: 0 0 0 0.25em;
   font-style: normal;
-  font-size: 0.75rem;
-  color: var(--gold-ink, var(--gold));
-  opacity: 1;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink-muted) 80%, var(--gold-ink, var(--gold)));
+  opacity: 0.9;
 }
 
 .ziwei-codex-tab.is-on {
-  color: var(--ink);
-  background: var(--gold-soft);
-  border: none;
-  font-weight: 600;
+  color: var(--gold-ink, var(--gold));
+  background: var(--surface-1);
+  border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
+  font-weight: 650;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 18%, transparent);
 }
 
 .ziwei-codex-tab.is-on em {
@@ -1259,6 +1380,60 @@
   color: var(--zw-gold, #d4af37);
   font-weight: 650;
   margin-right: 6px;
+}
+
+.ziwei-annual-shensha-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--zw-muted);
+}
+
+.ziwei-shensha-overview {
+  margin: 20px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft, var(--zw-line));
+}
+
+.ziwei-shensha-overview summary {
+  cursor: pointer;
+  color: var(--gold-ink, var(--zw-gold));
+  font-weight: 650;
+  list-style: none;
+}
+
+.ziwei-shensha-overview summary::-webkit-details-marker {
+  display: none;
+}
+
+.ziwei-shensha-overview-list {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ziwei-shensha-overview-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--zw-muted);
+}
+
+.ziwei-shensha-overview-list li.is-focus {
+  color: var(--zw-ink);
+}
+
+.ziwei-shensha-overview-list em {
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--zw-gold);
+  border: 1px solid var(--zw-line);
+  border-radius: 999px;
+  padding: 1px 7px;
 }
 
 .ziwei-school-badge {
@@ -1403,6 +1578,13 @@
 .ziwei-annual-q {
   color: var(--zw-gold);
   font-size: 0.88rem;
+}
+
+.ziwei-annual-ask-meta {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--zw-gold) 70%, var(--zw-muted));
 }
 
 .ziwei-annual-advice {
@@ -2052,6 +2234,148 @@ html[data-theme='moon'] .ziwei-plate-dizhi.is-刑 { stroke: rgba(140, 110, 55, 0
   text-decoration-color: rgba(180, 170, 200, 0.35);
   text-underline-offset: 2px;
 }
+
+/* 盘面沉浸激活：本源 / 已觉醒 / 封印 */
+.ziwei-plate-star.is-awaken-origin,
+.ziwei-plate-hua.is-awaken-origin {
+  color: #f0d78c;
+  text-shadow: 0 0 10px rgba(240, 215, 140, 0.55), 0 0 2px rgba(255, 236, 180, 0.9);
+  font-weight: 700;
+}
+.ziwei-plate-star.is-awaken-lit,
+.ziwei-plate-hua.is-awaken-lit {
+  color: #e8dff8;
+  text-shadow: 0 0 8px rgba(180, 150, 255, 0.4);
+  opacity: 1;
+}
+.ziwei-plate-star.is-awaken-sealed,
+.ziwei-plate-hua.is-awaken-sealed {
+  opacity: 0.42;
+  filter: grayscale(0.35);
+  color: rgba(170, 160, 190, 0.85);
+  text-shadow: none;
+}
+.ziwei-plate-star.is-karma-star.is-awaken-sealed,
+.ziwei-plate-hua.is-karma-star.is-awaken-sealed {
+  opacity: 0.5;
+  color: rgba(200, 150, 160, 0.9);
+}
+.ziwei-plate-lock {
+  display: inline-block;
+  margin-right: 2px;
+  font-style: normal;
+  font-size: 0.65em;
+  opacity: 0.85;
+  vertical-align: middle;
+}
+
+/* 本源 / 试炼弹层 */
+.plate-awaken-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: end center;
+  padding: 0 12px 24px;
+  pointer-events: none;
+}
+.plate-awaken-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 18, 0.55);
+  pointer-events: auto;
+}
+.plate-awaken-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  margin-bottom: env(safe-area-inset-bottom, 0);
+  padding: 20px 18px 16px;
+  border-radius: 16px 16px 12px 12px;
+  background: linear-gradient(165deg, #2a2438 0%, #1a1624 55%, #14101c 100%);
+  border: 1px solid rgba(220, 200, 160, 0.28);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45);
+  color: #f2ebe0;
+  pointer-events: auto;
+  animation: plate-awaken-up 0.28s ease-out;
+}
+@keyframes plate-awaken-up {
+  from { transform: translateY(24px); opacity: 0.4; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.plate-awaken-sheet.is-origin .plate-awaken-card {
+  border-color: rgba(240, 215, 140, 0.45);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45), 0 0 28px rgba(240, 215, 140, 0.12);
+}
+.plate-awaken-sheet.is-karma .plate-awaken-card {
+  border-color: rgba(200, 120, 140, 0.4);
+}
+.plate-awaken-kicker {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 160, 0.75);
+}
+.plate-awaken-name {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8f0dc;
+}
+.plate-awaken-karma-tag {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #f0c8d0;
+  background: rgba(160, 60, 90, 0.35);
+  border: 1px solid rgba(200, 120, 140, 0.4);
+}
+.plate-awaken-body {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(235, 228, 215, 0.92);
+}
+.plate-awaken-gain {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e0c878;
+}
+.plate-awaken-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.plate-awaken-btn {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 190, 220, 0.28);
+  background: rgba(255, 255, 255, 0.06);
+  color: #efe8dc;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.plate-awaken-btn.is-primary {
+  background: linear-gradient(135deg, #c9a84c, #8b6a28);
+  border-color: rgba(240, 215, 140, 0.5);
+  color: #1a1408;
+  font-weight: 650;
+}
+.plate-awaken-btn.is-ghost {
+  border: 0;
+  background: transparent;
+  color: rgba(200, 190, 220, 0.75);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .ziwei-plate-more {
   min-height: 20px;
   padding: 0 2px;
@@ -3968,8 +4292,7 @@ html[data-theme='moon'] .ziwei-plate-hua.is-hua-忌 {
 
 /* —— 主题收尾：图鉴列表字色（盖过奶油硬编码，提高月白对比） —— */
 .ziwei-page .ziwei-codex-short-name,
-.ziwei-page .ziwei-layer-tab strong,
-.ziwei-page .ziwei-codex-tab.is-on {
+.ziwei-page .ziwei-layer-tab strong {
   color: var(--ink);
 }
 
@@ -3985,23 +4308,37 @@ html[data-theme='moon'] .ziwei-plate-hua.is-hua-忌 {
 .ziwei-page .ziwei-codex-short-cta,
 .ziwei-page .ziwei-kicker,
 .ziwei-page .ziwei-inline-link,
-.ziwei-page .ziwei-codex-tab em,
-.ziwei-page .ziwei-layer-tab.is-on strong {
+.ziwei-page .ziwei-layer-tab.is-on strong,
+.ziwei-page .ziwei-codex-tab.is-on,
+.ziwei-page .ziwei-codex-tab.is-on em {
   color: var(--gold-ink, var(--gold));
 }
 
-.ziwei-page .ziwei-layer-tab,
-.ziwei-page .ziwei-codex-tab {
+/* 大 tab：板块卡片；小 tab：浅底 pill，勿再盖成同款金底块 */
+.ziwei-page .ziwei-layer-tab {
   background: color-mix(in srgb, var(--surface-2) 88%, var(--ink) 5%);
   border: none;
 }
 
-.ziwei-page .ziwei-layer-tab.is-on,
-.ziwei-page .ziwei-codex-tab.is-on {
+.ziwei-page .ziwei-layer-tab.is-on {
   background: var(--gold-soft);
 }
 
-/* 深度学习推演依据：正文一律墨色，四化标签加深 */
+.ziwei-page .ziwei-codex-tabs {
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+}
+
+.ziwei-page .ziwei-codex-tab {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.ziwei-page .ziwei-codex-tab.is-on {
+  background: var(--surface-1);
+  border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
+}
+
+/* 推演依据：宣纸底禁用浅金正文（盖过懒加载 ziwei 硬编码） */
 .ziwei-tl-deep .ziwei-year-deep-sec h5,
 .ziwei-tl-deep .ziwei-year-deep-step-title,
 .ziwei-tl-deep .ziwei-year-deep-hua-star {
@@ -4013,3 +4350,369 @@ html[data-theme='moon'] .ziwei-plate-hua.is-hua-忌 {
 .ziwei-tl-deep .ziwei-year-deep-hua .is-hua-权 { color: #6a3d88; }
 .ziwei-tl-deep .ziwei-year-deep-hua .is-hua-科 { color: #2a5a96; }
 .ziwei-tl-deep .ziwei-year-deep-hua .is-hua-忌 { color: #9a3a48; }
+
+/* —— 运限 · 本周造命任务条 / 清单卡 / 打卡浮窗 —— */
+.ziwei-wq-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin: 0 0 1rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--gold) 14%, transparent),
+      color-mix(in srgb, var(--surface-1) 92%, transparent)
+    );
+  box-shadow: var(--shadow);
+}
+
+.ziwei-wq-bar[data-kind='career'] {
+  border-color: color-mix(in srgb, #6a3d88 40%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, #6a3d88 12%, transparent), var(--surface-1));
+}
+.ziwei-wq-bar[data-kind='money'] {
+  border-color: color-mix(in srgb, #1f6b45 40%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, #1f6b45 12%, transparent), var(--surface-1));
+}
+.ziwei-wq-bar[data-kind='bond'] {
+  border-color: color-mix(in srgb, #9a3a48 40%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, #9a3a48 12%, transparent), var(--surface-1));
+}
+.ziwei-wq-bar[data-kind='move'] {
+  border-color: color-mix(in srgb, #2a5a96 40%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, #2a5a96 12%, transparent), var(--surface-1));
+}
+.ziwei-wq-bar[data-kind='body'],
+.ziwei-wq-bar[data-kind='home'] {
+  border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
+}
+
+.ziwei-wq-bar-main {
+  flex: 1;
+  min-width: 0;
+}
+.ziwei-wq-bar-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+.ziwei-wq-bar-task {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.ziwei-wq-bar-task strong {
+  margin-right: 0.25rem;
+  color: var(--ink);
+}
+.ziwei-wq-bar-xp {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted, color-mix(in srgb, var(--ink) 62%, transparent));
+}
+.ziwei-wq-go {
+  flex-shrink: 0;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.ziwei-wq-float {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 4.75rem);
+  z-index: 510;
+  pointer-events: none;
+}
+.ziwei-wq-float-btn {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  max-width: 9.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line));
+  background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.ziwei-wq-float-btn span {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.ziwei-wq-float-btn em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--gold);
+}
+.ziwei-wq-float-btn.is-done {
+  border-color: color-mix(in srgb, #1f6b45 45%, var(--line));
+}
+.ziwei-wq-float-btn.is-done em {
+  color: #1f6b45;
+}
+html.thread-peek-open .ziwei-wq-float {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ziwei-wq-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 620;
+  display: grid;
+  place-items: end center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.ziwei-wq-sheet.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ziwei-wq-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: color-mix(in srgb, #120e18 55%, transparent);
+  cursor: pointer;
+}
+.ziwei-wq-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  margin-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  padding: 1.15rem 1.2rem 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  box-shadow: var(--shadow);
+  transform: translateY(12px);
+  transition: transform 0.22s ease;
+}
+.ziwei-wq-sheet.is-open .ziwei-wq-card {
+  transform: translateY(0);
+}
+.ziwei-wq-card-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+.ziwei-wq-card h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+.ziwei-wq-card-theme {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+}
+.ziwei-wq-card-body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+.ziwei-wq-card-xp {
+  margin: 0.85rem 0 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold);
+}
+.ziwei-wq-card-meta {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+.ziwei-wq-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.ziwei-wq-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(max(20px, env(safe-area-inset-bottom, 0px)) + 5.5rem);
+  z-index: 700;
+  transform: translateX(-50%) translateY(8px);
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
+  font-size: 0.82rem;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.ziwei-wq-toast.is-on {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* —— Daily_Quest Banner / CheckIn / 结算 / 属性来源 —— */
+.ziwei-dq-banner { position: relative; }
+.ziwei-dq-x {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.ziwei-dq-x-inline {
+  position: static;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-right: 0.25rem;
+}
+.ziwei-dq-checkin {
+  margin: 1.25rem 0 0.5rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+.ziwei-dq-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+.ziwei-dq-row:last-of-type { border-bottom: 0; }
+.ziwei-dq-row strong { display: block; font-size: 0.92rem; color: var(--ink); }
+.ziwei-dq-row span { display: block; font-size: 0.75rem; color: color-mix(in srgb, var(--ink) 60%, transparent); margin-top: 0.15rem; }
+.ziwei-dq-row.is-done { opacity: 0.72; }
+.ziwei-dq-row.is-empty { opacity: 0.55; }
+.ziwei-dq-rails {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0.85rem 0;
+}
+.ziwei-dq-rails p { margin: 0 0 0.35rem; font-size: 0.82rem; color: var(--ink); }
+.ziwei-dq-rails span { font-size: 0.72rem; color: color-mix(in srgb, var(--ink) 58%, transparent); }
+.ziwei-dq-rail {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+.ziwei-dq-rail i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 40%, #6a3d88));
+}
+.ziwei-dq-rail.is-xp i {
+  background: linear-gradient(90deg, #2a5a96, color-mix(in srgb, var(--gold) 50%, #2a5a96));
+}
+.ziwei-dq-settle-cap,
+.ziwei-dq-settle-overflow {
+  margin: 0.35rem 0;
+  font-size: 0.8rem;
+  color: var(--gold);
+}
+.ziwei-dq-settle { position: fixed; inset: 0; z-index: 630; display: grid; place-items: end center; padding: 1rem; }
+
+button.craft-axis-row,
+.craft-axis-row[role='button'] {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0.55rem 0;
+  cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  border-radius: 0;
+  box-shadow: none;
+}
+button.craft-axis-row:focus-visible,
+.craft-axis-row[role='button']:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.craft-src-h {
+  margin: 0.85rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--gold);
+}
+.craft-src-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.45;
+}
+.craft-axis-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 640;
+  display: grid;
+  place-items: end center;
+  padding: 1rem;
+}
+.craft-axis-sheet.is-open .ziwei-wq-card {
+  transform: translateY(0);
+}
+.craft-axis-sheet .craft-tip-steps {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.craft-axis-sheet .craft-tip-steps li + li {
+  margin-top: 0.35rem;
+}
+.ziwei-dq-palace-link {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ziwei-dq-reaccept-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+.ziwei-dq-row.is-doing {
+  border-left: 3px solid var(--gold);
+  padding-left: 0.5rem;
+}

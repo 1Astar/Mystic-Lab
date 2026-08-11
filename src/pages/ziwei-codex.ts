@@ -17,6 +17,11 @@ import {
   listComboJourney,
 } from '../ziwei/combo-journey.ts';
 import {
+  claimNewCraftComboToasts,
+  listCraftComboAchievements,
+} from '../craft/combo-achievements.ts';
+import { ICON_EXPLORE_STAR } from '../ui/lab-icons.ts';
+import {
   codexProgress,
   connectionLine,
   isStarUnlocked,
@@ -52,7 +57,12 @@ import {
 } from '../ziwei/shensha-school-contrast.ts';
 import { allMutagenNotesForStar } from '../ziwei/star-mutagen-notes.ts';
 import { getGlossaryByName } from '../ziwei/term-glossary.ts';
+import { answerZiweiConcept, recordZiweiConceptMiss } from '../ziwei/concept-ask.ts';
 import { ziweiSysTabsHtml } from '../ui/lab-sys-tabs.ts';
+import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
+import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
+import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { draftFromZiwei } from '../share/drafts.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -500,6 +510,37 @@ function renderTermDetail(term: string): string {
     </article>`;
 }
 
+function renderCraftComboAchSection(): string {
+  const states = listCraftComboAchievements();
+  const cards = states
+    .map((s) => {
+      const pct = Math.round(s.progress * 100);
+      const badge =
+        s.status === 'complete'
+          ? '已解锁'
+          : s.status === 'partial'
+            ? `${s.litMembers.length}/${s.def.members.length}`
+            : '未集齐';
+      return `
+        <div class="ziwei-craft-ach is-${s.status}">
+          <div class="ziwei-craft-ach-head">
+            <strong>${escapeHtml(s.def.title)}</strong>
+            <span>${escapeHtml(badge)}</span>
+          </div>
+          <p>${escapeHtml(s.def.effectLine)}</p>
+          <p class="ziwei-journey-meta">${escapeHtml(s.def.members.join(' · '))}</p>
+          <div class="ziwei-journey-bar" aria-hidden="true"><i style="width:${pct}%"></i></div>
+        </div>`;
+    })
+    .join('');
+  return `
+    <section class="ziwei-craft-ach-block" aria-label="造命组合成就">
+      <h3>造命组合成就</h3>
+      <p class="ziwei-codex-hint">图鉴集齐成员即可强化造命雷达（帝星 / 业火）。</p>
+      <div class="ziwei-craft-ach-grid">${cards}</div>
+    </section>`;
+}
+
 function renderJourneyLayer(): string {
   const summary = comboJourneySummary();
   const steps = listComboJourney();
@@ -538,8 +579,31 @@ function renderJourneyLayer(): string {
       <p>已成组 <strong>${summary.complete}</strong> / ${summary.total} · 进行中 ${summary.partial}</p>
       <p class="ziwei-journey-next">${escapeHtml(nextLine)}</p>
     </header>
+    ${renderCraftComboAchSection()}
     <p class="ziwei-codex-hint">只维护少量经典组合；更多联动请回命盘点星 / 宫 / 三方四正做动态解释。</p>
     <div class="ziwei-journey-path">${cards}</div>`;
+}
+
+function showCraftComboAchToasts(): void {
+  const newly = claimNewCraftComboToasts();
+  if (!newly.length) return;
+  const first = newly[0]!;
+  document.querySelector('.unlock-toast')?.remove();
+  const toast = document.createElement('div');
+  toast.className = 'unlock-toast is-craft-ach';
+  toast.setAttribute('role', 'status');
+  toast.innerHTML = `
+    <span class="unlock-toast-icon">${ICON_EXPLORE_STAR}</span>
+    <div class="unlock-toast-text">
+      <strong>${escapeHtml(first.unlockLine)}</strong>
+      <span>${newly.length > 1 ? `另有 ${newly.length - 1} 项成就已同步` : '加成已写入造命雷达'}</span>
+    </div>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+  window.setTimeout(() => {
+    toast.classList.remove('is-visible');
+    window.setTimeout(() => toast.remove(), 400);
+  }, 4200);
 }
 
 function renderMeetLayer(): string {
@@ -639,18 +703,20 @@ function renderStarsCatalog(
   }
 
   return `
-    <div class="ziwei-codex-tabs" role="tablist">${tabs}</div>
+    <div class="ziwei-codex-tabs" role="tablist" aria-label="星曜分类">${tabs}</div>
     <p class="ziwei-codex-hint">${escapeHtml(STAR_BUCKET_META[bucket].blurb)} · 列表只留关键词，点开看完整图鉴</p>
     ${grid}`;
 }
 
 function renderPalacesCatalog(bucket: PalaceBucket): string {
-  const tabs = PALACE_BUCKETS.map(
-    (id) =>
-      `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-palace-bucket="${id}">
+  const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="宫位分类">
+    ${PALACE_BUCKETS.map(
+      (id) =>
+        `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-palace-bucket="${id}">
         ${escapeHtml(PALACE_BUCKET_META[id].title)}
       </button>`,
-  ).join('');
+    ).join('')}
+  </div>`;
 
   if (bucket === 'twelve') {
     return `
@@ -684,12 +750,14 @@ function renderPalacesCatalog(bucket: PalaceBucket): string {
 }
 
 function renderMutagenCatalog(bucket: MutagenBucket, map: Map<string, { lastPalace?: string }>): string {
-  const tabs = MUTAGEN_BUCKETS.map(
-    (id) =>
-      `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-mutagen-bucket="${id}">
+  const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="四化分类">
+    ${MUTAGEN_BUCKETS.map(
+      (id) =>
+        `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-mutagen-bucket="${id}">
         ${escapeHtml(MUTAGEN_BUCKET_META[id].title)}
       </button>`,
-  ).join('');
+    ).join('')}
+  </div>`;
 
   if (bucket === 'stars') {
     return `
@@ -714,12 +782,14 @@ function renderMutagenCatalog(bucket: MutagenBucket, map: Map<string, { lastPala
 }
 
 function renderStructureCatalog(bucket: StructureBucket): string {
-  const tabs = STRUCTURE_BUCKETS.map(
-    (id) =>
-      `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-structure-bucket="${id}">
+  const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="结构分类">
+    ${STRUCTURE_BUCKETS.map(
+      (id) =>
+        `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-structure-bucket="${id}">
         ${escapeHtml(STRUCTURE_BUCKET_META[id].title)}
       </button>`,
-  ).join('');
+    ).join('')}
+  </div>`;
 
   if (bucket === 'soul') {
     return `
@@ -820,6 +890,55 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
   let minorId = queryParam('minor');
   let shenshaId = queryParam('shensha');
   let contrastId = queryParam('contrast');
+
+  const activeAtlasLabel = (): string =>
+    detailId ||
+    palaceId ||
+    comboId ||
+    termId ||
+    minorId ||
+    shenshaId ||
+    contrastId ||
+    '';
+
+  const disposeFloat = mountLabFloatActions(page, {
+    system: 'ziwei',
+    surface: 'atlas',
+    atlasMode: true,
+    answerConcept: answerZiweiConcept,
+    onNotes: () => {
+      const label = activeAtlasLabel();
+      openLabNotesSheet({
+        system: 'ziwei',
+        surface: 'atlas',
+        context: label ? `图鉴 · ${label}` : '紫微图鉴',
+      });
+    },
+    draftShare: () => {
+      const label = activeAtlasLabel();
+      return draftFromZiwei({
+        headline: label ? `图鉴 · ${label}` : '紫微图鉴',
+        question: '紫微图鉴',
+        summary: label
+          ? `正在对照「${label}」。`
+          : '在紫微图鉴里对照星曜、宫位与神煞。',
+      });
+    },
+    onDeep: () => {
+      const label = activeAtlasLabel();
+      openLabDeepSheet({
+        system: 'ziwei',
+        title: label ? `追问 · ${label}` : '图鉴追问',
+        initialTab: 'ask',
+        seedQuery: label || undefined,
+        answerConcept: answerZiweiConcept,
+        onMiss: (q) => {
+          void recordZiweiConceptMiss(q);
+        },
+        deepHint: '结合图鉴词条追问；概念优先本地词库。',
+      });
+    },
+  });
 
   const entries = () => new Map(listCodexEntries().map((e) => [e.starId, e]));
 
@@ -1118,8 +1237,12 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       });
     });
     bindOpeners();
+    showCraftComboAchToasts();
   }
 
   paint();
-  return () => stars.remove();
+  return () => {
+    disposeFloat();
+    stars.remove();
+  };
 }

@@ -37,6 +37,15 @@ export type MonthScopeItem = {
   domains: string[];
   possibles: string[];
   tense: YearTense;
+  /** 流月干支 */
+  gz: string;
+  /** 流月四化 */
+  mutagenLine: string;
+  /** 对照：当年流年命宫 */
+  yearPalace: string;
+  yearMutagenLine: string;
+  /** 一句推进导读 */
+  lead: string;
 };
 
 export type DayScopeItem = {
@@ -298,15 +307,41 @@ export function buildMonthScope(
   const snap = resolveHoroscopeLimits(person, { year, month, day: 15, hour: 6 });
   const palace = snap?.monthPalace ?? '';
   const key = keyOf(palace);
+  const mutagenLine = snap?.monthMutagenLine || '';
+  const gz = snap?.monthGZ || '';
+  const yearPalace = snap?.yearPalace || '';
+  const yearMutagenLine = snap?.yearMutagenLine || '';
+  const theme =
+    MONTH_THEME[key] ?? (palace ? `${shortPalace(palace)}相关议题被推进` : '本月主场待定');
+  const ji = mutagenLine.includes('化忌')
+    ? mutagenLine.split(' · ').find((c) => c.includes('化忌'))
+    : '';
+  const lu = mutagenLine.split(' · ').find((c) => c.includes('化禄'));
+  const leadParts = [
+    gz ? `本月干支「${gz}」` : '',
+    palace ? `流月命在${shortPalace(palace)}` : '',
+    lu ? `${lu}宜推进` : '',
+    ji ? `${ji}宜复盘少硬刚` : '',
+  ].filter(Boolean);
+  const lead =
+    leadParts.length > 0
+      ? `${leadParts.join('；')}。在流年主轴下，把本月当成短窗口推进，不必一次梭哈。`
+      : `在年度主轴下，本月重点看${shortPalace(palace) || '推进'}——先对准主场，再看四化落点。`;
+
   return {
     year,
     month,
     monthLabel: monthLabel(month),
     palace,
-    theme: MONTH_THEME[key] ?? (palace ? `${shortPalace(palace)}相关议题被推进` : '本月主场待定'),
+    theme,
     domains: PALACE_DOMAIN[key] ?? ['推进', '观察'],
     possibles: (MONTH_POSSIBLES[key] ?? ['主场议题被短暂点亮', '日常节奏可能微调']).slice(0, 3),
     tense: tenseOf(year, nowYear),
+    gz,
+    mutagenLine,
+    yearPalace,
+    yearMutagenLine,
+    lead,
   };
 }
 

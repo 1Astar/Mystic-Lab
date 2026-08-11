@@ -6,6 +6,12 @@ import { getCardById } from '../tarot/deck.ts';
 import type { DrawnCard } from '../tarot/engine.ts';
 import { cardLabel } from '../tarot/engine.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
+import {
+  BAZI_SHARE_POSTER_PATH,
+  LIUYAO_SHARE_POSTER_PATH,
+  TAROT_SHARE_POSTER_PATH,
+  ZIWEI_SHARE_POSTER_PATH,
+} from './cover.ts';
 import type { ShareDraft } from './sheet.ts';
 
 export function draftFromLiuyao(input: {
@@ -68,6 +74,7 @@ export function draftFromLiuyao(input: {
         : undefined,
     },
     aiText: input.aiText,
+    invitePosterPath: LIUYAO_SHARE_POSTER_PATH,
   };
 }
 
@@ -120,6 +127,7 @@ export function draftFromTarot(input: {
         reversed: c.reversed,
       })),
     },
+    invitePosterPath: TAROT_SHARE_POSTER_PATH,
   };
 }
 
@@ -144,6 +152,7 @@ export function draftFromTarotReading(input: {
       headline: '塔罗',
       question: input.question,
       summary: input.reading.summary.slice(0, 400),
+      invitePosterPath: TAROT_SHARE_POSTER_PATH,
     });
   }
   return draftFromTarot({
@@ -194,6 +203,7 @@ export function draftFromBazi(input: {
       pillars: input.pillarsLabel,
       label: `日主 ${input.dayMaster}`,
     },
+    invitePosterPath: BAZI_SHARE_POSTER_PATH,
   };
 }
 
@@ -203,14 +213,17 @@ export function draftFromZiwei(input: {
   summary: string;
   sections?: { heading: string; body: string }[];
 }): ShareDraft {
-  return draftGeneric({
-    system: 'lab',
-    headline: input.headline,
-    question: input.question || '紫微命盘',
-    summary: input.summary,
-    sections: input.sections,
-    label: input.headline,
-  });
+  return {
+    ...draftGeneric({
+      system: 'lab',
+      headline: input.headline,
+      question: input.question || '紫微命盘',
+      summary: input.summary,
+      sections: input.sections,
+      label: input.headline,
+    }),
+    invitePosterPath: ZIWEI_SHARE_POSTER_PATH,
+  };
 }
 
 export function draftGeneric(input: {
@@ -221,6 +234,7 @@ export function draftGeneric(input: {
   sections?: { heading: string; body: string }[];
   label?: string;
   brandSlogan?: string;
+  invitePosterPath?: string;
 }): ShareDraft {
   return {
     system: input.system,
@@ -238,10 +252,14 @@ export function draftGeneric(input: {
       label: input.label || input.headline,
     },
     brandSlogan: input.brandSlogan,
+    invitePosterPath: input.invitePosterPath,
   };
 }
 
-/** Lab 首页邀请：不带具体卦象 / 不问具体问题 */
+/**
+ * Lab 首页邀请：不带具体卦象 / 不问具体问题。
+ * 不指定 invitePosterPath → 出图时从 LAB_INVITE_POSTER_PATHS 随机（不用板块专用图）。
+ */
 export function draftLabInvite(): ShareDraft {
   return draftGeneric({
     system: 'lab',

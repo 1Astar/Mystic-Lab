@@ -82,7 +82,7 @@ export function renderBaziHome(root: HTMLElement): () => void {
     <nav class="bazi-home-nav" aria-label="八字入口">
       <button type="button" class="bazi-home-link" data-path="/bazi/reading" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
         <strong>我的命盘</strong>
-        <span>白话速读 · 认识自己</span>
+        <span>白话解读 · 认识自己</span>
         ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
       </button>
       <button type="button" class="bazi-home-link" data-path="/bazi/chart" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>

@@ -1,4 +1,4 @@
-﻿/** 紫微边看边问：星曜 / 宫位概念本地答 */
+/** 紫微边看边问：星曜 / 宫位概念本地答 */
 import { getStarLore, MAJOR_STARS, type StarCard } from './stars.ts';
 import { getPalaceLore, PALACE_LORE } from './palace-lore.ts';
 import { isStarPmCaptureReady, postStarPmIdeaCapture } from '../ai/star-pm-endpoint.ts';

@@ -207,6 +207,11 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
       ${body}
       <footer class="ziwei-learn-foot">
         <button type="button" class="life-btn-ghost" data-learn-close>关闭</button>
+        ${
+          model.atlasHint
+            ? `<button type="button" class="life-btn-ghost" data-learn-atlas>${escapeHtml(model.atlasHint.label)} ›</button>`
+            : ''
+        }
         <button type="button" class="life-btn-primary" data-learn-chart>回到盘面看关系 ›</button>
       </footer>
     </aside>
@@ -237,6 +242,13 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
 
   sheet.querySelectorAll('[data-learn-close]').forEach((el) => {
     el.addEventListener('click', close);
+  });
+
+  sheet.querySelector('[data-learn-atlas]')?.addEventListener('click', () => {
+    const path = model.atlasHint?.path;
+    if (!path) return;
+    close();
+    navigate(path);
   });
 
   sheet

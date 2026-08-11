@@ -2,8 +2,9 @@ import { navigate } from '../router.ts';
 import { LIUYAO_CONCEPTS } from '../liuyao/learn-concepts.ts';
 import { mountLiuyaoModeSwitch, setLiuyaoMode } from '../liuyao/mode.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
-export function renderLiuyaoConcepts(root: HTMLElement): void {
+export function renderLiuyaoConcepts(root: HTMLElement): () => void {
   const page = document.createElement('div');
   page.className = 'page ly-concepts-page';
   mountEnvBanner(page);
@@ -88,4 +89,10 @@ export function renderLiuyaoConcepts(root: HTMLElement): void {
 
   paint(initial);
   root.appendChild(page);
+  return mountLabFloatShell(page, {
+    system: 'liuyao',
+    surface: 'atlas',
+    atlasMode: true,
+    tujianPath: '/liuyao/concepts',
+  });
 }

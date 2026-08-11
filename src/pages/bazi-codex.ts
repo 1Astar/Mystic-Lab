@@ -83,6 +83,12 @@ import {
   bindBaziCodexDetail,
   renderBaziCodexDetailHtml,
 } from '../ui/bazi-codex-detail.ts';
+import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
+import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
+import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
+import { BAZI_SHARE_POSTER_PATH } from '../share/cover.ts';
+import { draftGeneric } from '../share/drafts.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -124,7 +130,7 @@ const TAB_GUIDE: Record<Tab, string> = {
   nayin: '三十纳音 · 干支组合的气象象意',
   jiazi: '六十甲子 · 每柱干支的完整索引',
   luck: '大运流年基础概念 · 如何触发原局',
-  mine: '四柱速读 + 盘上已遇见的星煞',
+  mine: '四柱解读 + 盘上已遇见的星煞',
 };
 
 function parseTab(raw: string | undefined): Tab {
@@ -144,6 +150,46 @@ export function renderBaziCodex(root: HTMLElement): () => void {
 
   let tab: Tab = 'relation';
   let detailId: string | null = null;
+  const disposeFloat = mountLabFloatActions(page, {
+    system: 'bazi',
+    surface: 'atlas',
+    atlasMode: true,
+    answerConcept: answerBaziConcept,
+    onNotes: () => {
+      const enc = detailId ? getBaziEncyclopedia(detailId) : null;
+      openLabNotesSheet({
+        system: 'bazi',
+        surface: 'atlas',
+        context: enc ? `图鉴 · ${enc.title}` : '八字图鉴',
+      });
+    },
+    draftShare: () => {
+      const enc = detailId ? getBaziEncyclopedia(detailId) : null;
+      return draftGeneric({
+        system: 'bazi',
+        headline: enc ? `图鉴 · ${enc.title}` : '八字图鉴',
+        question: '八字图鉴',
+        summary: enc
+          ? `正在对照词条「${enc.title}」。`
+          : '在八字图鉴里对照词条与命盘。',
+        invitePosterPath: BAZI_SHARE_POSTER_PATH,
+      });
+    },
+    onDeep: () => {
+      const enc = detailId ? getBaziEncyclopedia(detailId) : null;
+      openLabDeepSheet({
+        system: 'bazi',
+        title: enc ? `追问 · ${enc.title}` : '图鉴追问',
+        initialTab: 'ask',
+        seedQuery: enc?.title,
+        answerConcept: answerBaziConcept,
+        onMiss: (q) => {
+          void recordBaziConceptMiss(q);
+        },
+        deepHint: '结合图鉴词条追问；概念优先本地词库。',
+      });
+    },
+  });
   let branchRingMode: BranchRingMode = 'chong';
   /** 生克图聚焦：只亮某一行的相关边 */
   let wuxingFocus: WuXing | null = null;
@@ -377,7 +423,10 @@ export function renderBaziCodex(root: HTMLElement): () => void {
   }
 
   paint();
-  return () => stars.remove();
+  return () => {
+    disposeFloat();
+    stars.remove();
+  };
 }
 
 let _chartCtxCache: {
@@ -553,7 +602,7 @@ function renderTengodGrid(): string {
     </div>`;
 }
 
-/** 我的命盘 · 速读 + 已点亮神煞 */
+/** 我的命盘 · 解读摘要 + 已点亮神煞 */
 function renderMineChartTab(): string {
   const { chart, luck } = activeChartContext();
   const featuredCards = SHENSHA_FEATURED.map((n) => getStarCardByName('shensha', n)).filter(
@@ -576,7 +625,7 @@ function renderMineChartTab(): string {
       </section>`
     : '';
 
-  let quick = `<p class="bazi-codex-empty">填写出生信息后，这里会给出四柱速读。</p>`;
+  let quick = `<p class="bazi-codex-empty">填写出生信息后，这里会给出四柱解读。</p>`;
   if (chart) {
     const natal = chart.pillars.filter((p) => p.key !== 'liunian' && !p.empty);
     const pillarsLine = natal
@@ -615,7 +664,7 @@ function renderMineChartTab(): string {
 
   return `
     <section class="bazi-gz-section">
-      <h2 class="bazi-codex-section-title">📖 命盘速读</h2>
+      <h2 class="bazi-codex-section-title">📖 命盘解读</h2>
       ${quick}
     </section>
     <section class="bazi-gz-section bazi-ss-tier">

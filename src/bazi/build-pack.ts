@@ -49,7 +49,7 @@ function boardExpandText(chart: BaziChart): string {
 export function buildBaziAnswerPack(
   input: BuildBaziPackInput,
 ): OfflineAnswerPack {
-  const q = input.question.trim() || '我的命盘速读';
+  const q = input.question.trim() || '我的命盘解读';
   const facts = buildBaziFacts(input.chart);
   const tone = detectBaziTone(facts);
   const ctx =

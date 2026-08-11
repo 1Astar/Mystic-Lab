@@ -16,6 +16,13 @@ import {
   type RankedHourCandidate,
 } from '../bazi/rectify-score.ts';
 import {
+  buildOfflineNarrate,
+  generateRectifyNarrate,
+  loadCachedNarrate,
+  cacheKeyForNarrate,
+  openRectifyAiSettings,
+} from '../bazi/rectify-personalize.ts';
+import {
   formatBirthBrief,
   getActivePerson,
   hasBirthInfo,
@@ -126,6 +133,7 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
 
       <section class="bazi-rectify-guide">
         <p>以下不是绝对答案，而是「哪个时辰更能解释你填的 ${filled.length} 件大事」。可点「符合 / 不符合 / 不确定」修正评分。</p>
+        <p>排名与百分比由<strong>规则引擎</strong>决定；可再生成 <strong>AI 个性化解说</strong>（不改写结论）。</p>
       </section>
 
       ${
@@ -143,6 +151,19 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
               <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">继续补充事件</button>
             </div>
           </article>
+        </section>
+
+        <section class="bazi-rectify-section" aria-label="AI 个性化解说">
+          <h2 class="life-route-title">个性化解说</h2>
+          <p class="life-footnote">引擎打底 · AI 用人话讲差异（不会改名次）</p>
+          <div id="bazi-rectify-ai-body" class="bazi-rectify-ai-body">
+            <p class="bazi-rectify-ai-placeholder">点下方生成，把命中/未命中讲成你的故事。</p>
+          </div>
+          <div class="bazi-rectify-actions">
+            <button type="button" class="life-btn-primary" id="bazi-rectify-ai-run">生成 AI 解说</button>
+            <button type="button" class="life-btn-ghost" id="bazi-rectify-ai-offline">只用规则摘要</button>
+          </div>
+          <p class="life-status" id="bazi-rectify-ai-status" hidden></p>
         </section>`
           : `<p class="life-status">未能排出候选，请放宽时段或检查出生日期。</p>`
       }
@@ -191,9 +212,82 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
     bindNav();
     bindFeedback();
     bindAdopt(ranked);
+    bindAiNarrate(ranked, filled);
 
     const status = page.querySelector<HTMLElement>('#bazi-rectify-result-status');
     void status;
+  }
+
+  function paintAiBody(text: string, via: string): void {
+    const body = page.querySelector<HTMLElement>('#bazi-rectify-ai-body');
+    if (!body) return;
+    const paras = text
+      .split(/\n\n+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    body.innerHTML = `
+      <p class="life-footnote">来源：${
+        via === 'ai' ? 'AI 解说' : via === 'cache' ? 'AI 缓存' : '规则摘要'
+      }</p>
+      ${paras.map((p) => `<p class="bazi-rectify-ai-para">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('')}
+    `;
+  }
+
+  function bindAiNarrate(ranked: RankedHourCandidate[], filled: ReturnType<typeof filledEvents>): void {
+    const input = {
+      personName: person.nickname,
+      birthBrief: formatBirthBrief(store.profile),
+      events: filled,
+      ranked,
+    };
+    const key = cacheKeyForNarrate(input);
+    const cached = loadCachedNarrate(key);
+    if (cached) paintAiBody(cached, 'cache');
+
+    const status = page.querySelector<HTMLElement>('#bazi-rectify-ai-status');
+    const runBtn = page.querySelector<HTMLButtonElement>('#bazi-rectify-ai-run');
+    const offlineBtn = page.querySelector<HTMLButtonElement>('#bazi-rectify-ai-offline');
+
+    offlineBtn?.addEventListener('click', () => {
+      paintAiBody(buildOfflineNarrate(input), 'offline');
+      if (status) {
+        status.hidden = false;
+        status.textContent = '已显示规则摘要（未调用 AI）。';
+      }
+    });
+
+    runBtn?.addEventListener('click', async () => {
+      if (!runBtn || !ranked.length) return;
+      runBtn.disabled = true;
+      if (status) {
+        status.hidden = false;
+        status.textContent = '正在生成个性化解说…';
+      }
+      const res = await generateRectifyNarrate(input, { force: true });
+      runBtn.disabled = false;
+      if (!res.ok) {
+        if (status) {
+          status.hidden = false;
+          status.textContent = res.reason;
+        }
+        paintAiBody(buildOfflineNarrate(input), 'offline');
+        if (res.needSettings) {
+          const go = confirm(`${res.reason}\n\n要打开 AI 配置吗？`);
+          if (go) openRectifyAiSettings();
+        }
+        return;
+      }
+      paintAiBody(res.text, res.via);
+      if (status) {
+        status.hidden = false;
+        status.textContent =
+          res.via === 'ai'
+            ? 'AI 解说已生成（未改动引擎排名）。'
+            : res.via === 'cache'
+              ? '已载入缓存解说。'
+              : '已用规则摘要。';
+      }
+    });
   }
 
   function bindFeedback(): void {

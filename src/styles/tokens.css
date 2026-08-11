@@ -9,6 +9,8 @@ html[data-theme='star'] {
   --gold: #e8d4a8;
   /* 标题/强调字用金：星夜可亮；月白须更深以保证宣纸底对比度 */
   --gold-ink: #e8d4a8;
+  /* 金色实心按钮上的字色（两主题皆须深，避免月白用 --bg-deep 米色） */
+  --ink-on-gold: #141018;
   --gold-soft: rgba(232, 212, 168, 0.12);
   --purple: #9aa6bc;
   --purple-deep: #2e1b4b;
@@ -77,6 +79,7 @@ html[data-theme='moon'] {
   --gold: #c9a84c;
   /* 宣纸底标题用更深褐金，避免 #8a6d2f 仍发虚 */
   --gold-ink: #5c481c;
+  --ink-on-gold: #3a2e14;
   --gold-soft: rgba(201, 168, 76, 0.14);
   --purple: #7a8499;
   --purple-deep: #d9dde6;

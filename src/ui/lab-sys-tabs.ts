@@ -1,4 +1,4 @@
-﻿/** 体系内顶栏：仅解读 / 盘面（探索改右上入口，不做第三 Tab） */
+/** 体系内顶栏：仅解读 / 盘面（探索改右上入口，不做第三 Tab） */
 
 import { navigate } from '../router.ts';
 
@@ -32,7 +32,7 @@ export function bindLabSysTabs(scope: ParentNode): void {
 }
 
 export const BAZI_SYS_TABS = {
-  reading: { path: '/bazi/reading', label: '命盘速读' },
+  reading: { path: '/bazi/reading', label: '命盘解读' },
   chart: { path: '/bazi/chart', label: '命盘解析' },
 } as const;
 

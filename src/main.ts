@@ -153,6 +153,18 @@ registerRoute(
   '/bazi/tujian',
   lazy(() => import('./pages/bazi-codex.ts'), 'renderBaziCodex', baziStyles),
 );
+registerRoute(
+  '/bazi/guess',
+  lazy(() => import('./pages/bazi-guess.ts'), 'renderBaziGuess', baziStyles),
+);
+registerRoute(
+  '/bazi/learn',
+  lazy(() => import('./pages/bazi-learn.ts'), 'renderBaziLearn', baziStyles),
+);
+registerRoute(
+  '/bazi/week',
+  lazy(() => import('./pages/bazi-week-weather.ts'), 'renderBaziWeekWeather', baziStyles),
+);
 registerRoute('/bazi/codex', () => {
   navigate('/bazi/tujian');
 });
@@ -199,6 +211,19 @@ registerRoute(
 registerRoute(
   '/wardrobe',
   lazy(() => import('./pages/wardrobe-home.ts'), 'renderWardrobeHome', mirrorStyles),
+);
+
+const craftStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/craft.css'),
+];
+registerRoute(
+  '/craft',
+  lazy(() => import('./pages/craft-home.ts'), 'renderCraftHome', craftStyles),
+);
+registerRoute(
+  '/craft/quest',
+  lazy(() => import('./pages/craft-quest.ts'), 'renderCraftQuest', craftStyles),
 );
 
 registerRoute(

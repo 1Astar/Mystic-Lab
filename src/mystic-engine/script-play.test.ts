@@ -63,12 +63,13 @@ describe('script director · 渐→艮 面试金样', () => {
     expect(pack.why.length).toBeGreaterThanOrEqual(2);
     expect(pack.reassurance).toMatch(/卦象|主见|深呼吸|判决/);
 
-    const html = renderAnswerPackHtml(pack, { cast });
+    const html = renderAnswerPackHtml(pack, { cast, question: q });
     expect(html).toMatch(/核心方向/);
     expect(html).toMatch(/现状与转机/);
     expect(html).toMatch(/具体动作/);
     expect(html).toMatch(/心理定心丸/);
     expect(html).toMatch(/对你这个问题/);
+    expect(html).toMatch(/面试|「/);
     expect(html).toMatch(/综合论断/);
     expect(html).toMatch(/发展趋势|应期推断|具体细节/);
     expect(html).toMatch(/为何这样看|盘面信号/);

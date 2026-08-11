@@ -2,8 +2,9 @@
 import { mountLiuyaoModeSwitch, setLiuyaoMode } from '../liuyao/mode.ts';
 import { TRIGRAM_ORDER, TRIGRAMS } from '../liuyao/trigrams.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
-export function renderLiuyaoBagua(root: HTMLElement): void {
+export function renderLiuyaoBagua(root: HTMLElement): () => void {
   const page = document.createElement('div');
   page.className = 'page ly-bagua-page';
   mountEnvBanner(page);
@@ -71,4 +72,10 @@ export function renderLiuyaoBagua(root: HTMLElement): void {
 
   page.append(grid, foot);
   root.appendChild(page);
+  return mountLabFloatShell(page, {
+    system: 'liuyao',
+    surface: 'atlas',
+    atlasMode: true,
+    tujianPath: '/liuyao/hexagrams',
+  });
 }

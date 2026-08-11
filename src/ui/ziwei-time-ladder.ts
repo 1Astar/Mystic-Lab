@@ -179,7 +179,13 @@ function monthReadHtml(year: number, monthItem: ReturnType<typeof buildMonthScop
   const possibles = monthItem.possibles.map((p) => `<li>${escapeHtml(p)}</li>`).join('');
   return `
     <div class="ziwei-tl-pane">
-      <h3 class="ziwei-tl-title">${year}年 · ${escapeHtml(monthItem.monthLabel)}</h3>
+      <h3 class="ziwei-tl-title">${year}年 · ${escapeHtml(monthItem.monthLabel)}${
+        monthItem.gz ? ` · ${escapeHtml(monthItem.gz)}` : ''
+      }</h3>
+      <section class="ziwei-tl-block">
+        <h4>本月推进</h4>
+        <p class="ziwei-tl-theme">${escapeHtml(monthItem.lead || monthItem.theme)}</p>
+      </section>
       <section class="ziwei-tl-block">
         <h4>本月主题</h4>
         <p class="ziwei-tl-theme">${escapeHtml(monthItem.theme)}</p>
@@ -189,7 +195,12 @@ function monthReadHtml(year: number, monthItem: ReturnType<typeof buildMonthScop
         <h4>可能表现</h4>
         <ul class="ziwei-tl-list">${possibles}</ul>
       </section>
-      <p class="ziwei-tl-meta">流月命｜${escapeHtml(shortPalace(monthItem.palace) || '—')}</p>
+      <p class="ziwei-tl-meta">流月命｜${escapeHtml(shortPalace(monthItem.palace) || '—')}${
+        monthItem.mutagenLine ? `　月四化｜${escapeHtml(monthItem.mutagenLine)}` : ''
+      }</p>
+      <p class="ziwei-tl-meta">对照流年命｜${escapeHtml(shortPalace(monthItem.yearPalace) || '—')}${
+        monthItem.yearMutagenLine ? `　年四化｜${escapeHtml(monthItem.yearMutagenLine)}` : ''
+      }</p>
       <button type="button" class="ziwei-year-why" data-open-deep>为什么这样判断 ›</button>
     </div>`;
 }
@@ -303,7 +314,7 @@ export type MountZiweiTimeLadderOpts = {
     sel: LimitBoardSelection,
     focus: TimeScopeLevel,
   ) => void;
-  /** 「为什么这样判断」→ 打开深度学习笔记抽屉 */
+  /** 「为什么这样判断」→ 打开笔记抽屉（推演依据） */
   onOpenDeep?: (ctx: ZiweiTimeLadderDeepCtx) => void;
 };
 

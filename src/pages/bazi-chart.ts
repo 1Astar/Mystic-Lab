@@ -63,8 +63,18 @@ import { openLabConceptPeek } from '../ui/lab-concept-peek.ts';
 import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
 import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
+import { formatSelectionAskSeed } from '../ui/lab-selection-ask.ts';
 import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
+import {
+  buildShuttleFrame,
+  clampShuttleYear,
+  decadeShiftCard,
+  shuttleYearRange,
+  type DecadeShiftCard,
+} from '../bazi/sense-shuttle.ts';
+import { mountTimeShuttleBoard, timeShuttleBoardHtml } from '../ui/bazi-time-shuttle.ts';
+import { markLearnInteraction } from '../bazi/learn-store.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -366,6 +376,11 @@ export function renderBaziChart(root: HTMLElement): () => void {
   let learnStep = stepFromLocation();
   let selectedLiuyue: number | null = null;
   let disposeFloat: (() => void) | null = null;
+  let disposeShuttle: (() => void) | null = null;
+  /** 已展示过的换大运气泡 */
+  const shownDecadeKeys = new Set<string>();
+  let pendingBubble: DecadeShiftCard | null = null;
+  let shuttlePrevDayunGod = '';
 
   const page = document.createElement('div');
   page.className = 'page life-page bazi-chart-page';
@@ -374,6 +389,8 @@ export function renderBaziChart(root: HTMLElement): () => void {
   function paint(): void {
     disposeFloat?.();
     disposeFloat = null;
+    disposeShuttle?.();
+    disposeShuttle = null;
     store = loadLifeStore();
     person = getActivePerson();
 
@@ -459,8 +476,10 @@ export function renderBaziChart(root: HTMLElement): () => void {
     });
 
     disposeFloat = mountLabFloatActions(page, {
+      system: 'bazi',
+      surface: 'chart',
       tujianPath: '/bazi/tujian',
-      notesLabel: '深度学习',
+      answerConcept: answerBaziConcept,
       onNotes: () => openLearnNotes(chart),
       draftShare: () => {
         const pillarsLabel = natalPillars(chart)
@@ -478,8 +497,12 @@ export function renderBaziChart(root: HTMLElement): () => void {
           ],
         });
       },
+      onSelectionAsk: (text) =>
+        openDeepSheet(chart, {
+          initialTab: 'ask',
+          seedQuery: formatSelectionAskSeed(text),
+        }),
       onDeep: () => openDeepSheet(chart, { initialTab: 'deep' }),
-      deepLabel: '深度解读',
     });
 
     page.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
@@ -511,9 +534,9 @@ export function renderBaziChart(root: HTMLElement): () => void {
     });
 
     if (mode === 'natal') {
-      bindLiunian();
       bindLuck();
       scrollLuckIntoView();
+      bindShuttle(chart);
     }
     if (mode === 'hepan') bindHepanForm();
   }
@@ -528,7 +551,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
         ${renderLearnNav()}
         ${renderStepBody(chart)}
         <div class="bazi-deep-learn-actions">
-          <button type="button" class="btn ly-btn-gold btn-sm" data-deep-reading>看整盘速读</button>
+          <button type="button" class="btn ly-btn-gold btn-sm" data-deep-reading>去命盘解读</button>
         </div>
       </div>`;
   }
@@ -562,6 +585,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
   function openLearnNotes(chart: BaziChart): void {
     openLabNotesSheet({
       system: 'bazi',
+      surface: 'chart',
       context: `${chart.dayMaster}${chart.dayMasterWx ? ` · ${chart.dayMasterWx}` : ''} · 出生密码`,
       bodyHtml: '<div class="bazi-deep-learn-mount"></div>',
       onBodyReady: (body) => {
@@ -762,6 +786,18 @@ export function renderBaziChart(root: HTMLElement): () => void {
   function renderNatal(chart: BaziChart): string {
     const jieqi = birthJieqiNote(store.profile);
     const luck = buildLuckCycles(store.profile, person.gender, liunianYear);
+    const birthY = Number(store.profile.birthYear) || liunianYear;
+    const range = shuttleYearRange(birthY);
+    const year = clampShuttleYear(liunianYear, range);
+    const shuttle =
+      luck != null
+        ? buildShuttleFrame(chart, store.profile, luck, year, {
+            gender: person.gender,
+          })
+        : null;
+    if (shuttle && !shuttle.dayunEmpty && shuttle.dayunStemGod && !shuttlePrevDayunGod) {
+      shuttlePrevDayunGod = shuttle.dayunStemGod;
+    }
     return `
       ${temperamentBlock(chart)}
 
@@ -770,22 +806,71 @@ export function renderBaziChart(root: HTMLElement): () => void {
         <p class="bazi-meta-note">真太阳时 ${escapeHtml(chart.trueSolarLabel)} · ${escapeHtml(chart.place.note)}</p>
       </section>
 
+      ${
+        shuttle && luck
+          ? timeShuttleBoardHtml(shuttle, range, pendingBubble)
+          : ''
+      }
+
       ${renderGrid(chart)}
 
       ${seasonBlock(chart)}
       ${luck ? renderLuckBoard(luck, selectedLiuyue) : '<p class="life-status">暂无法排出大运流年（需性别与完整出生信息）</p>'}
 
-      <section class="bazi-liunian-bar" aria-label="流年切换">
-        <button type="button" class="life-btn-ghost" id="bazi-year-prev" aria-label="上一年">←</button>
-        <label class="bazi-year-field">
-          <span>流年</span>
-          <input type="number" id="bazi-year-input" value="${chart.liunianYear}" min="1900" max="2100" />
-        </label>
-        <button type="button" class="life-btn-ghost" id="bazi-year-next" aria-label="下一年">→</button>
-        <button type="button" class="life-btn-ghost" id="bazi-year-now">今年</button>
-      </section>
-
     `;
+  }
+
+  function bindShuttle(chart: BaziChart): void {
+    const luck0 = buildLuckCycles(store.profile, person.gender, liunianYear);
+    if (!luck0) return;
+    const birthY = Number(store.profile.birthYear) || liunianYear;
+    const range = shuttleYearRange(birthY);
+    const initial = buildShuttleFrame(
+      chart,
+      store.profile,
+      luck0,
+      clampShuttleYear(liunianYear, range),
+      { gender: person.gender },
+    );
+
+    disposeShuttle = mountTimeShuttleBoard(page, initial, {
+      range,
+      initialPrevDayunGod: shuttlePrevDayunGod,
+      buildFrame: (year) => {
+        const cast = castBaziChart(store.profile, year, { gender: person.gender });
+        if ('error' in cast) return initial;
+        const luck = buildLuckCycles(store.profile, person.gender, year);
+        if (!luck) return initial;
+        return buildShuttleFrame(cast, store.profile, luck, year, {
+          gender: person.gender,
+        });
+      },
+      onCommitYear: (year) => {
+        const next = clampShuttleYear(year, range);
+        if (next === liunianYear) return;
+        liunianYear = next;
+        selectedLiuyue = null;
+        paint();
+      },
+      onShuttleInteract: () => {
+        markLearnInteraction('shuttle:year');
+      },
+      onDecadeBubble: () => {
+        markLearnInteraction('shuttle:decade');
+      },
+      onBubbleDismiss: () => {
+        pendingBubble = null;
+      },
+      resolveBubble: (frame, prevGod) => {
+        if (frame.dayunEmpty || !frame.dayunStemGod) return null;
+        const card = decadeShiftCard(prevGod, frame.dayunStemGod);
+        if (!card || shownDecadeKeys.has(card.key)) return null;
+        shownDecadeKeys.add(card.key);
+        pendingBubble = card;
+        shuttlePrevDayunGod = frame.dayunStemGod;
+        return card;
+      },
+    });
   }
 
   function renderHepan(selfChart: BaziChart): string {
@@ -905,29 +990,6 @@ export function renderBaziChart(root: HTMLElement): () => void {
     });
   }
 
-  function bindLiunian(): void {
-    page.querySelector('#bazi-year-prev')?.addEventListener('click', () => {
-      liunianYear -= 1;
-      paint();
-    });
-    page.querySelector('#bazi-year-next')?.addEventListener('click', () => {
-      liunianYear += 1;
-      paint();
-    });
-    page.querySelector('#bazi-year-now')?.addEventListener('click', () => {
-      liunianYear = new Date().getFullYear();
-      paint();
-    });
-    const yearInput = page.querySelector<HTMLInputElement>('#bazi-year-input');
-    yearInput?.addEventListener('change', () => {
-      const n = Number(yearInput.value);
-      if (Number.isFinite(n) && n >= 1900 && n <= 2100) {
-        liunianYear = Math.floor(n);
-        paint();
-      }
-    });
-  }
-
   function bindHepanForm(): void {
     const form = page.querySelector<HTMLFormElement>('#bazi-partner-form');
     const statusEl = page.querySelector<HTMLElement>('#bazi-partner-status');
@@ -987,6 +1049,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
   return () => {
     clearBaziChartAura(page);
     disposeFloat?.();
+    disposeShuttle?.();
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();
     document.querySelector('[data-lab-float-dock]')?.remove();

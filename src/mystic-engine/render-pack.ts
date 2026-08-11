@@ -197,11 +197,22 @@ function renderSynthesis(
 function renderQuestionAnswerStrip(
   script: NonNullable<OfflineAnswerPack['script']>,
   cast: CastResult | undefined,
+  question?: string,
 ): string {
+  const q = (question ?? '').trim();
+  const isDefault =
+    !q ||
+    q === '我的命盘解读' ||
+    q === '我的命盘速读' ||
+    q === '紫微命盘';
+  const title = isDefault ? '对本我' : '对你这个问题';
+  const sub = isDefault
+    ? '默认一句话回应 · 上方可填具体问题'
+    : `「${q}」· 一句话回应`;
   const truth = script.beats.find((b) => b.id === 'truth');
   return `
     <section class="ly-layer-card ly-question-answer" data-briefing-section data-layer="q-answer">
-      ${layerHead('对你这个问题', '一句话回应')}
+      ${layerHead(title, sub)}
       <p class="ly-pack-headline ly-verdict-card">${escapeHtml(script.headline)}</p>
       ${
         truth?.body
@@ -217,6 +228,7 @@ function renderQuestionAnswerStrip(
 function renderScriptPlay(
   pack: OfflineAnswerPack,
   cast: CastResult | undefined,
+  question?: string,
 ): string {
   const script = pack.script;
   if (!script) {
@@ -229,7 +241,7 @@ function renderScriptPlay(
   /** 样式以旧四层卡片为主；剧本/论断作补充层 */
   return `
     ${renderCoreLayer(pack, cast)}
-    ${renderQuestionAnswerStrip(script, cast)}
+    ${renderQuestionAnswerStrip(script, cast, question)}
     ${renderSynthesis(script, cast)}
     ${renderPulseLayer(pack, cast)}
     ${renderActionLayer(pack, cast)}
@@ -498,6 +510,10 @@ export type RenderPackOpts = {
   classicHtml?: string;
   /** 传入则可点本/变卦名打开卦象精读 */
   cast?: CastResult;
+  /** 隐藏「已带入档案」角标 */
+  hideContextUsed?: boolean;
+  /** 当前问题原文；用于「对你这个问题」标明对象 */
+  question?: string;
 };
 
 export function renderAnswerPackHtml(
@@ -530,9 +546,9 @@ export function renderAnswerPackHtml(
     <article class="ly-question-briefing ly-answer-pack${opts.compact ? ' is-compact' : ''}" data-question-briefing data-answer-pack>
       ${lead ? `<p class="ly-briefing-kicker">${cast ? linkifyHexInHtml(escapeHtml(lead), cast) : escapeHtml(lead)}</p>` : ''}
       ${topicLabel ? `<p class="ly-briefing-topic">${escapeHtml(topicLabel)}</p>` : ''}
-      ${pack.contextUsed ? `<p class="ly-pack-context">已带入档案</p>` : ''}
+      ${pack.contextUsed && !opts.hideContextUsed ? `<p class="ly-pack-context">已带入档案</p>` : ''}
 
-      ${renderScriptPlay(pack, cast)}
+      ${renderScriptPlay(pack, cast, opts.question)}
       ${subAnswers}
 
       ${

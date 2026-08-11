@@ -5,6 +5,7 @@ import {
   formatShenshaForPillarBody,
   shenshaNotesForPillar,
 } from './shensha-deep.ts';
+import { formatMutagenLine, formatMutagenWithPalaces } from './mutagen-format.ts';
 import type {
   AnnualAdvice,
   ComfortNote,
@@ -205,7 +206,8 @@ function buildPillar(
 function buildHeadline(opts: {
   soulPalace: PalaceSnap;
   bodyPalace: PalaceSnap;
-  intent: ZiweiIntent;
+  /** @deprecated 入口已合并，忽略 */
+  intent?: ZiweiIntent;
 }): string {
   const majors = opts.soulPalace.majors.map((s) => s.name);
   const lead = majors[0] ? getStarLore(majors[0]) : undefined;
@@ -216,10 +218,9 @@ function buildHeadline(opts: {
   const trait = lead
     ? `你的隐藏人格底色是「${lead.id}·${lead.epithet}」——${lead.myth}`
     : '你的内核像一块海绵：环境与流年对你影响更大。';
+  // 入口已合并：定调看清你是谁，运限看近段节奏
   const intentLine =
-    opts.intent === 'horizon'
-      ? '接下来三年，先收集自己的天赋卡，再决定哪条旷野值得反复走。'
-      : '先看清你已点亮的人格卡：你不是缺星，是缺一张读自己的地图。';
+    '先看清你已点亮的人格卡，再顺着运限看近段节奏怎么展开——你不是缺星，是缺一张读自己的地图。';
   return `${trait}${bodyHint}${intentLine}`;
 }
 
@@ -299,11 +300,8 @@ export function buildAnnual(opts: {
   const yearly = opts.astrolabe.horoscope(opts.dateStr).yearly;
   const nextY = opts.astrolabe.horoscope(opts.nextYearDateStr).yearly;
   const mutagen = yearly?.mutagen ?? [];
-  const labels = ['禄', '权', '科', '忌'] as const;
-  const mutagenLine =
-    mutagen.length > 0
-      ? mutagen.map((name, i) => `${name}化${labels[i] ?? ''}`).join('、')
-      : '流年四化暂缺';
+  const mutagenLine = formatMutagenWithPalaces(mutagen, opts.palaces, '、')
+    || (mutagen.length ? formatMutagenLine(mutagen).replace(/ · /g, '、') : '流年四化未能排出，请核对生辰');
 
   const focus: string[] = [];
   for (const starName of mutagen) {
@@ -317,36 +315,38 @@ export function buildAnnual(opts: {
   const soulOfYear = yearly?.palaceNames?.[4];
   if (soulOfYear && !focus.includes(soulOfYear)) focus.unshift(soulOfYear);
 
-  const q = opts.question.trim() || '我今年适合换工作吗？';
-  const hasJob = /工作|换|跳槽|职业|事业|官|升/.test(q);
-  const hasLove = /感情|恋爱|结婚|分手|关系/.test(q);
+  const q = opts.question.trim() || '今年我最该留意什么？';
   const jiStar = mutagen[3];
   const luStar = mutagen[0];
+  const quanStar = mutagen[1];
+  const keStar = mutagen[2];
+  const yearSoul = soulOfYear || focus[0] || '命宫';
 
-  let advice = `今年干支氛围偏「${yearly?.heavenlyStem ?? ''}${yearly?.earthlyBranch ?? ''}」。`;
-  if (hasJob) {
-    advice +=
-      focus.includes('官禄') || focus.includes('迁移')
-        ? '事业与旷野线被点亮：适合主动试探新岗位，但别一次梭哈。'
-        : '换工作可以想，但先把「为何要换」写清楚，再动。';
-  } else if (hasLove) {
-    advice +=
-      focus.includes('夫妻') || focus.includes('仆役')
-        ? '关系议题会被放大：沟通比承诺更重要。'
-        : '感情不必强求结果，先稳住自己的节律。';
-  } else {
-    advice += `把注意力放在 ${focus.slice(0, 2).join('、') || '内核'} 相关的生活议题上。`;
+  // 规则底稿：只依据干支/四化/落宫，不走关键词桶模板
+  let advice = `今年干支偏「${yearly?.heavenlyStem ?? ''}${yearly?.earthlyBranch ?? ''}」，流年命宫在${yearSoul}。`;
+  advice += `优先留意 ${focus.slice(0, 3).join('、') || '内核议题'} 相关的生活节奏。`;
+  if (luStar) {
+    const home = opts.palaces.find((p) =>
+      [...p.majors, ...p.minors].some((s) => s.name === luStar),
+    )?.name;
+    advice += `流年化禄在${luStar}${home ? `（本命${home.replace(/宫$/, '')}）` : ''}，那里更容易有实质推进。`;
   }
-  if (luStar) advice += `流年禄在${luStar}，那里更容易有实质推进。`;
-  if (jiStar) advice += `流年忌在${jiStar}，那里适合复盘，不适合硬刚。`;
+  if (quanStar) advice += `化权在${quanStar}，适合你站到台前拍板。`;
+  if (keStar) advice += `化科在${keStar}，名声与求教线索可借力。`;
+  if (jiStar) {
+    const home = opts.palaces.find((p) =>
+      [...p.majors, ...p.minors].some((s) => s.name === jiStar),
+    )?.name;
+    advice += `化忌在${jiStar}${home ? `（本命${home.replace(/宫$/, '')}）` : ''}，那里适合复盘，不适合硬刚。`;
+  }
+  advice += '流年是风向不是判决；占问后可结合 AI 贴合你的具体情况。';
 
   const shenshaLine = formatAnnualShenshaLine(opts.shenshaNotes ?? []);
 
   const nextMut = nextY?.mutagen ?? [];
   const nextLine =
-    nextMut.length > 0
-      ? nextMut.map((name, i) => `${name}化${labels[i] ?? ''}`).join('、')
-      : '四化待推';
+    formatMutagenWithPalaces(nextMut, opts.palaces, '、') ||
+    (nextMut.length ? formatMutagenLine(nextMut).replace(/ · /g, '、') : '下一年四化待排出');
   const forecastGuide = [
     `【${opts.year + 1} 年风向标】干支偏「${nextY?.heavenlyStem ?? ''}${nextY?.earthlyBranch ?? ''}」。`,
     `下一年四化：${nextLine}。`,
@@ -385,7 +385,6 @@ export function buildDecade(opts: {
   astrolabe: { horoscope: (date: string) => { decadal?: HoroscopeDecadal } };
   palaces: PalaceSnap[];
 }): DecadeAdvice {
-  const labels = ['禄', '权', '科', '忌'] as const;
   const h = opts.astrolabe.horoscope(opts.dateStr);
   const d = h.decadal;
   const idx = typeof d?.index === 'number' ? d.index : -1;
@@ -399,9 +398,10 @@ export function buildDecade(opts: {
   const majorStars = palace?.majors.map((s) => s.name) ?? [];
   const mutagen = d?.mutagen ?? [];
   const mutagenLine =
-    mutagen.length > 0
-      ? mutagen.map((name, i) => `${name}化${labels[i] ?? ''}`).join('、')
-      : '大限四化暂缺';
+    formatMutagenWithPalaces(mutagen, opts.palaces, '、') ||
+    (mutagen.length
+      ? formatMutagenLine(mutagen).replace(/ · /g, '、')
+      : '大限四化未能排出，请核对生辰');
 
   const labelName = String(d?.name ?? '大限');
   const started = idx >= 0 && Boolean(palace);
