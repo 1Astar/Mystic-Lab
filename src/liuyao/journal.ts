@@ -4,6 +4,23 @@ import { LINE_LABELS } from './hexagrams.ts';
 import { ensureSceneTags, normalizeSceneTags } from '../life/scene-tags.ts';
 import { currentReadingSubject } from '../life/reading-subject.ts';
 
+export type LiuyaoAiTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+  at: string;
+};
+
+/** 一次深度解读 / 追问会话（落入手札，复原可回看） */
+export type LiuyaoAiSession = {
+  id: string;
+  kind: 'deep' | 'followup';
+  createdAt: string;
+  updatedAt: string;
+  /** 深度解读正文（贴合你） */
+  deepReading?: string;
+  turns: LiuyaoAiTurn[];
+};
+
 export type LiuyaoJournalEntry = {
   id: string;
   createdAt: string;
@@ -30,6 +47,8 @@ export type LiuyaoJournalEntry = {
   sceneTags?: string[];
   subjectId?: string;
   subjectName?: string;
+  /** AI 深度解读与追问（可多段） */
+  aiSessions?: LiuyaoAiSession[];
 };
 
 const STORAGE_KEY = 'mystic-lab-liuyao-journal';
@@ -48,6 +67,7 @@ function normalize(entry: LiuyaoJournalEntry): LiuyaoJournalEntry {
     sceneTags: normalizeSceneTags(entry.sceneTags),
     subjectId: entry.subjectId,
     subjectName: entry.subjectName,
+    aiSessions: Array.isArray(entry.aiSessions) ? entry.aiSessions : [],
   };
 }
 
@@ -96,6 +116,7 @@ export function saveLiuyaoJournalEntry(input: {
     sceneTags: ensureSceneTags(input.question, input.sceneTags),
     subjectId: subject.subjectId,
     subjectName: subject.subjectName,
+    aiSessions: [],
   };
   const list = loadLiuyaoJournal();
   list.unshift(entry);
@@ -125,6 +146,73 @@ export function updateLiuyaoFulfilled(id: string, fulfilled: boolean): void {
   if (i < 0) return;
   list[i] = { ...list[i]!, fulfilled };
   persist(list);
+}
+
+/** 写入一次深度解读，返回 sessionId */
+export function saveLiuyaoAiDeepReading(
+  journalId: string,
+  deepReading: string,
+): string | null {
+  const text = deepReading.trim();
+  if (!journalId || !text) return null;
+  const list = loadLiuyaoJournal();
+  const i = list.findIndex((e) => e.id === journalId);
+  if (i < 0) return null;
+  const now = new Date().toISOString();
+  const session: LiuyaoAiSession = {
+    id: crypto.randomUUID(),
+    kind: 'deep',
+    createdAt: now,
+    updatedAt: now,
+    deepReading: text,
+    turns: [{ role: 'assistant', content: text, at: now }],
+  };
+  const prev = list[i]!;
+  const sessions = [...(prev.aiSessions ?? []), session].slice(-8);
+  list[i] = { ...prev, aiSessions: sessions };
+  persist(list);
+  return session.id;
+}
+
+/** 追加追问回合到已有 session；无 session 则新建 followup */
+export function appendLiuyaoAiTurns(
+  journalId: string,
+  sessionId: string | null | undefined,
+  turns: Array<{ role: 'user' | 'assistant'; content: string }>,
+): string | null {
+  if (!journalId || !turns.length) return null;
+  const list = loadLiuyaoJournal();
+  const i = list.findIndex((e) => e.id === journalId);
+  if (i < 0) return null;
+  const now = new Date().toISOString();
+  const prev = list[i]!;
+  const sessions = [...(prev.aiSessions ?? [])];
+  let sid = sessionId ?? '';
+  let idx = sid ? sessions.findIndex((s) => s.id === sid) : -1;
+  if (idx < 0) {
+    const created: LiuyaoAiSession = {
+      id: crypto.randomUUID(),
+      kind: 'followup',
+      createdAt: now,
+      updatedAt: now,
+      turns: [],
+    };
+    sessions.push(created);
+    idx = sessions.length - 1;
+    sid = created.id;
+  }
+  const cur = sessions[idx]!;
+  sessions[idx] = {
+    ...cur,
+    updatedAt: now,
+    turns: [
+      ...cur.turns,
+      ...turns.map((t) => ({ role: t.role, content: t.content, at: now })),
+    ].slice(-40),
+  };
+  list[i] = { ...prev, aiSessions: sessions.slice(-8) };
+  persist(list);
+  return sid;
 }
 
 export function journalMetaLine(entry: LiuyaoJournalEntry): string {

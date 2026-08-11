@@ -157,31 +157,32 @@ export const SPREADS: Record<SpreadType, SpreadDefinition> = {
   custom: {
     type: 'custom',
     name: '自定义牌阵',
-    description: '自己决定张数与位置名',
-    bestFor: '熟悉牌阵、想按自己的问法摆',
-    lightHint: '适合：想自己定抽几张、每个位置叫什么。',
-    moreHint: '选 2–7 张，为每个位置起名。怎么摆由你定义；解读会按你写的位置名来对照。',
+    description: '直接抽牌，自己摆到桌面上',
+    bestFor: '不想用固定阵位、想随手摆',
+    lightHint: '适合：直接抽卡，自己决定摆在哪儿。',
+    moreHint:
+      '不用预先起名或定张数。抽一张摆一张；摆够了就能翻开解读（建议至少 2 张，最多 7 张）。',
     positions: [
       {
         key: 'custom-1',
-        label: '位置 1',
-        labelEn: 'Pos 1',
-        meaning: '你为这个位置定义的含义。',
-        teachBefore: '这是你自定义的第一张。',
+        label: '第 1 张',
+        labelEn: 'Card 1',
+        meaning: '你摆放的第一张牌。',
+        teachBefore: '抽出后，摆到你想要的位置。',
       },
       {
         key: 'custom-2',
-        label: '位置 2',
-        labelEn: 'Pos 2',
-        meaning: '你为这个位置定义的含义。',
-        teachBefore: '这是你自定义的第二张。',
+        label: '第 2 张',
+        labelEn: 'Card 2',
+        meaning: '你摆放的第二张牌。',
+        teachBefore: '继续抽一张，摆到桌面上。',
       },
       {
         key: 'custom-3',
-        label: '位置 3',
-        labelEn: 'Pos 3',
-        meaning: '你为这个位置定义的含义。',
-        teachBefore: '这是你自定义的第三张。',
+        label: '第 3 张',
+        labelEn: 'Card 3',
+        meaning: '你摆放的第三张牌。',
+        teachBefore: '再抽一张，自己决定落点。',
       },
     ],
   },
@@ -209,21 +210,26 @@ export function buildCustomPositions(labels: string[]): SpreadPosition[] {
   const count = clampCustomCount(cleaned.length || 3);
   const positions: SpreadPosition[] = [];
   for (let i = 0; i < count; i += 1) {
-    const label = cleaned[i] || `位置 ${i + 1}`;
+    const label = cleaned[i] || `第 ${i + 1} 张`;
     positions.push({
       key: `custom-${i + 1}`,
       label,
-      labelEn: `Pos ${i + 1}`,
-      meaning: `「${label}」位置：对照你为这个位置写下的含义来读牌。`,
-      teachBefore: `下一张落在「${label}」。`,
+      labelEn: `Card ${i + 1}`,
+      meaning: `你摆放的「${label}」。`,
+      teachBefore: `抽出后，摆到你想要的位置。`,
     });
   }
   return positions;
 }
 
-export function defaultCustomLabels(count = 3): string[] {
+/** 自由摆放：预留上限张数，抽够可提前结束 */
+export function freeCustomLabels(count = CUSTOM_SPREAD_MAX): string[] {
   const n = clampCustomCount(count);
-  return Array.from({ length: n }, (_, i) => `位置 ${i + 1}`);
+  return Array.from({ length: n }, (_, i) => `第 ${i + 1} 张`);
+}
+
+export function defaultCustomLabels(count = 3): string[] {
+  return freeCustomLabels(count);
 }
 
 export function resolveSpread(
@@ -232,11 +238,10 @@ export function resolveSpread(
 ): SpreadDefinition {
   const base = SPREADS[type] ?? SPREADS['past-present-future'];
   if (type === 'custom' && customPositions && customPositions.length > 0) {
-    const labels = customPositions.map((p) => p.label).join(' · ');
     return {
       ...base,
-      name: `自定义 · ${labels}`,
-      description: labels,
+      name: '自定义牌阵',
+      description: `自由摆放 · ${customPositions.length} 张`,
       positions: customPositions,
     };
   }

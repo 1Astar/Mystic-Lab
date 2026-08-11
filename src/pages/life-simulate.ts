@@ -10,6 +10,8 @@ import {
   saveSimulation,
 } from '../life/storage.ts';
 import type { ChoiceSimulation } from '../life/types.ts';
+import { draftGeneric } from '../share/drafts.ts';
+import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -64,7 +66,7 @@ export function renderLifeSimulate(root: HTMLElement): () => void {
 
     <section class="life-card life-now-card">
       <p class="life-card-kicker">现在的我</p>
-      <p>${escapeHtml(store.profile.occupation || '职业未填')} · ${escapeHtml(store.profile.city || '城市未填')}${store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''}</p>
+      <p>${escapeHtml(store.profile.occupation || '职业未填')} · ${escapeHtml(store.profile.city || '现居地未填')}${store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''}</p>
     </section>
 
     <form class="life-form" id="life-sim-form">
@@ -128,7 +130,30 @@ export function renderLifeSimulate(root: HTMLElement): () => void {
           ? `<p class="life-sim-foot">已标记一条轨迹。可以过几周回来对照：现实有没有朝这个方向滑动？</p>`
           : ''
       }
+      <div class="ms-invite-host" data-life-invite></div>
     `;
+
+    const inviteHost = resultEl.querySelector('[data-life-invite]');
+    if (inviteHost) {
+      mountInviteCompanionBar(inviteHost as HTMLElement, {
+        unitLabel: '这次推演',
+        system: 'life',
+        draft: () => {
+          const sections = sim.branches.map((b) => ({
+            heading: `${b.label} · ${b.title}`,
+            body: `${b.trajectory.join(' → ')}\n${b.note}`,
+          }));
+          return draftGeneric({
+            system: 'life',
+            headline: '选择模拟',
+            question: sim.question,
+            summary: sim.branches.map((b) => `${b.label}:${b.title}`).join(' · '),
+            sections,
+            label: sim.horizonLabel,
+          });
+        },
+      });
+    }
 
     resultEl.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((btn) => {
       btn.addEventListener('click', () => {

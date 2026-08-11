@@ -65,3 +65,44 @@ export function wuxingClass(el: WuXing | string | undefined): string {
       return '';
   }
 }
+
+/** 纳音末字五行，如「大溪水」→ 水 */
+export function nayinWuxing(nayin: string): WuXing | '' {
+  const last = nayin.trim().slice(-1);
+  if (last === '木' || last === '火' || last === '土' || last === '金' || last === '水') {
+    return last;
+  }
+  return '';
+}
+
+export function nayinWxClass(nayin: string): string {
+  return wuxingClass(nayinWuxing(nayin));
+}
+
+/** 八字页氛围 data-bazi-wx 键：mu|huo|tu|jin|shui */
+export function baziWxAuraKey(wx: WuXing | string | undefined): string {
+  switch (wx) {
+    case '木':
+      return 'mu';
+    case '火':
+      return 'huo';
+    case '土':
+      return 'tu';
+    case '金':
+      return 'jin';
+    case '水':
+      return 'shui';
+    default:
+      return '';
+  }
+}
+
+/** 只染当前八字页根节点，不改全局 theme */
+export function applyBaziPageAura(
+  el: HTMLElement,
+  wx: WuXing | string | undefined,
+): void {
+  const key = baziWxAuraKey(wx);
+  if (key) el.dataset.baziWx = key;
+  else delete el.dataset.baziWx;
+}

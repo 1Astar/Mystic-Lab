@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { renderSixGodIcon, SIX_GODS } from '../xiaoliuren/six-gods.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 
@@ -21,7 +21,7 @@ export function renderXiaoliurenCodex(root: HTMLElement): void {
 
   const header = document.createElement('header');
   header.innerHTML = `
-    <h1 class="page-title">六神图鉴</h1>
+    <h1 class="page-title">六神探索</h1>
     <p class="page-subtitle">会用 · 为什么 · 多场景案例</p>
   `;
   page.append(header);

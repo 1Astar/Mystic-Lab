@@ -1,0 +1,399 @@
+﻿import { navigate } from '../router.ts';
+import { mountEnvBanner } from '../ui/banner.ts';
+import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
+import { createStarsLayer } from '../tarot/animations.ts';
+import { buildBaziAnswerPack } from '../bazi/build-pack.ts';
+import { castBaziChart } from '../bazi/cast.ts';
+import { buildBaziPortrait } from '../bazi/portrait-template.ts';
+import { buildEnergyBalance } from '../bazi/sense-energy.ts';
+import { buildYearForecast } from '../bazi/sense-forecast.ts';
+import { buildRealityInsight } from '../bazi/sense-insight.ts';
+import { buildTraditionOrigin } from '../bazi/sense-origin.ts';
+import { buildSeasonTone } from '../bazi/sense-season.ts';
+import { buildShenShaMarks } from '../bazi/sense-shensha.ts';
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
+import {
+  getActivePerson,
+  hasBirthInfo,
+  loadLifeStore,
+} from '../life/storage.ts';
+import { loadRectifyAdoption } from '../bazi/rectify-adoption.ts';
+import { draftFromBazi } from '../share/drafts.ts';
+import {
+  bindAnswerPackGestures,
+  renderAnswerPackHtml,
+} from '../mystic-engine/render-pack.ts';
+import { unlockBaziCodexFromChart } from '../bazi/codex.ts';
+import { WUXING_LORE, stemBranchById } from '../bazi/codex-lore.ts';
+import { getStarCard } from '../bazi/codex-tags.ts';
+import { showUnlockToast } from '../ui/unlock-toast.ts';
+import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
+import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
+import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
+import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
+import { buildBaziPageFaq } from '../bazi/page-faq.ts';
+import { applyBaziChartAura, clearBaziChartAura } from '../bazi/page-aura.ts';
+import { wuxingClass } from '../bazi/elements.ts';
+
+const Q_KEY = 'mystic.bazi.reading.q';
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function loadQuestion(): string {
+  try {
+    return sessionStorage.getItem(Q_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+function saveQuestion(q: string): void {
+  try {
+    sessionStorage.setItem(Q_KEY, q);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function renderBaziReading(root: HTMLElement): () => void {
+  const stars = createStarsLayer();
+  document.body.appendChild(stars);
+
+  const page = document.createElement('div');
+  page.className = 'page life-page bazi-reading-page';
+  mountEnvBanner(page);
+
+  let question = loadQuestion();
+  let unlockedOnce = false;
+  let disposeFloat: (() => void) | null = null;
+
+  function maybeUnlockCodex(chart: Parameters<typeof unlockBaziCodexFromChart>[0]): void {
+    if (unlockedOnce) return;
+    unlockedOnce = true;
+    const unlocked = unlockBaziCodexFromChart(chart);
+    if (unlocked.newly.length === 0) return;
+    const first = unlocked.newly[0]!;
+    const star = getStarCard(first.id);
+    const name =
+      first.kind === 'wuxing'
+        ? `${WUXING_LORE[first.id as keyof typeof WUXING_LORE]?.title ?? first.id} · ${first.reason ?? '已点亮'}`
+        : star
+          ? `${star.modern} · ${star.name}`
+          : (stemBranchById(first.id)?.title ?? first.id);
+    showUnlockToast({
+      isFirstTime: true,
+      count: unlocked.total,
+      cardName: name,
+      intoLabel: '已收入八字探索',
+    });
+  }
+
+  function paint(): void {
+    const store = loadLifeStore();
+    const person = getActivePerson();
+    const ready = hasBirthInfo(store.profile) && Boolean(store.profile.birthYear.trim());
+
+    if (!ready) {
+      clearBaziChartAura(page);
+      page.innerHTML = `
+        <button type="button" class="back-link life-back">← 返回八字</button>
+        <header class="life-header">
+          <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
+          <h1 class="page-title">我的命盘</h1>
+          <p class="page-subtitle">需要先填写出生年月日</p>
+        </header>
+        <section class="life-profile-gate">
+          <div>
+            <p class="life-card-kicker">还不能速读</p>
+            <p class="life-gate-brief">回到八字首页填写出生信息。</p>
+          </div>
+          <button type="button" class="life-btn-primary" data-path="/bazi?edit=1">去填写</button>
+        </section>
+      `;
+      bindNav();
+      mountLabReadingTopbar(page, {
+        backPath: '/',
+        backLabel: '← Lab',
+        person: { onChange: () => paint() },
+      });
+      return;
+    }
+
+    const yearNow = new Date().getFullYear();
+    const chartResult = castBaziChart(store.profile, yearNow, {
+      includeLiunian: true,
+      gender: person.gender,
+    });
+    if ('error' in chartResult) {
+      clearBaziChartAura(page);
+      page.innerHTML = `
+        <button type="button" class="back-link life-back">← 返回八字</button>
+        <header class="life-header">
+          <h1 class="page-title">我的命盘</h1>
+          <p class="page-subtitle">${escapeHtml(chartResult.error)}</p>
+        </header>
+        <button type="button" class="life-btn-primary" data-path="/bazi?edit=1">回去改出生信息</button>
+      `;
+      bindNav();
+      return;
+    }
+
+    applyBaziChartAura(page, chartResult);
+    const portrait = buildBaziPortrait(chartResult, {
+      gender: person.gender,
+    });
+    maybeUnlockCodex(chartResult);
+    const insight = buildRealityInsight(chartResult);
+    const season = buildSeasonTone(chartResult);
+    const energy = buildEnergyBalance(chartResult);
+    const forecast = buildYearForecast(chartResult, store.profile, {
+      gender: person.gender,
+      year: yearNow,
+    });
+    const marks = buildShenShaMarks(chartResult, 5);
+    const origin = buildTraditionOrigin(chartResult, store.profile, marks, {
+      gender: person.gender,
+      year: yearNow,
+    });
+    const pack = buildBaziAnswerPack({
+      question,
+      chart: chartResult,
+      gender: person.gender,
+    });
+    const cards: Array<{ title: string; body: string }> = [
+      { title: '性格底色', body: portrait.personality },
+      { title: '事业倾向', body: portrait.career },
+      { title: '关系模式', body: portrait.relationship },
+      { title: '财富方式', body: portrait.wealth },
+      { title: '内在课题', body: portrait.innerWork },
+    ];
+    const packHtml = renderAnswerPackHtml(pack, {
+      lead: question.trim() ? `就你的问题「${question.trim()}」` : '本我 · 命盘速读',
+      topicLabel: SYSTEM_POSITION.bazi,
+    });
+
+    const energyBars = energy.bars
+      .map(
+        (b) => `
+      <div class="bazi-energy-bar ${wuxingClass(b.wx)}${energy.shortage === b.wx ? ' is-short' : ''}${energy.excess === b.wx ? ' is-hot' : ''}">
+        <span class="bazi-energy-label">${escapeHtml(b.wx)}</span>
+        <span class="bazi-energy-track"><span class="bazi-energy-fill" style="width:${b.pct}%"></span></span>
+      </div>`,
+      )
+      .join('');
+
+    const marksHtml = marks.length
+      ? `<section class="bazi-sense-block bazi-sense-marks" aria-label="命盘印记">
+        <p class="bazi-sense-kicker">命盘印记</p>
+        <div class="bazi-mark-row">
+          ${marks
+            .map(
+              (m) =>
+                `<span class="bazi-mark-chip${m.needsComfort ? ' is-soft' : ''}">${escapeHtml(m.label)}</span>`,
+            )
+            .join('')}
+        </div>
+        ${marks
+          .filter((m) => m.needsComfort)
+          .map((m) => `<p class="bazi-mark-comfort">${escapeHtml(m.comfort)}</p>`)
+          .join('')}
+        ${marks
+          .filter((m) => !m.needsComfort)
+          .slice(0, 1)
+          .map((m) => `<p class="bazi-mark-comfort is-gentle">${escapeHtml(m.comfort)}</p>`)
+          .join('')}
+      </section>`
+      : '';
+
+    page.innerHTML = `
+      <button type="button" class="back-link life-back">← Lab</button>
+      ${baziSysTabsHtml('reading')}
+      <header class="life-header">
+        <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
+        <p class="home-eyebrow">MY BIRTH CODE</p>
+        <h1 class="page-title">我的命盘</h1>
+        <p class="page-subtitle">${SYSTEM_POSITION.bazi}</p>
+      </header>
+
+      ${(() => {
+        const ad = loadRectifyAdoption();
+        if (!ad) return '';
+        const alts = ad.alternatives
+          .slice(0, 2)
+          .map((a) => `${a.branch}时 ${a.confidencePct}%`)
+          .join(' · ');
+        return `<aside class="bazi-rectify-adopt-banner" aria-label="暂定时辰">
+          <p><strong>当前采用：${escapeHtml(ad.label)}</strong> · 可信度${escapeHtml(ad.confidenceLabel)}（${ad.confidencePct}%）</p>
+          ${alts ? `<p>可选候选：${escapeHtml(alts)}</p>` : ''}
+          <p><button type="button" class="life-btn-ghost" data-path="/bazi/rectify">重新校准 ›</button></p>
+        </aside>`;
+      })()}
+
+      <section class="bazi-sense-block bazi-sense-insight" aria-label="现实感悟">
+        <p class="bazi-sense-kicker">✨ 你的现实感悟</p>
+        <h2 class="bazi-sense-title">${escapeHtml(insight.title)}</h2>
+        <p class="bazi-insight-hook">${escapeHtml(insight.hook)}</p>
+        <p class="bazi-sense-body bazi-insight-story">${escapeHtml(insight.story)}</p>
+      </section>
+
+      <section class="bazi-sense-block bazi-sense-season" aria-label="季节定调">
+        <p class="bazi-sense-kicker">核心定调</p>
+        <h2 class="bazi-sense-title">${escapeHtml(season.title)}</h2>
+        <p class="bazi-sense-tag">${escapeHtml(season.tagline)}</p>
+        <p class="bazi-sense-body">${escapeHtml(season.body)}</p>
+      </section>
+
+      <section class="bazi-sense-block bazi-sense-energy" aria-label="能量平衡">
+        <p class="bazi-sense-kicker">能量状态</p>
+        <h2 class="bazi-sense-title">${escapeHtml(energy.headline)}</h2>
+        <p class="bazi-sense-tag">你的能量状态犹如一场「${escapeHtml(energy.weatherMeta)}」</p>
+        <div class="bazi-energy-bars" role="img" aria-label="五行能量柱">${energyBars}</div>
+        <p class="bazi-sense-body">${escapeHtml(energy.body)}</p>
+        <p class="bazi-sense-remedy">${escapeHtml(energy.remedy)}</p>
+      </section>
+
+      <section class="bazi-sense-block bazi-sense-forecast" aria-label="年度天气预报">
+        <p class="bazi-sense-kicker">大运与流年</p>
+        <h2 class="bazi-sense-title">${escapeHtml(forecast.title)}</h2>
+        <p class="bazi-sense-weather">${escapeHtml(forecast.weather)}</p>
+        <p class="bazi-sense-body">${escapeHtml(forecast.scene)}</p>
+        <p class="bazi-sense-advice"><strong>建议</strong> · ${escapeHtml(forecast.advice)}</p>
+        ${forecast.decadeNote ? `<p class="bazi-sense-decade">${escapeHtml(forecast.decadeNote)}</p>` : ''}
+      </section>
+
+      ${marksHtml}
+
+      <p class="bazi-reading-keyword">${escapeHtml(portrait.keyword)}</p>
+
+      <section class="bazi-reading-cards" aria-label="五域速读">
+        ${cards
+          .map(
+            (c) => `
+          <article class="bazi-reading-card">
+            <h2>${escapeHtml(c.title)}</h2>
+            <p>${escapeHtml(c.body)}</p>
+          </article>`,
+          )
+          .join('')}
+      </section>
+
+      <section class="bazi-reading-ask" aria-label="此刻想问">
+        <h2 class="life-route-title">此刻更想确认</h2>
+        <label class="life-field life-field-full">
+          <span>一句话问题（可选）</span>
+          <input type="text" id="bazi-reading-q" maxlength="120" placeholder="例如：要不要换工作？" value="${escapeHtml(question)}" />
+        </label>
+        <button type="button" class="life-btn-ghost" id="bazi-reading-ask-go">更新离线答问</button>
+      </section>
+
+      <div class="bazi-pack-host" data-bazi-pack>${packHtml}</div>
+
+      <details class="bazi-origin-fold">
+        <summary>
+          <span>传统命理溯源</span>
+          <em>点击展开</em>
+        </summary>
+        <div class="bazi-origin-body">
+          ${origin.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}
+        </div>
+      </details>
+
+      <div class="bazi-reading-actions">
+        <button type="button" class="life-btn-primary" data-path="/bazi/chart">想看为什么？进入命盘解析 ›</button>
+        <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/bazi/rectify">
+          <strong>觉得不准？试试生时校准</strong>
+          <span>用大事件反推更贴近的时辰</span>
+          <em aria-hidden="true">›</em>
+        </button>
+        <button type="button" class="life-btn-ghost" data-path="/bazi?edit=1">改出生信息</button>
+      </div>
+    `;
+
+    bindNav();
+    const packHost = page.querySelector<HTMLElement>('[data-bazi-pack]');
+    if (packHost) bindAnswerPackGestures(packHost);
+
+    mountLabReadingTopbar(page, {
+      backPath: '/',
+      backLabel: '← Lab',
+      person: {
+        onChange: () => paint(),
+      },
+    });
+
+    const shareDraft = () => {
+      const pillarsLabel = chartResult.pillars
+        .filter((p) => !p.empty)
+        .map((p) => `${p.title}${p.stem}${p.branch}`)
+        .join(' · ');
+      return draftFromBazi({
+        dayMaster: chartResult.dayMaster,
+        pillarsLabel,
+        question: question || '我的命盘速读',
+        summary: pack.verdict.headline,
+        sections: [{ heading: '定调', body: pack.verdict.headline }],
+      });
+    };
+
+    disposeFloat?.();
+    disposeFloat = mountLabFloatActions(page, {
+      tujianPath: '/bazi/tujian',
+      tujianLabel: '八字图鉴',
+      draftShare: shareDraft,
+      notesSystem: 'bazi',
+      notesContext: pack.verdict.headline,
+      notesLabel: '深度学习',
+      deepLabel: '深度解读',
+      onDeep: () => {
+        openLabDeepSheet({
+          system: 'bazi',
+          title: `${getActivePerson().nickname || '我'}的命盘`,
+          initialTab: 'ask',
+          presets: buildBaziPageFaq(chartResult, { question }),
+          answerConcept: answerBaziConcept,
+          onMiss: (q) => {
+            void recordBaziConceptMiss(q);
+          },
+          deepHint: '结合你的出生密码与当下问题，做一次更贴合的解读。概念题请用「边看边问」。',
+          onDeep: () => navigate('/bazi/chart'),
+        });
+      },
+    });
+
+    const qInput = page.querySelector<HTMLInputElement>('#bazi-reading-q');
+    page.querySelector('#bazi-reading-ask-go')?.addEventListener('click', () => {
+      question = qInput?.value.trim() ?? '';
+      saveQuestion(question);
+      paint();
+    });
+  }
+
+  function bindNav(): void {
+    page.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
+      if (el.classList.contains('life-back') || el.closest('.lab-reading-chrome')) return;
+      el.addEventListener('click', () => {
+        const path = el.dataset.path;
+        if (path) navigate(path);
+      });
+    });
+  }
+
+  paint();
+  root.appendChild(page);
+
+  return () => {
+    clearBaziChartAura(page);
+    stars.remove();
+    disposeFloat?.();
+    document.querySelector('[data-lab-float-dock]')?.remove();
+    document.querySelector('.lab-deep-sheet')?.remove();
+    document.querySelector('.lab-notes-sheet')?.remove();
+  };
+}

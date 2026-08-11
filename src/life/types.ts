@@ -1,5 +1,11 @@
 /** 人生宇宙 · 轻画像档案与平行世界 */
 
+import type { BirthTimeAccuracy, BirthTimeSource } from './birth-time-meta.ts';
+import {
+  normalizeBirthTimeAccuracy,
+  normalizeBirthTimeSource,
+} from './birth-time-meta.ts';
+
 export type LifeGenerationSource = 'ai' | 'template';
 
 /** 档案关系（自己 / 他人） */
@@ -32,6 +38,10 @@ export type LifeProfileInput = {
   birthDay: string;
   birthHour: string;
   birthPlace: string;
+  /** 时间精度（如实申报） */
+  birthTimeAccuracy?: BirthTimeAccuracy;
+  /** 时间来源 */
+  birthTimeSource?: BirthTimeSource;
   confusion: string;
   /** 解读风险偏好：稳健 / 均衡 / 进取 */
   riskPreference?: 'cautious' | 'balanced' | 'bold';
@@ -141,6 +151,8 @@ export const EMPTY_PROFILE: LifeProfileInput = {
   birthDay: '',
   birthHour: '',
   birthPlace: '',
+  birthTimeAccuracy: '',
+  birthTimeSource: '',
   confusion: '',
 };
 
@@ -156,6 +168,8 @@ export function toLifeProfileInput(
     birthDay: p.birthDay ?? '',
     birthHour: p.birthHour ?? '',
     birthPlace: p.birthPlace ?? '',
+    birthTimeAccuracy: normalizeBirthTimeAccuracy(p.birthTimeAccuracy),
+    birthTimeSource: normalizeBirthTimeSource(p.birthTimeSource),
     confusion: p.confusion ?? '',
     riskPreference: p.riskPreference,
   };

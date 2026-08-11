@@ -12,6 +12,7 @@ describe('classic-corpus', () => {
     expect(c?.judgment).toBeTruthy();
     expect(c?.lineClassics.length).toBe(6);
     expect(c?.zengshan).toContain('增删卜易');
+    expect(c?.zengshan).toMatch(/愉悦|响应|预备|主「/);
   });
 });
 

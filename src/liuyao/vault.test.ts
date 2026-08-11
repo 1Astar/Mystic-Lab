@@ -86,6 +86,6 @@ describe('liuyao vault', () => {
   it('empty journal has zero collected', () => {
     const snap = buildVaultSnapshot();
     expect(snap.collected).toBe(0);
-    expect(meetLineFor(null)).toMatch(/点亮图鉴/);
+    expect(meetLineFor(null)).toMatch(/点亮探索/);
   });
 });

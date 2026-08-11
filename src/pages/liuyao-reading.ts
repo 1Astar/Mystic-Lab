@@ -328,7 +328,11 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     stage.innerHTML = `
       <div class="ly-step ly-step-casting">
         <p class="ly-step-kicker">${kicker}</p>
-        <p class="ly-cast-hint-top">点击铜钱起卦 · 共六次成卦；</p>
+        ${
+          done
+            ? ''
+            : '<p class="ly-cast-hint-top">点击铜钱起卦 · 共六次成卦</p>'
+        }
         <h2 class="ly-step-title">${title}</h2>
         ${
           showYaoHints
@@ -467,27 +471,30 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
     `;
 
     const shell = stage.querySelector<HTMLElement>('[data-result-shell]')!;
-    resultTabsApi = mountLiuyaoResultTabs(shell, {
-      cast: result,
-      reading,
-      question,
-      learn,
-    });
-
     if (!journalSaved) {
       const entry = saveLiuyaoJournalEntry({
         question,
         cast: result,
         reading,
         changingLabels,
-        tags: resultTabsApi.getNoteTags(),
-        reflection: mergeReflection(resultTabsApi.getNoteDraft(), resultTabsApi.collectPrompts()),
-        castAt: resultTabsApi.getCastAt().toISOString(),
+        castAt: new Date().toISOString(),
         learnMode: learn,
       });
       journalId = entry.id;
       journalSaved = true;
       showMeetToast(result);
+    }
+
+    resultTabsApi = mountLiuyaoResultTabs(shell, {
+      cast: result,
+      reading,
+      question,
+      learn,
+      journalId,
+    });
+
+    if (journalId && resultTabsApi) {
+      updateLiuyaoTags(journalId, resultTabsApi.getNoteTags());
     }
 
     const noteFold = shell.querySelector('.ly-peer-note');

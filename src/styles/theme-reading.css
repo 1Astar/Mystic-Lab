@@ -1,0 +1,591 @@
+/**
+ * 阅读面主题适配：板块底色 + 正文对比度
+ * 星夜/月白共用变量；硬编码暗色面在月白下改为宣纸面。
+ */
+
+/* —— 全局：辅助字对比度底线 —— */
+.page {
+  color: var(--ink);
+}
+
+.page .page-subtitle,
+.page .ziwei-lead,
+.page .life-status {
+  color: var(--ink-muted);
+}
+
+/* —— 五行语义色跟主题 —— */
+.wx-mu { color: var(--wx-mu) !important; }
+.wx-huo { color: var(--wx-huo) !important; }
+.wx-tu { color: var(--wx-tu) !important; }
+.wx-jin { color: var(--wx-jin) !important; }
+.wx-shui { color: var(--wx-shui) !important; }
+
+/* —— 八字盘面 —— */
+.bazi-chart-page .bazi-meta,
+.bazi-year-field,
+.bazi-grid-wrap,
+.bazi-luck-rail,
+.bazi-season-chip {
+  border-color: var(--line);
+}
+
+.bazi-chart-page .bazi-meta {
+  background: var(--surface-1);
+  color: var(--surface-ink);
+}
+
+.bazi-chart-page .bazi-meta-note {
+  color: var(--gold);
+}
+
+.bazi-year-field {
+  background: var(--surface-1);
+  color: var(--surface-ink);
+}
+
+.bazi-year-field input {
+  color: var(--ink);
+}
+
+.bazi-grid-wrap {
+  background: var(--surface-2);
+  box-shadow: none;
+}
+
+.bazi-grid thead th,
+.bazi-grid .bazi-row-label,
+.bazi-grid tbody th,
+.bazi-god,
+.bazi-hidden,
+.bazi-na,
+.bazi-note,
+.bazi-luck-meta,
+.bazi-luck-chip em,
+.bazi-luck-chip span {
+  color: var(--surface-muted);
+}
+
+.bazi-grid thead th em {
+  color: var(--gold);
+}
+
+.bazi-shensha .bazi-term,
+.bazi-zhishen .bazi-term,
+.bazi-meta-cell {
+  color: var(--surface-ink);
+}
+
+.bazi-col-liunian {
+  background: var(--gold-soft);
+}
+
+/* 大运/流年横滑列 */
+.bazi-luck {
+  border-color: var(--line);
+  background: var(--surface-2);
+  box-shadow: none;
+}
+
+.bazi-luck-meta,
+.bazi-luck-label,
+.bazi-luck-year,
+.bazi-luck-jieqi,
+.bazi-luck-age,
+.bazi-luck-date,
+.bazi-luck-xiao,
+.bazi-luck-empty,
+.bazi-luck-gz em,
+.bazi-luck-note {
+  color: var(--surface-muted);
+}
+
+.bazi-luck-label {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.bazi-luck-row,
+.bazi-luck-note {
+  border-top-color: var(--line-soft, var(--line));
+}
+
+.bazi-luck-col {
+  color: var(--surface-ink);
+  border-right-color: var(--line-soft, var(--line));
+}
+
+.bazi-luck-col.is-current,
+.bazi-luck-col.is-selected {
+  background: var(--gold-soft);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.bazi-luck-col.is-current .bazi-luck-age,
+.bazi-luck-col.is-selected .bazi-luck-age,
+.bazi-luck-col.is-current .bazi-luck-xiao,
+.bazi-luck-col.is-selected .bazi-luck-xiao,
+.bazi-luck-col.is-current .bazi-luck-gz em,
+.bazi-luck-col.is-selected .bazi-luck-gz em {
+  color: var(--gold);
+}
+
+/* —— 人生/八字通用卡片底 —— */
+.life-card,
+.life-panel,
+.life-block,
+.bazi-section,
+.bazi-panel {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.life-card-body,
+.life-muted,
+.bazi-muted {
+  color: var(--ink);
+}
+
+.life-home-page .life-focus-note,
+.life-home-page .life-profile-gate,
+.life-home-page .life-route,
+.life-home-page .life-route-card {
+  border: none !important;
+  box-shadow: none;
+}
+
+.life-home-page .life-gate-brief,
+.life-home-page .life-route-desc,
+.life-home-page .life-route-tip,
+.life-home-page .life-ai-hint {
+  color: var(--ink-muted) !important;
+}
+
+.life-home-page .life-focus-note p:last-child,
+.life-home-page .life-route-title,
+.life-home-page .life-route-body strong {
+  color: var(--ink) !important;
+}
+
+.life-home-page .life-focus-tag,
+.life-home-page .life-card-kicker,
+.life-home-page .page-title {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+.life-home-page .life-btn-primary {
+  color: var(--surface-ink, var(--ink));
+}
+
+html[data-theme='star'] .life-home-page .life-btn-primary {
+  color: #1a1228;
+}
+
+/* —— 紫微仪盘 —— */
+.ziwei-plate-grid {
+  border-color: var(--chart-line);
+  background:
+    radial-gradient(ellipse at 50% 48%, var(--chart-bg-glow), transparent 55%),
+    var(--chart-bg);
+}
+
+.ziwei-plate-nav {
+  border-bottom-color: var(--line);
+}
+
+.ziwei-plate-nav-item,
+.ziwei-plate-nav-lines {
+  color: var(--ink-muted);
+}
+
+.ziwei-plate-nav-item.is-on,
+.ziwei-plate-nav-lines.is-on {
+  color: var(--gold);
+}
+
+.ziwei-plate-nav-item.is-on::after {
+  background: var(--gold);
+}
+
+.ziwei-plate-cell {
+  border-right-color: color-mix(in srgb, var(--chart-line) 55%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--chart-line) 55%, transparent);
+  color: var(--ink);
+}
+
+.ziwei-plate-star {
+  color: var(--chart-star);
+}
+
+.ziwei-plate-star.is-minor,
+.ziwei-plate-minors {
+  color: var(--chart-minor);
+}
+
+.ziwei-plate-foot {
+  border-top-color: var(--line-soft, var(--line));
+}
+
+.ziwei-plate-name {
+  color: color-mix(in srgb, var(--gold) 55%, #a05060);
+}
+
+.ziwei-plate-gz {
+  color: color-mix(in srgb, var(--ink-muted) 70%, #6a8cbc);
+}
+
+.ziwei-plate-decadal,
+.ziwei-plate-more,
+.ziwei-plate-empty {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .ziwei-plate-name {
+  color: #8a4050;
+}
+
+html[data-theme='moon'] .ziwei-plate-gz {
+  color: #3d5f8a;
+}
+
+.ziwei-plate-rel-label {
+  fill: var(--ink);
+  stroke: color-mix(in srgb, var(--chart-bg) 88%, transparent);
+}
+
+.ziwei-plate-status-hit span {
+  border-color: var(--line);
+  background: var(--gold-soft);
+  color: var(--ink-muted);
+}
+
+/* —— 紫微运限 —— */
+.ziwei-limit {
+  border-top-color: var(--line);
+}
+
+.ziwei-limit-kicker,
+.ziwei-limit-label {
+  color: var(--gold);
+}
+
+.ziwei-limit-summary,
+.ziwei-limit-fold,
+.ziwei-limit-chip,
+.ziwei-limit-chip em {
+  color: var(--ink-muted);
+}
+
+.ziwei-limit-fold.is-open,
+.ziwei-limit-chip.is-on {
+  color: var(--gold);
+}
+
+.ziwei-limit-chip.is-on em {
+  color: color-mix(in srgb, var(--gold) 75%, var(--ink-muted));
+}
+
+.ziwei-limit-chip.is-on::after {
+  background: var(--gold);
+}
+
+.ziwei-limit-row,
+.ziwei-limit-row.is-nested {
+  border-bottom-color: var(--line-soft, var(--line));
+}
+
+/* —— 紫微叙事正文（防浅灰看不清） —— */
+.ziwei-page .ziwei-decade-lead,
+.ziwei-page .ziwei-combo-line,
+.ziwei-page .ziwei-headline-text,
+.ziwei-page .ziwei-annual-advice,
+.ziwei-page .ziwei-pillar-body,
+.ziwei-page .ziwei-forecast-body,
+.ziwei-page .ziwei-comfort p:last-child {
+  color: var(--ink);
+}
+
+.ziwei-page .ziwei-combo-myth,
+.ziwei-page .ziwei-mutagen-inline,
+.ziwei-page .ziwei-annual-meta,
+.ziwei-page .ziwei-decade-meta {
+  color: var(--ink-muted);
+}
+
+/* 传统口径下钻弹层（防暗底 + 月白墨色叠糊） */
+.ziwei-drill-sheet {
+  color: var(--ink);
+}
+
+.ziwei-drill-panel {
+  background: var(--drawer-bg, var(--surface-1)) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+  box-shadow: var(--shadow);
+}
+
+.ziwei-drill-panel h2,
+.ziwei-drill-body {
+  color: var(--ink) !important;
+}
+
+.ziwei-drill-close {
+  color: var(--ink-muted) !important;
+  border-color: var(--line) !important;
+}
+
+/* —— Lab 模式 tab / 顶栏按钮（未选中也保持可读，勿用星夜浅奶油字） —— */
+.ziwei-mode-tab,
+.lab-sys-tab {
+  color: var(--ink-muted) !important;
+  border-color: var(--line) !important;
+  background: transparent;
+}
+
+.ziwei-mode-tab.is-on,
+.lab-sys-tab.is-on {
+  color: var(--gold) !important;
+  background: var(--gold-soft) !important;
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line)) !important;
+}
+
+.lab-sys-tab:hover:not(.is-on),
+.lab-sys-tab:focus-visible:not(.is-on),
+.ziwei-mode-tab:hover:not(.is-on) {
+  color: var(--ink) !important;
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line)) !important;
+}
+
+/* —— 入口卡与顶栏 / 浮钮（两主题统一吃 token） —— */
+.entry-card,
+.lab-home-page .entry-card,
+.lab-systems .entry-card {
+  background: var(--surface-1) !important;
+  border-color: var(--line) !important;
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.entry-card h2,
+.lab-home-page .entry-card h2,
+.entry-card-primary h2 {
+  color: var(--gold) !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+}
+
+.entry-card p,
+.entry-card .entry-note,
+.lab-home-page .entry-card p {
+  color: var(--ink-muted) !important;
+}
+
+.lab-guide-trigger {
+  color: var(--gold) !important;
+  opacity: 1 !important;
+}
+
+.home-eyebrow {
+  color: var(--ink-muted) !important;
+}
+
+.home-slogan {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+/* 解读页卡片：无框线 */
+.bazi-reading-page .bazi-reading-card,
+.bazi-reading-page .bazi-reading-ask,
+.bazi-reading-page .bazi-reading-keyword,
+.bazi-reading-page .ly-layer-card,
+.bazi-reading-page .ly-verdict-card {
+  border: none !important;
+  box-shadow: none;
+}
+
+.life-profile-page .life-fieldset,
+.life-profile-page .life-more,
+.life-profile-page .profile-people-item {
+  background: var(--surface-1) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+
+.life-profile-page .life-fieldset legend,
+.life-profile-page .life-more > summary {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+.life-profile-page .life-ai-hint,
+.life-profile-page .life-footnote,
+.life-profile-page .life-age-hint,
+.life-profile-page .profile-people-item em {
+  color: var(--ink-muted) !important;
+}
+
+.life-profile-page .page-title {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+.life-profile-page .birth-dt-trigger {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+
+/* 月白：卡片用宣纸白，避免残留暗紫底 */
+html[data-theme='moon'] .lab-home-page .entry-card,
+html[data-theme='moon'] .lab-systems .entry-card {
+  background: #fffdf8 !important;
+  border-color: rgba(122, 92, 30, 0.22) !important;
+  box-shadow: 0 6px 18px rgba(44, 51, 64, 0.06);
+}
+
+html[data-theme='moon'] .lab-home-page .entry-card p {
+  color: #4a5568 !important;
+}
+
+/* 星夜：卡片保持暗面，说明字用更亮的蓝灰 */
+html[data-theme='star'] .lab-home-page .entry-card p,
+html[data-theme='star'] .lab-systems .entry-card p {
+  color: #c4cce0 !important;
+}
+
+.module-topbar,
+.lab-reading-chrome,
+.lab-home-chrome {
+  color: var(--ink);
+}
+
+.module-topbar-back,
+.back-link,
+.life-back {
+  color: var(--ink-muted);
+}
+
+.question-input,
+input.question-input,
+textarea.question-input {
+  color: var(--ink);
+  background: var(--surface-1);
+  border-color: var(--line);
+}
+
+.question-input::placeholder {
+  color: var(--ink-muted);
+  opacity: 0.85;
+}
+
+/* 忌：月白下保持可读 */
+html[data-theme='moon'] .ziwei-plate-hua.is-hua-忌 {
+  background: rgba(80, 70, 60, 0.88);
+  color: #fff8ee;
+}
+
+html[data-theme='moon'] .entry-card h2 {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  color: var(--gold);
+}
+
+/* 月白头像：宣纸印钮，不再用深蓝孤岛 */
+html[data-theme='moon'] .lab-avatar-btn {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 248, 230, 0.95), transparent 52%),
+    linear-gradient(155deg, #fffdf8, #f0e6d2);
+  color: #b8953d;
+  border-color: color-mix(in srgb, var(--gold) 80%, #8a6d2f);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 0 0 3px rgba(201, 168, 76, 0.16);
+}
+
+/* —— 跨模块对比度底线（共享类；模块内懒加载请自带 token） —— */
+.back-link,
+.life-back,
+.module-topbar .back-link {
+  color: var(--ink-muted);
+}
+
+.back-link:hover,
+.life-back:hover {
+  color: var(--gold);
+}
+
+.person-switch-trigger {
+  color: var(--ink);
+}
+
+.person-switch-trigger:hover,
+.person-switch-trigger:focus-visible {
+  color: var(--gold);
+}
+
+.journal-reflection,
+.xlr-journal-reflect,
+.ly-journal-reflect,
+textarea.question-input,
+input.question-input {
+  color: var(--ink);
+  background: var(--surface-1);
+  border-color: var(--line);
+}
+
+.journal-reflection::placeholder,
+.xlr-journal-reflect::placeholder,
+textarea.question-input::placeholder {
+  color: var(--ink-muted);
+}
+
+.lab-ask-shell,
+.lab-ask-input {
+  color: var(--ink);
+  background: var(--surface-1);
+  border-color: var(--line);
+}
+
+/* 分享深页 / 弹层：禁止奶油硬编码盖过月白阅读底 */
+.ms-view,
+.ms-share-sheet,
+.ms-invite-bar {
+  color: var(--ink);
+}
+
+.ms-view-body,
+.ms-invite-lead,
+.ms-invite-ask,
+.ms-share-q {
+  color: var(--ink);
+}
+
+.ms-view-sec h2,
+.ms-view-home,
+.ms-view-invite-title,
+.ms-invite-title,
+.ms-view-reward {
+  color: var(--gold-ink, var(--gold));
+}
+
+.ms-view-q,
+.ms-view-invite-sub,
+.ms-share-lead,
+.ms-share-hint,
+.ms-share-soft,
+.ms-invite-soft {
+  color: var(--ink-muted);
+}
+
+.ms-share-sheet {
+  background: var(--drawer-bg);
+  border-color: var(--line);
+}
+
+.ms-share-fab {
+  background: var(--surface-1);
+  border-color: var(--line);
+  color: var(--gold);
+}

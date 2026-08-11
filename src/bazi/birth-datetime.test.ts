@@ -47,3 +47,16 @@ describe('birth-datetime', () => {
     });
   });
 });
+
+describe('birth-datetime wheel index', () => {
+  it('scrollTop 与选项下标一一对应（避免垫高重复导致 +2 错位）', async () => {
+    const { scrollTopForWheelIndex, wheelIndexFromScrollTop } = await import(
+      '../ui/birth-datetime-picker.ts'
+    );
+    // 选中 2003：相对 1900 的下标 103
+    expect(scrollTopForWheelIndex(103)).toBe(103 * 40);
+    expect(wheelIndexFromScrollTop(103 * 40)).toBe(103);
+    // 旧 bug：双 80px 垫高会让视觉 2003 读成 2005（+2）
+    expect(wheelIndexFromScrollTop(103 * 40)).not.toBe(105);
+  });
+});

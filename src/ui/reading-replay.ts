@@ -2,6 +2,8 @@ import type { CodexEncounter } from '../codex/collection.ts';
 import { resolveEncounterReplay, resolveJournalReading } from '../journal/replay.ts';
 import type { JournalEntry } from '../journal/records.ts';
 import { updateJournalReadingSnapshot } from '../journal/records.ts';
+import { draftFromTarotReading } from '../share/drafts.ts';
+import { clearSideActionFabs, mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountQuestionThread, openThreadCardPeek } from './question-thread-panel.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
@@ -103,9 +105,23 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
     });
   }
 
-  const close = (): void => onClose();
+  const close = (): void => {
+    clearSideActionFabs();
+    document.documentElement.classList.remove('thread-peek-open');
+    onClose();
+  };
   container.querySelector('.reading-replay-close')?.addEventListener('click', close);
   container.querySelector('[data-close]')?.addEventListener('click', close);
+
+  mountInviteCompanionBar(container, {
+    system: 'tarot',
+    draft: () =>
+      draftFromTarotReading({
+        reading,
+        question: entry.question,
+      }),
+  });
+
   requestAnimationFrame(() => container.classList.add('is-visible'));
 }
 
@@ -115,21 +131,23 @@ export function openEncounterReplay(
   encounter: CodexEncounter,
 ): void {
   host.querySelector('.reading-replay')?.remove();
-  try {
-    const resolved = resolveEncounterReplay(cardId, encounter);
-    const overlay = document.createElement('div');
-    mountReadingReplay(overlay, {
-      entry: resolved.entry,
-      focusCardId: cardId,
-      regenerated: resolved.regenerated,
-      hydratedThread: resolved.hydratedThread,
-      onClose: () => {
-        overlay.classList.remove('is-visible');
-        window.setTimeout(() => overlay.remove(), 220);
-      },
-    });
-    host.appendChild(overlay);
-  } catch {
-    /* ignore */
-  }
+  void import('../styles/tarot.css').then(() => {
+    try {
+      const resolved = resolveEncounterReplay(cardId, encounter);
+      const overlay = document.createElement('div');
+      mountReadingReplay(overlay, {
+        entry: resolved.entry,
+        focusCardId: cardId,
+        regenerated: resolved.regenerated,
+        hydratedThread: resolved.hydratedThread,
+        onClose: () => {
+          overlay.classList.remove('is-visible');
+          window.setTimeout(() => overlay.remove(), 220);
+        },
+      });
+      host.appendChild(overlay);
+    } catch {
+      /* ignore */
+    }
+  });
 }

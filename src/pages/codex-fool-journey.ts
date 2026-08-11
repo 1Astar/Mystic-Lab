@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { openCodexCardDetail } from '../codex/detail-host.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountCodexStoryMap } from '../ui/codex-story-map.ts';
@@ -15,7 +15,7 @@ export function renderCodexFoolJourney(root: HTMLElement): void {
   const back = document.createElement('button');
   back.type = 'button';
   back.className = 'back-link';
-  back.textContent = '← 返回图鉴';
+  back.textContent = '← 返回探索';
   back.addEventListener('click', () => navigate('/tarot/tujian'));
   page.append(back);
 

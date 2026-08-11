@@ -86,7 +86,7 @@ export function resolveJournalReading(entry: JournalEntry): JournalReadingResolv
   return { reading, regenerated: true, entry };
 }
 
-/** 从图鉴相遇记录定位手札并复原完整结果 */
+/** 从探索相遇记录定位手札并复原完整结果 */
 export function findJournalForEncounter(
   cardId: string,
   encounter: CodexEncounter,

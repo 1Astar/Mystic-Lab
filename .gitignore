@@ -35,5 +35,10 @@ public/mediapipe/gesture_recognizer.task
 audit-2026-07-09/
 assets/
 
+# 运行时只用 webp；png 原图本地归档不入库
+public/ziwei/stars/*.png
+public/bazi/covers/*.png
+public/bazi/covers/samples/*.png
+
 .vercel
 .env*.local

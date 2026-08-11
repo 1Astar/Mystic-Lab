@@ -3,6 +3,7 @@ import {
   hasUsableProfile,
   loadLifeStore,
 } from './storage.ts';
+import { effectiveAge } from './age.ts';
 import type { LifePortrait, LifeProfileInput, PersonProfile } from './types.ts';
 import { PERSON_RELATION_LABELS } from './types.ts';
 
@@ -19,10 +20,11 @@ export type LabProfileSnapshot = {
   displayName: string;
 };
 
-/** 一行摘要：29岁 · 产品经理 · 上海 */
+/** 一行摘要：29岁 · 产品经理 · 上海（年龄由生日推算） */
 export function formatProfileBrief(profile: LifeProfileInput): string {
+  const age = effectiveAge(profile);
   const parts = [
-    profile.age.trim() ? `${profile.age.trim()}岁` : '',
+    age ? `${age}岁` : '',
     profile.occupation.trim(),
     profile.city.trim(),
   ].filter(Boolean);

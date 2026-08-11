@@ -70,7 +70,7 @@ export const NUMBER_STAGES: NumberStage[] = [
 ];
 
 export const COURT_NOTE =
-  '侍从 / 骑士 / 王后 / 国王代表该花色在不同阶段的人格面向——探索、行动、滋养、掌控。可在收集图鉴中逐张展开。';
+  '侍从 / 骑士 / 王后 / 国王代表该花色在不同阶段的人格面向——探索、行动、滋养、掌控。可在收集探索中逐张展开。';
 
 export const COMBINATION_EXAMPLES: CombinationExample[] = [
   {

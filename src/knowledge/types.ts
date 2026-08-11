@@ -32,7 +32,7 @@ export type CardKnowledge = {
   loveMeaning: string;
   studyMeaning: string;
   selfMeaning: string;
-  /** 正位关键词（图鉴深度解读） */
+  /** 正位关键词（探索深度解读） */
   uprightKeywords?: string[];
   /** 逆位关键词 */
   reversedKeywords?: string[];
@@ -40,7 +40,7 @@ export type CardKnowledge = {
   wealthMeaning?: string;
   /** 容易误读的点（正向纠正口吻） */
   misreadings?: string[];
-  /** 整牌总览（牌面画面描述，图鉴 / 看懂牌面） */
+  /** 整牌总览（牌面画面描述，探索 / 看懂牌面） */
   visualOverview?: string;
   foolJourney?: FoolJourneyStep;
   /** 现实对应场景：具体生活情境 */

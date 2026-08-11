@@ -1,7 +1,7 @@
 import { HEXAGRAMS } from './hexagrams.ts';
 import { loadLiuyaoJournal, type LiuyaoJournalEntry } from './journal.ts';
 
-/** 单卦相遇统计（由起卦记录推导，类似塔罗图鉴） */
+/** 单卦相遇统计（由起卦记录推导，类似塔罗探索） */
 export type HexMeetStat = {
   name: string;
   fullName: string;
@@ -67,7 +67,7 @@ export function meetCountFor(name: string): number {
 }
 
 export function meetLineFor(stat: HexMeetStat | null): string {
-  if (!stat) return '起卦后，遇见的卦会慢慢点亮图鉴。';
+  if (!stat) return '起卦后，遇见的卦会慢慢点亮探索。';
   if (stat.count === 1) return `你第一次遇见「${stat.fullName}」。`;
   return `这是你第 ${stat.count} 次遇见「${stat.fullName}」。`;
 }

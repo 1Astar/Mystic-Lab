@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { bindGuideInteractions, renderComposeTeach } from '../liuyao/compose-teach.ts';
 import { buildLearnSampleCast } from '../liuyao/learn-sample.ts';
 import { mountLiuyaoModeSwitch, setLiuyaoMode } from '../liuyao/mode.ts';
@@ -44,7 +44,7 @@ export function renderLiuyaoLearnBoard(root: HTMLElement): void {
     ${renderYaoKindLegend({ interactive: false })}
     ${renderComposeTeach({ cast, question, activeStep: 1 })}
     <nav class="ly-learn-quick ly-learn-board-links">
-      <a href="/liuyao/bagua" data-path="/liuyao/bagua">八卦图鉴</a>
+      <a href="/liuyao/bagua" data-path="/liuyao/bagua">八卦探索</a>
       <a href="/liuyao/hexagrams" data-path="/liuyao/hexagrams">六十四卦</a>
       <a href="/liuyao/concepts#shi-ying" data-path="/liuyao/concepts#shi-ying">概念速查</a>
       <a href="/liuyao/reading" data-path="/liuyao/reading">去实战起卦</a>

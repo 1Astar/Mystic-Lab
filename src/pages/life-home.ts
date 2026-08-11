@@ -3,8 +3,9 @@ import { isAiConfigured } from '../ai/settings.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
+import { generatePortrait } from '../life/generate.ts';
 import { formatProfileBrief } from '../life/profile-context.ts';
-import { hasUsableProfile, loadLifeStore } from '../life/storage.ts';
+import { hasUsableProfile, loadLifeStore, saveLifeStore } from '../life/storage.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -26,11 +27,12 @@ export function renderLifeHome(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
 
-  const store = loadLifeStore();
+  let store = loadLifeStore();
   const profileReady = hasUsableProfile(store.profile);
   const portraitReady = Boolean(store.portrait);
   /** 玩法需先有档案 + 轻画像 */
   const gateOpen = profileReady && portraitReady;
+  const needPortrait = profileReady && !portraitReady;
   const aiOn = isAiConfigured();
 
   const modes: PlayMode[] = [
@@ -58,10 +60,36 @@ export function renderLifeHome(root: HTMLElement): () => void {
   ];
 
   const nextMode = gateOpen ? modes.find((m) => !m.done) ?? modes[0]! : null;
+  const lockHint = needPortrait
+    ? '档案已填好，还差「轻画像」——点上方生成即可解锁'
+    : '请先在「档案」填写现状，再生成轻画像';
 
   const page = document.createElement('div');
   page.className = 'page life-page life-home-page';
   mountEnvBanner(page);
+
+  const gateHtml = gateOpen
+    ? `<div>
+        <p class="life-card-kicker">已连接 · 档案 + 轻画像</p>
+        <p class="life-gate-brief">${escapeHtml(formatProfileBrief(store.profile))}${
+          store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''
+        }</p>
+      </div>
+      <button type="button" class="life-btn-ghost" data-path="/profile">编辑档案 ›</button>`
+    : needPortrait
+      ? `<div>
+          <p class="life-card-kicker">档案已就绪 · 还差轻画像</p>
+          <p class="life-gate-brief">${escapeHtml(formatProfileBrief(store.profile))}。玩法要用「人生阶段」当对照底，点一次生成即可（本地模板也行）。</p>
+        </div>
+        <div class="life-cta-row life-gate-actions">
+          <button type="button" class="life-btn-primary" data-gen-portrait>生成轻画像</button>
+          <button type="button" class="life-btn-ghost" data-path="/profile">去档案 ›</button>
+        </div>`
+      : `<div>
+          <p class="life-card-kicker">需要先建档案</p>
+          <p class="life-gate-brief">至少填写出生日期、职业、现居地或困惑中的一项，再生成轻画像后即可开玩。</p>
+        </div>
+        <button type="button" class="life-btn-primary" data-path="/profile">去档案</button>`;
 
   page.innerHTML = `
     <button type="button" class="back-link life-back">← 返回 Mystic Lab</button>
@@ -75,25 +103,11 @@ export function renderLifeHome(root: HTMLElement): () => void {
 
     <section class="life-focus-note" aria-label="定位">
       <p class="life-focus-tag">人生推演</p>
-      <p>这里只做<strong>模拟玩法</strong>。现状底座在独立的「档案」模块；建档并生成轻画像后即可开玩。</p>
+      <p>这里只做<strong>模拟玩法</strong>。先有档案，再生成<strong>轻画像（人生阶段）</strong>，三个玩法才解锁。</p>
     </section>
 
-    <section class="life-profile-gate ${gateOpen ? 'is-ready' : ''}" aria-label="档案状态">
-      ${
-        gateOpen
-          ? `<div>
-              <p class="life-card-kicker">已连接 · 档案</p>
-              <p class="life-gate-brief">${escapeHtml(formatProfileBrief(store.profile))}${
-                store.portrait ? ` · ${escapeHtml(store.portrait.stageTitle)}` : ''
-              }</p>
-            </div>
-            <button type="button" class="life-btn-ghost" data-path="/profile">编辑档案 ›</button>`
-          : `<div>
-              <p class="life-card-kicker">需要先建档案</p>
-              <p class="life-gate-brief">玩法会读取「档案」里的现状与轻画像。档案是 Lab 独立模块，各体系共用。</p>
-            </div>
-            <button type="button" class="life-btn-primary" data-path="/profile">去档案</button>`
-      }
+    <section class="life-profile-gate ${gateOpen ? 'is-ready' : needPortrait ? 'is-partial' : ''}" aria-label="档案状态">
+      ${gateHtml}
     </section>
 
     <section class="life-route" aria-label="推演玩法">
@@ -102,7 +116,9 @@ export function renderLifeHome(root: HTMLElement): () => void {
         <p class="life-route-tip">${
           gateOpen
             ? '三个玩法可自由进入，不必按顺序'
-            : '建好档案后解锁以下玩法'
+            : needPortrait
+              ? '档案已完成 · 生成轻画像后解锁'
+              : '建好档案并生成轻画像后解锁'
         }</p>
       </div>
       <ol class="life-route-list">
@@ -126,12 +142,18 @@ export function renderLifeHome(root: HTMLElement): () => void {
             return `
             <li class="life-route-step ${state}">
               ${i > 0 ? '<span class="life-route-connector" aria-hidden="true"></span>' : ''}
-              <button type="button" class="life-route-card" data-path="${m.path}" data-open="${gateOpen ? '1' : '0'}" data-lock="请先在「档案」生成轻画像" ${gateOpen ? '' : 'aria-disabled="true"'}>
+              <button type="button" class="life-route-card" data-path="${m.path}" data-open="${gateOpen ? '1' : '0'}" data-lock="${escapeHtml(lockHint)}" ${gateOpen ? '' : 'aria-disabled="true"'}>
                 <span class="life-route-n">${m.n}</span>
                 <span class="life-route-body">
                   <strong>${m.title}</strong>
                   <span class="life-route-desc">${m.desc}</span>
-                  ${!gateOpen ? '<span class="life-route-lock">需先完成档案</span>' : ''}
+                  ${
+                    !gateOpen
+                      ? `<span class="life-route-lock">${
+                          needPortrait ? '需先生成轻画像' : '需先填写档案'
+                        }</span>`
+                      : ''
+                  }
                 </span>
                 <span class="life-route-badge">${badge}</span>
               </button>
@@ -163,7 +185,7 @@ export function renderLifeHome(root: HTMLElement): () => void {
       if (!path) return;
       if (el.dataset.open === '0') {
         statusEl.hidden = false;
-        statusEl.textContent = el.dataset.lock || '请先去「档案」建立并生成轻画像';
+        statusEl.textContent = el.dataset.lock || lockHint;
         statusEl.classList.add('is-flash');
         window.setTimeout(() => statusEl.classList.remove('is-flash'), 600);
         return;
@@ -171,6 +193,33 @@ export function renderLifeHome(root: HTMLElement): () => void {
       if ((el as HTMLButtonElement).disabled) return;
       navigate(path);
     });
+  });
+
+  page.querySelector<HTMLButtonElement>('[data-gen-portrait]')?.addEventListener('click', async (ev) => {
+    const btn = ev.currentTarget as HTMLButtonElement;
+    btn.disabled = true;
+    statusEl.hidden = false;
+    statusEl.textContent = aiOn ? '正在结合档案推演轻画像…' : '正在用本地模板生成轻画像…';
+    try {
+      store = loadLifeStore();
+      if (!hasUsableProfile(store.profile)) {
+        statusEl.textContent = '档案信息不足，请先去「档案」补一项现状。';
+        return;
+      }
+      const portrait = await generatePortrait(store.profile);
+      store = {
+        ...loadLifeStore(),
+        portrait,
+        updatedAt: new Date().toISOString(),
+      };
+      saveLifeStore(store);
+      statusEl.textContent =
+        portrait.source === 'ai' ? '轻画像已生成（AI），正在解锁玩法…' : '轻画像已生成（本地模板），正在解锁玩法…';
+      navigate('/life');
+    } catch (err) {
+      statusEl.textContent = err instanceof Error ? err.message : '生成失败，请稍后重试';
+      btn.disabled = false;
+    }
   });
 
   root.appendChild(page);

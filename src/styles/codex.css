@@ -530,8 +530,8 @@
   font-size: 0.48rem;
   line-height: 1.25;
   text-align: center;
-  color: rgba(255, 214, 166, 0.85);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  color: var(--gold);
+  text-shadow: 0 1px 4px color-mix(in srgb, var(--bg-deep) 85%, transparent);
   pointer-events: none;
 }
 
@@ -1019,15 +1019,27 @@
 
 .journal-reflection {
   width: 100%;
+  min-height: 5.5rem;
   margin-top: 10px;
-  padding: 10px;
+  padding: 12px 14px;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
   color: var(--ink);
-  background: rgba(26, 18, 48, 0.6);
+  background: var(--surface-1);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   resize: vertical;
+}
+
+.journal-reflection::placeholder {
+  color: var(--ink-muted);
+}
+
+.journal-reflection:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
 }
 
 .journal-actions {

@@ -210,8 +210,8 @@ export function renderDeepNotesBlockHtml(
 ): string {
   return `
     <section class="ly-deep-notes ly-result-panel" data-deep-notes data-note-tabs>
-      <h3 class="ly-ch-title">📝 解读笔记</h3>
-      <div class="ly-note-mini-tabs" role="tablist" aria-label="解读笔记分区">
+      <h3 class="ly-ch-title">📝 深度学习</h3>
+      <div class="ly-note-mini-tabs" role="tablist" aria-label="深度学习分区">
         <button type="button" class="ly-note-mini-tab is-active" data-note-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
         <button type="button" class="ly-note-mini-tab" data-note-tab="dress" role="tab" aria-selected="false">专业排盘</button>
         <button type="button" class="ly-note-mini-tab" data-note-tab="classic" role="tab" aria-selected="false">古籍解析</button>

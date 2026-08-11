@@ -1,4 +1,4 @@
-import { renderMeihuaHero } from '../ui/meihua-hero.ts';
+﻿import { renderMeihuaHero } from '../ui/meihua-hero.ts';
 import { renderThemedModuleHome } from '../ui/themed-module-home.ts';
 
 export function renderMeihuaHome(root: HTMLElement): () => void {
@@ -18,7 +18,7 @@ export function renderMeihuaHome(root: HTMLElement): () => void {
     secondaryLink: '看看如何成卦 ›',
     entries: [
       {
-        title: '卦象图鉴',
+        title: '卦象探索',
         desc: '八卦 / 六十四卦 / 体用 / 动爻',
         icon: '☯',
         comingSoon: true,

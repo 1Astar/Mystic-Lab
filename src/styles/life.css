@@ -33,18 +33,55 @@
   margin-bottom: 8px;
 }
 
+/* 体系顶栏下的模式切换：解读 / 盘面 */
+.lab-sys-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.lab-sys-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.lab-sys-tab.is-on {
+  color: var(--gold);
+  background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  font-weight: 600;
+}
+
+.lab-sys-tab:hover:not(.is-on),
+.lab-sys-tab:focus-visible:not(.is-on) {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  color: var(--ink);
+  outline: none;
+}
+
 .life-ai-hint {
   margin: 8px 0 0;
   font-size: 0.78rem;
-  color: rgba(255, 230, 200, 0.72);
+  color: var(--ink-muted);
 }
 
 .life-focus-note {
   margin: 0 0 20px;
   padding: 14px 16px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
+  border: none;
   border-radius: 12px;
-  background: rgba(20, 16, 36, 0.45);
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--ink);
 }
 
 .life-profile-gate {
@@ -56,34 +93,46 @@
   margin: 0 0 18px;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px dashed rgba(255, 214, 166, 0.35);
-  background: rgba(20, 16, 36, 0.45);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--ink);
 }
 
 .life-profile-gate.is-ready {
-  border-style: solid;
-  border-color: rgba(201, 162, 39, 0.4);
+  border: none;
+  background: color-mix(in srgb, var(--gold-soft) 55%, var(--surface-2));
+}
+
+.life-profile-gate.is-partial {
+  background: color-mix(in srgb, var(--gold-soft) 35%, var(--surface-2));
+}
+
+.life-gate-actions {
+  margin: 0;
+  justify-content: flex-end;
+  flex: 1 1 auto;
 }
 
 .life-gate-brief {
   margin: 4px 0 0;
   font-size: 0.84rem;
   line-height: 1.45;
-  color: rgba(255, 230, 200, 0.78);
+  color: var(--ink-muted);
 }
 
 .life-focus-tag {
   margin: 0 0 6px;
   font-size: 0.72rem;
   letter-spacing: 0.12em;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
+  font-weight: 650;
 }
 
 .life-focus-note p:last-child {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.55;
-  color: rgba(255, 245, 230, 0.88);
+  color: var(--ink);
 }
 
 .life-cta-row {
@@ -100,8 +149,9 @@
   margin: 0 0 22px;
   padding: 16px 14px 18px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
-  background: rgba(14, 12, 28, 0.5);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--ink) 6%);
+  color: var(--ink);
 }
 
 .life-route-head {
@@ -113,14 +163,14 @@
   margin: 0 0 6px;
   font-size: 1.05rem;
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
-  color: #fff5e6;
+  color: var(--ink);
 }
 
 .life-route-tip {
   margin: 0;
   font-size: 0.82rem;
   line-height: 1.45;
-  color: rgba(255, 230, 200, 0.72);
+  color: var(--ink-muted);
 }
 
 .life-route-list {
@@ -145,13 +195,13 @@
   margin: 0 auto;
   background: linear-gradient(
     180deg,
-    rgba(255, 214, 166, 0.55),
-    rgba(155, 127, 212, 0.35)
+    color-mix(in srgb, var(--gold) 55%, transparent),
+    color-mix(in srgb, var(--purple) 35%, transparent)
   );
 }
 
 .life-route-step.is-locked .life-route-connector {
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--ink-muted) 25%, transparent);
 }
 
 .life-route-card {
@@ -163,44 +213,58 @@
   text-align: left;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(255, 255, 255, 0.04);
-  color: inherit;
+  border: none;
+  background: color-mix(in srgb, var(--surface-1) 88%, var(--ink) 4%);
+  color: var(--ink);
   font: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
 }
 
 .life-route-step.is-current .life-route-card {
-  border-color: transparent;
-  background: linear-gradient(135deg, #c9a227, #e8b4d0 55%, #9b7fd4);
+  border: none;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--gold) 88%, #fff),
+    color-mix(in srgb, var(--gold) 45%, var(--purple)) 55%,
+    color-mix(in srgb, var(--purple) 55%, var(--gold))
+  );
+  color: var(--surface-ink, var(--ink));
+}
+
+html[data-theme='star'] .life-route-step.is-current .life-route-card {
   color: #1a1228;
 }
 
 .life-route-step.is-current .life-route-desc,
 .life-route-step.is-current .life-route-badge {
-  color: rgba(26, 18, 40, 0.72);
+  color: color-mix(in srgb, currentColor 72%, transparent);
 }
 
 .life-route-step.is-done .life-route-card {
-  border-color: rgba(201, 162, 39, 0.4);
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-1));
 }
 
 .life-route-step.is-locked .life-route-card {
-  opacity: 0.55;
+  opacity: 0.72;
   cursor: not-allowed;
-  border-style: dashed;
+  background: color-mix(in srgb, var(--surface-2) 90%, var(--ink-muted) 4%);
 }
 
 .life-route-step.is-open:not(.is-current) .life-route-card:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 214, 166, 0.45);
+  background: color-mix(in srgb, var(--surface-1) 80%, var(--gold) 8%);
 }
 
 .life-route-n {
   font-size: 1.05rem;
   font-weight: 700;
   min-width: 1.6em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.life-route-step.is-current .life-route-n {
+  color: inherit;
 }
 
 .life-route-body {
@@ -212,17 +276,18 @@
 
 .life-route-body strong {
   font-size: 0.95rem;
+  color: inherit;
 }
 
 .life-route-desc {
   font-size: 0.78rem;
-  color: rgba(255, 230, 200, 0.65);
+  color: var(--ink-muted);
   line-height: 1.4;
 }
 
 .life-route-lock {
   font-size: 0.74rem;
-  color: rgba(255, 180, 160, 0.9);
+  color: var(--danger, #c45c5c);
 }
 
 .life-route-badge {
@@ -230,19 +295,20 @@
   white-space: nowrap;
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(255, 230, 200, 0.8);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--ink-muted);
 }
 
 .life-route-step.is-current .life-route-badge {
-  background: rgba(26, 18, 40, 0.18);
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  color: inherit;
 }
 
 .life-route-status {
   margin: 12px 0 0;
   text-align: center;
   font-size: 0.84rem;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-route-status.is-flash {
@@ -277,21 +343,38 @@
 }
 
 .life-btn-primary {
-  background: linear-gradient(135deg, #c9a227, #e8b4d0 55%, #9b7fd4);
-  color: #1a1228;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--gold) 92%, #fff),
+    color-mix(in srgb, var(--gold) 55%, var(--purple)) 55%,
+    color-mix(in srgb, var(--purple) 70%, var(--gold))
+  );
+  color: var(--surface-ink, var(--ink));
   font-weight: 600;
 }
 
+html[data-theme='star'] .life-btn-primary {
+  color: #1a1228;
+}
+
 .life-btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  color: #ffe6c8;
-  border: 1px solid rgba(255, 214, 166, 0.35);
+  background: var(--gold-soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
 }
 
 .life-btn-ghost {
-  background: transparent;
-  color: rgba(255, 230, 200, 0.85);
-  border: 1px dashed rgba(255, 214, 166, 0.35);
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink-muted));
+  border: none;
+}
+
+.life-btn-ghost:hover,
+.life-btn-ghost:focus-visible {
+  color: var(--ink);
+  border: none;
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--ink) 6%);
+  outline: none;
 }
 
 .life-btn-primary:disabled,
@@ -321,9 +404,9 @@
   text-align: left;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.18);
-  background: rgba(18, 14, 32, 0.55);
-  color: inherit;
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--ink);
   font: inherit;
   cursor: pointer;
 }
@@ -344,15 +427,16 @@
 
 .life-entry-text strong {
   font-size: 0.98rem;
+  color: var(--ink);
 }
 
 .life-entry-text span {
   font-size: 0.82rem;
-  color: rgba(255, 230, 200, 0.65);
+  color: var(--ink-muted);
 }
 
 .life-entry-chevron {
-  color: rgba(255, 214, 166, 0.7);
+  color: var(--gold-ink, var(--gold));
   font-size: 1.2rem;
 }
 
@@ -366,14 +450,75 @@
   margin: 0;
   padding: 14px 16px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(16, 12, 28, 0.5);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--ink);
 }
 
 .life-fieldset legend {
   padding: 0 6px;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
   font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.life-age-hint {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.life-age-hint strong {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 650;
+}
+
+.life-more {
+  margin: 0;
+  padding: 0 16px 4px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
+}
+
+.life-more > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 0;
+  color: var(--gold-ink, var(--gold));
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  user-select: none;
+}
+
+.life-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.life-more > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  color: var(--gold-ink, var(--gold));
+  transition: transform 0.15s ease;
+}
+
+.life-more[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.life-more > summary span {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.life-more-body {
+  padding: 0 0 14px;
 }
 
 .life-field {
@@ -382,7 +527,7 @@
   gap: 6px;
   margin-top: 10px;
   font-size: 0.82rem;
-  color: rgba(255, 230, 200, 0.75);
+  color: var(--ink-muted);
 }
 
 .life-field input,
@@ -392,12 +537,12 @@
   width: 100%;
   box-sizing: border-box;
   border-radius: 10px;
-  border: 1px solid rgba(255, 214, 166, 0.25);
-  background: rgba(8, 6, 18, 0.55);
-  color: #fff5e6;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
   padding: 10px 12px;
   font: inherit;
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 .life-field select {
@@ -405,8 +550,8 @@
   -webkit-appearance: none;
   padding-right: 36px;
   background-image:
-    linear-gradient(45deg, transparent 50%, rgba(255, 214, 166, 0.75) 50%),
-    linear-gradient(135deg, rgba(255, 214, 166, 0.75) 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--gold-ink, var(--gold)) 50%),
+    linear-gradient(135deg, var(--gold-ink, var(--gold)) 50%, transparent 50%);
   background-position:
     calc(100% - 16px) 50%,
     calc(100% - 10px) 50%;
@@ -419,13 +564,13 @@
 .life-field input:focus,
 .life-field textarea:focus {
   outline: none;
-  border-color: rgba(255, 214, 166, 0.55);
-  box-shadow: 0 0 0 3px rgba(255, 214, 166, 0.1);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
 }
 
 .life-field select option {
-  background: #16121f;
-  color: #fff5e6;
+  background: var(--surface-1);
+  color: var(--ink);
 }
 
 .life-field textarea {
@@ -445,10 +590,123 @@
   }
 }
 
+.birth-time-meta {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+.birth-meta-block {
+  display: grid;
+  gap: 6px;
+}
+.birth-meta-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.birth-meta-title em {
+  margin-left: 6px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+}
+.birth-meta-hint {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+.birth-meta-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.birth-meta-chip {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+.birth-meta-chip.is-on {
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--ink));
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.birth-meta-source-toggle {
+  width: 100%;
+  margin: 0;
+  padding: 8px 2px;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--ink-muted) 45%, transparent);
+}
+.birth-meta-source-toggle:hover,
+.birth-meta-source-toggle.is-open {
+  color: var(--gold-ink, var(--gold));
+}
+.birth-meta-rectify {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-2));
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.birth-meta-rectify.is-nudge {
+  background: color-mix(in srgb, var(--gold-soft) 88%, var(--surface-2));
+}
+.birth-meta-rectify strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+.birth-meta-rectify em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+.birth-meta-rectify i {
+  font-style: normal;
+  color: var(--gold-ink, var(--gold));
+  font-size: 1.1rem;
+}
+
+.bazi-reading-actions {
+  display: grid;
+  gap: 10px;
+}
+.bazi-reading-actions .bazi-home-link {
+  width: 100%;
+}
+
 .life-footnote {
   margin: 10px 0 0;
   font-size: 0.75rem;
-  color: rgba(255, 230, 200, 0.55);
+  color: var(--ink-muted);
 }
 
 .life-form-actions {
@@ -461,35 +719,38 @@
 .life-status {
   margin: 8px 0 0;
   font-size: 0.82rem;
-  color: rgba(255, 214, 166, 0.9);
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-card {
-  margin-top: 18px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 214, 166, 0.22);
-  background:
-    linear-gradient(160deg, rgba(40, 28, 64, 0.55), rgba(12, 10, 24, 0.72));
+  margin-top: 28px;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--line-soft, var(--line));
+  padding-top: 28px;
+  background: transparent;
 }
 
 .life-card-kicker {
   margin: 0 0 6px;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
+  font-weight: 650;
 }
 
 .life-card h2,
 .life-card h3 {
   margin: 0 0 8px;
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-card-body {
   margin: 0 0 12px;
-  line-height: 1.6;
-  color: rgba(255, 245, 230, 0.9);
+  line-height: 1.65;
+  color: var(--ink);
 }
 
 .life-chip-row {
@@ -503,20 +764,21 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.78rem;
-  background: rgba(155, 127, 212, 0.25);
-  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: color-mix(in srgb, var(--purple) 14%, var(--surface-2));
+  border: none;
+  color: var(--ink-muted);
 }
 
 .life-meta {
   margin: 0 0 6px;
   font-size: 0.8rem;
-  color: rgba(255, 230, 200, 0.7);
+  color: var(--ink-muted);
 }
 
 .life-hint-list {
   margin: 10px 0 0;
   padding-left: 1.1em;
-  color: rgba(255, 245, 230, 0.85);
+  color: var(--ink);
   font-size: 0.88rem;
   line-height: 1.5;
 }
@@ -528,12 +790,13 @@
 .life-forks-head h2 {
   margin: 0 0 4px;
   font-size: 1.05rem;
+  color: var(--ink);
 }
 
 .life-forks-head p {
   margin: 0 0 12px;
   font-size: 0.82rem;
-  color: rgba(255, 230, 200, 0.65);
+  color: var(--ink-muted);
 }
 
 .life-fork-list {
@@ -550,25 +813,27 @@
   align-items: center;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.16);
-  background: rgba(14, 12, 26, 0.5);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
   cursor: pointer;
+  color: var(--ink);
 }
 
 .life-fork-item.is-on {
-  border-color: rgba(201, 162, 39, 0.45);
-  background: rgba(40, 32, 18, 0.35);
+  border: none;
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-2));
 }
 
 .life-fork-label {
   font-size: 0.82rem;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
   white-space: nowrap;
 }
 
 .life-archives-title {
   margin: 22px 0 12px;
   font-size: 1.05rem;
+  color: var(--ink);
 }
 
 .life-archive-grid {
@@ -590,13 +855,13 @@
 .life-tone {
   margin: 0 0 8px;
   font-size: 0.78rem;
-  color: #e8b4d0;
+  color: var(--ink-muted);
 }
 
 .life-archive-title {
   margin: 0 0 8px;
   font-weight: 600;
-  color: #ffe6c8;
+  color: var(--ink);
 }
 
 .life-dl {
@@ -615,12 +880,12 @@
 
 .life-dl dt {
   margin: 0;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-dl dd {
   margin: 0;
-  color: rgba(255, 245, 230, 0.88);
+  color: var(--ink);
   line-height: 1.45;
 }
 
@@ -631,7 +896,7 @@
 
 .life-empty p {
   margin: 12px 0 20px;
-  color: rgba(255, 230, 200, 0.75);
+  color: var(--ink-muted);
 }
 
 /* ── 选择模拟 ── */
@@ -644,9 +909,9 @@
 }
 
 .life-preset-chip {
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 230, 200, 0.88);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  color: var(--ink-muted);
   border-radius: 999px;
   padding: 6px 12px;
   font: inherit;
@@ -655,17 +920,16 @@
 }
 
 .life-preset-chip:hover {
-  border-color: rgba(201, 162, 39, 0.5);
-  background: rgba(201, 162, 39, 0.12);
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-horizon {
   margin: 18px 0 14px;
   padding: 16px 18px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 214, 166, 0.28);
-  background:
-    linear-gradient(135deg, rgba(60, 40, 20, 0.4), rgba(20, 16, 36, 0.65));
+  border: none;
+  background: color-mix(in srgb, var(--gold-soft) 55%, var(--surface-2));
   text-align: center;
 }
 
@@ -673,20 +937,20 @@
   margin: 0;
   font-size: 0.72rem;
   letter-spacing: 0.14em;
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-horizon-value {
   margin: 6px 0 8px;
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
   font-size: 1.55rem;
-  color: #fff5e6;
+  color: var(--ink);
 }
 
 .life-horizon-q {
   margin: 0;
   font-size: 0.9rem;
-  color: rgba(255, 230, 200, 0.85);
+  color: var(--ink-muted);
 }
 
 .life-branch-grid {
@@ -730,7 +994,7 @@
   position: relative;
   padding: 0 0 14px 18px;
   font-size: 0.88rem;
-  color: rgba(255, 245, 230, 0.9);
+  color: var(--ink);
   line-height: 1.4;
 }
 
@@ -742,8 +1006,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #ffd6a6;
-  box-shadow: 0 0 0 3px rgba(255, 214, 166, 0.15);
+  background: var(--gold-ink, var(--gold));
+  box-shadow: 0 0 0 3px var(--gold-soft);
 }
 
 .life-timeline li::after {
@@ -753,7 +1017,7 @@
   top: 14px;
   bottom: 0;
   width: 1px;
-  background: rgba(255, 214, 166, 0.28);
+  background: color-mix(in srgb, var(--gold) 28%, transparent);
 }
 
 .life-timeline li:last-child {
@@ -768,7 +1032,7 @@
   margin: 0;
   font-size: 0.82rem;
   line-height: 1.5;
-  color: rgba(255, 230, 200, 0.7);
+  color: var(--ink-muted);
   flex: 1;
 }
 
@@ -783,7 +1047,7 @@
   margin: 16px 0 0;
   text-align: center;
   font-size: 0.84rem;
-  color: rgba(255, 214, 166, 0.85);
+  color: var(--gold-ink, var(--gold));
 }
 
 /* ── 预测打卡 ── */
@@ -798,10 +1062,10 @@
   gap: 10px 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 214, 166, 0.2);
-  background: rgba(16, 12, 28, 0.45);
+  border: none;
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
   font-size: 0.82rem;
-  color: rgba(255, 230, 200, 0.85);
+  color: var(--ink-muted);
 }
 
 .life-forecast-cards {
@@ -812,6 +1076,7 @@
 
 .life-forecast-card h3 {
   font-size: 1rem;
+  color: var(--ink);
 }
 
 .life-forecast-top {
@@ -825,25 +1090,25 @@
 .life-forecast-pred {
   margin: 0 0 8px;
   line-height: 1.55;
-  color: rgba(255, 245, 230, 0.92);
+  color: var(--ink);
 }
 
 .life-forecast-why {
   margin: 0 0 8px;
   font-size: 0.86rem;
   line-height: 1.5;
-  color: rgba(255, 230, 200, 0.75);
+  color: var(--ink-muted);
 }
 
 .life-forecast-why strong {
-  color: #ffd6a6;
+  color: var(--gold-ink, var(--gold));
   font-weight: 600;
 }
 
 .life-forecast-reflect {
   margin: 0 0 8px;
   font-size: 0.84rem;
-  color: #e8b4d0;
+  color: var(--ink-muted);
 }
 
 .life-forecast-actions {
@@ -851,4 +1116,117 @@
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
+}
+
+/* —— 主题收尾：表单/标题吃 token，避免奶油硬编码盖月白 —— */
+.life-route-title,
+.life-field input,
+.life-field textarea,
+.life-field select,
+.life-fork-input {
+  color: var(--ink);
+}
+
+.life-route-tip,
+.life-field {
+  color: var(--ink-muted);
+}
+
+.life-field input,
+.life-field textarea,
+.life-field select,
+.life-fork-input {
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+
+.life-btn-ghost {
+  color: var(--gold-ink);
+  border: none;
+  background: var(--gold-soft);
+}
+
+.life-btn-ghost:hover,
+.life-btn-ghost:focus-visible {
+  color: var(--ink);
+  border: none;
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--ink) 6%);
+}
+
+.life-fieldset,
+.life-more,
+.life-focus-note,
+.life-profile-gate {
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
+  border: none;
+  color: var(--ink);
+}
+
+.life-fieldset legend,
+.life-more > summary,
+.life-age-hint strong,
+.life-status,
+.life-focus-tag,
+.life-card-kicker,
+.life-route-status {
+  color: var(--gold-ink, var(--gold));
+}
+
+.life-ai-hint,
+.life-footnote,
+.life-age-hint,
+.life-more > summary span,
+.life-gate-brief,
+.life-route-tip,
+.life-route-desc {
+  color: var(--ink-muted);
+}
+
+.life-focus-note p:last-child,
+.life-route-title,
+.life-route-body strong,
+.life-card-body {
+  color: var(--ink);
+}
+
+.life-route {
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--ink) 6%);
+  border: none;
+  color: var(--ink);
+}
+
+.life-route-card {
+  background: color-mix(in srgb, var(--surface-1) 88%, var(--ink) 4%);
+  border: none;
+  color: var(--ink);
+}
+
+.life-profile-page .page-title,
+.life-page .page-title {
+  color: var(--gold-ink, var(--gold));
+}
+
+/* 人生宇宙首页：强制可读 */
+.life-home-page .life-focus-note,
+.life-home-page .life-profile-gate,
+.life-home-page .life-route {
+  border: none;
+}
+
+.life-home-page .life-gate-brief,
+.life-home-page .life-focus-note p,
+.life-home-page .life-route-desc,
+.life-home-page .life-route-tip {
+  color: var(--ink-muted);
+}
+
+.life-home-page .life-focus-note p:last-child,
+.life-home-page .life-route-title,
+.life-home-page .life-route-body strong {
+  color: var(--ink);
+}
+
+.life-home-page .life-focus-tag,
+.life-home-page .life-card-kicker {
+  color: var(--gold-ink, var(--gold));
 }

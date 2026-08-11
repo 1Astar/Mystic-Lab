@@ -39,13 +39,26 @@ function classifySlice(s: string): KindMap {
   if (/薪|工资|月薪|\d+\s*k|涨薪|调薪|转正.*拿|拿到.*钱|谈薪/.test(s)) {
     return { id: 'salary_negotiate', domain: 'career', confidence: 'high' };
   }
-  if (/离职|辞职|走人|跳槽|离开|不干|裸辞/.test(s) && /留|留下|要不要留|继续/.test(s)) {
+  /** 去留：忌用裸「留下／离开」（感情「他会离开吗」、闲聊「留下回忆」会误伤） */
+  const careerStayLeave =
+    /要不要留|该不该留|留不留|留下还是|还是走|走还是留|要不要留下|该不该留下|继续干/.test(
+      s,
+    ) ||
+    (/留在|留下来/.test(s) &&
+      /公司|工作|岗|职|团队|老板|单位|冠英/.test(s));
+  const careerQuitVerb =
+    /离职|辞职|走人|跳槽|裸辞|要不要走|该不该走|不干了/.test(s) ||
+    (/离开/.test(s) &&
+      /公司|工作|岗|职|团队|老板|单位/.test(s) &&
+      !/对象|男朋友|女朋友|感情|恋爱|旅行|城市/.test(s));
+
+  if (careerQuitVerb && (/留|留下|要不要留|继续干|留下来|留在/.test(s) || careerStayLeave)) {
     return { id: 'quit_vs_stay', domain: 'career', confidence: 'high' };
   }
-  if (/要不要留|留下|继续干|该不该留/.test(s)) {
+  if (careerStayLeave) {
     return { id: 'quit_vs_stay', domain: 'career', confidence: 'high' };
   }
-  if (/离职|辞职|走人|跳槽|离开|不干|裸辞|要不要走|该不该走/.test(s)) {
+  if (careerQuitVerb) {
     return { id: 'quit_now', domain: 'career', confidence: 'high' };
   }
   if (/找工作|求职|下一份|换工作|三个月.*求职|求职.*三个月|投简历|海投/.test(s)) {
@@ -74,7 +87,13 @@ function classifySlice(s: string): KindMap {
   if (/喜欢我|是不是喜欢|爱不爱|有感觉/.test(s)) {
     return { id: 'love_likes', domain: 'love', confidence: 'high' };
   }
-  if (/分手|要不要分|继续在一起|去留/.test(s) && /感情|对象|恋爱|他|她|男朋友|女朋友/.test(s)) {
+  if (
+    /分手|要不要分手|继续在一起|分不分/.test(s) ||
+    (/去留/.test(s) && /感情|对象|恋爱|男朋友|女朋友|伴侣/.test(s)) ||
+    (/离开|会不会走|还能不能在一起/.test(s) &&
+      /他|她|对象|男朋友|女朋友|伴侣/.test(s) &&
+      !/公司|工作|岗|职|老板/.test(s))
+  ) {
     return { id: 'love_stay_leave', domain: 'love', confidence: 'mid' };
   }
   if (/联系|找他|找她|主动吗|要不要找/.test(s)) {

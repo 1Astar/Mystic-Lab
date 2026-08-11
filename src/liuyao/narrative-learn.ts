@@ -181,7 +181,7 @@ export function renderCausalReadingHtml(
           : `<p class="ly-guide-tip">${escapeHtml(causal.actionLead)}</p>`
       }
       ${restHtml}
-      <p class="ly-lesson-deep-hint">想边学边推演用神/元忌、点爻与笔记 → 切到「五步学习」。</p>
+      <p class="ly-lesson-deep-hint">想边学边推演用神/元忌、点爻与笔记 → 切到「六步学习」。</p>
     </section>
   `;
 }

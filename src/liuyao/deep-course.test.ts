@@ -41,7 +41,7 @@ describe('deep-course', () => {
     expect(notes).toMatch(/本卦辞 · /);
     expect(notes).toMatch(/data-gua-switch/);
     expect(notes).toMatch(/传统解卦全书/);
-    expect(notes).toMatch(/ly-guide-snippet|图鉴 ·/);
+    expect(notes).toMatch(/ly-guide-snippet|探索 ·/);
     expect(notes).toMatch(/个人沉淀/);
     expect(notes).toMatch(/专业排盘/);
     expect(notes).toMatch(/用神状态|ly-spirit-nar|data-dress-energy/);

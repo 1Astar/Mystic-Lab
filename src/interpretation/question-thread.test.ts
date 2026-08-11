@@ -114,6 +114,7 @@ describe('topic sanitize + question thread', () => {
     expect(thread!.answers[2]!.insight).toMatch(/温水|画饼|理想/);
     expect(thread!.answers[3]!.insight).toMatch(/①|情绪化|画饼|断崖/);
     expect(thread!.answers[4]!.insight).toMatch(/休整|初心|体面/);
+    expect(thread!.answers[4]!.action).toMatch(/：/);
     expect(thread!.answers[1]!.insight.length).toBeGreaterThan(80);
     expect(thread!.overall).toMatch(/想走又纠结|先冷静休息|精神内耗/);
   });

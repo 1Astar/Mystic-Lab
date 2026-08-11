@@ -1,11 +1,16 @@
 import type { CastResult } from '../liuyao/engine.ts';
+import { buildDirectReading } from '../liuyao/direct-reading.ts';
+import { buildBoardExpandText } from '../liuyao/board-lens.ts';
 import { pickActions } from './actions.ts';
 import { resolveUserContext } from './context.ts';
 import { mapEvidence } from './evidence.ts';
 import { detectIntents } from './intent.ts';
 import { leanForIntent } from './lean.ts';
 import { detectTone } from './tone.ts';
-import type { OfflineAnswerPack, UserContext } from './types.ts';
+import { parseWeekActions } from './week-actions.ts';
+import { buildWhyItems } from './why.ts';
+import { buildScriptPlay } from './script-play.ts';
+import type { OfflineAnswerPack, SceneAction, UserContext, WhyItem } from './types.ts';
 
 export type BuildPackInput = {
   question: string;
@@ -16,18 +21,10 @@ export type BuildPackInput = {
   context?: UserContext | null;
 };
 
-function buildDecision(packAnswers: OfflineAnswerPack['answers'], cast: CastResult): string {
-  if (packAnswers.length >= 2) {
-    const bits = packAnswers.map((a) => a.lean).join('；');
-    return `几件事绑在一起看：${bits} 综合建议：先做破局动作里那一件可验证的事，再用结果决定加码还是撤。`;
-  }
-  if (packAnswers[0]) return packAnswers[0].lean;
-  const to = cast.changed?.keywords[0] ?? cast.primary.keywords[0] ?? '';
-  return `当前主调偏「${to}」：先把可核对的事实看清，再决定加码还是收手。`;
-}
-
 /**
- * Mystic Engine 主入口：问题 → Intent → Context → Evidence → Action → Pack
+ * Mystic Engine 主入口：
+ * 内容以 direct-reading 四层为主（核心方向 / 现状与转机 / 具体动作 / 心理定心丸），
+ * 剧本导演补充：问题回应、综合论断、条件触发行动与底线。
  */
 export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack {
   const castAt = input.castAt ?? new Date();
@@ -38,52 +35,85 @@ export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack
       ? input.context
       : resolveUserContext({ useProfile: input.useProfile });
 
+  const direct = buildDirectReading(input.cast, input.question);
+  const script = buildScriptPlay({
+    question: input.question,
+    cast: input.cast,
+    castAt,
+  });
+
   const answers = intents.map((hit) => ({
     intentId: hit.id,
     questionSlice: hit.slice,
-    lean: leanForIntent(hit.id, input.cast, tone),
+    lean: leanForIntent(hit.id, input.cast, tone, hit.slice || input.question),
     evidence: mapEvidence(input.cast, hit.id, input.question, castAt),
   }));
 
   const primaryIntent = intents[0]?.id ?? 'open_explore';
   const { breakthrough, checklist } = pickActions(primaryIntent, tone, ctx);
+  const weekFromDirect = parseWeekActions(direct.nextSteps);
 
-  // 多意图时：若含谈薪/转正，破局优先用谈薪动作
-  const salaryHit = intents.find(
-    (h) => h.id === 'salary_negotiate' || h.id === 'probation_convert',
-  );
-  const stayHit = intents.find(
-    (h) => h.id === 'quit_vs_stay' || h.id === 'quit_now',
-  );
-  let finalBt = breakthrough;
-  let finalCheck = checklist;
-  if (salaryHit) {
-    const sal = pickActions(salaryHit.id, tone, ctx);
-    finalBt = sal.breakthrough;
-    finalCheck = sal.checklist;
-    if (stayHit) {
-      const stay = pickActions(stayHit.id, tone, ctx);
-      finalCheck = [...finalCheck, ...stay.checklist].slice(0, 3);
-    }
-  } else if (stayHit) {
-    const stay = pickActions(stayHit.id, tone, ctx);
-    finalBt = stay.breakthrough;
-    finalCheck = stay.checklist;
+  const actionBeat = script.beats.find((b) => b.id === 'action');
+  const boundaryBeat = script.beats.find((b) => b.id === 'boundary');
+
+  /** 旧内容为主：本周动作优先用 direct / pickActions；剧本行动与底线作补充 */
+  const scriptExtras: SceneAction[] = [];
+  if (actionBeat?.body.trim()) {
+    scriptExtras.push({
+      id: 'script-action',
+      title: '针对你的问题',
+      body: actionBeat.body,
+    });
+  }
+  if (boundaryBeat?.body.trim()) {
+    scriptExtras.push({
+      id: 'script-boundary',
+      title: '什么时候该停',
+      body: boundaryBeat.body,
+    });
   }
 
-  const from = input.cast.primary.keywords[0] ?? input.cast.primary.name;
-  const to = input.cast.changed?.keywords[0];
-  const boardExpand = input.cast.changed
-    ? `盘面辅读：本卦偏「${from}」→ 变卦偏「${to}」。世爻在关注你的目标落点；动爻处是松动点，宜小步核对。`
-    : `盘面辅读：本卦偏「${from}」，格局偏静——先对齐事实再加码。`;
+  let weekActions: SceneAction[] = [];
+  if (weekFromDirect.length) {
+    weekActions = [...weekFromDirect];
+  } else {
+    weekActions = [breakthrough, ...checklist].filter((a) => a.body.trim());
+  }
+  for (const extra of scriptExtras) {
+    if (weekActions.length >= 4) break;
+    if (!weekActions.some((w) => w.body === extra.body)) {
+      weekActions.push(extra);
+    }
+  }
+  if (!weekActions.length && scriptExtras.length) {
+    weekActions = scriptExtras.slice(0, 3);
+  }
+
+  const why: WhyItem[] = buildWhyItems(
+    input.cast,
+    direct.domain,
+    input.question,
+    castAt,
+  );
 
   return {
     intents,
     answers,
-    decision: buildDecision(answers, input.cast),
-    breakthrough: finalBt,
-    checklist: finalCheck,
-    boardExpand,
+    decision: direct.decision,
+    breakthrough: weekActions[0] ?? breakthrough,
+    checklist: weekActions.slice(1),
+    boardExpand: buildBoardExpandText(input.cast, castAt),
     contextUsed: Boolean(ctx),
+    verdict: {
+      /** 旧版卦象主调一句话（核心方向大标题） */
+      headline: direct.verdict,
+      parse: direct.analysis,
+      decision: direct.decision,
+    },
+    why,
+    energy: undefined,
+    reassurance: direct.reassurance,
+    coreMetaphor: direct.coreMetaphor,
+    script,
   };
 }

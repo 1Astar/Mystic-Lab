@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { mountLiuyaoModeSwitch, setLiuyaoMode } from '../liuyao/mode.ts';
 import { TRIGRAM_ORDER, TRIGRAMS } from '../liuyao/trigrams.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
@@ -33,7 +33,7 @@ export function renderLiuyaoBagua(root: HTMLElement): void {
   const header = document.createElement('header');
   header.className = 'ly-codex-header';
   header.innerHTML = `
-    <h1 class="page-title">八卦图鉴</h1>
+    <h1 class="page-title">八卦探索</h1>
     <p class="page-subtitle">八个基本象：看清符号长什么样，以及为何取这个自然象</p>
   `;
   page.append(header);
@@ -62,7 +62,7 @@ export function renderLiuyaoBagua(root: HTMLElement): void {
   const foot = document.createElement('div');
   foot.className = 'ly-learn-foot';
   foot.innerHTML = `
-    <button type="button" class="btn btn-ghost" data-path="/liuyao/hexagrams">看六十四卦图鉴</button>
+    <button type="button" class="btn btn-ghost" data-path="/liuyao/hexagrams">看六十四卦探索</button>
     <button type="button" class="btn ly-btn-gold" data-path="/liuyao/learn">回六爻之旅</button>
   `;
   foot.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {

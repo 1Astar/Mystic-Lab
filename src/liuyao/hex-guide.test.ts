@@ -30,8 +30,6 @@ describe('hex-guide shared snippets', () => {
     expect(html).toMatch(/ly-guide-snippet/);
     expect(html).toMatch(/ly-guide-snippet-hero/);
     expect(html).toMatch(/ly-guide-snippet-related/);
-    expect(html).toMatch(/data-guide-sub-host/);
-    expect(html).toMatch(/成卦/);
     expect(html).toMatch(/整体意象/);
     expect(html).toMatch(/ly-guide-snippet-yao/);
     expect(html).toMatch(/上卦 ·/);
@@ -39,18 +37,28 @@ describe('hex-guide shared snippets', () => {
     expect(html).toMatch(/分域/);
     expect(html).toMatch(/data-guide-domains/);
     expect(html).toMatch(/为什么叫/);
-    expect(html).toMatch(/六十四卦图鉴/);
+    expect(html).toMatch(/六十四卦探索/);
     expect(html.match(/整体意象/g)?.length).toBe(1);
   });
 
-  it('guide notes domain pane mirrors notes structure', () => {
+  it('guide notes mirrors reading shell: 意象/分域 + 专业排盘 + 古籍解析', () => {
     const pack = buildHexGuidePack(HEXAGRAMS[3]!);
     const html = renderHexGuideNotesHtml(pack);
+    expect(html).toMatch(/data-guide-tab="xiang"/);
+    expect(html).toMatch(/data-guide-tab="dress"/);
+    expect(html).toMatch(/data-guide-tab="books"/);
+    expect(html).toMatch(/data-xiang-sec="guide"/);
+    expect(html).toMatch(/data-xiang-sec="domain"/);
     expect(html).toMatch(/整体意象/);
     expect(html).toMatch(/ly-guide-snippet-related/);
     expect(html).toMatch(/上卦 ·/);
     expect(html).toMatch(/分域/);
-    expect(html).toMatch(/data-guide-sub-host/);
+    expect(html).toMatch(/ly-domain-card|ly-hex-expand/);
+    expect(html).toMatch(/专业排盘/);
+    expect(html).toMatch(/古籍解析/);
+    expect(html).toMatch(/ly-dress-archive|装卦表/);
+    expect(html).not.toMatch(/data-guide-tab="yao"/);
+    expect(html).not.toMatch(/data-guide-tab="classic"/);
     expect(renderGuideArtHtml(pack)).toMatch(/ly-guide-art/);
   });
 });

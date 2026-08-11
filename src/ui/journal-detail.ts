@@ -1,6 +1,8 @@
 import type { ReadingResult } from '../interpretation/types.ts';
 import type { JournalEntry } from '../journal/records.ts';
 import { updateJournalReadingSnapshot } from '../journal/records.ts';
+import { draftFromTarotReading } from '../share/drafts.ts';
+import { clearSideActionFabs, mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountQuestionThread } from './question-thread-panel.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
@@ -61,6 +63,11 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
     }
     ${reading.learningNote ? `<div class="journal-detail-learning"><h3>学习笔记</h3><p>${escapeHtml(reading.learningNote)}</p></div>` : ''}
     <div id="journal-detail-feedback"></div>
+    ${
+      canContinue
+        ? '<button type="button" class="btn journal-detail-continue" data-continue-bottom>继续完成这局牌阵</button>'
+        : ''
+    }
   `;
 
   const threadHost = container.querySelector('#journal-detail-thread') as HTMLElement | null;
@@ -79,6 +86,23 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
     });
   }
 
-  container.querySelector('.journal-detail-close')?.addEventListener('click', onClose);
-  container.querySelector('[data-continue]')?.addEventListener('click', () => onContinue?.());
+  container.querySelector('.journal-detail-close')?.addEventListener('click', () => {
+    clearSideActionFabs();
+    document.documentElement.classList.remove('thread-peek-open');
+    onClose();
+  });
+  container.querySelectorAll('[data-continue], [data-continue-bottom]').forEach((el) => {
+    el.addEventListener('click', () => onContinue?.());
+  });
+
+  if (!isPartial) {
+    mountInviteCompanionBar(container, {
+      system: 'tarot',
+      draft: () =>
+        draftFromTarotReading({
+          reading,
+          question: entry.question,
+        }),
+    });
+  }
 }

@@ -2,6 +2,7 @@ import {
   getLabProfileSnapshot,
   loadUseProfilePref,
 } from '../life/profile-context.ts';
+import { effectiveAge } from '../life/age.ts';
 import type { RiskPreference, UserContext } from './types.ts';
 
 function normalizeRisk(raw: string | undefined): RiskPreference {
@@ -30,9 +31,10 @@ export function resolveUserContext(opts?: {
   ].filter(Boolean);
 
   const riskRaw = (profile as { riskPreference?: string }).riskPreference;
+  const age = effectiveAge(profile);
 
   return {
-    age: profile.age.trim() || undefined,
+    age: age || undefined,
     occupation: profile.occupation.trim() || undefined,
     currentStage: stageParts.length ? stageParts.join(' · ') : undefined,
     riskPreference: normalizeRisk(riskRaw),

@@ -23,16 +23,17 @@ describe('pattern-summary', () => {
     const summary = buildPatternSummary(cast, '面试能过吗', new Date('2026-07-21'));
     expect(summary.chips.some((c) => /持世/.test(c.label))).toBe(true);
     expect(summary.chips.some((c) => /世应/.test(c.label))).toBe(true);
+    expect(summary.chips.every((c) => !c.note || !/世卦/.test(c.note))).toBe(true);
     const html = renderPatternSummaryHtml(summary);
     expect(html).toMatch(/ly-pattern-summary/);
+    expect(html).toMatch(/<details/);
     expect(html).toMatch(/格局摘要/);
+    expect(html).toMatch(/先认三个词/);
     expect(html).toMatch(/持世/);
     expect(html).toMatch(/data-pattern-chip/);
     expect(html).toMatch(/data-pattern-open="dress"/);
-    expect(html).toMatch(/简单说|白话/);
-    expect(summary.chips.every((c) => /简单说/.test(c.tip) || /合局|冲局|游魂|归魂/.test(c.tip))).toBe(
-      true,
-    );
+    expect(html).not.toMatch(/官鬼（五世卦）|兄弟（五世卦）/);
+    expect(summary.palaceBrief).toMatch(/宫/);
   });
 
   it('marks 六冲 for pure hexagrams', () => {

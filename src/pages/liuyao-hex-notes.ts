@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { HEXAGRAMS, hexagramByKingWen } from '../liuyao/hexagrams.ts';
 import {
   bindHexGuideNotes,
@@ -22,7 +22,7 @@ function resolveHex() {
   return { hex, tab: byTab };
 }
 
-/** 图鉴解读笔记：整页（深链）；主入口仍是 HEX CARD 右侧抽屉 */
+/** 探索深度学习：整页（深链）；主入口仍是 HEX CARD 右侧抽屉 */
 export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const page = document.createElement('div');
   page.className = 'page ly-hexagrams-page ly-hex-notes-page';
@@ -35,7 +35,7 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const back = document.createElement('button');
   back.type = 'button';
   back.className = 'back-link';
-  back.textContent = hex ? `← 返回「${hex.name}」图鉴卡` : '← 返回六十四卦图鉴';
+  back.textContent = hex ? `← 返回「${hex.name}」探索卡` : '← 返回六十四卦探索';
   back.addEventListener('click', () => {
     if (hex) {
       navigate(`/liuyao/hexagrams?gua=${encodeURIComponent(hex.name)}`);
@@ -50,9 +50,9 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
     const empty = document.createElement('div');
     empty.className = 'ly-hex-notes-empty';
     empty.innerHTML = `
-      <h1 class="page-title">解读笔记</h1>
-      <p class="page-subtitle">未指定卦名。请从图鉴卡进入，或在地址加 ?gua=乾</p>
-      <button type="button" class="btn" data-go-list>打开六十四卦图鉴</button>
+      <h1 class="page-title">深度学习</h1>
+      <p class="page-subtitle">未指定卦名。请从探索卡进入，或在地址加 ?gua=乾</p>
+      <button type="button" class="btn" data-go-list>打开六十四卦探索</button>
     `;
     empty.querySelector('[data-go-list]')?.addEventListener('click', () => {
       navigate('/liuyao/hexagrams');
@@ -66,7 +66,7 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
   const header = document.createElement('header');
   header.className = 'ly-codex-header ly-hex-notes-head';
   header.innerHTML = `
-    <p class="ly-guide-kicker">解读笔记 · 文王第 ${hex.kingWen} 卦</p>
+    <p class="ly-guide-kicker">深度学习 · 文王第 ${hex.kingWen} 卦</p>
     <h1 class="page-title">${hex.fullName}</h1>
     <p class="page-subtitle">${meetBannerForHex(hex)}</p>
   `;
@@ -101,8 +101,17 @@ export function renderLiuyaoHexNotes(root: HTMLElement): void {
         if (entry) openLiuyaoEncounterReplay(page, entry);
       },
     });
-    if (tab && tab !== 'domain') {
-      notes.querySelector<HTMLButtonElement>(`[data-guide-tab="${tab}"]`)?.click();
+    if (tab && tab !== 'xiang' && tab !== 'domain') {
+      const legacy: Record<string, string> = {
+        yao: 'books',
+        classic: 'books',
+        pro: 'dress',
+      };
+      const mapped = legacy[tab] ?? tab;
+      notes.querySelector<HTMLButtonElement>(`[data-guide-tab="${mapped}"]`)?.click();
+    } else if (tab === 'domain') {
+      // 旧深链「分域」→ 卦象解析内的分域轨
+      notes.querySelector<HTMLButtonElement>('[data-xiang-sec="domain"]')?.click();
     }
   }
 

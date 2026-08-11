@@ -4,6 +4,7 @@ import {
   resolveLiuyaoCast,
   resolveLiuyaoLearnMode,
 } from '../liuyao/replay.ts';
+import { clearSideActionFabs } from '../share/invite-bar.ts';
 import { mountLiuyaoResultTabs } from './liuyao/result-tabs.ts';
 
 function escapeHtml(s: string): string {
@@ -12,6 +13,40 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function renderAiSessionsHtml(entry: LiuyaoJournalEntry): string {
+  const sessions = entry.aiSessions ?? [];
+  if (!sessions.length) return '';
+  const blocks = sessions
+    .map((s) => {
+      const title = s.kind === 'deep' ? '深度解读' : '追问';
+      const body =
+        s.deepReading?.trim() ||
+        s.turns
+          .filter((t) => t.role === 'assistant')
+          .map((t) => t.content)
+          .join('\n\n') ||
+        '';
+      if (!body.trim()) return '';
+      const extra =
+        s.turns.length > 1
+          ? `<details class="ly-replay-ai-turns"><summary>追问记录（${s.turns.length} 条）</summary>${s.turns
+              .map(
+                (t) =>
+                  `<p class="ly-replay-ai-turn is-${t.role}"><strong>${
+                    t.role === 'user' ? '你' : '陪读'
+                  }</strong> · ${escapeHtml(t.content)}</p>`,
+              )
+              .join('')}</details>`
+          : '';
+      return `<section class="ly-replay-ai"><h4>${title}</h4><p class="ly-replay-pre">${escapeHtml(
+        body,
+      )}</p>${extra}</section>`;
+    })
+    .filter(Boolean)
+    .join('');
+  return blocks ? `<div class="ly-replay-ai-wrap">${blocks}</div>` : '';
 }
 
 function mountTextFallback(
@@ -106,6 +141,7 @@ export function mountLiuyaoReadingReplay(
         }
       </header>
       <div class="ly-replay-result-host" data-ly-replay-host></div>
+      ${renderAiSessionsHtml(entry)}
       ${
         entry.reflection
           ? `<p class="ly-replay-reflection"><strong>当时感想</strong> · ${escapeHtml(entry.reflection)}</p>`
@@ -116,21 +152,38 @@ export function mountLiuyaoReadingReplay(
 
   const host = container.querySelector<HTMLElement>('[data-ly-replay-host]');
   if (host) {
-    mountLiuyaoResultTabs(host, {
-      cast,
-      reading: entry.reading,
-      question: entry.question,
-      learn,
-      castAt: new Date(entry.castAt ?? entry.createdAt),
-      initialTags: entry.tags,
-      initialNoteDraft: entry.reflection,
-    });
+    try {
+      mountLiuyaoResultTabs(host, {
+        cast,
+        reading: entry.reading,
+        question: entry.question,
+        learn,
+        castAt: new Date(entry.castAt ?? entry.createdAt),
+        initialTags: entry.tags,
+        initialNoteDraft: entry.reflection,
+        journalId: entry.id,
+      });
+    } catch (err) {
+      console.error('[ly-replay] mount result failed', err);
+      host.innerHTML = `
+        <p class="ly-replay-regen">完整盘面暂时打不开，先看当时四层解读。</p>
+        <section class="ly-replay-layer"><h4>一句话</h4><p>${escapeHtml(entry.reading?.summary || entry.summary || '—')}</p></section>
+        <section class="ly-replay-layer"><h4>依据</h4><p class="ly-replay-pre">${escapeHtml(entry.reading?.basis || '—')}</p></section>
+        <section class="ly-replay-layer"><h4>情境</h4><p class="ly-replay-pre">${escapeHtml(entry.reading?.context || '—')}</p></section>
+        <section class="ly-replay-layer"><h4>行动</h4><p class="ly-replay-pre">${escapeHtml(entry.reading?.action || '—')}</p></section>
+      `;
+    }
   }
 
   container.querySelectorAll('[data-replay-close]').forEach((el) => {
     el.addEventListener('click', onClose);
   });
   requestAnimationFrame(() => container.classList.add('is-visible'));
+}
+
+/** 复原时确保六爻样式已加载（从旅程等未挂 liuyao.css 的页打开时不会白块按钮） */
+async function ensureLiuyaoStyles(): Promise<void> {
+  await import('../styles/liuyao.css');
 }
 
 /** 复原当时占问：叠层打开完整结果场景 */
@@ -142,9 +195,14 @@ export function openLiuyaoEncounterReplay(
 
   const overlay = document.createElement('div');
   overlay.dataset.lyReplay = '';
-  mountLiuyaoReadingReplay(overlay, entry, () => {
-    overlay.classList.remove('is-visible');
-    window.setTimeout(() => overlay.remove(), 220);
-  });
   host.appendChild(overlay);
+
+  void ensureLiuyaoStyles().then(() => {
+    if (!overlay.isConnected) return;
+    mountLiuyaoReadingReplay(overlay, entry, () => {
+      clearSideActionFabs();
+      overlay.classList.remove('is-visible');
+      window.setTimeout(() => overlay.remove(), 220);
+    });
+  });
 }

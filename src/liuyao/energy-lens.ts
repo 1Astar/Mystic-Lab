@@ -205,6 +205,8 @@ function positionPower(index: number): string {
 function domainTopic(domain?: SceneDomain): string {
   if (domain === 'career') return '求职 / 工作';
   if (domain === 'love') return '感情 / 关系';
+  if (domain === 'wealth') return '钱财 / 投入';
+  if (domain === 'growth') return '学习 / 方向';
   if (domain === 'life') return '资源 / 钱财';
   return '你当下关心的事';
 }

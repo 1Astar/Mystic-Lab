@@ -103,7 +103,26 @@ describe('structured reading', () => {
     expect(body).toMatch(/卡点|风险|理想化|感觉|核实/);
     expect(body).not.toMatch(/关于【提问/);
     expect(body).not.toMatch(/【提问 1】/);
+    expect(body).not.toMatch(/禁止只背|必须落在这个位置功能/);
     expect(body).toContain('offer');
+  });
+
+  it('past / present / future leads are user-facing, not prompt placeholders', () => {
+    for (const [key, pos] of [
+      ['past', '过去'],
+      ['present', '现在'],
+      ['future', '未来'],
+    ] as const) {
+      const ctx: ReadingContext = {
+        ...workCtx,
+        cardPosition: pos,
+        positionKey: key,
+        question: '这段工作关系会怎么走？',
+      };
+      const mock = buildStructuredMockReading(ctx, knowledge, true);
+      expect(mock.sections[0]?.body).toMatch(new RegExp(pos));
+      expect(mock.sections[0]?.body).not.toMatch(/禁止只背|必须落在这个位置功能|正位百科/);
+    }
   });
 
   it('builds per-question answers for multi-part work questions', () => {

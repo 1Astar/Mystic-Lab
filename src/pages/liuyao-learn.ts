@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { LIUYAO_LEARN_CHAPTERS } from '../liuyao/learn-chapters.ts';
 import { mountLiuyaoModeSwitch, setLiuyaoMode } from '../liuyao/mode.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
@@ -32,11 +32,11 @@ export function renderLiuyaoLearn(root: HTMLElement): void {
   header.innerHTML = `
     <h1 class="page-title">六爻之旅</h1>
     <p class="page-subtitle">从阴阳到动爻，一步步看懂卦象结构</p>
-    <nav class="ly-learn-quick" aria-label="图鉴快捷入口">
+    <nav class="ly-learn-quick" aria-label="探索快捷入口">
       <a href="/liuyao/learn/board" data-path="/liuyao/learn/board">对照读卦</a>
       <a href="/liuyao/classic" data-path="/liuyao/classic">古文资料夹</a>
-      <a href="/liuyao/bagua" data-path="/liuyao/bagua">八卦图鉴</a>
-      <a href="/liuyao/hexagrams" data-path="/liuyao/hexagrams">六十四卦图鉴</a>
+      <a href="/liuyao/bagua" data-path="/liuyao/bagua">八卦探索</a>
+      <a href="/liuyao/hexagrams" data-path="/liuyao/hexagrams">六十四卦探索</a>
       <a href="/liuyao/concepts#shi-ying" data-path="/liuyao/concepts#shi-ying">世应</a>
       <a href="/liuyao/concepts#liu-qin" data-path="/liuyao/concepts#liu-qin">六亲</a>
       <a href="/liuyao/concepts#dong-yao" data-path="/liuyao/concepts#dong-yao">动爻</a>

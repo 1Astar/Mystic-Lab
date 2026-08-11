@@ -20,7 +20,8 @@ describe('xiaoliuren interpret schema', () => {
     expect(reading.meaning).toContain('大安代表');
     expect(reading.analysis).toContain('稳步推进');
     expect(reading.analysis).not.toMatch(/会发财|一定|注定/);
-    expect(reading.suggestion).toContain('稳住');
+    expect(reading.suggestion).toMatch(/条款|核对|清单/);
+    expect(reading.suggestion).toContain('侧重');
     expect(reading.reflection).toBeTruthy();
     expect(reading.typeId).toBe('career');
   });

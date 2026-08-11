@@ -1,7 +1,7 @@
 import type { Hexagram } from './hexagrams.ts';
 import type { Trigram, TrigramId } from './trigrams.ts';
 
-export type SceneDomain = 'career' | 'love' | 'life' | 'general';
+export type SceneDomain = 'career' | 'love' | 'life' | 'wealth' | 'growth' | 'general';
 
 /** 单卦自然象 → 人事取象（工作/感情常用） */
 const TRIGRAM_SCENE: Record<
@@ -200,7 +200,7 @@ export function renderFoundationBridgeHtml(
         合在一起，主调偏「${escapeScene(scene.themeWords)}」——${escapeScene(scene.meaning)}
       </p>
       <p class="ly-foundation-bridge-ask"><em>此刻可自问：</em>${escapeScene(ask)}</p>
-      <p class="ly-guide-tip">工作 / 感情分行细译，请打开「解读笔记 · 卦象解析」（手机点下方「打开解读笔记」或右侧书签）。</p>
+      <p class="ly-guide-tip">工作 / 感情分行细译，请打开「卦象精读 · 卦象解析」（手机点下方「打开卦象精读」或右侧书签）。</p>
     </div>
   `;
 }
@@ -224,6 +224,12 @@ export function detectSceneDomain(question: string): SceneDomain {
     return 'career';
   }
   if (/感情|恋爱|分手|复合|婚姻|对象|喜欢|关系/.test(q)) return 'love';
+  if (/投资|股票|基金|理财|定投|回本|回款|现金流|被动收入|大额支出|该不该买|花不花/.test(q)) {
+    return 'wealth';
+  }
+  if (/考研|考试|考证|留学|志愿|五年规划|人生方向|职业规划|两难|选哪个/.test(q)) {
+    return 'growth';
+  }
   if (/生活|搬家|健康|家庭|钱|财务/.test(q)) return 'life';
   return 'general';
 }

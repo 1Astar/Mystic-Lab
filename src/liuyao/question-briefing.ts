@@ -7,11 +7,12 @@ import { getClassicCorpus } from './classic-corpus.ts';
 import { buildClassicCompendium } from './classic-compendium.ts';
 import { buildPatternSummary } from './pattern-summary.ts';
 import { yongTopicLabel } from './yong-focus.ts';
-import {
-  buildOfflineAnswerPack,
-} from '../mystic-engine/build-pack.ts';
+import { buildOfflineAnswerPack } from '../mystic-engine/build-pack.ts';
+import { renderAnswerPackHtml } from '../mystic-engine/render-pack.ts';
 import type { OfflineAnswerPack } from '../mystic-engine/types.ts';
 import { loadUseProfilePref } from '../life/profile-context.ts';
+import { formatHexWithPinyin } from './hex-pinyin.ts';
+import { buildDirectReading } from './direct-reading.ts';
 
 export type BriefingBlock = {
   title: string;
@@ -28,6 +29,7 @@ export type QuestionBriefing = {
   layer4: BriefingBlock;
   strategy: BriefingBlock;
   pack: OfflineAnswerPack;
+  cast: CastResult;
 };
 
 function escapeHtml(s: string): string {
@@ -77,7 +79,7 @@ function buildClassicNote(
   );
 
   return {
-    title: '📜 古籍旁注（选读）',
+    title: '古籍旁注（选读）',
     body:
       `${classicQuiet}` +
       (corpus?.judgment ? `\n卦辞摘录：「${corpus.judgment}」` : '') +
@@ -87,23 +89,23 @@ function buildClassicNote(
   };
 }
 
-function answersBody(pack: OfflineAnswerPack): string {
-  return pack.answers
-    .map((a, i) => {
-      const ev = a.evidence.map((e) => `· ${e.plain}`).join('\n');
-      return `${i + 1}. ${a.questionSlice}\n倾向：${a.lean}\n证据：\n${ev}`;
+function whyBody(pack: OfflineAnswerPack): string {
+  return pack.why
+    .map((w) => {
+      const lines = [
+        w.title,
+        w.hook,
+        ...(w.points ?? []),
+        w.tip ? `建议：${w.tip}` : '',
+      ].filter(Boolean);
+      return lines.join('\n') || `${w.title}\n${w.body}`;
     })
     .join('\n\n');
 }
 
-function actionsBody(pack: OfflineAnswerPack): string {
-  const check = pack.checklist
-    .map((c, i) => `${i + 1}. ${c.title}：${c.body}`)
-    .join('\n');
-  return (
-    `【${pack.breakthrough.title}】\n${pack.breakthrough.body}` +
-    (check ? `\n\n还可同步：\n${check}` : '')
-  );
+function weekBody(pack: OfflineAnswerPack): string {
+  const items = [pack.breakthrough, ...pack.checklist];
+  return items.map((c, i) => `${i + 1}. 【${c.title}】${c.body}`).join('\n');
 }
 
 /** 生成结合所问的解答（OfflineAnswerPack） */
@@ -119,39 +121,47 @@ export function buildQuestionBriefing(
     castAt,
     useProfile: loadUseProfilePref(true),
   });
+  const direct = buildDirectReading(cast, question);
 
-  const lead = cast.changed
-    ? `（基于${cast.primary.fullName}卦变${cast.changed.fullName}，结合你的问题）`
-    : `（基于${cast.primary.fullName}，结合你的问题）`;
+  const lead =
+    direct.frame ||
+    (cast.changed
+      ? `（基于${formatHexWithPinyin(cast.primary.name, cast.primary.fullName)}卦变${formatHexWithPinyin(cast.changed.name, cast.changed.fullName)}，结合你的问题）`
+      : `（基于${formatHexWithPinyin(cast.primary.name, cast.primary.fullName)}，结合你的问题）`);
 
-  const firstLean = pack.answers[0]?.lean ?? pack.decision;
+  const script = pack.script;
+  const calm = script?.beats.find((b) => b.id === 'calm');
+  const truth = script?.beats.find((b) => b.id === 'truth');
+  const action = script?.beats.find((b) => b.id === 'action');
+  const boundary = script?.beats.find((b) => b.id === 'boundary');
 
   return {
     topicLabel,
     questionLead: lead,
     layer1: {
-      title: '先答你的问题',
-      body: answersBody(pack),
-      quote: firstLean,
+      title: '对你这个问题',
+      body: pack.verdict.parse,
+      quote: pack.verdict.headline,
     },
     layer2: {
-      title: '决策参考',
-      body: pack.decision,
+      title: truth?.title ?? '就你的问题，盘面在说什么',
+      body: truth?.body ?? whyBody(pack),
     },
     layer3: {
-      title: '破局动作',
-      body: actionsBody(pack),
+      title: action?.title ?? '接下来可以做什么',
+      body: action ? action.body : weekBody(pack),
     },
     layer4: {
-      title: '盘面辅读',
-      body: pack.boardExpand ?? '',
+      title: calm?.title ?? '先松一口气',
+      body: calm?.body ?? pack.reassurance ?? '',
     },
     strategy: {
-      title: '破局动作',
-      body: pack.breakthrough.body,
-      quote: pack.breakthrough.title,
+      title: boundary?.title ?? pack.breakthrough.title,
+      body: boundary?.body ?? pack.breakthrough.body,
+      quote: pack.verdict.headline,
     },
     pack,
+    cast,
   };
 }
 
@@ -168,88 +178,19 @@ export function buildQuestionBriefingWithClassic(
   };
 }
 
-function renderBlockHtml(block: BriefingBlock, extraClass = ''): string {
-  if (!block.body.trim() && !block.quote) return '';
-  return `
-    <section class="ly-briefing-layer${extraClass}" data-briefing-section>
-      <h4 class="ly-briefing-title">${escapeHtml(block.title)}</h4>
-      ${
-        block.quote
-          ? `<blockquote class="ly-briefing-quote"><p>${escapeHtml(block.quote)}</p></blockquote>`
-          : ''
-      }
-      ${block.body.trim() ? `<div class="ly-briefing-body">${nlToBr(block.body)}</div>` : ''}
-    </section>`;
-}
-
-export function renderAnswerPackHtml(pack: OfflineAnswerPack, topicLabel: string, lead: string): string {
-  const answerSections = pack.answers
-    .map((a) => {
-      const ev = a.evidence
-        .map((e) => `<li data-fact="${escapeHtml(e.factKey)}">${escapeHtml(e.plain)}</li>`)
-        .join('');
-      return `
-        <article class="ly-pack-answer" data-intent="${escapeHtml(a.intentId)}">
-          <h5 class="ly-pack-q">${escapeHtml(a.questionSlice)}</h5>
-          <p class="ly-pack-lean"><strong>倾向：</strong>${escapeHtml(a.lean)}</p>
-          <ul class="ly-pack-evidence">${ev}</ul>
-        </article>`;
-    })
-    .join('');
-
-  const checks = pack.checklist
-    .map(
-      (c) =>
-        `<li><strong>${escapeHtml(c.title)}</strong> — ${escapeHtml(c.body)}</li>`,
-    )
-    .join('');
-
-  return `
-    <article class="ly-question-briefing ly-answer-pack" data-question-briefing data-answer-pack>
-      <p class="ly-briefing-kicker">${escapeHtml(lead)}</p>
-      <p class="ly-briefing-topic">本题焦点 · ${escapeHtml(topicLabel)}</p>
-      ${
-        pack.contextUsed
-          ? `<p class="ly-pack-context">已带入档案上下文</p>`
-          : ''
-      }
-      <section class="ly-briefing-layer is-verdict" data-briefing-section>
-        <h4 class="ly-briefing-title">先答你的问题</h4>
-        ${answerSections}
-      </section>
-      <section class="ly-briefing-layer" data-briefing-section>
-        <h4 class="ly-briefing-title">决策参考</h4>
-        <div class="ly-briefing-body">${nlToBr(pack.decision)}</div>
-      </section>
-      <section class="ly-briefing-layer is-actions" data-briefing-section>
-        <h4 class="ly-briefing-title">破局动作</h4>
-        <blockquote class="ly-briefing-quote"><p>${escapeHtml(pack.breakthrough.title)}</p></blockquote>
-        <div class="ly-briefing-body">${nlToBr(pack.breakthrough.body)}</div>
-        ${checks ? `<ul class="ly-pack-checklist">${checks}</ul>` : ''}
-      </section>
-      ${
-        pack.boardExpand
-          ? `<details class="ly-briefing-more"><summary>盘面辅读</summary><div class="ly-briefing-body">${nlToBr(pack.boardExpand)}</div></details>`
-          : ''
-      }
-    </article>
-  `;
-}
-
-function renderBlockHtmlLegacy(block: BriefingBlock, extraClass = ''): string {
-  return renderBlockHtml(block, extraClass);
-}
-
 export function renderQuestionBriefingHtml(b: QuestionBriefing, classic?: BriefingBlock): string {
-  const lead = b.questionLead;
-  let html = renderAnswerPackHtml(b.pack, b.topicLabel, lead);
-  if (classic) {
-    html = html.replace(
-      '</article>',
-      `<details class="ly-briefing-more"><summary>${escapeHtml(classic.title)}</summary>${renderBlockHtmlLegacy({ ...classic, title: '' })}</details></article>`,
-    );
-  }
-  return html;
+  const classicHtml = classic
+    ? `<details class="ly-classic-fold">
+        <summary>古籍旁注 · 选读</summary>
+        <div class="ly-classic-fold-body">${nlToBr(classic.body)}</div>
+      </details>`
+    : '';
+  return renderAnswerPackHtml(b.pack, {
+    topicLabel: b.topicLabel,
+    lead: b.questionLead,
+    classicHtml,
+    cast: b.cast,
+  });
 }
 
 export function renderQuestionBriefingForCast(
@@ -260,3 +201,6 @@ export function renderQuestionBriefingForCast(
   const full = buildQuestionBriefingWithClassic(cast, question, castAt);
   return renderQuestionBriefingHtml(full, full.classic);
 }
+
+/** @deprecated 使用 mystic-engine/render-pack */
+export { renderAnswerPackHtml };

@@ -4,9 +4,28 @@
 import type { CastResult } from './engine.ts';
 import { detectSceneDomain } from './scene-map.ts';
 import { buildDirectReading } from './direct-reading.ts';
-import { isAiConfigured, loadAiSettings } from '../ai/settings.ts';
+import { buildCompactHexagramPayload } from './board-compact.ts';
+import { LIUYAO_COACH_SYSTEM, liuyaoCoachPersonaOneLiner } from './coach-prompt.ts';
+import { formatHexWithPinyin } from './hex-pinyin.ts';
+import {
+  canUseMysticFollow,
+  friendlyQuotaCopy,
+  loadAiServiceMode,
+  recordFollowUse,
+} from '../ai/ai-mode.ts';
+import { resolveAiRunReady, runChatCompletion } from '../ai/chat-runner.ts';
+import { isAiConfigured } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 import { answerAndStoreAsk } from './ask-answer.ts';
+import { appendLiuyaoAiTurns } from './journal.ts';
+import {
+  bindPersonalContextCard,
+  formatPersonalContextLines,
+  hasPersonalContext,
+  personalContextFieldsHtml,
+  readPersonalContextFrom,
+} from './personal-context.ts';
+import { renderAskPanelHtml, bindAskPanel } from './ask-panel.ts';
 
 export type ChatTurn = { role: 'user' | 'assistant'; content: string };
 
@@ -18,31 +37,32 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 风水涣变巽 / 风水涣（无变） */
+/** 风水涣（huàn）变巽为风（xùn） */
 export function hexChangeLabel(cast: CastResult): string {
+  const primary = formatHexWithPinyin(cast.primary.name, cast.primary.fullName);
   if (cast.changed) {
-    const short =
-      cast.changed.fullName === cast.changed.name || cast.changed.name.length === 1
-        ? cast.changed.fullName
-        : cast.changed.name;
-    return `${cast.primary.fullName}变${short}`;
+    const changed = formatHexWithPinyin(cast.changed.name, cast.changed.fullName);
+    return `${primary}变${changed}`;
   }
-  return cast.primary.fullName;
+  return primary;
 }
 
-/** 定死的前置上下文（按本卦名注入） */
+/** 定死的前置上下文：教练人设 + 精简盘面 + 离线判词 */
 export function buildFollowupSystemPrompt(cast: CastResult, question: string): string {
   const label = hexChangeLabel(cast);
   const direct = buildDirectReading(cast, question);
+  const compact = buildCompactHexagramPayload(cast, question);
   return [
+    LIUYAO_COACH_SYSTEM,
+    '',
+    liuyaoCoachPersonaOneLiner(),
     `你知道这个卦叫「${label}」。`,
-    '你是一个懂女性主义、懂现代职业规划的陪读——不是算命摊判官，也不替用户做人生决定。',
-    '说话像靠谱朋友：先给可执行建议，再轻轻对照卦象；避免恐吓、宿命论、性别刻板印象。',
-    '若涉及去留/薪资/权力不对等：优先谈边界、书面确认、两手准备与身体感受，不鼓励为「忍」而自我消耗。',
     `用户原占问题：${question.trim() || '（未填写）'}`,
-    `本卦：${cast.primary.fullName}（${cast.primary.keywords.join('、')}）；变卦：${cast.changed?.fullName ?? '无'}（${cast.changed?.keywords.join('、') ?? '—'}）；动爻：${cast.changingIndexes.length ? cast.changingIndexes.map((i) => ['初', '二', '三', '四', '五', '上'][i] + '爻').join('、') : '无'}。`,
-    `系统已给的核心判词：${direct.verdict}`,
-    '回答用「你」；150–280 字为宜；可分点；结尾可给一个很小的下一步。',
+    `系统已给的核心判词（可参考，勿照抄）：${direct.verdict}`,
+    `核心隐喻：${direct.coreMetaphor}`,
+    '追问时直接回答这一问：150–280 字，口语化，用「你」；结尾给一个很小的下一步。不要重复套固定四段标题。',
+    '精简排盘 JSON（勿复述全文，只取相关）：',
+    JSON.stringify(compact),
   ].join('\n');
 }
 
@@ -99,34 +119,27 @@ async function chatFollowup(
   history: ChatTurn[],
   userAsk: string,
 ): Promise<string> {
-  if (!isAiConfigured()) {
-    throw new Error('NO_AI');
-  }
-  const settings = loadAiSettings();
-  const baseUrl = settings.baseUrl.replace(/\/$/, '');
-  const messages = [
-    { role: 'system', content: system },
-    ...history.map((t) => ({ role: t.role, content: t.content })),
-    { role: 'user', content: userAsk },
-  ];
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${settings.apiKey.trim()}`,
-    },
-    body: JSON.stringify({
-      model: settings.model,
-      temperature: 0.55,
-      messages,
-    }),
+  const mode = loadAiServiceMode();
+  const ready = resolveAiRunReady({
+    kind: 'follow',
+    mysticFollowOk: canUseMysticFollow(),
   });
-  if (!res.ok) throw new Error(`AI 请求失败 (${res.status})`);
-  const data = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const text = data.choices?.[0]?.message?.content?.trim() ?? '';
-  if (!text) throw new Error('AI 返回为空');
+  if (!ready.ok) {
+    if (ready.reason === 'need_byok') throw new Error('NO_AI');
+    if (ready.reason === 'mystic_soon') {
+      throw new Error(friendlyQuotaCopy(mode).detail);
+    }
+    throw new Error(friendlyQuotaCopy(mode).headline);
+  }
+  const text = await runChatCompletion(
+    [
+      { role: 'system', content: system },
+      ...history.map((t) => ({ role: t.role, content: t.content })),
+      { role: 'user', content: userAsk },
+    ],
+    { temperature: 0.55 },
+  );
+  if (mode === 'mystic') recordFollowUse();
   return text;
 }
 
@@ -143,13 +156,21 @@ function toast(msg: string): void {
   }, 1600);
 }
 
-/** 打开追问聊天弹层 */
+/** 打开追问聊天弹层；若带 initialAssistant，则以「深度解读」为主，下方可继续追问 */
 export function openFollowupChat(opts: {
   cast: CastResult;
   question: string;
   castAt?: Date;
+  /** 手札 id：有则落库 */
+  journalId?: string | null;
+  /** 已有 AI session（深度解读后继续聊） */
+  aiSessionId?: string | null;
   seedAsk?: string;
   seedContext?: string;
+  /** 直接展示的深度解读（不另调模型） */
+  initialAssistant?: string;
+  /** 打开时默认 Tab：深度解读 | 边看边问 */
+  initialTab?: 'deep' | 'ask';
 }): void {
   document.querySelector('.ly-follow-chat')?.remove();
 
@@ -158,7 +179,11 @@ export function openFollowupChat(opts: {
   const system = buildFollowupSystemPrompt(cast, question);
   const presets = buildFollowupPresets(cast, question);
   const label = hexChangeLabel(cast);
+  const deepText = opts.initialAssistant?.trim() || '';
+  const isDeepMode = Boolean(deepText);
+  const startTab = opts.initialTab === 'ask' ? 'ask' : 'deep';
   const history: ChatTurn[] = [];
+  let aiSessionId = opts.aiSessionId ?? null;
 
   const modal = document.createElement('div');
   modal.className = 'ly-follow-chat';
@@ -167,14 +192,33 @@ export function openFollowupChat(opts: {
     <div class="ly-follow-chat-sheet" role="dialog" aria-modal="true" aria-labelledby="ly-follow-title">
       <header class="ly-follow-chat-head">
         <div>
-          <p class="ly-follow-chat-kicker">追问陪读</p>
+          <p class="ly-follow-chat-kicker">深度解读</p>
           <h2 id="ly-follow-title">「${escapeHtml(label)}」</h2>
         </div>
         <button type="button" class="ly-follow-chat-x" data-follow-close aria-label="关闭">×</button>
       </header>
-      <p class="ly-follow-chat-persona">懂女性主义 · 懂现代职业规划 · 陪你把卦译回现实</p>
+      <div class="ly-deep-sheet-tabs" role="tablist" aria-label="深度解读与边看边问">
+        <button type="button" class="ly-deep-sheet-tab${startTab === 'deep' ? ' is-on' : ''}" data-deep-tab="deep" role="tab" aria-selected="${startTab === 'deep'}">深度解读</button>
+        <button type="button" class="ly-deep-sheet-tab${startTab === 'ask' ? ' is-on' : ''}" data-deep-tab="ask" role="tab" aria-selected="${startTab === 'ask'}">边看边问</button>
+      </div>
+      <div class="ly-deep-sheet-pane" data-deep-pane="deep" ${startTab === 'ask' ? 'hidden' : ''}>
+      <p class="ly-follow-chat-persona">${
+        isDeepMode
+          ? '先看完这一篇，有不清楚的再往下追问；概念题可切到「边看边问」'
+          : '陪你把卦译回现实 · 坚定温柔；常问概念请用「边看边问」'
+      }</p>
       ${
-        opts.seedContext
+        isDeepMode
+          ? `<section class="ly-follow-deep" data-follow-deep>
+              <p class="ly-follow-deep-body">${escapeHtml(deepText).replace(/\n/g, '<br>')}</p>
+            </section>`
+          : `<section class="ly-follow-deep-empty">
+              <p>还没有深度解读。可先去「边看边问」查概念，或生成一篇贴合你的解读。</p>
+              <button type="button" class="btn ly-btn-gold btn-sm" data-follow-make-deep>生成深度解读</button>
+            </section>`
+      }
+      ${
+        opts.seedContext && !isDeepMode
           ? `<p class="ly-follow-seed-ctx">已附上选中内容：${escapeHtml(opts.seedContext.slice(0, 80))}${opts.seedContext.length > 80 ? '…' : ''}</p>`
           : ''
       }
@@ -186,16 +230,42 @@ export function openFollowupChat(opts: {
           )
           .join('')}
       </div>
-      <div class="ly-follow-messages" data-follow-messages></div>
-      ${
-        isAiConfigured()
-          ? ''
-          : `<p class="ly-follow-ai-hint">未配置 AI 时用规则短答。<button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button></p>`
-      }
+      <div class="ly-follow-messages" data-follow-messages ${isDeepMode ? 'data-follow-qa' : ''}></div>
+      ${(() => {
+        const modeNow = loadAiServiceMode();
+        const modeHint =
+          modeNow === 'mystic'
+            ? `默认用 Mystic AI · ${friendlyQuotaCopy(modeNow).headline}`
+            : isAiConfigured()
+              ? '默认用你上次选的 AI Key'
+              : '请先配置 AI Key，或改选 Mystic AI';
+        const journalHint = opts.journalId
+          ? isDeepMode
+            ? '解读与追问都会写入本卦手札。'
+            : '对话会写入本卦手札，可在记录里回看。'
+          : '';
+        return `<p class="ly-follow-ai-hint">${escapeHtml(modeHint)}${
+          journalHint ? ` · ${escapeHtml(journalHint)}` : ''
+        }${
+          modeNow === 'byok' && !isAiConfigured()
+            ? ` <button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button>`
+            : ''
+        }</p>`;
+      })()}
+      <details class="ly-follow-ctx-fold" data-follow-ctx-fold>
+        <summary>补充情况（选填）· 灰字不用手删 · 点标签跳段</summary>
+        ${personalContextFieldsHtml('f')}
+      </details>
       <form class="ly-follow-composer" data-follow-form>
-        <textarea class="question-input" data-follow-input rows="2" placeholder="继续追问…"></textarea>
+        <textarea class="question-input ly-follow-ask" data-follow-input rows="2" placeholder="${
+          isDeepMode ? '对这篇解读继续追问…' : '继续追问…'
+        }"></textarea>
         <button type="submit" class="btn ly-btn-gold" data-follow-send>发送</button>
       </form>
+      </div>
+      <div class="ly-deep-sheet-pane ly-deep-ask-pane" data-deep-pane="ask" ${startTab === 'deep' ? 'hidden' : ''}>
+        ${renderAskPanelHtml(cast, question)}
+      </div>
     </div>
   `;
 
@@ -203,9 +273,14 @@ export function openFollowupChat(opts: {
   const input = modal.querySelector<HTMLTextAreaElement>('[data-follow-input]')!;
   const form = modal.querySelector<HTMLFormElement>('[data-follow-form]')!;
   const sendBtn = modal.querySelector<HTMLButtonElement>('[data-follow-send]')!;
+  const ctxHost = modal.querySelector<HTMLElement>('[data-follow-ctx-fold]')!;
 
   const paintMessages = () => {
-    messagesEl.innerHTML = history
+    // 深度解读正文已在上方专区，消息区只画追问回合
+    const visible = isDeepMode
+      ? history.filter((t, i) => !(i === 0 && t.role === 'assistant' && t.content === deepText))
+      : history;
+    messagesEl.innerHTML = visible
       .map(
         (t) => `
       <div class="ly-follow-bubble is-${t.role}">
@@ -213,8 +288,23 @@ export function openFollowupChat(opts: {
       </div>`,
       )
       .join('');
+    messagesEl.hidden = visible.length === 0;
     messagesEl.scrollTop = messagesEl.scrollHeight;
   };
+
+  const persistTurns = (turns: ChatTurn[]) => {
+    if (!opts.journalId || !turns.length) return;
+    const sid = appendLiuyaoAiTurns(
+      opts.journalId,
+      aiSessionId,
+      turns.map((t) => ({ role: t.role, content: t.content })),
+    );
+    if (sid) aiSessionId = sid;
+  };
+
+  if (deepText) {
+    history.push({ role: 'assistant', content: deepText });
+  }
 
   const close = () => {
     modal.classList.remove('is-open');
@@ -227,15 +317,31 @@ export function openFollowupChat(opts: {
   modal.querySelector('[data-follow-ai-settings]')?.addEventListener('click', () => {
     openAiSettingsModal();
   });
+  modal.querySelector('[data-follow-make-deep]')?.addEventListener('click', () => {
+    close();
+    void import('./personalize-deep.ts').then(({ openPersonalizeDeep }) => {
+      openPersonalizeDeep({
+        cast: opts.cast,
+        question: opts.question,
+        castAt: opts.castAt,
+        journalId: opts.journalId,
+      });
+    });
+  });
 
   let seedOnce = opts.seedContext?.trim() || '';
 
   const runAsk = async (raw: string) => {
     const userAsk = raw.trim();
     if (!userAsk) return;
-    const withCtx = seedOnce
+    const personal = readPersonalContextFrom(ctxHost, 'f');
+    const personalLines = formatPersonalContextLines(personal);
+    let withCtx = seedOnce
       ? `（对照这段解读：${seedOnce.slice(0, 200)}）\n${userAsk}`
       : userAsk;
+    if (hasPersonalContext(personal)) {
+      withCtx = `${withCtx}\n\n【我补充的情况】\n${personalLines.join('\n')}`;
+    }
     seedOnce = '';
 
     history.push({ role: 'user', content: userAsk });
@@ -247,34 +353,33 @@ export function openFollowupChat(opts: {
     const thinking = document.createElement('div');
     thinking.className = 'ly-follow-bubble is-assistant is-thinking';
     thinking.innerHTML = '<p>陪读正在想…</p>';
+    messagesEl.hidden = false;
     messagesEl.appendChild(thinking);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 
     try {
       let answer: string;
-      if (isAiConfigured()) {
-        try {
-          answer = await chatFollowup(system, history.slice(0, -1), withCtx);
-        } catch {
-          const fallback = await answerAndStoreAsk({
-            cast,
-            question,
-            userAsk: withCtx,
-            castAt,
-          });
-          answer = fallback.answer;
+      try {
+        answer = await chatFollowup(system, history.slice(0, -1), withCtx);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (msg === 'NO_AI' || /接上|配置|即将开放|额度|免费/.test(msg)) {
+          throw err;
         }
-      } else {
         const fallback = await answerAndStoreAsk({
           cast,
           question,
           userAsk: withCtx,
           castAt,
         });
-        answer = fallback.hint ? `${fallback.answer}\n\n（${fallback.hint}）` : fallback.answer;
+        answer = fallback.answer;
       }
       thinking.remove();
       history.push({ role: 'assistant', content: answer });
+      persistTurns([
+        { role: 'user', content: userAsk },
+        { role: 'assistant', content: answer },
+      ]);
       paintMessages();
     } catch (err) {
       thinking.remove();
@@ -300,9 +405,37 @@ export function openFollowupChat(opts: {
   });
 
   document.body.appendChild(modal);
-  requestAnimationFrame(() => modal.classList.add('is-open'));
-  if (opts.seedAsk) void runAsk(opts.seedAsk);
-  else input.focus();
+  bindPersonalContextCard(modal);
+  const askPane = modal.querySelector<HTMLElement>('[data-deep-pane="ask"]');
+  if (askPane) bindAskPanel(askPane, cast, question, castAt);
+
+  const setDeepTab = (tab: 'deep' | 'ask') => {
+    modal.querySelectorAll<HTMLButtonElement>('[data-deep-tab]').forEach((btn) => {
+      const on = btn.dataset.deepTab === tab;
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    modal.querySelectorAll<HTMLElement>('[data-deep-pane]').forEach((pane) => {
+      pane.hidden = pane.dataset.deepPane !== tab;
+    });
+  };
+
+  modal.querySelectorAll<HTMLButtonElement>('[data-deep-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.deepTab === 'ask' ? 'ask' : 'deep';
+      setDeepTab(tab);
+      if (tab === 'deep') input.focus();
+      else askPane?.querySelector<HTMLTextAreaElement>('[data-ask-input]')?.focus();
+    });
+  });
+
+  requestAnimationFrame(() => {
+    modal.classList.add('is-open');
+    paintMessages();
+  });
+  if (opts.seedAsk && !isDeepMode) void runAsk(opts.seedAsk);
+  else if (startTab === 'deep') input.focus();
+  else askPane?.querySelector<HTMLTextAreaElement>('[data-ask-input]')?.focus();
 }
 
 function blockText(el: HTMLElement): string {
@@ -312,7 +445,7 @@ function blockText(el: HTMLElement): string {
 /** 滑动露出「复制 / 追问」；也可点浮动按钮 */
 export function bindFollowupGestures(
   root: HTMLElement,
-  opts: { cast: CastResult; question: string; castAt?: Date },
+  opts: { cast: CastResult; question: string; castAt?: Date; journalId?: string | null },
 ): void {
   if (root.dataset.followBound === '1') return;
   root.dataset.followBound = '1';
@@ -380,25 +513,12 @@ export function bindFollowupGestures(
         cast: opts.cast,
         question: opts.question,
         castAt: opts.castAt,
+        journalId: opts.journalId,
         seedContext: ctx,
       });
       setOpen(false);
     });
   });
 
-  if (!root.querySelector('[data-follow-fab]')) {
-    const fab = document.createElement('button');
-    fab.type = 'button';
-    fab.className = 'ly-follow-fab';
-    fab.dataset.followFab = '1';
-    fab.textContent = '追问 AI';
-    fab.addEventListener('click', () => {
-      openFollowupChat({
-        cast: opts.cast,
-        question: opts.question,
-        castAt: opts.castAt,
-      });
-    });
-    root.appendChild(fab);
-  }
+  // 底部主 CTA 由 bindPersonalizeFab 挂载
 }

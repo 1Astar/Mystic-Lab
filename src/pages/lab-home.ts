@@ -1,4 +1,4 @@
-import { navigate } from '../router.ts';
+﻿import { navigate } from '../router.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { mysticEmblemHtml, type MysticEmblemKind } from '../ui/mystic-emblem.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
@@ -10,77 +10,62 @@ import {
   type AiSettings,
 } from '../ai/settings.ts';
 import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
+import { draftLabInvite } from '../share/drafts.ts';
+import { openShareSheet } from '../share/sheet.ts';
+import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 
 interface LabEntry {
   path: string;
   title: string;
-  /** 卡片上的一句话用途 */
   desc: string;
-  /** 短定位标签 */
   note?: string;
   emblem: MysticEmblemKind;
   comingSoon?: boolean;
 }
 
-/** 第一行塔罗 | 六爻；无单独档案卡片（改顶栏头像） */
-const SYSTEMS: LabEntry[] = [
+/** 各体系入口常驻：塔罗 → 六爻 → 八字 → 紫微 → 小六壬 → 梅花 */
+const ALL_SYSTEMS: LabEntry[] = [
   {
     path: '/tarot',
     title: '塔罗',
-    desc: '关系、内心、选择',
-    note: '心理探索',
+    desc: '人与事：画面、张力、下一步',
+    note: SYSTEM_POSITION.tarot,
     emblem: 'tarot',
   },
   {
     path: '/liuyao',
     title: '六爻',
-    desc: '六爻叠合、动爻、世应',
-    note: '变化结构',
+    desc: '谈薪、offer、官司等具体事',
+    note: SYSTEM_POSITION.liuyao,
     emblem: 'hex',
+  },
+  {
+    path: '/bazi',
+    title: '八字',
+    desc: '日主、十神、命盘结构',
+    note: SYSTEM_POSITION.bazi,
+    emblem: 'bazi',
+  },
+  {
+    path: '/ziwei',
+    title: '紫微',
+    desc: '星曜探索 · 十年大限 · 人生地图',
+    note: SYSTEM_POSITION.ziwei,
+    emblem: 'cosmos',
   },
   {
     path: '/xiaoliuren',
     title: '小六壬',
-    desc: '今天明天顺不顺',
-    note: '时间趋势',
+    desc: '出门、面试、临时吉凶倾向',
+    note: '即时定向',
     emblem: 'star',
   },
   {
     path: '/meihua',
     title: '梅花易数',
-    desc: '一念一事，八卦取象',
-    note: '象与动念',
+    desc: '人品、一事一象，先定大方向',
+    note: '象与气机',
     emblem: 'plum',
-  },
-  {
-    path: '/bazi',
-    title: '八字',
-    desc: '四柱排盘 · 日主十神',
-    note: '命理结构',
-    emblem: 'bazi',
-  },
-  {
-    path: '/life',
-    title: '人生宇宙',
-    desc: '平行 · 选择模拟 · 预测打卡',
-    note: '人生推演',
-    emblem: 'cosmos',
-  },
-];
-
-const GLOBAL_ENTRIES: LabEntry[] = [
-  {
-    path: '/records',
-    title: '我的旅程',
-    desc: '塔罗 · 小六壬 · 六爻 · 收藏 · 笔记',
-    emblem: 'heart',
-  },
-  {
-    path: '/knowledge',
-    title: '知识库',
-    desc: '学习不同占问体系',
-    emblem: 'tarot',
-    comingSoon: true,
   },
 ];
 
@@ -112,6 +97,7 @@ function appendEntryCard(
 
   card.addEventListener('click', (e) => {
     e.preventDefault();
+    if (entry.comingSoon) return;
     navigate(entry.path);
   });
 
@@ -141,6 +127,28 @@ function mountLabHomeAiButton(host: HTMLElement): void {
   host.appendChild(btn);
 }
 
+/** 顶栏分享图标：打开邀请分享面板 */
+function mountLabHomeShareButton(host: HTMLElement): void {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lab-home-share-btn';
+  btn.setAttribute('aria-label', '邀请分享');
+  btn.title = '邀请同行';
+  btn.innerHTML = `
+    <svg class="lab-home-share-ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"/>
+      <circle cx="6" cy="12" r="3"/>
+      <circle cx="18" cy="19" r="3"/>
+      <path d="M8.6 13.5 15.4 17.5"/>
+      <path d="M15.4 6.5 8.6 10.5"/>
+    </svg>
+  `;
+  btn.addEventListener('click', () => {
+    openShareSheet(draftLabInvite(), { mode: 'invite', autoStart: true });
+  });
+  host.appendChild(btn);
+}
+
 export function renderLabHome(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
@@ -157,16 +165,14 @@ export function renderLabHome(root: HTMLElement): () => void {
     <header class="home-header">
       <p class="home-eyebrow">MYSTIC LAB</p>
       <h1 class="page-title">Mystic Lab</h1>
-      <p class="page-subtitle">选择一种方式，开始一次占问</p>
-      <button type="button" class="lab-guide-trigger">不知道从哪里开始？</button>
+      <p class="page-subtitle">答案不在牌里，在你心里。</p>
+      <div class="lab-home-cta-row">
+        <button type="button" class="lab-guide-trigger">怎么选体系？</button>
+      </div>
     </header>
-    <section class="lab-section" aria-label="占问体系">
-      <h2 class="lab-section-label">占问体系</h2>
-      <div class="lab-systems"></div>
-    </section>
-    <section class="lab-section" aria-label="全局入口">
-      <h2 class="lab-section-label">全局</h2>
-      <div class="lab-global"></div>
+
+    <section class="lab-section" aria-label="体系入口">
+      <div class="lab-systems" data-lab-systems></div>
     </section>
   `;
 
@@ -179,15 +185,11 @@ export function renderLabHome(root: HTMLElement): () => void {
 
   const aiHost = page.querySelector<HTMLElement>('[data-lab-ai-host]')!;
   mountLabHomeAiButton(aiHost);
+  mountLabHomeShareButton(aiHost);
 
-  const systems = page.querySelector<HTMLElement>('.lab-systems')!;
-  for (const entry of SYSTEMS) {
-    appendEntryCard(systems, entry, true);
-  }
-
-  const global = page.querySelector<HTMLElement>('.lab-global')!;
-  for (const entry of GLOBAL_ENTRIES) {
-    appendEntryCard(global, entry);
+  const systemsHost = page.querySelector<HTMLElement>('[data-lab-systems]')!;
+  for (const entry of ALL_SYSTEMS) {
+    appendEntryCard(systemsHost, entry, true);
   }
 
   root.appendChild(page);
@@ -195,7 +197,9 @@ export function renderLabHome(root: HTMLElement): () => void {
   return () => {
     stars.remove();
     document.querySelector('.lab-guide-modal')?.remove();
-    document.querySelector('.person-switch-sheet')?.remove();
+    document.querySelector('.person-switch-dropdown')?.remove();
+    document.querySelector('[data-person-drop-backdrop]')?.remove();
+    document.querySelector('[data-lab-me-drawer]')?.remove();
     document.querySelector('.ai-settings-modal')?.remove();
   };
 }

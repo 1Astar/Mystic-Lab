@@ -36,6 +36,19 @@ describe('detectIntents', () => {
     ).toBe(true);
   });
 
+  it('does not treat bare 离开/留下 as career quit', () => {
+    expect(detectIntents('他会离开我吗').map((h) => h.id)).not.toContain('quit_now');
+    expect(detectIntents('他会离开我吗').map((h) => h.id)).toContain('love_stay_leave');
+    expect(detectIntents('留下回忆就好').map((h) => h.id)).not.toContain('quit_vs_stay');
+    expect(detectIntents('我想离开这里去旅行').map((h) => h.id)).not.toContain(
+      'quit_now',
+    );
+    expect(detectIntents('要不要分手').map((h) => h.id)).toContain('love_stay_leave');
+    expect(detectIntents('我要不要留在这家公司').map((h) => h.id)).toContain(
+      'quit_vs_stay',
+    );
+  });
+
   it('maps new catalog intents', () => {
     expect(detectIntents('我想内部转岗去产品组').map((h) => h.id)).toContain(
       'career_transfer',

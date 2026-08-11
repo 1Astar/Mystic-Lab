@@ -1,0 +1,199 @@
+/* 双盘映照 */
+
+.mirror-page .life-header {
+  margin-bottom: 18px;
+}
+
+.mirror-hero-meta {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--gold-soft) 55%, transparent);
+}
+
+.mirror-hero-meta p {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.mirror-hero-meta p:last-child {
+  margin-bottom: 0;
+}
+
+.mirror-headline {
+  color: var(--ink) !important;
+  font-size: 0.95rem !important;
+  margin-top: 8px !important;
+}
+
+.mirror-theme-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.mirror-theme-card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface, color-mix(in srgb, var(--bg-deep) 88%, #fff 12%));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.mirror-theme-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  transform: translateY(-1px);
+}
+
+.mirror-theme-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+}
+
+.mirror-theme-card-head strong {
+  font-size: 1.05rem;
+  margin-right: 4px;
+}
+
+.mirror-theme-card-head span {
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+}
+
+.mirror-theme-shared,
+.mirror-theme-synthesis {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.mirror-theme-synthesis {
+  color: var(--ink-muted);
+}
+
+.mirror-theme-more {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+
+.mirror-footnote {
+  margin: 16px 0 8px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.mirror-gate {
+  padding: 20px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.mirror-gate p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.mirror-split {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 720px) {
+  .mirror-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.mirror-pane,
+.mirror-result {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-deep) 92%, #fff 8%);
+}
+
+.mirror-pane h3,
+.mirror-result h3,
+.mirror-evidence h3 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.mirror-pane p,
+.mirror-result p {
+  margin: 0;
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.mirror-evidence {
+  margin-top: 12px;
+}
+
+.mirror-evidence ul {
+  margin: 0;
+  padding-left: 1.1em;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.mirror-result-stack {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mirror-result.is-synthesis {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 70%, transparent);
+}
+
+.mirror-stability {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--gold-soft);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.mirror-stability p {
+  margin: 0 0 6px;
+}
+
+.mirror-stability p:last-child {
+  margin-bottom: 0;
+}
+
+.mirror-detail-head {
+  margin-bottom: 16px;
+}
+
+.mirror-detail-head .page-title {
+  margin-top: 4px;
+}

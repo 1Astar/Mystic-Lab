@@ -20,6 +20,16 @@ function castHuanToXun(): ReturnType<typeof buildCastFromThrows> {
   return buildCastFromThrows(throws, 'coin');
 }
 
+function castSui(): ReturnType<typeof buildCastFromThrows> {
+  const sui = HEXAGRAMS.find((h) => h.name === '随')!;
+  const lines = linesFromHexagram(sui);
+  const throws = lines.map((bit) => {
+    if (bit === 1) return facesToThrow(['obverse', 'obverse', 'reverse']);
+    return facesToThrow(['obverse', 'reverse', 'reverse']);
+  }) as YaoThrow[];
+  return buildCastFromThrows(throws, 'coin');
+}
+
 describe('direct-reading', () => {
   it('splits multi career questions', () => {
     const parts = splitQuestionParts(
@@ -37,27 +47,64 @@ describe('direct-reading', () => {
     const q = '我要不要留在冠英？8月初要不要离职？转正能拿到8k吗？';
     const d = buildDirectReading(cast, q);
     expect(d.frame).toMatch(/风水涣/);
+    expect(d.frame).toMatch(/huàn/);
     expect(d.frame).toMatch(/巽为风/);
+    expect(d.frame).not.toMatch(/xùn/);
     expect(d.verdict).toMatch(/8k|心累|费劲/);
+    expect(d.analysis).toMatch(/本卦/);
+    expect(d.analysis).toMatch(/对应你的问题/);
+    expect(d.analysis).toMatch(/核心隐喻/);
     expect(d.analysis).toMatch(/涣/);
-    expect(d.analysis).toMatch(/巽|柔|反复/);
-    expect(d.decision).toMatch(/不建议|死磕|两手|机会/);
-    expect(d.nextSteps).toMatch(/红线|期限|准备|口风/);
+    expect(d.analysis).toMatch(/巽/);
+    expect(d.analysis).toMatch(/冠英|核心隐喻/);
+    expect(d.analysis.length).toBeGreaterThan(80);
+    expect(d.decision).toMatch(/不建议|死磕|机会/);
+    expect(d.nextSteps).toMatch(/红线|期限|口风|两手/);
+    expect(d.why).toMatch(/眼下|变在哪|走向|物质根基|目标系统/);
+    expect(d.reassurance).toMatch(/不是生死判决|有主见/);
     expect(d.partLeans.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('reassurance uses cast hex names, not hardcoded 涣/巽', () => {
+    const cast = castSui();
+    expect(cast.primary.name).toBe('随');
+    const d = buildDirectReading(cast, '最近该怎么推进这件事');
+    expect(d.reassurance).toMatch(/随/);
+    expect(d.reassurance).not.toMatch(/「涣」|『涣』/);
+    expect(d.reassurance).not.toMatch(/「巽」|『巽』/);
+    expect(d.decision).not.toMatch(/。；/);
+  });
+
+  it('answers meta UX questions about flow/emptiness', () => {
+    const cast = castSui();
+    const q =
+      '作为一个刚来玩的用户：今晚把六爻起卦走完，我会不会觉得流程太长、解读又太空？';
+    const d = buildDirectReading(cast, q);
+    expect(d.verdict).toMatch(/流程|仪式|空话|可核对/);
+    expect(d.verdict).not.toMatch(/跟随对象/);
+    expect(d.analysis).toMatch(/仪式|定调|术语/);
+    expect(d.analysis).not.toMatch(/跟随对象|该跟谁/);
+    expect(d.nextSteps).toMatch(/扫定调|深度解读/);
+    expect(d.nextSteps).not.toMatch(/锁一问/);
+    expect(d.reassurance).toMatch(/太长|太空|术语/);
   });
 });
 
 describe('question-briefing', () => {
-  it('uses OfflineAnswerPack section titles', () => {
+  it('uses OfflineAnswerPack script sections', () => {
     const cast = castHuanToXun();
     const q = '我要不要留在冠英？8月初要不要离职？转正能拿到8k吗？';
     const b = buildQuestionBriefing(cast, q, new Date('2026-07-24T14:56:00'));
     expect(b.questionLead).toMatch(/基于/);
-    expect(b.layer1.title).toMatch(/先答你的问题/);
+    expect(b.layer1.title).toMatch(/对你这个问题/);
+    expect(b.pack.script?.beats).toHaveLength(4);
+    expect(b.pack.verdict.headline.length).toBeGreaterThan(8);
     expect(b.pack.answers.length).toBeGreaterThanOrEqual(2);
-    expect(b.layer2.title).toMatch(/决策参考/);
-    expect(b.layer3.title).toMatch(/破局动作/);
+    expect(b.layer2.title).toMatch(/为何这样看|盘面在说什么|眼下/);
+    expect(b.layer3.title).toMatch(/接下来|具体动作/);
+    expect(b.layer4.title).toMatch(/松一口气|定心丸/);
     expect(b.pack.breakthrough.body).not.toMatch(/只选一个可验证动作/);
+    expect(b.pack.why.length).toBeGreaterThanOrEqual(2);
   });
 
   it('renders briefing with answer pack', () => {
@@ -68,8 +115,17 @@ describe('question-briefing', () => {
       new Date('2026-07-24T14:56:00'),
     );
     expect(html).toMatch(/ly-question-briefing/);
-    expect(html).toMatch(/ly-answer-pack|先答你的问题|破局动作/);
-    expect(html).not.toMatch(/第一层/);
-    expect(html).not.toMatch(/现状与转折点/);
+    expect(html).toMatch(/核心方向/);
+    expect(html).toMatch(/对你这个问题/);
+    expect(html).toMatch(/现状与转机/);
+    expect(html).toMatch(/具体动作/);
+    expect(html).toMatch(/心理定心丸/);
+    expect(html).toMatch(/综合论断|为何这样看|什么时候该停/);
+    expect(html).toMatch(/ly-layer-card/);
+    expect(html).toMatch(/盘面辅读|世在/);
+    expect(html).toMatch(/ly-classic-fold/);
+    expect(html).not.toMatch(/爻相细说/);
+    expect(html).not.toMatch(/为什么这么判断？/);
+    expect(html).not.toMatch(/四段剧本/);
   });
 });

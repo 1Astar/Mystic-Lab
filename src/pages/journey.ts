@@ -15,6 +15,8 @@ import {
   type JourneyItem,
 } from '../journal/journey.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
+import { canResumePartial, stashResumeJournalId } from '../journal/resume.ts';
+import type { JournalEntry } from '../journal/records.ts';
 import { getLabProfileSnapshot } from '../life/profile-context.ts';
 import {
   fulfilledLabel,
@@ -29,11 +31,18 @@ import { mountJourneyBackupBar } from '../ui/journey-backup-bar.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { openLiuyaoEncounterReplay } from '../ui/liuyao-encounter-replay.ts';
+import { clearSideActionFabs } from '../share/invite-bar.ts';
 import { openXiaoliurenJournalReplay } from '../ui/xiaoliuren-reading-replay.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
 
 type JourneyTab = 'all' | 'tarot' | 'xiaoliuren' | 'liuyao' | 'favorites' | 'progress' | 'notes';
+
+function continuePartialTarot(entry: JournalEntry): void {
+  if (!canResumePartial(entry)) return;
+  stashResumeJournalId(entry.id);
+  navigate('/tarot/reading');
+}
 
 function escapeHtml(text: string): string {
   return text
@@ -70,6 +79,7 @@ function openJourneyItem(
 }
 
 export function renderJourney(root: HTMLElement): void {
+  clearSideActionFabs();
   const page = document.createElement('div');
   page.className = 'page journey-page';
   mountEnvBanner(page);
@@ -131,6 +141,8 @@ export function renderJourney(root: HTMLElement): void {
   let active: JourneyTab = 'all';
 
   function closeDetail(): void {
+    clearSideActionFabs();
+    document.documentElement.classList.remove('thread-peek-open');
     page.querySelector('.journal-detail')?.remove();
     page.querySelector('.journey-xlr-detail')?.remove();
   }
@@ -208,6 +220,7 @@ export function renderJourney(root: HTMLElement): void {
         regenerated,
         hydratedThread,
         onClose: closeDetail,
+        onContinue: canResumePartial(entry) ? () => continuePartialTarot(entry) : undefined,
       });
       mountSiblingSummary(detail, item);
       page.appendChild(detail);
@@ -451,10 +464,22 @@ export function renderJourney(root: HTMLElement): void {
         }
         ${item.reflection.trim() ? `<p class="journey-note-preview">笔记：${escapeHtml(item.reflection.trim())}</p>` : ''}
         <p class="journey-open-hint">点击查看详情 →</p>
+        ${
+          item.system === 'tarot' && item.tarot && canResumePartial(item.tarot)
+            ? '<button type="button" class="btn btn-sm journey-continue-btn" data-continue>继续完成</button>'
+            : ''
+        }
       `;
       article.addEventListener('click', () => {
         openJourneyItem(item, openers);
       });
+      const continueBtn = article.querySelector<HTMLButtonElement>('[data-continue]');
+      if (continueBtn && item.tarot) {
+        continueBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          continuePartialTarot(item.tarot!);
+        });
+      }
       listHost.appendChild(article);
     }
   }

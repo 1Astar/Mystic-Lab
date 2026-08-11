@@ -115,6 +115,8 @@ function matterOf(domain: SceneDomain, question: string): string {
   if (/薪|工资|资产|投资|收入|钱|财|回本/.test(q)) return '钱与回报';
   if (domain === 'career') return '工作 / 面试这件事';
   if (domain === 'love') return '这段感情';
+  if (domain === 'wealth') return '钱与投入';
+  if (domain === 'growth') return '学习 / 选择';
   if (domain === 'life') return '资源与生活盘';
   return '你问的这件事';
 }

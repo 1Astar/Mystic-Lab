@@ -1,4 +1,4 @@
-/** Lab 旅程备份：图鉴 + 各体系占问/手札/进度 + AI 设置（含 API Key） */
+/** Lab 旅程备份：探索 + 各体系占问/手札/进度 + AI 设置（含 API Key） */
 
 export const BACKUP_FORMAT = 'mystic-lab-backup' as const;
 export const BACKUP_VERSION = 1 as const;
@@ -603,7 +603,7 @@ function importMerge(
 
 /**
  * 导入备份。
- * - merge（默认）：手札/图鉴等按 id 合并，同 id 保留较新；本机独有键保留
+ * - merge（默认）：手札/探索等按 id 合并，同 id 保留较新；本机独有键保留
  * - replace：先清空本机覆盖范围内的键，再写入备份内容
  */
 export function importBackupPayload(

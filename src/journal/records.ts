@@ -90,7 +90,7 @@ function hasSimilarEntry(
   });
 }
 
-/** 从图鉴相遇记录回填缺失的手札 */
+/** 从探索相遇记录回填缺失的手札 */
 export function backfillJournalFromCodex(): number {
   const existing = loadJournalEntries();
   const codexEntries = getAllEntries();
@@ -158,7 +158,7 @@ export function backfillJournalFromCodex(): number {
         position: d.spreadLabel,
         reversed: d.reversed,
       })),
-      summary: `「${names}」已收入图鉴。答案不在牌里，在你心里。`,
+      summary: `「${names}」已收入探索。答案不在牌里，在你心里。`,
       learningNote: buildLearningNote(spreadType, question),
       reflection: '',
       fulfilled: null,

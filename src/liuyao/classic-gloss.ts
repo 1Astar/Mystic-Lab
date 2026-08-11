@@ -2,6 +2,7 @@
  * 古文旁的白话对照（教学用，非逐字考证译文）
  * 缺省时回退到本卦 gist / 通用提示
  */
+import { LINE_GLOSS_DATA } from './data/line-gloss.ts';
 
 /** 大象白话：64 卦简注 */
 export const DA_XIANG_GLOSS: Record<string, string> = {
@@ -71,25 +72,8 @@ export const DA_XIANG_GLOSS: Record<string, string> = {
   未济: '火在水上、未济；君子应慎辨物居方。',
 };
 
-/** 乾卦六爻白话（其余卦暂用提示） */
-export const LINE_GLOSS: Record<string, string[]> = {
-  乾: [
-    '龙还潜在水底：时机未到，先别强出头。',
-    '龙出现在田野：利于遇见能帮你的人。',
-    '整天勤奋、夜里也警惕：虽有压力，可无大过。',
-    '或跳或停在深渊边：进退之间，尚无大咎。',
-    '龙飞在天上：利于遇见贵人／关键人物。',
-    '龙飞得太高：满盈难久，会有悔恨。',
-  ],
-  坤: [
-    '踩到霜，就该想到坚冰将至：防微杜渐。',
-    '正直、方正、大气：不必刻意作为也顺利。',
-    '含藏才华可守正：或辅佐事务，成事不必居功。',
-    '扎紧口袋：不多言，无过也无虚名。',
-    '穿黄裳：居中守谦，大吉。',
-    '龙战于野：阴极生变，冲突已显。',
-  ],
-};
+/** 六爻白话：初→上（64 卦齐全；教学用） */
+export const LINE_GLOSS: Record<string, readonly string[]> = LINE_GLOSS_DATA;
 
 export function glossDaXiang(name: string): string | undefined {
   return DA_XIANG_GLOSS[name];

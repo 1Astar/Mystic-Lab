@@ -32,8 +32,16 @@ import {
 } from '../../liuyao/pattern-summary.ts';
 import { renderQuestionBriefingForCast } from '../../liuyao/question-briefing.ts';
 import { buildOfflineAnswerPack } from '../../mystic-engine/build-pack.ts';
+import { bindAnswerPackGestures } from '../../mystic-engine/render-pack.ts';
 import { loadUseProfilePref } from '../../life/profile-context.ts';
 import { bindFollowupGestures } from '../../liuyao/followup-chat.ts';
+import {
+  bindPersonalizeFab,
+  bindPersonalizeGuide,
+} from '../../liuyao/personalize-deep.ts';
+import { draftFromLiuyao } from '../../share/drafts.ts';
+import { mountInviteCompanionBar } from '../../share/invite-bar.ts';
+import { loadLiuyaoJournal } from '../../liuyao/journal.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -41,6 +49,37 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function bindShareResultButton(
+  host: HTMLElement,
+  opts: {
+    cast: CastResult;
+    question: string;
+    castAt: Date;
+    journalId?: string | null;
+    reading: FourLayerReading;
+  },
+): void {
+  mountInviteCompanionBar(host, {
+    unitLabel: '这一卦',
+    system: 'liuyao',
+    draft: () => {
+      let aiText: string | undefined;
+      if (opts.journalId) {
+        const entry = loadLiuyaoJournal().find((e) => e.id === opts.journalId);
+        const deep = entry?.aiSessions?.find((s) => s.deepReading)?.deepReading;
+        if (deep) aiText = deep;
+      }
+      return draftFromLiuyao({
+        cast: opts.cast,
+        question: opts.question,
+        reading: opts.reading,
+        castAt: opts.castAt,
+        aiText,
+      });
+    },
+  });
 }
 
 function renderTagChips(selected: string[]): string {
@@ -78,7 +117,7 @@ export function renderPeerNoteFold(opts: {
         </div>
         ${
           learn
-            ? `<p class="ly-layer-guide">详细解读请点右侧「解读笔记」；这里可自由补充标签与一句结语。</p>`
+            ? `<p class="ly-layer-guide">详细装卦与卦象解析请点「卦象精读」；这里可自由补充标签与一句结语。</p>`
             : renderJournalPromptsHtml()
         }
         <textarea class="question-input ly-note-draft" rows="3" placeholder="${
@@ -111,10 +150,13 @@ export function mountLiuyaoResultTabs(
     castAt?: Date;
     initialTags?: string[];
     initialNoteDraft?: string;
+    /** 手札 id：AI 解读落库 */
+    journalId?: string | null;
   },
 ): LiuyaoResultTabsApi {
   const { cast, question, learn } = opts;
   const castAt = opts.castAt ?? new Date();
+  const journalId = opts.journalId ?? null;
   let noteTags: string[] = [...(opts.initialTags ?? [])];
   let noteDraft = opts.initialNoteDraft ?? '';
 
@@ -125,9 +167,9 @@ export function mountLiuyaoResultTabs(
       castAt,
       useProfile: loadUseProfilePref(true),
     });
-    const gist = pack.answers[0]?.lean ?? pack.decision;
+    const answerLine = pack.script?.headline ?? pack.answers[0]?.lean ?? pack.decision;
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: gist })}
+      ${renderHexHero(cast, { castAt, askable: true, answerLine })}
       ${renderQuickBoard(cast, castAt, { omitHeader: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
@@ -153,11 +195,11 @@ export function mountLiuyaoResultTabs(
       castAt,
       useProfile: loadUseProfilePref(true),
     });
-    const gist = pack.answers[0]?.lean ?? pack.decision;
+    const answerLine = pack.script?.headline ?? pack.answers[0]?.lean ?? pack.decision;
     const pattern = buildPatternSummary(cast, question, castAt);
 
     host.innerHTML = `
-      ${renderHexHero(cast, { castAt, askable: true, primaryGist: gist })}
+      ${renderHexHero(cast, { castAt, askable: true, answerLine })}
       ${renderPatternSummaryHtml(pattern)}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
@@ -171,15 +213,14 @@ export function mountLiuyaoResultTabs(
             .join('')}
         </div>
         <div class="ly-result-tab-panel is-active" data-panel="reading" role="tabpanel">
-          <p class="ly-guide-tip">先答子问 → 证据 → 决策 → 破局动作。分域与装卦细节在「解读笔记」。</p>
           ${renderQuestionBriefingForCast(cast, question, castAt)}
           <div class="ly-briefing-actions">
             <button type="button" class="btn ly-briefing-to-notes" data-course-note-open>
-              📖 打开解读笔记
+              📖 打开卦象精读
             </button>
-            <button type="button" class="btn ly-briefing-to-course" data-goto-teach>
+            <a class="ly-briefing-to-course-link" href="#teach" data-goto-teach>
               想弄懂为什么 → 去六步学习
-            </button>
+            </a>
           </div>
         </div>
         <div class="ly-result-tab-panel" data-panel="teach" role="tabpanel" hidden>
@@ -193,10 +234,16 @@ export function mountLiuyaoResultTabs(
 
   const layersApi = bindResultLayers(host, cast, question);
   bindYaoAskButtons(host, cast, question, castAt);
-  bindFollowupGestures(host, { cast, question, castAt });
+  bindFollowupGestures(host, { cast, question, castAt, journalId });
+  bindAnswerPackGestures(host, cast);
+  // 先挂分享，再挂深度解读：分享卸载不会误删深度入口
+  bindShareResultButton(host, { cast, question, castAt, journalId, reading: opts.reading });
   if (learn) {
+    bindPersonalizeGuide(host, { cast, question, castAt, journalId });
     bindQinDict(host);
     bindLearnTeachPage(host, cast, question, castAt);
+  } else {
+    bindPersonalizeFab(host, { cast, question, castAt, journalId });
   }
 
   const tagsHost = host.querySelector<HTMLElement>('[data-note-tags]');
@@ -214,7 +261,8 @@ export function mountLiuyaoResultTabs(
   };
   paintTags();
 
-  host.querySelector('[data-goto-teach]')?.addEventListener('click', () => {
+  host.querySelector('[data-goto-teach]')?.addEventListener('click', (e) => {
+    e.preventDefault();
     host.querySelector<HTMLButtonElement>('.ly-result-tab[data-tab="teach"]')?.click();
     host.querySelector('[data-learn-course]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });

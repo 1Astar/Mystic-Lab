@@ -167,7 +167,8 @@ export function updateProfile(profile: LifeProfileInput): LifeStore {
   const next = syncFlatProfile({
     ...store,
     profiles,
-    portrait: active.id === SELF_PROFILE_ID ? undefined : store.portrait,
+    // 改自己档案不抹轻画像；用户可再点「生成」覆盖
+    portrait: store.portrait,
   });
   saveLifeStore(next);
   return next;
@@ -177,7 +178,13 @@ export function updateProfile(profile: LifeProfileInput): LifeStore {
 export function updateBirthFields(
   birth: Pick<
     LifeProfileInput,
-    'birthYear' | 'birthMonth' | 'birthDay' | 'birthHour' | 'birthPlace'
+    | 'birthYear'
+    | 'birthMonth'
+    | 'birthDay'
+    | 'birthHour'
+    | 'birthPlace'
+    | 'birthTimeAccuracy'
+    | 'birthTimeSource'
   >,
 ): LifeStore {
   const store = loadLifeStore();
@@ -190,6 +197,29 @@ export function updateBirthFields(
     birthHour: birth.birthHour.trim(),
     birthPlace: birth.birthPlace.trim(),
   };
+  if (birth.birthTimeAccuracy !== undefined) {
+    nextPerson.birthTimeAccuracy = birth.birthTimeAccuracy;
+  }
+  if (birth.birthTimeSource !== undefined) {
+    nextPerson.birthTimeSource = birth.birthTimeSource;
+  }
+  const profiles = store.profiles.map((p) => (p.id === active.id ? nextPerson : p));
+  const next = syncFlatProfile({ ...store, profiles });
+  saveLifeStore(next);
+  return next;
+}
+
+/** 合并当前激活人任意字段（如性别） */
+export function patchActivePerson(
+  partial: Partial<Pick<PersonProfile, 'gender' | 'nickname'>>,
+): LifeStore {
+  const store = loadLifeStore();
+  const active = getPersonFromStore(store, store.activeProfileId) ?? store.profiles[0]!;
+  const nextPerson: PersonProfile = { ...active, ...partial };
+  if (partial.gender !== undefined) {
+    nextPerson.gender =
+      partial.gender === 'female' || partial.gender === 'male' ? partial.gender : '';
+  }
   const profiles = store.profiles.map((p) => (p.id === active.id ? nextPerson : p));
   const next = syncFlatProfile({ ...store, profiles });
   saveLifeStore(next);

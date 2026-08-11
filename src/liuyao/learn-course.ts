@@ -49,6 +49,7 @@ import {
   renderXiangNotesPaneHtml,
   bindXiangNotesPane,
   selectXiangSec,
+  selectXiangHexSide,
 } from './xiang-notes-pane.ts';
 import {
   buildYongFocusPack,
@@ -795,12 +796,12 @@ export function renderLearnNotesShellHtml(
 ): string {
   const stepLesson = lesson ?? buildCourseLessons(cast, question, castAt)[0] ?? null;
   const title = stepLesson
-    ? `解读笔记 · Step ${stepLesson.step}`
-    : '解读笔记';
+    ? `卦象精读 · Step ${stepLesson.step}`
+    : '卦象精读';
   return `
     <div class="ly-learn-notes" data-learn-notes>
-      <button type="button" class="ly-course-bookmark" data-course-note-open aria-label="打开解读笔记">
-        📖<br />解读<br />笔记
+      <button type="button" class="ly-course-bookmark" data-course-note-open aria-label="打开卦象精读">
+        📖<br />卦象<br />精读
       </button>
       <aside class="ly-course-drawer" data-course-drawer hidden>
         <div class="ly-course-drawer-backdrop" data-course-drawer-close></div>
@@ -809,7 +810,7 @@ export function renderLearnNotesShellHtml(
             <h4 data-drawer-title>${escapeHtml(title)}</h4>
             <button type="button" class="ly-course-drawer-x" data-course-drawer-close aria-label="关闭">×</button>
           </header>
-          <div class="ly-note-mini-tabs" role="tablist" aria-label="解读笔记分区">
+          <div class="ly-note-mini-tabs" role="tablist" aria-label="卦象精读分区">
             <button type="button" class="ly-note-mini-tab is-active" data-drawer-tab="xiang" role="tab" aria-selected="true">卦象解析</button>
             <button type="button" class="ly-note-mini-tab" data-drawer-tab="dress" role="tab" aria-selected="false">专业排盘</button>
             <button type="button" class="ly-note-mini-tab" data-drawer-tab="books" role="tab" aria-selected="false">古籍解析</button>
@@ -898,7 +899,7 @@ export function renderLearnCourseHtml(
       <nav class="ly-course-nav" aria-label="课程导航">
         <button type="button" class="ly-course-nav-btn" data-course-prev disabled>← 上一步</button>
         <button type="button" class="ly-course-nav-btn ly-course-nav-note" data-course-note-open>
-          📝 解读笔记<span class="ly-course-note-dot" aria-hidden="true"></span>
+          📝 卦象精读<span class="ly-course-note-dot" aria-hidden="true"></span>
         </button>
         <button type="button" class="ly-course-nav-btn ly-course-nav-next" data-course-next>下一步 →</button>
       </nav>
@@ -940,7 +941,7 @@ export function bindLearnCourse(
   const syncDrawerForStep = (lesson: CourseLesson) => {
     persistStudyNotes();
     const title = notes.querySelector('[data-drawer-title]');
-    if (title) title.textContent = `解读笔记 · Step ${lesson.step}`;
+    if (title) title.textContent = `卦象精读 · Step ${lesson.step}`;
     const pane = notes.querySelector<HTMLElement>('[data-drawer-pane="journal"]');
     if (pane) pane.innerHTML = renderDrawerNotePaneHtml(lesson, cast);
     notes.querySelector<HTMLTextAreaElement>('[data-course-note]')?.addEventListener('input', (e) => {
@@ -1195,7 +1196,8 @@ export function bindLearnCourse(
       if (notes.classList.contains('is-drawer-open') && t.closest('.ly-course-bookmark')) {
         closeDrawer();
       } else {
-        openDrawer();
+        // 「卦象精读」入口默认卦象解析，不跟 Step 落到古籍
+        openDrawer({ tab: 'xiang' });
       }
       return;
     }
@@ -1210,12 +1212,23 @@ export function bindLearnCourse(
     }
   });
 
-  /** 此刻解读等处的「打开解读笔记」——不在 notes/course 内，需单独委托 */
+  /** 此刻解读等处的「打开卦象精读」——不在 notes/course 内，需单独委托 */
   root.addEventListener('click', (e) => {
+    const hot = (e.target as HTMLElement).closest<HTMLElement>('.ly-hex-hot');
+    if (hot && root.contains(hot) && !notes.contains(hot)) {
+      const kind = hot.dataset.hexKind === 'changed' ? 'changed' : 'primary';
+      openDrawer({ tab: 'xiang' });
+      const host = notes.querySelector<HTMLElement>('[data-xiang-notes]');
+      if (host) {
+        selectXiangSec(host, 'guide');
+        selectXiangHexSide(host, kind);
+      }
+      return;
+    }
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-course-note-open]');
     if (!btn || !root.contains(btn)) return;
     if (notes.contains(btn) || course.contains(btn)) return;
-    openDrawer();
+    openDrawer({ tab: 'xiang' });
   });
 
   const paint = () => {

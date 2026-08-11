@@ -2,6 +2,7 @@ import type { CastResult } from './engine.ts';
 import type { Hexagram } from './hexagrams.ts';
 import { upperLowerFromLines } from './hexagrams.ts';
 import { getClassicCorpus } from './classic-corpus.ts';
+import { getHexVoice } from './hex-voice.ts';
 import { trigramScene } from './scene-map.ts';
 import type { TrigramId } from './trigrams.ts';
 
@@ -107,32 +108,39 @@ function pick(
 
 function buildMeta(hex: Hexagram, tone: Tone): DomainOracle[] {
   const kw = hex.keywords.slice(0, 3).join('、');
+  const voice = getHexVoice(hex.name);
   return [
     {
       label: '卦义',
-      modern: `「${hex.name}」主「${kw}」。${hex.gist}`,
+      modern: voice
+        ? `「${hex.name}」主「${voice.frame}」（${kw}）。${hex.gist}`
+        : `「${hex.name}」主「${kw}」。${hex.gist}`,
       classic: `${hex.name}：${kw}。`,
     },
     {
       label: '解释',
-      modern: pick(
-        tone,
-        '局面偏开，宜顺势推进，同时防满招损。',
-        '局面偏紧，宜守、宜缓，先把边界与事实对齐。',
-        '有回转、重启之象，旧局松动，适合小步试新。',
-        '结构偏稳，宜积小成，忌无必要的大转向。',
-      ),
+      modern: voice
+        ? voice.metaphorSolo
+        : pick(
+            tone,
+            '局面偏开，宜顺势推进，同时防满招损。',
+            '局面偏紧，宜守、宜缓，先把边界与事实对齐。',
+            '有回转、重启之象，旧局松动，适合小步试新。',
+            '结构偏稳，宜积小成，忌无必要的大转向。',
+          ),
       classic: pick(tone, '亨通可图', '阻滞宜守', '有复有转', '平稳渐进'),
     },
     {
       label: '特性',
-      modern: pick(
-        tone,
-        '主动、外展、易被看见；适合当先锋，也要戒骄。',
-        '谨慎、内收、重证据；宜作配角稳住，勿硬冲。',
-        '善回看、能改道；适合复盘后重启。',
-        '耐心、承载、重节奏；稳中求进。',
-      ),
+      modern: voice
+        ? `${voice.frame}。${voice.decision.split('\n')[0] ?? ''}`
+        : pick(
+            tone,
+            '主动、外展、易被看见；适合当先锋，也要戒骄。',
+            '谨慎、内收、重证据；宜作配角稳住，勿硬冲。',
+            '善回看、能改道；适合复盘后重启。',
+            '耐心、承载、重节奏；稳中求进。',
+          ),
       classic: pick(tone, '刚健外展', '慎守为先', '能复能改', '厚载渐进'),
     },
   ];
@@ -146,16 +154,20 @@ function buildDomains(
 ): DomainOracle[] {
   const tone = toneFromKeywords(hex);
   const kw = hex.keywords.slice(0, 2).join('、');
+  const voice = getHexVoice(hex.name);
+  const frame = voice?.frame ?? kw;
 
   const fortune: DomainOracle = {
     label: '运势',
-    modern: pick(
-      tone,
-      `整体偏开（${kw}）。春夏更利推进；秋冬宜守成复盘。`,
-      `整体偏紧（${kw}）。宜少动多观察，等窗口再推。`,
-      `运势有回转（${kw}）。适合重启与修复，忌一次梭哈。`,
-      `运势以稳为主（${kw}）。按部就班，积小成大。`,
-    ),
+    modern: voice
+      ? `整体主调「${frame}」。${voice.metaphorSolo}春夏可偏进，秋冬宜核对再推。`
+      : pick(
+          tone,
+          `整体偏开（${kw}）。春夏更利推进；秋冬宜守成复盘。`,
+          `整体偏紧（${kw}）。宜少动多观察，等窗口再推。`,
+          `运势有回转（${kw}）。适合重启与修复，忌一次梭哈。`,
+          `运势以稳为主（${kw}）。按部就班，积小成大。`,
+        ),
     classic: pick(tone, '运开可进', '运滞宜守', '运有复机', '运平宜稳'),
   };
 
@@ -176,14 +188,16 @@ function buildDomains(
     modern: (() => {
       const u = trigramScene(upper);
       const l = trigramScene(lower);
-      const tip = pick(
-        tone,
-        '热度与条件较匹配，关系偏热烈稳定；好过了头也易碰触，宜多包容。',
-        '内外期待有落差，易见冷淡、拉扯。先对齐边界，再谈升温。',
-        '关系有回暖、重谈之机，适合一次真诚对话验证。',
-        '宜渐进沟通，把没说清的话说清，勿制造戏剧转折。',
-      );
-      return `你这边偏「${l.love}」；关系场偏「${u.love}」。合看主调「${kw}」——${tip}可自问：该推进、该止步，还是先说清楚？`;
+      const tip = voice
+        ? voice.metaphorSolo
+        : pick(
+            tone,
+            '热度与条件较匹配，关系偏热烈稳定；好过了头也易碰触，宜多包容。',
+            '内外期待有落差，易见冷淡、拉扯。先对齐边界，再谈升温。',
+            '关系有回暖、重谈之机，适合一次真诚对话验证。',
+            '宜渐进沟通，把没说清的话说清，勿制造戏剧转折。',
+          );
+      return `你这边偏「${l.love}」；关系场偏「${u.love}」。合看主调「${frame}」——${tip}可自问：该推进、该止步，还是先说清楚？`;
     })(),
     classic: pick(tone, '情热而稳', '情路不顺', '情可复温', '情宜缓语'),
   };
@@ -253,14 +267,16 @@ function buildDomains(
     modern: (() => {
       const u = trigramScene(upper);
       const l = trigramScene(lower);
-      const tip = pick(
-        tone,
-        `运势偏上升（${kw}）。多能遇见提携或被看见；脚踏实地、戒骄。`,
-        `局面偏紧（${kw}）。宜守边界与证据，减无效消耗，再等窗口。`,
-        `转机露头（${kw}）。旧法可能失效，适合小步试新路径。`,
-        `结构偏稳（${kw}）。把节奏与职责对齐，积小成，忌大转向。`,
-      );
-      return `你这边偏「${l.career}」；外面场偏「${u.career}」。合看主调「${kw}」——${tip}可自问：我是在硬推，还是该先停/先谈？`;
+      const tip = voice
+        ? `${voice.frame}。${voice.mapAsk.replace(/^对应你的问题：/, '')}`
+        : pick(
+            tone,
+            `运势偏上升（${kw}）。多能遇见提携或被看见；脚踏实地、戒骄。`,
+            `局面偏紧（${kw}）。宜守边界与证据，减无效消耗，再等窗口。`,
+            `转机露头（${kw}）。旧法可能失效，适合小步试新路径。`,
+            `结构偏稳（${kw}）。把节奏与职责对齐，积小成，忌大转向。`,
+          );
+      return `你这边偏「${l.career}」；外面场偏「${u.career}」。合看主调「${frame}」——${tip}可自问：我是在硬推，还是该先停/先谈？`;
     })(),
     classic: pick(tone, '事业渐开', '事业宜守', '事业有转', '事业稳进'),
   };
@@ -404,32 +420,67 @@ function buildCoreBai(
   lowerNature: string,
 ): string {
   const corpus = getClassicCorpus(hex.name);
+  const voice = getHexVoice(hex.name);
   const judgment = corpus?.judgment?.trim();
   const judgmentBit = judgment
     ? `古辞说：「${hex.name}，${judgment.slice(0, 28)}${judgment.length > 28 ? '…' : ''}」。`
-    : `主题落在「${hex.keywords.join('、')}」。`;
-  return `「${upperNature}在上、${lowerNature}在下」（上${upperId}下${lowerId}）。${judgmentBit}意思是：${hex.gist}无论你问什么，先认清这是怎样的场，再顺势做一小步，往往比硬扛更有效。`;
+    : voice
+      ? `主调落在「${voice.frame}」。`
+      : `主题落在「${hex.keywords.join('、')}」。`;
+  const gistBit = voice ? voice.metaphorSolo : hex.gist;
+  return `「${upperNature}在上、${lowerNature}在下」（上${upperId}下${lowerId}）。${judgmentBit}意思是：${gistBit}无论你问什么，先认清这是怎样的场，再顺势做一小步，往往比硬扛更有效。`;
 }
 
 function buildChangedImpact(primary: Hexagram, changed: Hexagram): string {
-  return `本卦给你的主调是「${primary.keywords.slice(0, 2).join('、')}」（${primary.fullName}），变卦提醒你：事情可能滑向「${changed.keywords.slice(0, 2).join('、')}」（${changed.fullName}）。${changed.gist}——变卦是方向感，不是一口吃成胖子的判决；先按变卦做可验证的一小步。`;
+  const pVoice = getHexVoice(primary.name);
+  const cVoice = getHexVoice(changed.name);
+  const from = pVoice?.frame ?? primary.keywords.slice(0, 2).join('、');
+  const to = cVoice?.asChanged ?? changed.keywords.slice(0, 2).join('、');
+  const trail = cVoice?.metaphorSolo ?? changed.gist;
+  return `本卦给你的主调是「${from}」（${primary.fullName}），变卦提醒你：事情可能滑向「${to}」（${changed.fullName}）。${trail}——变卦是方向感，不是一口吃成胖子的判决；先按变卦做可验证的一小步。`;
+}
+
+type HexExpandSide = 'primary' | 'changed';
+
+/** 单卦分域包（本卦或变卦） */
+export function buildHexExpandForHex(
+  hex: Hexagram,
+  lines: CastResult['primaryLines'],
+  side: HexExpandSide,
+  peer?: Hexagram | null,
+): HexExpandPack {
+  const { upper, lower } = upperLowerFromLines(lines);
+  const tone = toneFromKeywords(hex);
+  const title =
+    side === 'changed' ? `变卦【${hex.fullName}】` : `本卦【${hex.fullName}】`;
+  const changedImpact =
+    side === 'primary' && peer ? buildChangedImpact(hex, peer) : null;
+
+  return {
+    primaryTitle: title,
+    coreBai: buildCoreBai(hex, upper.id, lower.id, upper.nature, lower.nature),
+    meta: buildMeta(hex, tone),
+    domains: buildDomains(hex, upper.id, lower.id),
+    changedImpact,
+    /** 兼容旧字段：工作/感情已并入分域卡 */
+    sceneHtml: '',
+  };
 }
 
 /** 本卦释义 + 多领域分域 + 变卦影响（笔记拓展） */
 export function buildHexExpandPack(cast: CastResult): HexExpandPack {
-  const { upper, lower } = upperLowerFromLines(cast.primaryLines);
-  const primary = cast.primary;
-  const tone = toneFromKeywords(primary);
+  return buildHexExpandForHex(
+    cast.primary,
+    cast.primaryLines,
+    'primary',
+    cast.changed,
+  );
+}
 
-  return {
-    primaryTitle: `本卦【${primary.fullName}】`,
-    coreBai: buildCoreBai(primary, upper.id, lower.id, upper.nature, lower.nature),
-    meta: buildMeta(primary, tone),
-    domains: buildDomains(primary, upper.id, lower.id),
-    changedImpact: cast.changed ? buildChangedImpact(primary, cast.changed) : null,
-    /** 兼容旧字段：工作/感情已并入分域卡 */
-    sceneHtml: '',
-  };
+/** 变卦完整分域；无变则 null */
+export function buildChangedHexExpandPack(cast: CastResult): HexExpandPack | null {
+  if (!cast.changed) return null;
+  return buildHexExpandForHex(cast.changed, cast.changedLines, 'changed');
 }
 
 function renderOracleTags(domains: DomainOracle[]): string {
@@ -455,15 +506,26 @@ function renderDomainCardHtml(d: DomainOracle): string {
 
 /** 白话分域：每条 = 大标题 + 断语标签 + 解释（工作/感情已写全） */
 export function renderHexExpandBaiHtml(pack: HexExpandPack): string {
-  const changedBody = pack.changedImpact
-    ? `<p class="ly-hex-expand-body">${escapeHtml(pack.changedImpact)}</p>`
-    : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下结构看清。</p>`;
+  const isChanged = pack.primaryTitle.startsWith('变卦');
+  const changedSec = isChanged
+    ? `<section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">相对本卦</p>
+        <p class="ly-guide-tip">以上是变卦各域落点；切回本卦对照，看从哪滑到哪。</p>
+      </section>`
+    : `<section class="ly-hex-expand-sec">
+        <p class="ly-hex-expand-sec-title">变卦方向</p>
+        ${
+          pack.changedImpact
+            ? `<p class="ly-hex-expand-body">${escapeHtml(pack.changedImpact)}</p>`
+            : `<p class="ly-guide-tip">无动则无变：时间轴停在本卦，先把当下结构看清。</p>`
+        }
+      </section>`;
 
   const allDomains = [...pack.meta, ...pack.domains];
   const cards = allDomains.map(renderDomainCardHtml).join('');
 
   return `
-    <article class="ly-hex-expand" data-hex-expand>
+    <article class="ly-hex-expand" data-hex-expand data-hex-side="${isChanged ? 'changed' : 'primary'}">
       <h4 class="ly-hex-expand-title">📜 · ${escapeHtml(pack.primaryTitle)}</h4>
       <section class="ly-hex-expand-sec">
         <p class="ly-hex-expand-sec-title">卦象核心释义</p>
@@ -475,10 +537,7 @@ export function renderHexExpandBaiHtml(pack: HexExpandPack): string {
           ${cards}
         </div>
       </section>
-      <section class="ly-hex-expand-sec">
-        <p class="ly-hex-expand-sec-title">变卦方向</p>
-        ${changedBody}
-      </section>
+      ${changedSec}
     </article>
   `;
 }

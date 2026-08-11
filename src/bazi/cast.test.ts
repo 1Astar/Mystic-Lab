@@ -47,6 +47,24 @@ describe('castBaziChart', () => {
     expect(chart.pillars).toHaveLength(5);
   });
 
+  it('labels day stem god by gender', () => {
+    const base = {
+      ...EMPTY_PROFILE,
+      birthYear: '2005',
+      birthMonth: '12',
+      birthDay: '23',
+      birthHour: '8:37',
+      birthPlace: '北京',
+    };
+    const female = castBaziChart(base, 2025, { gender: 'female', includeLiunian: false });
+    const male = castBaziChart(base, 2025, { gender: 'male', includeLiunian: false });
+    expect('error' in female).toBe(false);
+    expect('error' in male).toBe(false);
+    if ('error' in female || 'error' in male) return;
+    expect(female.pillars.find((p) => p.key === 'day')?.stemGod).toBe('女主');
+    expect(male.pillars.find((p) => p.key === 'day')?.stemGod).toBe('男主');
+  });
+
   it('leaves hour empty when missing', () => {
     const chart = castBaziChart(
       {
@@ -100,6 +118,146 @@ describe('shensha & zizuo', () => {
       dayBranch: '巳',
     });
     expect(list).toContain('天乙贵人');
+  });
+
+  it('marks 孤辰寡宿 from year branch (寅年 → 孤辰巳 / 寡宿丑)', () => {
+    expect(
+      shenshaForBranch({
+        branch: '巳',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).toContain('孤辰寡宿');
+    expect(
+      shenshaForBranch({
+        branch: '丑',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).toContain('孤辰寡宿');
+    expect(
+      shenshaForBranch({
+        branch: '午',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).not.toContain('孤辰寡宿');
+  });
+
+  it('marks 劫煞 from year sanhe (申子辰 → 劫煞在巳)', () => {
+    expect(
+      shenshaForBranch({
+        branch: '巳',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toContain('劫煞');
+    expect(
+      shenshaForBranch({
+        branch: '寅',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).not.toContain('劫煞');
+  });
+
+  it('marks 天德/月德 from month branch (need stem)', () => {
+    // 寅月天德见丁；月德见丙
+    expect(
+      shenshaForBranch({
+        branch: '子',
+        stem: '丁',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '子',
+        monthBranch: '寅',
+      }),
+    ).toContain('天德');
+    expect(
+      shenshaForBranch({
+        branch: '申',
+        stem: '甲',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '子',
+        monthBranch: '卯',
+      }),
+    ).toContain('天德');
+    expect(
+      shenshaForBranch({
+        branch: '午',
+        stem: '丙',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '子',
+        monthBranch: '寅',
+      }),
+    ).toContain('月德');
+  });
+
+  it('marks MORE list stars: 金舆/咸池/灾煞/亡神/白虎/吊客/破碎', () => {
+    expect(
+      shenshaForBranch({
+        branch: '辰',
+        dayStem: '甲',
+        yearBranch: '酉',
+        dayBranch: '子',
+      }),
+    ).toContain('金舆');
+    expect(
+      shenshaForBranch({
+        branch: '酉',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toEqual(expect.arrayContaining(['桃花', '咸池']));
+    expect(
+      shenshaForBranch({
+        branch: '午',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toContain('灾煞');
+    expect(
+      shenshaForBranch({
+        branch: '亥',
+        dayStem: '甲',
+        yearBranch: '子',
+        dayBranch: '卯',
+      }),
+    ).toContain('亡神');
+    // 午年：白虎寅(+8)、吊客辰(-2)
+    expect(
+      shenshaForBranch({
+        branch: '寅',
+        dayStem: '甲',
+        yearBranch: '午',
+        dayBranch: '子',
+      }),
+    ).toContain('白虎');
+    expect(
+      shenshaForBranch({
+        branch: '辰',
+        dayStem: '甲',
+        yearBranch: '午',
+        dayBranch: '子',
+      }),
+    ).toContain('吊客');
+    expect(
+      shenshaForBranch({
+        branch: '酉',
+        dayStem: '甲',
+        yearBranch: '寅',
+        dayBranch: '子',
+      }),
+    ).toContain('破碎');
   });
 
   it('returns changsheng label', () => {

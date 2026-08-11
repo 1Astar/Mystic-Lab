@@ -4,6 +4,7 @@ import type {
   LifeProfileInput,
   ParallelWorld,
 } from './types.ts';
+import { effectiveAge } from './age.ts';
 
 function pickBySeed<T>(items: T[], seed: number): T {
   return items[Math.abs(seed) % items.length]!;
@@ -27,9 +28,10 @@ function ageBand(ageRaw: string): 'early' | 'mid' | 'later' | 'open' {
 
 /** 本地模板：结合填写信息的现状推演（探索叙事，非断语） */
 export function buildTemplatePortrait(profile: LifeProfileInput): LifePortrait {
+  const age = effectiveAge(profile);
   const seed = hashSeed(
     [
-      profile.age,
+      age,
       profile.occupation,
       profile.city,
       profile.confusion,
@@ -38,7 +40,7 @@ export function buildTemplatePortrait(profile: LifeProfileInput): LifePortrait {
       profile.birthDay,
     ].join('|'),
   );
-  const band = ageBand(profile.age);
+  const band = ageBand(age);
   const occ = profile.occupation.trim() || '当下的工作节奏';
   const city = profile.city.trim() || '当前所在的城市';
   const confusion = profile.confusion.trim() || '某种尚未说清的犹豫';

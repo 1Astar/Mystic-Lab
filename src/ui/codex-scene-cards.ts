@@ -90,7 +90,7 @@ function orientationBriefInner(knowledge: CardKnowledge): string {
     </div>`;
 }
 
-/** 完整图鉴：正逆位直接展示，无需点击展开 */
+/** 完整探索：正逆位直接展示，无需点击展开 */
 export function renderOrientationBriefHtml(knowledge: CardKnowledge): string {
   return `
     <section class="codex-orient-panel">
@@ -100,7 +100,7 @@ export function renderOrientationBriefHtml(knowledge: CardKnowledge): string {
 }
 
 /**
- * 图鉴学习折叠。完整图鉴有独立「现实映射」Tab 时，基础牌义只留正逆位，避免重复。
+ * 探索学习折叠。完整探索有独立「现实映射」Tab 时，基础牌义只留正逆位，避免重复。
  */
 export type LearnFoldsOptions = {
   includeOrientation?: boolean;

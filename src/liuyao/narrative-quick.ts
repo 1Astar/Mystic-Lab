@@ -8,7 +8,9 @@ import { dressHexagram } from './najia.ts';
 import { siZhuFromDate, renderCastTimePlaque } from './ganzhi.ts';
 import { formatLiuqinShort } from './energy-lens.ts';
 import { buildOfflineAnswerPack } from '../mystic-engine/build-pack.ts';
+import { renderAnswerPackHtml } from '../mystic-engine/render-pack.ts';
 import { loadUseProfilePref } from '../life/profile-context.ts';
+import { formatHexWithPinyin } from './hex-pinyin.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -110,6 +112,9 @@ function renderConclusionTab(cast: CastResult, question: string, facts: ReadingF
     cast,
     useProfile: loadUseProfilePref(true),
   });
+  const lead = cast.changed
+    ? `（基于${formatHexWithPinyin(cast.primary.name, cast.primary.fullName)}卦变${formatHexWithPinyin(cast.changed.name, cast.changed.fullName)}，结合你的问题）`
+    : `（基于${formatHexWithPinyin(cast.primary.name, cast.primary.fullName)}，结合你的问题）`;
   const move =
     facts.changing.labels.length === 0
       ? '无动爻'
@@ -117,30 +122,12 @@ function renderConclusionTab(cast: CastResult, question: string, facts: ReadingF
   const arrow = facts.changed
     ? `「${facts.primary.keywords[0]}」→「${facts.changed.keywords[0]}」`
     : `「${facts.primary.keywords[0]}」`;
-  const lead = cast.changed
-    ? `（基于${cast.primary.fullName}卦变${cast.changed.fullName}，结合你的问题）`
-    : `（基于${cast.primary.fullName}，结合你的问题）`;
-  const gist = pack.answers[0]?.lean ?? pack.decision;
-  const partHtml =
-    pack.answers.length > 1
-      ? `<ul class="ly-quick-parts">${pack.answers
-          .map(
-            (a) =>
-              `<li><strong>${escapeHtml(a.questionSlice)}</strong><span>${escapeHtml(a.lean)}</span></li>`,
-          )
-          .join('')}</ul>`
-      : '';
+
   return `
     <section class="ly-result-panel">
       <h3>结论</h3>
-      <p class="ly-briefing-kicker">${escapeHtml(lead)}</p>
-      <blockquote class="ly-briefing-quote ly-quick-verdict-quote"><p>${escapeHtml(gist)}</p></blockquote>
+      ${renderAnswerPackHtml(pack, { lead, compact: true, cast })}
       <p class="ly-quick-tags">世应${escapeHtml(facts.shiYingRel.rel)} · ${escapeHtml(move)} · ${escapeHtml(arrow)}</p>
-      <h4 class="ly-quick-decision-h">决策参考</h4>
-      <p class="ly-guide-tip">${escapeHtml(pack.decision)}</p>
-      ${partHtml}
-      <h4 class="ly-quick-decision-h">破局动作</h4>
-      <p class="ly-guide-tip"><strong>${escapeHtml(pack.breakthrough.title)}</strong> — ${escapeHtml(pack.breakthrough.body)}</p>
     </section>
   `;
 }
