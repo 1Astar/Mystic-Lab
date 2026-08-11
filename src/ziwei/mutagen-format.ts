@@ -58,19 +58,22 @@ export function formatMutagenWithPalaces(
 
 export function parseMutagenLine(line: string): MutagenPiece[] {
   if (!line.trim()) return [];
-  return line
-    .split(/\s*[·、]\s*/)
-    .map((chunk) => {
-      const m = chunk.trim().match(/^(.+?)化([禄权科忌])(?:→(.+))?$/);
-      if (!m) return null;
-      const palaceRaw = m[3]?.trim();
-      return {
-        star: m[1]!.trim(),
-        kind: m[2] as MutagenKind,
-        palace: palaceRaw ? (palaceRaw.endsWith('宫') ? palaceRaw : `${palaceRaw}宫`) : undefined,
-      };
-    })
-    .filter((x): x is MutagenPiece => Boolean(x));
+  const out: MutagenPiece[] = [];
+  for (const chunk of line.split(/\s*[·、]\s*/)) {
+    const m = chunk.trim().match(/^(.+?)化([禄权科忌])(?:→(.+))?$/);
+    if (!m) continue;
+    const palaceRaw = m[3]?.trim();
+    out.push({
+      star: m[1]!.trim(),
+      kind: m[2] as MutagenKind,
+      palace: palaceRaw
+        ? palaceRaw.endsWith('宫')
+          ? palaceRaw
+          : `${palaceRaw}宫`
+        : undefined,
+    });
+  }
+  return out;
 }
 
 export function mutagenKindHint(kind: MutagenKind): string {

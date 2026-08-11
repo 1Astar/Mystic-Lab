@@ -10,6 +10,7 @@ import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 import {
   buildLearnAchievements,
   countUnlockedAchievements,
+  type LearnAchievementId,
 } from '../bazi/learn-achievements.ts';
 import { buildLearnTreeView, learnTreeProgressPct } from '../bazi/learn-tree.ts';
 
@@ -36,7 +37,8 @@ export function renderBaziLearn(root: HTMLElement): () => void {
   const collected = view.knowledgeRows.filter((r) => r.collected).length;
   const achievements = buildLearnAchievements(view.state);
   const achCount = countUnlockedAchievements(view.state);
-  let selectedAchId = achievements.find((a) => !a.unlocked)?.id ?? achievements[0]?.id ?? '';
+  let selectedAchId: LearnAchievementId =
+    achievements.find((a) => !a.unlocked)?.id ?? achievements[0]?.id ?? 'chugui_seal';
   /** 默认折叠：不展开任一 Tab */
   let showcaseTab: ShowcaseTab = null;
 
@@ -198,7 +200,10 @@ export function renderBaziLearn(root: HTMLElement): () => void {
   function bindAchBadges(): void {
     page.querySelectorAll<HTMLButtonElement>('[data-ach-id]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        selectedAchId = btn.dataset.achId || selectedAchId;
+        const next = btn.dataset.achId;
+        if (next && achievements.some((a) => a.id === next)) {
+          selectedAchId = next as LearnAchievementId;
+        }
         const peek = page.querySelector('[data-ach-peek]');
         const sel = selectedAch();
         if (peek) {

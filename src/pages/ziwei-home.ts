@@ -75,18 +75,8 @@ export function renderZiweiHome(root: HTMLElement): () => void {
       </header>
 
       <section class="ziwei-intent" aria-label="你想看什么">
-        <p class="ziwei-kicker">先选一个入口</p>
-        <p class="ziwei-lead">你想知道未来 3 年的人生节奏，还是想看看当下的全局格局？</p>
-        <div class="ziwei-intent-row">
-          <button type="button" class="ziwei-intent-card ${intent === 'horizon' ? 'is-on' : ''}" data-intent="horizon">
-            <strong>近三年节奏</strong>
-            <span>像看一段缓慢展开的旷野</span>
-          </button>
-          <button type="button" class="ziwei-intent-card ${intent === 'map' ? 'is-on' : ''}" data-intent="map">
-            <strong>当下全局格局</strong>
-            <span>一张人生地图</span>
-          </button>
-        </div>
+        <p class="ziwei-kicker">入口</p>
+        <p class="ziwei-lead">近三年节奏与当下格局已合并到同一解读页；填好生辰后即可进入。</p>
       </section>
 
       <section class="ziwei-archive" aria-label="出生信息">
@@ -203,13 +193,6 @@ export function renderZiweiHome(root: HTMLElement): () => void {
     });
 
     page.querySelector('.life-back')?.addEventListener('click', () => navigate('/'));
-    page.querySelectorAll<HTMLButtonElement>('[data-intent]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        intent = btn.dataset.intent === 'horizon' ? 'horizon' : 'map';
-        saveZiweiIntent(intent);
-        paint();
-      });
-    });
     page.querySelectorAll<HTMLInputElement>('input[name="zw-gender"]').forEach((input) => {
       input.addEventListener('change', () => {
         const v = input.value === 'male' ? 'male' : 'female';
