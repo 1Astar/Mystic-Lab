@@ -1101,7 +1101,53 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   text-align: center;
 }
 
-/* 二级小 tab：轻量分段（不吸顶，避免被上层分区条压住） */
+/* 多级吸顶栈：上级 + 当前级同粘，不互相压盖 */
+.ziwei-codex-sticky-stack {
+  position: sticky;
+  top: 0;
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 4px 0 12px;
+  padding: 0 0 6px;
+  background: color-mix(in srgb, var(--bg-deep) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+.ziwei-codex-sticky-stack .ziwei-layer-tabs-caps {
+  position: static;
+  top: auto;
+  z-index: auto;
+  margin: 0;
+  padding: 6px 12px 4px 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+.ziwei-codex-sticky-row {
+  padding: 2px 0 4px;
+}
+.ziwei-codex-sticky-row .ziwei-codex-tabs,
+.ziwei-codex-sticky-row .ziwei-star-kind-chips,
+.ziwei-codex-sticky-row .ziwei-shensha-theme-chips {
+  margin: 0;
+}
+.ziwei-codex-sticky-row .ziwei-codex-tabs {
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+}
+.ziwei-codex-sticky-row .ziwei-star-kind-chips,
+.ziwei-codex-sticky-row .ziwei-shensha-theme-chips {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+  padding: 2px 12px 2px 0;
+}
+.ziwei-codex-sticky-row .ziwei-star-kind-chips::-webkit-scrollbar,
+.ziwei-codex-sticky-row .ziwei-shensha-theme-chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* 二级小 tab：轻量分段（由 sticky-stack 统一吸顶） */
 .ziwei-codex-tabs {
   display: flex;
   flex-wrap: nowrap;
@@ -1249,7 +1295,7 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   background: color-mix(in srgb, var(--surface-2) 92%, var(--gold) 8%);
 }
 
-/* 分区 Tab：轻盈胶囊 + 底线 · 吸顶（可横滑，末项不被裁切） */
+/* 分区 Tab：轻盈胶囊 + 底线（可横滑；吸顶由 .ziwei-codex-sticky-stack 接管） */
 .ziwei-layer-tabs-caps {
   display: flex;
   flex-wrap: nowrap;

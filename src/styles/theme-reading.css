@@ -709,6 +709,10 @@ html[data-theme='moon'] .codex-progress-suit-bar i {
 
 /* 八字/紫微图鉴：吸顶分类条月白底 */
 html[data-theme='moon'] .bazi-codex-tabs,
+html[data-theme='moon'] .ziwei-codex-sticky-stack,
 html[data-theme='moon'] .ziwei-layer-tabs-caps {
   background: color-mix(in srgb, var(--bg-deep) 96%, #fff) !important;
+}
+html[data-theme='moon'] .ziwei-codex-sticky-stack .ziwei-layer-tabs-caps {
+  background: transparent !important;
 }

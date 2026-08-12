@@ -1086,6 +1086,36 @@ function renderStructureCatalog(bucket: StructureBucket): string {
     </button>`;
 }
 
+/**
+ * 多级吸顶：L1 分区 + 当前路径上的下级导航收成一条 sticky 栈。
+ * 点到哪一级，就显示「上级 + 当前级」（同栈一起粘住，互不压盖）。
+ */
+function assembleZiweiStickyNav(page: HTMLElement): void {
+  const layer = page.querySelector<HTMLElement>('.ziwei-layer-tabs-caps');
+  if (!layer || layer.closest('.ziwei-codex-sticky-stack')) return;
+
+  const stack = document.createElement('div');
+  stack.className = 'ziwei-codex-sticky-stack';
+  stack.setAttribute('role', 'navigation');
+  stack.setAttribute('aria-label', '图鉴分级导航');
+  layer.replaceWith(stack);
+  stack.appendChild(layer);
+
+  const hoist = (sel: string, level: string): void => {
+    const el = page.querySelector(sel);
+    if (!el || el.closest('.ziwei-codex-sticky-stack')) return;
+    const row = document.createElement('div');
+    row.className = `ziwei-codex-sticky-row is-${level}`;
+    el.replaceWith(row);
+    row.appendChild(el);
+    stack.appendChild(row);
+  };
+
+  hoist('.ziwei-codex-tabs', 'l2');
+  hoist('.ziwei-star-kind-chips', 'l3');
+  hoist('.ziwei-shensha-theme-chips', 'l4');
+}
+
 export function renderZiweiCodex(root: HTMLElement): () => void {
   const stars = createStarsLayer();
   document.body.appendChild(stars);
