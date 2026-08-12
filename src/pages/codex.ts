@@ -11,10 +11,11 @@ import { mountCodexFlatGrid } from '../codex/grid.ts';
 import { openCodexCardDetail } from '../codex/detail-host.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountCodexLearnCards } from '../ui/codex-learn-cards.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 type CodexFilter = 'all' | 'collected' | 'favorite';
 
-export function renderCodex(root: HTMLElement): void {
+export function renderCodex(root: HTMLElement): () => void {
   let filter: CodexFilter = 'collected';
   let selectedId: string | null = null;
 
@@ -168,4 +169,12 @@ export function renderCodex(root: HTMLElement): void {
   }
 
   render();
+  return mountLabFloatShell(page, {
+    system: 'tarot',
+    surface: 'atlas',
+    atlasMode: true,
+    tujianPath: '/tarot/tujian',
+    notesContext: () => (selectedId ? `图鉴 · ${selectedId}` : '塔罗图鉴'),
+    seedQuery: () => selectedId ?? undefined,
+  });
 }

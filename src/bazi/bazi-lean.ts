@@ -23,7 +23,7 @@ export function leanForBaziIntent(
   questionSlice = '',
 ): string {
   if (isMetaUxQuestion(questionSlice)) {
-    return '命盘速读会压成可核对的几步：先定调，再看盘面依据与本周动作。';
+    return '命盘解读会压成可核对的几步：先定调，再看盘面依据与本周动作。';
   }
   const soft = tone === 'soft' || tone === 'flow';
   const cut = tone === 'cut' || tone === 'hard' || tone === 'open';

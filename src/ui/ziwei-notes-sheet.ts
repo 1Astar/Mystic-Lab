@@ -1,5 +1,6 @@
 /**
- * 紫微「深度学习」笔记抽屉：多 Tab（先推演依据 + 学习笔记）
+ * 紫微笔记抽屉（笔按钮）：推演依据 | 笔记
+ * 与火花「深度解读」分工：笔=依据与手记；火花=AI 贴合解读。
  */
 import type { PersonProfile } from '../life/types.ts';
 import {
@@ -10,7 +11,11 @@ import {
 import { buildYearTrack, type TimeScopeLevel } from '../ziwei/time-scope.ts';
 import type { LimitBoardSelection } from '../ziwei/horoscope-limits.ts';
 import type { ZiweiChartView } from '../ziwei/types.ts';
-import { openLabNotesSheet } from './lab-notes-sheet.ts';
+import {
+  loadLabNoteText,
+  openLabNotesSheet,
+  type LabNotesSurface,
+} from './lab-notes-sheet.ts';
 import { bindYearDeepBody, renderYearDeepBodyHtml } from './ziwei-year-deep-drawer.ts';
 
 export type ZiweiNotesTab = 'reason' | 'notes';
@@ -24,6 +29,7 @@ export type OpenZiweiNotesSheetOpts = {
   /** 默认推演依据 */
   initialTab?: ZiweiNotesTab;
   context?: string;
+  surface?: LabNotesSurface;
 };
 
 function escapeHtml(s: string): string {
@@ -59,10 +65,10 @@ function resolvePack(
 function tabsHtml(active: ZiweiNotesTab): string {
   const tabs: Array<{ id: ZiweiNotesTab; label: string }> = [
     { id: 'reason', label: '推演依据' },
-    { id: 'notes', label: '学习笔记' },
+    { id: 'notes', label: '笔记' },
   ];
   return `
-    <div class="ly-note-mini-tabs ziwei-notes-tabs" role="tablist" aria-label="紫微深度学习">
+    <div class="ly-note-mini-tabs ziwei-notes-tabs" role="tablist" aria-label="紫微笔记">
       ${tabs
         .map(
           (t) => `
@@ -72,15 +78,7 @@ function tabsHtml(active: ZiweiNotesTab): string {
     </div>`;
 }
 
-function loadDraft(personId: string): string {
-  try {
-    return localStorage.getItem(`mystic-lab.reading-notes.ziwei.${personId}`) ?? '';
-  } catch {
-    return '';
-  }
-}
-
-/** 笔按钮 /「为什么这样判断」打开 */
+/** 笔按钮 /「为什么这样判断」→ 笔记抽屉（默认推演依据） */
 export function openZiweiNotesSheet(opts: OpenZiweiNotesSheetOpts): void {
   const resolved = resolvePack(opts);
   const start = opts.initialTab ?? 'reason';
@@ -94,10 +92,11 @@ export function openZiweiNotesSheet(opts: OpenZiweiNotesSheetOpts): void {
 
   const titleLevel = resolved?.pack.levelLabel ?? '流年';
   const year = resolved?.pack.year ?? opts.selection?.year ?? '';
-  const draft = loadDraft(opts.person.id);
+  const draft = loadLabNoteText('ziwei', opts.person.id);
 
   openLabNotesSheet({
     system: 'ziwei',
+    surface: opts.surface ?? 'reading',
     context: opts.context ?? opts.view.theater.headline,
     showNotePad: false,
     bodyHtml: `

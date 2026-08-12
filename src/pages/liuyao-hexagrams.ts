@@ -22,6 +22,7 @@ import {
 } from '../liuyao/hex-favorites.ts';
 import { getJournalEntryById } from '../liuyao/journey.ts';
 import { openLiuyaoEncounterReplay } from '../ui/liuyao-encounter-replay.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 function artHtml(h: Hexagram): string {
   const pack = buildHexGuidePack(h);
@@ -414,5 +415,14 @@ export function renderLiuyaoHexagrams(root: HTMLElement): () => void {
   window.addEventListener('keydown', onKey);
 
   root.appendChild(page);
-  return () => window.removeEventListener('keydown', onKey);
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'liuyao',
+    surface: 'atlas',
+    atlasMode: true,
+    tujianPath: '/liuyao/hexagrams',
+  });
+  return () => {
+    disposeFloat();
+    window.removeEventListener('keydown', onKey);
+  };
 }

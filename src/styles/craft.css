@@ -1,0 +1,807 @@
+/* 造命：跟星夜/月白语义 token，忌奶油硬编码 */
+
+.craft-page .life-header {
+  margin-bottom: 16px;
+}
+
+.craft-page .bazi-home-person {
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-page .page-subtitle {
+  color: var(--ink-muted);
+}
+
+.craft-xp-card {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse at 12% 0%, var(--gold-soft), transparent 50%),
+    var(--surface-1);
+  color: var(--surface-ink);
+  box-shadow: var(--shadow);
+}
+
+.craft-xp-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.craft-xp-head span {
+  color: var(--surface-muted);
+  font-size: 0.78rem;
+}
+
+.craft-xp-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  overflow: hidden;
+}
+
+.craft-xp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 55%, #fff));
+}
+
+.craft-xp-bar-sm {
+  height: 6px;
+  margin-top: 6px;
+}
+
+.craft-xp-mini {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--surface-muted);
+}
+
+.craft-quest-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.craft-quest-btn {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.craft-quest-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+}
+
+.craft-quest-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.craft-quest-btn strong {
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.craft-quest-btn span {
+  font-size: 0.78rem;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-step {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--surface-ink);
+}
+
+.craft-step-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-step h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.craft-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.craft-chip {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  border: 1px solid var(--line);
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-para {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--surface-ink);
+  white-space: pre-wrap;
+}
+
+.craft-para:last-child {
+  margin-bottom: 0;
+}
+
+.craft-challenge {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border-left: 3px solid var(--gold);
+  background: var(--gold-soft);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--surface-ink);
+}
+
+.craft-task {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+}
+
+.craft-classroom {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--gold) 40%, var(--line));
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--surface-muted);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+
+.craft-page .mirror-gate,
+.craft-gate {
+  padding: 20px 16px;
+  border: 1px dashed color-mix(in srgb, var(--gold) 40%, var(--line));
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: var(--surface-1);
+  color: var(--ink);
+}
+
+/* 灵根图谱 */
+.craft-spirit-card {
+  margin: 0 0 18px;
+  padding: 16px 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse at 30% 0%, var(--gold-soft), transparent 55%),
+    var(--surface-1);
+  color: var(--surface-ink);
+  box-shadow: var(--shadow);
+  animation: craft-spirit-in 0.55s ease-out;
+}
+
+@keyframes craft-spirit-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.craft-spirit-kicker {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-spirit-title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.craft-spirit-sub {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  color: var(--surface-muted);
+}
+
+.craft-axis-list-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 6px;
+}
+
+.craft-axis-list-head .craft-panel-h3 {
+  margin: 0;
+}
+
+.craft-axis-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold-ink, var(--gold)) 12%, transparent);
+  color: var(--gold-ink, var(--gold));
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.craft-axis-help:hover,
+.craft-axis-help:focus-visible {
+  background: color-mix(in srgb, var(--gold-ink, var(--gold)) 22%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.craft-tip-steps {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.craft-tip-steps li + li {
+  margin-top: 0.35rem;
+}
+
+.craft-radar-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 14px;
+}
+
+.craft-radar {
+  width: min(100%, 240px);
+  height: auto;
+}
+
+.craft-radar-guide {
+  fill: color-mix(in srgb, var(--gold) 6%, transparent);
+  stroke: color-mix(in srgb, var(--gold) 35%, var(--line));
+  stroke-width: 1;
+}
+
+.craft-radar-fill {
+  fill: color-mix(in srgb, var(--gold) 12%, transparent);
+  stroke: color-mix(in srgb, var(--gold) 45%, var(--line));
+  stroke-width: 1.5;
+  transition: fill 0.3s ease;
+}
+
+.craft-radar-fill.is-lit {
+  fill: color-mix(in srgb, var(--gold) 28%, transparent);
+  stroke: var(--gold);
+}
+
+.craft-radar-label {
+  font-size: 11px;
+  fill: var(--ink-muted);
+}
+
+.craft-radar-label.is-lit {
+  fill: var(--gold-ink, var(--gold));
+  font-weight: 600;
+}
+
+.craft-axis-list {
+  display: grid;
+  gap: 0;
+  margin-bottom: 14px;
+}
+
+.craft-axis-row.is-dim {
+  opacity: 0.55;
+}
+
+.craft-axis-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.craft-axis-meta span {
+  color: var(--surface-muted);
+  font-size: 0.72rem;
+}
+
+.craft-axis-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  overflow: hidden;
+}
+
+.craft-axis-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 55%, #fff));
+}
+
+.craft-axis-src {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-panel-h3 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.craft-wuxing-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.craft-wx-cell {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--surface-muted);
+}
+
+.craft-wx-cell.is-day {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 600;
+}
+
+.craft-wx-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  overflow: hidden;
+}
+
+.craft-wx-bar i {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--gold) 75%, transparent);
+}
+
+.craft-wx-cell.is-day .craft-wx-bar i {
+  background: var(--gold);
+}
+
+/* 点亮成长 */
+.craft-activate {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed color-mix(in srgb, var(--gold) 35%, var(--line));
+}
+
+.craft-act-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.craft-act-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--ink) 4%);
+  color: var(--ink);
+}
+
+.craft-act-row.is-done,
+.craft-act-row.is-locked {
+  opacity: 0.72;
+}
+
+.craft-act-main {
+  display: grid;
+  gap: 2px;
+  font-size: 0.84rem;
+}
+
+.craft-act-main span {
+  font-size: 0.72rem;
+  color: var(--surface-muted);
+}
+
+.craft-act-tag {
+  display: inline-block;
+  margin-right: 6px;
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  border: 1px solid var(--line);
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-act-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.craft-act-btn {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.craft-inline-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: inherit;
+  color: var(--gold);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.craft-act-go {
+  background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-act-done,
+.craft-act-locked {
+  font-size: 0.75rem;
+  color: var(--surface-muted);
+}
+
+.craft-act-fold {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--surface-ink);
+}
+
+.craft-act-fold summary {
+  cursor: pointer;
+  color: var(--gold-ink, var(--gold));
+}
+
+/* 流年 Buff */
+.craft-year-buff {
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed color-mix(in srgb, var(--gold) 35%, var(--line));
+}
+
+.craft-buff-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.craft-buff-year,
+.craft-buff-month {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.craft-buff-section {
+  margin-top: 12px;
+}
+
+.craft-buff-h4 {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-buff-month-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.craft-buff-month-head .craft-buff-h4 {
+  margin: 0;
+}
+
+.craft-buff-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.craft-buff-row {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--ink) 4%);
+  color: var(--ink);
+}
+
+.craft-buff-row.is-challenge {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+}
+
+.craft-buff-main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.86rem;
+  margin-bottom: 4px;
+}
+
+.craft-buff-main span {
+  font-size: 0.72rem;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-buff-advice {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--surface-muted);
+}
+
+.craft-buff-bazi {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--surface-muted);
+}
+
+.craft-buff-flag {
+  font-style: normal;
+  font-size: 0.65rem;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--gold));
+  vertical-align: middle;
+}
+
+.craft-awaken-tip {
+  color: var(--ink-muted);
+}
+
+.craft-combo-achs {
+  margin: 14px 0 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+
+.craft-combo-ach-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.craft-combo-ach {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 180, 140, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.craft-combo-ach.is-complete {
+  border-color: rgba(220, 190, 100, 0.45);
+  background: rgba(200, 160, 60, 0.08);
+}
+
+.craft-combo-ach.is-burst {
+  box-shadow: 0 0 0 1px rgba(220, 120, 90, 0.35);
+}
+
+.craft-combo-ach strong {
+  margin-right: 8px;
+  color: var(--ink);
+}
+
+.craft-combo-ach-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-combo-ach p {
+  margin: 6px 0 2px;
+  font-size: 0.82rem;
+  color: var(--surface-ink);
+}
+
+.craft-combo-ach em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--surface-muted);
+}
+
+.craft-combo-ach.is-locked,
+.craft-combo-ach.is-partial:not(.is-complete) {
+  opacity: 0.78;
+}
+
+/* 属性来源 / 空轴说明弹层（不依赖 ziwei.css，造命路由可独立显示） */
+.craft-axis-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 640;
+  display: grid;
+  place-items: end center;
+  padding: 1rem;
+  opacity: 1;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.craft-axis-sheet .ziwei-wq-backdrop,
+.craft-axis-sheet [data-close].ziwei-wq-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: color-mix(in srgb, #120e18 55%, transparent);
+  cursor: pointer;
+}
+
+.craft-axis-sheet .ziwei-wq-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  margin-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  padding: 1.15rem 1.2rem 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+  transform: none;
+}
+
+.craft-axis-sheet .ziwei-wq-card-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-axis-sheet .ziwei-wq-card h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.craft-axis-sheet .ziwei-wq-card-theme {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+}
+
+.craft-axis-sheet .ziwei-wq-card-body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.craft-axis-sheet .ziwei-wq-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 0.85rem;
+}
+
+.craft-axis-sheet .craft-src-h {
+  margin: 0.85rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-axis-sheet .craft-src-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.craft-axis-sheet .craft-tip-steps {
+  margin: 0 0 0.25rem;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.craft-axis-sheet .craft-tip-steps li + li {
+  margin-top: 0.35rem;
+}
+
+
+
+.craft-year-tips {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink);
+}

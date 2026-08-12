@@ -315,15 +315,46 @@ export const GLOSSARY: GlossaryEntry[] = [
     name: '流年',
     shortMeaning: '某一年被点亮的线索：适合对照具体问题。',
     traditional: '流年干支与四化、叠在本命与大限之上读。',
-    relatedTerms: ['大限', '流月', '四化'],
+    relatedTerms: ['大限', '流月', '流日', '四化'],
   },
   {
     id: 'limit-liuyue',
     category: 'limit',
     name: '流月',
     shortMeaning: '月份尺度的激活：把流年课题拆成更短窗口。',
-    traditional: '流月在专业排盘中用于细看时机，产品后续会加深。',
-    relatedTerms: ['流年', '大限'],
+    traditional:
+      '流月看当月干支、流月命宫与流月四化，叠在本命与流年之上读。宜推进处看化禄，宜复盘处看化忌；是短窗口，不是十年判决。',
+    relatedTerms: ['流年', '流日', '大限', '四化', '运限四化'],
+  },
+  {
+    id: 'limit-liuri',
+    category: 'limit',
+    name: '流日',
+    aliases: ['日限'],
+    shortMeaning: '某一天的主场落点：把流月课题再缩成「今天」。',
+    traditional:
+      '流日看当日干支与流日命宫，叠在本命、大限、流年、流月之上。适合对照当天发生的事做验证，不作长篇人生判决。',
+    relatedTerms: ['流月', '流时', '流年', '大限'],
+  },
+  {
+    id: 'limit-liushi',
+    category: 'limit',
+    name: '流时',
+    aliases: ['时限'],
+    shortMeaning: '时辰尺度的时机提示：此刻能量往哪边偏。',
+    traditional:
+      '流时看该时辰落宫。把它当「现在这一拍」的提示，不展开成整年故事；宜短、宜可执行。',
+    relatedTerms: ['流日', '流月', '流年'],
+  },
+  {
+    id: 'struct-konggong',
+    category: 'structure',
+    name: '空宫',
+    aliases: ['空宫位'],
+    shortMeaning: '该宫没有主星坐守：主题更依赖三方四正与对宫来补读。',
+    traditional:
+      '空宫不是「没有这部分人生」。主星不在，宫职仍在；借对宫、三合与飞星来看该领域如何被外界与会照带动。忌把空宫读成缺失或诅咒。',
+    relatedTerms: ['三方四正', '对宫', '三合', '身宫'],
   },
 ];
 

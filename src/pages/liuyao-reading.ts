@@ -41,6 +41,9 @@ import {
   renderHexagramSvg,
   renderThreeCoins,
 } from '../ui/liuyao/hexagram-view.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
+import { LIUYAO_SHARE_POSTER_PATH } from '../share/cover.ts';
+import { draftFromLiuyao, draftGeneric } from '../share/drafts.ts';
 
 type Phase = 'question' | 'method' | 'casting' | 'result';
 
@@ -61,6 +64,28 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   const page = document.createElement('div');
   page.className = 'page ly-reading-page';
   mountEnvBanner(page);
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'liuyao',
+    surface: 'reading',
+    tujianPath: '/liuyao/hexagrams',
+    draftShare: () => {
+      const c = cast ?? lastResult;
+      if (!c) {
+        return draftGeneric({
+          system: 'liuyao',
+          headline: '六爻解读',
+          question: question || '六爻占问',
+          summary: question ? `问题：${question}` : '正在六爻解读。',
+          label: '六爻',
+          invitePosterPath: LIUYAO_SHARE_POSTER_PATH,
+        });
+      }
+      return draftFromLiuyao({
+        cast: c,
+        question: question || '六爻占问',
+      });
+    },
+  });
 
   const topbar = document.createElement('div');
   topbar.className = 'ly-topbar';
@@ -69,10 +94,12 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   back.className = 'back-link';
   back.textContent = '← 返回六爻';
   back.addEventListener('click', () => goBack());
+  const centerHost = document.createElement('div');
+  centerHost.className = 'ly-topbar-center';
   const actionsHost = document.createElement('div');
   actionsHost.className = 'ly-topbar-actions';
-  topbar.append(back, actionsHost);
-  mountPersonSwitcher(actionsHost);
+  topbar.append(back, centerHost, actionsHost);
+  mountPersonSwitcher(centerHost);
   mountLiuyaoSfxToggle(actionsHost);
 
   const modeBar = document.createElement('div');
@@ -524,6 +551,7 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   page.classList.toggle('is-learn-mode', isLearn());
   renderQuestion();
   return () => {
+    disposeFloat();
     syncJournalNotes();
     document.querySelector('.ly-yao-pop')?.remove();
     document.querySelector('.ly-flip-modal')?.remove();

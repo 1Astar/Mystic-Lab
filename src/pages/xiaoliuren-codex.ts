@@ -1,12 +1,13 @@
 ﻿import { navigate } from '../router.ts';
 import { renderSixGodIcon, SIX_GODS } from '../xiaoliuren/six-gods.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 function listLine(items: string[]): string {
   return items.join(' · ');
 }
 
-export function renderXiaoliurenCodex(root: HTMLElement): void {
+export function renderXiaoliurenCodex(root: HTMLElement): () => void {
   const page = document.createElement('div');
   page.className = 'page xlr-codex-page xlr-xuan-page';
   mountEnvBanner(page);
@@ -71,4 +72,10 @@ export function renderXiaoliurenCodex(root: HTMLElement): void {
 
   page.append(grid, links);
   root.appendChild(page);
+  return mountLabFloatShell(page, {
+    system: 'xiaoliuren',
+    surface: 'atlas',
+    atlasMode: true,
+    tujianPath: '/xiaoliuren/tujian',
+  });
 }

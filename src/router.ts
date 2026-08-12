@@ -1,3 +1,5 @@
+import { clearLabFloatDock } from './ui/lab-float-actions.ts';
+
 export type RouteHandler = (
   root: HTMLElement,
 ) => void | (() => void) | Promise<void | (() => void)>;
@@ -9,8 +11,11 @@ export function registerRoute(path: string, handler: RouteHandler): void {
 }
 
 export function navigate(path: string): void {
-  if (path !== location.pathname) {
-    history.pushState({}, '', path);
+  const next = new URL(path, location.origin);
+  const nextKey = `${next.pathname.replace(/\/$/, '') || '/'}${next.search}`;
+  const curKey = `${location.pathname.replace(/\/$/, '') || '/'}${location.search}`;
+  if (nextKey !== curKey) {
+    history.pushState({}, '', `${next.pathname}${next.search}${next.hash}`);
   }
   void render();
 }
@@ -37,6 +42,7 @@ export async function render(): Promise<void> {
     cleanup();
     cleanup = null;
   }
+  clearLabFloatDock();
 
   // 与历史行为一致：先清空。同步页（如首页）直接 append；勿先画全屏「载入中」
   root.innerHTML = '';

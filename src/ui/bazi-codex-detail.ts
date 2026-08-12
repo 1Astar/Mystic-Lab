@@ -167,6 +167,21 @@ export function renderBaziCodexDetailHtml(
         ${lit ? '' : lockedBanner}
       </div>`,
     express: bodyOrTeaser(`
+      ${
+        dossier.dayunAs
+          ? section(
+              dossier.dayunAs.rich ? '作大运时' : '作大运时 · 速览（详解待补）',
+              `<p class="bazi-enc-dayun-theme"><strong>${escapeHtml(dossier.dayunAs.theme)}</strong></p>
+               <p>${escapeHtml(dossier.dayunAs.weather)}</p>
+               <ul class="bazi-enc-list">
+                 <li><strong>宜推进</strong> · ${escapeHtml(dossier.dayunAs.leanIn)}</li>
+                 <li><strong>留意</strong> · ${escapeHtml(dossier.dayunAs.watch)}</li>
+                 <li><strong>怎么用</strong> · ${escapeHtml(dossier.dayunAs.playbook)}</li>
+               </ul>
+               <p class="bazi-enc-memory-line">${escapeHtml(dossier.dayunAs.memory)}</p>`,
+            )
+          : ''
+      }
       ${section('性格表现', `<p>${escapeHtml(dossier.personality)}</p>`)}
       ${section('优势', `<p>${escapeHtml(dossier.strength)}</p>`)}
       ${section('短板与失衡', `<p>${escapeHtml(dossier.imbalance)}</p>`)}

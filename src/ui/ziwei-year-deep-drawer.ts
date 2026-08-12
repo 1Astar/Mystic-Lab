@@ -1,5 +1,5 @@
 /**
- * 流年深度解析：右侧抽屉 + 可内嵌正文（仿六爻深度学习）
+ * 流年推演正文：右侧抽屉 + 可内嵌（笔记「推演依据」Tab 共用）
  */
 import type { PersonProfile } from '../life/types.ts';
 import {
@@ -33,7 +33,7 @@ function possiblesHeader(tense: YearDeepPack['tense']): string {
   return '可能表现';
 }
 
-/** 推演正文（抽屉与「深度学习」Tab 共用） */
+/** 推演正文（抽屉与笔记「推演依据」Tab 共用） */
 export function renderYearDeepBodyHtml(
   pack: YearDeepPack,
   events: string[],
@@ -53,6 +53,8 @@ export function renderYearDeepBodyHtml(
     )
     .join('');
 
+  const mutagenTitle =
+    pack.level === 'month' ? '流月四化' : pack.level === 'decade' ? '大限四化' : '流年四化';
   const mutagen = pack.mutagen.length
     ? pack.mutagen
         .map(
@@ -66,7 +68,7 @@ export function renderYearDeepBodyHtml(
         </li>`,
         )
         .join('')
-    : '<li class="ziwei-year-deep-muted">本年四化暂缺</li>';
+    : `<li class="ziwei-year-deep-muted">${escapeHtml(mutagenTitle)}未能排出，请核对生辰</li>`;
 
   const related = pack.relatedPalaces
     .map(
@@ -115,7 +117,7 @@ export function renderYearDeepBodyHtml(
     </section>
 
     <section class="ziwei-year-deep-sec">
-      <h5>三、具体解释</h5>
+      <h5>三、${escapeHtml(mutagenTitle)}</h5>
       <ul class="ziwei-year-deep-hua-list">${mutagen}</ul>
     </section>
 

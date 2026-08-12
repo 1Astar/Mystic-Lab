@@ -140,6 +140,15 @@ export function renderLunarFlipScroll(
 
   return `
     <div class="xlr-lunar-calendar${convertedClass}" aria-label="公历转农历">
+      <svg class="xlr-cal-filters" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="xlr-knockout-black" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="
+            1 0 0 0 0
+            0 1 0 0 0
+            0 0 1 0 0
+            5 5 5 0 -0.35"/>
+        </filter>
+      </svg>
       <p class="xlr-lunar-status${flipped ? ' is-done' : ''}" id="xlr-converting" aria-live="polite">
         ${flipped ? '换算完成' : '正在换算…'}
       </p>

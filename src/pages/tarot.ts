@@ -35,9 +35,11 @@ import {
 import { resolveResumeFromStash } from '../journal/resume.ts';
 import { mergeReadingBackground } from '../life/profile-context.ts';
 import { navigate } from '../router.ts';
-import { draftFromTarot } from '../share/drafts.ts';
+import { TAROT_SHARE_POSTER_PATH } from '../share/cover.ts';
+import { draftFromTarot, draftGeneric } from '../share/drafts.ts';
 import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
 import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
 import {
@@ -184,6 +186,28 @@ export function renderTarot(root: HTMLElement): () => void {
   root.appendChild(page);
   attachPersonSwitcherToPage(page);
   document.body.appendChild(hintBar.el);
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'tarot',
+    surface: 'reading',
+    tujianPath: '/tarot/tujian',
+    draftShare: () => {
+      if (reading && drawnCards.length) {
+        return draftFromTarot({
+          cards: drawnCards,
+          reading,
+          question: question || '塔罗占问',
+        });
+      }
+      return draftGeneric({
+        system: 'tarot',
+        headline: '塔罗解读',
+        question: question || '塔罗占问',
+        summary: question ? `问题：${question}` : '正在塔罗解读。',
+        label: '塔罗',
+        invitePosterPath: TAROT_SHARE_POSTER_PATH,
+      });
+    },
+  });
 
   function syncGestureEnvBanner(): void {
     syncCameraGestureBanner(page, drawMode === 'gesture');
@@ -1947,6 +1971,7 @@ export function renderTarot(root: HTMLElement): () => void {
   window.addEventListener('pagehide', onPageHide);
 
   return () => {
+    disposeFloat();
     savePartialProgress();
     window.removeEventListener('pagehide', onPageHide);
     questionCoach?.destroy();

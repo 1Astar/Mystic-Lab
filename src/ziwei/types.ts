@@ -1,5 +1,6 @@
 import type { MajorStarId } from './stars.ts';
 
+/** 入口已合并；horizon 仅兼容旧调用，语义等同 map */
 export type ZiweiIntent = 'horizon' | 'map';
 
 export type StarSnap = {

@@ -1,4 +1,4 @@
-﻿/** 八字边看边问：概念本地答（不调 AI）——优先图鉴实体，禁止另写重复正文 */
+/** 八字边看边问：概念本地答（不调 AI）——优先图鉴实体，禁止另写重复正文 */
 import { STEM_LORE, BRANCH_LORE, WUXING_LORE, WUXING_ORDER } from './codex-lore.ts';
 import { ALL_STAR_CARDS } from './codex-tags.ts';
 import { answerFromCodexEntity } from './codex-entity-resolve.ts';

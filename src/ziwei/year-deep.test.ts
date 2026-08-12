@@ -13,6 +13,7 @@ const person = {
   birthMonth: '2',
   birthDay: '11',
   birthHour: '12',
+  birthPlace: '',
   lifeTags: [],
 } as PersonProfile;
 

@@ -24,6 +24,7 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
   page.innerHTML = `
     <div class="ly-topbar">
       <button type="button" class="back-link ly-home-back">← 返回 Mystic Lab</button>
+      <div class="ly-topbar-center"></div>
       <div class="ly-topbar-actions"></div>
     </div>
     <div class="ly-mode-bar"></div>
@@ -32,9 +33,10 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
 
   const body = page.querySelector<HTMLElement>('.ly-home-body')!;
   const modeBar = page.querySelector<HTMLElement>('.ly-mode-bar')!;
+  const center = page.querySelector<HTMLElement>('.ly-topbar-center')!;
   const actions = page.querySelector<HTMLElement>('.ly-topbar-actions')!;
 
-  mountPersonSwitcher(actions);
+  mountPersonSwitcher(center);
   mountLiuyaoSfxToggle(actions);
   mountLiuyaoModeSwitch(modeBar, {
     onChange: (mode) => paint(mode),

@@ -22,6 +22,8 @@ export type LabConceptPeekOpts = {
   term: string;
   /** 结构化分段；缺省则用 answerConcept 整段作「释义」 */
   tabs?: LabConceptTab[];
+  /** 默认打开的 tab id；缺省为第一项 */
+  initialTab?: string;
   answerConcept?: (q: string) => { answer: string; hit: boolean };
   onMiss?: (q: string) => void;
   /** 打开完整边看边问 */
@@ -88,6 +90,10 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
   if (!term || term === '—') return;
 
   const { tabs, hint } = resolveTabs(opts);
+  const initialId =
+    (opts.initialTab && tabs.some((t) => t.id === opts.initialTab)
+      ? opts.initialTab
+      : tabs[0]?.id) ?? '';
   const atlasBtn = opts.onOpenAtlas
     ? `<button type="button" class="lab-concept-peek-atlas" data-peek-atlas>看完整百科</button>`
     : '';
@@ -97,9 +103,9 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
       ? `<div class="lab-concept-peek-tabs" role="tablist" aria-label="释义分段">
           ${tabs
             .map(
-              (t, i) => `
-            <button type="button" class="lab-concept-peek-tab${i === 0 ? ' is-on' : ''}"
-              role="tab" aria-selected="${i === 0}" data-peek-tab="${escapeHtml(t.id)}">
+              (t) => `
+            <button type="button" class="lab-concept-peek-tab${t.id === initialId ? ' is-on' : ''}"
+              role="tab" aria-selected="${t.id === initialId}" data-peek-tab="${escapeHtml(t.id)}">
               ${escapeHtml(t.label)}
             </button>`,
             )
@@ -109,8 +115,8 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
 
   const panes = tabs
     .map(
-      (t, i) => `
-      <div class="lab-concept-peek-pane" data-peek-pane="${escapeHtml(t.id)}" ${i === 0 ? '' : 'hidden'}>
+      (t) => `
+      <div class="lab-concept-peek-pane" data-peek-pane="${escapeHtml(t.id)}" ${t.id === initialId ? '' : 'hidden'}>
         <p>${escapeHtml(t.body).replace(/\n/g, '<br>')}</p>
       </div>`,
     )

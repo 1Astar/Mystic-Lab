@@ -1,4 +1,5 @@
 import { renderSixGodIcon, SIX_GODS } from '../../xiaoliuren/six-gods.ts';
+import { CHINESE_HOURS } from '../../xiaoliuren/chinese-hour.ts';
 import { getLiurenPointCoords } from '../../xiaoliuren/liuren-points.ts';
 import { renderPalmPlate } from './palm-plate.ts';
 
@@ -52,28 +53,48 @@ export function renderHandPlate(activeIndex: number | null, dotIndex: number | n
 }
 
 export function renderHourTimeline(activeIndex: number): string {
-  const segments = [
-    [23, 1], [1, 3], [3, 5], [5, 7], [7, 9], [9, 11],
-    [11, 13], [13, 15], [15, 17], [17, 19], [19, 21], [21, 23],
-  ];
-  const names = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-
   return `
-    <div class="xlr-hour-timeline">
-      ${names
-        .map((name, i) => {
-          const [start, end] = segments[i];
-          const range = start > end ? `${start}:00–${end}:00` : `${String(start).padStart(2, '0')}:00–${String(end).padStart(2, '0')}:00`;
-          const active = i === activeIndex ? ' is-active' : '';
-          return `
-            <div class="xlr-hour-seg${active}">
-              <span class="xlr-hour-seg-name">${name}时</span>
+    <div class="xlr-hour-timeline" role="listbox" aria-label="十二时辰">
+      ${CHINESE_HOURS.map((h) => {
+        const active = h.index === activeIndex ? ' is-active' : '';
+        const range = h.rangeLabel.replace(' – ', '–');
+        return `
+            <button type="button" class="xlr-hour-seg${active}" role="option" data-hour-index="${h.index}" aria-selected="${h.index === activeIndex ? 'true' : 'false'}">
+              <span class="xlr-hour-seg-name">${h.name}时 <em>${h.alias}</em></span>
               <span class="xlr-hour-seg-range">${range}</span>
-            </div>`;
-        })
-        .join('')}
+            </button>`;
+      }).join('')}
     </div>
   `;
+}
+
+/** 点时辰格：更新记忆句 + 彩蛋说明，并同步表盘指针 */
+export function mountHourTimelineLore(
+  container: HTMLElement,
+  memoryEl?: HTMLElement | null,
+  onSelect?: (hourIndex: number) => void,
+): void {
+  const loreEl = container.querySelector<HTMLElement>('[data-shichen-lore]');
+  container.querySelectorAll<HTMLButtonElement>('.xlr-hour-seg[data-hour-index]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.hourIndex);
+      const hour = CHINESE_HOURS[idx];
+      if (!hour) return;
+      container.querySelectorAll('.xlr-hour-seg').forEach((seg) => {
+        const on = seg === btn;
+        seg.classList.toggle('is-active', on);
+        seg.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (memoryEl) {
+        memoryEl.textContent = `${hour.alias} · ${hour.memoryHint}`;
+      }
+      if (loreEl) {
+        loreEl.hidden = false;
+        loreEl.textContent = hour.lore;
+      }
+      onSelect?.(idx);
+    });
+  });
 }
 
 export { getLiurenPointCoords };

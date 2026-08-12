@@ -34,11 +34,28 @@ export type MirrorThemeCard = {
   changeNote: string;
 };
 
+export type MirrorYearRow = {
+  year: number;
+  age: number;
+  current: boolean;
+  /** 甲辰大运 · 偏财 */
+  baziDayun: string;
+  /** 乙巳流年 · 食神 */
+  baziLiunian: string;
+  ziweiPalace: string;
+  ziweiChip: string;
+  ziweiMutagen: string;
+  /** 这一年两边怎么对上看 */
+  compare: string;
+};
+
 export type MirrorComparePack = {
   personName: string;
   dayMasterBrief: string;
   soulBrief: string;
   themes: MirrorThemeCard[];
+  /** 流年时间轴（八字×紫微） */
+  timeline: MirrorYearRow[];
   headline: string;
   generatedAt: string;
 };

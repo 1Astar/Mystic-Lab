@@ -9,8 +9,12 @@ import {
 export type EnergyBar = {
   wx: WuXing;
   score: number;
-  /** 0–100 供环/柱 */
+  /** 0–100 供环/球大小（天性构成） */
   pct: number;
+  /** 月令旺衰 */
+  strength: SeasonLabel;
+  /** 点球：季节解释 */
+  seasonTip: string;
 };
 
 export type EnergyBalance = {
@@ -22,6 +26,8 @@ export type EnergyBalance = {
   remedy: string;
   /** 气象总喻，如「夏天的雷阵雨」 */
   weatherMeta: string;
+  /** 天平旁注 */
+  balanceHint: string;
 };
 
 const STRENGTH_SCORE: Record<SeasonLabel, number> = {
@@ -33,6 +39,23 @@ const STRENGTH_SCORE: Record<SeasonLabel, number> = {
 };
 
 const ORDER: WuXing[] = ['木', '火', '土', '金', '水'];
+
+/** 我克者（抬高自己时被削弱的一侧） */
+const KE_NEXT: Record<WuXing, WuXing> = {
+  木: '土',
+  火: '金',
+  土: '水',
+  金: '木',
+  水: '火',
+};
+
+const GROWTH_PLAIN: Record<WuXing, string> = {
+  木: '自我与生长感',
+  火: '表达与热度',
+  土: '包容与落地',
+  金: '边界与收口',
+  水: '冷静与流动',
+};
 
 const EXCESS_PLAIN: Record<WuXing, string> = {
   木: '「生长」能量偏满——想法多、伸展欲强，容易焦虑地想扩张',
@@ -58,16 +81,26 @@ const REMEDY: Record<WuXing, string> = {
   水: '补水不代表你真要一直喝水，而是提醒你保持冷静、多接触水边环境，甚至穿蓝色系——把情绪从过热里降下来。',
 };
 
+const SEASON_TIP: Record<SeasonLabel, (wx: WuXing) => string> = {
+  旺: (wx) =>
+    `盘上这季「${wx}」当令：天性又足，这股「${GROWTH_PLAIN[wx]}」现在最吃得开。`,
+  相: (wx) =>
+    `盘上这季「${wx}」有助力：适合借势用「${GROWTH_PLAIN[wx]}」，不必硬冲。`,
+  休: (wx) =>
+    `盘上这季「${wx}」在蓄力：天性不少，也宜慢热深耕，先养再亮。`,
+  囚: (wx) =>
+    `盘上这季「${wx}」受压：天性再多也要先找出口，别把「${GROWTH_PLAIN[wx]}」硬扛到底。`,
+  死: (wx) =>
+    `盘上这季「${wx}」入衰地——虽然天性「${wx}」不少，但这季更该歇着养根，别硬扩张。`,
+};
+
 function emptyScores(): Record<WuXing, number> {
   return { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
 }
 
-/** 五行构成分（月令旺衰 + 干支出现），供能量柱与调和色共用 */
-export function scoreChartWx(chart: BaziChart): Record<WuXing, number> {
+/** 天性构成分：只计干支出现（球大小） */
+export function scoreNatalWx(chart: BaziChart): Record<WuXing, number> {
   const scores = emptyScores();
-  for (const row of chart.season) {
-    scores[row.label] += STRENGTH_SCORE[row.strength] ?? 2;
-  }
   for (const p of chart.pillars) {
     if (p.empty || p.key === 'liunian') continue;
     const sw = STEM_WUXING[p.stem];
@@ -78,26 +111,62 @@ export function scoreChartWx(chart: BaziChart): Record<WuXing, number> {
   return scores;
 }
 
+/** 月令旺衰表 */
+export function seasonStrengthMap(chart: BaziChart): Record<WuXing, SeasonLabel> {
+  const map: Record<WuXing, SeasonLabel> = {
+    木: '休',
+    火: '休',
+    土: '休',
+    金: '休',
+    水: '休',
+  };
+  for (const row of chart.season) {
+    map[row.label] = row.strength;
+  }
+  return map;
+}
+
+/** 五行构成分（月令旺衰 + 干支出现），供调和色等共用 */
+export function scoreChartWx(chart: BaziChart): Record<WuXing, number> {
+  const scores = scoreNatalWx(chart);
+  for (const row of chart.season) {
+    scores[row.label] += STRENGTH_SCORE[row.strength] ?? 2;
+  }
+  return scores;
+}
+
+/** 上拖试探：抬高某一行时的杠杆提示 */
+export function energyLeverTip(raised: WuXing): string {
+  const hurt = KE_NEXT[raised];
+  return `如果你把「${raised}」的能量拖高，「${GROWTH_PLAIN[raised]}」会变强，但「${hurt}」（${GROWTH_PLAIN[hurt]}）会被削弱——先感到杠杆，再决定要不要真的加码。`;
+}
+
 /**
- * 能量平衡：图形化数据 + 短板调频文案。规则模板，无术语表。
+ * 能量平衡：天平数据 + 短板调频文案。规则模板，无术语表。
  */
 export function buildEnergyBalance(chart: BaziChart): EnergyBalance {
-  const raw = scoreChartWx(chart);
-  const vals = ORDER.map((wx) => raw[wx]);
+  const natal = scoreNatalWx(chart);
+  const seasons = seasonStrengthMap(chart);
+  const vals = ORDER.map((wx) => natal[wx]);
   const max = Math.max(...vals, 1);
   const min = Math.min(...vals);
   const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
 
-  const bars: EnergyBar[] = ORDER.map((wx) => ({
-    wx,
-    score: Math.round(raw[wx] * 10) / 10,
-    pct: Math.round((raw[wx] / max) * 100),
-  }));
+  const bars: EnergyBar[] = ORDER.map((wx) => {
+    const strength = seasons[wx];
+    return {
+      wx,
+      score: Math.round(natal[wx] * 10) / 10,
+      pct: Math.round((natal[wx] / max) * 100),
+      strength,
+      seasonTip: SEASON_TIP[strength](wx),
+    };
+  });
 
   const excess =
-    max >= avg + 1.2 ? ORDER.find((wx) => raw[wx] === max) ?? null : null;
+    max >= avg + 1.2 ? ORDER.find((wx) => natal[wx] === max) ?? null : null;
   const shortage =
-    min <= avg - 0.8 ? ORDER.find((wx) => raw[wx] === min) ?? null : null;
+    min <= avg - 0.8 ? ORDER.find((wx) => natal[wx] === min) ?? null : null;
 
   const parts: string[] = [];
   if (excess) parts.push(`你的八字中${EXCESS_PLAIN[excess]}。`);
@@ -126,6 +195,7 @@ export function buildEnergyBalance(chart: BaziChart): EnergyBalance {
     body: parts.join(''),
     remedy: REMEDY[remedyWx],
     weatherMeta,
+    balanceHint: '球大＝天性多；发灰＝盘上这季不得令。点看季节，上拖试杠杆。',
   };
 }
 

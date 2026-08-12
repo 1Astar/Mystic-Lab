@@ -27,6 +27,21 @@ import {
   type YearTrackItem,
 } from '../ziwei/time-scope.ts';
 import type { PalaceSnap, ZiweiChartView } from '../ziwei/types.ts';
+import {
+  choiceLabel,
+  getYearStance,
+  listYearTips,
+  resolveYearJi,
+  shouldAutoOpenYearStance,
+} from '../craft/year-stance.ts';
+import {
+  decadeUnlockLabel,
+  decadeUnlockState,
+  isDecadeUnlocked,
+  virtualAgeAt,
+  type DecadeUnlockState,
+} from '../ziwei/decade-map.ts';
+import { openYearStanceSheet } from './ziwei-year-stance-sheet.ts';
 type ExpandTab = 'read' | 'record';
 
 /** 流年横滑左右各扩几年（接近旧运限条） */
@@ -52,7 +67,12 @@ const LEVELS: Array<{ id: TimeScopeLevel; label: string; hint: string }> = [
   { id: 'hour', label: '流时', hint: '此刻时机' },
 ];
 
-function decadeChips(palaces: PalaceSnap[], selected?: string): string {
+function decadeChips(
+  palaces: PalaceSnap[],
+  selected?: string,
+  virtualAge = 0,
+  previewLocked?: string,
+): string {
   const rows = palaces
     .filter((p) => p.decadalRange)
     .slice()
@@ -61,13 +81,52 @@ function decadeChips(palaces: PalaceSnap[], selected?: string): string {
     .map((p) => {
       const [from, to] = p.decadalRange!;
       const gz = `${p.decadalStem ?? ''}${p.decadalBranch ?? ''}`;
-      const on = selected === p.name ? 'is-on' : '';
-      return `<button type="button" class="ziwei-tl-chip ${on}" data-decade="${escapeHtml(p.name)}" aria-pressed="${selected === p.name}">
-        <span>${from}–${to}</span>
-        <em>${escapeHtml(shortPalace(p.name))}${gz ? ` · ${escapeHtml(gz)}` : ''}</em>
+      const state = decadeUnlockState(from, to, virtualAge);
+      const on =
+        state === 'locked'
+          ? previewLocked === p.name
+            ? 'is-on'
+            : ''
+          : selected === p.name
+            ? 'is-on'
+            : '';
+      const stateClass =
+        state === 'locked'
+          ? 'is-locked'
+          : state === 'current'
+            ? 'is-current'
+            : 'is-cleared';
+      const lockHint =
+        state === 'locked' ? `<i class="ziwei-tl-lock" aria-hidden="true">锁</i>` : '';
+      return `<button type="button" class="ziwei-tl-chip ${stateClass} ${on}" data-decade="${escapeHtml(p.name)}" data-decade-state="${state}" aria-pressed="${Boolean(on)}" ${state === 'locked' ? 'aria-label="未解锁大限"' : ''}>
+        <span>${from}–${to}${lockHint}</span>
+        <em>${escapeHtml(shortPalace(p.name))}${gz ? ` · ${escapeHtml(gz)}` : ''}${
+          state === 'locked' ? ` · ${escapeHtml(decadeUnlockLabel(state, from, to))}` : ''
+        }</em>
       </button>`;
     })
     .join('');
+}
+
+function decadeLockedPreviewHtml(opts: {
+  palace: string;
+  ageFrom: number;
+  ageTo: number;
+  gz: string;
+}): string {
+  return `
+    <div class="ziwei-tl-pane is-locked-preview">
+      <p class="ziwei-tl-kicker">大限地图 · 未解锁</p>
+      <h3 class="ziwei-tl-title">大限 · ${escapeHtml(shortPalace(opts.palace) || '—')}${
+        opts.gz ? ` · ${escapeHtml(opts.gz)}` : ''
+      }</h3>
+      <p class="ziwei-tl-focus">虚岁 ${opts.ageFrom}–${opts.ageTo}</p>
+      <section class="ziwei-tl-block">
+        <h4>到岁再开</h4>
+        <p class="ziwei-tl-theme">${escapeHtml(decadeUnlockLabel('locked', opts.ageFrom, opts.ageTo))}</p>
+        <p class="ziwei-tl-theme-sub">这十年叙事包尚未开启。流年仍可照常查看；到虚岁 ${opts.ageFrom} 后再展开主题、四化与可能表现。</p>
+      </section>
+    </div>`;
 }
 
 function yearRailHtml(items: YearTrackItem[], selected?: number): string {
@@ -110,13 +169,15 @@ function dayRailHtml(selected?: number): string {
     .join('');
 }
 
-function decadeReadHtml(item: DecadeScopeItem): string {
+function decadeReadHtml(item: DecadeScopeItem, state: DecadeUnlockState): string {
   const possibles = item.possibles.map((p) => `<li>${escapeHtml(p)}</li>`).join('');
   const age =
     item.ageFrom && item.ageTo ? `虚岁 ${item.ageFrom}–${item.ageTo}` : '十年阶段';
+  const status =
+    state === 'current' ? '进行中' : state === 'unlocked' ? '已走过' : '十年阶段';
   return `
     <div class="ziwei-tl-pane">
-      <p class="ziwei-tl-kicker">十年阶段</p>
+      <p class="ziwei-tl-kicker">大限地图 · ${escapeHtml(status)}</p>
       <h3 class="ziwei-tl-title">大限 · ${escapeHtml(shortPalace(item.palace) || '—')}${
         item.gz ? ` · ${escapeHtml(item.gz)}` : ''
       }</h3>
@@ -144,15 +205,34 @@ function decadeReadHtml(item: DecadeScopeItem): string {
     </div>`;
 }
 
-function yearReadHtml(item: YearTrackItem): string {
+function yearReadHtml(
+  item: YearTrackItem,
+  personId: string,
+): string {
   const possibles = item.possibles
     .slice(0, 3)
     .map((p) => `<li>${escapeHtml(p)}</li>`)
     .join('');
+  const stance = getYearStance(personId, item.year);
+  const tips = listYearTips({ personId, year: item.year });
+  const tipHtml = tips.length
+    ? `<ul class="ziwei-ys-inline-tips">${tips
+        .map((t) => `<li>${escapeHtml(t.text)}</li>`)
+        .join('')}</ul>`
+    : '';
+  const stanceLine = stance
+    ? `当前立场：${choiceLabel(stance.choice)} · ${stance.mainlineTitle}`
+    : '尚未选择立场';
   return `
     <div class="ziwei-tl-pane">
       <p class="ziwei-tl-kicker">${escapeHtml(item.tenseLabel)}</p>
       <h3 class="ziwei-tl-title">${item.year}年｜${escapeHtml(item.tenseLabel)}</h3>
+      <section class="ziwei-tl-block ziwei-tl-stance">
+        <h4>流年剧情</h4>
+        <p class="ziwei-tl-theme-sub">${escapeHtml(stanceLine)}</p>
+        ${tipHtml}
+        <button type="button" class="ziwei-year-why" data-open-stance>流年剧情 ›</button>
+      </section>
       <section class="ziwei-tl-block">
         <h4>年度主题</h4>
         <p class="ziwei-tl-theme">${escapeHtml(yearThemeHeadline(item))}</p>
@@ -179,7 +259,13 @@ function monthReadHtml(year: number, monthItem: ReturnType<typeof buildMonthScop
   const possibles = monthItem.possibles.map((p) => `<li>${escapeHtml(p)}</li>`).join('');
   return `
     <div class="ziwei-tl-pane">
-      <h3 class="ziwei-tl-title">${year}年 · ${escapeHtml(monthItem.monthLabel)}</h3>
+      <h3 class="ziwei-tl-title">${year}年 · ${escapeHtml(monthItem.monthLabel)}${
+        monthItem.gz ? ` · ${escapeHtml(monthItem.gz)}` : ''
+      }</h3>
+      <section class="ziwei-tl-block">
+        <h4>本月推进</h4>
+        <p class="ziwei-tl-theme">${escapeHtml(monthItem.lead || monthItem.theme)}</p>
+      </section>
       <section class="ziwei-tl-block">
         <h4>本月主题</h4>
         <p class="ziwei-tl-theme">${escapeHtml(monthItem.theme)}</p>
@@ -189,7 +275,12 @@ function monthReadHtml(year: number, monthItem: ReturnType<typeof buildMonthScop
         <h4>可能表现</h4>
         <ul class="ziwei-tl-list">${possibles}</ul>
       </section>
-      <p class="ziwei-tl-meta">流月命｜${escapeHtml(shortPalace(monthItem.palace) || '—')}</p>
+      <p class="ziwei-tl-meta">流月命｜${escapeHtml(shortPalace(monthItem.palace) || '—')}${
+        monthItem.mutagenLine ? `　月四化｜${escapeHtml(monthItem.mutagenLine)}` : ''
+      }</p>
+      <p class="ziwei-tl-meta">对照流年命｜${escapeHtml(shortPalace(monthItem.yearPalace) || '—')}${
+        monthItem.yearMutagenLine ? `　年四化｜${escapeHtml(monthItem.yearMutagenLine)}` : ''
+      }</p>
       <button type="button" class="ziwei-year-why" data-open-deep>为什么这样判断 ›</button>
     </div>`;
 }
@@ -303,7 +394,7 @@ export type MountZiweiTimeLadderOpts = {
     sel: LimitBoardSelection,
     focus: TimeScopeLevel,
   ) => void;
-  /** 「为什么这样判断」→ 打开深度学习笔记抽屉 */
+  /** 「为什么这样判断」→ 打开笔记抽屉（推演依据） */
   onOpenDeep?: (ctx: ZiweiTimeLadderDeepCtx) => void;
 };
 
@@ -322,6 +413,8 @@ export function mountZiweiTimeLadder(
   const now = new Date();
   let level: TimeScopeLevel = 'year';
   let tab: ExpandTab = 'read';
+  let previewLockedPalace = '';
+  const virtAge = virtualAgeAt(opts.birthYear, now);
   let sel: LimitBoardSelection = {
     decadePalace:
       opts.initial?.decadePalace ??
@@ -331,6 +424,22 @@ export function mountZiweiTimeLadder(
     day: opts.initial?.day ?? Math.min(now.getDate(), 28),
     hour: opts.initial?.hour ?? getChineseHour(now).index,
   };
+
+  // 若初始大限落在未来锁区，回落到当前进行中的大限
+  {
+    const initName = sel.decadePalace || '';
+    const initP = opts.view.palaces.find((p) => p.name === initName);
+    if (initP?.decadalRange) {
+      const [from, to] = initP.decadalRange;
+      if (!isDecadeUnlocked(from, to, virtAge)) {
+        const current = opts.view.palaces.find((p) => {
+          if (!p.decadalRange) return false;
+          return decadeUnlockState(p.decadalRange[0], p.decadalRange[1], virtAge) === 'current';
+        });
+        if (current) sel = { ...sel, decadePalace: current.name };
+      }
+    }
+  }
 
   function rebuildYears(center = sel.year): void {
     yearItems = buildYearTrack({
@@ -380,21 +489,42 @@ export function mountZiweiTimeLadder(
 
   function contentHtml(): string {
     const yItem = currentYear();
-    const decadeRail = decadeChips(opts.view.palaces, sel.decadePalace);
+    const decadeRail = decadeChips(
+      opts.view.palaces,
+      sel.decadePalace,
+      virtAge,
+      previewLockedPalace,
+    );
     const yearRail = yearRailHtml(yearItems, sel.year);
 
     if (level === 'decade') {
+      if (previewLockedPalace) {
+        const p = opts.view.palaces.find((x) => x.name === previewLockedPalace);
+        const [from, to] = p?.decadalRange ?? [0, 0];
+        const gz = `${p?.decadalStem ?? ''}${p?.decadalBranch ?? ''}`;
+        return `
+        <div class="ziwei-tl-cascade" aria-label="大限">
+          ${cascadeRow('大限', decadeRail, 'is-decade')}
+        </div>
+        <div class="ziwei-tl-read">${decadeLockedPreviewHtml({
+          palace: previewLockedPalace,
+          ageFrom: from,
+          ageTo: to,
+          gz,
+        })}</div>`;
+      }
       const d = buildDecadeScope(
         opts.person,
         opts.view,
         opts.birthYear,
         sel.decadePalace || opts.view.soulPalace.name,
       );
+      const state = decadeUnlockState(d.ageFrom, d.ageTo, virtAge);
       return `
         <div class="ziwei-tl-cascade" aria-label="大限">
           ${cascadeRow('大限', decadeRail, 'is-decade')}
         </div>
-        <div class="ziwei-tl-read">${decadeReadHtml(d)}</div>`;
+        <div class="ziwei-tl-read">${decadeReadHtml(d, state)}</div>`;
     }
     if (level === 'month') {
       const m = buildMonthScope(opts.person, sel.year!, sel.month!);
@@ -440,7 +570,7 @@ export function mountZiweiTimeLadder(
           <button type="button" role="tab" class="ziwei-year-tab ${tab === 'read' ? 'is-on' : ''}" data-tab="read" aria-selected="${tab === 'read'}">当前时间内容</button>
           <button type="button" role="tab" class="ziwei-year-tab ${tab === 'record' ? 'is-on' : ''}" data-tab="record" aria-selected="${tab === 'record'}">我的记录</button>
         </div>
-        ${tab === 'read' ? yearReadHtml(yItem) : recordsHtml(opts.person.id, yItem.year)}
+        ${tab === 'read' ? yearReadHtml(yItem, opts.person.id) : recordsHtml(opts.person.id, yItem.year)}
       </div>`;
   }
 
@@ -463,6 +593,7 @@ export function mountZiweiTimeLadder(
       btn.addEventListener('click', () => {
         level = (btn.dataset.level as TimeScopeLevel) || 'year';
         tab = 'read';
+        if (level !== 'decade') previewLockedPalace = '';
         emit(level);
         paint();
       });
@@ -505,6 +636,16 @@ export function mountZiweiTimeLadder(
     host.querySelectorAll<HTMLButtonElement>('[data-decade]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const name = btn.dataset.decade ?? '';
+        const state = (btn.dataset.decadeState || 'unlocked') as DecadeUnlockState;
+        if (state === 'locked') {
+          previewLockedPalace = name;
+          if (level !== 'decade') level = 'decade';
+          tab = 'read';
+          // 不改 sel.decadePalace，不 emit 盘面叠限——只预告
+          paint();
+          return;
+        }
+        previewLockedPalace = '';
         sel = { ...sel, decadePalace: name };
         const p = opts.view.palaces.find((x) => x.name === name);
         if (p?.decadalRange) {
@@ -526,7 +667,16 @@ export function mountZiweiTimeLadder(
     });
 
     host.querySelector('[data-open-deep]')?.addEventListener('click', openDeep);
+    host.querySelector('[data-open-stance]')?.addEventListener('click', () => {
+      openYearStanceSheet({
+        person: opts.person,
+        year: sel.year ?? new Date().getFullYear(),
+        palaces: opts.view.palaces,
+        onDone: () => paint(),
+      });
+    });
     host.querySelector('[data-jump-year]')?.addEventListener('click', () => {
+      previewLockedPalace = '';
       const d = buildDecadeScope(
         opts.person,
         opts.view,
@@ -596,16 +746,63 @@ export function mountZiweiTimeLadder(
       host.querySelector<HTMLElement>('.ziwei-tl-chip.is-on') ??
       host.querySelector<HTMLElement>('.ziwei-tl-shichen.is-on');
     on?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+
+    maybeAutoOpenStance();
+  }
+
+  function maybeAutoOpenStance(): void {
+    if (level !== 'year' || tab !== 'read') return;
+    const year = sel.year ?? new Date().getFullYear();
+    const ji = resolveYearJi({
+      person: opts.person,
+      year,
+      palaces: opts.view.palaces,
+    });
+    if (
+      !shouldAutoOpenYearStance({
+        personId: opts.person.id,
+        year,
+        hasJi: Boolean(ji?.jiStar),
+      })
+    ) {
+      return;
+    }
+    // 避免同一次 paint 连环弹：下一帧再开
+    window.setTimeout(() => {
+      if (document.querySelector('.ziwei-year-stance-sheet')) return;
+      if (
+        !shouldAutoOpenYearStance({
+          personId: opts.person.id,
+          year,
+          hasJi: Boolean(ji?.jiStar),
+        })
+      ) {
+        return;
+      }
+      openYearStanceSheet({
+        person: opts.person,
+        year,
+        palaces: opts.view.palaces,
+        onDone: () => paint(),
+      });
+    }, 80);
   }
 
   paint();
   return {
     destroy: () => {
       document.querySelector('[data-ziwei-year-deep]')?.remove();
+      document.querySelector('.ziwei-year-stance-sheet')?.remove();
       host.innerHTML = '';
     },
     syncDecade: (palaceName: string) => {
       if (!palaceName || sel.decadePalace === palaceName) return;
+      const p = opts.view.palaces.find((x) => x.name === palaceName);
+      if (p?.decadalRange) {
+        const [from, to] = p.decadalRange;
+        if (!isDecadeUnlocked(from, to, virtAge)) return;
+      }
+      previewLockedPalace = '';
       sel = { ...sel, decadePalace: palaceName };
       paint();
     },

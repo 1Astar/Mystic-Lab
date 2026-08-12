@@ -1,10 +1,21 @@
 import type { BaziChart } from './cast.ts';
 
+export type ShenShaPlacement = {
+  name: string;
+  pillars: string[];
+};
+
 export type ShenShaMark = {
   /** UI 标签，如「先天贵人」 */
   label: string;
-  /** 传统名，折叠溯源用 */
+  /** 代表传统名（优先展示用） */
   traditional: string;
+  /** 本规则下命中的全部传统名 */
+  traditionals: string[];
+  /** 落柱标题，如 年柱 / 日柱 */
+  pillars: string[];
+  /** 传统名 × 落柱（用来源短句） */
+  placements: ShenShaPlacement[];
   /** 是否偏「需安抚」 */
   needsComfort: boolean;
   comfort: string;
@@ -76,34 +87,64 @@ const RULES: Rule[] = [
   },
 ];
 
-function collectTraditional(chart: BaziChart): string[] {
-  const out: string[] = [];
+/** 传统神煞名 → 落柱标题列表 */
+function collectTraditionalHits(chart: BaziChart): Map<string, string[]> {
+  const map = new Map<string, string[]>();
   for (const p of chart.pillars) {
     if (p.empty || p.key === 'liunian') continue;
     for (const s of p.shensha || []) {
       const t = s.trim();
-      if (t) out.push(t);
+      if (!t) continue;
+      const arr = map.get(t) ?? [];
+      if (!arr.includes(p.title)) arr.push(p.title);
+      map.set(t, arr);
     }
   }
-  return [...new Set(out)];
+  return map;
+}
+
+/** 印记来源短句（peek「来源」Tab）：月柱「天喜」 */
+export function markSourceBody(mark: ShenShaMark): string {
+  const bits: string[] = [];
+  for (const p of mark.placements) {
+    for (const pillar of p.pillars) {
+      bits.push(`${pillar}「${p.name}」`);
+    }
+  }
+  if (bits.length) return bits.join(' · ');
+  const name = mark.traditionals[0] ?? mark.traditional;
+  if (mark.pillars.length) {
+    return mark.pillars.map((pillar) => `${pillar}「${name}」`).join(' · ');
+  }
+  return name ? `本盘「${name}」` : mark.label;
 }
 
 /**
  * 神煞减量：最多 5 个，改名展示，凶向给安抚。
  */
 export function buildShenShaMarks(chart: BaziChart, limit = 5): ShenShaMark[] {
-  const present = collectTraditional(chart);
+  const hits = collectTraditionalHits(chart);
   const marks: ShenShaMark[] = [];
   const usedLabels = new Set<string>();
 
   for (const rule of RULES) {
-    const hit = rule.names.find((n) => present.includes(n));
-    if (!hit) continue;
+    const matched = rule.names.filter((n) => hits.has(n));
+    if (!matched.length) continue;
     if (usedLabels.has(rule.label)) continue;
     usedLabels.add(rule.label);
+    const placements: ShenShaPlacement[] = matched.map((n) => ({
+      name: n,
+      pillars: [...(hits.get(n) ?? [])],
+    }));
+    const pillars = [
+      ...new Set(placements.flatMap((p) => p.pillars)),
+    ];
     marks.push({
       label: rule.label,
-      traditional: hit,
+      traditional: matched[0]!,
+      traditionals: matched,
+      pillars,
+      placements,
       needsComfort: rule.needsComfort,
       comfort: rule.comfort,
       priority: rule.priority,

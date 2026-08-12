@@ -73,7 +73,7 @@ STAR_PM_CAPTURE_SECRET=你的StarPM收件密钥
 
 `/api/share` 需绑定 KV：`SHARE_KV`（或改用 D1）。本地 `npm run dev` 用内存，无需 KV。
 
-**Vercel**：前端在 `*.vercel.app` 时自动把分享 API 指到 Cloudflare Pages（`mystic-lab.pages.dev/api/share`），复用已绑的 `SHARE_KV`。也可用 `VITE_SHARE_API_URL` / `SHARE_UPSTREAM_BASE` 覆盖。  
+**Vercel / 正式域**（`*.vercel.app`、`mystic.starry-studio.cn`）：`vercel.json` 把 `/api/share`、`/api/mystic` **rewrite 代理**到 Cloudflare Pages；前端在这些宿主上也默认直连 `mystic-lab.pages.dev/api/share`（防 Functions 未挂上）。可用 `VITE_SHARE_API_URL` 覆盖。  
 结果页点 **「链接」** 或分享弹层「只复制链接」会生成 `/s/{id}` 深链；**复制浏览器地址栏不会加次数**。朋友打开深链看一会儿后双方可加次数。
 
 ## 自检

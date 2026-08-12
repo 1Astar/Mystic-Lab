@@ -35,6 +35,16 @@ describe('codex relations atlas', () => {
     expect(html).toContain('天干 · 五合');
   });
 
+  it('can skip stem pair lists when stem ring is shown', () => {
+    const html = renderRelationsAtlasHtml({
+      skipWuxingPairs: true,
+      skipBranchPairLists: true,
+      skipStemPairLists: true,
+    });
+    expect(html).not.toContain('天干 · 五合');
+    expect(html.trim()).toBe('');
+  });
+
   it('branch fragment includes 冲合', () => {
     const hits = relationsForBranch('子');
     expect(hits.some((h) => h.kind === '冲' && h.peers.includes('午'))).toBe(true);

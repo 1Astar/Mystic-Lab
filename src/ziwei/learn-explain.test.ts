@@ -194,4 +194,36 @@ describe('learn-explain', () => {
     });
     expect(chong.branchMap?.every((r) => r.kind === '冲')).toBe(true);
   });
+
+  it('covers 流日 / 流时 / 空宫 glossary and unknown-term fallback', () => {
+    const person = createSelfPerson({
+      ...EMPTY_PROFILE,
+      birthYear: '1996',
+      birthMonth: '8',
+      birthDay: '12',
+      birthHour: '8:37',
+    });
+    person.gender = 'female';
+    const view = castZiweiChart(person, { intent: 'map', year: 2026 });
+    if ('error' in view) return;
+
+    const day = buildLearnExplain(view, { kind: 'limit', term: '流日' });
+    expect(day.oneLiner).toMatch(/天|今天|主场/);
+    expect(day.oneLiner).not.toMatch(/后续会补全/);
+
+    const hour = buildLearnExplain(view, { kind: 'limit', term: '流时' });
+    expect(hour.oneLiner).toMatch(/时辰|时机/);
+
+    const empty = buildLearnExplain(view, { kind: 'structure', term: '空宫' });
+    expect(empty.oneLiner).toMatch(/主星|三方|对宫/);
+
+    const unknown = buildLearnExplain(view, {
+      kind: 'structure',
+      term: '未收录术语XYZ',
+      palaceName: '命宫',
+    });
+    expect(unknown.oneLiner).not.toMatch(/后续会补全/);
+    expect(unknown.oneLiner).toMatch(/结构用语|主星|四化/);
+    expect(unknown.traditional.length).toBeGreaterThan(8);
+  });
 });

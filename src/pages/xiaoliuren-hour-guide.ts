@@ -1,13 +1,13 @@
 import { navigate } from '../router.ts';
 import { formatHourMemory, getChineseHour, sectorPointerAngle, formatClockTime } from '../xiaoliuren/chinese-hour.ts';
 import { solarToLunar } from '../xiaoliuren/lunar.ts';
-import { renderHourTimeline } from '../ui/xiaoliuren/hand-plate.ts';
+import { mountHourTimelineLore, renderHourTimeline } from '../ui/xiaoliuren/hand-plate.ts';
 import {
   formatWeekday,
   mountShichenDialAnimation,
   renderShichenDial,
+  syncShichenDialToHour,
 } from '../ui/xiaoliuren/shichen-dial.ts';
-import { mountShichenTableLore, renderShichenTable } from '../ui/xiaoliuren/shichen-table.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 
 export function renderXiaoliurenHourGuide(root: HTMLElement): void {
@@ -29,7 +29,7 @@ export function renderXiaoliurenHourGuide(root: HTMLElement): void {
   const header = document.createElement('header');
   header.innerHTML = `
     <h1 class="page-title">时辰入门</h1>
-    <p class="page-subtitle">${formatClockTime(now)} 属${hour.label}（${hour.alias}） · 快速看懂十二时辰</p>
+    <p class="page-subtitle">${formatClockTime(now)} 属${hour.label}（${hour.alias}） · 点格看说明</p>
   `;
   page.append(header);
 
@@ -52,10 +52,14 @@ export function renderXiaoliurenHourGuide(root: HTMLElement): void {
   list.className = 'xlr-hour-guide-list';
   list.innerHTML = `
     <p class="xlr-hour-guide-now-memory">${formatHourMemory(hour)}</p>
-    ${renderShichenTable(hour.index)}
+    <p class="xlr-hour-guide-hint">点上方一时辰，指针会跟着转，并显示彩蛋说明</p>
+    <p class="xlr-shichen-lore xlr-hour-guide-lore" data-shichen-lore>${hour.lore}</p>
   `;
   page.append(list);
-  mountShichenTableLore(list);
+
+  mountHourTimelineLore(page, list.querySelector('.xlr-hour-guide-now-memory'), (idx) => {
+    syncShichenDialToHour(visual, idx);
+  });
 
   const btn = document.createElement('button');
   btn.type = 'button';

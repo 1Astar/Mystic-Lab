@@ -10,6 +10,12 @@ import {
 import { normalizeStatus } from '../ziwei/term-glossary.ts';
 import type { PalaceSnap, ZiweiChartView } from '../ziwei/types.ts';
 import { openZiweiLearnSheet } from './ziwei-learn-sheet.ts';
+import {
+  buildPlateAwakenCopy,
+  classifyPlateStar,
+  type PlateStarRef,
+} from '../craft/plate-awaken.ts';
+import { openPlateAwakenSheet } from '../craft/plate-awaken-sheet.ts';
 
 type LayerMode = 'sanfang' | 'feixing' | 'dizhi';
 
@@ -131,6 +137,7 @@ function palaceCellHtml(
   p: PalaceSnap,
   role: CellRole,
   limits: HoroscopeLimitSnap | null,
+  view: ZiweiChartView,
 ): string {
   const pos = BRANCH_GRID[p.earthlyBranch];
   const roleCls =
@@ -154,19 +161,44 @@ function palaceCellHtml(
     ? `<span class="ziwei-plate-marks" aria-hidden="true">${tags.join(' ')}</span>`
     : '';
 
+  const starStateCls = (ref: PlateStarRef) => {
+    const kind = classifyPlateStar(ref, view);
+    if (kind === 'origin') return 'is-awaken-origin';
+    if (kind === 'awakened') return 'is-awaken-lit';
+    return 'is-awaken-sealed';
+  };
+
   const majorRows =
     p.majors
       .map((s) => {
         const status = s.brightness ? normalizeStatus(s.brightness) : '';
+        const ref: PlateStarRef = { palace: p.name, star: s.name, isMajor: true };
+        const state = starStateCls(ref);
+        const lock = state === 'is-awaken-sealed' ? '<i class="ziwei-plate-lock" aria-hidden="true">🔒</i>' : '';
+        const karma =
+          isShaLike(s.name) || s.mutagen === '忌'
+            ? ' is-karma-star'
+            : '';
         const hua = s.mutagen
-          ? `<button type="button" class="ziwei-plate-hua is-hua-${escapeHtml(s.mutagen)}" data-plate-hua="${escapeHtml(s.mutagen)}" data-star-name="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}" aria-label="化${escapeHtml(s.mutagen)}">${escapeHtml(s.mutagen)}</button>`
+          ? (() => {
+              const mRef: PlateStarRef = {
+                palace: p.name,
+                star: s.name,
+                mutagenCard: `化${s.mutagen}`,
+                isMajor: true,
+              };
+              const mState = starStateCls(mRef);
+              const mLock = mState === 'is-awaken-sealed' ? '<i class="ziwei-plate-lock" aria-hidden="true">🔒</i>' : '';
+              const mKarma = s.mutagen === '忌' ? ' is-karma-star' : '';
+              return `<button type="button" class="ziwei-plate-hua is-hua-${escapeHtml(s.mutagen)} ${mState}${mKarma}" data-plate-hua="${escapeHtml(s.mutagen)}" data-star-name="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}" aria-label="化${escapeHtml(s.mutagen)}">${mLock}化${escapeHtml(s.mutagen)}</button>`;
+            })()
           : '';
         const statusBtn = status
           ? `<button type="button" class="ziwei-plate-status-hit is-status-${status}" data-plate-status="${escapeHtml(status)}" data-star-name="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}" aria-label="星曜状态：${escapeHtml(status)}"><span>${escapeHtml(status)}</span></button>`
           : '';
         return `
           <div class="ziwei-plate-star-row">
-            <button type="button" class="ziwei-plate-star is-major" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${escapeHtml(s.name)}</button>
+            <button type="button" class="ziwei-plate-star is-major ${state}${karma}" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${lock}${escapeHtml(s.name)}</button>
             <span class="ziwei-plate-star-tags">${hua}${statusBtn}</span>
           </div>`;
       })
@@ -178,10 +210,17 @@ function palaceCellHtml(
   const minors =
     showMinors.length > 0
       ? `<div class="ziwei-plate-minors">${showMinors
-          .map(
-            (s) =>
-              `<button type="button" class="ziwei-plate-star is-minor" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${escapeHtml(s.name)}</button>`,
-          )
+          .map((s) => {
+            const ref: PlateStarRef = {
+              palace: p.name,
+              star: s.name,
+              isMajor: false,
+            };
+            const state = starStateCls(ref);
+            const lock = state === 'is-awaken-sealed' ? '<i class="ziwei-plate-lock" aria-hidden="true">🔒</i>' : '';
+            const karma = isShaLike(s.name) ? ' is-karma-star' : '';
+            return `<button type="button" class="ziwei-plate-star is-minor ${state}${karma}" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${lock}${escapeHtml(s.name)}</button>`;
+          })
           .join('')}${
           more > 0
             ? `<button type="button" class="ziwei-plate-more" data-plate-open-palace="${escapeHtml(p.name)}">+${more}</button>`
@@ -226,6 +265,10 @@ function palaceCellHtml(
         <span class="ziwei-plate-gz">${escapeHtml(p.heavenlyStem)}${escapeHtml(p.earthlyBranch)}</span>
       </div>
     </div>`;
+}
+
+function isShaLike(name: string): boolean {
+  return ['擎羊', '陀罗', '火星', '铃星', '地空', '地劫'].includes(name);
 }
 
 function softFlyPath(from: Pt, to: Pt, self: boolean): string {
@@ -607,7 +650,7 @@ export function mountZiweiPlate(
       .map((br) => {
         const p = byBranch.get(br);
         if (!p) return '';
-        return palaceCellHtml(p, cellRole(p, rel, layer, dizhi), limits);
+        return palaceCellHtml(p, cellRole(p, rel, layer, dizhi), limits, view);
       })
       .join('');
 
@@ -725,26 +768,73 @@ export function mountZiweiPlate(
     });
 
     host.querySelectorAll<HTMLElement>('[data-plate-star]').forEach((el) => {
-      el.title = '点一下亮所在宫连线 · 再点看星曜释义';
+      const isSeries = el.classList.contains('is-series');
+      el.title = isSeries
+        ? '点一下亮所在宫连线 · 再点看星曜释义'
+        : '点星曜：本源已亮 / 试炼激活';
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         const palaceName = el.dataset.palaceName ?? '';
         const starName = el.dataset.plateStar ?? '';
-        const samePalace =
-          selected != null &&
-          !!palaceName &&
-          (selected.name === palaceName ||
-            selected.name.replace(/宫$/, '') === palaceName.replace(/宫$/, ''));
-        if (palaceName && !samePalace) {
-          selected = findPalace(palaceName);
-          if (layer === 'sanfang') showSanfangLines = true;
-          paint();
+
+        if (isSeries) {
+          const samePalace =
+            selected != null &&
+            !!palaceName &&
+            (selected.name === palaceName ||
+              selected.name.replace(/宫$/, '') === palaceName.replace(/宫$/, ''));
+          if (palaceName && !samePalace) {
+            selected = findPalace(palaceName);
+            if (layer === 'sanfang') showSanfangLines = true;
+            paint();
+            return;
+          }
+          openLearn({
+            kind: 'star',
+            starName,
+            palaceName: palaceName || undefined,
+          });
           return;
         }
-        openLearn({
-          kind: 'star',
-          starName,
-          palaceName: palaceName || undefined,
+
+        if (palaceName) {
+          selected = findPalace(palaceName);
+          if (layer === 'sanfang') showSanfangLines = true;
+        }
+        const isMajor = el.classList.contains('is-major');
+        const ref: PlateStarRef = {
+          palace: palaceName,
+          star: starName,
+          isMajor,
+        };
+        const kind = classifyPlateStar(ref, view);
+        const copy = buildPlateAwakenCopy(ref, kind);
+        paint();
+        openPlateAwakenSheet({
+          ref,
+          copy,
+          onDone: (result) => {
+            if (result === 'activate') {
+              paint();
+              return;
+            }
+            if (result === 'sanfang') {
+              selected = findPalace(palaceName) ?? selected;
+              layer = 'sanfang';
+              showSanfangLines = true;
+              paint();
+              return;
+            }
+            if (result === 'learn') {
+              openLearn({
+                kind: 'star',
+                starName,
+                palaceName: palaceName || undefined,
+              });
+              return;
+            }
+            paint();
+          },
         });
       });
     });
@@ -775,28 +865,60 @@ export function mountZiweiPlate(
     });
 
     host.querySelectorAll<HTMLElement>('[data-plate-hua]').forEach((el) => {
-      el.title = '点一下亮所在宫连线 · 再点看四化释义';
+      el.title = '点四化：试炼激活或查看本源';
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         const palaceName = el.dataset.palaceName ?? '';
         const hua = el.dataset.plateHua ?? '';
-        const samePalace =
-          selected != null &&
-          !!palaceName &&
-          (selected.name === palaceName ||
-            selected.name.replace(/宫$/, '') === palaceName.replace(/宫$/, ''));
-        // 盘内四化：未选该宫先切线；底部流年四化行无宫名 → 直接释义
-        if (palaceName && !samePalace) {
+        const starName = el.dataset.starName || el.dataset.mutagenStar || '';
+        if (palaceName) {
           selected = findPalace(palaceName);
           if (layer === 'sanfang') showSanfangLines = true;
-          paint();
+        }
+        // 底部流年四化行无宫名 → 直接释义
+        if (!palaceName) {
+          openLearn({
+            kind: 'mutagen',
+            term: `化${hua}`,
+            starName: starName || undefined,
+          });
           return;
         }
-        openLearn({
-          kind: 'mutagen',
-          term: `化${hua}`,
-          starName: el.dataset.starName || el.dataset.mutagenStar,
-          palaceName: palaceName || undefined,
+        const ref: PlateStarRef = {
+          palace: palaceName,
+          star: starName,
+          mutagenCard: `化${hua}`,
+          isMajor: true,
+        };
+        const kind = classifyPlateStar(ref, view);
+        const copy = buildPlateAwakenCopy(ref, kind);
+        paint();
+        openPlateAwakenSheet({
+          ref,
+          copy,
+          onDone: (result) => {
+            if (result === 'activate') {
+              paint();
+              return;
+            }
+            if (result === 'sanfang') {
+              selected = findPalace(palaceName) ?? selected;
+              layer = 'sanfang';
+              showSanfangLines = true;
+              paint();
+              return;
+            }
+            if (result === 'learn') {
+              openLearn({
+                kind: 'mutagen',
+                term: `化${hua}`,
+                starName: starName || undefined,
+                palaceName,
+              });
+              return;
+            }
+            paint();
+          },
         });
       });
     });

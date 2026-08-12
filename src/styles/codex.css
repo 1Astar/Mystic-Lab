@@ -172,8 +172,8 @@
 .codex-progress {
   margin: 0;
   padding: 14px 16px;
-  background: var(--gold-soft);
-  border: 1px solid rgba(255, 214, 166, 0.25);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
 }
 
@@ -183,7 +183,7 @@
 }
 
 .codex-progress-main strong {
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   font-size: 1.1rem;
 }
 
@@ -195,7 +195,7 @@
 }
 
 .codex-progress-sub strong {
-  color: var(--purple);
+  color: var(--gold-ink, var(--purple));
 }
 
 .codex-progress-suits {
@@ -226,22 +226,28 @@
 }
 
 .codex-progress-suit-count strong {
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .codex-progress-suit-bar {
   grid-column: 1 / -1;
   display: block;
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  /* 月白宣纸上不能用近白轨道，必须用墨色淡轨 + 金填充 */
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
   overflow: hidden;
 }
 
 .codex-progress-suit-bar i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, rgba(201, 168, 76, 0.55), rgba(255, 214, 166, 0.9));
+  min-width: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--gold)),
+    var(--gold)
+  );
   border-radius: inherit;
 }
 
@@ -323,6 +329,12 @@
   display: flex;
   gap: 8px;
   margin: 16px 0 12px;
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  padding: 8px 0;
+  background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .codex-tabs button {
@@ -331,16 +343,17 @@
   font: inherit;
   font-size: 0.8rem;
   color: var(--ink-muted);
-  background: var(--bg-panel);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 999px;
   cursor: pointer;
 }
 
 .codex-tabs button.is-active {
-  color: var(--gold);
-  border-color: var(--gold);
-  background: var(--gold-soft);
+  color: var(--gold-ink, var(--gold));
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-1));
+  font-weight: 600;
 }
 
 .codex-grid {
@@ -365,8 +378,8 @@
   justify-content: flex-start;
   gap: 4px;
   font: inherit;
-  color: inherit;
-  background: var(--bg-panel);
+  color: var(--ink);
+  background: var(--surface-1);
   border: 1px solid var(--line);
   border-radius: 10px;
   cursor: pointer;
@@ -391,9 +404,9 @@
   padding: 2px 6px;
   font-size: 0.52rem;
   letter-spacing: 0.04em;
-  color: var(--ink);
-  background: rgba(11, 11, 20, 0.72);
-  border: 1px solid rgba(255, 214, 166, 0.25);
+  color: var(--gold-ink, var(--ink));
+  background: color-mix(in srgb, var(--surface-1) 88%, var(--gold-soft));
+  border: 1px solid var(--line);
   border-radius: 999px;
   pointer-events: none;
 }
@@ -479,33 +492,30 @@
 
 .codex-cell.is-locked {
   cursor: pointer;
-  background: rgba(20, 18, 32, 0.85);
-  border-color: rgba(201, 168, 76, 0.22);
-  box-shadow:
-    0 0 0 1px rgba(201, 168, 76, 0.12),
-    0 0 18px rgba(201, 168, 76, 0.12);
+  background: var(--surface-2);
+  border-color: var(--line);
+  box-shadow: none;
 }
 
 .codex-cell.is-locked .codex-cell-img {
-  filter: grayscale(1) brightness(0.55);
-  opacity: 0.45;
+  filter: grayscale(0.55) brightness(0.92);
+  opacity: 0.72;
 }
 
 .codex-cell.is-locked .codex-name {
-  color: var(--ink-muted);
-  opacity: 0.65;
+  color: var(--ink);
+  opacity: 0.9;
 }
 
 .codex-cell.is-locked:hover {
-  border-color: rgba(255, 214, 166, 0.35);
-  box-shadow:
-    0 0 0 1px rgba(255, 214, 166, 0.2),
-    0 0 22px rgba(255, 214, 166, 0.18);
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+  box-shadow: none;
+  background: color-mix(in srgb, var(--gold-soft) 40%, var(--surface-2));
 }
 
 .codex-cell.is-locked:hover .codex-cell-img {
-  filter: grayscale(0.85) brightness(0.65);
-  opacity: 0.55;
+  filter: grayscale(0.35) brightness(0.96);
+  opacity: 0.85;
 }
 
 .codex-cell-seal {
@@ -530,8 +540,8 @@
   font-size: 0.48rem;
   line-height: 1.25;
   text-align: center;
-  color: var(--gold);
-  text-shadow: 0 1px 4px color-mix(in srgb, var(--bg-deep) 85%, transparent);
+  color: var(--gold-ink, var(--gold));
+  text-shadow: none;
   pointer-events: none;
 }
 
@@ -566,8 +576,8 @@
   font-size: 0.5rem;
   line-height: 1.3;
   text-align: center;
-  color: var(--gold);
-  opacity: 0.88;
+  color: var(--ink-muted);
+  opacity: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -575,7 +585,7 @@
 
 .codex-cell.is-locked .codex-cell-role {
   color: var(--ink-muted);
-  opacity: 0.75;
+  opacity: 0.92;
 }
 
 .codex-detail-role {
@@ -1573,17 +1583,17 @@
   padding: 12px 12px;
   text-align: left;
   font: inherit;
-  color: inherit;
-  background: linear-gradient(145deg, rgba(46, 27, 75, 0.7), rgba(26, 18, 48, 0.85));
-  border: 1px solid rgba(255, 214, 166, 0.22);
+  color: var(--ink);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
 
 .codex-learn-card:hover {
-  border-color: rgba(255, 214, 166, 0.4);
-  background: rgba(255, 214, 166, 0.06);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 55%, var(--surface-1));
 }
 
 .codex-learn-icon {
@@ -1603,7 +1613,8 @@
 
 .codex-learn-title {
   font-size: 0.82rem;
-  color: var(--gold);
+  font-weight: 600;
+  color: var(--gold-ink, var(--gold));
 }
 
 .codex-learn-desc {
@@ -1616,7 +1627,7 @@
   flex-shrink: 0;
   font-size: 0.85rem;
   color: var(--ink-muted);
-  opacity: 0.5;
+  opacity: 0.75;
   align-self: center;
 }
 
@@ -1944,7 +1955,7 @@
 .codex-section-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   letter-spacing: 0.04em;
   margin-bottom: 10px;
 }
@@ -2391,14 +2402,15 @@
 .codex-world-intro {
   padding: 16px;
   border-radius: var(--radius);
-  background: linear-gradient(145deg, rgba(46, 27, 75, 0.6), rgba(26, 18, 48, 0.9));
-  border: 1px solid rgba(255, 214, 166, 0.2);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   text-align: center;
+  color: var(--ink);
 }
 
 .codex-world-title {
   font-size: 1.1rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   margin-bottom: 14px;
 }
 
@@ -2422,8 +2434,8 @@
 
 .codex-world-arrow {
   font-size: 1rem;
-  color: var(--gold);
-  opacity: 0.7;
+  color: var(--gold-ink, var(--gold));
+  opacity: 0.85;
 }
 
 .codex-world-hubs {
@@ -2434,7 +2446,7 @@
 
 .codex-hub-label {
   font-size: 0.76rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   margin-bottom: 8px;
 }
 
@@ -2446,17 +2458,17 @@
   padding: 14px 16px;
   text-align: left;
   font: inherit;
-  color: inherit;
-  background: var(--bg-panel);
-  border: 1px solid rgba(255, 214, 166, 0.25);
+  color: var(--ink);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
 
 .codex-hub-card:hover {
-  border-color: rgba(255, 214, 166, 0.45);
-  background: rgba(255, 214, 166, 0.04);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 50%, var(--surface-1));
 }
 
 .codex-hub-icon {
@@ -2472,7 +2484,7 @@
 
 .codex-hub-text strong {
   font-size: 0.9rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .codex-hub-text span {
@@ -2482,7 +2494,7 @@
 
 .codex-hub-go {
   font-size: 0.78rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .codex-hub-suits {
@@ -2504,16 +2516,17 @@
   padding: 12px;
   text-align: left;
   font: inherit;
-  color: inherit;
-  background: var(--bg-panel);
+  color: var(--ink);
+  background: var(--surface-1);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
 
 .codex-hub-suit:hover {
-  border-color: rgba(255, 214, 166, 0.3);
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 50%, var(--surface-1));
 }
 
 .codex-hub-suit-icon {
@@ -2528,6 +2541,7 @@
 
 .codex-hub-suit-text strong {
   font-size: 0.82rem;
+  color: var(--gold-ink, var(--gold));
 }
 
 .codex-hub-suit-text span {
@@ -2887,4 +2901,79 @@
 .suit-quiz-next {
   margin-top: 10px;
   width: 100%;
+}
+
+/* —— 月白：图鉴入口 / 塔罗世界 / 未解锁牌 / 进度条（强制可读） —— */
+html[data-theme='moon'] .codex-learn-card,
+html[data-theme='moon'] .codex-world-intro,
+html[data-theme='moon'] .codex-hub-card,
+html[data-theme='moon'] .codex-hub-suit,
+html[data-theme='moon'] .codex-cell {
+  background: var(--surface-1) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='moon'] .codex-cell.is-locked {
+  background: var(--surface-2) !important;
+}
+
+html[data-theme='moon'] .codex-learn-title,
+html[data-theme='moon'] .codex-world-title,
+html[data-theme='moon'] .codex-section-label,
+html[data-theme='moon'] .codex-hub-label,
+html[data-theme='moon'] .codex-hub-text strong,
+html[data-theme='moon'] .codex-hub-go,
+html[data-theme='moon'] .codex-hub-suit-text strong,
+html[data-theme='moon'] .codex-cell-tease,
+html[data-theme='moon'] .codex-progress-main strong,
+html[data-theme='moon'] .codex-progress-suit-count strong {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .codex-learn-desc,
+html[data-theme='moon'] .codex-world-block p,
+html[data-theme='moon'] .codex-hub-text span,
+html[data-theme='moon'] .codex-cell-role,
+html[data-theme='moon'] .codex-cell.is-locked .codex-cell-role {
+  color: var(--ink-muted) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme='moon'] .codex-name,
+html[data-theme='moon'] .codex-cell.is-locked .codex-name,
+html[data-theme='moon'] .codex-world-block h3 {
+  color: var(--ink) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme='moon'] .codex-progress {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme='moon'] .codex-progress-suit-bar {
+  background: color-mix(in srgb, var(--ink) 22%, transparent) !important;
+  height: 6px !important;
+}
+
+html[data-theme='moon'] .codex-progress-suit-bar i {
+  background: linear-gradient(
+    90deg,
+    var(--gold-ink, var(--gold)),
+    var(--gold)
+  ) !important;
+}
+
+html[data-theme='moon'] .codex-cell-seal {
+  border-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 45%, var(--line)) !important;
+  box-shadow:
+    inset 0 0 10px color-mix(in srgb, var(--gold) 18%, transparent),
+    0 0 8px color-mix(in srgb, var(--gold) 12%, transparent) !important;
+}
+
+html[data-theme='moon'] .codex-cell.is-locked .codex-cell-img {
+  filter: grayscale(0.45) brightness(0.94) !important;
+  opacity: 0.78 !important;
 }

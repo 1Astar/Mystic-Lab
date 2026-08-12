@@ -5,8 +5,7 @@
 import { COMBO_LORE } from './combo-lore.ts';
 import { getPalaceLore } from './palace-lore.ts';
 import { sanfangSizheng, branchLinksForPalace } from './palace-relations.ts';
-import { getMinorStarLore } from './minor-star-lore.ts';
-import { getShenshaLore } from './shensha-lore.ts';
+import { resolveDecoStarLore } from './shensha-resolve.ts';
 import { getStarProfile } from './star-profiles.ts';
 import { getStarLore, mutagenToCardId } from './stars.ts';
 import {
@@ -77,6 +76,8 @@ export type LearnExplain = {
     toPalace: string;
     effect: string;
   }>;
+  /** 神煞等：跳图鉴同源条目 */
+  atlasHint?: { path: string; label: string };
 };
 
 function palaceKey(name: string): string {
@@ -345,17 +346,25 @@ function buildTermExplain(
 ): LearnExplain {
   const g = getGlossaryByName(termName);
   if (!g) {
+    const deco = resolveDecoStarLore(termName);
+    if (deco) {
+      return buildStarExplain(view, termName, palaceName);
+    }
     return {
       title: termName,
-      subtitle: '',
+      subtitle: TERM_CATEGORY_LABEL.structure,
       category: 'structure',
       categoryLabel: TERM_CATEGORY_LABEL.structure,
-      oneLiner: `${termName}：盘面术语，后续会补全释义。`,
-      traditional: '',
-      inChart: '可先结合当前点亮的宫位与星曜阅读。',
+      oneLiner: `${termName}：盘面结构用语。先看它落在哪宫、同宫主星是什么，再叠四化与三方四正。`,
+      traditional:
+        '词条仍在扩充。陌生神煞/术语名不要单独当吉凶判决；以宫职主题 + 主星组合为主，它只作细部色调。',
+      inChart: palaceName
+        ? `你正在「${palaceName}」语境下点到「${termName}」。可先读该宫主题与主星，再回来对照这个词。`
+        : '可先结合当前点亮的宫位与主星阅读；需要时再到图鉴神煞桶核对同名条目。',
       related: [
         rel('三方四正', 'structure', { term: '三方四正', kind: 'structure' }),
         rel('庙旺落陷', 'status', { term: '庙旺落陷', kind: 'status' }),
+        rel('四化', 'mutagen', { term: '四化', kind: 'mutagen' }),
       ],
     };
   }
@@ -459,9 +468,7 @@ function buildStarExplain(
 ): LearnExplain {
   const profile = getStarProfile(starName);
   const lore = getStarLore(starName);
-  const minor = getMinorStarLore(starName);
-  const shensha = getShenshaLore(starName);
-  const deco = minor ?? shensha;
+  const deco = resolveDecoStarLore(starName);
   const palace =
     (palaceName ? findPalace(view, palaceName) : undefined) ??
     findStarPalace(view, starName);
@@ -477,10 +484,11 @@ function buildStarExplain(
   const traditional = lore
     ? `${lore.portrait}\n${lore.trait}`
     : profile?.metaphor ||
-      (minor?.traditional ??
-        (shensha
-          ? `${shensha.traditional}\n\n何时用：${shensha.when}`
-          : '')) ||
+      (deco
+        ? deco.when
+          ? `${deco.traditional}\n\n何时用：${deco.when}`
+          : deco.traditional
+        : '') ||
       '本星为盘面神煞/杂曜，图鉴正在补全。先看落宫主题与同宫主星，再把它当细部色调。';
 
   let inChart = `盘面尚未定位到「${starName}」的落宫。`;
@@ -493,11 +501,12 @@ function buildStarExplain(
     );
     const palaceLore = getPalaceLore(palace.name);
     if (deco && !profile && !lore) {
-      const tag = minor ? `杂曜·${minor.epithet}` : `神煞·${shensha!.epithet}`;
+      const tag =
+        deco.kind === 'minor' ? `杂曜·${deco.epithet}` : `神煞·${deco.epithet}`;
       inChart = `${starName}（${tag}）落在${palace.name}${
         palaceLore?.hint ? `「${palaceLore.hint}」` : ''
       }。力轻于主星，先读同宫主星与三方四正，再叠这层色调。`;
-      if (shensha?.when) inChart += `\n语境：${shensha.when}。`;
+      if (deco.when) inChart += `\n语境：${deco.when}。`;
     } else {
       inChart = `${starName}落入${palace.name}，说明「${
         profile?.keywords.slice(0, 3).join('、') || oneLiner.replace(/^[^：]*：/, '').slice(0, 24)
@@ -539,6 +548,12 @@ function buildStarExplain(
     inChart,
     related,
     elementLabel,
+    atlasHint: deco?.shenshaId
+      ? {
+          path: `/ziwei/tujian?bucket=shensha&shensha=${encodeURIComponent(deco.shenshaId)}`,
+          label: '打开图鉴同源条目',
+        }
+      : undefined,
     statusLink: status
       ? {
           status,
@@ -640,6 +655,8 @@ export function buildLearnExplain(view: ZiweiChartView, focus: LearnFocus): Lear
   if (focus.term || kind === 'structure' || kind === 'mutagen' || kind === 'limit') {
     const name = focus.term ?? focus.palaceName ?? focus.starName ?? '三方四正';
     if (getStarLore(name) && !getGlossaryByName(name))
+      return buildStarExplain(view, name, focus.palaceName);
+    if (resolveDecoStarLore(name) && !getGlossaryByName(name))
       return buildStarExplain(view, name, focus.palaceName);
     if ((getPalaceLore(name) || getPalaceLore(name.replace(/宫$/, ''))) && !getGlossaryByName(name))
       return buildPalaceExplain(view, name);

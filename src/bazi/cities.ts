@@ -59,8 +59,8 @@ export type PlaceResolve = {
   note: string;
 };
 
-export function resolveBirthPlaceLng(place: string): PlaceResolve {
-  const raw = place.trim();
+export function resolveBirthPlaceLng(place: string | null | undefined): PlaceResolve {
+  const raw = (place ?? '').trim();
   if (!raw) {
     return {
       matched: false,

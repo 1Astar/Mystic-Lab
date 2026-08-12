@@ -20,6 +20,8 @@ export type ShareDraft = {
   visual: ShareVisual;
   aiText?: string;
   brandSlogan?: string;
+  /** 指定 Lab 封面海报（如紫微）；缺省随机池 */
+  invitePosterPath?: string;
 };
 
 export type ShareSheetMode = 'save' | 'share' | 'invite';
@@ -58,6 +60,7 @@ export async function ensureShareDeepLink(draft: ShareDraft): Promise<string> {
     visual: draft.visual,
     includeAi: false,
     brandSlogan: draft.brandSlogan || '答案不在牌里，在你心里。',
+    invitePosterPath: draft.invitePosterPath,
   });
   const url = shareDeepUrl(snap.id);
   try {
@@ -211,6 +214,7 @@ export function openShareSheet(
       <p class="ms-share-status" data-ms-status hidden></p>
       <div class="ms-share-actions" data-ms-pre>
         <button type="button" class="btn ms-share-go" data-ms-go>${escapeHtml(copy.primary)}</button>
+        <button type="button" class="ms-share-copy-btn" data-ms-copy-link>复制分享链接</button>
       </div>
       <div class="ms-share-done" data-ms-done hidden>
         <div class="ms-flip" data-ms-flip tabindex="0" role="button" aria-label="点一下翻转正反面">
@@ -224,6 +228,7 @@ export function openShareSheet(
           </div>
         </div>
         <p class="ms-share-hint" data-ms-flip-hint>点一下翻转 · 长按当前面保存</p>
+        <button type="button" class="ms-share-link-tap" data-ms-copy-link-done>复制分享链接</button>
       </div>
     </div>
   `;
@@ -266,8 +271,51 @@ export function openShareSheet(
     status.textContent = t;
   };
 
+  const linkBtns = () =>
+    modal.querySelectorAll<HTMLButtonElement>('[data-ms-copy-link], [data-ms-copy-link-done]');
+
   const setBusy = (busy: boolean) => {
     goBtn.disabled = busy;
+    linkBtns().forEach((b) => {
+      b.disabled = busy;
+    });
+  };
+
+  const markLinkCopied = (ok: boolean) => {
+    linkBtns().forEach((b) => {
+      b.classList.toggle('is-copied', ok);
+      if (b.dataset.msCopyLinkDone !== undefined || b.hasAttribute('data-ms-copy-link-done')) {
+        b.textContent = ok ? '已复制链接' : '复制分享链接';
+      } else {
+        b.textContent = ok ? '已复制' : '复制分享链接';
+      }
+    });
+  };
+
+  const copyLink = async () => {
+    setStatus('正在生成分享链接…');
+    setBusy(true);
+    try {
+      // 邀请图模式优先站首页；其余用可加次数深链 /s/{id}
+      if (isLabInvite) {
+        const home = `${location.origin}/`;
+        await navigator.clipboard.writeText(home);
+        deepUrl = home;
+        markLinkCopied(true);
+        setStatus('已复制邀请链接（进站首页）');
+      } else {
+        const url = await copyShareDeepLink(draft);
+        deepUrl = url;
+        markLinkCopied(true);
+        setStatus('已复制分享链接，发给朋友即可打开');
+      }
+      window.setTimeout(() => markLinkCopied(false), 2200);
+    } catch (err) {
+      markLinkCopied(false);
+      setStatus(shareFailMessage(err));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const buildCreateBody = (): ShareCreateBody => ({
@@ -282,6 +330,7 @@ export function openShareSheet(
     includeAi: !isLabInvite && includeAi && hasAi,
     aiText: !isLabInvite && includeAi && hasAi ? draft.aiText : undefined,
     brandSlogan: draft.brandSlogan || '答案不在牌里，在你心里。',
+    invitePosterPath: draft.invitePosterPath,
   });
 
   const generate = async (opts?: { quiet?: boolean }) => {
@@ -301,7 +350,13 @@ export function openShareSheet(
     } catch {
       /* ignore */
     }
-    const pair = await renderShareCoverPair(snap, deepUrl);
+    const pair = await renderShareCoverPair(
+      {
+        ...snap,
+        invitePosterPath: draft.invitePosterPath || snap.invitePosterPath,
+      },
+      deepUrl,
+    );
     frontUrl = pair.front;
     backUrl = pair.back;
     frontImg.src = frontUrl;
@@ -405,6 +460,12 @@ export function openShareSheet(
     void generate().catch((err) => {
       setBusy(false);
       setStatus(shareFailMessage(err));
+    });
+  });
+
+  modal.querySelectorAll('[data-ms-copy-link], [data-ms-copy-link-done]').forEach((el) => {
+    el.addEventListener('click', () => {
+      void copyLink();
     });
   });
 

@@ -1,18 +1,24 @@
 import type { ShareClaimResult, ShareCreateBody, ShareSnapshot } from './types.ts';
 
-/** Cloudflare 已绑 SHARE_KV；Vercel 静态站本地 /api/share 常 404，默认回落到 CF */
+/** Cloudflare 已绑 SHARE_KV；Vercel/正式域同源 /api/share 常未挂 Functions，回落到 CF */
 const CF_SHARE_API = 'https://mystic-lab.pages.dev/api/share';
+
+function needsCloudflareShareFallback(host: string): boolean {
+  return (
+    host.endsWith('.vercel.app') ||
+    host === 'vercel.app' ||
+    host.endsWith('.starry-studio.cn') ||
+    host === 'starry-studio.cn'
+  );
+}
 
 function resolveShareApiBase(): string {
   const fromEnv = String(import.meta.env.VITE_SHARE_API_URL || '')
     .trim()
     .replace(/\/$/, '');
   if (fromEnv) return fromEnv;
-  if (typeof location !== 'undefined') {
-    const host = location.hostname;
-    if (host.endsWith('.vercel.app') || host === 'vercel.app') {
-      return CF_SHARE_API;
-    }
+  if (typeof location !== 'undefined' && needsCloudflareShareFallback(location.hostname)) {
+    return CF_SHARE_API;
   }
   return '/api/share';
 }

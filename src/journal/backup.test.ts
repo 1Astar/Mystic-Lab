@@ -202,4 +202,157 @@ describe('journey backup', () => {
       /不是 Mystic Lab/,
     );
   });
+
+  it('exports bazi/ziwei play progress and reading notes', () => {
+    const storage = mockStorage({
+      'mystic-lab-bazi-codex': '{"entries":[{"id":"wood"}],"metTags":["天乙"],"updatedAt":"t"}',
+      'mystic-lab-ziwei-codex': '{"entries":[{"starId":"ziwei"}],"updatedAt":"t"}',
+      'mystic-lab-craft-xp-v1': '{"xp":120,"level":2,"checked":["2026-W01:q1"],"updatedAt":"t"}',
+      'mystic.ziwei.yearVerify.v1': '{"self:2026":["跳槽"]}',
+      'mystic.ziwei.dayVerify.v1': '{"self:2026-8-11":["顺利"]}',
+      'mystic-lab-bazi-partner': '{"nickname":"伴侣"}',
+      'mystic-lab.reading-notes.bazi.self': '{"text":"八字笔记"}',
+      'mystic-lab.ziwei-ai-deep.self': '紫微深度解读正文',
+      'mystic-lab.bazi-ai-deep.self': '八字深度解读正文',
+      'mystic.liuyao.hexGuide.favorites.v1': '["乾"]',
+      'mystic-ly-ask-vault': '[{"id":"v1"}]',
+      'mystic-lab-ai-quota-v1': '{"deepLeft":2}',
+      'mystic.bazi.reading.q': '临时问句',
+    });
+    const backup = buildBackupPayload(storage);
+    expect(backup.keys['mystic-lab-bazi-codex']).toContain('wood');
+    expect(backup.keys['mystic-lab-ziwei-codex']).toContain('ziwei');
+    expect(backup.keys['mystic-lab-craft-xp-v1']).toContain('"xp":120');
+    expect(backup.keys['mystic.ziwei.yearVerify.v1']).toContain('跳槽');
+    expect(backup.keys['mystic.ziwei.dayVerify.v1']).toContain('顺利');
+    expect(backup.keys['mystic-lab-bazi-partner']).toContain('伴侣');
+    expect(backup.keys['mystic-lab.reading-notes.bazi.self']).toContain('八字笔记');
+    expect(backup.keys['mystic-lab.ziwei-ai-deep.self']).toBe('紫微深度解读正文');
+    expect(backup.keys['mystic-lab.bazi-ai-deep.self']).toBe('八字深度解读正文');
+    expect(backup.keys['mystic.liuyao.hexGuide.favorites.v1']).toContain('乾');
+    expect(backup.keys['mystic-ly-ask-vault']).toContain('v1');
+    expect(backup.keys['mystic-lab-ai-quota-v1']).toContain('deepLeft');
+    expect(backup.keys['mystic.bazi.reading.q']).toBeUndefined();
+  });
+
+  it('merge mode unions bazi/ziwei codex and craft xp', () => {
+    const storage = mockStorage({
+      'mystic-lab-bazi-codex': JSON.stringify({
+        entries: [
+          {
+            id: 'wood',
+            kind: 'wuxing',
+            unlockedAt: '2026-06-01T00:00:00.000Z',
+            meetCount: 1,
+          },
+        ],
+        metTags: ['天乙'],
+        updatedAt: '2026-06-01T00:00:00.000Z',
+      }),
+      'mystic-lab-ziwei-codex': JSON.stringify({
+        entries: [
+          {
+            starId: 'ziwei',
+            unlockedAt: '2026-06-01T00:00:00.000Z',
+            meetCount: 1,
+            lastPalace: '命宫',
+          },
+        ],
+        updatedAt: '2026-06-01T00:00:00.000Z',
+      }),
+      'mystic-lab-craft-xp-v1': JSON.stringify({
+        xp: 50,
+        level: 1,
+        checked: ['2026-W01:q1'],
+        updatedAt: '2026-06-01T00:00:00.000Z',
+      }),
+      'mystic.ziwei.yearVerify.v1': JSON.stringify({ 'self:2026': ['本地事'] }),
+    });
+    const backup = parseBackupJson(
+      serializeBackup({
+        format: BACKUP_FORMAT,
+        version: 1,
+        exportedAt: '2026-07-22T00:00:00.000Z',
+        keys: {
+          'mystic-lab-bazi-codex': JSON.stringify({
+            entries: [
+              {
+                id: 'wood',
+                kind: 'wuxing',
+                unlockedAt: '2026-07-01T00:00:00.000Z',
+                meetCount: 3,
+              },
+              {
+                id: 'fire',
+                kind: 'wuxing',
+                unlockedAt: '2026-07-01T00:00:00.000Z',
+                meetCount: 1,
+              },
+            ],
+            metTags: ['天乙', '文昌'],
+            updatedAt: '2026-07-01T00:00:00.000Z',
+          }),
+          'mystic-lab-ziwei-codex': JSON.stringify({
+            entries: [
+              {
+                starId: 'ziwei',
+                unlockedAt: '2026-07-01T00:00:00.000Z',
+                meetCount: 4,
+                lastPalace: '财帛',
+              },
+              {
+                starId: 'tianji',
+                unlockedAt: '2026-07-01T00:00:00.000Z',
+                meetCount: 1,
+              },
+            ],
+            updatedAt: '2026-07-01T00:00:00.000Z',
+          }),
+          'mystic-lab-craft-xp-v1': JSON.stringify({
+            xp: 120,
+            level: 2,
+            checked: ['2026-W01:q2'],
+            updatedAt: '2026-07-01T00:00:00.000Z',
+          }),
+          'mystic.ziwei.yearVerify.v1': JSON.stringify({
+            'self:2026': ['备份事'],
+            'self:2025': ['去年'],
+          }),
+        },
+      }),
+    );
+    importBackupPayload(backup, storage, { mode: 'merge' });
+
+    const bazi = JSON.parse(storage.getItem('mystic-lab-bazi-codex')!) as {
+      entries: { id: string; meetCount: number; unlockedAt: string }[];
+      metTags: string[];
+    };
+    expect(bazi.entries.map((e) => e.id).sort()).toEqual(['fire', 'wood']);
+    expect(bazi.entries.find((e) => e.id === 'wood')?.meetCount).toBe(3);
+    expect(bazi.entries.find((e) => e.id === 'wood')?.unlockedAt).toBe(
+      '2026-06-01T00:00:00.000Z',
+    );
+    expect(bazi.metTags.sort()).toEqual(['天乙', '文昌']);
+
+    const ziwei = JSON.parse(storage.getItem('mystic-lab-ziwei-codex')!) as {
+      entries: { starId: string; meetCount: number; lastPalace?: string }[];
+    };
+    expect(ziwei.entries.map((e) => e.starId).sort()).toEqual(['tianji', 'ziwei']);
+    expect(ziwei.entries.find((e) => e.starId === 'ziwei')?.meetCount).toBe(4);
+    expect(ziwei.entries.find((e) => e.starId === 'ziwei')?.lastPalace).toBe('财帛');
+
+    const craft = JSON.parse(storage.getItem('mystic-lab-craft-xp-v1')!) as {
+      xp: number;
+      checked: string[];
+    };
+    expect(craft.xp).toBe(120);
+    expect(craft.checked.sort()).toEqual(['2026-W01:q1', '2026-W01:q2']);
+
+    const year = JSON.parse(storage.getItem('mystic.ziwei.yearVerify.v1')!) as Record<
+      string,
+      string[]
+    >;
+    expect(year['self:2026'].sort()).toEqual(['备份事', '本地事']);
+    expect(year['self:2025']).toEqual(['去年']);
+  });
 });

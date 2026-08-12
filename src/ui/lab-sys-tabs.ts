@@ -1,4 +1,4 @@
-﻿/** 体系内顶栏：仅解读 / 盘面（探索改右上入口，不做第三 Tab） */
+/** 体系内顶栏：仅解读 / 盘面（探索改右上入口，不做第三 Tab） */
 
 import { navigate } from '../router.ts';
 
@@ -32,7 +32,7 @@ export function bindLabSysTabs(scope: ParentNode): void {
 }
 
 export const BAZI_SYS_TABS = {
-  reading: { path: '/bazi/reading', label: '命盘速读' },
+  reading: { path: '/bazi/reading', label: '命盘解读' },
   chart: { path: '/bazi/chart', label: '命盘解析' },
 } as const;
 
@@ -41,21 +41,21 @@ export const ZIWEI_SYS_TABS = {
   chart: { path: '/ziwei/chart', label: '完整命盘' },
 } as const;
 
-export function baziSysTabsHtml(active: keyof typeof BAZI_SYS_TABS): string {
+export function baziSysTabsHtml(active: keyof typeof BAZI_SYS_TABS | null): string {
   return labSysTabsHtml(
     (Object.keys(BAZI_SYS_TABS) as (keyof typeof BAZI_SYS_TABS)[]).map((k) => ({
       ...BAZI_SYS_TABS[k],
-      active: k === active,
+      active: active !== null && k === active,
     })),
     '八字导航',
   );
 }
 
-export function ziweiSysTabsHtml(active: keyof typeof ZIWEI_SYS_TABS): string {
+export function ziweiSysTabsHtml(active: keyof typeof ZIWEI_SYS_TABS | null): string {
   return labSysTabsHtml(
     (Object.keys(ZIWEI_SYS_TABS) as (keyof typeof ZIWEI_SYS_TABS)[]).map((k) => ({
       ...ZIWEI_SYS_TABS[k],
-      active: k === active,
+      active: active !== null && k === active,
     })),
     '紫微导航',
   );

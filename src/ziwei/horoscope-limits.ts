@@ -5,6 +5,7 @@ import { astro } from 'iztro';
 import type { PersonProfile } from '../life/types.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
 import { genderToIztro } from './cast.ts';
+import { formatMutagenLine } from './mutagen-format.ts';
 import { clockToTimeIndex } from './time-index.ts';
 
 export type LimitBoardSelection = {
@@ -25,17 +26,16 @@ export type HoroscopeLimitSnap = {
   /** 流年四化：破军化禄 · … */
   yearMutagenLine: string;
   decadeMutagenLine: string;
+  /** 流月四化 */
+  monthMutagenLine: string;
   yearGZ: string;
   decadeGZ: string;
+  monthGZ: string;
   decadeAge?: [number, number];
+  yearMutagen: string[];
+  monthMutagen: string[];
+  decadeMutagen: string[];
 };
-
-const HUA = ['禄', '权', '科', '忌'] as const;
-
-function mutagenLine(stars: string[] | undefined): string {
-  if (!stars?.length) return '';
-  return stars.map((s, i) => `${s}化${HUA[i] ?? ''}`).join(' · ');
-}
 
 function palaceAt(
   palaces: Array<{ name: string }>,
@@ -85,6 +85,10 @@ export function resolveHoroscopeLimits(
     : undefined;
   const range = decadeSnap?.decadal?.range as [number, number] | undefined;
 
+  const yearMutagen = (h.yearly?.mutagen as string[] | undefined) ?? [];
+  const monthMutagen = (h.monthly?.mutagen as string[] | undefined) ?? [];
+  const decadeMutagen = (h.decadal?.mutagen as string[] | undefined) ?? [];
+
   return {
     dateStr,
     decadePalace,
@@ -92,10 +96,15 @@ export function resolveHoroscopeLimits(
     monthPalace,
     dayPalace,
     hourPalace,
-    yearMutagenLine: mutagenLine(h.yearly?.mutagen as string[] | undefined),
-    decadeMutagenLine: mutagenLine(h.decadal?.mutagen as string[] | undefined),
+    yearMutagenLine: formatMutagenLine(yearMutagen),
+    decadeMutagenLine: formatMutagenLine(decadeMutagen),
+    monthMutagenLine: formatMutagenLine(monthMutagen),
     yearGZ: `${h.yearly?.heavenlyStem ?? ''}${h.yearly?.earthlyBranch ?? ''}`,
     decadeGZ: `${h.decadal?.heavenlyStem ?? ''}${h.decadal?.earthlyBranch ?? ''}`,
+    monthGZ: `${h.monthly?.heavenlyStem ?? ''}${h.monthly?.earthlyBranch ?? ''}`,
     decadeAge: range ? [Number(range[0]), Number(range[1])] : undefined,
+    yearMutagen,
+    monthMutagen,
+    decadeMutagen,
   };
 }

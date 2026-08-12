@@ -1,4 +1,5 @@
 import { XLR_ASSETS } from './assets.ts';
+import { CHINESE_HOURS, sectorCenterAngle } from '../../xiaoliuren/chinese-hour.ts';
 
 export type ShichenDialOptions = {
   activeIndex: number;
@@ -25,13 +26,14 @@ function wedgePath(cx: number, cy: number, rOut: number, rIn: number, startDeg: 
   return `M ${x1} ${y1} A ${rOut} ${rOut} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${rIn} ${rIn} 0 ${large} 0 ${x4} ${y4} Z`;
 }
 
-export function renderShichenDial(opts: ShichenDialOptions): string {
-  const cx = 120;
-  const cy = 120;
-  const sizeClass = opts.size === 'hero' ? ' xlr-shichen-scene--hero' : ' xlr-shichen-scene--flow';
-  const start = opts.activeIndex * 30 - 90 - 15;
+function activeWedgePath(activeIndex: number): string {
+  const start = activeIndex * 30 - 90 - 15;
   const end = start + 30;
-  const activeWedge = wedgePath(cx, cy, 108, 72, start, end);
+  return wedgePath(120, 120, 108, 72, start, end);
+}
+
+export function renderShichenDial(opts: ShichenDialOptions): string {
+  const sizeClass = opts.size === 'hero' ? ' xlr-shichen-scene--hero' : ' xlr-shichen-scene--flow';
   const enter = opts.animateEnter ? ' is-entering' : '';
 
   return `
@@ -39,7 +41,7 @@ export function renderShichenDial(opts: ShichenDialOptions): string {
       <div class="xlr-shichen-dial">
         <img class="xlr-shichen-dial-bg" src="${XLR_ASSETS.shichenDialBg}" alt="" loading="eager" decoding="async" />
         <svg class="xlr-shichen-overlay" viewBox="0 0 240 240" aria-hidden="true">
-          <path class="xlr-shichen-seg is-active is-lit" d="${activeWedge}"/>
+          <path class="xlr-shichen-seg is-active is-lit" d="${activeWedgePath(opts.activeIndex)}"/>
         </svg>
         <div class="xlr-shichen-center" aria-label="十二时辰盘">
           <span class="xlr-shichen-hour-label">${opts.hourLabel}</span>
@@ -48,11 +50,33 @@ export function renderShichenDial(opts: ShichenDialOptions): string {
           ${opts.weekday ? `<span class="xlr-shichen-weekday">${opts.weekday}</span>` : ''}
         </div>
         <div class="xlr-shichen-pointer-wrap">
-          <img class="xlr-shichen-pointer-img" src="${XLR_ASSETS.shichenPointer}" alt="" loading="lazy" />
+          <img class="xlr-shichen-pointer-img" src="${XLR_ASSETS.shichenPointer}" alt="" loading="eager" decoding="async" />
         </div>
       </div>
     </div>
   `;
+}
+
+/** 点格预览：指针、亮区、中心文案跟到对应时辰 */
+export function syncShichenDialToHour(container: HTMLElement, hourIndex: number): void {
+  const hour = CHINESE_HOURS[hourIndex];
+  if (!hour) return;
+
+  const scene = container.querySelector('.xlr-shichen-scene');
+  const wrap = container.querySelector('.xlr-shichen-pointer-wrap') as HTMLElement | null;
+  const path = container.querySelector('.xlr-shichen-overlay path');
+  const label = container.querySelector('.xlr-shichen-hour-label');
+  const time = container.querySelector('.xlr-shichen-time');
+  if (!scene || !wrap) return;
+
+  const deg = sectorCenterAngle(hourIndex);
+  scene.setAttribute('data-active-index', String(hourIndex));
+  scene.setAttribute('data-clock-deg', String(deg));
+  wrap.style.transition = 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)';
+  wrap.style.transform = `rotate(${deg}deg)`;
+  if (path) path.setAttribute('d', activeWedgePath(hourIndex));
+  if (label) label.textContent = hour.label;
+  if (time) time.textContent = hour.rangeLabel.replace(' – ', '–');
 }
 
 export function mountShichenDialAnimation(container: HTMLElement): void {

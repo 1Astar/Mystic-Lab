@@ -29,7 +29,7 @@ export const STAR_BUCKET_META: Record<
   sha: { title: '煞星', blurb: '六煞星' },
   aux: { title: '辅曜', blurb: '重要辅曜' },
   minor: { title: '杂曜', blurb: '细部色调' },
-  shensha: { title: '神煞', blurb: '百科全收录 · 分组可查' },
+  shensha: { title: '神煞', blurb: '盘中有 · 议题色调' },
 };
 
 export type CatalogSection = 'stars' | 'palaces' | 'mutagen' | 'structure';
@@ -42,7 +42,7 @@ export const CATALOG_SECTIONS: Array<{
   { id: 'stars', title: '星曜', blurb: '主星 · 吉煞 · 辅杂' },
   { id: 'palaces', title: '宫位', blurb: '十二宫 · 对合' },
   { id: 'mutagen', title: '四化', blurb: '禄权科忌 · 运限' },
-  { id: 'structure', title: '结构', blurb: '庙旺 · 局 · 运限' },
+  { id: 'structure', title: '命盘规则', blurb: '庙旺 · 局 · 运限' },
 ];
 
 export type PalaceBucket = 'twelve' | 'sanfang' | 'dui';

@@ -239,6 +239,53 @@ export function pickDeepShenshaHighlights(
   return [...best.values()].sort((a, b) => b.score - a.score).slice(0, limit);
 }
 
+/**
+ * 本盘神煞总览：排盘精露（plate 策略）+ 有词条的命中，供定调总览串联图鉴/弹窗
+ */
+export function listChartShenshaOverview(
+  view: Pick<ZiweiChartView, 'palaces'>,
+): DeepShenshaHit[] {
+  const best = new Map<string, DeepShenshaHit>();
+
+  for (const p of view.palaces) {
+    const bonus = palaceBonus(p.name, p.isBody);
+    for (const s of filterPlateAdjectives(p.adjectives, p.name)) {
+      const name = canon(s.name);
+      const lore = getShenshaLore(name);
+      if (!lore && !DEEP_WEIGHT[name]) continue;
+      const score = (DEEP_WEIGHT[name] ?? 1) + bonus;
+      const hit: DeepShenshaHit = {
+        name,
+        palace: p.name,
+        epithet: lore?.epithet ?? name,
+        oneLiner: lore?.oneLiner ?? '',
+        score,
+        why: deepWhy(name, p.name),
+      };
+      const prev = best.get(name);
+      if (!prev || hit.score > prev.score) best.set(name, hit);
+    }
+    for (const s of filterPlateSeriesForPalace(p)) {
+      const name = canon(s.name);
+      const lore = getShenshaLore(name);
+      if (!lore && !DEEP_WEIGHT[name]) continue;
+      const score = (DEEP_WEIGHT[name] ?? 1) + bonus;
+      const hit: DeepShenshaHit = {
+        name,
+        palace: p.name,
+        epithet: lore?.epithet ?? name,
+        oneLiner: lore?.oneLiner ?? '',
+        score,
+        why: deepWhy(name, p.name),
+      };
+      const prev = best.get(name);
+      if (!prev || hit.score > prev.score) best.set(name, hit);
+    }
+  }
+
+  return [...best.values()].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'zh'));
+}
+
 /** 图鉴分组元数据（百科完整展示用） */
 export const SHENSHA_CODEX_GROUPS: Array<{
   id: 'adjective' | 'changsheng' | 'boshi' | 'jiangqian' | 'suiqian' | 'misc';
