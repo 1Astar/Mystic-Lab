@@ -4,12 +4,9 @@ import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import {
   getStarLore,
-  type StarCard,
 } from '../ziwei/stars.ts';
-import {
-  getStarProfile,
-} from '../ziwei/star-profiles.ts';
-import { COMBO_LORE, getComboLore } from '../ziwei/combo-lore.ts';
+import { type DetailTabId } from '../ziwei/star-profiles.ts';
+import { getComboLore } from '../ziwei/combo-lore.ts';
 import { PALACE_LORE, getPalaceLore } from '../ziwei/palace-lore.ts';
 import {
   comboJourneySummary,
@@ -23,7 +20,6 @@ import {
 import { ICON_EXPLORE_STAR } from '../ui/lab-icons.ts';
 import {
   codexProgress,
-  connectionLine,
   isStarUnlocked,
   listCodexEntries,
   meetSummary,
@@ -32,12 +28,9 @@ import {
   CATALOG_SECTIONS,
   MUTAGEN_BUCKET_META,
   PALACE_BUCKET_META,
-  STAR_BUCKET_META,
   STRUCTURE_BUCKET_META,
   minorStarsInBucket,
   mutagenStarCards,
-  shenshaCodexSections,
-  starListKicker,
   starsInBucket,
   type CatalogSection,
   type MutagenBucket,
@@ -45,6 +38,35 @@ import {
   type StarBucket,
   type StructureBucket,
 } from '../ziwei/codex-taxonomy.ts';
+import {
+  renderBucketGuidePrimerHtml,
+  starTaxonomyOverviewGuide,
+} from '../ziwei/codex-bucket-guide.ts';
+import {
+  SHENSHA_THEME_META,
+  SHENSHA_THEME_ORDER,
+  SHENSHA_TONE_META,
+  countShenshaByTheme,
+  listCodexShenshaFlat,
+  shenshaBrowseMeta,
+  type ShenshaThemeId,
+} from '../ziwei/codex-shensha-browse.ts';
+import {
+  STAR_KIND_META,
+  STAR_KIND_ORDER,
+  STAR_MEET_META,
+  parseStarMeet,
+  starBucketToKind,
+  starKindToBucket,
+  type StarKindFilter,
+  type StarMeetFilter,
+} from '../ziwei/codex-star-browse.ts';
+import {
+  isZiweiCodexFavorite,
+  listZiweiCodexFavorites,
+  toggleZiweiCodexFavorite,
+  ziweiFavButtonLabel,
+} from '../ziwei/codex-favorites.ts';
 import { getMinorStarLore, type MinorStarLore } from '../ziwei/minor-star-lore.ts';
 import { getShenshaLore, type ShenshaLore } from '../ziwei/shensha-lore.ts';
 import {
@@ -55,15 +77,31 @@ import {
   getContrastRow,
   getShenshaSchoolTag,
 } from '../ziwei/shensha-school-contrast.ts';
-import { allMutagenNotesForStar } from '../ziwei/star-mutagen-notes.ts';
 import { getGlossaryByName } from '../ziwei/term-glossary.ts';
 import { answerZiweiConcept, recordZiweiConceptMiss } from '../ziwei/concept-ask.ts';
 import { ziweiSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
-import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
+import { openLabNotesSheet, loadLabNoteText } from '../ui/lab-notes-sheet.ts';
 import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
 import { draftFromZiwei } from '../share/drafts.ts';
-
+import {
+  renderFeaturedStrip,
+  renderShortMinorCard,
+  renderShortShenshaCard,
+  renderShortStarCard,
+  renderStarDetail,
+} from './ziwei-codex-star-ui.ts';
+import { getActivePerson } from '../life/storage.ts';
+import { castZiweiChart } from '../ziwei/cast.ts';
+import { indexChartStars } from '../ziwei/codex-collect.ts';
+import {
+  listBirthMutagenHits,
+  listLimitMutagenHits,
+  mutagenHitTitle,
+  type CodexMutagenHit,
+} from '../ziwei/codex-mutagen-hits.ts';
+import type { PersonProfile } from '../life/types.ts';
+import type { ZiweiChartView } from '../ziwei/types.ts';
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -115,12 +153,14 @@ function setUrl(opts: {
   contrast?: string;
   layer?: CodexLayer;
   bucket?: string;
+  meet?: string;
 }): void {
   try {
     const q = new URLSearchParams();
     const layer = opts.layer ?? 'stars';
     if (layer !== 'stars') q.set('layer', layer);
     if (opts.bucket) q.set('bucket', opts.bucket);
+    if (opts.meet && opts.meet !== 'all') q.set('meet', opts.meet);
     if (opts.star) q.set('star', opts.star);
     if (opts.palace) q.set('palace', opts.palace);
     if (opts.combo) q.set('combo', opts.combo);
@@ -135,163 +175,18 @@ function setUrl(opts: {
   }
 }
 
-/** 列表短卡 */
-function renderShortStarCard(
-  star: StarCard,
-  entries: Map<string, { lastPalace?: string }>,
-): string {
-  const unlocked = isStarUnlocked(star.id);
-  const entry = entries.get(star.id);
-  const profile = getStarProfile(star.id);
-  const kicker = starListKicker(star);
-  const keys = (profile?.keywords ?? []).slice(0, 3);
-  const keyLine = keys.length
-    ? keys.map((k) => escapeHtml(k)).join(' · ')
-    : escapeHtml(star.epithet);
-  return `
-    <button type="button" class="ziwei-codex-short ${unlocked ? 'is-lit' : 'is-dim'}" data-open-star="${star.id}">
-      <span class="ziwei-codex-short-name">${escapeHtml(star.title)}</span>
-      <span class="ziwei-codex-short-kicker">${escapeHtml(kicker)}</span>
-      <span class="ziwei-codex-short-keys">关键词　${keyLine}</span>
-      <span class="ziwei-codex-short-cta">${unlocked ? '查看完整图鉴 →' : '尚未点亮 · 仍可预览 →'}</span>
-      ${
-        unlocked && entry?.lastPalace
-          ? `<span class="ziwei-codex-short-meet">${escapeHtml(connectionLine(star.id, entry.lastPalace))}</span>`
-          : ''
-      }
-    </button>`;
+/* 主星列表/特色/详情 → ziwei-codex-star-ui.ts */
+
+function isAtlasCollected(
+  id: string,
+  chartHits: Map<string, unknown>,
+): boolean {
+  return chartHits.has(id) || isStarUnlocked(id);
 }
 
-function renderShortMinorCard(m: MinorStarLore): string {
-  return `
-    <button type="button" class="ziwei-codex-short is-minor" data-open-minor="${escapeHtml(m.id)}">
-      <span class="ziwei-codex-short-name">${escapeHtml(m.id)}</span>
-      <span class="ziwei-codex-short-kicker">杂曜｜${escapeHtml(m.epithet)}</span>
-      <span class="ziwei-codex-short-keys">${escapeHtml(m.oneLiner)}</span>
-      <span class="ziwei-codex-short-cta">查看完整图鉴 →</span>
-    </button>`;
-}
-
-function renderShortShenshaCard(s: ShenshaLore): string {
-  return `
-    <button type="button" class="ziwei-codex-short is-shensha" data-open-shensha="${escapeHtml(s.id)}">
-      <span class="ziwei-codex-short-name">${escapeHtml(s.id)}</span>
-      <span class="ziwei-codex-short-kicker">神煞｜${escapeHtml(s.epithet)}</span>
-      <span class="ziwei-codex-short-keys">${escapeHtml(s.oneLiner)}</span>
-      <span class="ziwei-codex-short-cta">查看完整图鉴 →</span>
-    </button>`;
-}
-
-function renderFeaturedStrip(): string {
-  return `
-    <section class="ziwei-codex-featured" aria-label="特色入口">
-      <button type="button" class="ziwei-codex-featured-card" data-open-star="紫微">
-        <strong>定盘</strong><span>紫微 · 核心人设</span>
-      </button>
-      <button type="button" class="ziwei-codex-featured-card" data-open-star="天机">
-        <strong>智变</strong><span>天机 · 谋划应变</span>
-      </button>
-      <button type="button" class="ziwei-codex-featured-card" data-goto-journey>
-        <strong>组合旅程</strong><span>点亮搭戏进度</span>
-      </button>
-      <button type="button" class="ziwei-codex-featured-card" data-goto-meet>
-        <strong>我的相遇</strong><span>命盘角色收藏</span>
-      </button>
-    </section>`;
-}
-
-function renderStarDetail(star: StarCard, entries: Map<string, { lastPalace?: string }>): string {
-  const unlocked = isStarUnlocked(star.id);
-  const entry = entries.get(star.id);
-  const p = getStarProfile(star.id);
-  const relatedCombos = COMBO_LORE.filter((c) => c.members.includes(star.id));
-
-  const basic = p
-    ? `<p>${escapeHtml(p.oneLiner)}</p><p>${escapeHtml(p.metaphor)}</p><p>${escapeHtml(star.myth)}</p>`
-    : `<p>${escapeHtml(star.myth)}</p><p>${escapeHtml(star.portrait)}</p>`;
-
-  const trait = p
-    ? `
-      <p><strong>核心动力</strong>　${escapeHtml(p.trait.drive)}</p>
-      <p><strong>天赋优势</strong>　${escapeHtml(p.trait.gift)}</p>
-      <p><strong>阴影模式</strong>　${escapeHtml(p.trait.shadow)}</p>
-      <p><strong>真正需要</strong>　${escapeHtml(p.trait.need)}</p>`
-    : `<p>${escapeHtml(star.trait)}</p>`;
-
-  const love = p ? p.mirror.love : star.mirrorLove;
-  const work = p ? p.mirror.work : star.mirrorWork;
-  const wealth = p ? p.mirror.wealth : '财富面向随落宫与四化而变；先看财帛、官禄会照。';
-  const health = p ? p.mirror.self : star.counsel;
-
-  const palaces = p
-    ? p.palaces
-        .map(
-          (hit) => `
-        <section class="ziwei-detail-block">
-          <h4>${escapeHtml(hit.title)} <em>${escapeHtml(hit.hint)}</em></h4>
-          <p>${escapeHtml(hit.line)}</p>
-        </section>`,
-        )
-        .join('')
-    : '<p class="ziwei-codex-hint">落十二宫细读陆续补全；可先回命盘点宫位看动态解释。</p>';
-
-  const youBlock = unlocked
-    ? `<p>${escapeHtml(connectionLine(star.id, entry?.lastPalace))}</p>
-       <p class="ziwei-codex-hint">回命盘点这颗星或所在宫，可看与当前三方四正的联动（动态组合，不另开几百张卡）。</p>`
-    : `<p class="ziwei-star-locked">排盘遇见后，这里会记你与它的相遇。</p>`;
-
-  const comboBlock = relatedCombos.length
-    ? `<ul class="ziwei-meet-list">${relatedCombos
-        .map(
-          (c) =>
-            `<li><button type="button" data-open-combo="${escapeHtml(c.id)}">${escapeHtml(c.title)} · ${escapeHtml(c.members.join('·'))}</button></li>`,
-        )
-        .join('')}</ul>`
-    : `<p class="ziwei-codex-hint">暂无预置组合卡。可在命盘里点「三方四正 / 四化」看与当前宫的动态联动。</p>`;
-
-  return `
-    <article class="ziwei-star-detail ${unlocked ? 'is-lit' : ''}">
-      <button type="button" class="ziwei-detail-back" data-close-detail>← 返回图鉴</button>
-      <header class="ziwei-detail-top">
-        <p class="ziwei-kicker">星曜图鉴 · ${escapeHtml(starListKicker(star))}</p>
-        <h2 class="ziwei-remember-name">${escapeHtml(star.title)}</h2>
-        ${
-          p?.keywords?.length
-            ? `<ul class="ziwei-keywords">${p.keywords.map((k) => `<li>${escapeHtml(k)}</li>`).join('')}</ul>`
-            : ''
-        }
-      </header>
-      <section class="ziwei-detail-block"><h3>基本含义</h3>${basic}</section>
-      <section class="ziwei-detail-block"><h3>性格表现</h3>${trait}</section>
-      <section class="ziwei-detail-block"><h3>感情</h3><p>${escapeHtml(love)}</p></section>
-      <section class="ziwei-detail-block"><h3>事业</h3><p>${escapeHtml(work)}</p></section>
-      <section class="ziwei-detail-block"><h3>财富</h3><p>${escapeHtml(wealth)}</p></section>
-      <section class="ziwei-detail-block"><h3>健康 / 自我状态</h3><p>${escapeHtml(health)}</p></section>
-      <section class="ziwei-detail-block"><h3>落十二宫</h3>${palaces}</section>
-      <section class="ziwei-detail-block">
-        <h3>庙旺状态</h3>
-        <p>亮度（庙旺得利平陷）决定发挥顺不顺，不是吉凶判决。</p>
-        <p><button type="button" class="ziwei-inline-link" data-open-term="庙旺落陷">查看庙旺落陷 →</button></p>
-      </section>
-      <section class="ziwei-detail-block">
-        <h3>四化变化</h3>
-        ${
-          star.category === 'mutagen'
-            ? `<p>${escapeHtml(star.trait)}</p>`
-            : `<ul class="ziwei-mutagen-notes">${allMutagenNotesForStar(star.id)
-                .map(
-                  (n) =>
-                    `<li><strong>化${escapeHtml(n.kind)}</strong>　${escapeHtml(n.text)}</li>`,
-                )
-                .join('')}</ul>`
-        }
-        <p><button type="button" class="ziwei-inline-link" data-open-term="四化">查看四化总述 →</button></p>
-        <p class="ziwei-codex-hint">落在你盘哪一宫、哪一年干，回命盘点四化飞星图层动态看——不另开几百张卡。</p>
-      </section>
-      <section class="ziwei-detail-block"><h3>你的命盘中的${escapeHtml(star.title)}</h3>${youBlock}</section>
-      <section class="ziwei-detail-block"><h3>相关星曜 / 组合</h3>${comboBlock}</section>
-      <section class="ziwei-detail-counsel"><h3>给你的醒言</h3><p>${escapeHtml(p?.counsel ?? star.counsel)}</p></section>
-    </article>`;
+function favBtnHtml(id: string): string {
+  const on = isZiweiCodexFavorite(id);
+  return `<button type="button" class="ziwei-fav-btn ${on ? 'is-on' : ''}" data-toggle-fav="${escapeHtml(id)}" aria-pressed="${on}">${escapeHtml(ziweiFavButtonLabel(on))}</button>`;
 }
 
 function renderMinorDetail(m: MinorStarLore): string {
@@ -299,7 +194,10 @@ function renderMinorDetail(m: MinorStarLore): string {
     <article class="ziwei-star-detail is-lit">
       <button type="button" class="ziwei-detail-back" data-close-detail>← 返回图鉴</button>
       <p class="ziwei-kicker">杂曜 · ${escapeHtml(m.epithet)}</p>
-      <h2 class="ziwei-remember-name">${escapeHtml(m.id)}</h2>
+      <div class="ziwei-detail-title-row">
+        <h2 class="ziwei-remember-name">${escapeHtml(m.id)}</h2>
+        ${favBtnHtml(m.id)}
+      </div>
       <p class="ziwei-remember-line">${escapeHtml(m.oneLiner)}</p>
       <section class="ziwei-detail-block"><h3>基本含义</h3><pre class="ziwei-learn-body">${escapeHtml(m.traditional)}</pre></section>
       <section class="ziwei-detail-block">
@@ -331,7 +229,10 @@ function renderShenshaDetail(s: ShenshaLore): string {
     <article class="ziwei-star-detail is-lit">
       <button type="button" class="ziwei-detail-back" data-close-detail>← 返回图鉴</button>
       <p class="ziwei-kicker">神煞 · ${escapeHtml(s.epithet)}${tag ? ` · ${escapeHtml(tag.badge)}` : ''}</p>
-      <h2 class="ziwei-remember-name">${escapeHtml(s.id)}</h2>
+      <div class="ziwei-detail-title-row">
+        <h2 class="ziwei-remember-name">${escapeHtml(s.id)}</h2>
+        ${favBtnHtml(s.id)}
+      </div>
       <p class="ziwei-remember-line">${escapeHtml(s.oneLiner)}</p>
       <section class="ziwei-detail-block"><h3>基本含义</h3><pre class="ziwei-learn-body">${escapeHtml(s.traditional)}</pre></section>
       <section class="ziwei-detail-block"><h3>何时用到</h3><p>${escapeHtml(s.when)}</p></section>
@@ -493,7 +394,7 @@ function renderTermDetail(term: string): string {
   return `
     <article class="ziwei-star-detail is-lit">
       <button type="button" class="ziwei-detail-back" data-close-sub>← 返回图鉴</button>
-      <p class="ziwei-kicker">结构 / 术语</p>
+      <p class="ziwei-kicker">命盘规则 / 术语</p>
       <h2 class="ziwei-remember-name">${escapeHtml(g.name)}</h2>
       <p class="ziwei-remember-line">${escapeHtml(g.shortMeaning)}</p>
       <section class="ziwei-detail-block"><h3>传统含义</h3><pre class="ziwei-learn-body">${escapeHtml(g.traditional)}</pre></section>
@@ -651,62 +552,311 @@ function renderMeetLayer(): string {
     </section>`;
 }
 
-function renderStarsCatalog(
-  bucket: StarBucket,
-  map: Map<string, { lastPalace?: string }>,
-): string {
-  const tabs = STAR_BUCKETS.map((id) => {
-    const meta = STAR_BUCKET_META[id];
-    let count = '';
-    if (id === 'minor') count = String(minorStarsInBucket().length);
-    else if (id === 'shensha')
-      count = String(shenshaCodexSections().reduce((n, s) => n + s.items.length, 0));
-    else count = String(starsInBucket(id).length);
-    return `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-star-bucket="${id}">
-      ${escapeHtml(meta.title)} <em>${escapeHtml(count)}</em>
-    </button>`;
-  }).join('');
+function openStarBucketGuideNotes(): void {
+  const pack = starTaxonomyOverviewGuide();
+  const person = getActivePerson();
+  const draft = loadLabNoteText('ziwei', person.id);
 
-  let grid = '';
-  if (bucket === 'minor') {
-    grid = `<div class="ziwei-codex-short-grid">${minorStarsInBucket()
-      .map((m) => renderShortMinorCard(m))
-      .join('')}</div>`;
-  } else if (bucket === 'shensha') {
-    const sections = shenshaCodexSections();
-    const total = sections.reduce((n, s) => n + s.items.length, 0);
-    grid = `
-      <button type="button" class="ziwei-codex-short is-shensha is-school" data-open-contrast="overview">
-        <span class="ziwei-codex-short-name">通行派 × 中州派</span>
-        <span class="ziwei-codex-short-kicker">流派对照｜截空 / 截路等</span>
-        <span class="ziwei-codex-short-keys">${escapeHtml(SCHOOL_OVERVIEW.oneLiner)}</span>
-        <span class="ziwei-codex-short-cta">查看对照表 →</span>
-      </button>
-      <p class="ziwei-codex-hint">神煞百科 · 共 ${total} 条。排盘默认「${escapeHtml(SCHOOL_META[APP_SHENSHA_SCHOOL].title)}」；中州特有名目仍收录便于对照。</p>
-      ${sections
-        .map(
-          (sec) => `
-        <section class="ziwei-codex-shensha-group" aria-label="${escapeHtml(sec.title)}">
-          <header class="ziwei-codex-shensha-head">
-            <h3>${escapeHtml(sec.title)} <em>${sec.items.length}</em></h3>
-            <p>${escapeHtml(sec.blurb)}</p>
-          </header>
-          <div class="ziwei-codex-short-grid">${sec.items.map((s) => renderShortShenshaCard(s)).join('')}</div>
-        </section>`,
-        )
-        .join('')}`;
+  const reflectHtml = pack.reflect.length
+    ? `<aside class="lab-notes-reflect" aria-label="对照提示">
+        <p class="lab-notes-reflect-title">可以记一笔</p>
+        <ul class="lab-notes-reflect-list">
+          ${pack.reflect
+            .map(
+              (item, i) => `
+            <li>
+              <button type="button" class="lab-notes-reflect-item" data-guide-reflect-i="${i}">
+                ${escapeHtml(item)}
+              </button>
+            </li>`,
+            )
+            .join('')}
+        </ul>
+        <p class="lab-notes-reflect-hint">点一句，写进下方笔记</p>
+      </aside>`
+    : '';
+
+  openLabNotesSheet({
+    system: 'ziwei',
+    surface: 'atlas',
+    context: pack.context,
+    showNotePad: false,
+    bodyHtml: `
+      <div class="ziwei-notes-learn" data-bucket-guide-root>
+        <div class="ly-note-mini-tabs ziwei-notes-tabs" role="tablist" aria-label="分类说明与笔记">
+          <button type="button" class="ly-note-mini-tab is-active" data-bucket-notes-tab="guide" role="tab" aria-selected="true">说明</button>
+          <button type="button" class="ly-note-mini-tab" data-bucket-notes-tab="notes" role="tab" aria-selected="false">笔记</button>
+        </div>
+        <div class="ly-note-mini-body">
+          <div class="ly-note-tab-panel is-active" data-bucket-notes-pane="guide">
+            ${renderBucketGuidePrimerHtml(pack)}
+          </div>
+          <div class="ly-note-tab-panel" data-bucket-notes-pane="notes" hidden>
+            ${reflectHtml}
+            <label class="lab-notes-label" for="lab-notes-ta">写下这次想留住的句子、对照与疑问</label>
+            <textarea id="lab-notes-ta" class="lab-notes-input" rows="10" maxlength="4000" placeholder="例如：主星是主角，神煞是色调… / 我还想搞清…">${escapeHtml(draft)}</textarea>
+            <p class="lab-notes-hint">自动保存在本机，按档案分开；可随时回来续写。</p>
+          </div>
+        </div>
+      </div>`,
+    onBodyReady: (body) => {
+      const switchTab = (tab: 'guide' | 'notes') => {
+        body.querySelectorAll<HTMLButtonElement>('[data-bucket-notes-tab]').forEach((b) => {
+          const on = b.dataset.bucketNotesTab === tab;
+          b.classList.toggle('is-active', on);
+          b.setAttribute('aria-selected', String(on));
+        });
+        body.querySelectorAll<HTMLElement>('[data-bucket-notes-pane]').forEach((pane) => {
+          const on = pane.dataset.bucketNotesPane === tab;
+          pane.classList.toggle('is-active', on);
+          pane.hidden = !on;
+        });
+        if (tab === 'notes') body.querySelector<HTMLTextAreaElement>('#lab-notes-ta')?.focus();
+      };
+
+      body.querySelectorAll<HTMLButtonElement>('[data-bucket-notes-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          switchTab(btn.dataset.bucketNotesTab === 'notes' ? 'notes' : 'guide');
+        });
+      });
+
+      body.querySelectorAll<HTMLButtonElement>('[data-guide-reflect-i]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.guideReflectI);
+          const line = pack.reflect[i];
+          const ta = body.querySelector<HTMLTextAreaElement>('#lab-notes-ta');
+          if (!line || !ta) return;
+          const cur = ta.value.trimEnd();
+          ta.value = (cur ? `${cur}\n${line}` : line).slice(0, 4000);
+          switchTab('notes');
+          ta.focus();
+          ta.setSelectionRange(ta.value.length, ta.value.length);
+        });
+      });
+    },
+  });
+}
+
+function renderStarsCatalog(
+  meet: StarMeetFilter,
+  kind: StarKindFilter,
+  map: Map<string, { lastPalace?: string }>,
+  chartHits: Map<string, import('../ziwei/codex-collect.ts').ChartStarHit>,
+  hasChart: boolean,
+  shenshaTheme: ShenshaThemeId | 'all' = 'all',
+): string {
+  const favSet = new Set(listZiweiCodexFavorites());
+  const passMeet = (id: string): boolean => {
+    if (meet === 'all') return true;
+    if (meet === 'favorite') return favSet.has(id);
+    return isAtlasCollected(id, chartHits);
+  };
+
+  const meetTabs = (['collected', 'all', 'favorite'] as StarMeetFilter[])
+    .map((id) => {
+      let n = 0;
+      if (id === 'favorite') n = favSet.size;
+      else if (id === 'collected') {
+        const ids = new Set<string>([
+          ...starsInBucket('major').map((s) => s.id),
+          ...starsInBucket('lucky').map((s) => s.id),
+          ...starsInBucket('sha').map((s) => s.id),
+          ...starsInBucket('aux').map((s) => s.id),
+          ...minorStarsInBucket().map((m) => m.id),
+          ...listCodexShenshaFlat().map((s) => s.id),
+        ]);
+        n = [...ids].filter((x) => isAtlasCollected(x, chartHits)).length;
+      } else {
+        n =
+          starsInBucket('major').length +
+          starsInBucket('lucky').length +
+          starsInBucket('sha').length +
+          starsInBucket('aux').length +
+          minorStarsInBucket().length +
+          listCodexShenshaFlat().length;
+      }
+      return `<button type="button" class="ziwei-codex-tab ${meet === id ? 'is-on' : ''}" data-star-meet="${id}">
+      ${escapeHtml(STAR_MEET_META[id].title)} <em>${n}</em>
+    </button>`;
+    })
+    .join('');
+
+  const kindChips = `
+    <div class="ziwei-star-kind-chips is-fullrow" role="group" aria-label="星曜类型">
+      ${STAR_KIND_ORDER.map(
+        (id) => `<button type="button" class="ziwei-shensha-theme-chip ${kind === id ? 'is-on' : ''}" data-star-kind="${id}">
+          ${escapeHtml(STAR_KIND_META[id].title)}
+        </button>`,
+      ).join('')}
+      <button type="button" class="ziwei-codex-help is-overview" data-bucket-guide="overview" title="主星、神煞、杂曜怎么分？" aria-label="星曜分类说明（打开笔记）">?</button>
+    </div>`;
+
+  let body = '';
+  if (kind === 'major') {
+    const list = starsInBucket('major').filter((s) => passMeet(s.id));
+    body = list.length
+      ? `<div class="ziwei-codex-short-grid">${list.map((s) => renderShortStarCard(s, map, chartHits, hasChart)).join('')}</div>`
+      : `<p class="ziwei-codex-hint">${
+          meet === 'favorite'
+            ? '还没有收藏主星。点开详情里的☆可收藏。'
+            : meet === 'collected'
+              ? hasChart
+                ? '这盘还没有已收集的主星，可切到「全部」浏览十四主星。'
+                : '排盘或解锁后，已收集会出现在这里。'
+              : '暂无条目。'
+        }</p>`;
+  } else if (kind === 'support') {
+    const blocks: Array<{ title: string; bucket: StarBucket | 'minor' }> = [
+      { title: '吉星', bucket: 'lucky' },
+      { title: '煞星', bucket: 'sha' },
+      { title: '辅曜', bucket: 'aux' },
+      { title: '杂曜', bucket: 'minor' },
+    ];
+    const sections = blocks
+      .map((b) => {
+        if (b.bucket === 'minor') {
+          const items = minorStarsInBucket().filter((m) => passMeet(m.id));
+          if (!items.length) return '';
+          return `
+        <section class="ziwei-codex-shensha-group" aria-label="${escapeHtml(b.title)}">
+          <header class="ziwei-codex-shensha-head"><h3>${escapeHtml(b.title)} <em>${items.length}</em></h3></header>
+          <div class="ziwei-codex-short-grid">${items.map((m) => renderShortMinorCard(m, chartHits, hasChart)).join('')}</div>
+        </section>`;
+        }
+        const items = starsInBucket(b.bucket).filter((s) => passMeet(s.id));
+        if (!items.length) return '';
+        return `
+        <section class="ziwei-codex-shensha-group" aria-label="${escapeHtml(b.title)}">
+          <header class="ziwei-codex-shensha-head"><h3>${escapeHtml(b.title)} <em>${items.length}</em></h3></header>
+          <div class="ziwei-codex-short-grid">${items.map((s) => renderShortStarCard(s, map, chartHits, hasChart)).join('')}</div>
+        </section>`;
+      })
+      .join('');
+    body =
+      sections ||
+      `<p class="ziwei-codex-hint">${
+        meet === 'favorite'
+          ? '还没有收藏配角星。点开详情☆可收藏。'
+          : meet === 'collected'
+            ? '还没有已收集的配角星，可切「全部」浏览。'
+            : '暂无条目。'
+      }</p>`;
   } else {
-    const list = starsInBucket(bucket);
-    grid = `<div class="ziwei-codex-short-grid">${list
-      .map((s) => renderShortStarCard(s, map))
-      .join('')}</div>`;
+    const scopedIds =
+      meet === 'favorite'
+        ? new Set(listCodexShenshaFlat().map((s) => s.id).filter((id) => favSet.has(id)))
+        : meet === 'collected'
+          ? new Set(
+              listCodexShenshaFlat()
+                .map((s) => s.id)
+                .filter((id) => isAtlasCollected(id, chartHits)),
+            )
+          : new Set(listCodexShenshaFlat().map((s) => s.id));
+
+    const themeScope = meet === 'all' ? undefined : scopedIds;
+    const themeCounts = countShenshaByTheme(themeScope);
+    const themeChips = `
+      <div class="ziwei-shensha-theme-chips" role="group" aria-label="人生议题">
+        <button type="button" class="ziwei-shensha-theme-chip ${shenshaTheme === 'all' ? 'is-on' : ''}" data-shensha-theme="all">全部议题</button>
+        ${SHENSHA_THEME_ORDER.map((id) => {
+          const n = themeCounts[id];
+          if (!n && meet !== 'all') return '';
+          return `<button type="button" class="ziwei-shensha-theme-chip ${shenshaTheme === id ? 'is-on' : ''}" data-shensha-theme="${id}">
+            ${escapeHtml(SHENSHA_THEME_META[id].title)}${n ? ` <em>${n}</em>` : ''}
+          </button>`;
+        }).join('')}
+      </div>`;
+
+    const list = listCodexShenshaFlat().filter((s) => {
+      if (!scopedIds.has(s.id)) return false;
+      if (shenshaTheme !== 'all' && shenshaBrowseMeta(s.id).theme !== shenshaTheme) return false;
+      return true;
+    });
+
+    const byTheme = new Map<ShenshaThemeId, typeof list>();
+    for (const s of list) {
+      const t = shenshaBrowseMeta(s.id).theme;
+      const arr = byTheme.get(t) ?? [];
+      arr.push(s);
+      byTheme.set(t, arr);
+    }
+
+    const sectionsHtml =
+      shenshaTheme === 'all'
+        ? SHENSHA_THEME_ORDER.map((tid) => {
+            const items = byTheme.get(tid);
+            if (!items?.length) return '';
+            const meta = SHENSHA_THEME_META[tid];
+            return `
+        <section class="ziwei-codex-shensha-group" aria-label="${escapeHtml(meta.title)}">
+          <header class="ziwei-codex-shensha-head">
+            <h3>${escapeHtml(meta.title)} <em>${items.length}</em></h3>
+            <p>${escapeHtml(meta.blurb)}</p>
+          </header>
+          <div class="ziwei-codex-short-grid">${items
+            .map((s) => {
+              const b = shenshaBrowseMeta(s.id);
+              return renderShortShenshaCard(s, chartHits, hasChart, {
+                tone: b.tone,
+                themeLabel: SHENSHA_THEME_META[b.theme].title,
+              });
+            })
+            .join('')}</div>
+        </section>`;
+          }).join('')
+        : `<div class="ziwei-codex-short-grid">${list
+            .map((s) => {
+              const b = shenshaBrowseMeta(s.id);
+              return renderShortShenshaCard(s, chartHits, hasChart, {
+                tone: b.tone,
+                themeLabel: SHENSHA_THEME_META[b.theme].title,
+              });
+            })
+            .join('')}</div>`;
+
+    const empty =
+      list.length === 0
+        ? `<p class="ziwei-codex-hint">${
+            meet === 'favorite'
+              ? '还没有收藏神煞。点开详情☆可收藏。'
+              : meet === 'collected'
+                ? hasChart
+                  ? '这盘还没有已收集的神煞色调，可切「全部」浏览。'
+                  : '排盘后，已收集会列出盘上的神煞色调。'
+                : '这个议题下暂时没有条目，换一个试试。'
+          }</p>`
+        : '';
+
+    const toneLegend = `<p class="ziwei-shensha-tone-legend" aria-label="色调图例">
+      <span class="is-tone-support">${escapeHtml(SHENSHA_TONE_META.support.short)}</span>
+      <span class="is-tone-neutral">${escapeHtml(SHENSHA_TONE_META.neutral.short)}</span>
+      <span class="is-tone-caution">${escapeHtml(SHENSHA_TONE_META.caution.short)}</span>
+      <em>色调是气氛提示，不是吉凶判决</em>
+    </p>`;
+
+    body = `
+      ${themeChips}
+      ${toneLegend}
+      ${empty}
+      ${sectionsHtml}
+      <section class="ziwei-codex-shensha-group ziwei-codex-school-foot" aria-label="流派对照">
+        <p class="ziwei-codex-hint">若对照他书/他盘神煞名目有出入，可看流派差异（非入门必读）。</p>
+        <button type="button" class="ziwei-codex-short is-shensha is-school" data-open-contrast="overview">
+          <span class="ziwei-codex-short-name">通行派 × 中州派</span>
+          <span class="ziwei-codex-short-kicker">可选｜流派对照</span>
+          <span class="ziwei-codex-short-keys">${escapeHtml(SCHOOL_OVERVIEW.oneLiner)}</span>
+          <span class="ziwei-codex-short-cta">查看对照表 →</span>
+        </button>
+      </section>`;
   }
 
   return `
-    <div class="ziwei-codex-tabs" role="tablist" aria-label="星曜分类">${tabs}</div>
-    <p class="ziwei-codex-hint">${escapeHtml(STAR_BUCKET_META[bucket].blurb)} · 列表只留关键词，点开看完整图鉴</p>
-    ${grid}`;
+    <div class="ziwei-codex-tabs is-fullrow" role="tablist" aria-label="收集状态">${meetTabs}</div>
+    <p class="ziwei-codex-hint">${escapeHtml(STAR_MEET_META[meet].blurb)} · ${escapeHtml(STAR_KIND_META[kind].blurb)}</p>
+    ${kindChips}
+    ${body}`;
 }
+
 
 function renderPalacesCatalog(bucket: PalaceBucket): string {
   const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="宫位分类">
@@ -749,7 +899,33 @@ function renderPalacesCatalog(bucket: PalaceBucket): string {
     <p class="ziwei-codex-hint">具体到你的盘：回完整命盘点宫，会按当前宫动态标出对宫与三合。</p>`;
 }
 
-function renderMutagenCatalog(bucket: MutagenBucket, map: Map<string, { lastPalace?: string }>): string {
+function renderMutagenHitCard(h: CodexMutagenHit): string {
+  const title = mutagenHitTitle(h);
+  const chartQs = new URLSearchParams({ mode: 'chart' });
+  if (h.palace) chartQs.set('palace', h.palace);
+  if (h.star) chartQs.set('star', h.star);
+  return `
+    <div class="ziwei-codex-short is-lit ziwei-mutagen-hit">
+      <span class="ziwei-codex-short-name">${escapeHtml(title)}</span>
+      <span class="ziwei-codex-short-kicker">${escapeHtml(h.scopeLabel)}｜${escapeHtml(h.hint)}</span>
+      <span class="ziwei-codex-short-keys">${escapeHtml(h.label)} 落在 ${escapeHtml(h.star)}${
+        h.palace ? ` · ${escapeHtml(h.palace)}` : ''
+      }</span>
+      <span class="ziwei-mutagen-hit-actions">
+        <button type="button" class="ziwei-inline-link" data-open-term="${escapeHtml(h.label)}">看词条 →</button>
+        <button type="button" class="ziwei-inline-link" data-goto-chart="${escapeHtml(chartQs.toString())}">看命盘 →</button>
+      </span>
+    </div>`;
+}
+
+function renderMutagenCatalog(
+  bucket: MutagenBucket,
+  map: Map<string, { lastPalace?: string }>,
+  chartHits: Map<string, import('../ziwei/codex-collect.ts').ChartStarHit>,
+  hasChart: boolean,
+  person: PersonProfile,
+  view: ZiweiChartView | null,
+): string {
   const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="四化分类">
     ${MUTAGEN_BUCKETS.map(
       (id) =>
@@ -764,25 +940,67 @@ function renderMutagenCatalog(bucket: MutagenBucket, map: Map<string, { lastPala
       ${tabs}
       <p class="ziwei-codex-hint">禄权科忌 · 催化状态，不是第四套主星</p>
       <div class="ziwei-codex-short-grid">${mutagenStarCards()
-        .map((s) => renderShortStarCard(s, map))
+        .map((s) => renderShortStarCard(s, map, chartHits, hasChart))
         .join('')}</div>`;
   }
 
   const term = bucket === 'birth' ? '生年四化' : '运限四化';
   const g = getGlossaryByName(term);
-  return `
-    ${tabs}
+  const glossaryCard = `
     <button type="button" class="ziwei-codex-short is-lit" data-open-term="${term}">
       <span class="ziwei-codex-short-name">${escapeHtml(term)}</span>
       <span class="ziwei-codex-short-kicker">${escapeHtml(MUTAGEN_BUCKET_META[bucket].blurb)}</span>
       <span class="ziwei-codex-short-keys">${escapeHtml(g?.shortMeaning ?? '')}</span>
-      <span class="ziwei-codex-short-cta">查看完整图鉴 →</span>
-    </button>
-    <p class="ziwei-codex-hint">飞入某宫、叠在某主星上的具体句，在命盘点「四化飞星」图层动态生成，避免卡片爆炸。</p>`;
+      <span class="ziwei-codex-short-cta">总述词条 →</span>
+    </button>`;
+
+  if (!view || !hasChart) {
+    return `
+      ${tabs}
+      ${glossaryCard}
+      <p class="ziwei-codex-hint">排盘后这里会列出你盘上的四化落点（化禄 · 星 · 宫）。</p>`;
+  }
+
+  if (bucket === 'birth') {
+    const hits = listBirthMutagenHits(view);
+    return `
+      ${tabs}
+      <p class="ziwei-codex-hint">你的本命四化 · 点词条看含义，点命盘看落宫</p>
+      ${glossaryCard}
+      <div class="ziwei-codex-short-grid" style="margin-top:10px">
+        ${
+          hits.length
+            ? hits.map(renderMutagenHitCard).join('')
+            : `<p class="ziwei-codex-hint">本盘暂未读出生年四化落点，可先打开「四化星」看禄权科忌。</p>`
+        }
+      </div>`;
+  }
+
+  const { year, decade, yearNum } = listLimitMutagenHits(person, view);
+  return `
+    ${tabs}
+    <p class="ziwei-codex-hint">运限叠在生年之上 · ${yearNum}流年与当前大限</p>
+    ${glossaryCard}
+    <h3 class="ziwei-palace-chips-title">${yearNum}流年四化</h3>
+    <div class="ziwei-codex-short-grid">
+      ${
+        year.length
+          ? year.map(renderMutagenHitCard).join('')
+          : `<p class="ziwei-codex-hint">今年流年四化暂未排出。</p>`
+      }
+    </div>
+    <h3 class="ziwei-palace-chips-title">大限四化</h3>
+    <div class="ziwei-codex-short-grid">
+      ${
+        decade.length
+          ? decade.map(renderMutagenHitCard).join('')
+          : `<p class="ziwei-codex-hint">当前大限四化暂未排出（童限/未起运时可能为空）。</p>`
+      }
+    </div>`;
 }
 
 function renderStructureCatalog(bucket: StructureBucket): string {
-  const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="结构分类">
+  const tabs = `<div class="ziwei-codex-tabs" role="tablist" aria-label="命盘规则分类">
     ${STRUCTURE_BUCKETS.map(
       (id) =>
         `<button type="button" class="ziwei-codex-tab ${bucket === id ? 'is-on' : ''}" data-structure-bucket="${id}">
@@ -801,7 +1019,7 @@ function renderStructureCatalog(bucket: StructureBucket): string {
             return `
             <button type="button" class="ziwei-codex-short" data-open-term="${term}">
               <span class="ziwei-codex-short-name">${escapeHtml(term)}</span>
-              <span class="ziwei-codex-short-kicker">结构｜指针</span>
+              <span class="ziwei-codex-short-kicker">规则｜指针</span>
               <span class="ziwei-codex-short-keys">${escapeHtml(g?.shortMeaning ?? '')}</span>
               <span class="ziwei-codex-short-cta">查看完整图鉴 →</span>
             </button>`;
@@ -839,6 +1057,7 @@ function renderStructureCatalog(bucket: StructureBucket): string {
         <span class="ziwei-codex-short-keys">${escapeHtml(getGlossaryByName('庙旺落陷')?.shortMeaning ?? '')}</span>
         <span class="ziwei-codex-short-cta">查看完整图鉴 →</span>
       </button>
+      <p class="ziwei-codex-hint"><button type="button" class="ziwei-inline-link" data-goto-luoxian>🔍 看看我命盘里哪颗星落陷了？</button></p>
       <div class="ziwei-codex-short-grid" style="margin-top:10px">
         ${levels
           .map((term) => {
@@ -877,8 +1096,11 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
   root.appendChild(page);
 
   let layer: CodexLayer = queryLayer();
-  let starBucket: StarBucket = (queryParam('bucket') as StarBucket) || 'major';
-  if (!STAR_BUCKETS.includes(starBucket)) starBucket = 'major';
+  const rawBucket = (queryParam('bucket') as StarBucket) || 'major';
+  let starKind: StarKindFilter = STAR_BUCKETS.includes(rawBucket)
+    ? starBucketToKind(rawBucket)
+    : 'major';
+  let starMeet: StarMeetFilter = parseStarMeet(queryParam('meet'));
   let palaceBucket: PalaceBucket = 'twelve';
   let mutagenBucket: MutagenBucket = 'stars';
   let structureBucket: StructureBucket = 'brightness';
@@ -890,6 +1112,57 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
   let minorId = queryParam('minor');
   let shenshaId = queryParam('shensha');
   let contrastId = queryParam('contrast');
+  let detailTab: DetailTabId = 'portrait';
+  let palaceFocus = '';
+  let shenshaTheme: ShenshaThemeId | 'all' = 'all';
+
+  function chartContext(): {
+    chartHits: ReturnType<typeof indexChartStars>;
+    hasChart: boolean;
+    personId: string;
+    person: PersonProfile;
+    view: ZiweiChartView | null;
+  } {
+    const person = getActivePerson();
+    const view = castZiweiChart(person, {
+      intent: 'map',
+      year: new Date().getFullYear(),
+    });
+    if ('error' in view) {
+      return {
+        chartHits: new Map(),
+        hasChart: false,
+        personId: person.id,
+        person,
+        view: null,
+      };
+    }
+    return {
+      chartHits: indexChartStars(view),
+      hasChart: true,
+      personId: person.id,
+      person,
+      view,
+    };
+  }
+
+  if (!queryParam('meet') && chartContext().hasChart) starMeet = 'collected';
+
+  function bindLuoxianJump(): void {
+    page.querySelector('[data-goto-luoxian]')?.addEventListener('click', () => {
+      navigate('/ziwei/reading?mode=chart&status=%E9%99%B7');
+    });
+  }
+
+  function bindChartJumps(): void {
+    page.querySelectorAll<HTMLButtonElement>('[data-goto-chart]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const qs = btn.dataset.gotoChart ?? 'mode=chart';
+        navigate(`/ziwei/reading?${qs}`);
+      });
+    });
+  }
 
   const activeAtlasLabel = (): string =>
     detailId ||
@@ -953,12 +1226,25 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
   }
 
   function bindOpeners(): void {
+    page.querySelectorAll<HTMLButtonElement>('[data-toggle-fav]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.toggleFav ?? '';
+        if (!id) return;
+        toggleZiweiCodexFavorite(id);
+        paint();
+      });
+    });
     page.querySelectorAll<HTMLButtonElement>('[data-open-star]').forEach((btn) => {
       btn.addEventListener('click', () => {
         detailId = btn.dataset.openStar ?? '';
+        detailTab = 'portrait';
+        palaceFocus = '';
+        const lore = getStarLore(detailId);
+        starKind = lore?.category === 'major' ? 'major' : 'support';
         clearDetailExcept('star');
         layer = 'stars';
-        setUrl({ layer: 'stars', star: detailId, bucket: starBucket });
+        setUrl({ layer: 'stars', star: detailId, bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
     });
@@ -967,8 +1253,8 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         minorId = btn.dataset.openMinor ?? '';
         clearDetailExcept('minor');
         layer = 'stars';
-        starBucket = 'minor';
-        setUrl({ layer: 'stars', minor: minorId, bucket: 'minor' });
+        starKind = 'support';
+        setUrl({ layer: 'stars', minor: minorId, bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
     });
@@ -977,8 +1263,8 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         shenshaId = btn.dataset.openShensha ?? '';
         clearDetailExcept('shensha');
         layer = 'stars';
-        starBucket = 'shensha';
-        setUrl({ layer: 'stars', bucket: 'shensha', shensha: shenshaId });
+        starKind = 'shensha';
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet, shensha: shenshaId });
         paint();
       });
     });
@@ -987,8 +1273,8 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         contrastId = btn.dataset.openContrast ?? 'overview';
         clearDetailExcept('contrast');
         layer = 'stars';
-        starBucket = 'shensha';
-        setUrl({ layer: 'stars', bucket: 'shensha', contrast: contrastId });
+        starKind = 'shensha';
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet, contrast: contrastId });
         paint();
       });
     });
@@ -1014,7 +1300,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       btn.addEventListener('click', () => {
         termId = btn.dataset.openTerm ?? '';
         clearDetailExcept('term');
-        setUrl({ layer, term: termId, bucket: starBucket });
+        setUrl({ layer, term: termId, bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
     });
@@ -1028,10 +1314,10 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderTermDetail(termId)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-sub]')?.addEventListener('click', () => {
         termId = '';
-        setUrl({ layer, bucket: starBucket });
+        setUrl({ layer, bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
       bindOpeners();
@@ -1043,10 +1329,11 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderMinorDetail(getMinorStarLore(minorId)!)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         minorId = '';
-        setUrl({ layer: 'stars', bucket: 'minor' });
+        starKind = 'support';
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
       bindOpeners();
@@ -1058,10 +1345,11 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderSchoolContrastDetail(contrastId)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         contrastId = '';
-        setUrl({ layer: 'stars', bucket: 'shensha' });
+        starKind = 'shensha';
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
       bindOpeners();
@@ -1073,10 +1361,11 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderShenshaDetail(getShenshaLore(shenshaId)!)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         shenshaId = '';
-        setUrl({ layer: 'stars', bucket: 'shensha' });
+        starKind = 'shensha';
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
       bindOpeners();
@@ -1088,7 +1377,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderPalaceDetail(palaceId)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-sub]')?.addEventListener('click', () => {
         palaceId = '';
         setUrl({ layer: 'palaces' });
@@ -1103,7 +1392,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回紫微</button>
         ${renderComboDetail(comboId)}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-sub]')?.addEventListener('click', () => {
         comboId = '';
         setUrl({ layer });
@@ -1113,18 +1402,54 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       return;
     }
 
+    const { chartHits, hasChart, personId, person, view } = chartContext();
+
     const detail = detailId ? getStarLore(detailId) : undefined;
     if (detail) {
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 返回紫微</button>
-        ${renderStarDetail(detail, map)}
+        ${renderStarDetail(detail, {
+          entries: map,
+          chartHits,
+          hasChart,
+          detailTab,
+          palaceFocus,
+          personId,
+        })}
       `;
-      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+      page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
       page.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         detailId = '';
-        setUrl({ layer: 'stars', bucket: starBucket });
+        detailTab = 'portrait';
+        palaceFocus = '';
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
+      page.querySelectorAll<HTMLButtonElement>('[data-detail-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          detailTab = (btn.dataset.detailTab as DetailTabId) || 'portrait';
+          paint();
+        });
+      });
+      page.querySelectorAll<HTMLButtonElement>('[data-palace-chip]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          palaceFocus = btn.dataset.palaceChip ?? '';
+          detailTab = 'you';
+          paint();
+        });
+      });
+      page.querySelectorAll<HTMLButtonElement>('[data-unlock-tip]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const tip = btn.parentElement?.querySelector<HTMLElement>('.ziwei-detail-unlock-tip');
+          if (!tip) return;
+          const open = tip.hasAttribute('hidden');
+          if (open) tip.removeAttribute('hidden');
+          else tip.setAttribute('hidden', '');
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          btn.classList.toggle('is-open', open);
+        });
+      });
+      bindLuoxianJump();
       bindOpeners();
       return;
     }
@@ -1139,9 +1464,10 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     ).join('');
 
     let body = '';
-    if (layer === 'stars') body = renderStarsCatalog(starBucket, map);
+    if (layer === 'stars') body = renderStarsCatalog(starMeet, starKind, map, chartHits, hasChart, shenshaTheme);
     else if (layer === 'palaces') body = renderPalacesCatalog(palaceBucket);
-    else if (layer === 'mutagen') body = renderMutagenCatalog(mutagenBucket, map);
+    else if (layer === 'mutagen')
+      body = renderMutagenCatalog(mutagenBucket, map, chartHits, hasChart, person, view);
     else if (layer === 'structure') body = renderStructureCatalog(structureBucket);
     else if (layer === 'journey') body = renderJourneyLayer();
     else body = renderMeetLayer();
@@ -1149,27 +1475,30 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     const showFeatured = layer !== 'journey' && layer !== 'meet';
 
     page.innerHTML = `
-      <button type="button" class="back-link life-back">← 返回命盘</button>
+      <button type="button" class="back-link life-back">← 返回紫微</button>
       <header class="life-header ziwei-header">
         <div class="life-header-emblem">${mysticEmblemHtml('cosmos', 'md')}</div>
         <h1 class="page-title">星曜图鉴</h1>
         <p class="page-subtitle">基础图鉴 + 命盘动态组合 · ${all.collected}/${all.total}</p>
       </header>
-      ${ziweiSysTabsHtml('reading')}
+      ${ziweiSysTabsHtml(null)}
       ${showFeatured ? renderFeaturedStrip() : ''}
       ${
         layer === 'journey' || layer === 'meet'
-          ? `<div class="ziwei-layer-tabs">
+          ? `<div class="ziwei-layer-tabs ziwei-layer-tabs-caps">
               <button type="button" class="ziwei-layer-tab" data-layer="stars"><strong>完整图鉴</strong><span>返回分类</span></button>
               <button type="button" class="ziwei-layer-tab ${layer === 'journey' ? 'is-on' : ''}" data-layer="journey"><strong>组合旅程</strong><span>搭戏进度</span></button>
               <button type="button" class="ziwei-layer-tab ${layer === 'meet' ? 'is-on' : ''}" data-layer="meet"><strong>我的相遇</strong><span>收藏</span></button>
             </div>`
-          : `<div class="ziwei-layer-tabs">${sectionTabs}</div>`
+          : `<div class="ziwei-layer-tabs ziwei-layer-tabs-caps">${sectionTabs}</div>`
       }
       ${body}
     `;
+    assembleZiweiStickyNav(page);
+    bindLuoxianJump();
+    bindChartJumps();
 
-    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei/reading'));
+    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/ziwei'));
     page.querySelectorAll<HTMLElement>('.lab-sys-tabs [data-path]').forEach((el) => {
       el.addEventListener('click', () => {
         const path = el.dataset.path;
@@ -1184,7 +1513,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         comboId = '';
         termId = '';
         minorId = '';
-        setUrl({ layer, bucket: starBucket });
+        setUrl({ layer, bucket: starKindToBucket(starKind), meet: starMeet });
         paint();
       });
     });
@@ -1208,14 +1537,37 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       setUrl({ layer: 'meet' });
       paint();
     });
-    page.querySelectorAll<HTMLButtonElement>('[data-star-bucket]').forEach((btn) => {
+    page.querySelectorAll<HTMLButtonElement>('[data-star-meet]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const next = btn.dataset.starBucket as StarBucket;
-        if (STAR_BUCKETS.includes(next)) {
-          starBucket = next;
-          setUrl({ layer: 'stars', bucket: starBucket });
+        starMeet = parseStarMeet(btn.dataset.starMeet);
+        setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet });
+        paint();
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('[data-star-kind]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.starKind as StarKindFilter;
+        if ((STAR_KIND_ORDER as string[]).includes(next)) {
+          starKind = next;
+          setUrl({ layer: 'stars', bucket: starKindToBucket(starKind), meet: starMeet });
           paint();
         }
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('[data-shensha-theme]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.shenshaTheme ?? 'all';
+        if (next === 'all' || (SHENSHA_THEME_ORDER as string[]).includes(next)) {
+          shenshaTheme = next as ShenshaThemeId | 'all';
+          paint();
+        }
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('[data-bucket-guide]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openStarBucketGuideNotes();
       });
     });
     page.querySelectorAll<HTMLButtonElement>('[data-palace-bucket]').forEach((btn) => {

@@ -18,6 +18,7 @@ import { meetLineFor } from '../liuyao/vault.ts';
 import { TRIGRAM_ORDER, TRIGRAMS, type TrigramId } from '../liuyao/trigrams.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { liuyaoPageBgStyle } from '../ui/liuyao-hero.ts';
+import { mountScrollTopFab } from '../ui/scroll-top.ts';
 
 type VaultFilter = 'all' | 'met' | 'favorite';
 
@@ -294,5 +295,6 @@ export function renderLiuyaoVault(root: HTMLElement): () => void {
 
   paintGrid();
   root.appendChild(page);
-  return () => {};
+  const disposeTop = mountScrollTopFab();
+  return () => disposeTop();
 }

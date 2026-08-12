@@ -197,3 +197,154 @@
 .mirror-detail-head .page-title {
   margin-top: 4px;
 }
+
+/* 流年时间轴 */
+.mirror-timeline {
+  margin: 0 0 20px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-deep) 90%, #fff 10%);
+}
+
+.mirror-timeline-head {
+  margin-bottom: 12px;
+}
+
+.mirror-timeline-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.mirror-timeline-head p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.mirror-year-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mirror-year-chip {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 2px;
+  min-width: 4.5rem;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mirror-year-chip strong {
+  font-size: 0.95rem;
+}
+
+.mirror-year-chip span {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+.mirror-year-chip.is-on {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 75%, transparent);
+}
+
+.mirror-year-detail {
+  display: grid;
+  gap: 10px;
+}
+
+.mirror-year-age {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.mirror-year-split {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .mirror-year-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.mirror-year-split h3 {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.mirror-year-split p {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.mirror-year-compare {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold-soft) 65%, transparent);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.mirror-rectify-cta {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 16px;
+}
+
+.mirror-rectify-actions {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 20px;
+}
+
+.mirror-dual-meters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 0.82rem;
+}
+
+.mirror-dual-meters span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--ink-muted);
+}
+
+.mirror-dual-meters .is-combined {
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+}
+
+.mirror-dual-card {
+  margin-bottom: 12px;
+}
+
+.mirror-dual-top {
+  margin-bottom: 18px;
+}
+
+.mirror-dual-list .life-route-title {
+  margin-bottom: 10px;
+}

@@ -49,6 +49,10 @@ import {
   type BranchRingMode,
 } from '../bazi/codex-branch-ring.ts';
 import {
+  renderStemRelationRingHtml,
+  type StemRingMode,
+} from '../bazi/codex-stem-ring.ts';
+import {
   getBaziEncyclopedia,
   isAtlasLibraryKind,
 } from '../bazi/codex-encyclopedia.ts';
@@ -71,6 +75,7 @@ import {
 import { castBaziChart, type BaziChart } from '../bazi/cast.ts';
 import { nayinOf } from '../bazi/pillar-meta.ts';
 import { buildLuckCycles } from '../bazi/luck-cycles.ts';
+import { dayunLoreHint } from '../bazi/codex-jiazi-dayun-lore.ts';
 import { buildEnergyBalance } from '../bazi/sense-energy.ts';
 import { wuxingClass, type WuXing } from '../bazi/elements.ts';
 import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
@@ -122,7 +127,7 @@ const TAB_ORDER: Tab[] = [
 ];
 
 const TAB_GUIDE: Record<Tab, string> = {
-  relation: '五行生克 · 地支合冲刑害 · 天干五合',
+  relation: '五行生克 · 地支环图 · 天干环图',
   stem: '你的核心性格底色',
   branch: '环境、根基与行动方式',
   tengod: '你如何与世界发生关系',
@@ -191,6 +196,7 @@ export function renderBaziCodex(root: HTMLElement): () => void {
     },
   });
   let branchRingMode: BranchRingMode = 'chong';
+  let stemRingMode: StemRingMode = 'he';
   /** 生克图聚焦：只亮某一行的相关边 */
   let wuxingFocus: WuXing | null = null;
   try {
@@ -271,14 +277,14 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       </button>`;
 
     page.innerHTML = `
-      <button type="button" class="back-link life-back">← 返回命盘</button>
+      <button type="button" class="back-link life-back">← 返回八字</button>
       <header class="life-header">
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <h1 class="page-title">八字探索</h1>
         <p class="page-subtitle">${SYSTEM_POSITION.bazi} · 已点亮 ${litCount}/${litTotal}</p>
       </header>
 
-      ${baziSysTabsHtml('reading')}
+      ${baziSysTabsHtml(null)}
 
       <div class="bazi-codex-tabs" role="tablist">
         ${tabBtn('relation', '生克关系')}
@@ -296,7 +302,7 @@ export function renderBaziCodex(root: HTMLElement): () => void {
 
       ${
         tab === 'relation'
-          ? renderShengKeTab(map, branchRingMode, wuxingFocus)
+          ? renderShengKeTab(map, branchRingMode, stemRingMode, wuxingFocus)
           : tab === 'stem'
             ? renderStemGrid()
             : tab === 'branch'
@@ -316,7 +322,7 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       ${detailId ? renderDetail(detailId, map) : ''}
     `;
 
-    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/bazi/reading'));
+    page.querySelector('.life-back')?.addEventListener('click', () => navigate('/bazi'));
     page.querySelectorAll<HTMLElement>('.lab-sys-tabs [data-path]').forEach((el) => {
       el.addEventListener('click', () => {
         const path = el.dataset.path;
@@ -351,6 +357,24 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       }
       paint();
     };
+
+    page.querySelectorAll<HTMLElement>('[data-rel-inline]').forEach((el) => {
+      el.addEventListener('click', (ev) => {
+        // 单击不打开下方详情；留给双击展开
+        ev.stopPropagation();
+        ev.preventDefault();
+      });
+      el.addEventListener('dblclick', (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        toggleRelationInlineGloss(el);
+      });
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        toggleRelationInlineGloss(el);
+      });
+    });
 
     page.querySelectorAll<HTMLElement>('[data-codex-id]').forEach((el) => {
       el.addEventListener('click', (ev) => {
@@ -396,6 +420,15 @@ export function renderBaziCodex(root: HTMLElement): () => void {
         const next = btn.dataset.branchRingMode as BranchRingMode | undefined;
         if (next && next !== branchRingMode) {
           branchRingMode = next;
+          paint();
+        }
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('[data-stem-ring-mode]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.stemRingMode as StemRingMode | undefined;
+        if (next && next !== stemRingMode) {
+          stemRingMode = next;
           paint();
         }
       });
@@ -521,10 +554,49 @@ function compactEntryHtml(opts: {
     </button>`;
 }
 
+/** 生克关系词条：双击卡片内展开释义（不挂下方详情） */
+function relationAtlasCardHtml(r: (typeof RELATION_ATLAS)[number]): string {
+  const tip = '双击展开释义';
+  const panelId = `rel-gloss-${r.id.replace(/[^a-zA-Z0-9\u4e00-\u9fff:_-]/g, '_')}`;
+  const mark = r.group === '天干关系' ? '天' : '地';
+  return `
+    <article
+      class="bazi-codex-entry is-card is-rel-inline"
+      data-rel-inline="${escapeHtml(r.id)}"
+      data-tip="${escapeHtml(tip)}"
+      title="${escapeHtml(tip)}"
+      tabindex="0"
+      role="button"
+      aria-expanded="false"
+      aria-controls="${escapeHtml(panelId)}"
+    >
+      <span class="bazi-codex-thumb is-glyph" aria-hidden="true">${escapeHtml(mark)}</span>
+      <span class="bazi-codex-entry-body">
+        <strong>${escapeHtml(r.title)}</strong>
+        <span class="bazi-codex-meta">${escapeHtml(r.group)}</span>
+        <span class="bazi-codex-presence">${escapeHtml(r.group)} · ${escapeHtml(r.title)}</span>
+        <span class="bazi-rel-inline-hint" aria-hidden="true">双击看释义</span>
+      </span>
+      <div id="${escapeHtml(panelId)}" class="bazi-rel-inline-gloss" hidden>
+        <p class="bazi-rel-inline-gloss-body">${escapeHtml(r.gloss)}</p>
+      </div>
+    </article>`;
+}
+
+function toggleRelationInlineGloss(el: HTMLElement): void {
+  const open = el.classList.toggle('is-gloss-open');
+  el.setAttribute('aria-expanded', open ? 'true' : 'false');
+  const panel = el.querySelector<HTMLElement>('.bazi-rel-inline-gloss');
+  if (panel) panel.hidden = !open;
+  el.setAttribute('data-tip', open ? '双击收起释义' : '双击展开释义');
+  el.setAttribute('title', open ? '双击收起释义' : '双击展开释义');
+}
+
 /** 生克关系：五行生克 + 地支合冲刑害 + 天干五合 + 词条 */
 function renderShengKeTab(
   map: Map<string, { reason?: string }>,
   ringMode: BranchRingMode,
+  stemMode: StemRingMode,
   wxFocus: WuXing | null = null,
 ): string {
   const statusByWx: Partial<Record<WuXing, string>> = {};
@@ -534,8 +606,6 @@ function renderShengKeTab(
   }
   const gan = RELATION_ATLAS.filter((r) => r.group === '天干关系');
   const zhi = RELATION_ATLAS.filter((r) => r.group === '地支关系');
-  const card = (r: (typeof RELATION_ATLAS)[number]) =>
-    compactEntryHtml({ id: r.id, title: r.title, core: r.gloss, lit: true });
   return `
     ${renderWuxingShengKeMapHtml({
       title: '五行生克',
@@ -546,14 +616,21 @@ function renderShengKeTab(
       focus: wxFocus,
     })}
     ${renderBranchRelationRingHtml({ mode: ringMode })}
-    ${renderRelationsAtlasHtml({ skipWuxingPairs: true, skipBranchPairLists: true })}
+    ${renderStemRelationRingHtml({ mode: stemMode })}
+    ${renderRelationsAtlasHtml({
+      skipWuxingPairs: true,
+      skipBranchPairLists: true,
+      skipStemPairLists: true,
+    })}
     <section class="bazi-gz-section">
       <h2 class="bazi-codex-section-title">天干关系词条</h2>
-      <div class="bazi-codex-entry-grid">${gan.map(card).join('')}</div>
+      <p class="bazi-codex-hint">悬停看提示 · 双击卡片展开释义（不另开下方详情）</p>
+      <div class="bazi-codex-entry-grid">${gan.map(relationAtlasCardHtml).join('')}</div>
     </section>
     <section class="bazi-gz-section">
       <h2 class="bazi-codex-section-title">地支关系词条</h2>
-      <div class="bazi-codex-entry-grid">${zhi.map(card).join('')}</div>
+      <p class="bazi-codex-hint">悬停看提示 · 双击卡片展开释义（不另开下方详情）</p>
+      <div class="bazi-codex-entry-grid">${zhi.map(relationAtlasCardHtml).join('')}</div>
     </section>
   `;
 }
@@ -647,7 +724,7 @@ function renderMineChartTab(): string {
     const du = luck?.dayun.find((d) => d.current && !d.empty);
     const ln = luck?.liunian.find((l) => l.current) || luck?.liunian.find((l) => l.selected);
     const duLabel = du
-      ? `${du.ganZhi}（约${du.startAge}–${du.endAge}岁）`
+      ? `${du.ganZhi}（约${du.startAge}–${du.endAge}岁）${dayunLoreHint(du.ganZhi) ? ` · ${dayunLoreHint(du.ganZhi)}` : ''}`
       : '—';
     const lnLabel = ln ? `${ln.year}${ln.ganZhi || ''}` : '—';
     quick = `

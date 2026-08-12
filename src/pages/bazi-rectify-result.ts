@@ -148,6 +148,7 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
             <p class="life-footnote">${escapeHtml(advice)}</p>
             <div class="bazi-rectify-actions">
               <button type="button" class="life-btn-primary" data-adopt="${escapeHtml(top.candidate.branch)}">采用为暂定时辰</button>
+              <button type="button" class="life-btn-ghost" data-path="/mirror/rectify/result">看双盘对照打分 ›</button>
               <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">继续补充事件</button>
             </div>
           </article>

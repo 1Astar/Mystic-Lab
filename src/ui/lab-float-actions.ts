@@ -16,6 +16,7 @@ import {
   formatSelectionAskSeed,
   mountLabSelectionAsk,
 } from './lab-selection-ask.ts';
+import { clearScrollTopFab, mountScrollTopFab } from './scroll-top.ts';
 
 export type LabFloatActionsOpts = {
   system: LabNotesSystem;
@@ -37,11 +38,14 @@ export type LabFloatActionsOpts = {
   answerConcept?: (q: string) => { answer: string; hit: boolean };
   /** 关闭选区追问（默认开启） */
   disableSelectionAsk?: boolean;
+  /** 长页一键回顶（默认开启） */
+  showScrollTop?: boolean;
 };
 
 export function clearLabFloatDock(): void {
   document.querySelectorAll('[data-lab-float-dock]').forEach((el) => el.remove());
   document.querySelectorAll('[data-lab-deep-fab]').forEach((el) => el.remove());
+  clearScrollTopFab();
   clearLabSelectionAsk();
 }
 
@@ -137,9 +141,14 @@ export function mountLabFloatActions(page: HTMLElement, opts: LabFloatActionsOpt
         onAsk: (text) => defaultSelectionAsk(opts, text),
       });
 
+  const disposeTop =
+    opts.showScrollTop === false ? () => {} : mountScrollTopFab();
+
   return () => {
     disposeSel();
+    disposeTop();
     dock.remove();
+    clearScrollTopFab();
     clearLabSelectionAsk();
   };
 }

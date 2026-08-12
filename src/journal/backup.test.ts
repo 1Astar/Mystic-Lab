@@ -213,6 +213,7 @@ describe('journey backup', () => {
       'mystic-lab-bazi-partner': '{"nickname":"伴侣"}',
       'mystic-lab.reading-notes.bazi.self': '{"text":"八字笔记"}',
       'mystic-lab.ziwei-ai-deep.self': '紫微深度解读正文',
+      'mystic-lab.bazi-ai-deep.self': '八字深度解读正文',
       'mystic.liuyao.hexGuide.favorites.v1': '["乾"]',
       'mystic-ly-ask-vault': '[{"id":"v1"}]',
       'mystic-lab-ai-quota-v1': '{"deepLeft":2}',
@@ -227,6 +228,7 @@ describe('journey backup', () => {
     expect(backup.keys['mystic-lab-bazi-partner']).toContain('伴侣');
     expect(backup.keys['mystic-lab.reading-notes.bazi.self']).toContain('八字笔记');
     expect(backup.keys['mystic-lab.ziwei-ai-deep.self']).toBe('紫微深度解读正文');
+    expect(backup.keys['mystic-lab.bazi-ai-deep.self']).toBe('八字深度解读正文');
     expect(backup.keys['mystic.liuyao.hexGuide.favorites.v1']).toContain('乾');
     expect(backup.keys['mystic-ly-ask-vault']).toContain('v1');
     expect(backup.keys['mystic-lab-ai-quota-v1']).toContain('deepLeft');

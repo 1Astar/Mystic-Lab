@@ -10,6 +10,10 @@ import {
   ganZhiPlainHint,
   shuttleYearRange,
 } from './sense-shuttle.ts';
+import {
+  dayunLoreDecadeNote,
+  dayunLoreHint,
+} from './codex-jiazi-dayun-lore.ts';
 
 const profile = {
   ...EMPTY_PROFILE,
@@ -62,5 +66,9 @@ describe('sense-shuttle', () => {
     expect(frame.tone.length).toBeGreaterThan(8);
     expect(frame.shipMetaphor).toMatch(/船/);
     expect(frame.yearTag).toMatch(/今/);
+    if (frame.dayunGanZhi) {
+      expect(frame.dayunHint).toBe(dayunLoreHint(frame.dayunGanZhi));
+      expect(frame.decadeNote).toBe(dayunLoreDecadeNote(frame.dayunGanZhi));
+    }
   });
 });

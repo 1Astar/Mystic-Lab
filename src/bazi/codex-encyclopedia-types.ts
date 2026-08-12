@@ -100,6 +100,20 @@ export type CodexDossier = {
   };
   /** 卡片核心词（短） */
   coreKeyword: string;
+  /**
+   * 作大运时专区（六十甲子等运程词条）
+   * 缺省 = 本词条无大运专篇
+   */
+  dayunAs?: {
+    theme: string;
+    weather: string;
+    leanIn: string;
+    watch: string;
+    playbook: string;
+    memory: string;
+    /** 手写精品 */
+    rich: boolean;
+  };
   /** 神煞：本产品查法 + 他派差异；非神煞可缺省 */
   schoolDiff?: ShenshaSchoolDiff;
 };

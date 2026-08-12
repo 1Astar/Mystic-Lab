@@ -60,9 +60,12 @@ export function renderRelationsAtlasHtml(opts?: {
   skipWuxingPairs?: boolean;
   /** 地支环图已展示时，折叠区只留天干五合等 */
   skipBranchPairLists?: boolean;
+  /** 天干环图已展示时，不再重复五合竖列表 */
+  skipStemPairLists?: boolean;
 }): string {
   const skipWx = opts?.skipWuxingPairs !== false;
   const skipBranch = opts?.skipBranchPairLists === true;
+  const skipStem = opts?.skipStemPairLists === true;
   const shengRows = WUXING_ORDER.map(
     (wx) =>
       pairRow(wx, SHENG_OF[wx], '生', `${wx}生${SHENG_OF[wx]}`, wx, SHENG_OF[wx]),
@@ -130,6 +133,10 @@ export function renderRelationsAtlasHtml(opts?: {
   return `
     ${wxSecs}
     ${branchSecs}
+    ${
+      skipStem
+        ? ''
+        : `
     <section class="bazi-gz-section bazi-rel-atlas-sec">
       <h2 class="bazi-codex-section-title">天干 · 五合</h2>
       <p class="bazi-rel-atlas-lead">
@@ -138,7 +145,8 @@ export function renderRelationsAtlasHtml(opts?: {
         与上方「地支六合」不是同一张表。
       </p>
       <div class="bazi-rel-pair-list">${ganHeRows}</div>
-    </section>`;
+    </section>`
+    }`;
 }
 
 function hitChips(hits: BranchRelationHit[] | { kind: string; label: string; peers: string[] }[]): string {

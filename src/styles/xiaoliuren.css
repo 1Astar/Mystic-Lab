@@ -173,25 +173,25 @@
   gap: 4px;
   font-size: 0.76rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.62);
+  color: var(--ink-muted);
 }
 
 .xlr-phase-teach-example {
   margin: 10px 0 0;
   font-size: 0.74rem;
   line-height: 1.55;
-  color: rgba(201, 168, 108, 0.72);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-phase-teach-conclusion {
   margin: 8px 0 0;
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.78);
+  color: var(--ink-muted);
 }
 
 .xlr-phase-teach-conclusion strong {
-  color: var(--xlr-gold, #c9a86c);
+  color: var(--gold-ink, var(--xlr-gold, var(--gold)));
   font-weight: 600;
 }
 
@@ -448,24 +448,28 @@
 .xlr-hour-timeline {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 14px;
+  gap: 5px;
+  margin-top: 10px;
 }
 
 .xlr-hour-seg {
-  padding: 8px 6px;
+  padding: 5px 4px;
   text-align: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid transparent;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font: inherit;
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.25;
+  color: var(--ink-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .xlr-hour-seg.is-active {
-  background: rgba(255, 214, 166, 0.1);
-  border-color: var(--ink-muted);
-  color: var(--gold);
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--gold) 50%, var(--line));
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-hour-seg-name {
@@ -473,11 +477,25 @@
   font-weight: 600;
 }
 
+.xlr-hour-seg-name em {
+  margin-left: 2px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.62rem;
+  color: var(--gold-ink, var(--gold));
+  opacity: 0.9;
+}
+
+.xlr-hour-seg:not(.is-active) .xlr-hour-seg-name em {
+  color: var(--ink-muted);
+  opacity: 0.85;
+}
+
 .xlr-hour-seg-range {
   display: block;
-  margin-top: 2px;
-  font-size: 0.6rem;
-  opacity: 0.75;
+  margin-top: 1px;
+  font-size: 0.58rem;
+  opacity: 0.85;
 }
 
 .xlr-hour-memory {
@@ -629,23 +647,23 @@
   margin-top: 10px;
   font-size: 1rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
 }
 
 .xlr-result-block {
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 214, 166, 0.08);
-  border-top: 1px solid rgba(255, 214, 166, 0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-top: 1px solid var(--line);
 }
 
 .xlr-result-process {
   margin: 10px 2px 0;
   font-size: 0.72rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.42);
+  color: var(--ink-muted);
 }
 
 .xlr-result-huangli-bridge {
@@ -686,7 +704,7 @@
 .xlr-result-reflect-hint {
   margin: 8px 0 0;
   font-size: 0.74rem;
-  color: rgba(201, 168, 108, 0.62);
+  color: var(--ink-muted);
 }
 
 .xlr-reading-actions .btn[disabled] {
@@ -698,7 +716,7 @@
   margin: 12px 2px 0;
   font-size: 0.82rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.78);
+  color: var(--ink-muted);
 }
 
 .xlr-result-q span {
@@ -706,14 +724,14 @@
   margin-bottom: 4px;
   font-size: 0.68rem;
   letter-spacing: 0.12em;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-result-q em {
   margin-left: 6px;
   font-style: normal;
   font-size: 0.72rem;
-  color: rgba(201, 168, 108, 0.55);
+  color: var(--ink-muted);
 }
 
 .xlr-result-layer-no {
@@ -814,9 +832,9 @@
   border-radius: 999px;
   font-size: 0.72rem;
   letter-spacing: 0.04em;
-  color: var(--xlr-gold, #c9a86c);
-  background: rgba(201, 168, 108, 0.12);
-  border: 1px solid rgba(201, 168, 108, 0.22);
+  color: var(--gold-ink, var(--xlr-gold, var(--gold)));
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-2));
+  border: 1px solid var(--line);
 }
 
 .xlr-codex-oneliner {
@@ -841,14 +859,14 @@
 .xlr-codex-fields dt {
   font-size: 0.68rem;
   letter-spacing: 0.12em;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-codex-fields dd {
   margin: 0;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: var(--ink-muted, rgba(232, 224, 212, 0.72));
+  color: var(--ink-muted);
 }
 
 .xlr-codex-links {
@@ -1104,8 +1122,8 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 .xlr-hour-guide-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .xlr-hour-guide-now-memory {
@@ -1115,8 +1133,23 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   color: var(--ink-muted);
 }
 
-.xlr-hour-guide-list .xlr-shichen-table {
-  margin-top: 0;
+.xlr-hour-guide-hint {
+  margin: 0 2px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+  opacity: 0.9;
+}
+
+.xlr-hour-guide-lore {
+  margin: 0 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-hour-guide-row {
@@ -1155,7 +1188,22 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 }
 
 .xlr-hour-guide-page .btn {
-  margin-top: 20px;
+  margin-top: 12px;
+}
+
+/* 时辰入门：盘略小、时间格收紧，避免整页被拉开 */
+.xlr-hour-guide-page .xlr-shichen-scene {
+  max-width: min(240px, 72vw);
+  margin: 4px auto 0;
+}
+
+.xlr-hour-guide-page .xlr-hour-timeline {
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.xlr-hour-guide-page .xlr-hour-seg {
+  padding: 4px 3px;
 }
 
 @keyframes xlr-pulse {
@@ -1228,11 +1276,9 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   overflow: hidden;
   padding: 16px 16px 18px;
   background: var(--surface-1);
-  border: 1px solid rgba(255, 214, 166, 0.14);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 214, 166, 0.06);
+  box-shadow: var(--shadow, 0 16px 40px rgba(0, 0, 0, 0.35));
 }
 
 .xlr-flow-panel::before {
@@ -1268,9 +1314,9 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   font-family: var(--font-serif);
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--gold);
-  background: rgba(255, 214, 166, 0.1);
-  border: 1px solid rgba(255, 214, 166, 0.22);
+  color: var(--gold-ink, var(--gold));
+  background: var(--gold-soft);
+  border: 1px solid var(--line);
 }
 
 .xlr-flow-body {
@@ -1298,7 +1344,7 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 }
 
 .xlr-flow-sub strong {
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-question-input {
@@ -1320,16 +1366,16 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   margin-top: 20px;
   padding: 16px 16px 14px;
   border-radius: 12px;
-  background: rgba(255, 248, 236, 0.035);
-  border: 1px solid rgba(201, 168, 108, 0.12);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-subcard-title {
   margin: 0 0 10px;
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.14em;
-  color: rgba(201, 168, 108, 0.72);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-time-main {
@@ -1345,7 +1391,7 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   margin: 6px 0 0;
   font-size: 0.76rem;
   line-height: 1.5;
-  color: rgba(232, 224, 212, 0.52);
+  color: var(--ink-muted);
 }
 
 .xlr-huangli-lines {
@@ -1367,29 +1413,29 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 .xlr-huangli-line dt {
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: rgba(201, 168, 108, 0.65);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-huangli-line dd {
   margin: 0;
-  color: rgba(232, 224, 212, 0.82);
+  color: var(--ink);
 }
 
 .xlr-huangli-line--yi dt {
-  color: rgba(165, 214, 167, 0.85);
+  color: color-mix(in srgb, var(--wx-mu) 82%, var(--ink));
 }
 
 .xlr-huangli-line--ji dt {
-  color: rgba(239, 154, 154, 0.85);
+  color: color-mix(in srgb, var(--danger) 88%, var(--ink));
 }
 
 .xlr-huangli-note {
   margin: 14px 0 0;
   padding-top: 12px;
-  border-top: 1px solid rgba(201, 168, 108, 0.1);
+  border-top: 1px solid var(--line);
   font-size: 0.78rem;
   line-height: 1.65;
-  color: rgba(232, 224, 212, 0.55);
+  color: var(--ink-muted);
 }
 
 .xlr-huangli-link {
@@ -1400,22 +1446,22 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   background: none;
   font: inherit;
   font-size: 0.76rem;
-  color: rgba(201, 168, 108, 0.62);
+  color: var(--gold-ink, var(--gold));
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .xlr-huangli-link:hover {
-  color: var(--xlr-gold, var(--gold));
+  color: var(--gold-ink, var(--xlr-gold, var(--gold)));
 }
 
 /* ── 提问页 · 单主卡 + 子卡 ── */
 .xlr-flow-question {
   padding: 22px 20px 24px;
-  background: rgba(16, 14, 28, 0.78);
-  border: 1px solid rgba(201, 168, 108, 0.1);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.28);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow, 0 10px 36px rgba(0, 0, 0, 0.28));
 }
 
 .xlr-flow-question::before {
@@ -1424,7 +1470,7 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 
 .xlr-flow-question .xlr-flow-kicker {
   margin-bottom: 18px;
-  color: rgba(201, 168, 108, 0.58);
+  color: var(--ink-muted);
 }
 
 .xlr-flow-question .xlr-flow-heading {
@@ -1437,26 +1483,27 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   margin-top: 10px;
   font-size: 0.84rem;
   line-height: 1.7;
-  color: rgba(232, 224, 212, 0.52);
+  color: var(--ink-muted);
 }
 
 .xlr-flow-question .xlr-question-input {
   margin-top: 20px;
   padding: 14px 16px;
   color: var(--ink);
-  background: rgba(8, 8, 16, 0.55);
-  border: 1px solid rgba(201, 168, 108, 0.14);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 10px;
 }
 
 .xlr-flow-question .xlr-question-input::placeholder {
-  color: rgba(232, 224, 212, 0.32);
+  color: var(--ink-muted);
+  opacity: 1;
 }
 
 .xlr-flow-question .xlr-question-input:focus {
   outline: none;
-  border-color: rgba(201, 168, 108, 0.35);
-  box-shadow: 0 0 0 2px rgba(201, 168, 108, 0.08);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .xlr-flow-question .xlr-time-subcard {
@@ -1476,8 +1523,8 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   margin-top: 16px;
   padding: 12px 10px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 214, 166, 0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-shichen-table-title {
@@ -1502,45 +1549,49 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   width: 100%;
   padding: 7px 10px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--ink) 5%, var(--surface-1));
+  border: 1px solid var(--line-soft, var(--line));
   font: inherit;
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .xlr-shichen-row:hover {
-  background: rgba(255, 255, 255, 0.055);
+  background: color-mix(in srgb, var(--gold) 12%, var(--surface-2));
+  color: var(--ink);
 }
 
 .xlr-shichen-row.is-active {
-  background: rgba(255, 214, 166, 0.1);
-  border-color: rgba(255, 214, 166, 0.32);
-  color: var(--gold);
+  background: color-mix(in srgb, var(--gold-soft) 75%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  color: var(--gold-ink, var(--ink));
   font-weight: 600;
 }
 
 .xlr-shichen-row.is-tapped {
-  border-color: rgba(201, 168, 108, 0.55);
-  background: rgba(201, 168, 108, 0.14);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 80%, var(--surface-1));
 }
 
 .xlr-shichen-row-name {
   letter-spacing: 0.06em;
+  color: inherit;
+  font-weight: 600;
 }
 
 .xlr-shichen-row-alias {
   font-size: 0.66rem;
-  color: rgba(201, 168, 108, 0.65);
+  color: var(--ink-muted);
 }
 
 .xlr-shichen-row-range {
   text-align: right;
   font-size: 0.66rem;
-  opacity: 0.85;
+  color: var(--ink-muted);
+  opacity: 1;
 }
 
 .xlr-shichen-lore {
@@ -1564,8 +1615,8 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   margin-bottom: 12px;
   padding: 8px 10px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 214, 166, 0.1);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-count-step {
@@ -1662,6 +1713,7 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 .xlr-shichen-pointer-wrap {
   position: absolute;
   inset: 0;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1745,8 +1797,8 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 
 .xlr-orbit-body {
   padding: 12px 10px 8px;
-  background: rgba(10, 10, 18, 0.55);
-  border: 1px solid rgba(255, 214, 166, 0.12);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 12px;
 }
 
@@ -2225,8 +2277,8 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   margin-top: 14px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: rgba(11, 11, 20, 0.45);
-  border: 1px solid rgba(255, 214, 166, 0.1);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-step-tally-row {
@@ -2436,8 +2488,8 @@ body.xlr-huangli-lock {
 .xlr-home-panel {
   padding: 12px 10px 10px;
   border-radius: 12px;
-  background: rgba(16, 14, 28, 0.78);
-  border: 1px solid rgba(201, 168, 108, 0.1);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   overflow: hidden;
 }
 
@@ -2508,7 +2560,7 @@ body.xlr-huangli-lock {
   font-size: 1.75rem;
   font-weight: 600;
   letter-spacing: 0.14em;
-  color: var(--ink);
+  color: var(--xlr-ink);
 }
 
 .xlr-home-module {
@@ -2566,7 +2618,7 @@ body.xlr-huangli-lock {
   margin: 14px 0 8px;
   font-size: 0.68rem;
   letter-spacing: 0.12em;
-  color: rgba(201, 168, 108, 0.62);
+  color: var(--gold-ink, var(--gold));
   text-align: center;
 }
 
@@ -2623,7 +2675,7 @@ body.xlr-huangli-lock {
   margin: -2px 0 10px;
   font-size: 0.68rem;
   text-align: center;
-  color: rgba(232, 224, 212, 0.42);
+  color: var(--xlr-ink-muted, var(--ink-muted));
 }
 
 .xlr-home-core {
@@ -2674,8 +2726,26 @@ body.xlr-huangli-lock {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  margin: 0;
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   animation: xlr-scene-in 0.5s ease backwards;
   animation-delay: calc(var(--i) * 0.05s);
+}
+
+.xlr-home-god-badge:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.xlr-home-god-badge:active {
+  transform: scale(0.96);
 }
 
 .xlr-home-god-icon {
@@ -2692,7 +2762,7 @@ body.xlr-huangli-lock {
 
 .xlr-home-god-badge span {
   font-size: 0.52rem;
-  color: var(--xlr-ink-muted);
+  color: var(--ink-muted);
   white-space: nowrap;
 }
 
@@ -2719,15 +2789,22 @@ body.xlr-huangli-lock {
 }
 
 .xlr-home-secondary {
-  padding: 8px;
-  border: 0;
-  background: none;
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
   font: inherit;
-  font-size: 0.78rem;
-  color: var(--xlr-ink-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--gold-ink, var(--gold));
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
+}
+
+.xlr-home-secondary:active {
+  background: color-mix(in srgb, var(--gold-soft) 55%, var(--surface-1));
 }
 
 .xlr-home-links {
@@ -2740,7 +2817,7 @@ body.xlr-huangli-lock {
 
 .xlr-home-links a {
   font-size: 0.72rem;
-  color: rgba(201, 168, 108, 0.55);
+  color: var(--ink-muted);
   text-decoration: none;
 }
 
@@ -2922,8 +2999,8 @@ body.xlr-huangli-lock {
   font-size: 0.8rem;
   line-height: 1.6;
   color: var(--xlr-ink-muted);
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(201, 168, 108, 0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-palm-explain strong,
@@ -2991,12 +3068,20 @@ body.xlr-huangli-lock {
   overflow: visible;
 }
 
+/* 黄历挂历步：跟主题面板，勿强制夜黑 */
 .xlr-flow-panel.xlr-flow-lunar {
   overflow: visible;
-  background:
-    radial-gradient(ellipse 88% 50% at 50% 22%, rgba(201, 168, 108, 0.08), transparent 58%),
-    rgba(12, 10, 20, 0.92);
-  border-color: rgba(255, 214, 166, 0.14);
+  background: var(--xlr-panel, var(--surface-1));
+  border-color: var(--xlr-panel-border, var(--line));
+  color: var(--xlr-ink, var(--ink));
+}
+
+.xlr-cal-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .xlr-lunar-calendar {
@@ -3015,11 +3100,11 @@ body.xlr-huangli-lock {
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   line-height: 1.25;
-  color: rgba(201, 168, 108, 0.52);
+  color: color-mix(in srgb, var(--gold) 72%, var(--ink-muted));
 }
 
 .xlr-lunar-status.is-done {
-  color: rgba(201, 168, 108, 0.82);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-cal-card {
@@ -3042,35 +3127,37 @@ body.xlr-huangli-lock {
 
 .xlr-cal-hanger {
   display: block;
-  width: 86%;
+  width: 90%;
   height: auto;
-  margin: 0 auto -26px;
+  margin: 0 auto -48px;
   object-fit: contain;
   object-position: center bottom;
   flex-shrink: 0;
   position: relative;
   z-index: 3;
   pointer-events: none;
-  opacity: 0.92;
+  opacity: 0.96;
 }
 
 .xlr-cal-page {
   position: relative;
   z-index: 1;
-  width: 92%;
+  width: 90%;
   margin: 0 auto;
   overflow: visible;
+  /* 再上提一截，让纸页顶缘钻进顶杆下沿，消灭露白缝 */
+  transform: translateY(-6px);
   transform-origin: top center;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.45s ease;
 }
 
 .xlr-cal-page.is-turning {
-  transform: translateY(-6px) scale(0.985);
+  transform: translateY(-12px) scale(0.985);
   filter: brightness(1.04);
 }
 
 .xlr-cal-page.is-turned {
-  transform: none;
+  transform: translateY(-6px);
   filter: none;
 }
 
@@ -3256,7 +3343,7 @@ body.xlr-huangli-lock {
   text-align: left;
   font-size: 0.52rem;
   line-height: 1.45;
-  color: rgba(62, 48, 30, 0.72);
+  color: rgba(42, 34, 24, 0.9);
 }
 
 .xlr-cal-meta-col {
@@ -3274,7 +3361,7 @@ body.xlr-huangli-lock {
   min-width: 2.4em;
   margin-right: 6px;
   letter-spacing: 0.08em;
-  color: rgba(82, 58, 38, 0.5);
+  color: rgba(62, 48, 30, 0.72);
 }
 
 .xlr-lunar-explain {
@@ -3282,15 +3369,16 @@ body.xlr-huangli-lock {
   padding: 12px 14px 10px;
   border-radius: 10px;
   text-align: left;
-  background: rgba(255, 248, 236, 0.04);
-  border: 1px solid rgba(201, 168, 108, 0.1);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-lunar-explain-title {
   margin: 0;
   font-size: 0.72rem;
   letter-spacing: 0.12em;
-  color: rgba(201, 168, 108, 0.78);
+  font-weight: 600;
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-lunar-explain-body,
@@ -3298,11 +3386,11 @@ body.xlr-huangli-lock {
   margin: 8px 0 0;
   font-size: 0.78rem;
   line-height: 1.65;
-  color: rgba(232, 224, 212, 0.58);
+  color: var(--ink-muted);
 }
 
 .xlr-lunar-explain-step {
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--ink);
 }
 
 .xlr-lunar-expand {
@@ -3314,12 +3402,12 @@ body.xlr-huangli-lock {
   margin-top: 12px;
   padding: 8px 10px 6px;
   border: 0;
-  border-top: 1px solid rgba(201, 168, 108, 0.14);
+  border-top: 1px solid var(--line);
   background: none;
   font: inherit;
   font-size: 0.76rem;
   letter-spacing: 0.04em;
-  color: rgba(201, 168, 108, 0.82);
+  color: var(--gold-ink, var(--gold));
   cursor: pointer;
   transition: color 0.2s ease, letter-spacing 0.2s ease;
 }
@@ -3330,7 +3418,7 @@ body.xlr-huangli-lock {
 }
 
 .xlr-lunar-expand:hover {
-  color: rgba(232, 204, 150, 0.95);
+  color: var(--ink);
 }
 
 .xlr-lunar-expand:hover span {
@@ -3392,8 +3480,8 @@ body.xlr-huangli-lock {
   margin-bottom: 12px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid var(--xlr-panel-border);
+  background: var(--surface-2);
+  border: 1px solid var(--xlr-panel-border, var(--line));
 }
 
 .xlr-count-step-badge {
@@ -3441,7 +3529,11 @@ body.xlr-huangli-lock {
 }
 
 .xlr-flow-kicker {
-  color: var(--xlr-ink-muted);
+  color: var(--xlr-ink-muted, var(--ink-muted));
+}
+
+html[data-theme='moon'] .xlr-flow-kicker {
+  color: var(--gold-ink, var(--ink-muted));
 }
 
 .xlr-reading-page {
@@ -3702,9 +3794,9 @@ body.xlr-huangli-lock {
   border-radius: 10px;
   font-size: 0.78rem;
   line-height: 1.65;
-  color: rgba(232, 224, 212, 0.68);
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(201, 168, 108, 0.1);
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-palm-god-chip {
@@ -3793,7 +3885,7 @@ body.xlr-huangli-lock {
 .xlr-journey-progress-bar {
   height: 6px;
   border-radius: 999px;
-  background: rgba(201, 168, 108, 0.12);
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
   overflow: hidden;
 }
 
@@ -3801,14 +3893,18 @@ body.xlr-huangli-lock {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #c9a86c, #f0e0c0);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--gold)),
+    var(--gold)
+  );
   transition: width 0.35s ease;
 }
 
 .xlr-journey-progress-label {
   margin-top: 6px;
   font-size: 0.72rem;
-  color: rgba(201, 168, 108, 0.65);
+  color: var(--ink-muted);
 }
 
 .xlr-journey-continue {
@@ -3832,8 +3928,8 @@ body.xlr-huangli-lock {
   align-items: center;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(201, 168, 108, 0.14);
-  background: rgba(16, 14, 28, 0.78);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -3841,14 +3937,14 @@ body.xlr-huangli-lock {
 }
 
 .xlr-journey-card.is-done button {
-  border-color: rgba(201, 168, 108, 0.32);
-  background: rgba(201, 168, 108, 0.08);
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 55%, var(--surface-1));
 }
 
 .xlr-journey-card-no {
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-journey-card-main {
@@ -3866,17 +3962,17 @@ body.xlr-huangli-lock {
   font-style: normal;
   font-size: 0.7rem;
   line-height: 1.4;
-  color: rgba(232, 224, 212, 0.48);
+  color: var(--ink-muted);
 }
 
 .xlr-journey-card-status {
   font-size: 0.66rem;
-  color: rgba(201, 168, 108, 0.55);
+  color: var(--ink-muted);
   white-space: nowrap;
 }
 
 .xlr-journey-card.is-done .xlr-journey-card-status {
-  color: #c9a86c;
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-journey-celebrate {
@@ -3885,15 +3981,19 @@ body.xlr-huangli-lock {
   border-radius: 14px;
   text-align: center;
   background:
-    linear-gradient(165deg, rgba(201, 168, 108, 0.16), rgba(16, 14, 28, 0.85));
-  border: 1px solid rgba(201, 168, 108, 0.28);
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--gold) 16%, var(--surface-1)),
+      var(--surface-1)
+    );
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
 }
 
 .xlr-journey-celebrate-eyebrow {
   margin: 0;
   font-size: 0.62rem;
   letter-spacing: 0.24em;
-  color: rgba(201, 168, 108, 0.55);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-journey-celebrate h2 {
@@ -3909,7 +4009,7 @@ body.xlr-huangli-lock {
   margin: 10px 0 0;
   font-size: 0.78rem;
   line-height: 1.6;
-  color: rgba(232, 224, 212, 0.58);
+  color: var(--ink-muted);
 }
 
 .xlr-journey-celebrate-actions {
@@ -3937,7 +4037,7 @@ body.xlr-huangli-lock {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(6, 5, 12, 0.62);
+  background: color-mix(in srgb, var(--bg-deep) 72%, transparent);
   opacity: 0;
   transition: opacity 0.24s ease;
   cursor: pointer;
@@ -3952,9 +4052,10 @@ body.xlr-huangli-lock {
   width: min(100%, 390px);
   max-height: 82vh;
   border-radius: 18px 18px 0 0;
-  background: #12101f;
-  border: 1px solid rgba(201, 168, 108, 0.18);
+  background: var(--drawer-bg, var(--surface-1));
+  border: 1px solid var(--line);
   border-bottom: 0;
+  color: var(--ink);
   transform: translateY(108%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   display: flex;
@@ -3970,7 +4071,7 @@ body.xlr-huangli-lock {
   height: 4px;
   margin: 10px auto 0;
   border-radius: 999px;
-  background: rgba(201, 168, 108, 0.28);
+  background: color-mix(in srgb, var(--gold) 35%, var(--line));
 }
 
 .xlr-journey-sheet-close {
@@ -3981,8 +4082,8 @@ body.xlr-huangli-lock {
   height: 32px;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(232, 224, 212, 0.7);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink-muted);
   cursor: pointer;
 }
 
@@ -3995,7 +4096,7 @@ body.xlr-huangli-lock {
   margin: 0;
   font-size: 0.68rem;
   letter-spacing: 0.12em;
-  color: rgba(201, 168, 108, 0.62);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-journey-title {
@@ -4008,14 +4109,14 @@ body.xlr-huangli-lock {
 .xlr-journey-sub {
   margin: 6px 0 0;
   font-size: 0.78rem;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--ink-muted));
 }
 
 .xlr-journey-p {
   margin: 12px 0 0;
   font-size: 0.84rem;
   line-height: 1.65;
-  color: rgba(232, 224, 212, 0.68);
+  color: var(--ink-muted);
 }
 
 .xlr-journey-actions {
@@ -4029,13 +4130,230 @@ body.xlr-huangli-lock {
   margin: 4px 0 0;
   text-align: center;
   font-size: 0.72rem;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--gold));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xlr-journey-sheet-backdrop,
   .xlr-journey-sheet-panel,
   .xlr-journey-progress-bar span {
+    transition: none;
+  }
+}
+
+/* 六神徽章详情 · 居中弹窗 + 分类 tab */
+.xlr-god-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  pointer-events: none;
+}
+
+.xlr-god-sheet.is-open {
+  pointer-events: auto;
+}
+
+.xlr-god-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--bg-deep) 58%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.xlr-god-sheet.is-open .xlr-god-sheet-backdrop {
+  opacity: 1;
+}
+
+.xlr-god-sheet-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 360px);
+  max-height: min(78vh, 640px);
+  border-radius: 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: 0 16px 40px rgba(44, 51, 64, 0.14);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+.xlr-god-sheet.is-open .xlr-god-sheet-panel {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.xlr-god-sheet-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.xlr-god-sheet-kicker {
+  margin: 14px 18px 0;
+  padding-right: 36px;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.xlr-god-sheet-body {
+  padding: 4px 16px 0;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.xlr-god-modal-head {
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+.xlr-god-modal-icon {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 4px auto 0;
+}
+
+.xlr-god-modal-name {
+  margin: 8px 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.28rem;
+  color: var(--ink);
+}
+
+.xlr-god-modal-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin: 8px 0 0;
+}
+
+.xlr-god-modal-keywords span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-2));
+  border: 1px solid var(--line);
+}
+
+.xlr-god-modal-oneliner {
+  margin: 8px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.xlr-god-modal-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.xlr-god-modal-tab {
+  margin: 0;
+  padding: 7px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.xlr-god-modal-tab.is-active {
+  background: var(--surface-1);
+  color: var(--gold-ink, var(--gold));
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(44, 51, 64, 0.06);
+}
+
+.xlr-god-modal-panels {
+  margin-top: 10px;
+  padding-bottom: 4px;
+}
+
+.xlr-god-modal-panel[hidden] {
+  display: none;
+}
+
+.xlr-god-modal-fields {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.xlr-god-modal-field dt {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.xlr-god-modal-field dd {
+  margin: 3px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.xlr-god-modal-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--surface-1));
+}
+
+.xlr-god-modal-nav-btn {
+  margin: 0;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.xlr-god-modal-nav-btn:active {
+  background: color-mix(in srgb, var(--gold-soft) 50%, var(--surface-1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xlr-god-sheet-backdrop,
+  .xlr-god-sheet-panel {
     transition: none;
   }
 }
@@ -4065,8 +4383,8 @@ body.xlr-huangli-lock {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(16, 14, 28, 0.78);
-  border: 1px solid rgba(201, 168, 108, 0.14);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
 }
 
 .xlr-depth-layer-no {
@@ -4092,29 +4410,29 @@ body.xlr-huangli-lock {
   margin-top: 2px;
   font-style: normal;
   font-size: 0.72rem;
-  color: rgba(201, 168, 108, 0.75);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-depth-layers p {
   margin: 4px 0 0;
   font-size: 0.74rem;
   line-height: 1.5;
-  color: rgba(232, 224, 212, 0.55);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-section {
   margin-top: 20px;
   padding: 14px 12px;
   border-radius: 14px;
-  background: rgba(16, 14, 28, 0.72);
-  border: 1px solid rgba(201, 168, 108, 0.12);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
 }
 
 .xlr-depth-kicker {
   margin: 0;
   font-size: 0.66rem;
   letter-spacing: 0.1em;
-  color: rgba(201, 168, 108, 0.62);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-depth-h2 {
@@ -4128,7 +4446,7 @@ body.xlr-huangli-lock {
   margin: 8px 0 0;
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.62);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-god-list {
@@ -4140,8 +4458,8 @@ body.xlr-huangli-lock {
 .xlr-depth-god-card {
   padding: 12px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(201, 168, 108, 0.1);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   text-align: center;
 }
 
@@ -4155,6 +4473,7 @@ body.xlr-huangli-lock {
 .xlr-depth-god-card h3 {
   margin: 8px 0 0;
   font-size: 1rem;
+  color: var(--ink);
 }
 
 .xlr-depth-god-use,
@@ -4163,7 +4482,7 @@ body.xlr-huangli-lock {
   text-align: left;
   font-size: 0.78rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.68);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-god-use span,
@@ -4172,7 +4491,7 @@ body.xlr-huangli-lock {
   margin-bottom: 2px;
   font-size: 0.66rem;
   letter-spacing: 0.1em;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-depth-palm-topics {
@@ -4184,7 +4503,8 @@ body.xlr-huangli-lock {
 .xlr-depth-palm-topics article {
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-depth-palm-topics h3 {
@@ -4198,7 +4518,7 @@ body.xlr-huangli-lock {
   padding-left: 1.1rem;
   font-size: 0.76rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.62);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-cast-flow {
@@ -4213,20 +4533,20 @@ body.xlr-huangli-lock {
   position: relative;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(201, 168, 108, 0.08);
-  border: 1px solid rgba(201, 168, 108, 0.14);
+  background: color-mix(in srgb, var(--gold-soft) 55%, var(--surface-2));
+  border: 1px solid var(--line);
 }
 
 .xlr-depth-cast-flow span {
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--xlr-gold, #c9a86c);
+  color: var(--gold-ink, var(--xlr-gold, var(--gold)));
 }
 
 .xlr-depth-cast-flow p {
   margin: 4px 0 0;
   font-size: 0.74rem;
-  color: rgba(232, 224, 212, 0.58);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-cast-flow em {
@@ -4234,7 +4554,7 @@ body.xlr-huangli-lock {
   margin-top: 4px;
   font-style: normal;
   text-align: center;
-  color: rgba(201, 168, 108, 0.45);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-case-god {
@@ -4255,7 +4575,7 @@ body.xlr-huangli-lock {
 .xlr-depth-case-god p {
   margin: 2px 0 0;
   font-size: 0.72rem;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-case-grid {
@@ -4267,20 +4587,21 @@ body.xlr-huangli-lock {
 .xlr-depth-case-grid > div {
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-depth-case-grid dt {
   font-size: 0.66rem;
   letter-spacing: 0.1em;
-  color: rgba(201, 168, 108, 0.7);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-depth-case-grid dd {
   margin: 4px 0 0;
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(232, 224, 212, 0.72);
+  color: var(--ink-muted);
 }
 
 .xlr-depth-section .btn {
@@ -4305,22 +4626,22 @@ body.xlr-huangli-lock {
   font-size: 0.82rem;
   line-height: 1.55;
   color: var(--ink);
-  background: rgba(201, 168, 108, 0.1);
-  border: 1px solid rgba(201, 168, 108, 0.22);
+  background: color-mix(in srgb, var(--gold-soft) 60%, var(--surface-2));
+  border: 1px solid var(--line);
 }
 
 .xlr-kungfu-section {
   margin-top: 22px;
   padding: 14px 14px 12px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 214, 166, 0.1);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
 }
 
 .xlr-kungfu-h2 {
   margin: 0 0 10px;
   font-size: 0.95rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-kungfu-lead {
@@ -4340,8 +4661,8 @@ body.xlr-huangli-lock {
   padding: 12px 10px;
   border-radius: 10px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 214, 166, 0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-kungfu-metric strong {
@@ -4361,7 +4682,7 @@ body.xlr-huangli-lock {
 .xlr-kungfu-note {
   margin: 10px 2px 0;
   font-size: 0.74rem;
-  color: rgba(230, 180, 34, 0.85);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-kungfu-gates {
@@ -4379,12 +4700,13 @@ body.xlr-huangli-lock {
   padding: 10px 12px;
   border-radius: 8px;
   font-size: 0.82rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 214, 166, 0.1);
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-kungfu-gates li.is-done {
-  border-color: rgba(201, 168, 108, 0.35);
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
 }
 
 .xlr-kungfu-gates li.is-locked {
@@ -4410,7 +4732,7 @@ body.xlr-huangli-lock {
 
 .xlr-kungfu-bar-label {
   font-size: 0.78rem;
-  color: rgba(232, 224, 212, 0.85);
+  color: var(--ink);
 }
 
 .xlr-kungfu-bar-label em {
@@ -4422,7 +4744,7 @@ body.xlr-huangli-lock {
 .xlr-kungfu-bar-track {
   height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
   overflow: hidden;
 }
 
@@ -4430,7 +4752,11 @@ body.xlr-huangli-lock {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(201, 168, 108, 0.55), rgba(255, 214, 166, 0.85));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--gold)),
+    var(--gold)
+  );
 }
 
 .xlr-kungfu-bar-pct {
@@ -4512,7 +4838,7 @@ body.xlr-huangli-lock {
 
 .xlr-step-kicker,
 .xlr-result-block h3 {
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-replay-sheet,
@@ -4528,4 +4854,349 @@ body.xlr-huangli-lock {
   color: var(--ink);
   background: var(--surface-1);
   border-color: var(--line);
+}
+
+/* —— 月白：小六壬首页/宣纸页去夜靛硬切 —— */
+html[data-theme='moon'] .xlr-xuan-page,
+html[data-theme='moon'] .xlr-home-page {
+  --xlr-ink: var(--ink);
+  --xlr-ink-muted: var(--ink-muted);
+  --xlr-gold: var(--gold-ink, var(--gold));
+  --xlr-gold-soft: var(--gold-soft);
+  --xlr-panel: var(--surface-1);
+  --xlr-panel-border: var(--line);
+  --xlr-bg-deep: var(--bg-deep);
+  --xlr-bg-mid: var(--surface-2);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(201, 168, 76, 0.08), transparent 42%),
+    linear-gradient(180deg, #faf7f1, var(--bg-deep) 48%, #efe8dc);
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-home-title {
+  color: var(--gold-ink, var(--ink));
+}
+
+html[data-theme='moon'] .xlr-home-eyebrow,
+html[data-theme='moon'] .xlr-home-module {
+  color: var(--gold-ink, var(--gold));
+}
+
+html[data-theme='moon'] .xlr-home-slogan,
+html[data-theme='moon'] .xlr-home-gods-head,
+html[data-theme='moon'] .xlr-home-god-badge span,
+html[data-theme='moon'] .xlr-home-gods-hint {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-home-panel {
+  background: var(--surface-1);
+  border-color: var(--line);
+  box-shadow: 0 8px 20px rgba(44, 51, 64, 0.06);
+}
+
+html[data-theme='moon'] .xlr-home-panel-label {
+  color: var(--gold-ink, var(--gold));
+}
+
+html[data-theme='moon'] .xlr-home-palm-viewport {
+  background: #ebe4d6;
+}
+
+html[data-theme='moon'] .xlr-notify-try {
+  background: var(--surface-1);
+  border-color: color-mix(in srgb, var(--gold) 35%, var(--line));
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-notify-try-btn,
+html[data-theme='moon'] .xlr-notify-try .btn {
+  color: var(--gold-ink, var(--ink));
+  background: var(--gold-soft);
+  border-color: var(--line);
+}
+
+html[data-theme='moon'] .xlr-rule-divider {
+  border-top-color: color-mix(in srgb, var(--gold) 28%, var(--line));
+}
+
+html[data-theme='moon'] .xlr-rule-divider::after {
+  background: var(--gold);
+}
+
+html[data-theme='moon'] .xlr-home-primary {
+  color: var(--ink-on-gold);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--gold) 92%, #fff),
+    color-mix(in srgb, var(--gold) 72%, var(--gold-ink, var(--gold)))
+  );
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+  box-shadow: 0 6px 18px rgba(44, 51, 64, 0.08);
+}
+
+html[data-theme='moon'] .xlr-home-secondary {
+  color: var(--gold-ink, var(--gold));
+  background: var(--surface-1);
+  border-color: var(--line);
+  box-shadow: 0 4px 14px rgba(44, 51, 64, 0.05);
+}
+
+html[data-theme='moon'] .xlr-home-links a {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-flow-panel {
+  background: var(--surface-1);
+  border-color: var(--line);
+  box-shadow: 0 8px 24px rgba(44, 51, 64, 0.06);
+}
+
+/* 月白挂历：宣纸面板 + 抠掉素材黑底，不再整页强制夜黑 */
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar {
+  background: var(--surface-1);
+  border-color: var(--line);
+  box-shadow: 0 8px 24px rgba(44, 51, 64, 0.06);
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-flow-kicker {
+  color: var(--gold-ink, var(--gold));
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-status {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-status.is-done {
+  color: var(--gold-ink, var(--gold));
+}
+
+html[data-theme='moon'] .xlr-cal-hanger,
+html[data-theme='moon'] .xlr-cal-paper-main {
+  filter: url('#xlr-knockout-black');
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-explain {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-explain-title,
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-expand {
+  color: var(--gold-ink, var(--gold));
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-explain-body {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-flow-panel.xlr-flow-lunar .xlr-lunar-explain-step {
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-flow-question,
+html[data-theme='moon'] .xlr-result-block,
+html[data-theme='moon'] .xlr-count-steps,
+html[data-theme='moon'] .xlr-orbit-body,
+html[data-theme='moon'] .xlr-step-tally,
+html[data-theme='moon'] .xlr-palm-explain,
+html[data-theme='moon'] .xlr-reveal-tally,
+html[data-theme='moon'] .xlr-journey-sheet-panel,
+html[data-theme='moon'] .xlr-journey-card button,
+html[data-theme='moon'] .xlr-depth-section,
+html[data-theme='moon'] .xlr-depth-layers > li {
+  background: var(--surface-1);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-flow-question .xlr-question-input,
+html[data-theme='moon'] .xlr-orbit-body,
+html[data-theme='moon'] .xlr-result-block,
+html[data-theme='moon'] .xlr-step-tally,
+html[data-theme='moon'] .xlr-palm-explain,
+html[data-theme='moon'] .xlr-reveal-tally,
+html[data-theme='moon'] .xlr-count-steps {
+  background: var(--surface-2);
+}
+
+html[data-theme='moon'] .xlr-shichen-table {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+html[data-theme='moon'] .xlr-shichen-table-title {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+html[data-theme='moon'] .xlr-shichen-row {
+  color: var(--ink);
+  background: var(--surface-1);
+  border-color: var(--line);
+}
+
+html[data-theme='moon'] .xlr-shichen-row-name {
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-shichen-row-alias,
+html[data-theme='moon'] .xlr-shichen-row-range {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-shichen-row.is-active,
+html[data-theme='moon'] .xlr-shichen-row.is-tapped {
+  color: var(--gold-ink, var(--ink));
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+}
+
+html[data-theme='moon'] .xlr-shichen-row.is-active .xlr-shichen-row-alias,
+html[data-theme='moon'] .xlr-shichen-row.is-active .xlr-shichen-row-range,
+html[data-theme='moon'] .xlr-shichen-row.is-tapped .xlr-shichen-row-alias,
+html[data-theme='moon'] .xlr-shichen-row.is-tapped .xlr-shichen-row-range {
+  color: color-mix(in srgb, var(--gold-ink, var(--ink)) 78%, var(--ink-muted));
+}
+
+html[data-theme='moon'] .xlr-subcard {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+html[data-theme='moon'] .xlr-subcard-title,
+html[data-theme='moon'] .xlr-huangli-line dt,
+html[data-theme='moon'] .xlr-huangli-link,
+html[data-theme='moon'] .xlr-flow-num {
+  color: var(--gold-ink, var(--gold));
+}
+
+html[data-theme='moon'] .xlr-time-sub,
+html[data-theme='moon'] .xlr-huangli-note,
+html[data-theme='moon'] .xlr-flow-question .xlr-flow-hint,
+html[data-theme='moon'] .xlr-flow-question .xlr-flow-kicker {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-huangli-line dd {
+  color: var(--ink);
+}
+
+html[data-theme='moon'] .xlr-flow-question .xlr-question-input::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+html[data-theme='moon'] .xlr-home-back,
+html[data-theme='moon'] .xlr-xuan-page .back-link {
+  color: var(--ink-muted);
+}
+
+html[data-theme='moon'] .xlr-home-flow-label,
+html[data-theme='moon'] .xlr-home-gods-hint,
+html[data-theme='moon'] .xlr-god-sheet-kicker,
+html[data-theme='moon'] .xlr-codex-fields dt,
+html[data-theme='moon'] .xlr-codex-keywords span {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .xlr-home-god-badge span {
+  color: var(--ink-muted) !important;
+}
+
+html[data-theme='moon'] .xlr-god-sheet-panel {
+  background: var(--surface-1) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+
+html[data-theme='moon'] .xlr-god-modal-tab.is-active {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .xlr-god-modal-field dt,
+html[data-theme='moon'] .xlr-god-sheet-kicker,
+html[data-theme='moon'] .xlr-god-modal-keywords span {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .xlr-god-modal-field dd {
+  color: var(--ink-muted) !important;
+}
+
+html[data-theme='moon'] .xlr-hour-seg {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  color: var(--ink-muted) !important;
+}
+
+html[data-theme='moon'] .xlr-hour-seg.is-active {
+  background: color-mix(in srgb, var(--gold-soft) 70%, var(--surface-1)) !important;
+  border-color: color-mix(in srgb, var(--gold) 50%, var(--line)) !important;
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .xlr-hour-guide-now-memory {
+  color: var(--ink) !important;
+}
+
+/* 星夜标题：勿吃月白深墨 */
+html[data-theme='star'] .xlr-home-title {
+  color: var(--xlr-ink);
+}
+
+/* 掌上演算之旅 / 深度理解 / 功夫：禁浅米色字叠宣纸 */
+html[data-theme='moon'] .xlr-journey-kicker,
+html[data-theme='moon'] .xlr-journey-sub,
+html[data-theme='moon'] .xlr-journey-done-badge,
+html[data-theme='moon'] .xlr-journey-card-no,
+html[data-theme='moon'] .xlr-journey-card.is-done .xlr-journey-card-status,
+html[data-theme='moon'] .xlr-journey-celebrate-eyebrow,
+html[data-theme='moon'] .xlr-depth-kicker,
+html[data-theme='moon'] .xlr-depth-layers em,
+html[data-theme='moon'] .xlr-depth-god-use span,
+html[data-theme='moon'] .xlr-depth-god-why span,
+html[data-theme='moon'] .xlr-depth-cast-flow span,
+html[data-theme='moon'] .xlr-depth-case-grid dt,
+html[data-theme='moon'] .xlr-kungfu-h2,
+html[data-theme='moon'] .xlr-kungfu-note {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .xlr-journey-p,
+html[data-theme='moon'] .xlr-journey-progress-label,
+html[data-theme='moon'] .xlr-journey-card-main em,
+html[data-theme='moon'] .xlr-journey-card-status,
+html[data-theme='moon'] .xlr-journey-celebrate > p,
+html[data-theme='moon'] .xlr-journey-sheet-close,
+html[data-theme='moon'] .xlr-depth-lead,
+html[data-theme='moon'] .xlr-depth-god-use,
+html[data-theme='moon'] .xlr-depth-god-why,
+html[data-theme='moon'] .xlr-depth-palm-topics ul,
+html[data-theme='moon'] .xlr-depth-cast-flow p,
+html[data-theme='moon'] .xlr-depth-cast-flow em,
+html[data-theme='moon'] .xlr-depth-case-god p,
+html[data-theme='moon'] .xlr-depth-case-grid dd {
+  color: var(--ink-muted) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme='moon'] .xlr-depth-god-card,
+html[data-theme='moon'] .xlr-depth-palm-topics article,
+html[data-theme='moon'] .xlr-depth-case-grid > div,
+html[data-theme='moon'] .xlr-kungfu-section,
+html[data-theme='moon'] .xlr-kungfu-metric,
+html[data-theme='moon'] .xlr-kungfu-gates li {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+
+html[data-theme='moon'] .xlr-journey-progress-bar {
+  background: color-mix(in srgb, var(--ink) 18%, transparent) !important;
+}
+
+html[data-theme='moon'] .xlr-journey-progress-bar span {
+  background: linear-gradient(90deg, var(--gold-ink, var(--gold)), var(--gold)) !important;
 }

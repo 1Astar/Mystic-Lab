@@ -13,6 +13,7 @@ import {
   AXIS_GAIN_FORTUNE,
   AXIS_GAIN_MAJOR,
   axisForMajor,
+  CRAFT_AXES,
   resolveSpiritRootPanel,
   scoreSpiritAxes,
 } from './spirit-roots.ts';
@@ -27,6 +28,7 @@ import {
   clampBuffMult,
   composeMultByAxis,
   effectsForYearMutagen,
+  resolveYearBuffPack,
 } from './spirit-buff.ts';
 import type { CraftAxisScore } from './spirit-roots.ts';
 
@@ -198,11 +200,41 @@ describe('spirit year buff', () => {
       birthHour: '14:30',
       birthPlace: '成都',
     });
-    const res = resolveSpiritRootWithGrowth(person, { year: 2026 });
+    const res = resolveSpiritRootWithGrowth(person, { year: 2026, month: 6 });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(res.panel.yearBuff?.year).toBe(2026);
+    expect(res.panel.yearBuff?.month).toBe(6);
     expect(res.panel.yearBuff?.entries.length).toBeGreaterThan(0);
+    expect(res.panel.yearBuff?.monthEntries.length).toBeGreaterThan(0);
     expect(res.panel.axes.every((a) => typeof a.permanentValue === 'number')).toBe(true);
+  });
+
+  it('stacks year × month multipliers', () => {
+    const person = createEmptyPerson({
+      nickname: '测',
+      gender: 'female',
+      birthYear: '1990',
+      birthMonth: '5',
+      birthDay: '12',
+      birthHour: '14:30',
+      birthPlace: '成都',
+    });
+    const a = resolveYearBuffPack(person, 2026, '', 3);
+    const b = resolveYearBuffPack(person, 2026, '', 9);
+    expect(a.month).toBe(3);
+    expect(b.month).toBe(9);
+    expect(a.monthMutagenLine).not.toBe(b.monthMutagenLine);
+    const yearOnly = composeMultByAxis(a.entries);
+    const stacked = a.multByAxis;
+    // 叠乘后至少有一轴与「仅流年」不同（或月四化空则相等）
+    if (a.monthEntries.length > 0) {
+      const changed = CRAFT_AXES.some((ax) => Math.abs(stacked[ax.id] - yearOnly[ax.id]) > 1e-9);
+      expect(changed).toBe(true);
+    }
+    for (const v of Object.values(stacked)) {
+      expect(v).toBeGreaterThanOrEqual(BUFF_MULT_MIN);
+      expect(v).toBeLessThanOrEqual(BUFF_MULT_MAX);
+    }
   });
 });

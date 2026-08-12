@@ -4,10 +4,12 @@
  */
 import type { BaziChart } from '../bazi/cast.ts';
 import {
-  BRANCH_WUXING,
-  STEM_WUXING,
   type WuXing,
 } from '../bazi/elements.ts';
+import {
+  buildLifeWuxingBars,
+  toCraftWuxingBars,
+} from '../bazi/life-structure.ts';
 import type { PersonProfile } from '../life/types.ts';
 import { castBaziChart } from '../bazi/cast.ts';
 import { castZiweiChart } from '../ziwei/cast.ts';
@@ -112,6 +114,8 @@ export type SpiritRootPanel = {
   activatedCount: number;
   /** 流年 Buff 包（方案2） */
   yearBuff?: YearBuffPack;
+  /** 流年剧情锦囊（当年 + 后两年承接） */
+  yearTips?: string[];
   /** 图鉴组合成就 C */
   comboAchievements?: CraftComboAchState[];
 };
@@ -187,26 +191,8 @@ export function scoreSpiritAxes(input: {
   });
 }
 
-const WX_ORDER: WuXing[] = ['木', '火', '土', '金', '水'];
-
 export function buildWuxingBars(chart: BaziChart): WuxingBar[] {
-  const counts: Record<WuXing, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
-  for (const p of chart.pillars) {
-    if (p.empty) continue;
-    if (p.key === 'liunian') continue;
-    const sw = STEM_WUXING[p.stem];
-    const bw = BRANCH_WUXING[p.branch];
-    if (sw) counts[sw] += 1;
-    if (bw) counts[bw] += 1;
-  }
-  if (chart.dayMasterWx) counts[chart.dayMasterWx] += 2;
-  const max = Math.max(1, ...WX_ORDER.map((el) => counts[el]));
-  return WX_ORDER.map((el) => ({
-    el,
-    count: counts[el],
-    pct: Math.round((counts[el] / max) * 100),
-    dayMaster: chart.dayMasterWx === el,
-  }));
+  return toCraftWuxingBars(buildLifeWuxingBars(chart));
 }
 
 export function applyActivationGains(

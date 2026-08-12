@@ -197,6 +197,10 @@ export type OpenLabNotesSheetOpts = {
   onBodyReady?: (body: HTMLElement, sheet: HTMLElement) => void;
   /** 有 bodyHtml 时是否仍显示学习笔记；默认 true */
   showNotePad?: boolean;
+  /** bodyHtml 模式下笔记折叠区是否默认展开 */
+  notePadOpen?: boolean;
+  /** 说明卡片，嵌在笔记输入上方（引导边看边记） */
+  primerHtml?: string;
   /** 对照提示（显示在笔记上方；点一行可写入输入框） */
   reflect?: {
     title: string;
@@ -235,15 +239,22 @@ export function openLabNotesSheet(opts: OpenLabNotesSheetOpts): void {
         </aside>`
       : '';
 
+  const primerHtml = opts.primerHtml
+    ? `<div class="lab-notes-primer" data-notes-primer>${opts.primerHtml}</div>`
+    : '';
+
   const defaultPad = `
+        ${primerHtml}
         ${reflectHtml}
         <label class="lab-notes-label" for="lab-notes-ta">写下这次想留住的句子、对照与疑问</label>
         <textarea id="lab-notes-ta" class="lab-notes-input" rows="10" maxlength="4000" placeholder="例如：今天最对味的一句是… / 想验证的一件小事…">${escapeHtml(doc.text)}</textarea>
         <p class="lab-notes-hint">自动保存在本机；按体系分本，界面标签自动带，也可自打标签。</p>`;
 
+  const padOpenAttr = opts.notePadOpen ? ' open' : '';
   const foldedPad = showPad
-    ? `<details class="lab-notes-pad">
+    ? `<details class="lab-notes-pad"${padOpenAttr}>
         <summary>笔记</summary>
+        ${primerHtml}
         ${reflectHtml}
         <label class="lab-notes-label" for="lab-notes-ta">写下这次想留住的句子、对照与疑问</label>
         <textarea id="lab-notes-ta" class="lab-notes-input is-compact" rows="6" maxlength="4000" placeholder="例如：今天最对味的一句是…">${escapeHtml(doc.text)}</textarea>

@@ -46,4 +46,10 @@ describe('shensha resolve + overview', () => {
     expect(rows[0]?.name).toBeTruthy();
     expect(rows[0]?.palace).toMatch(/宫$/);
   });
+
+  it('resolves 将星 without stripping to 将', () => {
+    const deco = resolveDecoStarLore('将星');
+    expect(deco?.id).toBe('将星');
+    expect(deco?.oneLiner).toMatch(/台前|带队|统领/);
+  });
 });

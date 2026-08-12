@@ -20,6 +20,11 @@
   cursor: pointer;
 }
 
+.birth-dt-trigger.is-empty {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
 .birth-dt-trigger:hover {
   border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
   background: color-mix(in srgb, var(--surface-2) 88%, var(--ink) 4%);

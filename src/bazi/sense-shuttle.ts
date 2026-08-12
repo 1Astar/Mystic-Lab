@@ -7,6 +7,10 @@ import { BRANCH_WUXING, STEM_WUXING } from './elements.ts';
 import { TEN_GOD_PLAIN } from './learn-steps.ts';
 import type { DayunColumn, LiunianColumn, LuckCycles } from './luck-cycles.ts';
 import { buildYearForecast } from './sense-forecast.ts';
+import {
+  dayunLoreDecadeNote,
+  dayunLoreHint,
+} from './codex-jiazi-dayun-lore.ts';
 
 /** 十神 → 心态短词（换运气泡用） */
 export const TEN_GOD_ATTITUDE: Record<string, string> = {
@@ -162,6 +166,8 @@ export function buildShuttleFrame(
   else if (y < nowYear) yearTag = `${y} · 过去`;
   else yearTag = `${y} · 未来`;
 
+  const loreDecade = dayunGz ? dayunLoreDecadeNote(dayunGz) : '';
+
   return {
     year: y,
     age: Math.max(1, y - birthYear + 1),
@@ -175,7 +181,7 @@ export function buildShuttleFrame(
     liunianHint: ganZhiPlainHint(liuGz),
     dayunGanZhi: dayunGz,
     dayunStemGod: dayunGod,
-    dayunHint: ganZhiPlainHint(dayunGz),
+    dayunHint: dayunGz ? dayunLoreHint(dayunGz) : '',
     dayunEmpty: !dayun || dayun.empty,
     dayunStartYear: dayun?.startYear ?? y,
     dayunEndYear: dayun?.endYear ?? y,
@@ -184,7 +190,7 @@ export function buildShuttleFrame(
     tone: dayun?.empty
       ? '童限还没有干支大运：先看本命船怎么造的，季节云要等起运后才飘来。'
       : forecast.tone,
-    decadeNote: forecast.decadeNote,
+    decadeNote: loreDecade || forecast.decadeNote,
     shipMetaphor: SHIP_METAPHOR,
     yearTag,
   };

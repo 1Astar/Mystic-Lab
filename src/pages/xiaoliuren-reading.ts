@@ -130,7 +130,7 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
   const disposeFloat = mountLabFloatShell(page, {
     system: 'xiaoliuren',
     surface: 'reading',
-    tujianPath: '/xiaoliuren/tujian',
+    tujianPath: '/xiaoliuren',
   });
 
   const isLearn = () => lessonMode === 'learn';

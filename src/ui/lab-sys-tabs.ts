@@ -41,21 +41,21 @@ export const ZIWEI_SYS_TABS = {
   chart: { path: '/ziwei/chart', label: '完整命盘' },
 } as const;
 
-export function baziSysTabsHtml(active: keyof typeof BAZI_SYS_TABS): string {
+export function baziSysTabsHtml(active: keyof typeof BAZI_SYS_TABS | null): string {
   return labSysTabsHtml(
     (Object.keys(BAZI_SYS_TABS) as (keyof typeof BAZI_SYS_TABS)[]).map((k) => ({
       ...BAZI_SYS_TABS[k],
-      active: k === active,
+      active: active !== null && k === active,
     })),
     '八字导航',
   );
 }
 
-export function ziweiSysTabsHtml(active: keyof typeof ZIWEI_SYS_TABS): string {
+export function ziweiSysTabsHtml(active: keyof typeof ZIWEI_SYS_TABS | null): string {
   return labSysTabsHtml(
     (Object.keys(ZIWEI_SYS_TABS) as (keyof typeof ZIWEI_SYS_TABS)[]).map((k) => ({
       ...ZIWEI_SYS_TABS[k],
-      active: k === active,
+      active: active !== null && k === active,
     })),
     '紫微导航',
   );

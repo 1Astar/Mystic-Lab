@@ -21,6 +21,7 @@ export const BACKUP_KEYS = [
   'mystic-lab-liuyao-classic-seen',
   'mystic.liuyao.hexGuide.sediment.v1',
   'mystic.liuyao.hexGuide.favorites.v1',
+  'mystic.ziwei.codex.favorites.v1',
   'mystic-lab-liuyao-mode',
   'mystic-ly-ask-vault',
   // 八字 / 紫微玩过进度
@@ -33,12 +34,14 @@ export const BACKUP_KEYS = [
   'mystic-lab-bazi-learn-v1',
   'mystic-lab-bazi-guess-v1',
   'mystic-lab-bazi-week-weather-v1',
+  'mystic-lab-bazi-journal',
   'mystic.ziwei.yearVerify.v1',
   'mystic.ziwei.dayVerify.v1',
   // 造命功课
   'mystic-lab-craft-xp-v1',
   'mystic-lab-craft-activate-v1',
   'mystic-lab-craft-combo-ach-v1',
+  'mystic-lab-year-stance-v1',
   'mystic-lab-daily-quest-v1',
   'mystic-lab-daily-quest-week-v1',
   'mystic-lab-user-xp-v1',
@@ -64,6 +67,7 @@ export const BACKUP_KEY_PREFIXES = [
   'mystic-ly-course-note:',
   'mystic-lab.reading-notes.',
   'mystic-lab.ziwei-ai-deep.',
+  'mystic-lab.bazi-ai-deep.',
 ] as const;
 
 /** 永不导入/导出（临时态） */
@@ -967,6 +971,7 @@ function mergeKeyValue(
     case 'mystic-lab-journal':
     case 'mystic-lab-xiaoliuren-journal':
     case 'mystic-lab-liuyao-journal':
+    case 'mystic-lab-bazi-journal':
       return mergeIdArray(localRaw, importedRaw, { max: 80, sortKey: 'createdAt' });
     case 'mystic-lab-question-rewrite-feedback':
       return mergeIdArray(localRaw, importedRaw, {
@@ -1024,6 +1029,7 @@ function mergeKeyValue(
       if (
         key.startsWith('mystic-lab.reading-notes.') ||
         key.startsWith('mystic-lab.ziwei-ai-deep.') ||
+        key.startsWith('mystic-lab.bazi-ai-deep.') ||
         key.startsWith('mystic-ly-course-note:')
       ) {
         const localText = localRaw ?? '';

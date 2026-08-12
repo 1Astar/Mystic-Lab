@@ -1,6 +1,6 @@
 /**
- * 造命 · 流年 Buff（方案2）
- * 紫微流年四化 → 限时系数；永久分不变，有效分 = 永久 × 系数（夹紧 0.5～1.8）
+ * 造命 · 流年 / 流月 Buff
+ * 紫微四化 → 限时系数；永久分不变，有效分 = 永久 × 流年 × 流月（夹紧 0.5～1.8）
  */
 import type { PersonProfile } from '../life/types.ts';
 import { resolveHoroscopeLimits } from '../ziwei/horoscope-limits.ts';
@@ -20,6 +20,8 @@ export type BuffEffect = {
   mult: number;
 };
 
+export type BuffScope = 'year' | 'month';
+
 export type YearBuffEntry = {
   id: string;
   title: string;
@@ -28,14 +30,25 @@ export type YearBuffEntry = {
   effects: BuffEffect[];
   effectLabel: string;
   advice: string;
+  /** 流年 / 流月 */
+  scope?: BuffScope;
 };
 
 export type YearBuffPack = {
   year: number;
+  /** 1–12，参与叠乘的流月 */
+  month: number;
   yearGZ: string;
+  monthGZ: string;
+  /** 展示用总述（年+月） */
   mutagenLine: string;
+  yearMutagenLine: string;
+  monthMutagenLine: string;
+  /** 流年词条（stance 会往这里追加） */
   entries: YearBuffEntry[];
-  /** 六轴最终乘子（已夹紧） */
+  /** 流月词条 */
+  monthEntries: YearBuffEntry[];
+  /** 六轴最终乘子：年×月（已夹紧） */
   multByAxis: Record<CraftAxisId, number>;
   /** 八字弱提示，不改系数 */
   baziHint: string;
@@ -61,12 +74,21 @@ function formatEffects(effects: BuffEffect[]): string {
     .join(' · ');
 }
 
+function periodWord(scope: BuffScope): string {
+  return scope === 'month' ? '本月' : '本年';
+}
+
 /** 单条四化 → 轴乘子与白话（忌=考验，不说倒霉） */
-export function effectsForYearMutagen(star: string, kind: MutagenKind): {
+export function effectsForYearMutagen(
+  star: string,
+  kind: MutagenKind,
+  scope: BuffScope = 'year',
+): {
   effects: BuffEffect[];
   advice: string;
 } {
   const home = axisForMajor(star);
+  const when = periodWord(scope);
 
   if (kind === '忌') {
     const soft = home ?? 'tongbian';
@@ -75,7 +97,7 @@ export function effectsForYearMutagen(star: string, kind: MutagenKind): {
         { axis: soft, mult: 0.7 },
         { axis: 'yeli', mult: 1.6 },
       ],
-      advice: `本年限时：${star}化忌——「${axisLabel(soft)}」不宜靠小聪明硬推；「业力」暴涨，适合硬扛复盘或向「温养」高的人求助。考验不是倒霉。`,
+      advice: `${when}限时：${star}化忌——「${axisLabel(soft)}」不宜靠小聪明硬推；「业力」暴涨，适合硬扛复盘或向「温养」高的人求助。考验不是倒霉。`,
     };
   }
 
@@ -91,7 +113,7 @@ export function effectsForYearMutagen(star: string, kind: MutagenKind): {
         ];
     return {
       effects,
-      advice: `本年限时：${star}化禄——资源与满足感更容易来，可主动推进，但仍留弹性。`,
+      advice: `${when}限时：${star}化禄——资源与满足感更容易来，可主动推进，但仍留弹性。`,
     };
   }
 
@@ -107,7 +129,7 @@ export function effectsForYearMutagen(star: string, kind: MutagenKind): {
         ];
     return {
       effects,
-      advice: `本年限时：${star}化权——适合站到台前拍板，也别一个人扛完。`,
+      advice: `${when}限时：${star}化权——适合站到台前拍板，也别一个人扛完。`,
     };
   }
 
@@ -123,7 +145,7 @@ export function effectsForYearMutagen(star: string, kind: MutagenKind): {
       ];
   return {
     effects,
-    advice: `本年限时：${star}化科——名声与求教线索可借力，适合展示与学习。`,
+    advice: `${when}限时：${star}化科——名声与求教线索可借力，适合展示与学习。`,
   };
 }
 
@@ -151,25 +173,28 @@ export function composeMultByAxis(entries: YearBuffEntry[]): Record<CraftAxisId,
   return mults;
 }
 
-/** 从 iztro 流年 mutagen 数组（顺序禄权科忌）建词条 */
+/** 从 iztro mutagen 数组（顺序禄权科忌）建词条 */
 export function buildBuffEntriesFromMutagen(
   yearMutagen: string[],
-  year: number,
+  yearOrKey: number | string,
+  scope: BuffScope = 'year',
 ): YearBuffEntry[] {
   const entries: YearBuffEntry[] = [];
+  const keyBase = String(yearOrKey);
   for (let i = 0; i < KIND_ORDER.length; i++) {
     const star = yearMutagen[i];
     const kind = KIND_ORDER[i]!;
     if (!star) continue;
-    const { effects, advice } = effectsForYearMutagen(star, kind);
+    const { effects, advice } = effectsForYearMutagen(star, kind, scope);
     entries.push({
-      id: `${year}-${kind}-${star}`,
+      id: `${keyBase}-${kind}-${star}`,
       title: `${star}化${kind}`,
       kind,
       star,
       effects,
       effectLabel: formatEffects(effects),
       advice,
+      scope,
     });
   }
   return entries;
@@ -192,20 +217,49 @@ export function applyBuffToAxes(
   });
 }
 
+function clampMonth(m: number): number {
+  if (!Number.isFinite(m)) return new Date().getMonth() + 1;
+  return Math.min(12, Math.max(1, Math.floor(m)));
+}
+
+/**
+ * 解析流年+流月 Buff 包。
+ * @param month 1–12，默认当前月
+ */
 export function resolveYearBuffPack(
   person: PersonProfile,
   year: number,
   baziHint = '',
+  month?: number,
 ): YearBuffPack {
-  const snap = resolveHoroscopeLimits(person, { year, month: 6, day: 15 });
+  const mo = clampMonth(month ?? new Date().getMonth() + 1);
+  const snap = resolveHoroscopeLimits(person, { year, month: mo, day: 15 });
   const yearMutagen = snap?.yearMutagen ?? [];
-  const entries = buildBuffEntriesFromMutagen(yearMutagen, year);
+  const monthMutagen = snap?.monthMutagen ?? [];
+  const yearEntries = buildBuffEntriesFromMutagen(yearMutagen, year, 'year');
+  const monthEntries = buildBuffEntriesFromMutagen(
+    monthMutagen,
+    `${year}m${mo}`,
+    'month',
+  );
+  const yearMutagenLine =
+    snap?.yearMutagenLine ||
+    (yearMutagen.length ? yearMutagen.join(' · ') : '流年四化未能排出');
+  const monthMutagenLine =
+    snap?.monthMutagenLine ||
+    (monthMutagen.length ? monthMutagen.join(' · ') : '流月四化未能排出');
+
   return {
     year,
+    month: mo,
     yearGZ: snap?.yearGZ ?? '',
-    mutagenLine: snap?.yearMutagenLine || (yearMutagen.length ? yearMutagen.join(' · ') : '流年四化未能排出'),
-    entries,
-    multByAxis: composeMultByAxis(entries),
+    monthGZ: snap?.monthGZ ?? '',
+    mutagenLine: `流年 ${yearMutagenLine} · 流月 ${monthMutagenLine}`,
+    yearMutagenLine,
+    monthMutagenLine,
+    entries: yearEntries,
+    monthEntries,
+    multByAxis: composeMultByAxis([...yearEntries, ...monthEntries]),
     baziHint,
   };
 }

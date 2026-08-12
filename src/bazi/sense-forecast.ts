@@ -4,6 +4,7 @@ import { resolveBirthPlaceLng } from './cities.ts';
 import type { BaziChart } from './cast.ts';
 import { categorizeTenGod, type TenGodCategory } from './ten-gods.ts';
 import { toTrueSolarDate } from './true-solar.ts';
+import { dayunLoreDecadeNote } from './codex-jiazi-dayun-lore.ts';
 
 export type YearForecast = {
   year: number;
@@ -226,7 +227,11 @@ export function buildYearForecast(
   }
 
   const pack = WEATHER[cat];
-  const decadeNote = dayun ? decadeWeather(dayun.cat) : undefined;
+  const decadeNote = dayun?.ganZhi
+    ? dayunLoreDecadeNote(dayun.ganZhi)
+    : dayun
+      ? decadeWeather(dayun.cat)
+      : undefined;
 
   return {
     year,

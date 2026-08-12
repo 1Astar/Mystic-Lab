@@ -96,12 +96,11 @@ registerRoute(
   '/xiaoliuren/reading',
   lazy(() => import('./pages/xiaoliuren-reading.ts'), 'renderXiaoliurenReading', xiaoliurenStyles),
 );
-registerRoute(
-  '/xiaoliuren/tujian',
-  lazy(() => import('./pages/xiaoliuren-codex.ts'), 'renderXiaoliurenCodex', xiaoliurenStyles),
-);
+registerRoute('/xiaoliuren/tujian', () => {
+  navigate('/xiaoliuren');
+});
 registerRoute('/xiaoliuren/codex', () => {
-  navigate('/xiaoliuren/tujian');
+  navigate('/xiaoliuren');
 });
 registerRoute(
   '/xiaoliuren/journal',
@@ -115,10 +114,9 @@ registerRoute(
   '/xiaoliuren/palm-journey',
   lazy(() => import('./pages/xiaoliuren-palm-journey.ts'), 'renderXiaoliurenPalmJourney', xiaoliurenStyles),
 );
-registerRoute(
-  '/xiaoliuren/depth',
-  lazy(() => import('./pages/xiaoliuren-depth.ts'), 'renderXiaoliurenDepth', xiaoliurenStyles),
-);
+registerRoute('/xiaoliuren/depth', () => {
+  navigate('/xiaoliuren/palm-journey');
+});
 registerRoute(
   '/xiaoliuren/kungfu',
   lazy(() => import('./pages/xiaoliuren-kungfu.ts'), 'renderXiaoliurenKungfu', xiaoliurenStyles),
@@ -132,6 +130,19 @@ registerRoute(
 registerRoute(
   '/bazi',
   lazy(() => import('./pages/bazi-home.ts'), 'renderBaziHome', baziStyles),
+);
+registerRoute(
+  '/bazi/structure',
+  lazy(
+    () => import('./pages/bazi-structure.ts'),
+    'renderBaziStructure',
+    [
+      () => import('./styles/life.css'),
+      () => import('./styles/bazi.css'),
+      () => import('./styles/bazi-structure.css'),
+      () => import('./styles/mirror.css'),
+    ],
+  ),
 );
 registerRoute(
   '/bazi/reading',
@@ -164,6 +175,10 @@ registerRoute(
 registerRoute(
   '/bazi/week',
   lazy(() => import('./pages/bazi-week-weather.ts'), 'renderBaziWeekWeather', baziStyles),
+);
+registerRoute(
+  '/bazi/journal',
+  lazy(() => import('./pages/bazi-journal.ts'), 'renderBaziJournal', baziStyles),
 );
 registerRoute('/bazi/codex', () => {
   navigate('/bazi/tujian');
@@ -200,6 +215,11 @@ const mirrorStyles = [
   () => import('./styles/life.css'),
   () => import('./styles/mirror.css'),
 ];
+const wardrobeStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/mirror.css'),
+  () => import('./styles/wardrobe.css'),
+];
 registerRoute(
   '/mirror',
   lazy(() => import('./pages/mirror-home.ts'), 'renderMirrorHome', mirrorStyles),
@@ -209,8 +229,22 @@ registerRoute(
   lazy(() => import('./pages/mirror-theme.ts'), 'renderMirrorTheme', mirrorStyles),
 );
 registerRoute(
+  '/mirror/rectify',
+  lazy(() => import('./pages/mirror-rectify.ts'), 'renderMirrorRectify', [
+    ...mirrorStyles,
+    () => import('./styles/bazi.css'),
+  ]),
+);
+registerRoute(
+  '/mirror/rectify/result',
+  lazy(() => import('./pages/mirror-rectify-result.ts'), 'renderMirrorRectifyResult', [
+    ...mirrorStyles,
+    () => import('./styles/bazi.css'),
+  ]),
+);
+registerRoute(
   '/wardrobe',
-  lazy(() => import('./pages/wardrobe-home.ts'), 'renderWardrobeHome', mirrorStyles),
+  lazy(() => import('./pages/wardrobe-home.ts'), 'renderWardrobeHome', wardrobeStyles),
 );
 
 const craftStyles = [

@@ -56,7 +56,7 @@
 }
 
 .lab-sys-tab.is-on {
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   background: var(--gold-soft);
   border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
   font-weight: 600;
@@ -346,15 +346,16 @@ html[data-theme='star'] .life-route-step.is-current .life-route-card {
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--gold) 92%, #fff),
-    color-mix(in srgb, var(--gold) 55%, var(--purple)) 55%,
-    color-mix(in srgb, var(--purple) 70%, var(--gold))
+    color-mix(in srgb, var(--gold) 70%, var(--gold-ink, var(--gold))) 55%,
+    color-mix(in srgb, var(--gold) 78%, var(--ink-on-gold))
   );
-  color: var(--surface-ink, var(--ink));
-  font-weight: 600;
+  color: var(--ink-on-gold);
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 html[data-theme='star'] .life-btn-primary {
-  color: #1a1228;
+  color: var(--ink-on-gold);
 }
 
 .life-btn-secondary {
@@ -377,7 +378,14 @@ html[data-theme='star'] .life-btn-primary {
   outline: none;
 }
 
-.life-btn-primary:disabled,
+.life-btn-primary:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--ink) 8%);
+  color: var(--ink-muted);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
 .life-btn-secondary:disabled,
 .life-entry:disabled {
   opacity: 0.45;
@@ -526,8 +534,9 @@ html[data-theme='star'] .life-btn-primary {
   flex-direction: column;
   gap: 6px;
   margin-top: 10px;
-  font-size: 0.82rem;
-  color: var(--ink-muted);
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-field input,
@@ -601,10 +610,10 @@ html[data-theme='star'] .life-btn-primary {
 }
 .birth-meta-title {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 650;
   letter-spacing: 0.04em;
-  color: var(--ink);
+  color: var(--gold-ink, var(--gold));
 }
 .birth-meta-title em {
   margin-left: 6px;
@@ -629,17 +638,20 @@ html[data-theme='star'] .life-btn-primary {
   padding: 8px 10px;
   border: none;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--surface-2) 82%, var(--ink) 5%);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--surface-1) 92%, var(--ink) 2%);
+  color: var(--ink-muted);
   font-size: 0.78rem;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 55%, transparent);
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 .birth-meta-chip.is-on {
-  background: var(--gold-soft);
+  background: color-mix(in srgb, var(--gold-soft) 78%, var(--gold) 12%);
   color: var(--gold-ink, var(--ink));
-  font-weight: 600;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 35%, transparent);
+  font-weight: 650;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--gold) 58%, transparent);
 }
 .birth-meta-source-toggle {
   width: 100%;
@@ -1127,9 +1139,12 @@ html[data-theme='star'] .life-btn-primary {
   color: var(--ink);
 }
 
-.life-route-tip,
-.life-field {
+.life-route-tip {
   color: var(--ink-muted);
+}
+
+.life-field {
+  color: var(--gold-ink, var(--gold));
 }
 
 .life-field input,
@@ -1138,6 +1153,24 @@ html[data-theme='star'] .life-btn-primary {
 .life-fork-input {
   border-color: var(--line);
   background: var(--surface-2);
+}
+
+.life-field input::placeholder,
+.life-field textarea::placeholder,
+.life-fork-input::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+html[data-theme='moon'] .life-field input::placeholder,
+html[data-theme='moon'] .life-field textarea::placeholder,
+html[data-theme='moon'] .life-fork-input::placeholder {
+  /* 宣纸底再加深半档，避免发虚 */
+  color: color-mix(in srgb, var(--ink-muted) 55%, var(--ink) 45%);
+}
+
+html[data-theme='moon'] .birth-dt-trigger.is-empty {
+  color: color-mix(in srgb, var(--ink-muted) 55%, var(--ink) 45%);
 }
 
 .life-btn-ghost {

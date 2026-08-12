@@ -61,14 +61,18 @@ describe('bazi sense · 规则拟人 A', () => {
     if ('error' in chart) return;
     const f = buildYearForecast(chart, profile, { gender: 'female', year: 2026 });
     expect(f.year).toBe(2026);
+    // 流年生活场景禁术语；大运 decadeNote 已同源甲子专篇，允许干支画面词
     expect(
       forJargonCheck(
-        `${f.title}${f.tone}${f.weather}${f.scene}${f.advice}${f.dos.join('')}${f.donts.join('')}${f.decadeNote ?? ''}${f.chartCta}`,
+        `${f.title}${f.tone}${f.weather}${f.scene}${f.advice}${f.dos.join('')}${f.donts.join('')}${f.chartCta}`,
       ),
     ).not.toMatch(FORBIDDEN);
     expect(f.tone.length).toBeGreaterThan(8);
     expect(f.dos.length).toBeGreaterThanOrEqual(2);
     expect(f.donts.length).toBeGreaterThanOrEqual(2);
+    if (f.decadeNote) {
+      expect(f.decadeNote).toMatch(/这段大运/);
+    }
   });
 
   it('现实感悟口语化', () => {

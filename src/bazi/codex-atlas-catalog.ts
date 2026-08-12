@@ -215,7 +215,7 @@ export type LuckConceptItem = {
 };
 
 export const LUCK_ATLAS: readonly LuckConceptItem[] = [
-  { id: 'luck:大运', title: '大运', gloss: '十年一段气运主题 · 如何触发原局、改写人生舞台。' },
+  { id: 'luck:大运', title: '大运', gloss: '十年一段气运主题 · 点对应甲子词条看「作大运时」专区。' },
   { id: 'luck:流年', title: '流年', gloss: '一年之干支 · 点醒原局哪些柱、对应哪些现实主题。' },
   { id: 'luck:流月', title: '流月', gloss: '月尺度的细触发 · 看当月干支与原局冲合。' },
   { id: 'luck:小运', title: '小运', gloss: '与流年并行的岁运线索 · 辅助看节奏。' },
@@ -294,8 +294,8 @@ export function buildAtlasShellEncyclopedia(): Record<string, BaziEncyclopediaEn
       'jiazi',
       gz,
       { category: '六十甲子', wuxing: undefined, yinyang: undefined },
-      `${gz} · 纳音${ny} · 天干${stem}、地支${branch}。`,
-      [ny, '六十甲子', `${stem}${branch}`],
+      `${gz} · 纳音${ny} · 天干${stem}、地支${branch}。可看作大运十年滤镜。`,
+      [ny, '六十甲子', `${stem}${branch}`, '大运'],
     );
   }
 

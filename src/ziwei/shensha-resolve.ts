@@ -19,10 +19,11 @@ export type ResolvedDecoStar = {
 };
 
 export function resolveDecoStarLore(name: string): ResolvedDecoStar | undefined {
-  const key = name.replace(/星$/, '').trim();
-  if (!key) return undefined;
+  const raw = name.trim();
+  if (!raw) return undefined;
 
-  const shensha = getShenshaLore(key);
+  // 交由底层「精确优先、再剥星」；此处勿先剥掉「将星」
+  const shensha = getShenshaLore(raw);
   if (shensha) {
     return {
       kind: 'shensha',
@@ -35,7 +36,7 @@ export function resolveDecoStarLore(name: string): ResolvedDecoStar | undefined 
     };
   }
 
-  const minor = getMinorStarLore(key);
+  const minor = getMinorStarLore(raw);
   if (minor) {
     return {
       kind: 'minor',

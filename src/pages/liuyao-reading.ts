@@ -94,10 +94,12 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   back.className = 'back-link';
   back.textContent = '← 返回六爻';
   back.addEventListener('click', () => goBack());
+  const centerHost = document.createElement('div');
+  centerHost.className = 'ly-topbar-center';
   const actionsHost = document.createElement('div');
   actionsHost.className = 'ly-topbar-actions';
-  topbar.append(back, actionsHost);
-  mountPersonSwitcher(actionsHost);
+  topbar.append(back, centerHost, actionsHost);
+  mountPersonSwitcher(centerHost);
   mountLiuyaoSfxToggle(actionsHost);
 
   const modeBar = document.createElement('div');

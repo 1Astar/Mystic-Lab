@@ -166,11 +166,11 @@
 }
 
 .life-home-page .life-btn-primary {
-  color: var(--surface-ink, var(--ink));
+  color: var(--ink-on-gold);
 }
 
 html[data-theme='star'] .life-home-page .life-btn-primary {
-  color: #1a1228;
+  color: var(--ink-on-gold);
 }
 
 /* —— 紫微仪盘 —— */
@@ -336,7 +336,7 @@ html[data-theme='moon'] .ziwei-plate-gz {
 
 .ziwei-mode-tab.is-on,
 .lab-sys-tab.is-on {
-  color: var(--gold) !important;
+  color: var(--gold-ink, var(--gold)) !important;
   background: var(--gold-soft) !important;
   border-color: color-mix(in srgb, var(--gold) 55%, var(--line)) !important;
 }
@@ -426,6 +426,14 @@ html[data-theme='moon'] .ziwei-plate-gz {
   color: var(--ink) !important;
 }
 
+.life-profile-page .birth-dt-trigger.is-empty {
+  color: var(--ink-muted) !important;
+}
+
+html[data-theme='moon'] .life-profile-page .birth-dt-trigger.is-empty {
+  color: color-mix(in srgb, var(--ink-muted) 55%, var(--ink) 45%) !important;
+}
+
 /* 月白：卡片用宣纸白，避免残留暗紫底 */
 html[data-theme='moon'] .lab-home-page .entry-card,
 html[data-theme='moon'] .lab-systems .entry-card {
@@ -445,6 +453,7 @@ html[data-theme='star'] .lab-systems .entry-card p {
 }
 
 .module-topbar,
+.ly-topbar,
 .lab-reading-chrome,
 .lab-home-chrome {
   color: var(--ink);
@@ -466,7 +475,7 @@ textarea.question-input {
 
 .question-input::placeholder {
   color: var(--ink-muted);
-  opacity: 0.85;
+  opacity: 1;
 }
 
 /* 综合论断 lean 标签：跟主题 token，避免月白宣纸底浅字不可读 */
@@ -645,4 +654,61 @@ textarea.question-input::placeholder {
 
 .craft-page .craft-radar-label.is-lit {
   fill: var(--gold-ink, var(--gold));
+}
+
+/* 塔罗图鉴（月白）：入口/世界/牌格/进度条 — 防懒加载旧紫底回潮 */
+html[data-theme='moon'] .codex-learn-card,
+html[data-theme='moon'] .codex-world-intro,
+html[data-theme='moon'] .codex-hub-card,
+html[data-theme='moon'] .codex-hub-suit,
+html[data-theme='moon'] .codex-cell {
+  background: var(--surface-1) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+
+html[data-theme='moon'] .codex-cell.is-locked {
+  background: var(--surface-2) !important;
+}
+
+html[data-theme='moon'] .codex-learn-title,
+html[data-theme='moon'] .codex-world-title,
+html[data-theme='moon'] .codex-section-label,
+html[data-theme='moon'] .codex-cell-tease,
+html[data-theme='moon'] .codex-progress-main strong,
+html[data-theme='moon'] .codex-progress-suit-count strong {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .codex-learn-desc,
+html[data-theme='moon'] .codex-world-block p,
+html[data-theme='moon'] .codex-cell-role {
+  color: var(--ink-muted) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme='moon'] .codex-name,
+html[data-theme='moon'] .codex-world-block h3 {
+  color: var(--ink) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme='moon'] .codex-progress {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme='moon'] .codex-progress-suit-bar {
+  background: color-mix(in srgb, var(--ink) 22%, transparent) !important;
+  height: 6px !important;
+}
+
+html[data-theme='moon'] .codex-progress-suit-bar i {
+  background: linear-gradient(90deg, var(--gold-ink, var(--gold)), var(--gold)) !important;
+}
+
+/* 八字/紫微图鉴：吸顶分类条月白底 */
+html[data-theme='moon'] .bazi-codex-tabs,
+html[data-theme='moon'] .ziwei-layer-tabs-caps {
+  background: color-mix(in srgb, var(--bg-deep) 96%, #fff) !important;
 }

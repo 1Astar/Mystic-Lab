@@ -381,6 +381,11 @@ export function mountBirthDatetimeField(opts: MountBirthDatetimeFieldOptions): {
   const dayInput = wrap.querySelector<HTMLInputElement>('input[name="birthDay"]')!;
   const hourInput = wrap.querySelector<HTMLInputElement>('input[name="birthHour"]')!;
 
+  function syncTriggerEmpty(next: BirthSolarValue | null): void {
+    trigger.classList.toggle('is-empty', !next);
+  }
+  syncTriggerEmpty(value);
+
   function writeInputs(next: BirthSolarValue | null): void {
     value = next;
     if (!next) {
@@ -389,6 +394,7 @@ export function mountBirthDatetimeField(opts: MountBirthDatetimeFieldOptions): {
       dayInput.value = '';
       hourInput.value = '';
       trigger.textContent = formatBirthTriggerLabel(null);
+      syncTriggerEmpty(null);
       return;
     }
     const fields = birthFieldsFromValue(next);
@@ -397,6 +403,7 @@ export function mountBirthDatetimeField(opts: MountBirthDatetimeFieldOptions): {
     dayInput.value = fields.birthDay;
     hourInput.value = fields.birthHour;
     trigger.textContent = formatBirthTriggerLabel(next);
+    syncTriggerEmpty(next);
     opts.onChange?.(fields);
   }
 

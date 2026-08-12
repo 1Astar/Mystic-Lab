@@ -45,7 +45,14 @@ import {
   type LiuyueColumn,
   type LuckCycles,
 } from '../bazi/luck-cycles.ts';
-import { buildBaziPageFaq } from '../bazi/page-faq.ts';
+import {
+  dayunLoreDecadeNote,
+  dayunLoreHint,
+} from '../bazi/codex-jiazi-dayun-lore.ts';
+import {
+  patternYongshenCardHtml,
+  resolvePatternYongshen,
+} from '../bazi/pattern-yongshen.ts';
 import { buildBaziPortrait } from '../bazi/portrait-template.ts';
 import {
   formatBirthBrief,
@@ -58,9 +65,9 @@ import { mountBirthDatetimeField } from '../ui/birth-datetime-picker.ts';
 import { draftFromBazi } from '../share/drafts.ts';
 import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
 import { answerFromCodexEntity } from '../bazi/codex-entity-resolve.ts';
+import { openBaziDeepReadingEntry } from '../bazi/personalize-deep.ts';
 import { openBaziCodexPopup } from '../ui/bazi-codex-popup.ts';
 import { openLabConceptPeek } from '../ui/lab-concept-peek.ts';
-import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
 import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
 import { formatSelectionAskSeed } from '../ui/lab-selection-ask.ts';
@@ -269,8 +276,12 @@ function renderDayunCol(c: DayunColumn): string {
       <span class="bazi-luck-empty-hint">起运前 · 无干支</span>
     </button>`;
   }
+  const loreTip = dayunLoreHint(c.ganZhi);
+  const tip = loreTip
+    ? `${c.ganZhi} · ${loreTip}`
+    : c.ganZhi;
   return `
-    <button type="button" class="bazi-luck-col ${c.current ? 'is-current' : ''}" data-luck-year="${c.startYear}">
+    <button type="button" class="bazi-luck-col ${c.current ? 'is-current' : ''}" data-luck-year="${c.startYear}" title="${escapeHtml(tip)}" aria-label="${escapeHtml(tip)}">
       <span class="bazi-luck-year">${c.startYear}</span>
       <span class="bazi-luck-age">${escapeHtml(ageLabel)}</span>
       ${godPair(c.stem, c.stemGod, c.branch, c.branchGod)}
@@ -304,6 +315,8 @@ function renderLuckBoard(luck: LuckCycles, selectedLiuyue: number | null): strin
     ? `流月 · ${yue.jieQi}${yue.dateLabel ? `（${yue.dateLabel}）` : ''} · ${yue.ganZhi}${yue.stemGod ? `（${yue.stemGod}）` : ''}`
     : '';
   const hasTongxian = luck.dayun.some((d) => d.empty);
+  const curDu = luck.dayun.find((d) => d.current && !d.empty);
+  const dayunLoreNote = curDu ? dayunLoreDecadeNote(curDu.ganZhi) : '';
   return `
     <section class="bazi-luck" aria-label="大运流年流月">
       <header class="bazi-luck-meta">
@@ -320,6 +333,11 @@ function renderLuckBoard(luck: LuckCycles, selectedLiuyue: number | null): strin
           ${luck.dayun.map(renderDayunCol).join('')}
         </div>
       </div>
+      ${
+        dayunLoreNote
+          ? `<p class="bazi-luck-note bazi-luck-dayun-lore" aria-label="当前大运作大运时">${escapeHtml(dayunLoreNote)}</p>`
+          : ''
+      }
       ${
         hasTongxian
           ? `<p class="bazi-luck-note bazi-luck-tongxian-note">童限：起运前的幼年段，尚无干支大运，故没有天干地支与十神解析（不是漏算）。点「童限」格可看说明；正式大运从右侧起运后开始。</p>`
@@ -600,15 +618,16 @@ export function renderBaziChart(root: HTMLElement): () => void {
     opts?: { initialTab?: 'deep' | 'ask'; seedQuery?: string },
   ): void {
     const luck = buildLuckCycles(store.profile, person.gender, liunianYear);
+    const portrait = buildBaziPortrait(chart, { gender: person.gender });
 
-    openLabDeepSheet({
-      system: 'bazi',
-      title: `${person.nickname || '我'}的命盘`,
-      initialTab: opts?.initialTab ?? 'ask',
+    openBaziDeepReadingEntry({
+      chart,
+      person,
+      question: '四柱排盘',
+      luck,
+      headline: portrait.keyword,
+      initialTab: opts?.initialTab,
       seedQuery: opts?.seedQuery,
-      deepTabLabel: '深度解读',
-      deepHint: '结合你的出生密码与当下问题，做一次更贴合的解读。概念题请用「边看边问」。',
-      presets: buildBaziPageFaq(chart),
       answerConcept: (q) => {
         const from = answerFromCodexEntity(q, { chart, luck, depth: 'chart' });
         if (from.hit) return { answer: from.answer, hit: true };
@@ -619,10 +638,6 @@ export function renderBaziChart(root: HTMLElement): () => void {
         if (from.hit) return { answer: from.answer, hit: true };
         return { answer: '', hit: false };
       },
-      onMiss: (q) => {
-        void recordBaziConceptMiss(q);
-      },
-      onDeep: () => navigate('/bazi/reading'),
     });
   }
 
@@ -815,6 +830,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
       ${renderGrid(chart)}
 
       ${seasonBlock(chart)}
+      ${patternYongshenCardHtml(resolvePatternYongshen(chart), { compact: true })}
       ${luck ? renderLuckBoard(luck, selectedLiuyue) : '<p class="life-status">暂无法排出大运流年（需性别与完整出生信息）</p>'}
 
     `;

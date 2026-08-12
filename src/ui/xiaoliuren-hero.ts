@@ -4,7 +4,7 @@
   sectorPointerAngle,
 } from '../xiaoliuren/chinese-hour.ts';
 import { solarToLunar } from '../xiaoliuren/lunar.ts';
-import { renderSixGodIcon, SIX_GODS } from '../xiaoliuren/six-gods.ts';
+import { renderSixGodIcon, SIX_GODS, type SixGodId } from '../xiaoliuren/six-gods.ts';
 import { renderXlrDivider } from './xiaoliuren/assets.ts';
 import {
   formatWeekday,
@@ -13,6 +13,7 @@ import {
 } from './xiaoliuren/shichen-dial.ts';
 import { XLR_ASSETS } from './xiaoliuren/assets.ts';
 import { mountStaggerEntrance } from './xiaoliuren/motion.ts';
+import { openSixGodSheet, parseGodIdFromSearch } from './xiaoliuren/god-sheet.ts';
 
 const FLOW_STEPS = ['时间', '起数', '掐指定位', '六神落位', '结合问题解读'] as const;
 
@@ -70,16 +71,16 @@ export function renderXiaoliurenHero(): string {
 
       ${renderXlrDivider('xlr-home-divider')}
 
-      <section class="xlr-home-gods xlr-home-panel xlr-stagger-item" style="--si:3" aria-label="六神探索">
-        <p class="xlr-home-panel-label">六神探索</p>
-        <p class="xlr-home-gods-hint">点下方「六神探索」看完整象征与用法</p>
+      <section id="xlr-home-gods" class="xlr-home-gods xlr-home-panel xlr-stagger-item" style="--si:3" aria-label="六神">
+        <p class="xlr-home-panel-label">六神</p>
+        <p class="xlr-home-gods-hint">点徽章看象征与用法</p>
         <div class="xlr-home-gods-row">
           ${SIX_GODS.map(
             (g, i) => `
-            <div class="xlr-home-god-badge" style="--i:${i}">
+            <button type="button" class="xlr-home-god-badge" style="--i:${i}" data-god="${g.id}" aria-label="查看${g.name}">
               ${renderSixGodIcon(g, 'xlr-home-god-icon')}
               <span>${g.name}</span>
-            </div>`,
+            </button>`,
           ).join('')}
         </div>
       </section>
@@ -97,4 +98,17 @@ export function mountXiaoliurenHero(root: HTMLElement): void {
 
   const dialHost = root.querySelector('.xlr-home-dial');
   if (dialHost) mountShichenDialAnimation(dialHost as HTMLElement);
+
+  root.querySelectorAll<HTMLButtonElement>('.xlr-home-god-badge[data-god]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.god as SixGodId | undefined;
+      if (id) openSixGodSheet(root, id);
+    });
+  });
+
+  const deepGod = parseGodIdFromSearch();
+  if (deepGod) {
+    openSixGodSheet(root, deepGod);
+    root.querySelector('#xlr-home-gods')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
 }

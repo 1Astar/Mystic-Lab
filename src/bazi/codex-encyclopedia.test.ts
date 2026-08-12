@@ -21,6 +21,11 @@ import { buildCodexDossier } from './codex-dossier.ts';
 import { buildChartLinkReport } from './codex-chart-link.ts';
 import { renderWuxingShengKeMapHtml } from './codex-wuxing-map.ts';
 import { renderBaziCodexDetailHtml } from '../ui/bazi-codex-detail.ts';
+import {
+  getJiaziDayunLore,
+  jiaziDayunRichCoverage,
+  listRichJiaziDayunIds,
+} from './codex-jiazi-dayun-lore.ts';
 
 describe('bazi encyclopedia', () => {
   it('core kinds still present', () => {
@@ -196,9 +201,11 @@ describe('bazi encyclopedia', () => {
     expect(d.combos.some((c) => c.peer === '甲')).toBe(true);
     expect(d.combos.some((c) => c.peer === '子')).toBe(true);
     expect(d.combos.some((c) => c.peer.includes('海中金') || c.note.includes('海中金'))).toBe(true);
-    expect(d.chartRole).toMatch(/干支|纳音|不能脱离/);
+    expect(d.chartRole).toMatch(/干支|纳音|不能脱离|作大运/);
     expect(d.memory).toMatch(/甲子/);
-    expect(d.coreKeyword).toMatch(/海中金/);
+    expect(d.dayunAs?.rich).toBe(true);
+    expect(d.dayunAs?.theme).toMatch(/蓄势|立骨/);
+    expect(d.coreKeyword).toMatch(/甲子/);
   });
 
   it('三十纳音均有 lore 且 dossier 非骨架占位', () => {
@@ -207,6 +214,23 @@ describe('bazi encyclopedia', () => {
       expect(d.season, n.name).not.toMatch(/骨架条目/);
       expect(d.likes.length, n.name).toBeGreaterThanOrEqual(2);
       expect(d.memory, n.name).toMatch(/纳音|勿单断|画面/);
+    }
+  });
+
+  it('六十甲子作大运时专区均为手写精品', () => {
+    const { rich, total } = jiaziDayunRichCoverage();
+    expect(total).toBe(60);
+    expect(rich).toBe(60);
+    expect(listRichJiaziDayunIds()).toEqual(listSixtyJiazi());
+    for (const gz of listSixtyJiazi()) {
+      const lore = getJiaziDayunLore(gz);
+      expect(lore.rich, gz).toBe(true);
+      expect(lore.theme, gz).not.toMatch(/待补/);
+      const d = buildCodexDossier(jiaziId(gz))!;
+      expect(d.dayunAs?.rich, gz).toBe(true);
+      expect(d.dayunAs!.theme.length, gz).toBeGreaterThan(4);
+      expect(d.dayunAs!.playbook.length, gz).toBeGreaterThan(8);
+      expect(d.dayunAs!.watch, gz).not.toMatch(/倒霉|必凶|必灾/);
     }
   });
 });

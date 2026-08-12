@@ -11,8 +11,11 @@ export function registerRoute(path: string, handler: RouteHandler): void {
 }
 
 export function navigate(path: string): void {
-  if (path !== location.pathname) {
-    history.pushState({}, '', path);
+  const next = new URL(path, location.origin);
+  const nextKey = `${next.pathname.replace(/\/$/, '') || '/'}${next.search}`;
+  const curKey = `${location.pathname.replace(/\/$/, '') || '/'}${location.search}`;
+  if (nextKey !== curKey) {
+    history.pushState({}, '', `${next.pathname}${next.search}${next.hash}`);
   }
   void render();
 }

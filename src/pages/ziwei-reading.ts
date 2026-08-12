@@ -61,12 +61,13 @@ function queryMode(): ViewMode {
   }
 }
 
-function queryFocus(): { star?: string; palace?: string } {
+function queryFocus(): { star?: string; palace?: string; status?: string } {
   try {
     const q = new URLSearchParams(location.search);
     return {
       star: q.get('star')?.trim() || undefined,
       palace: q.get('palace')?.trim() || undefined,
+      status: q.get('status')?.trim() || undefined,
     };
   } catch {
     return {};
@@ -736,17 +737,49 @@ export function renderZiweiReading(root: HTMLElement): () => void {
     `;
     bind(view);
     const host = page.querySelector<HTMLElement>('#ziwei-plate-host');
+    let statusPalace = focus.palace;
+    let statusStar = focus.star;
+    if (focus.status && !statusStar) {
+      const want = focus.status;
+      for (const p of view.palaces) {
+        const hit = [...p.majors, ...p.minors].find((s) =>
+          String(s.brightness || '').includes(want),
+        );
+        if (hit) {
+          statusPalace = p.name;
+          statusStar = hit.name;
+          break;
+        }
+      }
+    }
     if (host) {
       unmountPlate = mountZiweiPlate(host, view, {
         /* 仅深链带宫位时预选；默认不点宫、不画三方线 */
-        initialPalace: focus.palace || undefined,
+        initialPalace: statusPalace || undefined,
       });
+      if (focus.status) {
+        host.querySelectorAll('.ziwei-plate-status-hit').forEach((el) => {
+          const btn = el as HTMLElement;
+          if (btn.dataset.plateStatus === focus.status) {
+            btn.classList.add('is-luoxian-hl');
+            btn.closest('.ziwei-plate-star-row')?.classList.add('is-luoxian-hl');
+          }
+        });
+        const banner = document.createElement('p');
+        banner.className = 'ziwei-codex-hint ziwei-luoxian-banner';
+        banner.textContent = `已高亮「${focus.status}」状态的星 · 点星可看解释`;
+        host.prepend(banner);
+      }
     }
     attachTimeLadder(view, { withPlateOverlay: true });
-    if (focus.star) {
+    if (statusStar) {
       openZiweiLearnSheet({
         view,
-        focus: { starName: focus.star, palaceName: focus.palace },
+        focus: {
+          starName: statusStar,
+          palaceName: statusPalace,
+          status: focus.status,
+        },
         onOpenChart: () => undefined,
       });
     }

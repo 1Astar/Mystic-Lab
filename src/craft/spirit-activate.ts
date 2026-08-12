@@ -6,6 +6,11 @@ import {
   resolveYearBuffPack,
   type YearBuffPack,
 } from './spirit-buff.ts';
+import {
+  applyStanceToYearBuffPack,
+  getYearStance,
+  listYearTips,
+} from './year-stance.ts';
 import type { BaziChart } from '../bazi/cast.ts';
 import { castBaziChart } from '../bazi/cast.ts';
 import type { PersonProfile } from '../life/types.ts';
@@ -311,14 +316,15 @@ export function codexPathForStar(star: string, palace?: string): string {
   return `/ziwei/tujian?${q.toString()}`;
 }
 
-/** 含 β 成长 + 流年 Buff 有效分的灵根图谱 */
+/** 含 β 成长 + 流年×流月 Buff 有效分的灵根图谱 */
 export function resolveSpiritRootWithGrowth(
   person: PersonProfile,
-  opts?: { year?: number },
+  opts?: { year?: number; month?: number },
 ):
   | { ok: true; panel: SpiritRootPanel; view: ZiweiChartView }
   | { ok: false; error: string } {
   const year = opts?.year ?? new Date().getFullYear();
+  const month = opts?.month ?? new Date().getMonth() + 1;
   const view = castZiweiChart(person, { intent: 'map' });
   if ('error' in view) return { ok: false, error: view.error };
 
@@ -353,8 +359,17 @@ export function resolveSpiritRootWithGrowth(
     }
   }
 
-  const yearBuff: YearBuffPack = resolveYearBuffPack(person, year, baziHint);
+  const yearBuffBase: YearBuffPack = resolveYearBuffPack(
+    person,
+    year,
+    baziHint,
+    month,
+  );
+  const stance = getYearStance(person.id, year);
+  const yearBuff = applyStanceToYearBuffPack(yearBuffBase, stance?.choice);
+  const tips = listYearTips({ personId: person.id, year });
   panel.yearBuff = yearBuff;
+  panel.yearTips = tips.map((t) => t.text);
   panel.axes = applyFlatComboBonuses(panel.axes);
   panel.axes = applyBuffToAxes(panel.axes, yearBuff.multByAxis);
   const ye = applyYeHuoConditionalBurst(panel.axes);

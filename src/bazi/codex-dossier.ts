@@ -10,6 +10,7 @@ import {
 } from './codex-shensha-schema.ts';
 import { resolveSchoolDiff } from './codex-shensha-school-diff.ts';
 import { nayinOf } from './pillar-meta.ts';
+import { getJiaziDayunLore } from './codex-jiazi-dayun-lore.ts';
 import {
   fuXingLookupLines,
   guChenGuaSuLookupLines,
@@ -574,6 +575,7 @@ function buildJiaziDossier(entry: BaziEncyclopediaEntry): CodexDossier {
   const branch = gz.charAt(1);
   const ny = nayinOf(gz);
   const lore = getNayinLore(ny);
+  const dayun = getJiaziDayunLore(gz);
   const stemEntry = getBaziEncyclopedia(stem);
   const branchEntry = getBaziEncyclopedia(branch);
   const yy =
@@ -584,18 +586,24 @@ function buildJiaziDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     ...base,
     whatIs: `${gz}是什么：六十甲子之一。天干${stem}、地支${branch}，纳音${ny}。${
       lore ? lore.scene : entry.oneLiner
-    }`,
+    } 作大运时主题：${dayun.theme}。`,
     wuxingLabel:
       stemEntry?.tags.wuxing || getBaziEncyclopedia(nayinId(ny))?.tags.wuxing || '甲子',
     yinyangLabel: yy,
-    season: `纳音${ny}；天干看${stem}，地支看${branch}。甲子是索引，旺衰看月令与日主。`,
+    season: `纳音${ny}；天干看${stem}，地支看${branch}。甲子是索引，旺衰看月令与日主。大运十年看「作大运时」专区。`,
     likes: [
       `合读天干「${stem}」`,
       `合读地支「${branch}」`,
       `合读纳音「${ny}」`,
       '合十神格局与大运',
+      dayun.leanIn,
     ],
-    dislikes: ['只凭甲子名断吉凶', '忽略日主强弱', '纳音与十神两套重复结论'],
+    dislikes: [
+      '只凭甲子名断吉凶',
+      '忽略日主强弱',
+      '纳音与十神两套重复结论',
+      dayun.watch,
+    ],
     personality:
       lore?.temperament ||
       [stemEntry?.dimensions.personality, branchEntry?.dimensions.personality].filter(Boolean).join('；') ||
@@ -608,24 +616,37 @@ function buildJiaziDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     wealth: lore?.wealth || '须合财星与运岁；甲子只提供干支纳音索引。',
     love: lore?.love || branchEntry?.dimensions.love || base.love,
     body: lore?.body || stemEntry?.dimensions.health || base.body,
-    chartRole:
-      '六十甲子是干支对的完整编码：点开后应落到天干、地支与纳音三层。不能脱离日主、格局、十神和大运单独判断。',
+    chartRole: dayun.rich
+      ? `六十甲子编码；作大运时：${dayun.theme}。落到天干、地支与纳音三层，合日主格局与流年看，勿单断。`
+      : '六十甲子是干支对的完整编码：点开后应落到天干、地支与纳音三层。不能脱离日主、格局、十神和大运单独判断。大运专篇逐步补全。',
     combos: [
       { peer: stem, note: `天干${stem}：日主/十神关系的主轴之一。` },
       { peer: branch, note: `地支${branch}：藏干、刑冲合害与宫位场。` },
       { peer: ny, note: `纳音${ny}：本柱气象画面。` },
+      { peer: '大运', note: dayun.theme },
     ],
     positive: lore
-      ? `正面画面：${lore.strength} 使用边界：甲子是索引不是判决书。`
-      : `${gz} = ${stem}+${branch}+纳音${ny}。索引，勿单断。`,
-    memory: `${gz} = ${stem}+${branch} · 纳音${ny}。先拆三层，再合原局。`,
+      ? `正面画面：${lore.strength} 使用边界：甲子是索引不是判决书。大运十年：${dayun.theme}`
+      : `${gz} = ${stem}+${branch}+纳音${ny}。索引，勿单断。大运：${dayun.theme}`,
+    memory: dayun.rich
+      ? `${dayun.memory} 柱内：${gz} = ${stem}+${branch} · 纳音${ny}。`
+      : `${gz} = ${stem}+${branch} · 纳音${ny}。先拆三层，再合原局。${dayun.memory}`,
     pillarMeaning: {
       year: `年柱见${gz}：早年/家族编码为此干支对与纳音${ny}。`,
       month: `月柱见${gz}：事业与月令场以此干支对为当令线索。`,
       day: `日柱见${gz}：日主坐${branch}，纳音${ny}为自我画面。`,
       hour: `时柱见${gz}：晚成与子女出口编码。`,
     },
-    coreKeyword: `${gz} · ${ny}`,
+    coreKeyword: dayun.rich ? `${gz} · ${dayun.theme}` : `${gz} · ${ny}`,
+    dayunAs: {
+      theme: dayun.theme,
+      weather: dayun.weather,
+      leanIn: dayun.leanIn,
+      watch: dayun.watch,
+      playbook: dayun.playbook,
+      memory: dayun.memory,
+      rich: dayun.rich,
+    },
   };
 }
 

@@ -18,6 +18,7 @@ import { resolveJournalReading } from '../journal/replay.ts';
 import { canResumePartial, stashResumeJournalId } from '../journal/resume.ts';
 import type { JournalEntry } from '../journal/records.ts';
 import { getLabProfileSnapshot } from '../life/profile-context.ts';
+import { mountScrollTopFab } from '../ui/scroll-top.ts';
 import {
   fulfilledLabel,
   getXiaoliurenJournalEntry,
@@ -486,4 +487,5 @@ export function renderJourney(root: HTMLElement): void {
 
   renderTabs();
   renderBody();
+  mountScrollTopFab();
 }

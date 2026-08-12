@@ -189,9 +189,14 @@ export const MINOR_STAR_LORE: MinorStarLore[] = [
 ];
 
 export function getMinorStarLore(name: string): MinorStarLore | undefined {
-  const key = name.replace(/星$/, '');
+  const raw = name.trim();
+  if (!raw) return undefined;
+  const stripped = raw.replace(/星$/, '').trim();
   return (
-    MINOR_STAR_LORE.find((s) => s.id === key) ??
-    MINOR_STAR_LORE.find((s) => key.startsWith(s.id))
+    MINOR_STAR_LORE.find((s) => s.id === raw) ??
+    (stripped && stripped !== raw
+      ? MINOR_STAR_LORE.find((s) => s.id === stripped)
+      : undefined) ??
+    MINOR_STAR_LORE.find((s) => raw.startsWith(s.id) || stripped.startsWith(s.id))
   );
 }

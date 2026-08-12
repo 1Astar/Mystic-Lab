@@ -5,22 +5,22 @@ html[data-theme='star'] {
   --bg-panel: rgba(26, 18, 48, 0.72);
   --bg-card: rgba(46, 27, 75, 0.55);
   --ink: #f4f0e8;
-  --ink-muted: #9aa6bc;
+  --ink-muted: #b0a898;
   --gold: #e8d4a8;
   /* 标题/强调字用金：星夜可亮；月白须更深以保证宣纸底对比度 */
   --gold-ink: #e8d4a8;
   /* 金色实心按钮上的字色（两主题皆须深，避免月白用 --bg-deep 米色） */
   --ink-on-gold: #141018;
   --gold-soft: rgba(232, 212, 168, 0.12);
-  --purple: #9aa6bc;
+  --purple: #b8a890;
   --purple-deep: #2e1b4b;
   --purple-mid: #1a1230;
-  --accent: #9aa6bc;
+  --accent: #b8a890;
   --warn: #e6b422;
   --warn-bg: rgba(230, 180, 34, 0.12);
   --danger: #e05c5c;
   --line: rgba(201, 168, 76, 0.22);
-  --line-soft: rgba(122, 143, 212, 0.22);
+  --line-soft: rgba(201, 168, 76, 0.14);
   --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
   --radius: 20px;
   --radius-sm: 12px;
@@ -29,7 +29,7 @@ html[data-theme='star'] {
   --font-serif: 'Times New Roman', Georgia, serif;
   --stars-opacity: 0.35;
   --body-bg:
-    radial-gradient(circle at 85% 5%, rgba(122, 143, 212, 0.12), transparent 30%),
+    radial-gradient(circle at 85% 5%, rgba(201, 168, 76, 0.1), transparent 30%),
     radial-gradient(circle at 10% 20%, rgba(201, 168, 76, 0.08), transparent 25%),
     linear-gradient(165deg, #0a0e16, var(--bg-deep) 45%, #12101a);
   --drawer-bg: linear-gradient(165deg, rgba(24, 18, 36, 0.98), rgba(8, 8, 14, 0.99));
@@ -43,7 +43,7 @@ html[data-theme='star'] {
   --surface-1: rgba(22, 20, 34, 0.88);
   --surface-2: #16141f;
   --surface-ink: var(--ink);
-  --surface-muted: #b8c0d0;
+  --surface-muted: #c4b8a4;
   --chart-bg: #14121c;
   --chart-bg-glow: rgba(80, 70, 120, 0.22);
   --chart-line: rgba(201, 168, 76, 0.38);
@@ -51,7 +51,7 @@ html[data-theme='star'] {
   --chart-star: rgba(232, 200, 120, 0.95);
   --chart-minor: rgba(220, 210, 190, 0.82);
   --chart-name: rgba(210, 140, 150, 0.95);
-  --chart-gz: rgba(180, 200, 255, 0.8);
+  --chart-gz: rgba(220, 200, 160, 0.82);
   --chart-muted: rgba(201, 168, 76, 0.7);
   --chart-empty: rgba(255, 230, 200, 0.3);
   --chart-center-bg: rgba(10, 8, 16, 0.48);
@@ -75,7 +75,8 @@ html[data-theme='moon'] {
   --bg-panel: rgba(255, 252, 247, 0.72);
   --bg-card: rgba(255, 255, 255, 0.55);
   --ink: #2a3140;
-  --ink-muted: #4a5568;
+  /* 次级字略加深，避免在米色底偏虚 */
+  --ink-muted: #3f4a5c;
   --gold: #c9a84c;
   /* 宣纸底标题用更深褐金，避免 #8a6d2f 仍发虚 */
   --gold-ink: #5c481c;
@@ -106,7 +107,7 @@ html[data-theme='moon'] {
   --surface-1: #fffdf8;
   --surface-2: #f3eee4;
   --surface-ink: #2a3140;
-  --surface-muted: #4a5568;
+  --surface-muted: #3f4a5c;
   --chart-bg: #f7f2e8;
   --chart-bg-glow: rgba(201, 168, 76, 0.1);
   --chart-line: rgba(201, 168, 76, 0.36);
@@ -120,7 +121,7 @@ html[data-theme='moon'] {
   --chart-center-bg: rgba(255, 252, 247, 0.82);
   --chart-center-glow: rgba(201, 168, 76, 0.1);
   --chart-center-ink: #2a3140;
-  --chart-center-soft: #4a5568;
+  --chart-center-soft: #3f4a5c;
   --chart-kicker: #b8953d;
   --chart-label-stroke: rgba(247, 242, 232, 0.92);
   --chart-shadow: none;

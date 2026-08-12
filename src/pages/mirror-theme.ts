@@ -3,6 +3,7 @@ import { mountEnvBanner } from '../ui/banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
 import { castBaziChart } from '../bazi/cast.ts';
+import { buildLuckCycles } from '../bazi/luck-cycles.ts';
 import { parseBirthParts } from '../bazi/parse-birth.ts';
 import { getActivePerson } from '../life/storage.ts';
 import { buildMirrorCompare, getMirrorTheme } from '../mirror/build-compare.ts';
@@ -57,9 +58,13 @@ export function renderMirrorTheme(root: HTMLElement): () => void {
       const err = 'error' in chart ? chart.error : (ziwei as { error: string }).error;
       body = `<section class="mirror-gate"><p>${escapeHtml(err)}</p></section>`;
     } else {
+      const focusYear = new Date().getFullYear();
+      const luck = buildLuckCycles(person, person.gender, focusYear);
       const pack = buildMirrorCompare(chart, ziwei, {
         personName: person.nickname,
         gender: person.gender,
+        luck,
+        focusYear,
       });
       const theme = getMirrorTheme(pack, id) ?? pack.themes[0]!;
       body = `

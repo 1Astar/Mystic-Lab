@@ -77,3 +77,8 @@ export function sectorPointerAngle(date: Date = new Date()): number {
   const fraction = Math.min(1, Math.max(0, elapsed / 2));
   return hour.index * 30 - 15 + fraction * 30;
 }
+
+/** 某时辰扇区中线角度（点格预览用） */
+export function sectorCenterAngle(index: number): number {
+  return index * 30;
+}

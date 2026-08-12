@@ -15,13 +15,13 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function yearBuffHtml(buff: YearBuffPack): string {
-  const entries =
-    buff.entries.length === 0
-      ? `<p class="life-footnote">本年四化未能排出，请核对生辰。</p>`
-      : `<ul class="craft-buff-list">${buff.entries
-          .map(
-            (e) => `
+function buffEntryList(entries: YearBuffPack['entries'], emptyNote: string): string {
+  if (entries.length === 0) {
+    return `<p class="life-footnote">${escapeHtml(emptyNote)}</p>`;
+  }
+  return `<ul class="craft-buff-list">${entries
+    .map(
+      (e) => `
         <li class="craft-buff-row ${e.kind === '忌' ? 'is-challenge' : ''}">
           <div class="craft-buff-main">
             <strong>${escapeHtml(e.title)}</strong>
@@ -29,21 +29,53 @@ function yearBuffHtml(buff: YearBuffPack): string {
           </div>
           <p class="craft-buff-advice">${escapeHtml(e.advice)}</p>
         </li>`,
-          )
-          .join('')}</ul>`;
+    )
+    .join('')}</ul>`;
+}
+
+function yearBuffHtml(buff: YearBuffPack, tips: string[] = []): string {
+  const monthEntries = buff.monthEntries ?? [];
+  const prevMonth = buff.month <= 1 ? 12 : buff.month - 1;
+  const nextMonth = buff.month >= 12 ? 1 : buff.month + 1;
+  const prevMonthYear = buff.month <= 1 ? buff.year - 1 : buff.year;
+  const nextMonthYear = buff.month >= 12 ? buff.year + 1 : buff.year;
+
+  const tipHtml = tips.length
+    ? `<ul class="craft-year-tips" aria-label="流年锦囊">${tips
+        .map((t) => `<li>${escapeHtml(t)}</li>`)
+        .join('')}</ul>`
+    : '';
 
   return `
-    <div class="craft-year-buff" aria-label="本年限时词条">
+    <div class="craft-year-buff" aria-label="限时词条 · 流年×流月">
       <div class="craft-buff-head">
-        <h3 class="craft-panel-h3">本年限时词条</h3>
+        <h3 class="craft-panel-h3">限时词条</h3>
         <div class="craft-buff-year">
           <button type="button" class="craft-act-btn" data-buff-year="${buff.year - 1}">‹ ${buff.year - 1}</button>
           <strong>${buff.year}${buff.yearGZ ? ` · ${escapeHtml(buff.yearGZ)}` : ''}</strong>
           <button type="button" class="craft-act-btn" data-buff-year="${buff.year + 1}">${buff.year + 1} ›</button>
         </div>
       </div>
-      <p class="life-footnote">永久分不变；雷达与条为「有效分」。${escapeHtml(buff.mutagenLine)}</p>
-      ${entries}
+      <p class="life-footnote">永久分不变；有效分 = 永久 × 流年 × 流月（夹紧）。${escapeHtml(buff.mutagenLine)}</p>
+
+      <div class="craft-buff-section" aria-label="流年四化">
+        <h4 class="craft-buff-h4">流年</h4>
+        ${buffEntryList(buff.entries, '本年四化未能排出，请核对生辰。')}
+      </div>
+
+      <div class="craft-buff-section" aria-label="流月四化">
+        <div class="craft-buff-month-head">
+          <h4 class="craft-buff-h4">流月</h4>
+          <div class="craft-buff-month">
+            <button type="button" class="craft-act-btn" data-buff-month="${prevMonth}" data-buff-month-year="${prevMonthYear}">‹ ${prevMonth}月</button>
+            <strong>${buff.month}月${buff.monthGZ ? ` · ${escapeHtml(buff.monthGZ)}` : ''}</strong>
+            <button type="button" class="craft-act-btn" data-buff-month="${nextMonth}" data-buff-month-year="${nextMonthYear}">${nextMonth}月 ›</button>
+          </div>
+        </div>
+        ${buffEntryList(monthEntries, '本月四化未能排出，请核对生辰。')}
+      </div>
+
+      ${tipHtml}
       ${buff.baziHint ? `<p class="craft-buff-bazi">${escapeHtml(buff.baziHint)}</p>` : ''}
     </div>`;
 }
@@ -91,7 +123,7 @@ export function spiritRootCardHtml(panel: SpiritRootPanel): string {
       : `
     <div class="craft-wuxing" aria-label="五行磁场">
       <h3 class="craft-panel-h3">五行磁场</h3>
-      <p class="life-footnote">${escapeHtml(panel.dayMasterLine)} · 只展示，不做限时 Buff</p>
+      <p class="life-footnote">${escapeHtml(panel.dayMasterLine)} · 与八字「生命结构」同源 · <button type="button" class="craft-inline-link" data-path="/bazi/structure">查看档案 ›</button></p>
       <div class="craft-wuxing-grid">
         ${panel.wuxing
           .map(
@@ -164,7 +196,7 @@ export function spiritRootCardHtml(panel: SpiritRootPanel): string {
       </div>
       <div class="craft-axis-list">${bars}</div>
       ${achHtml}
-      ${panel.yearBuff ? yearBuffHtml(panel.yearBuff) : ''}
+      ${panel.yearBuff ? yearBuffHtml(panel.yearBuff, panel.yearTips) : ''}
       ${wuxing}
     </section>`;
 }

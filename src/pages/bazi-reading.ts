@@ -6,6 +6,10 @@ import { buildBaziAnswerPack } from '../bazi/build-pack.ts';
 import { castBaziChart } from '../bazi/cast.ts';
 import { buildBaziPortrait } from '../bazi/portrait-template.ts';
 import { buildEnergyBalance } from '../bazi/sense-energy.ts';
+import {
+  patternYongshenCardHtml,
+  resolvePatternYongshen,
+} from '../bazi/pattern-yongshen.ts';
 import { buildYearForecast } from '../bazi/sense-forecast.ts';
 import { buildRealityInsight } from '../bazi/sense-insight.ts';
 import { buildTraditionOrigin } from '../bazi/sense-origin.ts';
@@ -35,6 +39,8 @@ import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
 import { formatSelectionAskSeed } from '../ui/lab-selection-ask.ts';
 import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
 import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
+import { openBaziDeepReadingEntry } from '../bazi/personalize-deep.ts';
+import { buildLuckCycles } from '../bazi/luck-cycles.ts';
 import { answerBaziConcept, recordBaziConceptMiss } from '../bazi/concept-ask.ts';
 import { buildBaziPageFaq } from '../bazi/page-faq.ts';
 import { applyBaziChartAura, clearBaziChartAura } from '../bazi/page-aura.ts';
@@ -222,6 +228,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
     const insight = buildRealityInsight(chartResult);
     const season = buildSeasonTone(chartResult);
     const energy = buildEnergyBalance(chartResult);
+    const patternYong = resolvePatternYongshen(chartResult);
     const forecast = buildYearForecast(chartResult, store.profile, {
       gender: person.gender,
       year: yearNow,
@@ -340,6 +347,8 @@ export function renderBaziReading(root: HTMLElement): () => void {
           ${whyBlockHtml(buildEnergyWhy(chartResult))}
         </section>
 
+        ${patternYongshenCardHtml(patternYong)}
+
         ${marksHtml}
 
         <nav class="bazi-reading-jumps" aria-label="继续看">
@@ -349,6 +358,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
           <button type="button" class="bazi-reading-jump" data-path="/bazi/guess">猜命盘盲盒 ›</button>
           <button type="button" class="bazi-reading-jump" data-path="/bazi/week">脑内天气 ›</button>
           <button type="button" class="bazi-reading-jump" data-path="/bazi/learn">知识树 ›</button>
+          <button type="button" class="bazi-reading-jump" data-path="/bazi/journal">八字手札 ›</button>
         </nav>
 
         <details class="bazi-origin-fold">
@@ -525,7 +535,20 @@ export function renderBaziReading(root: HTMLElement): () => void {
                 void recordBaziConceptMiss(q);
               },
               deepHint: '围绕这枚印记继续追问。',
-              onDeep: () => navigate('/bazi/chart'),
+              onDeep: () => {
+                openBaziDeepReadingEntry({
+                  chart: chartResult,
+                  person: getActivePerson(),
+                  question,
+                  luck: buildLuckCycles(
+                    getActivePerson(),
+                    getActivePerson().gender,
+                    chartResult.liunianYear || new Date().getFullYear(),
+                  ),
+                  headline: pack.verdict.headline,
+                  initialTab: 'deep',
+                });
+              },
             });
           },
           onOpenAtlas: () => {
@@ -543,7 +566,20 @@ export function renderBaziReading(root: HTMLElement): () => void {
                   onMiss: (q) => {
                     void recordBaziConceptMiss(q);
                   },
-                  onDeep: () => navigate('/bazi/chart'),
+                  onDeep: () => {
+                    openBaziDeepReadingEntry({
+                      chart: chartResult,
+                      person: getActivePerson(),
+                      question,
+                      luck: buildLuckCycles(
+                        getActivePerson(),
+                        getActivePerson().gender,
+                        chartResult.liunianYear || new Date().getFullYear(),
+                      ),
+                      headline: pack.verdict.headline,
+                      initialTab: 'deep',
+                    });
+                  },
                 });
               },
             });
@@ -619,21 +655,34 @@ export function renderBaziReading(root: HTMLElement): () => void {
             void recordBaziConceptMiss(q);
           },
           deepHint: '由正文选区带入；概念优先本地词库。',
-          onDeep: () => navigate('/bazi/chart'),
+          onDeep: () => {
+            openBaziDeepReadingEntry({
+              chart: chartResult,
+              person: getActivePerson(),
+              question,
+              luck: buildLuckCycles(
+                getActivePerson(),
+                getActivePerson().gender,
+                chartResult.liunianYear || new Date().getFullYear(),
+              ),
+              headline: pack.verdict.headline,
+              initialTab: 'deep',
+            });
+          },
         });
       },
       onDeep: () => {
-        openLabDeepSheet({
-          system: 'bazi',
-          title: `${getActivePerson().nickname || '我'}的命盘`,
-          initialTab: 'ask',
-          presets: buildBaziPageFaq(chartResult, { question }),
-          answerConcept: answerBaziConcept,
-          onMiss: (q) => {
-            void recordBaziConceptMiss(q);
-          },
-          deepHint: '结合你的出生密码与当下问题，做一次更贴合的解读。概念题请用「边看边问」。',
-          onDeep: () => navigate('/bazi/chart'),
+        openBaziDeepReadingEntry({
+          chart: chartResult,
+          person: getActivePerson(),
+          question,
+          luck: buildLuckCycles(
+            getActivePerson(),
+            getActivePerson().gender,
+            chartResult.liunianYear || new Date().getFullYear(),
+          ),
+          headline: pack.verdict.headline,
+          initialTab: 'deep',
         });
       },
     });

@@ -481,6 +481,17 @@
   cursor: pointer;
 }
 
+.craft-inline-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: inherit;
+  color: var(--gold);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .craft-act-go {
   background: var(--gold-soft);
   border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
@@ -520,12 +531,38 @@
   margin-bottom: 6px;
 }
 
-.craft-buff-year {
+.craft-buff-year,
+.craft-buff-month {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 0.82rem;
   color: var(--ink);
+}
+
+.craft-buff-section {
+  margin-top: 12px;
+}
+
+.craft-buff-h4 {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.craft-buff-month-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.craft-buff-month-head .craft-buff-h4 {
+  margin: 0;
 }
 
 .craft-buff-list {
@@ -754,3 +791,17 @@
 }
 
 
+
+.craft-year-tips {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink);
+}

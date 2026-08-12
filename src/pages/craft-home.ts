@@ -36,6 +36,7 @@ export function renderCraftHome(root: HTMLElement): () => void {
   root.appendChild(page);
 
   let buffYear = new Date().getFullYear();
+  let buffMonth = new Date().getMonth() + 1;
 
   // 问号弹层：挂一次即可（paint 会清 innerHTML，但 page 节点保留）
   page.addEventListener(
@@ -67,7 +68,10 @@ export function renderCraftHome(root: HTMLElement): () => void {
     let spiritHtml = '';
     let spiritAxes: { id: CraftAxisId; sources: string[]; value: number; sub: string; label: string }[] = [];
     if (canCast) {
-      const spirit = resolveSpiritRootWithGrowth(person, { year: buffYear });
+      const spirit = resolveSpiritRootWithGrowth(person, {
+        year: buffYear,
+        month: buffMonth,
+      });
       if (spirit.ok) {
         spiritAxes = spirit.panel.axes;
         const sealed = countSealedStars(spirit.view);
@@ -95,7 +99,7 @@ export function renderCraftHome(root: HTMLElement): () => void {
       <div class="life-header-emblem">${mysticEmblemHtml('cosmos', 'md')}</div>
       <p class="home-eyebrow">CRAFT DESTINY</p>
       <h1 class="page-title">造命</h1>
-      <p class="page-subtitle">灵根图谱 · 流年限时词条 · 问答任务</p>
+      <p class="page-subtitle">灵根图谱 · 流年×流月限时词条 · 问答任务</p>
       <p class="bazi-home-person">当前角色 · ${escapeHtml(person.nickname)}</p>
     </header>
 
@@ -156,6 +160,19 @@ export function renderCraftHome(root: HTMLElement): () => void {
         const y = Number(btn.dataset.buffYear);
         if (!Number.isFinite(y) || y < 1900 || y > 2100) return;
         buffYear = Math.floor(y);
+        paint();
+      });
+    });
+
+    page.querySelectorAll<HTMLButtonElement>('[data-buff-month]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const m = Number(btn.dataset.buffMonth);
+        const y = Number(btn.dataset.buffMonthYear);
+        if (!Number.isFinite(m) || m < 1 || m > 12) return;
+        buffMonth = Math.floor(m);
+        if (Number.isFinite(y) && y >= 1900 && y <= 2100) {
+          buffYear = Math.floor(y);
+        }
         paint();
       });
     });

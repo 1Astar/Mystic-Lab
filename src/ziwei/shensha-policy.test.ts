@@ -12,6 +12,11 @@ describe('shensha tiers: codex full + deep filter', () => {
       const sec = sections.find((s) => s.id === id);
       expect(sec?.items.length).toBe(12);
     }
+    const jiang = sections
+      .find((s) => s.id === 'jiangqian')
+      ?.items.find((i) => i.id === '将星');
+    expect(jiang?.oneLiner).not.toMatch(/词条待补/);
+    expect(jiang?.oneLiner).toMatch(/台前|带队|统领/);
   });
 
   it('deep highlights pick at most 5 scored hits from a real chart', () => {

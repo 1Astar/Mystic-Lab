@@ -73,7 +73,9 @@ const ADJECTIVE: ShenshaLore[] = [
   S('天使', '解厄', '暗中解困、化险，悄悄递梯子。', '天使主解厄。通行多落疾厄；中州阴男阳女时可能与天伤换宫（奴仆/疾厄）。', '本命·安宫有派差'),
   S('天伤', '耗损提醒', '耗损与摩擦的提醒，逼你留意身体边界。', '天伤非死刑。通行多落奴仆；中州阴男阳女时可能与天使换宫。', '本命·安宫有派差'),
   S('斗君', '流月起点', '流月盘起跳宫指针。', '斗君是时间定位器，不是吉凶星。', '流月'),
-  S('将星', '统领', '被推到台前负责、带队。', '将星主统领担纲。有权也有责。将前十二之首。', '将前／神煞'),
+  S('将星', '统领', '被推到台前负责、带队。', '将星主统领担纲。有权也有责。将前十二之首。', '将前／神煞', {
+    group: 'jiangqian',
+  }),
   S('攀鞍', '升阶', '职位台阶、被往上托。', '攀鞍主升迁上路。与驿马天马并见，动中求进。', '将前十二'),
   S('岁建', '流年主', '流年地支所在：岁君落点。', '岁建是流年坐标。先看岁建宫星曜四化。', '岁前十二'),
   S('文昌贵人', '科名贵', '考试文书贵人气（神煞口径，别与文昌星混）。', '若与文昌星同现科名更浓；仅神煞则作轻提示。', '神煞表'),
@@ -153,8 +155,14 @@ function indexAll(): void {
 
 export function getShenshaLore(name: string): ShenshaLore | undefined {
   indexAll();
-  const key = name.replace(/星$/, '').trim();
-  return byAlias.get(key) ?? byId.get(key);
+  const raw = name.trim();
+  if (!raw) return undefined;
+  // 先精确匹配：避免「将星」被剥成「将」后落空
+  const exact = byAlias.get(raw) ?? byId.get(raw);
+  if (exact) return exact;
+  const stripped = raw.replace(/星$/, '').trim();
+  if (!stripped || stripped === raw) return undefined;
+  return byAlias.get(stripped) ?? byId.get(stripped);
 }
 
 export function listShenshaLore(): ShenshaLore[] {
