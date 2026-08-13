@@ -1,9 +1,10 @@
 /**
- * 星曜组合：根据探索点亮识别「我有哪些搭戏组合」
- * 完整 = 成员全亮；进行中 = 部分点亮；未启程 = 0
+ * 星曜组合：根据本命盘「三方四正会照」识别成格
+ * 完整 = 成员同处一三方四正；进行中 = 部分会照；未启程 = 无会照/无盘
  */
 import { COMBO_LORE, type ComboLore } from './combo-lore.ts';
-import { isStarUnlocked, listCodexEntries } from './codex.ts';
+import { evaluateComboFormation } from './combo-formation.ts';
+import type { ZiweiChartView } from './types.ts';
 
 export type ComboJourneyStatus = 'complete' | 'partial' | 'locked';
 
@@ -14,30 +15,32 @@ export type ComboJourneyStep = {
   missingMembers: string[];
   progress: number; // 0–1
   order: number;
+  ruleLine?: string;
+  focusPalace?: string;
 };
 
 export function evaluateCombo(
   combo: ComboLore,
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): Omit<ComboJourneyStep, 'combo' | 'order'> {
-  const set =
-    unlocked ?? new Set(listCodexEntries().map((e) => e.starId));
-  const litMembers = combo.members.filter((m) => set.has(m));
-  const missingMembers = combo.members.filter((m) => !set.has(m));
-  const progress =
-    combo.members.length === 0 ? 0 : litMembers.length / combo.members.length;
-  let status: ComboJourneyStatus = 'locked';
-  if (progress >= 1) status = 'complete';
-  else if (progress > 0) status = 'partial';
-  return { status, litMembers, missingMembers, progress };
+  const ev = evaluateComboFormation(combo.members, view ?? null, {
+    rule: combo.formationRule ?? 'sanfang',
+  });
+  return {
+    status: ev.status,
+    litMembers: ev.litMembers,
+    missingMembers: ev.missingMembers,
+    progress: ev.progress,
+    ruleLine: ev.ruleLine,
+    focusPalace: ev.focusPalace,
+  };
 }
 
-export function listComboJourney(): ComboJourneyStep[] {
-  const unlocked = new Set(listCodexEntries().map((e) => e.starId));
+export function listComboJourney(view?: ZiweiChartView | null): ComboJourneyStep[] {
   const steps = COMBO_LORE.map((combo, i) => ({
     combo,
     order: i + 1,
-    ...evaluateCombo(combo, unlocked),
+    ...evaluateCombo(combo, view),
   }));
   const rank = (s: ComboJourneyStatus) =>
     s === 'complete' ? 0 : s === 'partial' ? 1 : 2;
@@ -48,13 +51,29 @@ export function listComboJourney(): ComboJourneyStep[] {
   });
 }
 
-export function comboJourneySummary(): {
+/** 我的格局：强成格（展开） */
+export function listMineStrongCombos(view?: ZiweiChartView | null): ComboJourneyStep[] {
+  return listComboJourney(view).filter(
+    (s) => s.status === 'complete' && s.combo.rank === 'strong',
+  );
+}
+
+/** 我的格局：候选（软成格 + 进行中），折叠 */
+export function listMineCandidateCombos(view?: ZiweiChartView | null): ComboJourneyStep[] {
+  return listComboJourney(view).filter((s) => {
+    if (s.status === 'locked') return false;
+    if (s.status === 'partial') return true;
+    return s.status === 'complete' && s.combo.rank === 'soft';
+  });
+}
+
+export function comboJourneySummary(view?: ZiweiChartView | null): {
   complete: number;
   partial: number;
   total: number;
   next?: ComboJourneyStep;
 } {
-  const steps = listComboJourney();
+  const steps = listComboJourney(view);
   const complete = steps.filter((s) => s.status === 'complete').length;
   const partial = steps.filter((s) => s.status === 'partial').length;
   const next =
@@ -63,19 +82,22 @@ export function comboJourneySummary(): {
   return { complete, partial, total: steps.length, next };
 }
 
-export function isComboComplete(comboId: string): boolean {
+export function isComboComplete(
+  comboId: string,
+  view?: ZiweiChartView | null,
+): boolean {
   const combo = COMBO_LORE.find((c) => c.id === comboId);
   if (!combo) return false;
-  return evaluateCombo(combo).status === 'complete';
+  return evaluateCombo(combo, view).status === 'complete';
 }
 
-/** 供测试：不读 localStorage */
+/** 供测试：用假盘成员宫位表不够时，仍可用「无盘+空」；成格请用 evaluateComboFormation */
 export function evaluateComboAgainst(
   combo: ComboLore,
-  starIds: string[],
+  _starIds: string[],
+  view?: ZiweiChartView | null,
 ): ReturnType<typeof evaluateCombo> {
-  return evaluateCombo(combo, new Set(starIds));
+  return evaluateCombo(combo, view ?? null);
 }
 
-// re-export for callers that only need unlock check
-export { isStarUnlocked };
+export { isStarUnlocked } from './codex.ts';

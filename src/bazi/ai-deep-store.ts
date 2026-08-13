@@ -1,7 +1,7 @@
 /**
  * 八字 AI 深度解读本地文档（person 键）
  * - 兼容旧版纯文本
- * - v1：deepReading + turns（多轮追问）
+ * - v1：deepReading + turns（多轮追问）+ 可选手札关联
  */
 export type BaziAiDeepTurn = {
   role: 'user' | 'assistant';
@@ -14,6 +14,10 @@ export type BaziAiDeepDoc = {
   deepReading: string;
   turns: BaziAiDeepTurn[];
   updatedAt: string;
+  /** 挂入八字手札后的条目 id（回放用） */
+  journalId?: string;
+  /** 当前深度会话 id */
+  sessionId?: string;
 };
 
 export const BAZI_AI_DEEP_PREFIX = 'mystic-lab.bazi-ai-deep.';
@@ -69,6 +73,8 @@ export function parseBaziAiDeepRaw(raw: string | null): BaziAiDeepDoc | null {
             typeof parsed.updatedAt === 'string'
               ? parsed.updatedAt
               : new Date().toISOString(),
+          journalId: typeof parsed.journalId === 'string' ? parsed.journalId : undefined,
+          sessionId: typeof parsed.sessionId === 'string' ? parsed.sessionId : undefined,
         };
       }
     } catch {
@@ -105,7 +111,11 @@ export function loadBaziAiDeepReading(personId: string): string | null {
 }
 
 /** 写入/覆盖深度解读；重新生成时清空追问回合 */
-export function saveBaziAiDeepReading(personId: string, text: string): void {
+export function saveBaziAiDeepReading(
+  personId: string,
+  text: string,
+  link?: { journalId?: string; sessionId?: string },
+): void {
   const deep = text.trim();
   if (!deep) {
     try {
@@ -115,7 +125,10 @@ export function saveBaziAiDeepReading(personId: string, text: string): void {
     }
     return;
   }
-  persist(personId, emptyDoc(deep));
+  const doc = emptyDoc(deep);
+  if (link?.journalId) doc.journalId = link.journalId;
+  if (link?.sessionId) doc.sessionId = link.sessionId;
+  persist(personId, doc);
 }
 
 export function appendBaziAiDeepTurns(
@@ -129,6 +142,8 @@ export function appendBaziAiDeepTurns(
     deepReading: prev.deepReading,
     turns: normalizeTurns([...prev.turns, ...turns]),
     updatedAt: new Date().toISOString(),
+    journalId: prev.journalId,
+    sessionId: prev.sessionId,
   };
   persist(personId, next);
 }

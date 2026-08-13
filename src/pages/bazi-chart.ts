@@ -71,7 +71,7 @@ import { openLabConceptPeek } from '../ui/lab-concept-peek.ts';
 import { openLabNotesSheet } from '../ui/lab-notes-sheet.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
 import { formatSelectionAskSeed } from '../ui/lab-selection-ask.ts';
-import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
+import { baziViewModeTabsHtml } from '../ui/lab-sys-tabs.ts';
 import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
 import {
   buildShuttleFrame,
@@ -415,10 +415,10 @@ export function renderBaziChart(root: HTMLElement): () => void {
     if (!ready()) {
       clearBaziChartAura(page);
       page.innerHTML = `
-        <button type="button" class="back-link life-back">← 我的命盘</button>
+        <button type="button" class="back-link life-back">← 人生地图</button>
         <header class="life-header">
           <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
-          <h1 class="page-title">命盘解析</h1>
+          <h1 class="page-title">完整命盘</h1>
           <p class="page-subtitle">需要先填写出生年月日</p>
         </header>
         <section class="life-profile-gate">
@@ -439,9 +439,9 @@ export function renderBaziChart(root: HTMLElement): () => void {
     if ('error' in selfResult) {
       clearBaziChartAura(page);
       page.innerHTML = `
-        <button type="button" class="back-link life-back">← 我的命盘</button>
+        <button type="button" class="back-link life-back">← 人生地图</button>
         <header class="life-header">
-          <h1 class="page-title">命盘解析</h1>
+          <h1 class="page-title">完整命盘</h1>
           <p class="page-subtitle">${escapeHtml(selfResult.error)}</p>
         </header>
         <button type="button" class="life-btn-primary" data-path="/bazi?edit=1">回去改出生信息</button>
@@ -454,7 +454,14 @@ export function renderBaziChart(root: HTMLElement): () => void {
     applyBaziChartAura(page, chart);
     page.innerHTML = `
       <button type="button" class="back-link life-back">← Lab</button>
-      ${baziSysTabsHtml('chart')}
+      ${baziViewModeTabsHtml('chart')}
+
+      <header class="life-header">
+        <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
+        <h1 class="page-title">完整命盘</h1>
+        <p class="page-subtitle">出生密码五步 · 专业盘</p>
+        <button type="button" class="bazi-edit-birth" data-path="/bazi?edit=1">改出生信息</button>
+      </header>
 
       <nav class="bazi-mode-tabs" role="tablist" aria-label="盘面模式">
         <button type="button" role="tab" class="bazi-mode-tab ${mode === 'natal' ? 'is-active' : ''}" data-mode="natal" aria-selected="${mode === 'natal'}">
@@ -471,6 +478,12 @@ export function renderBaziChart(root: HTMLElement): () => void {
     `;
 
     bindNav();
+    page.querySelectorAll<HTMLButtonElement>('[data-bazi-view]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.baziView === 'theater') navigate('/bazi/reading');
+        else if (btn.dataset.baziView === 'chart') navigate('/bazi/reading?mode=chart');
+      });
+    });
     mountLabReadingTopbar(page, {
       backPath: '/',
       backLabel: '← Lab',
@@ -1056,6 +1069,12 @@ export function renderBaziChart(root: HTMLElement): () => void {
       el.addEventListener('click', () => {
         const path = el.dataset.path;
         if (path) navigate(path);
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('.life-back').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const label = btn.textContent ?? '';
+        navigate(label.includes('人生地图') ? '/bazi/reading' : '/');
       });
     });
   }

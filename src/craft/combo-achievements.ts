@@ -1,7 +1,9 @@
 /**
- * 造命 · 图鉴组合成就（纯图鉴集齐 → 雷达加成）
+ * 造命 · 图鉴组合成就（本命盘三方四正成格 → 雷达加成）
  */
-import { listCodexEntries } from '../ziwei/codex.ts';
+import { codexProgress } from '../ziwei/codex.ts';
+import { evaluateComboFormation } from '../ziwei/combo-formation.ts';
+import type { ZiweiChartView } from '../ziwei/types.ts';
 import { clampBuffMult } from './spirit-buff.ts';
 import type { CraftAxisId, CraftAxisScore } from './spirit-roots.ts';
 
@@ -298,32 +300,28 @@ type ToastStore = {
   updatedAt: string;
 };
 
-function unlockedSet(ids?: Iterable<string>): Set<string> {
-  if (ids) return new Set(ids);
-  return new Set(listCodexEntries().map((e) => e.starId));
+function chartView(view?: ZiweiChartView | null): ZiweiChartView | null {
+  return view && !('error' in view) ? view : null;
 }
 
 export function evaluateCraftComboAch(
   def: CraftComboAchievementDef,
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): Omit<CraftComboAchState, 'def' | 'bonusActive' | 'conditionalActive'> {
-  const set = unlocked ?? unlockedSet();
-  const litMembers = def.members.filter((m) => set.has(m));
-  const missingMembers = def.members.filter((m) => !set.has(m));
-  const progress =
-    def.members.length === 0 ? 0 : litMembers.length / def.members.length;
-  let status: CraftComboAchStatus = 'locked';
-  if (progress >= 1) status = 'complete';
-  else if (progress > 0) status = 'partial';
-  return { status, litMembers, missingMembers, progress };
+  const ev = evaluateComboFormation(def.members, chartView(view));
+  return {
+    status: ev.status,
+    litMembers: ev.litMembers,
+    missingMembers: ev.missingMembers,
+    progress: ev.progress,
+  };
 }
 
 export function listCraftComboAchievements(
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): CraftComboAchState[] {
-  const set = unlocked ?? unlockedSet();
   return CRAFT_COMBO_ACHIEVEMENTS.map((def) => {
-    const ev = evaluateCraftComboAch(def, set);
+    const ev = evaluateCraftComboAch(def, view);
     return {
       def,
       ...ev,
@@ -333,13 +331,13 @@ export function listCraftComboAchievements(
   });
 }
 
-export function craftComboProgress(unlocked?: Set<string>): {
+export function craftComboProgress(view?: ZiweiChartView | null): {
   complete: number;
   total: number;
   pct: number;
   states: CraftComboAchState[];
 } {
-  const states = listCraftComboAchievements(unlocked);
+  const states = listCraftComboAchievements(view);
   const complete = states.filter((s) => s.status === 'complete').length;
   const total = states.length;
   return {
@@ -372,12 +370,12 @@ function saveToastStore(store: ToastStore): void {
 }
 
 export function claimNewCraftComboToasts(
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): CraftComboAchievementDef[] {
   const store = loadToastStore();
   const newly: CraftComboAchievementDef[] = [];
   for (const def of CRAFT_COMBO_ACHIEVEMENTS) {
-    const ev = evaluateCraftComboAch(def, unlocked);
+    const ev = evaluateCraftComboAch(def, view);
     if (ev.status !== 'complete') continue;
     if (store.toasted.includes(def.id)) continue;
     newly.push(def);
@@ -389,16 +387,15 @@ export function claimNewCraftComboToasts(
 
 export function applyFlatComboBonuses(
   axes: CraftAxisScore[],
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): CraftAxisScore[] {
-  const set = unlocked ?? unlockedSet();
   const bag = new Map(
     axes.map((a) => [a.id, { value: a.value, sources: [...a.sources], lit: a.lit }]),
   );
 
   for (const def of CRAFT_COMBO_ACHIEVEMENTS) {
     if (def.kind === 'conditional' || !def.flatGains?.length) continue;
-    if (evaluateCraftComboAch(def, set).status !== 'complete') continue;
+    if (evaluateCraftComboAch(def, view).status !== 'complete') continue;
     const src = `成就·${def.title}`;
     for (const g of def.flatGains) {
       const row = bag.get(g.axis);
@@ -423,21 +420,20 @@ export function applyFlatComboBonuses(
 /** @deprecated 使用 applyFlatComboBonuses */
 export function applyDiXingFlatBonus(
   axes: CraftAxisScore[],
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): CraftAxisScore[] {
-  return applyFlatComboBonuses(axes, unlocked);
+  return applyFlatComboBonuses(axes, view);
 }
 
 export function applyYeHuoConditionalBurst(
   axes: CraftAxisScore[],
-  unlocked?: Set<string>,
+  view?: ZiweiChartView | null,
 ): {
   axes: CraftAxisScore[];
   active: boolean;
 } {
-  const set = unlocked ?? unlockedSet();
   const ye = CRAFT_COMBO_ACHIEVEMENTS.find((a) => a.id === 'ye_huo')!;
-  if (evaluateCraftComboAch(ye, set).status !== 'complete') {
+  if (evaluateCraftComboAch(ye, view).status !== 'complete') {
     return { axes, active: false };
   }
   const yeli = axes.find((a) => a.id === 'yeli');
@@ -464,28 +460,30 @@ export function applyYeHuoConditionalBurst(
 
 export function enrichCraftComboStates(
   axes: CraftAxisScore[],
-  opts?: { unlocked?: Set<string>; yeHuoActive?: boolean },
+  opts?: { view?: ZiweiChartView | null; yeHuoActive?: boolean },
 ): CraftComboAchState[] {
   const yeActive =
     opts?.yeHuoActive ??
     axes.some((a) => a.id === 'guangyao' && a.sources.includes('成就·业火淬炼'));
-  return listCraftComboAchievements(opts?.unlocked).map((s) => ({
+  return listCraftComboAchievements(opts?.view).map((s) => ({
     ...s,
     conditionalActive: s.def.id === 'ye_huo' ? yeActive : false,
   }));
 }
 
+/** 命盘顶栏：整本图鉴（主星+辅星+四化）收集进度 */
 export function craftAwakenProgressHtml(): string {
-  const { complete, total, pct } = craftComboProgress();
+  const { collected, total } = codexProgress();
+  const pct = total > 0 ? Math.round((collected / total) * 100) : 0;
   const label =
-    complete >= total
-      ? '角色觉醒进度 · 组合成就已齐'
-      : `角色觉醒进度 · 组合成就 ${complete}/${total}`;
+    collected >= total && total > 0
+      ? '整本图鉴收集进度 · 已齐'
+      : `整本图鉴收集进度 · ${collected}/${total}`;
   return `
-    <button type="button" class="ziwei-awaken-progress" data-path="/ziwei/tujian?layer=journey">
+    <button type="button" class="ziwei-awaken-progress" data-path="/ziwei/tujian?layer=stars">
       <div class="ziwei-awaken-progress-meta">
         <strong>${label}</strong>
-        <span>图鉴集齐组合可强化造命雷达 ›</span>
+        <span>主星 · 辅星 · 四化 ›</span>
       </div>
       <div class="ziwei-awaken-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
         <i style="width:${pct}%"></i>

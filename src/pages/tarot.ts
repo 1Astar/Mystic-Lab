@@ -40,6 +40,8 @@ import { draftFromTarot, draftGeneric } from '../share/drafts.ts';
 import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
+import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { openTarotDeepReadingEntry } from '../tarot/personalize-deep.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
 import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
 import {
@@ -205,6 +207,36 @@ export function renderTarot(root: HTMLElement): () => void {
         summary: question ? `问题：${question}` : '正在塔罗解读。',
         label: '塔罗',
         invitePosterPath: TAROT_SHARE_POSTER_PATH,
+      });
+    },
+    onDeep: () => {
+      if (!reading || drawnCards.length === 0) {
+        openLabDeepSheet({
+          system: 'tarot',
+          title: '塔罗追问',
+          initialTab: 'ask',
+          deepHint: '完成抽牌并出结果后，可生成贴合你的 AI 深度解读。',
+          answerConcept: (q) => ({
+            answer: `关于「${q}」：抽牌结果出来后，可用深度解读结合牌阵追问。`,
+            hit: false,
+          }),
+        });
+        return;
+      }
+      const journalId = ensureJournalSaved();
+      openTarotDeepReadingEntry({
+        journalId,
+        question,
+        spreadType,
+        cards: drawnCards.map((c) => ({
+          name: c.card.nameZh,
+          position: c.position ?? '',
+          reversed: c.reversed,
+        })),
+        summary: reading.summary,
+        learningNote: reading.learningNote ?? learningNote,
+        readingSnapshot: reading,
+        initialTab: 'deep',
       });
     },
   });

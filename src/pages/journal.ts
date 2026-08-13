@@ -10,6 +10,7 @@ import { canResumePartial, stashResumeJournalId } from '../journal/resume.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
+import { tarotAiBadgeHtml } from '../ui/tarot-ai-sessions.ts';
 
 function continuePartialReading(entry: JournalEntry): void {
   if (!canResumePartial(entry)) return;
@@ -104,10 +105,12 @@ export function renderJournal(root: HTMLElement): void {
           : !isPartial && entry.fulfilled === false
             ? '后来觉得：不太准'
             : '';
+      const aiBadge = tarotAiBadgeHtml(entry.aiSessions?.length ?? 0);
 
       item.innerHTML = `
         <time class="journal-date">${date}${isPartial ? ' · <span class="journal-badge">未完成</span>' : ''}</time>
         <p class="journal-question">${entry.question || '（未记录问题）'}</p>
+        ${aiBadge}
         <p class="journal-cards">${entry.cards.map((c) => `${c.position}·${c.name}`).join(' / ')}</p>
         <p class="journal-note">${isPartial ? entry.summary : entry.learningNote}</p>
         <p class="journal-open-hint">点击查看牌面与解读 →</p>

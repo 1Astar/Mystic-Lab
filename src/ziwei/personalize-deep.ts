@@ -1,5 +1,5 @@
 /**
- * 紫微深度解读：补充情况 → AI 生成 → 在深度解读面板展示
+ * 紫微深度解读：补充情况 → AI 生成 → 多轮追问（对标八字）
  */
 import type { PersonProfile } from '../life/types.ts';
 import type { ZiweiChartView } from './types.ts';
@@ -27,8 +27,17 @@ import {
 } from '../liuyao/personal-context.ts';
 import { answerZiweiConcept, recordZiweiConceptMiss } from './concept-ask.ts';
 import { buildZiweiPageFaq } from './page-faq.ts';
-
-const STORAGE_PREFIX = 'mystic-lab.ziwei-ai-deep.';
+import {
+  loadZiweiAiDeepDoc,
+  loadZiweiAiDeepReading,
+  saveZiweiAiDeepReading,
+} from './ai-deep-store.ts';
+import {
+  appendZiweiAiTurns,
+  buildZiweiJournalSnapshot,
+  createZiweiAiJournalEntry,
+} from './journal.ts';
+import { openZiweiFollowupChat } from './followup-chat.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -36,28 +45,6 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function storageKey(personId: string): string {
-  return `${STORAGE_PREFIX}${personId}`;
-}
-
-export function loadZiweiAiDeepReading(personId: string): string | null {
-  try {
-    const t = localStorage.getItem(storageKey(personId))?.trim();
-    return t || null;
-  } catch {
-    return null;
-  }
-}
-
-export function saveZiweiAiDeepReading(personId: string, text: string): void {
-  try {
-    if (!text.trim()) localStorage.removeItem(storageKey(personId));
-    else localStorage.setItem(storageKey(personId), text.trim());
-  } catch {
-    /* ignore */
-  }
 }
 
 function buildDeepPrompt(
@@ -96,21 +83,6 @@ function buildDeepPrompt(
       ].join('\n');
 
   return { system, user };
-}
-
-function resultHtml(text: string): string {
-  const parts = text
-    .split(/\n\n+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return `
-    <section class="ly-follow-deep-result">
-      <p class="ly-layer-guide">AI 深度解读</p>
-      ${parts
-        .map((p) => `<p class="ly-deep-para">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
-        .join('')}
-      <button type="button" class="btn ly-btn-gold btn-sm" data-zw-deep-regen>重新生成</button>
-    </section>`;
 }
 
 function toast(msg: string): void {
@@ -251,7 +223,18 @@ export function openZiweiPersonalizeDeep(opts: OpenZiweiPersonalizeDeepOpts): vo
         { temperature: 0.55 },
       );
       if (modeNow === 'mystic') recordDeepUse();
-      saveZiweiAiDeepReading(opts.person.id, text);
+      const linked = createZiweiAiJournalEntry({
+        deepReading: text,
+        question: opts.question,
+        snapshot: buildZiweiJournalSnapshot(opts.view),
+      });
+      saveZiweiAiDeepReading(
+        opts.person.id,
+        text,
+        linked
+          ? { journalId: linked.journalId, sessionId: linked.sessionId }
+          : undefined,
+      );
       close();
       if (opts.openSheetAfter !== false) {
         openZiweiDeepReadingEntry({
@@ -261,7 +244,11 @@ export function openZiweiPersonalizeDeep(opts: OpenZiweiPersonalizeDeepOpts): vo
           initialTab: 'deep',
         });
       }
-      toast('深度解读已生成');
+      toast(
+        linked
+          ? '深度解读已写入手札 · 可继续追问'
+          : '深度解读已生成 · 可继续追问',
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : '分析失败';
       status.textContent =
@@ -290,38 +277,81 @@ export type OpenZiweiDeepReadingEntryOpts = {
   person: PersonProfile;
   question: string;
   initialTab?: 'deep' | 'ask';
+  seedQuery?: string;
+  seedContext?: string;
 };
 
-/** 火花按钮入口：有缓存则展示；否则空态可生成；边看边问仍可用 */
+/** 旧档案仅有 person 键深度解读时，补一条手札并回挂 journalId */
+function ensureDeepJournalLink(opts: {
+  personId: string;
+  view: ZiweiChartView;
+  question?: string;
+}): void {
+  const doc = loadZiweiAiDeepDoc(opts.personId);
+  const deep = doc?.deepReading.trim();
+  if (!deep || doc?.journalId) return;
+  const linked = createZiweiAiJournalEntry({
+    deepReading: deep,
+    question: opts.question,
+    snapshot: buildZiweiJournalSnapshot(opts.view),
+  });
+  if (!linked) return;
+  saveZiweiAiDeepReading(opts.personId, deep, {
+    journalId: linked.journalId,
+    sessionId: linked.sessionId,
+  });
+  const extra = (doc?.turns ?? []).filter(
+    (t) => t.content.trim() && !(t.role === 'assistant' && t.content.trim() === deep),
+  );
+  if (extra.length) {
+    appendZiweiAiTurns(
+      linked.journalId,
+      linked.sessionId,
+      extra.map((t) => ({ role: t.role, content: t.content })),
+    );
+  }
+}
+
+/** 火花入口：有深度解读 → 多轮追问；否则空态可生成；边看边问仍可用 */
 export function openZiweiDeepReadingEntry(opts: OpenZiweiDeepReadingEntryOpts): void {
   const existing = loadZiweiAiDeepReading(opts.person.id);
-  const startDeep = opts.initialTab ?? (existing ? 'deep' : 'ask');
+
+  const openPersonalize = () => {
+    openZiweiPersonalizeDeep({
+      view: opts.view,
+      person: opts.person,
+      question: opts.question,
+    });
+  };
+
+  if (existing) {
+    ensureDeepJournalLink({
+      personId: opts.person.id,
+      view: opts.view,
+      question: opts.question,
+    });
+    openZiweiFollowupChat({
+      view: opts.view,
+      person: opts.person,
+      question: opts.question,
+      deepReading: existing,
+      initialTab: opts.initialTab === 'ask' ? 'ask' : 'deep',
+      seedAsk: opts.seedQuery,
+      seedContext: opts.seedContext,
+      answerConcept: answerZiweiConcept,
+    });
+    return;
+  }
 
   openLabDeepSheet({
     system: 'ziwei',
     title: `${opts.person.nickname || '我'}的命盘`,
-    initialTab: startDeep,
+    initialTab: opts.initialTab ?? 'ask',
+    seedQuery: opts.seedQuery,
     deepTabLabel: '深度解读',
-    deepHint: '结合十二宫与当下问题，用 AI 做一次更贴合的解读。概念题请用「边看边问」。',
-    deepPaneHtml: existing
-      ? resultHtml(existing)
-      : undefined,
-    onDeepPaneReady: (pane) => {
-      pane.querySelector('[data-zw-deep-regen]')?.addEventListener('click', () => {
-        openZiweiPersonalizeDeep({
-          view: opts.view,
-          person: opts.person,
-          question: opts.question,
-        });
-      });
-    },
-    onDeep: () => {
-      openZiweiPersonalizeDeep({
-        view: opts.view,
-        person: opts.person,
-        question: opts.question,
-      });
-    },
+    deepHint:
+      '结合十二宫与当下问题，用 AI 做一次更贴合的解读。生成后可多轮追问。概念题请用「边看边问」。',
+    onDeep: openPersonalize,
     presets: buildZiweiPageFaq(opts.view, { question: opts.question }),
     answerConcept: answerZiweiConcept,
     onMiss: (q) => {
@@ -329,3 +359,6 @@ export function openZiweiDeepReadingEntry(opts: OpenZiweiDeepReadingEntryOpts): 
     },
   });
 }
+
+/** 供测试 / 其他模块复用 */
+export { loadZiweiAiDeepReading, saveZiweiAiDeepReading } from './ai-deep-store.ts';

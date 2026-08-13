@@ -11,13 +11,14 @@ import {
   climateOfMonth,
   type ClimateFeel,
 } from './harmonize-tint.ts';
-import { type SeasonLabel, type WuXing } from './elements.ts';
+import { type SeasonLabel, type WuXing, seasonStrength } from './elements.ts';
 import { scoreChartWx } from './sense-energy.ts';
 import {
   collectTenGodLabels,
   countCategories,
   type TenGodCategory,
 } from './ten-gods.ts';
+import { TIAN_GAN_HE } from './relations.ts';
 
 /** 我生（食伤） */
 const SHI_SHANG: Record<WuXing, WuXing> = {
@@ -120,10 +121,16 @@ export type BodyStrengthBand = '身旺' | '身弱' | '中和';
 export type PatternMode =
   | 'zheng'
   | 'zhuan_wang'
+  | 'hua_qi'
   | 'cong_er'
   | 'cong_cai'
   | 'cong_sha'
   | 'cong_wang';
+
+export type CongTrust = 'true_tend' | 'false_tend';
+
+/** 化气真/假化倾向（与从格共用枚举语义：软置信） */
+export type HuaTrust = CongTrust;
 
 export type YongShenItem = {
   wx: WuXing;
@@ -141,6 +148,14 @@ export type PatternYongshenPack = {
   /** 取格依据一句 */
   patternWhy: string;
   patternMode: PatternMode;
+  /** 正格用神角色软提示（外格可空） */
+  roleTip: string;
+  /** 从格真/假从倾向 */
+  congTrust?: CongTrust | '';
+  /** 化气真/假化倾向 */
+  huaTrust?: HuaTrust | '';
+  /** 破局 / 假从 / 假化提示 */
+  breakTip?: string;
   /** 扶抑 / 专旺顺势 / 从势 */
   method: string;
   yong: YongShenItem[];
@@ -159,6 +174,11 @@ type PatternHit = {
   name: string;
   why: string;
   mode: PatternMode;
+  congTrust?: CongTrust;
+  huaTrust?: HuaTrust;
+  breakTip?: string;
+  /** 化气目标五行 */
+  huaWx?: WuXing;
 };
 
 function isStrong(s: SeasonLabel): boolean {
@@ -248,7 +268,68 @@ export function detectZhuanWang(
 }
 
 /**
+ * 化气格切片：日干参与天干五合 + 月令合化五行旺/相。
+ * 附真/假化倾向（软置信；非真假化全书）。
+ */
+export function detectHuaQi(
+  chart: BaziChart,
+  scores: Record<WuXing, number>,
+): PatternHit | null {
+  const dm = chart.dayMaster;
+  const dmWx = chart.dayMasterWx as WuXing | '';
+  if (!dm || !dmWx) return null;
+  const stems = chart.pillars
+    .filter((p) => !p.empty && ['year', 'month', 'day', 'hour'].includes(p.key))
+    .map((p) => p.stem.trim())
+    .filter(Boolean);
+  const month = chart.pillars.find((p) => p.key === 'month');
+  const day = chart.pillars.find((p) => p.key === 'day');
+  const mb = month && !month.empty ? month.branch : '';
+  if (!mb) return null;
+  const season = seasonStrength(mb);
+
+  for (const [a, b, el] of TIAN_GAN_HE) {
+    const hua = el as WuXing;
+    if (dm !== a && dm !== b) continue;
+    if (!stems.includes(a) || !stems.includes(b)) continue;
+    const lab = season[hua];
+    if (lab !== '旺' && lab !== '相') continue;
+    if ((scores[hua] ?? 0) < 2.5) continue;
+
+    const peer = dm === a ? b : a;
+    const heNear =
+      (month && !month.empty && (month.stem === a || month.stem === b)) ||
+      (day && !day.empty && (day.stem === a || day.stem === b));
+    const huaScore = scores[hua] ?? 0;
+    const dmScore = scores[dmWx] ?? 0;
+    const seasonWang = lab === '旺';
+    // 真化倾向：合化气明显压过日主原气，且合干贴近月/日，季节宜旺
+    const trueTend =
+      huaScore >= dmScore * 1.15 &&
+      huaScore >= 3.2 &&
+      (seasonWang || heNear) &&
+      dmScore <= huaScore;
+    const huaTrust: HuaTrust = trueTend ? 'true_tend' : 'false_tend';
+    const breakTip =
+      huaTrust === 'true_tend'
+        ? `合化「${hua}」气较显、日主原气不抢局：可先按真化倾向顺「${hua}」，仍合现实核对。`
+        : `合化「${hua}」能见，但日主原气或月令支撑一般：更像假化倾向——可顺一点「${hua}」，也留托底/泄秀，忌一口咬定已化。`;
+
+    return {
+      name: `${a}${b}化${hua}格（软）`,
+      why: `日干参与${a}${b}合（见${peer}），月令${hua}气偏${lab}：按化气软标顺「${hua}」（启发式，非真假化全书）。`,
+      mode: 'hua_qi',
+      huaWx: hua,
+      huaTrust,
+      breakTip,
+    };
+  }
+  return null;
+}
+
+/**
  * 从格软标：身弱跟最多的克泄耗；身旺跟比劫印势。
+ * 附真/假从倾向（软置信）。
  */
 export function detectCongGe(
   chart: BaziChart,
@@ -264,51 +345,80 @@ export function detectCongGe(
   const [topCat, topN] = ranked[0]!;
   if (topN < 2 || topN / total < 0.4) return null;
 
+  const ratio = topN / total;
+  const anchor = counts.bi_jie + counts.yin;
+  const leak = counts.shi_shang + counts.cai + counts.guan_sha;
+  // 真从：主势够浓且几乎不见印比托底；有印比残留更像假从
+  const congTrust: CongTrust =
+    ratio >= 0.55 && anchor === 0 ? 'true_tend' : 'false_tend';
+  const residual =
+    anchor > 0
+      ? `盘里还见印比约 ${anchor} 处`
+      : leak > 0 && band === '身旺'
+        ? `克泄耗仍有约 ${leak} 处`
+        : '杂气仍可见';
+  const breakTip =
+    congTrust === 'true_tend'
+      ? `从势较纯（主势约 ${Math.round(ratio * 100)}%）：可先按真从倾向顺势，仍合现实核对。`
+      : `${residual}：更像假从倾向——宜小步验证再全跟，可顺主势也留退路；忌一口咬定破局。`;
+
+  const withTrust = (
+    hit: Omit<PatternHit, 'congTrust' | 'breakTip'>,
+  ): PatternHit => ({ ...hit, congTrust, breakTip });
+
   if (band === '身弱') {
     if (topCat === 'shi_shang') {
-      return {
+      return withTrust({
         name: '从儿格（软）',
-        why: `身弱且食伤类偏多（${topN}/${total}）：先按从儿势顺泄秀，勿硬扶（软标，非真假从全书）。`,
+        why: `身弱且食伤类偏多（${topN}/${total}）：先按从儿势顺泄秀，勿硬扶（软标）。`,
         mode: 'cong_er',
-      };
+      });
     }
     if (topCat === 'cai') {
-      return {
+      return withTrust({
         name: '从财格（软）',
         why: `身弱且财星类偏多（${topN}/${total}）：先按从财势抓结果与交换，少空扛（软标）。`,
         mode: 'cong_cai',
-      };
+      });
     }
     if (topCat === 'guan_sha') {
-      return {
+      return withTrust({
         name: '从杀格（软）',
         why: `身弱且官杀类偏多（${topN}/${total}）：先按从杀势立规矩与交付，少硬刚（软标）。`,
         mode: 'cong_sha',
-      };
+      });
     }
     return null;
   }
 
   if (band === '身旺') {
     const follow = counts.bi_jie + counts.yin;
-    const leak = counts.shi_shang + counts.cai + counts.guan_sha;
     if (follow >= 3 && follow > leak) {
+      const trust: CongTrust =
+        follow >= leak + 2 && leak <= 1 ? 'true_tend' : 'false_tend';
       return {
         name: '从旺格（软）',
-        why: `身旺且比劫/印势压过克泄耗：先按从旺顺势成势，少硬砍（软标，非真从全书）。`,
+        why: `身旺且比劫/印势压过克泄耗：先按从旺顺势成势，少硬砍（软标）。`,
         mode: 'cong_wang',
+        congTrust: trust,
+        breakTip:
+          trust === 'true_tend'
+            ? `从旺势较顺（印比 ${follow} vs 克泄耗 ${leak}）：可先顺势成势，仍合现实核对。`
+            : `印比 ${follow}、克泄耗 ${leak}：更像假从旺倾向，宜边顺边修，勿一口咬定。`,
       };
     }
   }
   return null;
 }
 
-/** 外格优先于正格；未命中再月令正格 */
+/** 外格优先于正格：专旺 → 化气 → 从格 → 月令正格 */
 export function resolvePatternHit(chart: BaziChart): PatternHit {
   const scores = scoreChartWx(chart);
   const band = bodyBandOf(dayStrengthOf(chart));
   const zhuan = detectZhuanWang(chart, scores);
   if (zhuan) return zhuan;
+  const hua = detectHuaQi(chart, scores);
+  if (hua) return hua;
   const cong = detectCongGe(chart, band);
   if (cong) return cong;
   return resolveZhengPattern(chart);
@@ -325,11 +435,65 @@ function uniqWx(items: YongShenItem[]): WuXing[] {
   return out;
 }
 
+/** 正格用神角色软句（非子平全书；外格另有顺势 playbook） */
+export function zhengRoleTip(patternName: string, band: BodyStrengthBand): string {
+  const base = patternName.replace(/（软）$/, '');
+  const map: Record<string, string> = {
+    正官格: '官格：宜财星生官、印星护官；身旺可担责任，身弱先托底再担。',
+    七杀格: '杀格：宜食伤制杀或印化杀；锋芒当令时立规矩，少硬刚。',
+    正财格: '财格：宜食伤生财；身旺可耗，身弱先助身再抓结果。',
+    偏财格: '偏财格：宜流通交换；把握机会时留退路，少梭哈。',
+    食神格: '食神格：宜泄秀成器、食伤生财；少印星夺食压创意。',
+    伤官格: '伤官格：宜伤官生财或配印；锋利表达要落地，少空呛。',
+    正印格: '印格：宜官杀生印；学习托底优先，身旺再泄秀。',
+    偏印格: '偏印格：宜奇径学习；身弱可托，身旺宜输出防闷。',
+    建禄格: '建禄：月令得禄，扶抑看旺衰——旺则泄耗克，弱则生扶。',
+    羊刃格: '羊刃：锋芒当令，宜官杀修剪或食伤泄秀；少再叠比劫。',
+    比肩格: '比劫格：宜并肩成事；身旺防争，身弱可助。',
+    劫财格: '劫财格：宜协作也防争抢；身旺泄耗，身弱互助。',
+  };
+  if (map[base]) return map[base]!;
+  if (band === '身旺') return '正格身旺：多用泄、克、耗把力变成结果。';
+  if (band === '身弱') return '正格身弱：先印比托底，再小步出手。';
+  return '正格中和：表达与托底轮换，调候听月令。';
+}
+
 function yongJiForMode(
   dmWx: WuXing,
   band: BodyStrengthBand,
   mode: PatternMode,
+  huaWx?: WuXing,
 ): { yong: YongShenItem[]; ji: YongShenItem[]; method: string } {
+  if (mode === 'hua_qi' && huaWx) {
+    return {
+      method: '化气顺势（切片）· 顺合化五行',
+      yong: [
+        {
+          wx: huaWx,
+          role: '喜用',
+          why: '化气成局：先把合化这一行做满',
+        },
+        {
+          wx: SHI_SHANG[huaWx],
+          role: '喜用',
+          why: '化气宜泄秀：输出成可见成果',
+        },
+      ],
+      ji: [
+        {
+          wx: GUAN_SHA[huaWx],
+          role: '忌神',
+          why: '化气忌强克合化气，少硬砍',
+        },
+        {
+          wx: dmWx !== huaWx ? dmWx : CAI[huaWx],
+          role: '忌神',
+          why: '少逆势硬扶日主原气抢局',
+        },
+      ],
+    };
+  }
+
   if (mode === 'zhuan_wang') {
     return {
       method: '专旺顺势（切片）· 泄秀为用',
@@ -596,7 +760,7 @@ export function resolvePatternYongshen(chart: BaziChart): PatternYongshenPack {
   let method = '扶抑法 · 月令取格';
 
   if (dmWx) {
-    const pack = yongJiForMode(dmWx, band, pattern.mode);
+    const pack = yongJiForMode(dmWx, band, pattern.mode, pattern.huaWx);
     yong = pack.yong;
     ji = pack.ji;
     method = pack.method;
@@ -635,6 +799,14 @@ export function resolvePatternYongshen(chart: BaziChart): PatternYongshenPack {
   let playbook: string;
   if (pattern.mode === 'zhuan_wang') {
     playbook = `专旺局做事：把本气做满再泄秀成成果；少硬克硬砍。喜用优先：${yongLine}。`;
+  } else if (pattern.mode === 'hua_qi') {
+    const trustBit =
+      pattern.huaTrust === 'true_tend'
+        ? '（真化倾向）'
+        : pattern.huaTrust === 'false_tend'
+          ? '（假化倾向）'
+          : '';
+    playbook = `化气局${trustBit}：顺着合化五行成局，少逆势硬扶日主原气。喜用优先：${yongLine}。`;
   } else if (pattern.mode.startsWith('cong_')) {
     const tip =
       pattern.mode === 'cong_er'
@@ -644,7 +816,13 @@ export function resolvePatternYongshen(chart: BaziChart): PatternYongshenPack {
           : pattern.mode === 'cong_sha'
             ? '顺着规矩与交付'
             : '顺着成势与并肩';
-    playbook = `${pattern.name.replace('（软）', '')}：${tip}，少逆势硬扶。喜用优先：${yongLine}。`;
+    const trustBit =
+      pattern.congTrust === 'true_tend'
+        ? '（真从倾向）'
+        : pattern.congTrust === 'false_tend'
+          ? '（假从倾向）'
+          : '';
+    playbook = `${pattern.name.replace('（软）', '')}${trustBit}：${tip}，少逆势硬扶。喜用优先：${yongLine}。`;
   } else if (band === '身旺') {
     playbook = `这十年段做事：多用「泄、克、耗」——输出、立规矩、抓结果；少叠加只会让你更满的生扶。喜用优先：${yongLine}。`;
   } else if (band === '身弱') {
@@ -652,6 +830,9 @@ export function resolvePatternYongshen(chart: BaziChart): PatternYongshenPack {
   } else {
     playbook = `力量中和：表达与托底轮换用，调候优先听月令。喜用参考：${yongLine}。`;
   }
+
+  const roleTip =
+    pattern.mode === 'zheng' ? zhengRoleTip(pattern.name, band) : '';
 
   return {
     dayMaster: chart.dayMaster,
@@ -661,6 +842,10 @@ export function resolvePatternYongshen(chart: BaziChart): PatternYongshenPack {
     patternName: pattern.name,
     patternWhy: pattern.why,
     patternMode: pattern.mode,
+    roleTip,
+    congTrust: pattern.congTrust ?? '',
+    huaTrust: pattern.huaTrust ?? '',
+    breakTip: pattern.breakTip ?? '',
     method,
     yong: yongMerged,
     ji: jiFiltered,
@@ -670,7 +855,7 @@ export function resolvePatternYongshen(chart: BaziChart): PatternYongshenPack {
     headline: `${pattern.name} · ${band}（月令「${strength}」）`,
     playbook,
     boundary:
-      '规则推演：正格扶抑 + 专旺五格/从格软标；未含化气全书与真假从破局细则。合大运流年与现实核对，勿单凭喜用断吉凶。',
+      '规则推演：正格扶抑 + 专旺/化气/从格软标（含真假化与真假从倾向）；非化气全书与刑冲破局长表。合大运流年与现实核对，勿单凭喜用断吉凶。',
     climate,
   };
 }
@@ -701,6 +886,18 @@ export function patternYongshenCardHtml(
         · ${escape(pack.bodyBand)}
         · 喜用 ${escape(pack.yongWx.join('、') || '—')}
         · 忌 ${escape(pack.jiWx.join('、') || '—')}
+        ${pack.roleTip ? `<span class="py-compact-role"> · ${escape(pack.roleTip)}</span>` : ''}
+        ${
+          pack.huaTrust
+            ? `<span class="py-compact-role"> · ${escape(
+                pack.huaTrust === 'true_tend' ? '真化倾向' : '假化倾向',
+              )}</span>`
+            : pack.congTrust
+              ? `<span class="py-compact-role"> · ${escape(
+                  pack.congTrust === 'true_tend' ? '真从倾向' : '假从倾向',
+                )}</span>`
+              : ''
+        }
       </p>`;
   }
 
@@ -710,6 +907,18 @@ export function patternYongshenCardHtml(
       <h2 class="py-title">${escape(pack.headline)}</h2>
       <p class="py-method">${escape(pack.method)} · 日主 ${escape(pack.dayMaster)}${pack.dayMasterWx ? escape(pack.dayMasterWx) : ''}</p>
       <p class="py-why">${escape(pack.patternWhy)}</p>
+      ${pack.roleTip ? `<p class="py-role">${escape(pack.roleTip)}</p>` : ''}
+      ${
+        pack.huaTrust
+          ? `<p class="py-trust">${escape(
+              pack.huaTrust === 'true_tend' ? '真化倾向' : '假化倾向',
+            )}${pack.breakTip ? ` · ${escape(pack.breakTip)}` : ''}</p>`
+          : pack.congTrust
+            ? `<p class="py-trust">${escape(
+                pack.congTrust === 'true_tend' ? '真从倾向' : '假从倾向',
+              )}${pack.breakTip ? ` · ${escape(pack.breakTip)}` : ''}</p>`
+            : ''
+      }
       <div class="py-row">
         <span class="py-label">喜用</span>
         <div class="py-chips">${yongChips || '<span class="py-chip">—</span>'}</div>

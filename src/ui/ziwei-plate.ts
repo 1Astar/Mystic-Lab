@@ -161,11 +161,12 @@ function palaceCellHtml(
     ? `<span class="ziwei-plate-marks" aria-hidden="true">${tags.join(' ')}</span>`
     : '';
 
+  /** 盘面默认可读；本源/已觉醒保留高亮，未激活不再整盘变灰上锁 */
   const starStateCls = (ref: PlateStarRef) => {
     const kind = classifyPlateStar(ref, view);
     if (kind === 'origin') return 'is-awaken-origin';
     if (kind === 'awakened') return 'is-awaken-lit';
-    return 'is-awaken-sealed';
+    return '';
   };
 
   const majorRows =
@@ -174,7 +175,6 @@ function palaceCellHtml(
         const status = s.brightness ? normalizeStatus(s.brightness) : '';
         const ref: PlateStarRef = { palace: p.name, star: s.name, isMajor: true };
         const state = starStateCls(ref);
-        const lock = state === 'is-awaken-sealed' ? '<i class="ziwei-plate-lock" aria-hidden="true">🔒</i>' : '';
         const karma =
           isShaLike(s.name) || s.mutagen === '忌'
             ? ' is-karma-star'
@@ -188,9 +188,8 @@ function palaceCellHtml(
                 isMajor: true,
               };
               const mState = starStateCls(mRef);
-              const mLock = mState === 'is-awaken-sealed' ? '<i class="ziwei-plate-lock" aria-hidden="true">🔒</i>' : '';
               const mKarma = s.mutagen === '忌' ? ' is-karma-star' : '';
-              return `<button type="button" class="ziwei-plate-hua is-hua-${escapeHtml(s.mutagen)} ${mState}${mKarma}" data-plate-hua="${escapeHtml(s.mutagen)}" data-star-name="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}" aria-label="化${escapeHtml(s.mutagen)}">${mLock}化${escapeHtml(s.mutagen)}</button>`;
+              return `<button type="button" class="ziwei-plate-hua is-hua-${escapeHtml(s.mutagen)} ${mState}${mKarma}" data-plate-hua="${escapeHtml(s.mutagen)}" data-star-name="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}" aria-label="化${escapeHtml(s.mutagen)}">化${escapeHtml(s.mutagen)}</button>`;
             })()
           : '';
         const statusBtn = status
@@ -198,7 +197,7 @@ function palaceCellHtml(
           : '';
         return `
           <div class="ziwei-plate-star-row">
-            <button type="button" class="ziwei-plate-star is-major ${state}${karma}" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${lock}${escapeHtml(s.name)}</button>
+            <button type="button" class="ziwei-plate-star is-major ${state}${karma}" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${escapeHtml(s.name)}</button>
             <span class="ziwei-plate-star-tags">${hua}${statusBtn}</span>
           </div>`;
       })
@@ -217,9 +216,8 @@ function palaceCellHtml(
               isMajor: false,
             };
             const state = starStateCls(ref);
-            const lock = state === 'is-awaken-sealed' ? '<i class="ziwei-plate-lock" aria-hidden="true">🔒</i>' : '';
             const karma = isShaLike(s.name) ? ' is-karma-star' : '';
-            return `<button type="button" class="ziwei-plate-star is-minor ${state}${karma}" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${lock}${escapeHtml(s.name)}</button>`;
+            return `<button type="button" class="ziwei-plate-star is-minor ${state}${karma}" data-plate-star="${escapeHtml(s.name)}" data-palace-name="${escapeHtml(p.name)}">${escapeHtml(s.name)}</button>`;
           })
           .join('')}${
           more > 0

@@ -2151,6 +2151,70 @@
   color: var(--ink);
 }
 
+.tr-journal-ai-badge {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+
+.tr-ai-fold {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.tr-ai-fold > summary {
+  cursor: pointer;
+  font-size: 0.84rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.tr-replay-ai-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.tr-replay-ai h4 {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  color: var(--gold);
+}
+
+.tr-replay-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.tr-replay-ai-turns {
+  margin-top: 8px;
+}
+
+.tr-replay-ai-turns summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.tr-replay-ai-turn {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.tr-replay-ai-turn.is-user {
+  color: var(--ink);
+}
+
 .journal-detail-learning,
 .journal-detail-reflection {
   margin-top: 16px;
@@ -2354,10 +2418,11 @@
   margin: 8px 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border-left: 3px solid rgba(201, 168, 76, 0.5);
-  background: rgba(201, 168, 76, 0.08);
+  border-left: 3px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, transparent);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
   font-size: 0.88rem;
   line-height: 1.5;
+  color: var(--gold-ink, var(--ink));
 }
 
 .codex-quick-muted {

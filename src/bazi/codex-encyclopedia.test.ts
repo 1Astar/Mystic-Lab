@@ -26,6 +26,7 @@ import {
   jiaziDayunRichCoverage,
   listRichJiaziDayunIds,
 } from './codex-jiazi-dayun-lore.ts';
+import { getNayinLore } from './codex-nayin-lore.ts';
 
 describe('bazi encyclopedia', () => {
   it('core kinds still present', () => {
@@ -226,11 +227,28 @@ describe('bazi encyclopedia', () => {
       const lore = getJiaziDayunLore(gz);
       expect(lore.rich, gz).toBe(true);
       expect(lore.theme, gz).not.toMatch(/待补/);
+      expect(lore.weather.length, gz).toBeGreaterThanOrEqual(40);
+      expect(lore.playbook.length, gz).toBeGreaterThanOrEqual(35);
+      expect(lore.leanIn.length, gz).toBeGreaterThanOrEqual(10);
+      expect(lore.watch.length, gz).toBeGreaterThanOrEqual(10);
       const d = buildCodexDossier(jiaziId(gz))!;
       expect(d.dayunAs?.rich, gz).toBe(true);
       expect(d.dayunAs!.theme.length, gz).toBeGreaterThan(4);
       expect(d.dayunAs!.playbook.length, gz).toBeGreaterThan(8);
       expect(d.dayunAs!.watch, gz).not.toMatch(/倒霉|必凶|必灾/);
+    }
+  });
+
+  it('三十纳音 lore 字段齐全且非恐吓式单断', () => {
+    for (const n of NAYIN_ATLAS) {
+      const lore = getNayinLore(n.name)!;
+      expect(lore, n.name).toBeTruthy();
+      expect(lore.scene.length, n.name).toBeGreaterThanOrEqual(12);
+      expect(lore.memory, n.name).toMatch(/纳音|勿单断|画面/);
+      expect(lore.avoid.some((a) => /^(必凶|必灾|必贵)/.test(a)), n.name).toBe(false);
+      const d = buildCodexDossier(nayinId(n.name))!;
+      expect(d.whatIs, n.name).toMatch(n.name);
+      expect(d.whatIs, n.name).not.toMatch(/骨架条目|图鉴定义如下/);
     }
   });
 });

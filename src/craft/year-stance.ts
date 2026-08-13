@@ -5,7 +5,7 @@ import type { PersonProfile } from '../life/types.ts';
 import { resolveHoroscopeLimits } from '../ziwei/horoscope-limits.ts';
 import type { PalaceSnap } from '../ziwei/types.ts';
 import {
-  composeMultByAxis,
+  composeMultByAxisDetailed,
   type BuffEffect,
   type YearBuffEntry,
   type YearBuffPack,
@@ -313,11 +313,16 @@ export function applyStanceToYearBuffPack(
   };
 
   const entries = [...pack.entries, stanceEntry];
-  const multByAxis = composeMultByAxis([
+  const composed = composeMultByAxisDetailed([
     ...entries,
     ...(pack.monthEntries ?? []),
   ]);
-  return { ...pack, entries, multByAxis };
+  return {
+    ...pack,
+    entries,
+    multByAxis: composed.multByAxis,
+    conflictNote: composed.note || pack.conflictNote,
+  };
 }
 
 export function choiceLabel(choice: YearStanceChoice): string {

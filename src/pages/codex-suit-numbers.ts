@@ -2,8 +2,9 @@
 import { openCodexCardDetail } from '../codex/detail-host.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountSuitNumbersGuide } from '../ui/codex-suit-numbers.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
-export function renderCodexSuitNumbers(root: HTMLElement): void {
+export function renderCodexSuitNumbers(root: HTMLElement): () => void {
   let selectedId: string | null = null;
 
   const page = document.createElement('div');
@@ -61,4 +62,10 @@ export function renderCodexSuitNumbers(root: HTMLElement): void {
 
   root.appendChild(page);
   render();
+  return mountLabFloatShell(page, {
+    system: 'tarot',
+    surface: 'learn',
+    tujianPath: '/tarot/tujian',
+    notesContext: '牌组×数字',
+  });
 }

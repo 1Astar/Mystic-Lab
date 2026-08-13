@@ -396,7 +396,7 @@ html.thread-peek-open .lab-scroll-top {
 .lab-notes-sheet {
   position: fixed;
   inset: 0;
-  z-index: 560;
+  z-index: 620;
   display: flex;
   align-items: stretch;
   justify-content: flex-end;

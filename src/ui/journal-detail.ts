@@ -6,6 +6,7 @@ import { clearSideActionFabs, mountInviteCompanionBar } from '../share/invite-ba
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountQuestionThread } from './question-thread-panel.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
+import { renderTarotAiSessionsHtml, tarotAiBadgeHtml } from './tarot-ai-sessions.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -39,6 +40,8 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
     updateJournalReadingSnapshot(entry.id, reading);
   }
 
+  const hasAi = (entry.aiSessions?.length ?? 0) > 0;
+
   container.className = 'journal-detail';
   container.innerHTML = `
     <button type="button" class="journal-detail-close" aria-label="关闭">✕</button>
@@ -46,6 +49,7 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
       <time class="journal-detail-date">${escapeHtml(date)}${isPartial ? ' · 未完成' : ''}</time>
       <h2 class="journal-detail-question">${escapeHtml(entry.question || '（未记录问题）')}</h2>
       <p class="journal-detail-meta">${escapeHtml(spreadLabel)} · ${reading.cards.length} 张牌</p>
+      ${tarotAiBadgeHtml(entry.aiSessions?.length ?? 0)}
       ${
         canContinue
           ? '<button type="button" class="btn journal-detail-continue" data-continue>继续完成</button>'
@@ -56,6 +60,11 @@ export function mountJournalDetail(container: HTMLElement, options: JournalDetai
     ${hydratedThread ? '<p class="journal-detail-regen">已按你的问题补成「此刻解读」串讲（牌面原文保留）</p>' : ''}
     <div class="journal-detail-thread" id="journal-detail-thread"></div>
     <p class="journal-detail-summary">${escapeHtml(reading.summary)}</p>
+    ${
+      hasAi
+        ? `<details class="tr-ai-fold" open><summary>回看 AI 解读</summary>${renderTarotAiSessionsHtml(entry.aiSessions)}</details>`
+        : ''
+    }
     ${
       entry.reflection?.trim()
         ? `<div class="journal-handnote"><span class="journal-handnote-prefix">手札记录：</span>${escapeHtml(entry.reflection.trim())}</div>`

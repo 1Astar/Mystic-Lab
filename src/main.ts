@@ -44,6 +44,10 @@ const tarotStyles = [
   () => import('./styles/codex.css'),
 ];
 const xiaoliurenStyles = [() => import('./styles/xiaoliuren.css')];
+const xiaoliurenReadingStyles = [
+  () => import('./styles/xiaoliuren.css'),
+  () => import('./styles/liuyao.css'),
+];
 const liuyaoStyles = [() => import('./styles/liuyao.css')];
 const lifeStyles = [() => import('./styles/life.css')];
 const baziStyles = [
@@ -94,7 +98,7 @@ registerRoute(
 );
 registerRoute(
   '/xiaoliuren/reading',
-  lazy(() => import('./pages/xiaoliuren-reading.ts'), 'renderXiaoliurenReading', xiaoliurenStyles),
+  lazy(() => import('./pages/xiaoliuren-reading.ts'), 'renderXiaoliurenReading', xiaoliurenReadingStyles),
 );
 registerRoute('/xiaoliuren/tujian', () => {
   navigate('/xiaoliuren');
@@ -150,7 +154,9 @@ registerRoute(
 );
 registerRoute(
   '/bazi/chart',
-  lazy(() => import('./pages/bazi-chart.ts'), 'renderBaziChart', baziStyles),
+  () => {
+    navigate('/bazi/reading?mode=chart');
+  },
 );
 registerRoute(
   '/bazi/rectify',
@@ -205,6 +211,13 @@ registerRoute(
 registerRoute(
   '/ziwei/tujian',
   lazy(() => import('./pages/ziwei-codex.ts'), 'renderZiweiCodex', ziweiStyles),
+);
+registerRoute(
+  '/ziwei/journal',
+  lazy(() => import('./pages/ziwei-journal.ts'), 'renderZiweiJournal', [
+    ...ziweiStyles,
+    () => import('./styles/bazi.css'),
+  ]),
 );
 registerRoute('/ziwei/codex', () => {
   const q = location.search || '';

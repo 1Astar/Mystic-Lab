@@ -3,8 +3,9 @@ import { openCodexCardDetail } from '../codex/detail-host.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountCodexStoryMap } from '../ui/codex-story-map.ts';
 import { mountJourneyDetail } from '../ui/codex-journey-detail.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
-export function renderCodexFoolJourney(root: HTMLElement): void {
+export function renderCodexFoolJourney(root: HTMLElement): () => void {
   let selectedId: string | null = null;
   let detailMode: 'journey' | 'codex' = 'journey';
 
@@ -82,4 +83,10 @@ export function renderCodexFoolJourney(root: HTMLElement): void {
 
   root.appendChild(page);
   render();
+  return mountLabFloatShell(page, {
+    system: 'tarot',
+    surface: 'learn',
+    tujianPath: '/tarot/tujian',
+    notesContext: '愚人之旅',
+  });
 }

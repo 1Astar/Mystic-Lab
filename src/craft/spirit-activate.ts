@@ -13,7 +13,9 @@ import {
 } from './year-stance.ts';
 import type { BaziChart } from '../bazi/cast.ts';
 import { castBaziChart } from '../bazi/cast.ts';
+import { resolvePatternYongshen } from '../bazi/pattern-yongshen.ts';
 import type { PersonProfile } from '../life/types.ts';
+import { applyYongShenToAxes } from './spirit-yong-mult.ts';
 import { unlockStarsFromChart } from '../ziwei/codex.ts';
 import { castZiweiChart } from '../ziwei/cast.ts';
 import { mutagenToCardId } from '../ziwei/stars.ts';
@@ -350,13 +352,27 @@ export function resolveSpiritRootWithGrowth(
   );
 
   let baziHint = '';
+  let patternYong = null as ReturnType<typeof resolvePatternYongshen> | null;
   if (chart) {
+    patternYong = resolvePatternYongshen(chart);
     const liu = chart.pillars.find((p) => p.key === 'liunian' && !p.empty);
-    if (liu) {
-      baziHint = `八字天气（不改系数）：流年 ${liu.stem}${liu.branch}${liu.stemGod && liu.stemGod !== '—' ? ` · ${liu.stemGod}` : ''}——大环境提示，紫微词条才改有效分。`;
-    } else {
-      baziHint = `八字天气（不改系数）：日主 ${chart.dayMaster}${chart.dayMasterWx || ''} · 流年柱未排出。`;
-    }
+    const liuPart = liu
+      ? `流年 ${liu.stem}${liu.branch}${liu.stemGod && liu.stemGod !== '—' ? ` · ${liu.stemGod}` : ''}`
+      : `日主 ${chart.dayMaster}${chart.dayMasterWx || ''} · 流年柱未排出`;
+    const tip = patternYong.roleTip || patternYong.playbook;
+    const tipShort = tip.length > 48 ? `${tip.slice(0, 48)}…` : tip;
+    baziHint = `八字：格局叙事；流年/流月十神弱叠乘；喜用已弱叠六轴。${patternYong.patternName} · ${patternYong.bodyBand} · ${liuPart}。${tipShort}`;
+
+    const yongSet = new Set(patternYong.yongWx);
+    const jiSet = new Set(patternYong.jiWx);
+    panel.wuxing = panel.wuxing.map((w) => ({
+      ...w,
+      yongRole: yongSet.has(w.el) ? 'yong' : jiSet.has(w.el) ? 'ji' : '',
+    }));
+  }
+  panel.patternYong = patternYong;
+  if (patternYong) {
+    panel.axes = applyYongShenToAxes(panel.axes, patternYong);
   }
 
   const yearBuffBase: YearBuffPack = resolveYearBuffPack(
@@ -370,11 +386,12 @@ export function resolveSpiritRootWithGrowth(
   const tips = listYearTips({ personId: person.id, year });
   panel.yearBuff = yearBuff;
   panel.yearTips = tips.map((t) => t.text);
-  panel.axes = applyFlatComboBonuses(panel.axes);
+  panel.axes = applyFlatComboBonuses(panel.axes, view);
   panel.axes = applyBuffToAxes(panel.axes, yearBuff.multByAxis);
-  const ye = applyYeHuoConditionalBurst(panel.axes);
+  const ye = applyYeHuoConditionalBurst(panel.axes, view);
   panel.axes = ye.axes;
   panel.comboAchievements = enrichCraftComboStates(panel.axes, {
+    view,
     yeHuoActive: ye.active,
   });
 

@@ -3,6 +3,7 @@ import { formatCardNameZh } from '../tarot/card-names.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
 import { getCardRoleHint } from '../codex/card-role.ts';
 import { getCodexPreviewInfo } from '../codex/preview.ts';
+import { buildLiveSuitNumberBlend, NUMBER_STAGES } from '../knowledge/minor-structure.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -10,6 +11,30 @@ function escapeHtml(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+const RANK_TO_NUM: Record<string, string> = {
+  Ace: '1',
+  Two: '2',
+  Three: '3',
+  Four: '4',
+  Five: '5',
+  Six: '6',
+  Seven: '7',
+  Eight: '8',
+  Nine: '9',
+  Ten: '10',
+};
+
+function previewFormula(card: CardDefinition): { text: string; isBlend: boolean } {
+  if (card.arcana === 'minor' && card.suit && card.rank) {
+    const num = RANK_TO_NUM[card.rank];
+    if (num && NUMBER_STAGES.some((s) => s.num === num)) {
+      const blend = buildLiveSuitNumberBlend(card.suit, num);
+      if (blend) return { text: blend.line, isBlend: true };
+    }
+  }
+  return { text: getCardRoleHint(card).formula, isBlend: false };
 }
 
 export type CodexPreviewCallbacks = {
@@ -23,7 +48,7 @@ export function mountCodexPreview(
   callbacks: CodexPreviewCallbacks,
 ): void {
   const preview = getCodexPreviewInfo(card);
-  const role = getCardRoleHint(card);
+  const formula = previewFormula(card);
   const nameCn = formatCardNameZh(card);
 
   container.className = 'codex-detail codex-preview';
@@ -45,7 +70,7 @@ export function mountCodexPreview(
     </p>
     <section class="codex-preview-box">
       <h3>在牌组中的位置</h3>
-      <p class="codex-preview-role-formula">${escapeHtml(role.formula)}</p>
+      <p class="codex-preview-role-formula${formula.isBlend ? ' is-blend' : ''}">${escapeHtml(formula.text)}</p>
     </section>
     <section class="codex-preview-box">
       <h3>可预览</h3>

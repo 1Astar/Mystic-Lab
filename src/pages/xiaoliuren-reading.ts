@@ -8,6 +8,7 @@ import { formatSolarDateTime, solarToLunar, type LunarDate } from '../xiaoliuren
 import { buildPhaseTeach, renderPhaseTeachCard } from '../xiaoliuren/lesson-copy.ts';
 import { buildAiReading, buildProcessExplanation } from '../xiaoliuren/interpret.ts';
 import { saveXiaoliurenJournalEntry, updateXiaoliurenReflection } from '../xiaoliuren/journal.ts';
+import { openXiaoliurenDeepReadingEntry } from '../xiaoliuren/personalize-deep.ts';
 import { draftFromXiaoliuren } from '../share/drafts.ts';
 import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { renderSixGodIcon, getSixGodByIndex, sixGodOneLiner } from '../xiaoliuren/six-gods.ts';
@@ -131,6 +132,28 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
     system: 'xiaoliuren',
     surface: 'reading',
     tujianPath: '/xiaoliuren',
+    onDeep: () => {
+      if (!lesson) {
+        const el = document.createElement('div');
+        el.className = 'ly-follow-toast';
+        el.setAttribute('role', 'status');
+        el.textContent = '请先完成起课，再生成深度解读';
+        document.body.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('is-on'));
+        setTimeout(() => {
+          el.classList.remove('is-on');
+          setTimeout(() => el.remove(), 280);
+        }, 1800);
+        return;
+      }
+      openXiaoliurenDeepReadingEntry({
+        lesson,
+        question,
+        summary: sixGodOneLiner(lesson.result),
+        journalId,
+        initialTab: 'deep',
+      });
+    },
   });
 
   const isLearn = () => lessonMode === 'learn';

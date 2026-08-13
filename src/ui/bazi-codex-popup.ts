@@ -76,6 +76,8 @@ export function openBaziCodexPopup(opts: BaziCodexPopupOpts): boolean {
     artHtml: codexDetailArtHtml(id),
     lit,
     chartLink,
+    chart: opts.chart ?? null,
+    luck: opts.luck ?? null,
   });
 
   const modal = document.createElement('div');

@@ -52,7 +52,7 @@ const PLAY_LINKS: MeLink[] = [
 
 /** 旅程区 */
 const JOURNEY_LINKS: MeLink[] = [
-  { path: '/records', label: '我的旅程', desc: '各体系占问记录、收藏与回顾' },
+  { path: '/records', label: '我的旅程', desc: '塔罗 / 小六壬 / 六爻 / 八字 / 紫微记录与回顾' },
   { path: '/knowledge', label: '知识库', desc: '术语与图鉴合集', soon: true },
 ];
 

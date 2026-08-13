@@ -393,6 +393,21 @@
   font-weight: 600;
 }
 
+.craft-wx-cell.is-yong {
+  color: color-mix(in srgb, #2a7a4b 70%, var(--ink));
+}
+
+.craft-wx-cell.is-ji {
+  color: color-mix(in srgb, var(--ink-muted) 85%, var(--ink));
+}
+
+.craft-wx-cell em {
+  font-style: normal;
+  font-size: 0.65em;
+  margin-left: 2px;
+  opacity: 0.85;
+}
+
 .craft-wx-bar {
   height: 4px;
   border-radius: 999px;
@@ -408,6 +423,22 @@
 
 .craft-wx-cell.is-day .craft-wx-bar i {
   background: var(--gold);
+}
+
+.craft-wx-cell.is-yong .craft-wx-bar i {
+  background: color-mix(in srgb, #2a7a4b 70%, var(--gold));
+}
+
+.craft-wx-cell.is-ji .craft-wx-bar i {
+  background: color-mix(in srgb, var(--ink-muted) 55%, transparent);
+}
+
+.craft-pattern {
+  margin-top: 14px;
+}
+
+.craft-pattern .py-compact {
+  margin: 6px 0 8px;
 }
 
 /* 点亮成长 */
@@ -583,6 +614,25 @@
 
 .craft-buff-row.is-challenge {
   border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+}
+
+.craft-buff-row.is-bazi {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+  background: color-mix(in srgb, var(--gold-soft) 18%, var(--surface-1));
+}
+
+.craft-buff-lane {
+  font-style: normal;
+  font-size: 0.68em;
+  font-weight: 600;
+  margin-left: 4px;
+  color: var(--gold-ink, var(--gold));
+  letter-spacing: 0.04em;
+}
+
+.craft-buff-harmonize {
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 70%, var(--ink-muted));
 }
 
 .craft-buff-main {

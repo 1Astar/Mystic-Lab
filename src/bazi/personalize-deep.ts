@@ -8,9 +8,15 @@ import { buildBaziDeepPrompt } from './deep-prompt.ts';
 import { answerBaziConcept, recordBaziConceptMiss } from './concept-ask.ts';
 import { buildBaziPageFaq } from './page-faq.ts';
 import {
+  loadBaziAiDeepDoc,
   loadBaziAiDeepReading,
   saveBaziAiDeepReading,
 } from './ai-deep-store.ts';
+import {
+  appendBaziAiTurns,
+  buildBaziJournalSnapshot,
+  createBaziAiJournalEntry,
+} from './journal.ts';
 import { openBaziFollowupChat } from './followup-chat.ts';
 import {
   canUseMysticDeep,
@@ -191,7 +197,18 @@ export function openBaziPersonalizeDeep(opts: OpenBaziPersonalizeDeepOpts): void
         { temperature: 0.55 },
       );
       if (modeNow === 'mystic') recordDeepUse();
-      saveBaziAiDeepReading(opts.person.id, text);
+      const linked = createBaziAiJournalEntry({
+        deepReading: text,
+        question: opts.question || opts.headline,
+        snapshot: buildBaziJournalSnapshot(opts.chart, opts.luck ?? null),
+      });
+      saveBaziAiDeepReading(
+        opts.person.id,
+        text,
+        linked
+          ? { journalId: linked.journalId, sessionId: linked.sessionId }
+          : undefined,
+      );
       close();
       if (opts.openSheetAfter !== false) {
         openBaziDeepReadingEntry({
@@ -205,7 +222,11 @@ export function openBaziPersonalizeDeep(opts: OpenBaziPersonalizeDeepOpts): void
           initialTab: 'deep',
         });
       }
-      toast('深度解读已生成 · 可继续追问');
+      toast(
+        linked
+          ? '深度解读已写入手札 · 可继续追问'
+          : '深度解读已生成 · 可继续追问',
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : '分析失败';
       status.textContent =
@@ -241,6 +262,39 @@ export type OpenBaziDeepReadingEntryOpts = {
   answerDeep?: (q: string) => { answer: string; hit: boolean };
 };
 
+/** 旧档案仅有 person 键深度解读时，补一条手札并回挂 journalId */
+function ensureDeepJournalLink(opts: {
+  personId: string;
+  chart: BaziChart;
+  luck?: LuckCycles | null;
+  question?: string;
+  headline?: string;
+}): void {
+  const doc = loadBaziAiDeepDoc(opts.personId);
+  const deep = doc?.deepReading.trim();
+  if (!deep || doc?.journalId) return;
+  const linked = createBaziAiJournalEntry({
+    deepReading: deep,
+    question: opts.question || opts.headline,
+    snapshot: buildBaziJournalSnapshot(opts.chart, opts.luck ?? null),
+  });
+  if (!linked) return;
+  saveBaziAiDeepReading(opts.personId, deep, {
+    journalId: linked.journalId,
+    sessionId: linked.sessionId,
+  });
+  const extra = (doc?.turns ?? []).filter(
+    (t) => t.content.trim() && !(t.role === 'assistant' && t.content.trim() === deep),
+  );
+  if (extra.length) {
+    appendBaziAiTurns(
+      linked.journalId,
+      linked.sessionId,
+      extra.map((t) => ({ role: t.role, content: t.content })),
+    );
+  }
+}
+
 /** 火花入口：有深度解读 → 多轮追问；否则空态可生成；边看边问仍可用 */
 export function openBaziDeepReadingEntry(opts: OpenBaziDeepReadingEntryOpts): void {
   const existing = loadBaziAiDeepReading(opts.person.id);
@@ -257,6 +311,16 @@ export function openBaziDeepReadingEntry(opts: OpenBaziDeepReadingEntryOpts): vo
       answerDeep: opts.answerDeep,
     });
   };
+
+  if (existing) {
+    ensureDeepJournalLink({
+      personId: opts.person.id,
+      chart: opts.chart,
+      luck: opts.luck,
+      question: opts.question,
+      headline: opts.headline,
+    });
+  }
 
   if (existing && opts.initialTab !== 'ask') {
     openBaziFollowupChat({

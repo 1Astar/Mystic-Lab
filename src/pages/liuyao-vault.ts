@@ -17,6 +17,7 @@ import {
 import { meetLineFor } from '../liuyao/vault.ts';
 import { TRIGRAM_ORDER, TRIGRAMS, type TrigramId } from '../liuyao/trigrams.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 import { liuyaoPageBgStyle } from '../ui/liuyao-hero.ts';
 import { mountScrollTopFab } from '../ui/scroll-top.ts';
 
@@ -296,5 +297,14 @@ export function renderLiuyaoVault(root: HTMLElement): () => void {
   paintGrid();
   root.appendChild(page);
   const disposeTop = mountScrollTopFab();
-  return () => disposeTop();
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'liuyao',
+    surface: 'atlas',
+    tujianPath: '/liuyao/hexagrams',
+    notesContext: '六爻卦库',
+  });
+  return () => {
+    disposeFloat();
+    disposeTop();
+  };
 }

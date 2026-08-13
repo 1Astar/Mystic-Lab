@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import {
   getContinuePalmChapter,
   getNextPalmChapter,

@@ -27,10 +27,12 @@ import {
   buildBuffEntriesFromMutagen,
   clampBuffMult,
   composeMultByAxis,
+  composeMultByAxisDetailed,
   effectsForYearMutagen,
   resolveYearBuffPack,
 } from './spirit-buff.ts';
 import type { CraftAxisScore } from './spirit-roots.ts';
+import type { YearBuffEntry } from './spirit-buff.ts';
 
 const mem = new Map<string, string>();
 
@@ -210,6 +212,55 @@ describe('spirit year buff', () => {
     expect(res.panel.axes.every((a) => typeof a.permanentValue === 'number')).toBe(true);
   });
 
+  it('deepens baziHint with pattern and marks yong/ji on wuxing', () => {
+    const person = createEmptyPerson({
+      nickname: '测',
+      gender: 'female',
+      birthYear: '1990',
+      birthMonth: '5',
+      birthDay: '12',
+      birthHour: '14:30',
+      birthPlace: '成都',
+    });
+    const res = resolveSpiritRootWithGrowth(person, { year: 2026, month: 6 });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.panel.patternYong).toBeTruthy();
+    expect(res.panel.patternYong!.patternName.length).toBeGreaterThan(2);
+    const hint = res.panel.yearBuff?.baziHint ?? '';
+    expect(hint).toMatch(/格局叙事不改系数|弱叠乘|喜用/);
+    expect(hint).toContain(res.panel.patternYong!.patternName);
+    expect(hint).toContain(res.panel.patternYong!.bodyBand);
+    const roles = res.panel.wuxing.map((w) => w.yongRole).filter(Boolean);
+    expect(roles.length).toBeGreaterThan(0);
+  });
+
+  it('stacks 八字流月十神 weaker than 流年十神 into buff pack', () => {
+    const person = createEmptyPerson({
+      nickname: '测',
+      gender: 'female',
+      birthYear: '1990',
+      birthMonth: '5',
+      birthDay: '12',
+      birthHour: '14:30',
+      birthPlace: '成都',
+    });
+    const pack = resolveYearBuffPack(person, 2026, '', 6);
+    const baziYear = pack.entries.filter((e) => e.lane === 'bazi');
+    const baziMonth = pack.monthEntries.filter((e) => e.lane === 'bazi');
+    expect(baziYear.length).toBeGreaterThan(0);
+    expect(baziMonth.length).toBeGreaterThan(0);
+    expect(baziMonth[0]!.title).toMatch(/^流月·/);
+    const yearDelta = Math.abs((baziYear[0]!.effects[0]?.mult ?? 1) - 1);
+    const monthDelta = Math.abs((baziMonth[0]!.effects[0]?.mult ?? 1) - 1);
+    expect(monthDelta).toBeLessThan(yearDelta);
+    const a = resolveYearBuffPack(person, 2026, '', 3);
+    const b = resolveYearBuffPack(person, 2026, '', 9);
+    const am = a.monthEntries.find((e) => e.lane === 'bazi');
+    const bm = b.monthEntries.find((e) => e.lane === 'bazi');
+    expect(am?.id).not.toBe(bm?.id);
+  });
+
   it('stacks year × month multipliers', () => {
     const person = createEmptyPerson({
       nickname: '测',
@@ -236,5 +287,53 @@ describe('spirit year buff', () => {
       expect(v).toBeGreaterThanOrEqual(BUFF_MULT_MIN);
       expect(v).toBeLessThanOrEqual(BUFF_MULT_MAX);
     }
+  });
+
+  it('includes 大运十神 and dampens same-axis stack', () => {
+    const person = createEmptyPerson({
+      nickname: '测',
+      gender: 'female',
+      birthYear: '1990',
+      birthMonth: '5',
+      birthDay: '12',
+      birthHour: '14:30',
+      birthPlace: '成都',
+    });
+    const pack = resolveYearBuffPack(person, 2026, '', 6);
+    expect(pack.entries.some((e) => e.baziLayer === 'dayun')).toBe(true);
+    const fake: YearBuffEntry[] = [
+      {
+        id: 'a',
+        title: 'a',
+        kind: '禄',
+        star: 'x',
+        effects: [{ axis: 'guangyao', mult: 1.2 }],
+        effectLabel: '',
+        advice: '',
+      },
+      {
+        id: 'b',
+        title: 'b',
+        kind: '权',
+        star: 'y',
+        effects: [{ axis: 'guangyao', mult: 1.2 }],
+        effectLabel: '',
+        advice: '',
+      },
+      {
+        id: 'c',
+        title: 'c',
+        kind: '科',
+        star: 'z',
+        effects: [{ axis: 'guangyao', mult: 1.2 }],
+        effectLabel: '',
+        advice: '',
+      },
+    ];
+    const raw = 1.2 * 1.2 * 1.2;
+    const detailed = composeMultByAxisDetailed(fake);
+    expect(detailed.harmonized).toBe(true);
+    expect(detailed.note).toMatch(/调和/);
+    expect(detailed.multByAxis.guangyao).toBeLessThan(clampBuffMult(raw));
   });
 });

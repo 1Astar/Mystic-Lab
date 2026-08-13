@@ -4,6 +4,7 @@
  */
 import { getStarLore, MAJOR_STARS, type MajorStarId, type StarCard } from './stars.ts';
 import { MORE_PROFILES } from './star-profiles-more.ts';
+import { AUX_PROFILES } from './star-profiles-aux.ts';
 import { completePalaceHits } from './star-palace-complete.ts';
 
 export type DetailTabId = 'portrait' | 'trait' | 'mirror' | 'you';
@@ -396,7 +397,8 @@ export function getStarProfile(starId: string): StarProfile | undefined {
   if (!card) return undefined;
   const raw =
     DEMO[starId as MajorStarId] ??
-    (MORE_PROFILES[starId as MajorStarId] as RawStarProfile | undefined);
+    (MORE_PROFILES[starId as MajorStarId] as RawStarProfile | undefined) ??
+    AUX_PROFILES[starId];
   const base = raw ? normalizeProfile(raw) : fallbackProfile(card);
   if (card.category !== 'major') return base;
   return {

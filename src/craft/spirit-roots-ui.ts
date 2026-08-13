@@ -6,6 +6,7 @@ import {
   type SpiritRootPanel,
 } from './spirit-roots.ts';
 import type { YearBuffPack } from './spirit-buff.ts';
+import { patternYongshenCardHtml } from '../bazi/pattern-yongshen.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -22,9 +23,9 @@ function buffEntryList(entries: YearBuffPack['entries'], emptyNote: string): str
   return `<ul class="craft-buff-list">${entries
     .map(
       (e) => `
-        <li class="craft-buff-row ${e.kind === '忌' ? 'is-challenge' : ''}">
+        <li class="craft-buff-row ${e.kind === '忌' ? 'is-challenge' : ''}${e.lane === 'bazi' ? ' is-bazi' : ''}">
           <div class="craft-buff-main">
-            <strong>${escapeHtml(e.title)}</strong>
+            <strong>${escapeHtml(e.title)}${e.lane === 'bazi' ? ' <em class="craft-buff-lane">八字</em>' : ''}</strong>
             <span>${escapeHtml(e.effectLabel)}</span>
           </div>
           <p class="craft-buff-advice">${escapeHtml(e.advice)}</p>
@@ -56,14 +57,15 @@ function yearBuffHtml(buff: YearBuffPack, tips: string[] = []): string {
           <button type="button" class="craft-act-btn" data-buff-year="${buff.year + 1}">${buff.year + 1} ›</button>
         </div>
       </div>
-      <p class="life-footnote">永久分不变；有效分 = 永久 × 流年 × 流月（夹紧）。${escapeHtml(buff.mutagenLine)}</p>
+      <p class="life-footnote">永久分不变；有效分 = 永久 × 流年 × 流月（紫微四化 + 八字十神弱叠，夹紧）。${escapeHtml(buff.mutagenLine)}</p>
+      ${buff.conflictNote ? `<p class="life-footnote craft-buff-harmonize">${escapeHtml(buff.conflictNote)}</p>` : ''}
 
-      <div class="craft-buff-section" aria-label="流年四化">
+      <div class="craft-buff-section" aria-label="流年词条">
         <h4 class="craft-buff-h4">流年</h4>
-        ${buffEntryList(buff.entries, '本年四化未能排出，请核对生辰。')}
+        ${buffEntryList(buff.entries, '本年词条未能排出，请核对生辰。')}
       </div>
 
-      <div class="craft-buff-section" aria-label="流月四化">
+      <div class="craft-buff-section" aria-label="流月词条">
         <div class="craft-buff-month-head">
           <h4 class="craft-buff-h4">流月</h4>
           <div class="craft-buff-month">
@@ -72,7 +74,7 @@ function yearBuffHtml(buff: YearBuffPack, tips: string[] = []): string {
             <button type="button" class="craft-act-btn" data-buff-month="${nextMonth}" data-buff-month-year="${nextMonthYear}">${nextMonth}月 ›</button>
           </div>
         </div>
-        ${buffEntryList(monthEntries, '本月四化未能排出，请核对生辰。')}
+        ${buffEntryList(monthEntries, '本月词条未能排出，请核对生辰。')}
       </div>
 
       ${tipHtml}
@@ -123,19 +125,35 @@ export function spiritRootCardHtml(panel: SpiritRootPanel): string {
       : `
     <div class="craft-wuxing" aria-label="五行磁场">
       <h3 class="craft-panel-h3">五行磁场</h3>
-      <p class="life-footnote">${escapeHtml(panel.dayMasterLine)} · 与八字「生命结构」同源 · <button type="button" class="craft-inline-link" data-path="/bazi/structure">查看档案 ›</button></p>
+      <p class="life-footnote">${escapeHtml(panel.dayMasterLine)} · 与八字「生命结构」同源 · 色标喜用；喜用已弱叠六轴 · <button type="button" class="craft-inline-link" data-path="/bazi/structure">查看档案 ›</button></p>
       <div class="craft-wuxing-grid">
         ${panel.wuxing
-          .map(
-            (w) => `
-          <div class="craft-wx-cell ${w.dayMaster ? 'is-day' : ''}">
-            <span>${escapeHtml(w.el)}</span>
+          .map((w) => {
+            const role =
+              w.yongRole === 'yong'
+                ? ' is-yong'
+                : w.yongRole === 'ji'
+                  ? ' is-ji'
+                  : '';
+            const roleLabel =
+              w.yongRole === 'yong' ? '喜用' : w.yongRole === 'ji' ? '忌' : '';
+            return `
+          <div class="craft-wx-cell ${w.dayMaster ? 'is-day' : ''}${role}">
+            <span>${escapeHtml(w.el)}${roleLabel ? `<em>${escapeHtml(roleLabel)}</em>` : ''}</span>
             <div class="craft-wx-bar"><i style="width:${w.pct}%"></i></div>
-          </div>`,
-          )
+          </div>`;
+          })
           .join('')}
       </div>
     </div>`;
+
+  const patternBlock = panel.patternYong
+    ? `<div class="craft-pattern" aria-label="格局喜用">
+        <h3 class="craft-panel-h3">格局 · 喜用</h3>
+        ${patternYongshenCardHtml(panel.patternYong, { compact: true })}
+        <p class="life-footnote">喜用弱叠六轴 · 叙事仍链生命结构 · <button type="button" class="craft-inline-link" data-path="/bazi/structure">生命结构全卡 ›</button></p>
+      </div>`
+    : '';
 
   const majors =
     panel.soulMajors.length > 0
@@ -154,10 +172,10 @@ export function spiritRootCardHtml(panel: SpiritRootPanel): string {
               s.status === 'complete'
                 ? s.conditionalActive
                   ? '爆发中'
-                  : '已解锁'
+                  : '已成格'
                 : s.status === 'partial'
                   ? `${s.litMembers.length}/${s.def.members.length}`
-                  : '未集齐';
+                  : '未成格';
             return `<li class="craft-combo-ach is-${s.status}${s.conditionalActive ? ' is-burst' : ''}">
               <strong>${escapeHtml(s.def.title)}</strong>
               <span class="craft-combo-ach-badge">${escapeHtml(badge)}</span>
@@ -166,7 +184,7 @@ export function spiritRootCardHtml(panel: SpiritRootPanel): string {
             </li>`;
           })
           .join('')}</ul>
-        <p class="life-footnote">在紫微图鉴集齐成员即可解锁；去组合旅程查看进度。</p>
+        <p class="life-footnote">本命盘三方四正成格即可解锁；去组合旅程查看进度。</p>
       </div>`;
 
   return `
@@ -197,6 +215,7 @@ export function spiritRootCardHtml(panel: SpiritRootPanel): string {
       <div class="craft-axis-list">${bars}</div>
       ${achHtml}
       ${panel.yearBuff ? yearBuffHtml(panel.yearBuff, panel.yearTips) : ''}
+      ${patternBlock}
       ${wuxing}
     </section>`;
 }

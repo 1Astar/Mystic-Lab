@@ -26,6 +26,23 @@ export type JournalReadingFeedback = {
   at: string;
 };
 
+export type TarotAiTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+  at: string;
+};
+
+/** 一次深度解读 / 追问会话（落入手札，复原可回看） */
+export type TarotAiSession = {
+  id: string;
+  kind: 'deep' | 'followup';
+  createdAt: string;
+  updatedAt: string;
+  /** 深度解读正文（贴合你） */
+  deepReading?: string;
+  turns: TarotAiTurn[];
+};
+
 export type JournalEntry = {
   id: string;
   createdAt: string;
@@ -48,7 +65,23 @@ export type JournalEntry = {
   /** 这次问谁 */
   subjectId?: string;
   subjectName?: string;
+  /** AI 深度解读与追问（可多段）；旧记录可缺 */
+  aiSessions?: TarotAiSession[];
 };
+
+function normalizeAiSessions(raw: unknown): TarotAiSession[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((s): s is TarotAiSession => Boolean(s && typeof s === 'object' && typeof (s as TarotAiSession).id === 'string'))
+    .map((s) => ({
+      id: s.id,
+      kind: s.kind === 'followup' ? 'followup' : 'deep',
+      createdAt: s.createdAt ?? '',
+      updatedAt: s.updatedAt ?? s.createdAt ?? '',
+      deepReading: s.deepReading,
+      turns: Array.isArray(s.turns) ? s.turns : [],
+    }));
+}
 
 const STORAGE_KEY = 'mystic-lab-journal';
 const SESSION_BUCKET_MS = 15 * 60 * 1000;
@@ -163,6 +196,7 @@ export function backfillJournalFromCodex(): number {
       reflection: '',
       fulfilled: null,
       status: 'complete',
+      aiSessions: [],
     });
   }
 
@@ -229,11 +263,13 @@ export function upsertJournalProgress(
     sceneTags,
     subjectId: prev?.subjectId ?? subject.subjectId,
     subjectName: prev?.subjectName ?? subject.subjectName,
+    aiSessions: prev?.aiSessions ?? [],
   };
 
   const idx = list.findIndex((e) => e.id === id);
   if (idx >= 0) {
     entry.feedback = list[idx]?.feedback;
+    entry.aiSessions = list[idx]?.aiSessions ?? entry.aiSessions;
     list[idx] = entry;
   } else list.unshift(entry);
   persist(list);
@@ -327,6 +363,73 @@ export function getJournalEntryById(id: string): JournalEntry | undefined {
   return loadJournalEntries().find((e) => e.id === id);
 }
 
+/** 写入一次深度解读，返回 sessionId */
+export function saveTarotAiDeepReading(
+  journalId: string,
+  deepReading: string,
+): string | null {
+  const text = deepReading.trim();
+  if (!journalId || !text) return null;
+  const list = loadJournalEntries();
+  const i = list.findIndex((e) => e.id === journalId);
+  if (i < 0) return null;
+  const now = new Date().toISOString();
+  const session: TarotAiSession = {
+    id: crypto.randomUUID(),
+    kind: 'deep',
+    createdAt: now,
+    updatedAt: now,
+    deepReading: text,
+    turns: [{ role: 'assistant', content: text, at: now }],
+  };
+  const prev = list[i]!;
+  const sessions = [...(prev.aiSessions ?? []), session].slice(-8);
+  list[i] = { ...prev, aiSessions: sessions };
+  persist(list);
+  return session.id;
+}
+
+/** 追加追问回合到已有 session；无 session 则新建 followup */
+export function appendTarotAiTurns(
+  journalId: string,
+  sessionId: string | null | undefined,
+  turns: Array<{ role: 'user' | 'assistant'; content: string }>,
+): string | null {
+  if (!journalId || !turns.length) return null;
+  const list = loadJournalEntries();
+  const i = list.findIndex((e) => e.id === journalId);
+  if (i < 0) return null;
+  const now = new Date().toISOString();
+  const prev = list[i]!;
+  const sessions = [...(prev.aiSessions ?? [])];
+  let sid = sessionId ?? '';
+  let idx = sid ? sessions.findIndex((s) => s.id === sid) : -1;
+  if (idx < 0) {
+    const created: TarotAiSession = {
+      id: crypto.randomUUID(),
+      kind: 'followup',
+      createdAt: now,
+      updatedAt: now,
+      turns: [],
+    };
+    sessions.push(created);
+    idx = sessions.length - 1;
+    sid = created.id;
+  }
+  const cur = sessions[idx]!;
+  sessions[idx] = {
+    ...cur,
+    updatedAt: now,
+    turns: [
+      ...cur.turns,
+      ...turns.map((t) => ({ role: t.role, content: t.content, at: now })),
+    ].slice(-40),
+  };
+  list[i] = { ...prev, aiSessions: sessions.slice(-8) };
+  persist(list);
+  return sid;
+}
+
 export function loadJournalEntries(): JournalEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -340,6 +443,7 @@ export function loadJournalEntries(): JournalEntry[] {
       status: e.status ?? 'complete',
       readingSnapshot: e.readingSnapshot,
       feedback: e.feedback,
+      aiSessions: normalizeAiSessions(e.aiSessions),
     }));
   } catch {
     return [];

@@ -22,6 +22,8 @@ export function renderTarotHome(root: HTMLElement): () => void {
     subtitle: SYSTEM_POSITION.tarot,
     showStars: true,
     showAiSettings: true,
+    floatSystem: 'tarot',
+    floatTujianPath: '/tarot/tujian',
     entries: [
       {
         path: '/tarot/reading',

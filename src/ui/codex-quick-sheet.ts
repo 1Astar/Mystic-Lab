@@ -3,7 +3,7 @@ import { TAROT_DECK } from '../tarot/deck.ts';
 import { formatCardNameZh } from '../tarot/card-names.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
 import { getJourneyStep } from '../knowledge/fool-journey.ts';
-import { buildMinorSuitNumberFormula } from '../knowledge/minor-structure.ts';
+import { buildLiveSuitNumberBlend, buildMinorSuitNumberFormula } from '../knowledge/minor-structure.ts';
 import {
   getVisualHotspots,
   resolveCardKnowledge,
@@ -59,6 +59,22 @@ export function renderCodexKnowledgeBody(
     suit: card.suit,
     rank: card.rank,
   });
+  const RANK_TO_NUM: Record<string, string> = {
+    Ace: '1',
+    Two: '2',
+    Three: '3',
+    Four: '4',
+    Five: '5',
+    Six: '6',
+    Seven: '7',
+    Eight: '8',
+    Nine: '9',
+    Ten: '10',
+  };
+  const liveBlend =
+    card.suit && card.rank && RANK_TO_NUM[card.rank]
+      ? buildLiveSuitNumberBlend(card.suit, RANK_TO_NUM[card.rank]!)
+      : null;
 
   const focusKw =
     (reversed
@@ -99,9 +115,11 @@ export function renderCodexKnowledgeBody(
   const structureHint =
     card.arcana === 'major' && journey
       ? `<p class="codex-quick-muted">愚人之旅第 ${journey.order} 步 · ${escapeHtml(journey.title)}：${escapeHtml(journey.theme)}</p>`
-      : formula
-        ? `<p class="codex-quick-formula">${escapeHtml(formula.line)}</p>`
-        : `<p class="codex-quick-muted">${escapeHtml(role.formula)}</p>`;
+      : liveBlend
+        ? `<p class="codex-quick-formula">${escapeHtml(liveBlend.line)}</p>`
+        : formula
+          ? `<p class="codex-quick-formula">${escapeHtml(formula.line)}</p>`
+          : `<p class="codex-quick-muted">${escapeHtml(role.formula)}</p>`;
 
   return `
     <div class="codex-knowledge-body codex-learn-layout">

@@ -7,16 +7,24 @@ import {
 } from './codex-lore.ts';
 import {
   metTagIdsFromChart,
-  starCardIdsFromChart,
   ALL_STAR_CARDS,
   getStarCard,
   shenshaCardId,
+  tengodCardId,
 } from './codex-tags.ts';
-import { SHENSHA_FEATURED } from './codex-shensha-tiers.ts';
+import {
+  BAZI_ENCYCLOPEDIA_IDS,
+  getBaziEncyclopedia,
+  listBaziEncyclopediaByKind,
+} from './codex-encyclopedia.ts';
+import { jiaziId, nayinId, RELATION_ATLAS } from './codex-atlas-catalog.ts';
+import { nayinOf } from './pillar-meta.ts';
 import type { WuXing } from './elements.ts';
 import { buildEnergyBalance } from './sense-energy.ts';
 
 const STORAGE_KEY = 'mystic-lab-bazi-codex';
+const ENCOUNTER_CAP = 10;
+const DEDUPE_MS = 8000;
 
 export type BaziCodexKind =
   | 'wuxing'
@@ -29,6 +37,12 @@ export type BaziCodexKind =
   | 'relation'
   | 'luck';
 
+export type BaziCodexEncounter = {
+  at: string;
+  question: string;
+  summary: string;
+};
+
 export type BaziCodexEntry = {
   id: string;
   kind: BaziCodexKind;
@@ -36,6 +50,7 @@ export type BaziCodexEntry = {
   meetCount: number;
   /** 偏旺 | 偏弱 | 缺 — 仅五行 */
   reason?: string;
+  encounters?: BaziCodexEncounter[];
 };
 
 type CodexStore = {
@@ -45,13 +60,107 @@ type CodexStore = {
   updatedAt: string;
 };
 
+function isDuplicateEncounter(a: BaziCodexEncounter, b: BaziCodexEncounter): boolean {
+  if (a.question.trim() !== b.question.trim()) return false;
+  const dt = Math.abs(new Date(a.at).getTime() - new Date(b.at).getTime());
+  return dt < DEDUPE_MS;
+}
+
+function normalizeEncounters(raw: unknown): BaziCodexEncounter[] {
+  if (!Array.isArray(raw)) return [];
+  const out: BaziCodexEncounter[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const e = item as Partial<BaziCodexEncounter>;
+    if (typeof e.at !== 'string' || typeof e.question !== 'string') continue;
+    out.push({
+      at: e.at,
+      question: e.question,
+      summary: typeof e.summary === 'string' ? e.summary : '',
+    });
+  }
+  return out;
+}
+
+function sanitizeEntry(entry: BaziCodexEntry): BaziCodexEntry {
+  const encounters = normalizeEncounters(entry.encounters);
+  return {
+    ...entry,
+    encounters,
+    meetCount: Math.max(encounters.length, entry.meetCount || 0, 1),
+  };
+}
+
+function appendEncounter(
+  entry: BaziCodexEntry,
+  encounter: BaziCodexEncounter,
+): BaziCodexEntry {
+  const encounters = [...(entry.encounters ?? [])];
+  const newest = encounters[0];
+  if (newest && isDuplicateEncounter(encounter, newest)) {
+    return {
+      ...entry,
+      encounters,
+      meetCount: Math.max(encounters.length, entry.meetCount, 1),
+    };
+  }
+  encounters.unshift(encounter);
+  const capped = encounters.slice(0, ENCOUNTER_CAP);
+  return {
+    ...entry,
+    encounters: capped,
+    meetCount: Math.max(capped.length, entry.meetCount, 1),
+  };
+}
+
+function touchEntry(
+  map: Map<string, BaziCodexEntry>,
+  newly: BaziCodexEntry[],
+  base: Omit<BaziCodexEntry, 'encounters' | 'meetCount' | 'unlockedAt'> & {
+    unlockedAt?: string;
+    meetCount?: number;
+    encounters?: BaziCodexEncounter[];
+  },
+  now: string,
+  encounter: BaziCodexEncounter,
+  hasQuestionOpt: boolean,
+): void {
+  const prev = map.get(base.id);
+  if (!prev) {
+    const created = appendEncounter(
+      {
+        id: base.id,
+        kind: base.kind,
+        unlockedAt: now,
+        meetCount: 0,
+        reason: base.reason,
+        encounters: [],
+      },
+      encounter,
+    );
+    newly.push(created);
+    map.set(base.id, created);
+    return;
+  }
+  let next: BaziCodexEntry = {
+    ...prev,
+    reason: base.reason ?? prev.reason,
+    encounters: prev.encounters ?? [],
+  };
+  if (hasQuestionOpt) {
+    next = appendEncounter(next, encounter);
+  }
+  next.meetCount = Math.max(next.encounters?.length ?? 0, next.meetCount, 1);
+  map.set(base.id, next);
+}
+
 function loadStore(): CodexStore {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { entries: [], metTags: [], updatedAt: new Date().toISOString() };
     const parsed = JSON.parse(raw) as Partial<CodexStore>;
     return {
-      entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+      entries: (Array.isArray(parsed.entries) ? parsed.entries : []).map(sanitizeEntry),
       metTags: Array.isArray(parsed.metTags) ? parsed.metTags : [],
       updatedAt: parsed.updatedAt ?? new Date().toISOString(),
     };
@@ -69,6 +178,10 @@ function saveStore(store: CodexStore): void {
 
 export function listBaziCodexEntries(): BaziCodexEntry[] {
   return loadStore().entries;
+}
+
+export function getBaziCodexEntry(id: string): BaziCodexEntry | undefined {
+  return loadStore().entries.find((e) => e.id === id);
 }
 
 export function listMetCodexTags(): Set<string> {
@@ -120,71 +233,91 @@ export function stemBranchIdsFromChart(chart: BaziChart): string[] {
   return [...ids].filter((id) => ALL_STEM_BRANCH.some((x) => x.id === id));
 }
 
-export function unlockBaziCodexFromChart(chart: BaziChart): {
+/** 命盘可计入全库进度的词条 id（干支/十神/神煞/纳音/甲子/关系） */
+export function libraryIdsFromChart(chart: BaziChart): Array<{ id: string; kind: BaziCodexKind }> {
+  const out = new Map<string, BaziCodexKind>();
+
+  for (const id of stemBranchIdsFromChart(chart)) {
+    const lore = ALL_STEM_BRANCH.find((x) => x.id === id);
+    if (lore) out.set(id, lore.kind);
+  }
+
+  for (const raw of metTagIdsFromChart(chart)) {
+    if (raw.startsWith('tg:')) {
+      const id = tengodCardId(raw.slice(3));
+      if (getBaziEncyclopedia(id) || getStarCard(id)) out.set(id, 'tengod');
+      continue;
+    }
+    const id = shenshaCardId(raw);
+    if (getBaziEncyclopedia(id)) out.set(id, 'shensha');
+  }
+
+  for (const p of chart.pillars) {
+    if (p.empty || p.key === 'liunian') continue;
+    if (!p.stem || !p.branch || p.stem === '—' || p.branch === '—') continue;
+    const gz = `${p.stem}${p.branch}`;
+    const jz = jiaziId(gz);
+    if (getBaziEncyclopedia(jz)) out.set(jz, 'jiazi');
+    const ny = nayinOf(gz);
+    if (ny && ny !== '—') {
+      const nid = nayinId(ny);
+      if (getBaziEncyclopedia(nid)) out.set(nid, 'nayin');
+    }
+  }
+
+  for (const line of chart.relations) {
+    if (line.includes('三合')) out.set('rel:三合', 'relation');
+    else if (line.includes('半合')) out.set('rel:半合', 'relation');
+    else if (line.includes('三会')) out.set('rel:三会', 'relation');
+    else if (line.includes('相冲')) out.set('rel:六冲', 'relation');
+    else if (line.includes('相刑') || line.includes('自刑')) out.set('rel:相刑', 'relation');
+    else if (line.includes('相害')) out.set('rel:相害', 'relation');
+    else if (line.includes('相破')) out.set('rel:相破', 'relation');
+    else if (line.includes('相穿')) out.set('rel:相穿', 'relation');
+    else if (/合/.test(line) && !line.includes('三合') && !line.includes('半合')) {
+      // 地支六合或天干五合
+      if (/[甲乙丙丁戊己庚辛壬癸]/.test(line)) out.set('rel:天干五合', 'relation');
+      else out.set('rel:六合', 'relation');
+    }
+    for (const r of RELATION_ATLAS) {
+      if (line.includes(r.title) && getBaziEncyclopedia(r.id)) out.set(r.id, 'relation');
+    }
+  }
+
+  return [...out.entries()].map(([id, kind]) => ({ id, kind }));
+}
+
+export function unlockBaziCodexFromChart(
+  chart: BaziChart,
+  opts?: { question?: string; summary?: string },
+): {
   newly: BaziCodexEntry[];
   total: number;
 } {
   const store = loadStore();
-  const map = new Map(store.entries.map((e) => [e.id, e]));
+  const map = new Map(store.entries.map((e) => [e.id, sanitizeEntry(e)]));
   const newly: BaziCodexEntry[] = [];
   const now = new Date().toISOString();
+  const hasQuestionOpt = Boolean((opts?.question ?? '').trim());
+  const question = hasQuestionOpt ? (opts!.question as string).trim() : '（排盘遇见）';
+  const summary = opts?.summary ?? '';
+  const encounter: BaziCodexEncounter = { at: now, question, summary };
   const metTags = new Set(store.metTags);
   for (const id of metTagIdsFromChart(chart)) metTags.add(id);
 
   for (const { id, reason } of notableWuxingFromChart(chart)) {
-    const prev = map.get(id);
-    if (!prev) {
-      const entry: BaziCodexEntry = {
-        id,
-        kind: 'wuxing',
-        unlockedAt: now,
-        meetCount: 1,
-        reason,
-      };
-      newly.push(entry);
-      map.set(id, entry);
-    } else {
-      map.set(id, {
-        ...prev,
-        meetCount: prev.meetCount + 1,
-        reason: reason ?? prev.reason,
-      });
-    }
+    touchEntry(
+      map,
+      newly,
+      { id, kind: 'wuxing', reason },
+      now,
+      encounter,
+      hasQuestionOpt,
+    );
   }
 
-  for (const id of stemBranchIdsFromChart(chart)) {
-    const lore = ALL_STEM_BRANCH.find((x) => x.id === id)!;
-    const prev = map.get(id);
-    if (!prev) {
-      const entry: BaziCodexEntry = {
-        id,
-        kind: lore.kind,
-        unlockedAt: now,
-        meetCount: 1,
-      };
-      newly.push(entry);
-      map.set(id, entry);
-    } else {
-      map.set(id, { ...prev, meetCount: prev.meetCount + 1 });
-    }
-  }
-
-  for (const id of starCardIdsFromChart(chart)) {
-    const card = getStarCard(id);
-    if (!card) continue;
-    const prev = map.get(id);
-    if (!prev) {
-      const entry: BaziCodexEntry = {
-        id,
-        kind: card.kind,
-        unlockedAt: now,
-        meetCount: 1,
-      };
-      newly.push(entry);
-      map.set(id, entry);
-    } else {
-      map.set(id, { ...prev, meetCount: prev.meetCount + 1 });
-    }
+  for (const { id, kind } of libraryIdsFromChart(chart)) {
+    touchEntry(map, newly, { id, kind }, now, encounter, hasQuestionOpt);
   }
 
   saveStore({
@@ -222,7 +355,7 @@ export function baziCodexProgress(
     };
   }
   if (kind === 'shensha') {
-    const pool = SHENSHA_FEATURED.map((n) => shenshaCardId(n));
+    const pool = listBaziEncyclopediaByKind('shensha').map((e) => e.id);
     return {
       collected: pool.filter((id) => unlocked.has(id)).length,
       total: pool.length,
@@ -241,9 +374,17 @@ export function baziCodexProgress(
       total: ALL_STAR_CARDS.length,
     };
   }
+  if (kind === 'nayin' || kind === 'jiazi' || kind === 'relation' || kind === 'luck') {
+    const pool = listBaziEncyclopediaByKind(kind).map((e) => e.id);
+    return {
+      collected: pool.filter((id) => unlocked.has(id)).length,
+      total: pool.length,
+    };
+  }
+  // 全库进度
   return {
-    collected: unlocked.size,
-    total: WUXING_ORDER.length + ALL_STEM_BRANCH.length + ALL_STAR_CARDS.length,
+    collected: BAZI_ENCYCLOPEDIA_IDS.filter((id) => unlocked.has(id)).length,
+    total: BAZI_ENCYCLOPEDIA_IDS.length,
   };
 }
 

@@ -1436,6 +1436,16 @@ html[data-theme='moon'] .stars {
   border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
 }
 
+.journey-system-bazi {
+  color: color-mix(in srgb, var(--wx-tu) 75%, var(--ink));
+  border-color: color-mix(in srgb, var(--wx-tu) 40%, var(--line));
+}
+
+.journey-system-ziwei {
+  color: color-mix(in srgb, var(--purple) 40%, var(--ink));
+  border-color: color-mix(in srgb, #7a6bb5 45%, var(--line));
+}
+
 .journey-sibling-cross-actions {
   display: flex;
   flex-wrap: wrap;

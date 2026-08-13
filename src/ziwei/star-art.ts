@@ -1,25 +1,34 @@
-/** 紫微主星人格海报路径（仅 webp） */
+/** 已有人格海报的星名（仅 webp）：十四主星 + 六吉 */
+const STARS_WITH_ART = new Set([
+  // 十四主星
+  '紫微',
+  '天机',
+  '太阳',
+  '武曲',
+  '天同',
+  '廉贞',
+  '天府',
+  '太阴',
+  '贪狼',
+  '巨门',
+  '天相',
+  '天梁',
+  '七杀',
+  '破军',
+  // 六吉
+  '左辅',
+  '右弼',
+  '天魁',
+  '天钺',
+  '文昌',
+  '文曲',
+]);
+
+/** 紫微人格海报路径（仅 webp；主星 + 六吉） */
 export function majorStarArtUrl(starName: string): string | null {
   const name = starName.trim().replace(/星$/, '');
   if (!name) return null;
-  // 十四主星海报；辅星等暂无图
-  const majors = new Set([
-    '紫微',
-    '天机',
-    '太阳',
-    '武曲',
-    '天同',
-    '廉贞',
-    '天府',
-    '太阴',
-    '贪狼',
-    '巨门',
-    '天相',
-    '天梁',
-    '七杀',
-    '破军',
-  ]);
-  if (!majors.has(name)) return null;
+  if (!STARS_WITH_ART.has(name)) return null;
   return `/ziwei/stars/${encodeURIComponent(name)}.webp`;
 }
 

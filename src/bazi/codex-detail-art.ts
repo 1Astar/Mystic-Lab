@@ -10,6 +10,12 @@ import {
   tengodArtSvg,
   wuxingArtSvg,
 } from './codex-art.ts';
+import { nayinArtSvg } from './codex-nayin-art.ts';
+import { NAYIN_ATLAS, nayinId } from './codex-atlas-catalog.ts';
+
+const NAYIN_BY_ID = Object.fromEntries(
+  NAYIN_ATLAS.map((n) => [nayinId(n.name), n.name]),
+) as Record<string, string>;
 
 export function codexDetailArtHtml(id: string): string {
   if (WUXING_ORDER.includes(id as WuXing)) {
@@ -18,6 +24,14 @@ export function codexDetailArtHtml(id: string): string {
   const gz = [...STEM_LORE, ...BRANCH_LORE].find((x) => x.id === id);
   if (gz) {
     return memoryCoverHtml(id, stemBranchArtSvg(gz, { uid: `det-gz-${id}` }));
+  }
+  const nayinName = NAYIN_BY_ID[id];
+  if (nayinName) {
+    const idx = NAYIN_ATLAS.findIndex((n) => n.name === nayinName);
+    return memoryCoverHtml(
+      id,
+      nayinArtSvg(nayinName, { uid: `det-ny${idx >= 0 ? idx : 'x'}` }),
+    );
   }
   const star = getStarCard(id);
   if (star) {

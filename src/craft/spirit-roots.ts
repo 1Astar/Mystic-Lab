@@ -10,10 +10,13 @@ import {
   buildLifeWuxingBars,
   toCraftWuxingBars,
 } from '../bazi/life-structure.ts';
+import type { PatternYongshenPack } from '../bazi/pattern-yongshen.ts';
 import type { PersonProfile } from '../life/types.ts';
 import { castBaziChart } from '../bazi/cast.ts';
 import { castZiweiChart } from '../ziwei/cast.ts';
 import type { PalaceSnap, ZiweiChartView } from '../ziwei/types.ts';
+import type { CraftComboAchState } from './combo-achievements.ts';
+import type { YearBuffPack } from './spirit-buff.ts';
 
 export type CraftAxisId =
   | 'guangyao'
@@ -96,10 +99,9 @@ export type WuxingBar = {
   pct: number;
   /** 日主所在行 */
   dayMaster: boolean;
+  /** 喜用 / 忌神着色（不改系数） */
+  yongRole?: 'yong' | 'ji' | '';
 };
-
-import type { YearBuffPack } from './spirit-buff.ts';
-import type { CraftComboAchState } from './combo-achievements.ts';
 
 export type SpiritRootPanel = {
   axes: CraftAxisScore[];
@@ -118,6 +120,8 @@ export type SpiritRootPanel = {
   yearTips?: string[];
   /** 图鉴组合成就 C */
   comboAchievements?: CraftComboAchState[];
+  /** 八字格局喜用（叙事打通，不改六轴） */
+  patternYong?: PatternYongshenPack | null;
 };
 
 function findPalace(view: ZiweiChartView, name: string): PalaceSnap | undefined {

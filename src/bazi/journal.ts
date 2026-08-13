@@ -1,6 +1,6 @@
 /**
  * 八字手札：本地日记，附当时格局/喜用与大运流年快照。
- * 对齐小六壬/六爻手札的 localStorage 模式；首版不做多轮 AI、不做应验对照。
+ * 对齐六爻：深度解读 / 追问可挂入 aiSessions，手札内回看。
  */
 import type { BaziChart } from './cast.ts';
 import { dayunLoreHint } from './codex-jiazi-dayun-lore.ts';
@@ -21,6 +21,22 @@ export const BAZI_JOURNAL_MOODS: ReadonlyArray<{
   { id: 'heavy', label: '沉一点' },
   { id: 'curious', label: '好奇' },
 ];
+
+export type BaziAiTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+  at: string;
+};
+
+/** 一次深度解读 / 追问会话（落入手札，可回看） */
+export type BaziAiSession = {
+  id: string;
+  kind: 'deep' | 'followup';
+  createdAt: string;
+  updatedAt: string;
+  deepReading?: string;
+  turns: BaziAiTurn[];
+};
 
 export type BaziJournalSnapshot = {
   dayMaster: string;
@@ -46,6 +62,8 @@ export type BaziJournalEntry = {
   sceneTags?: string[];
   subjectId?: string;
   subjectName?: string;
+  /** AI 深度解读与追问（可多段） */
+  aiSessions?: BaziAiSession[];
 };
 
 export const BAZI_JOURNAL_STORAGE_KEY = 'mystic-lab-bazi-journal';
@@ -76,6 +94,44 @@ function normalizeSnapshot(raw: unknown): BaziJournalSnapshot | null {
   };
 }
 
+function normalizeAiSessions(raw: unknown): BaziAiSession[] {
+  if (!Array.isArray(raw)) return [];
+  const out: BaziAiSession[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const s = item as Partial<BaziAiSession>;
+    if (typeof s.id !== 'string' || !s.id) continue;
+    const kind = s.kind === 'followup' ? 'followup' : 'deep';
+    const turns: BaziAiTurn[] = [];
+    if (Array.isArray(s.turns)) {
+      for (const t of s.turns) {
+        if (!t || typeof t !== 'object') continue;
+        const role = (t as BaziAiTurn).role;
+        const content = (t as BaziAiTurn).content;
+        if ((role !== 'user' && role !== 'assistant') || typeof content !== 'string') continue;
+        if (!content.trim()) continue;
+        turns.push({
+          role,
+          content,
+          at:
+            typeof (t as BaziAiTurn).at === 'string'
+              ? (t as BaziAiTurn).at
+              : new Date().toISOString(),
+        });
+      }
+    }
+    out.push({
+      id: s.id,
+      kind,
+      createdAt: typeof s.createdAt === 'string' ? s.createdAt : new Date().toISOString(),
+      updatedAt: typeof s.updatedAt === 'string' ? s.updatedAt : new Date().toISOString(),
+      deepReading: typeof s.deepReading === 'string' ? s.deepReading : undefined,
+      turns: turns.slice(-40),
+    });
+  }
+  return out.slice(-8);
+}
+
 function normalizeEntry(entry: BaziJournalEntry): BaziJournalEntry {
   return {
     ...entry,
@@ -84,6 +140,7 @@ function normalizeEntry(entry: BaziJournalEntry): BaziJournalEntry {
     mood: isMood(entry.mood) ? entry.mood : '',
     snapshot: normalizeSnapshot(entry.snapshot),
     sceneTags: normalizeSceneTags(entry.sceneTags),
+    aiSessions: normalizeAiSessions(entry.aiSessions),
   };
 }
 
@@ -146,11 +203,119 @@ export function saveBaziJournalEntry(input: {
     sceneTags: ensureSceneTags(body, input.sceneTags),
     subjectId: subject.subjectId,
     subjectName: subject.subjectName,
+    aiSessions: [],
   };
   const list = loadBaziJournal();
   list.unshift(entry);
   persist(list);
   return entry;
+}
+
+/**
+ * 深度解读生成时落一条手札（对齐六爻：会话挂手札可回看）。
+ * 返回 { journalId, sessionId }
+ */
+export function createBaziAiJournalEntry(input: {
+  deepReading: string;
+  question?: string;
+  snapshot?: BaziJournalSnapshot | null;
+  sceneTags?: string[];
+}): { journalId: string; sessionId: string } | null {
+  const text = input.deepReading.trim();
+  if (!text) return null;
+  const now = new Date().toISOString();
+  const sessionId = crypto.randomUUID();
+  const q = (input.question || '').trim();
+  const body = q
+    ? `AI 深度解读 · ${q.slice(0, 80)}${q.length > 80 ? '…' : ''}`
+    : 'AI 深度解读';
+  const entry = saveBaziJournalEntry({
+    body,
+    mood: 'curious',
+    snapshot: input.snapshot ?? null,
+    sceneTags: input.sceneTags,
+  });
+  const session: BaziAiSession = {
+    id: sessionId,
+    kind: 'deep',
+    createdAt: now,
+    updatedAt: now,
+    deepReading: text,
+    turns: [{ role: 'assistant', content: text, at: now }],
+  };
+  const list = loadBaziJournal();
+  const i = list.findIndex((e) => e.id === entry.id);
+  if (i < 0) return { journalId: entry.id, sessionId };
+  list[i] = { ...list[i]!, aiSessions: [session] };
+  persist(list);
+  return { journalId: entry.id, sessionId };
+}
+
+/** 写入一次深度解读到已有手札，返回 sessionId */
+export function saveBaziAiDeepReadingToJournal(
+  journalId: string,
+  deepReading: string,
+): string | null {
+  const text = deepReading.trim();
+  if (!journalId || !text) return null;
+  const list = loadBaziJournal();
+  const i = list.findIndex((e) => e.id === journalId);
+  if (i < 0) return null;
+  const now = new Date().toISOString();
+  const session: BaziAiSession = {
+    id: crypto.randomUUID(),
+    kind: 'deep',
+    createdAt: now,
+    updatedAt: now,
+    deepReading: text,
+    turns: [{ role: 'assistant', content: text, at: now }],
+  };
+  const prev = list[i]!;
+  const sessions = [...(prev.aiSessions ?? []), session].slice(-8);
+  list[i] = { ...prev, aiSessions: sessions };
+  persist(list);
+  return session.id;
+}
+
+/** 追加追问回合到已有 session；无 session 则新建 followup */
+export function appendBaziAiTurns(
+  journalId: string,
+  sessionId: string | null | undefined,
+  turns: Array<{ role: 'user' | 'assistant'; content: string }>,
+): string | null {
+  if (!journalId || !turns.length) return null;
+  const list = loadBaziJournal();
+  const i = list.findIndex((e) => e.id === journalId);
+  if (i < 0) return null;
+  const now = new Date().toISOString();
+  const prev = list[i]!;
+  const sessions = [...(prev.aiSessions ?? [])];
+  let sid = sessionId ?? '';
+  let idx = sid ? sessions.findIndex((s) => s.id === sid) : -1;
+  if (idx < 0) {
+    const created: BaziAiSession = {
+      id: crypto.randomUUID(),
+      kind: 'followup',
+      createdAt: now,
+      updatedAt: now,
+      turns: [],
+    };
+    sessions.push(created);
+    idx = sessions.length - 1;
+    sid = created.id;
+  }
+  const cur = sessions[idx]!;
+  sessions[idx] = {
+    ...cur,
+    updatedAt: now,
+    turns: [
+      ...cur.turns,
+      ...turns.map((t) => ({ role: t.role, content: t.content, at: now })),
+    ].slice(-40),
+  };
+  list[i] = { ...prev, aiSessions: sessions.slice(-8) };
+  persist(list);
+  return sid;
 }
 
 export function updateBaziJournalReflection(id: string, reflection: string): void {

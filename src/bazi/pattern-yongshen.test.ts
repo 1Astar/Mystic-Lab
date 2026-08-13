@@ -4,11 +4,13 @@ import { castBaziChart, type BaziChart, type PillarCell } from './cast.ts';
 import {
   bodyBandOf,
   detectCongGe,
+  detectHuaQi,
   detectZhuanWang,
   patternYongshenCardHtml,
   resolvePatternYongshen,
 } from './pattern-yongshen.ts';
 import type { WuXing } from './elements.ts';
+import { scoreChartWx } from './sense-energy.ts';
 
 const PROFILE = {
   ...EMPTY_PROFILE,
@@ -113,7 +115,7 @@ describe('pattern-yongshen', () => {
     expect(pack.headline).toMatch(pack.patternName);
     const blob = `${pack.headline}${pack.playbook}${pack.boundary}${pack.patternWhy}`;
     expect(blob).not.toMatch(/必凶|倒霉|缺什么|死刑/);
-    expect(pack.boundary).toMatch(/规则推演|扶抑|专旺|从格/);
+    expect(pack.boundary).toMatch(/规则推演|扶抑|专旺|从格|化气/);
   });
 
   it('bodyBand maps season labels', () => {
@@ -186,5 +188,131 @@ describe('pattern-yongshen', () => {
     expect(pack.patternMode).toBe('cong_er');
     expect(pack.yongWx).toContain('火');
     expect(pack.method).toMatch(/从儿/);
+    expect(pack.congTrust).toMatch(/true_tend|false_tend/);
+    expect((pack.breakTip || '').length).toBeGreaterThan(4);
+    expect(patternYongshenCardHtml(pack)).toMatch(/真从倾向|假从倾向/);
+  });
+
+  it('detects 化气 soft when day stem he + month supports', () => {
+    const chart = mockChart({
+      dayMaster: '甲',
+      dayMasterWx: '木',
+      monthBranch: '未',
+      seasonStrength: '相',
+      stemGods: ['比肩', '劫财', '食神', '偏印'],
+    });
+    chart.pillars = chart.pillars.map((p) => {
+      if (p.key === 'day') return { ...p, stem: '甲' };
+      if (p.key === 'month') return { ...p, stem: '己', branch: '未' };
+      if (p.key === 'year') return { ...p, stem: '己', branch: '丑' };
+      return p;
+    });
+    const scores = scoreChartWx(chart);
+    // 抬土分确保过门
+    scores['土'] = Math.max(scores['土'] ?? 0, 8);
+    const hit = detectHuaQi(chart, { ...scores, 土: 8 });
+    expect(hit?.mode).toBe('hua_qi');
+    expect(hit?.name).toMatch(/化土/);
+    expect(hit?.huaTrust).toMatch(/true_tend|false_tend/);
+    expect((hit?.breakTip || '').length).toBeGreaterThan(8);
+  });
+
+  it('marks 假化倾向 when 合化气弱于日主原气', () => {
+    const chart = mockChart({
+      dayMaster: '甲',
+      dayMasterWx: '木',
+      monthBranch: '未',
+      seasonStrength: '相',
+      stemGods: ['比肩', '劫财', '食神', '偏印'],
+    });
+    chart.pillars = chart.pillars.map((p) => {
+      if (p.key === 'day') return { ...p, stem: '甲', branch: '寅' };
+      if (p.key === 'month') return { ...p, stem: '己', branch: '未' };
+      if (p.key === 'year') return { ...p, stem: '甲', branch: '卯' };
+      if (p.key === 'hour') return { ...p, stem: '乙', branch: '卯' };
+      return p;
+    });
+    const hit = detectHuaQi(chart, {
+      木: 10,
+      火: 1,
+      土: 3,
+      金: 1,
+      水: 2,
+    });
+    expect(hit?.mode).toBe('hua_qi');
+    expect(hit?.huaTrust).toBe('false_tend');
+    expect(hit?.breakTip).toMatch(/假化/);
+    const pack = resolvePatternYongshen({
+      ...chart,
+      // 尽量让化气优先于专旺/从格：土月 + 甲己
+    });
+    if (pack.patternMode === 'hua_qi') {
+      expect(pack.huaTrust).toBe('false_tend');
+      expect(patternYongshenCardHtml(pack)).toMatch(/假化倾向/);
+    }
+  });
+
+  it('marks 真化倾向 when 合化气明显压过日主原气', () => {
+    const chart = mockChart({
+      dayMaster: '甲',
+      dayMasterWx: '木',
+      monthBranch: '未',
+      seasonStrength: '旺',
+      stemGods: ['比肩', '劫财', '食神', '偏印'],
+    });
+    chart.pillars = chart.pillars.map((p) => {
+      if (p.key === 'day') return { ...p, stem: '甲' };
+      if (p.key === 'month') return { ...p, stem: '己', branch: '未' };
+      if (p.key === 'year') return { ...p, stem: '己', branch: '丑' };
+      if (p.key === 'hour') return { ...p, stem: '戊', branch: '辰' };
+      return p;
+    });
+    const hit = detectHuaQi(chart, {
+      木: 2,
+      火: 1,
+      土: 9,
+      金: 1,
+      水: 1,
+    });
+    expect(hit?.huaTrust).toBe('true_tend');
+    expect(hit?.breakTip).toMatch(/真化/);
+  });
+
+  it('false 从 tip mentions residual 印比 or 杂气', () => {
+    const chart = mockChart({
+      dayMaster: '甲',
+      dayMasterWx: '木',
+      monthBranch: '酉',
+      seasonStrength: '死',
+      // 食伤多但仍有印比 → 假从
+      stemGods: ['食神', '伤官', '偏印', '食神'],
+    });
+    const hit = detectCongGe(chart, '身弱');
+    expect(hit?.mode).toBe('cong_er');
+    expect(hit?.congTrust).toBe('false_tend');
+    expect(hit?.breakTip).toMatch(/假从|印比|杂气/);
+  });
+
+  it('zheng pattern has roleTip; 外格 empty roleTip', () => {
+    const chart = castBaziChart(PROFILE, 2026, {
+      includeLiunian: false,
+      gender: 'female',
+    });
+    if ('error' in chart) return;
+    const pack = resolvePatternYongshen(chart);
+    if (pack.patternMode === 'zheng') {
+      expect(pack.roleTip.length).toBeGreaterThan(4);
+      expect(patternYongshenCardHtml(pack)).toContain('py-role');
+    }
+    const cong = mockChart({
+      dayMaster: '甲',
+      dayMasterWx: '木',
+      monthBranch: '酉',
+      seasonStrength: '死',
+      stemGods: ['食神', '伤官', '食神', '伤官'],
+    });
+    const congPack = resolvePatternYongshen(cong);
+    expect(congPack.patternMode).not.toBe('zheng');
+    expect(congPack.roleTip).toBe('');
   });
 });

@@ -4,6 +4,8 @@ import { mysticEmblemHtml, type MysticEmblemKind } from './mystic-emblem.ts';
 import { mountEnvBanner } from './banner.ts';
 import { mountAiSettingsPanel } from './ai-settings-panel.ts';
 import { attachPersonSwitcherToPage } from './module-person-chrome.ts';
+import { mountLabFloatShell } from './lab-float-shell.ts';
+import type { LabNotesSystem } from './lab-notes-sheet.ts';
 
 export interface ModuleHomeEntry {
   title: string;
@@ -26,6 +28,9 @@ export interface ModuleHomeConfig {
   entries: ModuleHomeEntry[];
   showStars?: boolean;
   showAiSettings?: boolean;
+  /** 右下四钮：分享 / 笔记 / 图鉴 / 解读 */
+  floatSystem?: LabNotesSystem;
+  floatTujianPath?: string;
 }
 
 export function renderModuleHome(root: HTMLElement, config: ModuleHomeConfig): () => void {
@@ -103,5 +108,17 @@ export function renderModuleHome(root: HTMLElement, config: ModuleHomeConfig): (
   root.appendChild(page);
   attachPersonSwitcherToPage(page);
 
-  return () => stars?.remove();
+  const disposeFloat = config.floatSystem
+    ? mountLabFloatShell(page, {
+        system: config.floatSystem,
+        surface: 'learn',
+        tujianPath: config.floatTujianPath,
+        notesContext: `${config.title}首页`,
+      })
+    : () => {};
+
+  return () => {
+    disposeFloat();
+    stars?.remove();
+  };
 }

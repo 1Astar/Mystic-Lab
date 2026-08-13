@@ -11,6 +11,7 @@ import { liuyaoPageBgStyle, renderLiuyaoHero } from '../ui/liuyao-hero.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
 import { mountPersonSwitcher } from '../ui/person-switcher.ts';
 import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 export function renderLiuyaoHome(root: HTMLElement): () => void {
   const journalCount = loadLiuyaoJournal().length;
@@ -113,5 +114,13 @@ export function renderLiuyaoHome(root: HTMLElement): () => void {
   page.querySelector('.ly-home-back')?.addEventListener('click', () => navigate('/'));
   paint();
   root.appendChild(page);
-  return () => {};
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'liuyao',
+    surface: 'learn',
+    tujianPath: '/liuyao/hexagrams',
+    notesContext: '六爻首页',
+  });
+  return () => {
+    disposeFloat();
+  };
 }

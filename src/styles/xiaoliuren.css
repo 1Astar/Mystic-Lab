@@ -1035,6 +1035,13 @@
   color: var(--ink-muted);
 }
 
+.xlr-journal-ai-badge {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(201, 168, 76, 0.95);
+}
+
 .xlr-journal-reflect {
   margin-top: 10px;
 }
@@ -1117,6 +1124,45 @@ html[data-theme='moon'] .xlr-replay-backdrop {
 .xlr-replay-head {
   padding-right: 28px;
   margin-bottom: 12px;
+}
+
+.xlr-replay .ly-replay-ai-wrap {
+  margin: 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.xlr-replay .ly-replay-ai {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(201, 168, 76, 0.07);
+}
+.xlr-replay .ly-replay-ai h4 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: rgba(201, 168, 76, 0.95);
+}
+.xlr-replay .ly-replay-ai-turns {
+  margin-top: 8px;
+}
+.xlr-replay .ly-replay-ai-turns summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: rgba(201, 168, 76, 0.8);
+}
+.xlr-replay .ly-replay-ai-turn {
+  margin: 8px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.xlr-replay .ly-replay-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.88rem;
+  line-height: 1.55;
 }
 
 .xlr-hour-guide-list {

@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -33,7 +33,7 @@ import { unlockBaziCodexFromChart } from '../bazi/codex.ts';
 import { WUXING_LORE, stemBranchById } from '../bazi/codex-lore.ts';
 import { getStarCard } from '../bazi/codex-tags.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
-import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
+import { baziViewModeTabsHtml } from '../ui/lab-sys-tabs.ts';
 import { mountLabReadingTopbar } from '../ui/lab-reading-chrome.ts';
 import { mountLabFloatActions } from '../ui/lab-float-actions.ts';
 import { formatSelectionAskSeed } from '../ui/lab-selection-ask.ts';
@@ -65,21 +65,22 @@ import {
   markLearnInteraction,
   resolveBaziLearnTitle,
 } from '../bazi/learn-store.ts';
+import { renderBaziChart } from './bazi-chart.ts';
 
 const Q_KEY = 'mystic.bazi.reading.q';
 
-type ReadingPane = 'overview' | 'domains' | 'luck' | 'ask';
+/** 人生地图分区 · 对齐紫微 定调 / 四要素 / 运限 */
+type TheaterTab = 'self' | 'domains' | 'luck';
 
-const READING_PANES: Array<{ id: ReadingPane; label: string; hint: string }> = [
-  { id: 'overview', label: '总览', hint: '气场定调' },
+const THEATER_TABS: Array<{ id: TheaterTab; label: string; hint: string }> = [
+  { id: 'self', label: '定调', hint: '你是谁' },
   { id: 'domains', label: '五域', hint: '人生五面' },
-  { id: 'luck', label: '运势', hint: '大运流年' },
-  { id: 'ask', label: '答问', hint: '此刻确认' },
+  { id: 'luck', label: '运限', hint: '大运流年' },
 ];
 
-const READING_REFLECT: Record<ReadingPane, { title: string; items: string[] }> = {
-  overview: {
-    title: '总览 · 对照',
+const READING_REFLECT: Record<TheaterTab, { title: string; items: string[] }> = {
+  self: {
+    title: '定调 · 对照',
     items: ['今天最对味的一句是…', '想验证的一件小事是…'],
   },
   domains: {
@@ -87,12 +88,8 @@ const READING_REFLECT: Record<ReadingPane, { title: string; items: string[] }> =
     items: ['哪一面最像我？', '哪一面我想改？'],
   },
   luck: {
-    title: '运势 · 对照',
+    title: '运限 · 对照',
     items: ['今年宜忌里，我打算先做哪一条？', '哪一条我要刻意避开？'],
-  },
-  ask: {
-    title: '答问 · 对照',
-    items: ['这句话里，我最想核对的是…', '下一步我能做的一小步是…'],
   },
 };
 
@@ -104,12 +101,45 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function readingPaneTabsHtml(active: ReadingPane): string {
+function queryViewMode(): 'theater' | 'chart' {
+  try {
+    return new URLSearchParams(location.search).get('mode') === 'chart' ? 'chart' : 'theater';
+  } catch {
+    return 'theater';
+  }
+}
+
+function queryTheaterTab(): TheaterTab {
+  try {
+    const t = new URLSearchParams(location.search).get('tab');
+    if (t === 'domains' || t === 'luck' || t === 'self') return t;
+    if (t === 'overview') return 'self';
+    if (t === 'ask') return 'self';
+  } catch {
+    /* ignore */
+  }
+  return 'self';
+}
+
+function setReadingUrl(opts: { mode?: 'theater' | 'chart'; tab?: TheaterTab }): void {
+  try {
+    const q = new URLSearchParams();
+    const mode = opts.mode ?? 'theater';
+    if (mode === 'chart') q.set('mode', 'chart');
+    else if (opts.tab && opts.tab !== 'self') q.set('tab', opts.tab);
+    const qs = q.toString();
+    history.replaceState({}, '', qs ? `/bazi/reading?${qs}` : '/bazi/reading');
+  } catch {
+    /* ignore */
+  }
+}
+
+function theaterTabsHtml(active: TheaterTab): string {
   return `
-    <div class="bazi-reading-tabs" role="tablist" aria-label="命盘解读分区">
-      ${READING_PANES.map(
+    <div class="bazi-reading-tabs" role="tablist" aria-label="人生地图分区">
+      ${THEATER_TABS.map(
         (t) => `
-        <button type="button" role="tab" class="bazi-reading-tab${t.id === active ? ' is-on' : ''}" data-reading-pane="${t.id}" aria-selected="${t.id === active}">
+        <button type="button" role="tab" class="bazi-reading-tab${t.id === active ? ' is-on' : ''}" data-theater-tab="${t.id}" aria-selected="${t.id === active}">
           <strong>${t.label}</strong>
           <span>${t.hint}</span>
         </button>`,
@@ -134,6 +164,10 @@ function saveQuestion(q: string): void {
 }
 
 export function renderBaziReading(root: HTMLElement): () => void {
+  if (queryViewMode() === 'chart') {
+    return renderBaziChart(root);
+  }
+
   const stars = createStarsLayer();
   document.body.appendChild(stars);
 
@@ -142,7 +176,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
   mountEnvBanner(page);
 
   let question = loadQuestion();
-  let readingPane: ReadingPane = 'overview';
+  let theaterTab: TheaterTab = queryTheaterTab();
   let unlockedOnce = false;
   let disposeFloat: (() => void) | null = null;
   let disposeEnergy: (() => void) | null = null;
@@ -152,7 +186,9 @@ export function renderBaziReading(root: HTMLElement): () => void {
   function maybeUnlockCodex(chart: Parameters<typeof unlockBaziCodexFromChart>[0]): void {
     if (unlockedOnce) return;
     unlockedOnce = true;
-    const unlocked = unlockBaziCodexFromChart(chart);
+    const unlocked = unlockBaziCodexFromChart(chart, {
+      question: question.trim() || undefined,
+    });
     if (unlocked.newly.length === 0) return;
     const first = unlocked.newly[0]!;
     const star = getStarCard(first.id);
@@ -181,7 +217,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回八字</button>
         <header class="life-header">
           <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
-          <h1 class="page-title">我的命盘</h1>
+          <h1 class="page-title">人生地图</h1>
           <p class="page-subtitle">需要先填写出生年月日</p>
         </header>
         <section class="life-profile-gate">
@@ -211,7 +247,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 返回八字</button>
         <header class="life-header">
-          <h1 class="page-title">我的命盘</h1>
+          <h1 class="page-title">人生地图</h1>
           <p class="page-subtitle">${escapeHtml(chartResult.error)}</p>
         </header>
         <button type="button" class="life-btn-primary" data-path="/bazi?edit=1">回去改出生信息</button>
@@ -281,12 +317,13 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
     page.innerHTML = `
       <button type="button" class="back-link life-back">← Lab</button>
-      ${baziSysTabsHtml('reading')}
+      ${baziViewModeTabsHtml('theater')}
       <header class="life-header">
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <p class="home-eyebrow">MY BIRTH CODE</p>
-        <h1 class="page-title">我的命盘</h1>
+        <h1 class="page-title">人生地图</h1>
         <p class="page-subtitle">${SYSTEM_POSITION.bazi}</p>
+        <button type="button" class="bazi-edit-birth" data-path="/bazi?edit=1">改出生信息</button>
       </header>
 
       ${(() => {
@@ -303,22 +340,23 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </aside>`;
       })()}
 
-      ${readingPaneTabsHtml(readingPane)}
+      ${theaterTabsHtml(theaterTab)}
 
-      <div class="bazi-reading-pane${readingPane === 'overview' ? ' is-on' : ''}" data-pane="overview" ${readingPane === 'overview' ? '' : 'hidden'}>
-        <nav class="bazi-reading-anchors" aria-label="总览锚点">
+      <div class="bazi-reading-pane${theaterTab === 'self' ? ' is-on' : ''}" data-pane="self" ${theaterTab === 'self' ? '' : 'hidden'}>
+        <nav class="bazi-reading-anchors" aria-label="定调锚点">
           <button type="button" class="bazi-reading-anchor" data-anchor="bazi-ov-insight">感悟</button>
           <button type="button" class="bazi-reading-anchor" data-anchor="bazi-ov-season">定调</button>
           <button type="button" class="bazi-reading-anchor" data-anchor="bazi-ov-energy">能量</button>
           ${marks.length ? '<button type="button" class="bazi-reading-anchor" data-anchor="bazi-ov-marks">印记</button>' : ''}
+          <button type="button" class="bazi-reading-anchor" data-anchor="bazi-ov-ask">答问</button>
         </nav>
 
         <p class="bazi-reading-keyword">${escapeHtml(portrait.keyword)}</p>
         ${learnBadgeHtml()}
         ${
           question.trim()
-            ? `<p class="bazi-reading-ask-bridge">此刻问题 · ${escapeHtml(question.trim())} · <button type="button" class="bazi-reading-inline-link" data-reading-pane="ask">去答问 ›</button></p>`
-            : `<p class="bazi-reading-ask-bridge">有具体问题想核对？<button type="button" class="bazi-reading-inline-link" data-reading-pane="ask">去答问 ›</button></p>`
+            ? `<p class="bazi-reading-ask-bridge">此刻问题 · ${escapeHtml(question.trim())} · <a class="bazi-reading-inline-link" href="#bazi-ov-ask">去答问 ›</a></p>`
+            : `<p class="bazi-reading-ask-bridge">有具体问题想核对？<a class="bazi-reading-inline-link" href="#bazi-ov-ask">去答问 ›</a></p>`
         }
 
         <section id="bazi-ov-insight" class="bazi-sense-block bazi-sense-insight" aria-label="现实感悟">
@@ -351,14 +389,26 @@ export function renderBaziReading(root: HTMLElement): () => void {
 
         ${marksHtml}
 
+        <section id="bazi-ov-ask" class="bazi-reading-ask" aria-label="此刻想问">
+          <h2 class="life-route-title">此刻更想确认</h2>
+          <p class="bazi-reading-ask-lead">${escapeHtml(askLead)}</p>
+          <label class="life-field life-field-full">
+            <span>一句话问题（可选）</span>
+            <input type="text" id="bazi-reading-q" maxlength="120" placeholder="例如：要不要换工作？" value="${escapeHtml(question)}" />
+          </label>
+          <button type="button" class="life-btn-ghost" id="bazi-reading-ask-go">更新离线答问</button>
+          <div class="bazi-pack-host" data-bazi-pack>${packHtml}</div>
+        </section>
+
         <nav class="bazi-reading-jumps" aria-label="继续看">
-          <button type="button" class="bazi-reading-jump" data-reading-pane="domains">看五域 ›</button>
-          <button type="button" class="bazi-reading-jump" data-reading-pane="luck">看今年运势 ›</button>
-          <button type="button" class="bazi-reading-jump" data-reading-pane="ask">去答问 ›</button>
+          <button type="button" class="bazi-reading-jump" data-theater-tab="domains">看五域 ›</button>
+          <button type="button" class="bazi-reading-jump" data-theater-tab="luck">看运限 ›</button>
+          <button type="button" class="bazi-reading-jump" data-bazi-view="chart">完整命盘 ›</button>
           <button type="button" class="bazi-reading-jump" data-path="/bazi/guess">猜命盘盲盒 ›</button>
           <button type="button" class="bazi-reading-jump" data-path="/bazi/week">脑内天气 ›</button>
           <button type="button" class="bazi-reading-jump" data-path="/bazi/learn">知识树 ›</button>
           <button type="button" class="bazi-reading-jump" data-path="/bazi/journal">八字手札 ›</button>
+          <button type="button" class="bazi-reading-jump" data-path="/records">我的旅程 ›</button>
         </nav>
 
         <details class="bazi-origin-fold">
@@ -372,7 +422,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </details>
       </div>
 
-      <div class="bazi-reading-pane${readingPane === 'domains' ? ' is-on' : ''}" data-pane="domains" ${readingPane === 'domains' ? '' : 'hidden'}>
+      <div class="bazi-reading-pane${theaterTab === 'domains' ? ' is-on' : ''}" data-pane="domains" ${theaterTab === 'domains' ? '' : 'hidden'}>
         <header class="bazi-domains-head">
           <p class="bazi-reading-keyword">${escapeHtml(portrait.keyword)}</p>
           <p class="bazi-domains-lead">${escapeHtml(portrait.domainsLead)}</p>
@@ -393,9 +443,9 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </section>
       </div>
 
-      <div class="bazi-reading-pane${readingPane === 'luck' ? ' is-on' : ''}" data-pane="luck" ${readingPane === 'luck' ? '' : 'hidden'}>
+      <div class="bazi-reading-pane${theaterTab === 'luck' ? ' is-on' : ''}" data-pane="luck" ${theaterTab === 'luck' ? '' : 'hidden'}>
         <header class="bazi-luck-head">
-          <p class="bazi-sense-kicker">运势速览</p>
+          <p class="bazi-sense-kicker">运限速览</p>
           <p class="bazi-luck-tone">${escapeHtml(forecast.tone)}</p>
         </header>
 
@@ -441,31 +491,22 @@ export function renderBaziReading(root: HTMLElement): () => void {
         }
 
         <p class="bazi-luck-chart-cta">
-          <button type="button" class="bazi-reading-jump" data-path="/bazi/chart">${escapeHtml(forecast.chartCta)}</button>
+          <button type="button" class="bazi-reading-jump" data-bazi-view="chart">${escapeHtml(forecast.chartCta)}</button>
         </p>
       </div>
 
-      <div class="bazi-reading-pane${readingPane === 'ask' ? ' is-on' : ''}" data-pane="ask" ${readingPane === 'ask' ? '' : 'hidden'}>
-        <section class="bazi-reading-ask" aria-label="此刻想问">
-          <h2 class="life-route-title">此刻更想确认</h2>
-          <p class="bazi-reading-ask-lead">${escapeHtml(askLead)}</p>
-          <label class="life-field life-field-full">
-            <span>一句话问题（可选）</span>
-            <input type="text" id="bazi-reading-q" maxlength="120" placeholder="例如：要不要换工作？" value="${escapeHtml(question)}" />
-          </label>
-          <button type="button" class="life-btn-ghost" id="bazi-reading-ask-go">更新离线答问</button>
-        </section>
-        <div class="bazi-pack-host" data-bazi-pack>${packHtml}</div>
-      </div>
-
       <div class="bazi-reading-actions">
-        <button type="button" class="life-btn-primary" data-path="/bazi/chart">想看为什么？进入命盘解析 ›</button>
+        <button type="button" class="life-btn-primary" data-bazi-view="chart">想看为什么？进入完整命盘 ›</button>
         <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/bazi/rectify">
           <strong>觉得不准？试试生时校准</strong>
           <span>用大事件反推更贴近的时辰</span>
           <em aria-hidden="true">›</em>
         </button>
-        <button type="button" class="life-btn-ghost" data-path="/bazi?edit=1">改出生信息</button>
+        <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/records">
+          <strong>我的旅程</strong>
+          <span>回看八字手札与各体系记录</span>
+          <em aria-hidden="true">›</em>
+        </button>
       </div>
     `;
 
@@ -473,10 +514,11 @@ export function renderBaziReading(root: HTMLElement): () => void {
     const packHost = page.querySelector<HTMLElement>('[data-bazi-pack]');
     if (packHost) bindAnswerPackGestures(packHost);
 
-    const setReadingPane = (next: ReadingPane): void => {
-      readingPane = next;
-      page.querySelectorAll<HTMLButtonElement>('[data-reading-pane]').forEach((btn) => {
-        const on = btn.dataset.readingPane === next;
+    const setTheaterTab = (next: TheaterTab): void => {
+      theaterTab = next;
+      setReadingUrl({ mode: 'theater', tab: next });
+      page.querySelectorAll<HTMLButtonElement>('[data-theater-tab]').forEach((btn) => {
+        const on = btn.dataset.theaterTab === next;
         if (btn.classList.contains('bazi-reading-tab')) {
           btn.classList.toggle('is-on', on);
           btn.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -493,12 +535,27 @@ export function renderBaziReading(root: HTMLElement): () => void {
       });
     };
 
-    page.querySelectorAll<HTMLButtonElement>('[data-reading-pane]').forEach((btn) => {
+    page.querySelectorAll<HTMLButtonElement>('[data-bazi-view]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const next = btn.dataset.readingPane;
-        if (next === 'overview' || next === 'domains' || next === 'luck' || next === 'ask') {
-          setReadingPane(next);
+        if (btn.dataset.baziView === 'chart') {
+          navigate('/bazi/reading?mode=chart');
         }
+      });
+    });
+
+    page.querySelectorAll<HTMLButtonElement>('[data-theater-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.theaterTab;
+        if (next === 'self' || next === 'domains' || next === 'luck') {
+          setTheaterTab(next);
+        }
+      });
+    });
+
+    page.querySelectorAll<HTMLAnchorElement>('a.bazi-reading-inline-link[href="#bazi-ov-ask"]').forEach((a) => {
+      a.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        page.querySelector('#bazi-ov-ask')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
 
@@ -635,12 +692,12 @@ export function renderBaziReading(root: HTMLElement): () => void {
       answerConcept: answerBaziConcept,
       onNotes: () => {
         const paneLabel =
-          READING_PANES.find((p) => p.id === readingPane)?.label ?? '解读';
+          THEATER_TABS.find((p) => p.id === theaterTab)?.label ?? '解读';
         openLabNotesSheet({
           system: 'bazi',
           surface: 'reading',
           context: `${pack.verdict.headline} · ${paneLabel}`,
-          reflect: READING_REFLECT[readingPane],
+          reflect: READING_REFLECT[theaterTab],
         });
       },
       onSelectionAsk: (text) => {
@@ -691,7 +748,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
     page.querySelector('#bazi-reading-ask-go')?.addEventListener('click', () => {
       question = qInput?.value.trim() ?? '';
       saveQuestion(question);
-      readingPane = 'ask';
+      theaterTab = 'self';
       paint();
     });
   }

@@ -5,10 +5,17 @@ import { createStarsLayer } from '../tarot/animations.ts';
 import {
   baziCodexProgress,
   isBaziCodexUnlocked,
+  libraryIdsFromChart,
   listBaziCodexEntries,
   listMetCodexTags,
+  unlockBaziCodexFromChart,
   wuxingUnlockHint,
 } from '../bazi/codex.ts';
+import { getBaziCodexMarks, listBaziCodexMarkedIds } from '../bazi/codex-favorites.ts';
+import { takeJustLitIds } from '../bazi/codex-just-lit.ts';
+import {
+  chartPresenceBriefLine,
+} from '../bazi/codex-presence-brief.ts';
 import {
   BRANCH_LORE,
   STEM_LORE,
@@ -23,6 +30,7 @@ import {
   tengodArtSvg,
   wuxingArtSvg,
 } from '../bazi/codex-art.ts';
+import { nayinArtSvg } from '../bazi/codex-nayin-art.ts';
 import { getCodexCoverSrc } from '../bazi/codex-cover.ts';
 import { codexDetailArtHtml } from '../bazi/codex-detail-art.ts';
 import { renderRelationsAtlasHtml } from '../bazi/codex-relations-atlas.ts';
@@ -41,7 +49,6 @@ import {
 import { getShenshaVisual } from '../bazi/codex-shensha-visual.ts';
 import {
   SHENSHA_FEATURED,
-  SHENSHA_TAG,
 } from '../bazi/codex-shensha-tiers.ts';
 import { renderWuxingShengKeMapHtml } from '../bazi/codex-wuxing-map.ts';
 import {
@@ -65,12 +72,12 @@ import {
   LUCK_ATLAS,
   NAYIN_ATLAS,
   RELATION_ATLAS,
-  SHENSHA_ATLAS,
   SHENSHA_CATEGORIES,
   jiaziId,
   listSixtyJiazi,
   nayinId,
   shenshaAtlasByCategory,
+  type ShenshaCategory,
 } from '../bazi/codex-atlas-catalog.ts';
 import { castBaziChart, type BaziChart } from '../bazi/cast.ts';
 import { nayinOf } from '../bazi/pillar-meta.ts';
@@ -78,7 +85,6 @@ import { buildLuckCycles } from '../bazi/luck-cycles.ts';
 import { dayunLoreHint } from '../bazi/codex-jiazi-dayun-lore.ts';
 import { buildEnergyBalance } from '../bazi/sense-energy.ts';
 import { wuxingClass, type WuXing } from '../bazi/elements.ts';
-import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
 import {
   getActivePerson,
   hasBirthInfo,
@@ -111,8 +117,7 @@ type Tab =
   | 'shensha'
   | 'nayin'
   | 'jiazi'
-  | 'luck'
-  | 'mine';
+  | 'luck';
 
 const TAB_ORDER: Tab[] = [
   'relation',
@@ -123,7 +128,6 @@ const TAB_ORDER: Tab[] = [
   'nayin',
   'jiazi',
   'luck',
-  'mine',
 ];
 
 const TAB_GUIDE: Record<Tab, string> = {
@@ -131,17 +135,78 @@ const TAB_GUIDE: Record<Tab, string> = {
   stem: '你的核心性格底色',
   branch: '环境、根基与行动方式',
   tengod: '你如何与世界发生关系',
-  shensha: '神煞知识库 · 按类浏览（辅助信息，勿单断）',
+  shensha: '神煞按类浏览 · 辅助信息，勿单断',
   nayin: '三十纳音 · 干支组合的气象象意',
   jiazi: '六十甲子 · 每柱干支的完整索引',
-  luck: '大运流年基础概念 · 如何触发原局',
-  mine: '四柱解读 + 盘上已遇见的星煞',
+  luck: '大运流年 · 如何触发原局',
 };
+
+/** 图鉴「我的旅程」· 仿紫微「我的相遇」 */
+type JourneyHub = 'lit' | 'chart' | 'marks';
+type CodexLayer = 'atlas' | 'journey';
+
+type MarksFilter = 'all' | 'fire' | 'useful';
+
+function parseMarksFilter(raw: string | undefined): MarksFilter {
+  if (raw === 'fire' || raw === 'useful') return raw;
+  return 'all';
+}
+
+function parseJourneyHub(raw: string | undefined): JourneyHub {
+  if (raw === 'chart' || raw === 'marks' || raw === 'lit') return raw;
+  return 'lit';
+}
 
 function parseTab(raw: string | undefined): Tab {
   if (raw === 'wuxing' || raw === 'bonds') return 'relation';
+  if (raw === 'marks') return 'relation';
   if (raw && (TAB_ORDER as string[]).includes(raw)) return raw as Tab;
   return 'relation';
+}
+
+type ShenshaCatFilter = 'all' | 'featured' | ShenshaCategory;
+
+function parseShenshaCat(raw: string | undefined): ShenshaCatFilter {
+  if (raw === 'all' || raw === 'featured') return raw;
+  if (raw && (SHENSHA_CATEGORIES as readonly string[]).includes(raw)) {
+    return raw as ShenshaCategory;
+  }
+  return 'all';
+}
+
+function scrollChildIntoScroller(scroller: HTMLElement, child: Element | null): void {
+  if (!(child instanceof HTMLElement)) return;
+  const cRect = scroller.getBoundingClientRect();
+  const tRect = child.getBoundingClientRect();
+  scroller.scrollLeft += tRect.left - cRect.left - (cRect.width - tRect.width) / 2;
+}
+
+/** L1 + 神煞 L2 收成吸顶栈：上级与当前级一起粘住 */
+function assembleBaziStickyNav(page: HTMLElement): void {
+  const tabs = page.querySelector<HTMLElement>('.bazi-codex-tabs');
+  if (!tabs || tabs.closest('.bazi-codex-sticky-stack')) return;
+
+  const stack = document.createElement('div');
+  stack.className = 'bazi-codex-sticky-stack';
+  stack.setAttribute('role', 'navigation');
+  stack.setAttribute('aria-label', '八字图鉴分级导航');
+  tabs.replaceWith(stack);
+  stack.appendChild(tabs);
+
+  const sub = page.querySelector('.bazi-codex-subtabs');
+  if (sub && !sub.closest('.bazi-codex-sticky-stack')) {
+    const row = document.createElement('div');
+    row.className = 'bazi-codex-sticky-row is-l2';
+    sub.replaceWith(row);
+    row.appendChild(sub);
+    stack.appendChild(row);
+  }
+
+  scrollChildIntoScroller(tabs, tabs.querySelector('.bazi-codex-tab.is-on'));
+  const subtabs = stack.querySelector<HTMLElement>('.bazi-codex-subtabs');
+  if (subtabs) {
+    scrollChildIntoScroller(subtabs, subtabs.querySelector('.bazi-codex-subtab.is-on'));
+  }
 }
 
 export function renderBaziCodex(root: HTMLElement): () => void {
@@ -154,7 +219,20 @@ export function renderBaziCodex(root: HTMLElement): () => void {
   root.appendChild(page);
 
   let tab: Tab = 'relation';
+  let shenshaCat: ShenshaCatFilter = 'all';
+  let marksFilter: MarksFilter = 'all';
+  let layer: CodexLayer = 'atlas';
+  let journeyHub: JourneyHub = 'lit';
   let detailId: string | null = null;
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get('layer') === 'journey' || q.get('layer') === 'meet') {
+      layer = 'journey';
+      journeyHub = parseJourneyHub(q.get('hub') ?? undefined);
+    }
+  } catch {
+    /* ignore */
+  }
   const disposeFloat = mountLabFloatActions(page, {
     system: 'bazi',
     surface: 'atlas',
@@ -259,21 +337,118 @@ export function renderBaziCodex(root: HTMLElement): () => void {
     paint();
   }
 
+  function setJourneyUrl(hub: JourneyHub): void {
+    try {
+      const q = new URLSearchParams();
+      q.set('layer', 'journey');
+      if (hub !== 'lit') q.set('hub', hub);
+      history.replaceState({}, '', `/bazi/tujian?${q.toString()}`);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function clearJourneyUrl(): void {
+    try {
+      history.replaceState({}, '', '/bazi/tujian');
+    } catch {
+      /* ignore */
+    }
+  }
+
   function paint(): void {
     _chartCtxCache = null;
+    const { chart } = activeChartContext();
+    const unlocked = chart ? unlockBaziCodexFromChart(chart) : { newly: [], total: 0 };
+    _justLitIds = new Set(takeJustLitIds(unlocked.newly.map((e) => e.id)));
+
     const map = entries();
     const all = baziCodexProgress();
-    const wxP = baziCodexProgress('wuxing');
     const stemP = baziCodexProgress('stem');
     const branchP = baziCodexProgress('branch');
     const tgP = baziCodexProgress('tengod');
     const ssP = baziCodexProgress('shensha');
-    const litCount = Math.max(0, all.collected - wxP.collected);
-    const litTotal = Math.max(1, all.total - wxP.total);
+    const nyP = baziCodexProgress('nayin');
+    const jzP = baziCodexProgress('jiazi');
+
+    if (layer === 'journey') {
+      page.innerHTML = `
+        <button type="button" class="back-link" data-back-journey>← 返回图鉴</button>
+        <header class="life-header">
+          <p class="bazi-journey-kicker">个人收藏</p>
+          <h1 class="page-title">我的旅程</h1>
+          <p class="page-subtitle">收集对照 · 本盘遇见 · 我的标记</p>
+        </header>
+        ${baziSysTabsHtml(null)}
+        <div class="bazi-journey-page-body">
+          ${renderJourneyLayer(journeyHub, marksFilter, all)}
+        </div>
+        ${detailId ? renderDetail(detailId, map) : ''}
+      `;
+      page.querySelector('[data-back-journey]')?.addEventListener('click', () => {
+        layer = 'atlas';
+        detailId = null;
+        clearJourneyUrl();
+        paint();
+      });
+      page.querySelectorAll<HTMLElement>('.lab-sys-tabs [data-path]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const path = el.dataset.path;
+          if (path) navigate(path);
+        });
+      });
+      page.querySelectorAll<HTMLButtonElement>('[data-journey-hub]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          journeyHub = parseJourneyHub(btn.dataset.journeyHub);
+          detailId = null;
+          if (journeyHub !== 'marks') marksFilter = 'all';
+          setJourneyUrl(journeyHub);
+          paint();
+        });
+      });
+      page.querySelectorAll<HTMLButtonElement>('[data-marks-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          marksFilter = parseMarksFilter(btn.dataset.marksFilter);
+          detailId = null;
+          paint();
+        });
+      });
+      page.querySelectorAll<HTMLButtonElement>('[data-goto-reading]').forEach((btn) => {
+        btn.addEventListener('click', () => navigate('/bazi/reading'));
+      });
+      page.querySelectorAll<HTMLButtonElement>('[data-goto-atlas-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const next = parseTab(btn.dataset.gotoAtlasTab);
+          layer = 'atlas';
+          tab = next;
+          detailId = null;
+          if (tab !== 'relation') wuxingFocus = null;
+          if (tab !== 'shensha') shenshaCat = 'all';
+          clearJourneyUrl();
+          paint();
+          window.setTimeout(() => {
+            page.querySelector('.bazi-codex-tabs')?.scrollIntoView({
+              block: 'nearest',
+              behavior: 'smooth',
+            });
+          }, 40);
+        });
+      });
+      bindCodexOpeners();
+      return;
+    }
 
     const tabBtn = (id: Tab, label: string, p?: { collected: number; total: number }) => `
       <button type="button" class="bazi-codex-tab ${tab === id ? 'is-on' : ''}" data-tab="${id}">
         ${label}${p ? ` <em>${p.collected}/${p.total}</em>` : ''}
+      </button>`;
+
+    const journeyEntry = `
+      <button type="button" class="bazi-journey-entry" data-open-journey>
+        <span class="bazi-journey-entry-kicker">个人收藏</span>
+        <strong class="bazi-journey-entry-title">我的旅程</strong>
+        <span class="bazi-journey-entry-desc">已点亮词条 · 命盘印记 · 我的标记 · ${all.collected}/${all.total}</span>
+        <span class="bazi-journey-entry-cta" aria-hidden="true">→</span>
       </button>`;
 
     page.innerHTML = `
@@ -281,21 +456,21 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       <header class="life-header">
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <h1 class="page-title">八字探索</h1>
-        <p class="page-subtitle">${SYSTEM_POSITION.bazi} · 已点亮 ${litCount}/${litTotal}</p>
+        <p class="page-subtitle">图鉴分类 · 旅程单独入口 · 全库 ${all.collected}/${all.total}</p>
       </header>
 
       ${baziSysTabsHtml(null)}
+      ${journeyEntry}
 
       <div class="bazi-codex-tabs" role="tablist">
         ${tabBtn('relation', '生克关系')}
         ${tabBtn('stem', '十天干', stemP)}
         ${tabBtn('branch', '十二地支', branchP)}
         ${tabBtn('tengod', '十神', tgP)}
-        ${tabBtn('shensha', `神煞`, { collected: ssP.collected, total: SHENSHA_ATLAS.length })}
-        ${tabBtn('nayin', '纳音')}
-        ${tabBtn('jiazi', '甲子')}
+        ${tabBtn('shensha', `神煞`, ssP)}
+        ${tabBtn('nayin', '纳音', nyP)}
+        ${tabBtn('jiazi', '甲子', jzP)}
         ${tabBtn('luck', '运程')}
-        ${tabBtn('mine', '我的命盘')}
       </div>
 
       <p class="bazi-codex-guide">${escapeHtml(TAB_GUIDE[tab])}</p>
@@ -310,17 +485,17 @@ export function renderBaziCodex(root: HTMLElement): () => void {
               : tab === 'tengod'
                 ? renderTengodGrid()
                 : tab === 'shensha'
-                  ? renderShenshaAtlas()
+                  ? renderShenshaAtlas(shenshaCat)
                   : tab === 'nayin'
                     ? renderNayinGrid()
                     : tab === 'jiazi'
                       ? renderJiaziGrid()
-                      : tab === 'luck'
-                          ? renderLuckGrid()
-                          : renderMineChartTab()
+                      : renderLuckGrid()
       }
       ${detailId ? renderDetail(detailId, map) : ''}
     `;
+
+    assembleBaziStickyNav(page);
 
     page.querySelector('.life-back')?.addEventListener('click', () => navigate('/bazi'));
     page.querySelectorAll<HTMLElement>('.lab-sys-tabs [data-path]').forEach((el) => {
@@ -329,14 +504,33 @@ export function renderBaziCodex(root: HTMLElement): () => void {
         if (path) navigate(path);
       });
     });
+    page.querySelector('[data-open-journey]')?.addEventListener('click', () => {
+      layer = 'journey';
+      journeyHub = 'lit';
+      detailId = null;
+      setJourneyUrl('lit');
+      paint();
+    });
     page.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((btn) => {
       btn.addEventListener('click', () => {
         tab = parseTab(btn.dataset.tab);
         detailId = null;
         if (tab !== 'relation') wuxingFocus = null;
+        if (tab !== 'shensha') shenshaCat = 'all';
         paint();
       });
     });
+    page.querySelectorAll<HTMLButtonElement>('[data-ss-cat]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        shenshaCat = parseShenshaCat(btn.dataset.ssCat);
+        detailId = null;
+        paint();
+      });
+    });
+    bindCodexOpeners();
+  }
+
+  function bindCodexOpeners(): void {
     const openCodexId = (id: string): void => {
       if (!id) return;
       detailId = detailId === id ? null : id;
@@ -452,6 +646,13 @@ export function renderBaziCodex(root: HTMLElement): () => void {
 
     if (detailId) {
       bindBaziCodexDetail(page);
+      page.addEventListener(
+        'bazi-codex-marks-changed',
+        () => {
+          if (layer === 'journey' && journeyHub === 'marks') paint();
+        },
+        { once: true },
+      );
     }
   }
 
@@ -464,12 +665,14 @@ export function renderBaziCodex(root: HTMLElement): () => void {
 
 let _chartCtxCache: {
   chart: BaziChart | null;
-  luck: ReturnType<typeof buildLuckCycles>;
+  luck: ReturnType<typeof buildLuckCycles> | null;
 } | null = null;
+/** 本轮 paint 要播点亮动效的 id */
+let _justLitIds = new Set<string>();
 
 function activeChartContext(): {
   chart: BaziChart | null;
-  luck: ReturnType<typeof buildLuckCycles>;
+  luck: ReturnType<typeof buildLuckCycles> | null;
 } {
   if (_chartCtxCache) return _chartCtxCache;
   const store = loadLifeStore();
@@ -517,6 +720,9 @@ function cardThumbHtml(id: string): string {
   if (enc?.kind === 'wuxing') {
     return `<span class="bazi-codex-thumb is-svg" aria-hidden="true">${wuxingArtSvg(id as WuXing, { uid: `card-${id}` })}</span>`;
   }
+  if (enc?.kind === 'nayin') {
+    return `<span class="bazi-codex-thumb is-svg is-nayin" aria-hidden="true">${nayinArtSvg(enc.title, { uid: `card-${id}` })}</span>`;
+  }
   const star = getStarCard(id);
   return `<span class="bazi-codex-thumb is-glyph" aria-hidden="true">${escapeHtml(star?.glyph || enc?.title?.charAt(0) || '·')}</span>`;
 }
@@ -535,19 +741,28 @@ function compactEntryHtml(opts: {
   lit?: boolean;
   extraClass?: string;
 }): string {
-  const { chart } = activeChartContext();
+  const { chart, luck } = activeChartContext();
   const enc = getBaziEncyclopedia(opts.id);
   const dossier = buildCodexDossier(opts.id);
   const meta = enc ? cardMetaLabels(enc) : { wuxing: '', yinyang: '' };
   const keyword = dossier?.coreKeyword || opts.core;
   const lit = opts.lit ?? entryIsLit(opts.id);
-  const presence = chartPresenceLabel(opts.id, chart, lit);
+  const brief = chartPresenceBriefLine(opts.id, chart, luck, 48);
+  const presence = brief || chartPresenceLabel(opts.id, chart, lit);
+  const marks = getBaziCodexMarks(opts.id);
+  const markHtml = marks.length
+    ? `<span class="bazi-codex-marks">${marks
+        .map((m) => `<i class="bazi-codex-mark-pill is-${m}">${m === 'fire' ? '火' : '有用'}</i>`)
+        .join('')}</span>`
+    : '';
+  const justLit = _justLitIds.has(opts.id) ? ' is-just-lit' : '';
   return `
-    <button type="button" class="bazi-codex-entry is-card ${opts.extraClass ?? ''} ${lit ? 'is-lit' : 'is-soft'}" data-codex-id="${escapeHtml(opts.id)}">
+    <button type="button" class="bazi-codex-entry is-card ${opts.extraClass ?? ''} ${lit ? 'is-lit' : 'is-soft'}${justLit}" data-codex-id="${escapeHtml(opts.id)}">
+      <span class="bazi-codex-ripple" aria-hidden="true"></span>
       ${cardThumbHtml(opts.id)}
       <span class="bazi-codex-entry-body">
         <strong>${escapeHtml(opts.title)}</strong>
-        <span class="bazi-codex-meta">${escapeHtml([meta.wuxing, meta.yinyang].filter((x) => x && x !== '—').join(' · ') || enc?.tags.category || '')}</span>
+        <span class="bazi-codex-meta">${escapeHtml([meta.wuxing, meta.yinyang].filter((x) => x && x !== '—').join(' · ') || enc?.tags.category || '')}${markHtml}</span>
         <em>${escapeHtml(keyword)}</em>
         <span class="bazi-codex-presence">${escapeHtml(presence)}</span>
       </span>
@@ -679,90 +894,44 @@ function renderTengodGrid(): string {
     </div>`;
 }
 
-/** 我的命盘 · 解读摘要 + 已点亮神煞 */
-function renderMineChartTab(): string {
-  const { chart, luck } = activeChartContext();
-  const featuredCards = SHENSHA_FEATURED.map((n) => getStarCardByName('shensha', n)).filter(
-    (c): c is StarCardLore => Boolean(c),
-  );
-  const tagCards = SHENSHA_TAG.map((n) => getStarCardByName('shensha', n)).filter(
-    (c): c is StarCardLore => Boolean(c),
-  );
-  const litFeatured = featuredCards.filter((c) => isBaziCodexUnlocked(c.id));
-  const litTags = tagCards.filter((c) => isBaziCodexUnlocked(c.id));
-
-  const litBlock = litFeatured.length
-    ? `<div class="bazi-codex-entry-grid is-shensha">${litFeatured.map((c) => featuredBadgeHtml(c)).join('')}</div>`
-    : `<p class="bazi-codex-empty">排盘遇见后，精品神煞会点亮在这里。</p>`;
-
-  const tagBlock = litTags.length
-    ? `<section class="bazi-gz-section bazi-ss-tier">
-        <h2 class="bazi-codex-section-title">🏷 盘上的影响因子</h2>
-        <div class="bazi-codex-entry-grid is-ss-atlas">${litTags.map((c) => tagFactorHtml(c)).join('')}</div>
-      </section>`
-    : '';
-
-  let quick = `<p class="bazi-codex-empty">填写出生信息后，这里会给出四柱解读。</p>`;
-  if (chart) {
-    const natal = chart.pillars.filter((p) => p.key !== 'liunian' && !p.empty);
-    const pillarsLine = natal
-      .map((p) => `${p.title}${p.stem}${p.branch}`)
-      .join(' · ');
-    const dmWx = chart.dayMasterWx || '—';
-    const season = chart.season.find((s) => s.label === chart.dayMasterWx);
-    const strength = season?.strength ?? '—';
-    const energy = buildEnergyBalance(chart);
-    const tendency =
-      energy.excess && energy.shortage
-        ? `偏旺${energy.excess}、偏弱${energy.shortage}`
-        : energy.excess
-          ? `偏旺${energy.excess}`
-          : energy.shortage
-            ? `偏弱/缺${energy.shortage}`
-            : '相对均衡';
-    const rel = chart.relations.slice(0, 4).join('；') || '无明显冲合提示';
-    const du = luck?.dayun.find((d) => d.current && !d.empty);
-    const ln = luck?.liunian.find((l) => l.current) || luck?.liunian.find((l) => l.selected);
-    const duLabel = du
-      ? `${du.ganZhi}（约${du.startAge}–${du.endAge}岁）${dayunLoreHint(du.ganZhi) ? ` · ${dayunLoreHint(du.ganZhi)}` : ''}`
-      : '—';
-    const lnLabel = ln ? `${ln.year}${ln.ganZhi || ''}` : '—';
-    quick = `
-      <ul class="bazi-enc-list bazi-mine-quick">
-        <li><strong>四柱</strong> · ${escapeHtml(pillarsLine)}</li>
-        <li><strong>日主</strong> · ${escapeHtml(chart.dayMaster)}${escapeHtml(dmWx)}（月令「${escapeHtml(String(strength))}」）</li>
-        <li><strong>旺衰倾向</strong> · ${escapeHtml(tendency)} · ${escapeHtml(energy.headline)}</li>
-        <li><strong>盘面关系</strong> · ${escapeHtml(rel)}</li>
-        <li><strong>当前大运</strong> · ${escapeHtml(duLabel)}</li>
-        <li><strong>当前流年</strong> · ${escapeHtml(lnLabel)}</li>
-        <li><strong>读法</strong> · 点开词条「命盘」页看落点；神煞勿脱离日主与格局单断。</li>
-      </ul>`;
-  }
-
-  return `
-    <section class="bazi-gz-section">
-      <h2 class="bazi-codex-section-title">📖 命盘解读</h2>
-      ${quick}
-    </section>
-    <section class="bazi-gz-section bazi-ss-tier">
-      <h2 class="bazi-codex-section-title">✨ 我的命盘出现</h2>
-      ${litBlock}
-    </section>
-    ${tagBlock}`;
-}
-
-function renderShenshaAtlas(): string {
+function renderShenshaAtlas(cat: ShenshaCatFilter = 'all'): string {
   const byCat = shenshaAtlasByCategory();
   const featuredCards = SHENSHA_FEATURED.map((n) => getStarCardByName('shensha', n)).filter(
     (c): c is StarCardLore => Boolean(c),
   );
 
-  const catBlocks = SHENSHA_CATEGORIES.map((cat) => {
-    const list = byCat[cat] || [];
-    if (!list.length) return '';
-    return `
+  const catLabel = (c: ShenshaCategory): string => c.replace(/类$/, '');
+  const subtabs = `
+    <div class="bazi-codex-subtabs" role="tablist" aria-label="神煞分类">
+      <button type="button" class="bazi-codex-subtab ${cat === 'all' ? 'is-on' : ''}" data-ss-cat="all">全部</button>
+      <button type="button" class="bazi-codex-subtab ${cat === 'featured' ? 'is-on' : ''}" data-ss-cat="featured">精品</button>
+      ${SHENSHA_CATEGORIES.map(
+        (c) =>
+          `<button type="button" class="bazi-codex-subtab ${cat === c ? 'is-on' : ''}" data-ss-cat="${escapeHtml(c)}">${escapeHtml(catLabel(c))}<em>${(byCat[c] || []).length}</em></button>`,
+      ).join('')}
+    </div>`;
+
+  const featuredBlock = `
+    <section class="bazi-gz-section bazi-ss-tier">
+      <h2 class="bazi-codex-section-title">✨ 精品（有图）</h2>
+      <div class="bazi-codex-entry-grid is-shensha">${featuredCards.map((c) => featuredBadgeHtml(c)).join('')}</div>
+    </section>`;
+
+  const catsToShow =
+    cat === 'all' || cat === 'featured'
+      ? SHENSHA_CATEGORIES
+      : SHENSHA_CATEGORIES.filter((c) => c === cat);
+
+  const catBlocks =
+    cat === 'featured'
+      ? ''
+      : catsToShow
+          .map((c) => {
+            const list = byCat[c] || [];
+            if (!list.length) return '';
+            return `
       <section class="bazi-gz-section bazi-ss-tier">
-        <h2 class="bazi-codex-section-title">${escapeHtml(cat)} · ${list.length}</h2>
+        <h2 class="bazi-codex-section-title">${escapeHtml(c)} · ${list.length}</h2>
         <div class="bazi-codex-entry-grid is-ss-atlas">
           ${list
             .map((s) => {
@@ -777,20 +946,17 @@ function renderShenshaAtlas(): string {
             .join('')}
         </div>
       </section>`;
-  }).join('');
+          })
+          .join('');
 
   return `
-    <p class="bazi-codex-hint">共 ${SHENSHA_ATLAS.length} 条神煞骨架 · 辅助信息，勿脱离日主/格局/十神/大运单断</p>
-    <section class="bazi-gz-section bazi-ss-tier">
-      <h2 class="bazi-codex-section-title">✨ 精品（有图）</h2>
-      <div class="bazi-codex-entry-grid is-shensha">${featuredCards.map((c) => featuredBadgeHtml(c)).join('')}</div>
-    </section>
+    ${subtabs}
+    ${cat === 'all' || cat === 'featured' ? featuredBlock : ''}
     ${catBlocks}`;
 }
 
 function renderNayinGrid(): string {
   return `
-    <p class="bazi-codex-hint">三十纳音 · 知识库骨架，可点开</p>
     <div class="bazi-codex-entry-grid">
       ${NAYIN_ATLAS.map((n) =>
         compactEntryHtml({
@@ -819,7 +985,6 @@ function renderJiaziGrid(): string {
       .join('·');
   };
   return `
-    <p class="bazi-codex-hint">六十甲子 · ${listSixtyJiazi().length} 柱索引 · 点开看纳音与释义</p>
     <div class="bazi-codex-entry-grid is-jiazi">
       ${listSixtyJiazi()
         .map((gz) => {
@@ -840,12 +1005,311 @@ function renderJiaziGrid(): string {
 
 function renderLuckGrid(): string {
   return `
-    <p class="bazi-codex-hint">大运流年概念 · 看如何触发原局、影响哪些宫位</p>
     <div class="bazi-codex-entry-grid">
       ${LUCK_ATLAS.map((l) =>
         compactEntryHtml({ id: l.id, title: l.title, core: l.gloss, lit: true }),
       ).join('')}
     </div>`;
+}
+
+function renderJourneyLayer(
+  hub: JourneyHub,
+  marksFilter: MarksFilter,
+  progress: { collected: number; total: number },
+): string {
+  const hubs: Array<{ id: JourneyHub; label: string; hint: string }> = [
+    { id: 'lit', label: '已点亮', hint: '全库收集' },
+    { id: 'chart', label: '命盘印记', hint: '仅本盘' },
+    { id: 'marks', label: '我的标记', hint: '收藏' },
+  ];
+  const hubTabs = `
+    <div class="bazi-journey-hubs" role="tablist" aria-label="我的旅程">
+      ${hubs
+        .map(
+          (h) => `
+        <button type="button" role="tab" class="bazi-journey-hub${hub === h.id ? ' is-on' : ''}" data-journey-hub="${h.id}" aria-selected="${hub === h.id}">
+          <strong>${h.label}</strong>
+          <span>${h.hint}</span>
+        </button>`,
+        )
+        .join('')}
+    </div>`;
+
+  if (hub === 'marks') {
+    return `${hubTabs}${renderMarksGrid(marksFilter)}`;
+  }
+  if (hub === 'chart') {
+    return `${hubTabs}${renderJourneyChartHub()}`;
+  }
+  return `${hubTabs}${renderJourneyLitHub(progress)}`;
+}
+
+/** 已点亮 · 全库收集进度，按图鉴分类跳转对照（≠ 命盘印记） */
+function renderJourneyLitHub(progress: { collected: number; total: number }): string {
+  const litEntries = listBaziCodexEntries().filter((e) => isBaziCodexUnlocked(e.id));
+  const countForTab = (t: Tab): number =>
+    litEntries.filter((e) => {
+      if (t === 'relation') return e.kind === 'relation' || e.kind === 'wuxing';
+      return e.kind === t;
+    }).length;
+
+  const cats: Array<{ tab: Tab; label: string }> = [
+    { tab: 'relation', label: '生克关系' },
+    { tab: 'stem', label: '十天干' },
+    { tab: 'branch', label: '十二地支' },
+    { tab: 'tengod', label: '十神' },
+    { tab: 'shensha', label: '神煞' },
+    { tab: 'nayin', label: '纳音' },
+    { tab: 'jiazi', label: '甲子' },
+    { tab: 'luck', label: '运程' },
+  ];
+
+  const hero = `
+    <header class="bazi-journey-hero">
+      <p class="bazi-journey-lit-count"><span aria-hidden="true">✨</span> 已点亮 <strong>${progress.collected}</strong> / ${progress.total}</p>
+      <p class="bazi-journey-hero-sub">全库收集进度 · 含逛图鉴与排盘点亮 · 与「命盘印记」不同：这里不限本盘</p>
+    </header>`;
+
+  const overview = `
+    <section class="bazi-journey-kind-overview" aria-label="图鉴分类总览">
+      <p class="bazi-journey-kind-hint">点分类跳回图鉴对应 Tab · 在全库里继续对照</p>
+      <div class="bazi-journey-kind-grid" role="group">
+        ${cats
+          .map((c) => {
+            const n = countForTab(c.tab);
+            const p = baziCodexProgress(
+              c.tab === 'relation' ? 'relation' : c.tab === 'luck' ? 'luck' : c.tab,
+            );
+            return `
+            <button type="button" class="bazi-journey-kind-card${n ? '' : ' is-empty'}"
+              data-goto-atlas-tab="${c.tab}" ${n ? '' : 'disabled'}>
+              <strong>${escapeHtml(c.label)}</strong>
+              <em>${n}<span>/${p.total}</span></em>
+            </button>`;
+          })
+          .join('')}
+      </div>
+    </section>`;
+
+  if (!litEntries.length) {
+    return `
+      ${hero}
+      ${overview}
+      <p class="bazi-codex-empty">排盘或浏览图鉴后，点亮的词条会出现在对应分类里。</p>
+      <p class="bazi-journey-exit">
+        <button type="button" class="bazi-inline-link" data-goto-reading>去人生地图排盘 →</button>
+      </p>`;
+  }
+
+  return `
+    ${hero}
+    ${overview}
+    <p class="bazi-codex-guide">想看「只在我盘上」的词条 → 切到「命盘印记」</p>`;
+}
+
+/** 命盘印记 · 仅本盘遇见（≠ 已点亮全库收集） */
+function renderJourneyChartHub(): string {
+  const { chart, luck } = activeChartContext();
+
+  let quick = `<p class="bazi-codex-empty">填写出生信息后，这里会给出四柱解读。</p>
+    <p class="bazi-journey-exit"><button type="button" class="bazi-inline-link" data-goto-reading>去人生地图 →</button></p>`;
+  if (chart) {
+    const natal = chart.pillars.filter((p) => p.key !== 'liunian' && !p.empty);
+    const pillarsLine = natal.map((p) => `${p.title}${p.stem}${p.branch}`).join(' · ');
+    const dmWx = chart.dayMasterWx || '—';
+    const season = chart.season.find((s) => s.label === chart.dayMasterWx);
+    const strength = season?.strength ?? '—';
+    const energy = buildEnergyBalance(chart);
+    const tendency =
+      energy.excess && energy.shortage
+        ? `偏旺${energy.excess}、偏弱${energy.shortage}`
+        : energy.excess
+          ? `偏旺${energy.excess}`
+          : energy.shortage
+            ? `偏弱/缺${energy.shortage}`
+            : '相对均衡';
+    const rel = chart.relations.slice(0, 4).join('；') || '无明显冲合提示';
+    const du = luck?.dayun.find((d) => d.current && !d.empty);
+    const ln = luck?.liunian.find((l) => l.current) || luck?.liunian.find((l) => l.selected);
+    const duLabel = du
+      ? `${du.ganZhi}（约${du.startAge}–${du.endAge}岁）${dayunLoreHint(du.ganZhi) ? ` · ${dayunLoreHint(du.ganZhi)}` : ''}`
+      : '—';
+    const lnLabel = ln ? `${ln.year}${ln.ganZhi || ''}` : '—';
+    quick = `
+      <ul class="bazi-enc-list bazi-mine-quick">
+        <li><strong>四柱</strong> · ${escapeHtml(pillarsLine)}</li>
+        <li><strong>日主</strong> · ${escapeHtml(chart.dayMaster)}${escapeHtml(dmWx)}（月令「${escapeHtml(String(strength))}」）</li>
+        <li><strong>旺衰倾向</strong> · ${escapeHtml(tendency)} · ${escapeHtml(energy.headline)}</li>
+        <li><strong>盘面关系</strong> · ${escapeHtml(rel)}</li>
+        <li><strong>当前大运</strong> · ${escapeHtml(duLabel)}</li>
+        <li><strong>当前流年</strong> · ${escapeHtml(lnLabel)}</li>
+      </ul>
+      <p class="bazi-journey-exit"><button type="button" class="bazi-inline-link" data-goto-reading>在人生地图细读 →</button></p>`;
+  }
+
+  const onChart = chart ? libraryIdsFromChart(chart) : [];
+  const byKind = {
+    stem: onChart.filter((x) => x.kind === 'stem'),
+    branch: onChart.filter((x) => x.kind === 'branch'),
+    tengod: onChart.filter((x) => x.kind === 'tengod'),
+    shensha: onChart.filter((x) => x.kind === 'shensha'),
+    nayin: onChart.filter((x) => x.kind === 'nayin'),
+    jiazi: onChart.filter((x) => x.kind === 'jiazi'),
+    relation: onChart.filter((x) => x.kind === 'relation'),
+  };
+
+  const entryCard = (id: string): string => {
+    const enc = getBaziEncyclopedia(id);
+    const star = getStarCard(id);
+    const title = enc?.title ?? star?.name ?? id;
+    const core = buildCodexDossier(id)?.coreKeyword || enc?.oneLiner || star?.modern || '';
+    return compactEntryHtml({ id, title, core, lit: true });
+  };
+
+  const section = (
+    title: string,
+    ids: Array<{ id: string }>,
+    atlasTab: Tab,
+    emptyHint: string,
+  ): string => {
+    const jump = `<button type="button" class="bazi-inline-link bazi-section-atlas-jump" data-goto-atlas-tab="${atlasTab}">在图鉴看全库 →</button>`;
+    if (!ids.length) {
+      return `
+        <section class="bazi-gz-section">
+          <div class="bazi-section-head-row">
+            <h2 class="bazi-codex-section-title">${escapeHtml(title)}</h2>
+            ${jump}
+          </div>
+          <p class="bazi-codex-empty">${escapeHtml(emptyHint)}</p>
+        </section>`;
+    }
+    return `
+      <section class="bazi-gz-section">
+        <div class="bazi-section-head-row">
+          <h2 class="bazi-codex-section-title">${escapeHtml(title)} · ${ids.length}</h2>
+          ${jump}
+        </div>
+        <div class="bazi-codex-entry-grid">${ids.map((x) => entryCard(x.id)).join('')}</div>
+      </section>`;
+  };
+
+  const featuredOnChart = byKind.shensha.filter((x) => {
+    const card = getStarCard(x.id);
+    return card && (SHENSHA_FEATURED as readonly string[]).includes(card.name);
+  });
+  const otherShensha = byKind.shensha.filter((x) => !featuredOnChart.some((f) => f.id === x.id));
+
+  const featuredBlock = featuredOnChart.length
+    ? `<div class="bazi-codex-entry-grid is-shensha">${featuredOnChart
+        .map((x) => {
+          const card = getStarCard(x.id);
+          return card ? featuredBadgeHtml(card) : entryCard(x.id);
+        })
+        .join('')}</div>`
+    : '';
+
+  const otherSsBlock = otherShensha.length
+    ? `<div class="bazi-codex-entry-grid is-ss-atlas">${otherShensha
+        .map((x) => {
+          const card = getStarCard(x.id);
+          const enc = getBaziEncyclopedia(x.id);
+          const name = card?.name ?? enc?.title ?? x.id;
+          const gloss = card?.modern ?? enc?.oneLiner ?? '盘上神煞';
+          return `
+            <button type="button" class="bazi-ss-chip is-lit" data-codex-id="${escapeHtml(x.id)}">
+              <strong>${escapeHtml(name)}</strong>
+              <em>${escapeHtml(gloss)}</em>
+            </button>`;
+        })
+        .join('')}</div>`
+    : '';
+
+  const shenshaSection = !chart
+    ? `<section class="bazi-gz-section bazi-ss-tier">
+        <h2 class="bazi-codex-section-title">✨ 我的命盘出现</h2>
+        <p class="bazi-codex-empty">排盘后，盘上神煞、干支、十神都会出现在这里。</p>
+      </section>`
+    : `<section class="bazi-gz-section bazi-ss-tier">
+        <div class="bazi-section-head-row">
+          <h2 class="bazi-codex-section-title">✨ 本盘神煞 · ${byKind.shensha.length}</h2>
+          <button type="button" class="bazi-inline-link bazi-section-atlas-jump" data-goto-atlas-tab="shensha">在图鉴看全库 →</button>
+        </div>
+        <p class="bazi-codex-guide">只列落在你盘上的神煞 · 逛图鉴点亮但不在盘上的，请去「已点亮」</p>
+        ${
+          byKind.shensha.length
+            ? `${featuredBlock}${otherSsBlock}`
+            : `<p class="bazi-codex-empty">本盘暂无已入库神煞词条。</p>`
+        }
+      </section>`;
+
+  if (!chart) {
+    return `
+      <header class="bazi-journey-hero is-compact">
+        <p class="bazi-journey-hero-sub">仅本盘遇见 · 不是全库点亮列表</p>
+      </header>
+      <section class="bazi-gz-section">
+        <h2 class="bazi-codex-section-title">📖 命盘解读</h2>
+        ${quick}
+      </section>
+      ${shenshaSection}`;
+  }
+
+  return `
+    <header class="bazi-journey-hero is-compact">
+      <p class="bazi-journey-hero-sub">仅本盘遇见 · 共 ${onChart.length} 条 · 与「已点亮」全库收集分开</p>
+    </header>
+    <section class="bazi-gz-section">
+      <h2 class="bazi-codex-section-title">📖 命盘解读</h2>
+      ${quick}
+    </section>
+    ${shenshaSection}
+    ${section('天干', byKind.stem, 'stem', '本盘天干会列在这里')}
+    ${section('地支', byKind.branch, 'branch', '本盘地支会列在这里')}
+    ${section('十神', byKind.tengod, 'tengod', '本盘十神会列在这里')}
+    ${section('纳音', byKind.nayin, 'nayin', '四柱纳音会列在这里')}
+    ${section('甲子', byKind.jiazi, 'jiazi', '四柱甲子会列在这里')}
+    ${section('生克关系', byKind.relation, 'relation', '盘面冲合刑害等关系会列在这里')}`;
+}
+
+function renderMarksGrid(filter: MarksFilter): string {
+  const ids = listBaziCodexMarkedIds(filter === 'all' ? undefined : filter);
+  const sub = `
+    <div class="bazi-codex-subtabs" role="tablist" aria-label="标记筛选">
+      ${(['all', 'fire', 'useful'] as const)
+        .map((f) => {
+          const label = f === 'all' ? '全部' : f === 'fire' ? '火' : '对我有用';
+          const n = listBaziCodexMarkedIds(f === 'all' ? undefined : f).length;
+          return `<button type="button" class="bazi-codex-subtab${filter === f ? ' is-on' : ''}" data-marks-filter="${f}">${label} · ${n}</button>`;
+        })
+        .join('')}
+    </div>`;
+
+  if (!ids.length) {
+    return `
+      ${sub}
+      <div class="bazi-codex-empty">
+        <p>还没有标记。打开任意词条，在右上角点「火」或「对我有用」。</p>
+      </div>`;
+  }
+
+  const cards = ids
+    .map((id) => {
+      const enc = getBaziEncyclopedia(id);
+      if (!enc) return '';
+      const marks = getBaziCodexMarks(id);
+      const dossier = buildCodexDossier(id);
+      return compactEntryHtml({
+        id,
+        title: enc.title,
+        core: dossier?.coreKeyword || enc.oneLiner || enc.title,
+        lit: entryIsLit(id),
+        extraClass: marks.includes('fire') ? 'is-mark-fire' : '',
+      });
+    })
+    .filter(Boolean)
+    .join('');
+
+  return `${sub}<div class="bazi-codex-entry-grid">${cards}</div>`;
 }
 
 /** 精品：单独条目 = 小徽章 + 名称 + xx之星 */
@@ -869,16 +1333,6 @@ function featuredBadgeHtml(card: StarCardLore): string {
         <strong>${escapeHtml(card.name)}</strong>
         <em>${escapeHtml(unlocked ? card.modern : '未解锁 · 排盘遇见后点亮')}</em>
       </span>
-    </button>`;
-}
-
-/** 普通：名称 + 核心词（紧凑芯片） */
-function tagFactorHtml(card: StarCardLore): string {
-  const unlocked = isBaziCodexUnlocked(card.id);
-  return `
-    <button type="button" class="bazi-ss-chip ${unlocked ? 'is-lit' : 'is-soft'}" data-codex-id="${escapeHtml(card.id)}">
-      <strong>${escapeHtml(card.name)}</strong>
-      <em>${escapeHtml(unlocked ? card.modern : '未解锁')}</em>
     </button>`;
 }
 
@@ -993,5 +1447,7 @@ function renderDetail(id: string, map: Map<string, { reason?: string }>): string
     unlockHint: unlockHintFor(id, reason),
     memoryExtraHtml: memoryExtra(id, lit),
     chartLink: buildChartLinkReport(id, chart, luck),
+    chart,
+    luck,
   });
 }
