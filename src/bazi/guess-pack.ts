@@ -176,6 +176,28 @@ export const GUESS_CARDS: GuessCard[] = [
     explainWrong:
       '不是不变，也不是水被抬高；木抬高时，土（落地）先被削弱。',
   },
+  {
+    id: 'gq-fake-chart',
+    name: '匿名对照盘 · 寅申换轨型',
+    kind: '对照人物',
+    sealedLabel: '今日盲盒 · 一张半真半假的匿名盘',
+    clues: [
+      '日主乙木 · 月支见寅 · 流年支申',
+      '偏财透干：求财议题被照亮',
+      '像「藤萝遇到换轨年」——动与窗口同场',
+    ],
+    question: '这张匿名盘今年更宜哪句？',
+    options: [
+      { id: 'a', label: '当行程与合同窗：留缓冲，主业守一个可交付出口' },
+      { id: 'b', label: '必有灾祸，只能全年躲避' },
+      { id: 'c', label: '财透即可梭哈，不必看地支冲合' },
+    ],
+    answerId: 'a',
+    explainCorrect:
+      '对。半真半假盘用来练「组合」：寅申冲是换轨节奏，财透是议题显眼——合在一起更要缓冲与主线。',
+    explainWrong:
+      '不是灾祸恐吓，也不能只看财透。先练：冲＝窗，透＝照亮。',
+  },
 ];
 
 export function guessDayKey(d = new Date()): string {

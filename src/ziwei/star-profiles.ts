@@ -9,12 +9,12 @@ import { completePalaceHits } from './star-palace-complete.ts';
 
 export type DetailTabId = 'portrait' | 'trait' | 'mirror' | 'you';
 
-/** 白话 Tab：是谁 / 性格 / 生活 / 我的盘（内部 id 仍用 portrait|trait|mirror|you） */
+/** 白话 Tab：是什么 / 性格 / 生活 / 在你身上（内部 id 仍用 portrait|trait|mirror|you） */
 export const DETAIL_TAB_LABEL: Record<DetailTabId, string> = {
-  portrait: '是谁',
+  portrait: '是什么',
   trait: '性格',
   mirror: '生活',
-  you: '我的盘',
+  you: '在你身上',
 };
 
 /** 落宫优先（生活语言，避免宫斗叙事） */

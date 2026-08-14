@@ -49,6 +49,7 @@ import {
   dayunLoreDecadeNote,
   dayunLoreHint,
 } from '../bazi/codex-jiazi-dayun-lore.ts';
+import { renderLuckScaleConceptHtml } from '../bazi/codex-concept-diagrams.ts';
 import {
   patternYongshenCardHtml,
   resolvePatternYongshen,
@@ -317,6 +318,14 @@ function renderLuckBoard(luck: LuckCycles, selectedLiuyue: number | null): strin
   const hasTongxian = luck.dayun.some((d) => d.empty);
   const curDu = luck.dayun.find((d) => d.current && !d.empty);
   const dayunLoreNote = curDu ? dayunLoreDecadeNote(curDu.ganZhi) : '';
+  const curLn = luck.liunian.find((c) => c.current) ?? luck.liunian.find((c) => c.selected);
+  const scaleHtml = renderLuckScaleConceptHtml({
+    compact: true,
+    uid: 'lk-chart',
+    dayunGz: curDu?.ganZhi,
+    liunianYear: curLn?.year,
+    liuyueJie: yue?.jieQi,
+  });
   return `
     <section class="bazi-luck" aria-label="大运流年流月">
       <header class="bazi-luck-meta">
@@ -326,6 +335,8 @@ function renderLuckBoard(luck: LuckCycles, selectedLiuyue: number | null): strin
           <span>${luck.ageNow}岁</span>
         </p>
       </header>
+
+      ${scaleHtml}
 
       <div class="bazi-luck-row" aria-label="大运">
         <div class="bazi-luck-label" aria-hidden="true">大运</div>

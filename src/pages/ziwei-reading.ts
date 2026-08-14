@@ -16,6 +16,7 @@ import {
 import type { ZiweiChartView } from '../ziwei/types.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
 import { bindZiweiLearnHotspots, openZiweiLearnSheet } from '../ui/ziwei-learn-sheet.ts';
+import { bindLabLearnStrip, labLearnStripHtml } from '../ui/lab-learn-strip.ts';
 import { mountZiweiPlate, type MountZiweiPlateHandle } from '../ui/ziwei-plate.ts';
 import {
   mountZiweiTimeLadder,
@@ -441,6 +442,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         },
       });
     }
+    bindLabLearnStrip(page);
   }
 
   function paintError(msg: string): void {
@@ -498,6 +500,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
             .join('')}
         </ul>
         <button type="button" class="ziwei-drill-link" data-path="/ziwei/tujian?bucket=shensha">打开图鉴 · 神煞全部 ›</button>
+        <button type="button" class="ziwei-drill-link" data-path="/ziwei/guess">猜星曜盲盒 ›</button>
         <button type="button" class="ziwei-drill-link" data-path="/ziwei/journal">紫微手札 ›</button>
       </details>`;
   }
@@ -611,6 +614,18 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       ${theaterTabsHtml(theaterTab)}
 
       <div class="ziwei-theater-pane" data-theater-pane="self" ${theaterTab === 'self' ? '' : 'hidden'}>
+        ${labLearnStripHtml({
+          tip: spotLore
+            ? `本命主戏偏「${spotLore.title} · ${spotLore.epithet}」——点星名看浅解；完整画像请进图鉴。`
+            : '点盘上星名或宫位，先看一句浅解；完整百科留在图鉴。',
+          deepen: {
+            href: spot
+              ? `/ziwei/tujian?star=${encodeURIComponent(spot)}`
+              : '/ziwei/tujian',
+            label: spot ? `进图鉴看${spot} ›` : '进紫微图鉴 ›',
+          },
+          practice: { href: '/ziwei/guess', label: '猜星曜练一题 ›' },
+        })}
         <section class="ziwei-combo" aria-label="内核主星组合">
           <p class="ziwei-kicker">核心星曜 · 组合技</p>
           <div class="ziwei-combo-lead">

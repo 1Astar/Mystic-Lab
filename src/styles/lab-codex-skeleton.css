@@ -1,0 +1,78 @@
+/* 跨体系图鉴详情 · 共用读法骨架 */
+
+.lab-codex-skel {
+  margin: 10px 0 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--line, rgba(255, 255, 255, 0.12)));
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+
+.lab-codex-skel-lead {
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-ink, var(--gold));
+  opacity: 0.9;
+}
+
+.lab-codex-skel-track {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 2px;
+}
+
+.lab-codex-skel-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--ink-muted, var(--ink));
+}
+
+.lab-codex-skel-step.is-on > span:first-child {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 700;
+}
+
+.lab-codex-skel-arrow {
+  margin: 0 4px 0 2px;
+  opacity: 0.45;
+  color: var(--gold-ink, var(--gold));
+}
+
+.lab-codex-skel-slot {
+  margin: 0 0 12px;
+}
+
+.lab-codex-skel-slot-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.lab-codex-skel-slot-body > :first-child {
+  margin-top: 0;
+}
+
+.lab-codex-skel-practice-ctas {
+  margin: 8px 0 0;
+  font-size: 0.84rem;
+}
+
+.lab-codex-skel-practice-link {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lab-codex-skel-practice-sep {
+  margin: 0 8px;
+  opacity: 0.45;
+}

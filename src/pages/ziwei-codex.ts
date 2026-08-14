@@ -7,7 +7,29 @@ import {
 } from '../ziwei/stars.ts';
 import { type DetailTabId } from '../ziwei/star-profiles.ts';
 import { getComboLore } from '../ziwei/combo-lore.ts';
-import { PALACE_LORE, getPalaceLore } from '../ziwei/palace-lore.ts';
+import { PALACE_LORE, getPalaceLore, type PalaceLore } from '../ziwei/palace-lore.ts';
+import {
+  buildPalacePracticeTips,
+  defaultPalacePracticeTab,
+  findPalaceSnap,
+  formatPalaceConfigLine,
+  formatPalaceHeduLine,
+  listPalaceOccupants,
+  resolvePalaceListPresence,
+  PALACE_PRACTICE_TAB_LABEL,
+  PALACE_PRACTICE_TAB_ORDER,
+  type PalacePracticeTab,
+} from '../ziwei/palace-practice.ts';
+import { ziweiChartJumpQs } from '../ziwei/codex-in-chart.ts';
+import {
+  codexSkeletonChromeHtml,
+  codexSkeletonPracticeCtaHtml,
+} from '../ui/lab-codex-skeleton.ts';
+import {
+  formatReadPathTrailLine,
+  resolveZiweiReadPath,
+  type ZiweiReadPath,
+} from '../ziwei/read-path.ts';
 import {
   comboJourneySummary,
   evaluateCombo,
@@ -370,30 +392,151 @@ function renderSchoolContrastDetail(contrastId: string): string {
     </article>`;
 }
 
-function renderPalaceDetail(id: string): string {
+function renderPalaceDetail(
+  id: string,
+  view: ZiweiChartView | null = null,
+  personId = '',
+  palaceTab: PalacePracticeTab = 'core',
+): string {
   const p = getPalaceLore(id);
   if (!p) return `<p class="ziwei-codex-hint">未找到该宫位</p>`;
+  const snap = findPalaceSnap(view, id);
+  const occupants = listPalaceOccupants(snap);
+  const configLine = formatPalaceConfigLine(occupants, p.title);
+  const heduLine = formatPalaceHeduLine(occupants);
+  const tips = buildPalacePracticeTips(id, personId, view);
+  const tab = PALACE_PRACTICE_TAB_ORDER.includes(palaceTab) ? palaceTab : 'core';
+
+  const occupantChips = occupants.length
+    ? `<ul class="ziwei-palace-practice-stars">
+        ${occupants
+          .map((o) => {
+            const tags = [
+              o.brightness ? escapeHtml(o.brightness) : '',
+              o.mutagen ? `化${escapeHtml(o.mutagen)}` : '',
+            ]
+              .filter(Boolean)
+              .join(' · ');
+            const meta = tags
+              ? `<span class="ziwei-palace-practice-star-meta">${tags}</span>`
+              : '';
+            const inner = `
+              <strong>${escapeHtml(o.name)}</strong>
+              <em>${escapeHtml(o.epithet)}</em>
+              ${meta}`;
+            if (o.openAttr) {
+              return `<li><button type="button" class="ziwei-palace-practice-star" ${o.openAttr}="${escapeHtml(o.name)}">${inner}<span class="ziwei-palace-practice-star-cta">进图鉴 →</span></button></li>`;
+            }
+            return `<li><span class="ziwei-palace-practice-star is-static">${inner}</span></li>`;
+          })
+          .join('')}
+      </ul>
+      <p class="ziwei-codex-hint ziwei-palace-practice-click-hint">点星 / 煞进入星曜图鉴；下方可回完整命盘点此宫。</p>`
+    : `<p class="ziwei-codex-hint">${
+        view
+          ? '本宫暂无主辅星同宫；仍可看「是什么」Tab，或回完整命盘对照三方四正。'
+          : '尚未排盘——填出生资料后，这里会列出你本宫的星曜与神煞。'
+      }</p>
+      ${
+        view
+          ? ''
+          : `<p><a class="ziwei-inline-link" href="/ziwei">去排紫微盘 →</a></p>`
+      }`;
+
+  const chartPalaceName = snap?.name || p.title;
+  const chartJump = ziweiChartJumpQs({ palace: chartPalaceName });
+  const chartCta = `
+    <p class="ziwei-palace-practice-loop">
+      <button type="button" class="ziwei-inline-link ziwei-goto-chart-cta" data-goto-chart="${escapeHtml(chartJump)}">回本命盘点此宫 →</button>
+    </p>`;
+
+  const tipHtml = tips
+    .map((t) => {
+      const cta =
+        t.questHref != null
+          ? `<p><a class="ziwei-inline-link" href="${escapeHtml(t.questHref)}">打开造命功课 →</a></p>`
+          : t.kind === 'annual'
+            ? `<p><button type="button" class="ziwei-inline-link" data-goto-chart="mode=chart&year=${new Date().getFullYear()}">看流年盘本宫 →</button></p>`
+            : '';
+      return `
+        <div class="ziwei-palace-practice-tip is-${escapeHtml(t.kind)}">
+          <h4>${escapeHtml(t.title)}</h4>
+          <p>${escapeHtml(t.body)}</p>
+          ${cta}
+        </div>`;
+    })
+    .join('');
+
+  const soulBody =
+    snap?.isSoul || snap?.isBody
+      ? `<p class="ziwei-palace-practice-badge">${[
+          snap.isSoul ? '命宫' : '',
+          snap.isBody ? '身宫' : '',
+        ]
+          .filter(Boolean)
+          .join(' · ')}</p>`
+      : '';
+
+  const tabs = PALACE_PRACTICE_TAB_ORDER.map(
+    (idTab) => `
+      <button type="button" class="ziwei-detail-tab ${tab === idTab ? 'is-on' : ''}" data-palace-tab="${idTab}" role="tab" aria-selected="${tab === idTab}">
+        ${escapeHtml(PALACE_PRACTICE_TAB_LABEL[idTab])}
+      </button>`,
+  ).join('');
+
+  let panel = '';
+  if (tab === 'config') {
+    const heduHtml = heduLine
+      ? `<p class="ziwei-palace-practice-hedu"><span class="ziwei-palace-practice-hedu-kicker">合读</span>${escapeHtml(heduLine)}</p>`
+      : '';
+    panel = `
+      <div class="ziwei-detail-tab-panel ziwei-palace-practice-sec is-config" data-practice-sec="config">
+        <h3 class="ziwei-palace-practice-panel-title">你的${escapeHtml(p.title)}配置</h3>
+        ${heduHtml}
+        <p class="ziwei-palace-practice-config-line">${escapeHtml(configLine)}</p>
+        ${occupantChips}
+        ${chartCta}
+      </div>`;
+  } else if (tab === 'tips') {
+    panel = `
+      <div class="ziwei-detail-tab-panel ziwei-palace-practice-sec is-tips" data-practice-sec="tips">
+        <h3 class="ziwei-palace-practice-panel-title">日常提示</h3>
+        ${tipHtml}
+        ${chartCta}
+      </div>`;
+  } else {
+    panel = `
+      <div class="ziwei-detail-tab-panel ziwei-palace-practice-sec" data-practice-sec="core">
+        <h3 class="ziwei-palace-practice-panel-title">${escapeHtml(p.title)}核心议题</h3>
+        <p><strong>核心问题</strong>　${escapeHtml(p.asks)}</p>
+        ${p.commonLooks ? `<p><strong>常见场面</strong>　${escapeHtml(p.commonLooks)}</p>` : ''}
+        <p><strong>强时</strong>　${escapeHtml(p.strongWhen)}</p>
+        <p><strong>留意</strong>　${escapeHtml(p.watchOut)}</p>
+        <p>对宫：${escapeHtml(p.oppositeHint)}</p>
+        <p>${escapeHtml(p.afterStars ?? '先读本宫主星气质，再看对宫与三合会照，最后叠四化。')}</p>
+        <p><button type="button" class="ziwei-inline-link" data-open-term="三方四正">三方四正怎么用 →</button></p>
+        ${chartCta}
+      </div>`;
+  }
+
+  const skelActive =
+    tab === 'config' ? 'yours' : tab === 'tips' ? 'practice' : 'what';
+  const practiceCta = codexSkeletonPracticeCtaHtml([
+    { href: '/ziwei/guess', label: '猜星曜练一题 ›' },
+  ]);
+
   return `
-    <article class="ziwei-star-detail is-lit">
+    <article class="ziwei-star-detail is-lit ziwei-palace-practice">
       <button type="button" class="ziwei-detail-back" data-close-sub>← 返回宫位图鉴</button>
-      <p class="ziwei-kicker">十二宫 · ${escapeHtml(p.hint)}</p>
+      <p class="ziwei-kicker">十二宫 · 实战融合 · ${escapeHtml(p.hint)}</p>
       <h2 class="ziwei-remember-name">${escapeHtml(p.title)}</h2>
       <p class="ziwei-remember-line">${escapeHtml(p.oneLiner)}</p>
       <ul class="ziwei-keywords">${p.keywords.map((k) => `<li>${escapeHtml(k)}</li>`).join('')}</ul>
-      <section class="ziwei-detail-block"><h3>人生领域</h3><p>${escapeHtml(p.hint)}——${escapeHtml(p.oneLiner)}</p></section>
-      <section class="ziwei-detail-block"><h3>核心问题</h3><p>${escapeHtml(p.asks)}</p></section>
-      <section class="ziwei-detail-block">
-        <h3>常见表现</h3>
-        ${p.commonLooks ? `<p>${escapeHtml(p.commonLooks)}</p>` : ''}
-        <p><strong>强时</strong>　${escapeHtml(p.strongWhen)}</p>
-        <p><strong>留意</strong>　${escapeHtml(p.watchOut)}</p>
-      </section>
-      <section class="ziwei-detail-block">
-        <h3>落星后怎么看</h3>
-        <p>${escapeHtml(p.afterStars ?? '先读本宫主星气质，再看对宫与三合会照，最后叠四化。')}</p>
-        <p>对宫：${escapeHtml(p.oppositeHint)}</p>
-        <p><button type="button" class="ziwei-inline-link" data-open-term="三方四正">三方四正怎么用 →</button></p>
-      </section>
+      ${soulBody}
+      ${codexSkeletonChromeHtml({ active: skelActive })}
+      <div class="ziwei-detail-tabs" role="tablist" aria-label="宫位读法">${tabs}</div>
+      ${panel}
+      ${tab === 'tips' ? practiceCta : ''}
     </article>`;
 }
 
@@ -1030,6 +1173,34 @@ function renderStarsCatalog(
 }
 
 
+function renderShortPalaceCard(p: PalaceLore, view: ZiweiChartView | null): string {
+  const presence = resolvePalaceListPresence(p.id, p.title, view);
+  const statusLine = `<span class="ziwei-codex-short-status${
+    presence.stateCls === 'is-lit' ? ' is-activated' : ''
+  }">${escapeHtml(presence.statusLabel)}</span>`;
+  const meetBit = presence.meetLine
+    ? `<span class="ziwei-codex-short-meet">${escapeHtml(presence.meetLine)}</span>`
+    : '';
+  const roleBit = presence.roleBadge
+    ? `<span class="ziwei-palace-card-role">${escapeHtml(presence.roleBadge)}</span>`
+    : '';
+  return `
+    <button type="button" class="ziwei-codex-short is-palace ${presence.stateCls}" data-open-palace="${escapeHtml(p.id)}" aria-label="${escapeHtml(`${p.title} · ${presence.statusLabel}`)}">
+      ${statusLine}
+      <span class="ziwei-codex-short-row">
+        <span class="ziwei-codex-short-thumb is-palace" aria-hidden="true">
+          <span class="ziwei-palace-glyph">${escapeHtml(presence.glyph)}</span>
+        </span>
+        <span class="ziwei-codex-short-copy">
+          <span class="ziwei-codex-short-name">${escapeHtml(p.title)}${roleBit}</span>
+          <span class="ziwei-codex-short-kicker">十二宫｜${escapeHtml(p.hint)}</span>
+          <span class="ziwei-codex-short-keys">${escapeHtml(p.oneLiner)}</span>
+          ${meetBit}
+        </span>
+      </span>
+    </button>`;
+}
+
 function renderPalacesCatalog(bucket: PalaceBucket, view: ZiweiChartView | null = null): string {
   const tabs = underlineSubTabsHtml(
     '宫位分类',
@@ -1044,17 +1215,9 @@ function renderPalacesCatalog(bucket: PalaceBucket, view: ZiweiChartView | null 
   if (bucket === 'twelve') {
     return `
       ${tabs}
-      <p class="ziwei-codex-hint">十二宫 · 人生领域；点开看核心问题与落星读法</p>
+      <p class="ziwei-codex-hint">十二宫 · 人生领域；一句话记住戏，本盘有星可一眼看到</p>
       <div class="ziwei-codex-short-grid">
-        ${PALACE_LORE.map(
-          (p) => `
-          <button type="button" class="ziwei-codex-short" data-open-palace="${escapeHtml(p.id)}">
-            <span class="ziwei-codex-short-name">${escapeHtml(p.title)}</span>
-            <span class="ziwei-codex-short-kicker">十二宫｜${escapeHtml(p.hint)}</span>
-            <span class="ziwei-codex-short-keys">${escapeHtml(p.keywords.slice(0, 3).join(' · '))}</span>
-            <span class="ziwei-codex-short-cta">查看完整图鉴 →</span>
-          </button>`,
-        ).join('')}
+        ${PALACE_LORE.map((p) => renderShortPalaceCard(p, view)).join('')}
       </div>
       <div class="ziwei-palace-mode-tabs" role="group" aria-label="回命盘">
         <button type="button" class="ziwei-palace-mode-tab" data-goto-chart="mode=chart">本命盘</button>
@@ -1301,6 +1464,27 @@ function atlasTopTabsHtml(active: CatalogSection | null): string {
       </button>`,
       ).join('')}
     </div>`;
+}
+
+function renderReadPathCard(path: ZiweiReadPath): string {
+  const trailBits = path.trail
+    .map((s, i) => {
+      const on = path.trailStep === i + 1;
+      const label = s.title.replace(/宫$/, '');
+      return `<button type="button" class="ziwei-read-path-chip ${on ? 'is-on' : ''}" data-open-palace="${escapeHtml(s.palaceId)}" title="${escapeHtml(s.hint || s.title)}">${escapeHtml(label)}</button>`;
+    })
+    .join('<span class="ziwei-read-path-sep" aria-hidden="true">→</span>');
+  const focusHint = path.focus.hint ? ` · ${path.focus.hint}` : '';
+  return `
+    <section class="ziwei-read-path" aria-label="读盘路径">
+      <p class="ziwei-read-path-kicker">读盘路径 · 本周</p>
+      <p class="ziwei-read-path-lead">${escapeHtml(path.lead)}</p>
+      <p class="ziwei-read-path-sub">${escapeHtml(formatReadPathTrailLine(path))}</p>
+      <div class="ziwei-read-path-trail" role="group" aria-label="建议顺序">${trailBits}</div>
+      <button type="button" class="ziwei-read-path-cta" data-open-palace="${escapeHtml(path.focus.palaceId)}">
+        打开本周：${escapeHtml(path.focus.title)}${escapeHtml(focusHint)} →
+      </button>
+    </section>`;
 }
 
 /**
@@ -1573,6 +1757,10 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
   let shenshaId = queryParam('shensha');
   let contrastId = queryParam('contrast');
   let detailTab: DetailTabId = 'portrait';
+  /** 空串表示尚未按盘选择默认 Tab */
+  let palaceTab: PalacePracticeTab | '' = '';
+  /** 从宫位配置点进星曜后，详情页可回本宫实战 */
+  let returnPalaceId = '';
   let palaceFocus = '';
   let shenshaTheme: ShenshaThemeId | 'all' = 'all';
   let shenshaTone: ShenshaToneId | 'all' = 'all';
@@ -1701,6 +1889,8 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     shenshaId = '';
     contrastId = '';
     detailTab = 'portrait';
+    palaceTab = '';
+    returnPalaceId = '';
     palaceFocus = '';
     if (returnToMeet) {
       returnToMeet = false;
@@ -1738,6 +1928,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         layer = next;
         detailId = '';
         palaceId = '';
+        returnPalaceId = '';
         comboId = '';
         termId = '';
         minorId = '';
@@ -1755,6 +1946,22 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         paint();
       });
     });
+  }
+
+  function rememberReturnPalace(): void {
+    if (palaceId) returnPalaceId = palaceId;
+  }
+
+  function palaceLoopFooterHtml(): string {
+    if (!returnPalaceId) return '';
+    const lore = getPalaceLore(returnPalaceId);
+    const title = lore?.title ?? returnPalaceId;
+    const jump = ziweiChartJumpQs({ palace: title });
+    return `
+      <nav class="ziwei-palace-practice-loop is-footer" aria-label="交叉查询">
+        <button type="button" class="ziwei-inline-link" data-open-palace="${escapeHtml(returnPalaceId)}">← 回${escapeHtml(title)}实战</button>
+        <button type="button" class="ziwei-inline-link ziwei-goto-chart-cta" data-goto-chart="${escapeHtml(jump)}">回本命盘点此宫 →</button>
+      </nav>`;
   }
 
   function openDetailFromMeet(kind: 'star' | 'minor' | 'shensha' | 'contrast' | 'palace' | 'combo' | 'term'): void {
@@ -1904,6 +2111,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     });
     root.querySelectorAll<HTMLButtonElement>('[data-open-star]').forEach((btn) => {
       btn.addEventListener('click', () => {
+        rememberReturnPalace();
         detailId = btn.dataset.openStar ?? '';
         detailTab = 'portrait';
         palaceFocus = '';
@@ -1920,6 +2128,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     });
     root.querySelectorAll<HTMLButtonElement>('[data-open-minor]').forEach((btn) => {
       btn.addEventListener('click', () => {
+        rememberReturnPalace();
         minorId = btn.dataset.openMinor ?? '';
         clearDetailExcept('minor');
         openDetailFromMeet('minor');
@@ -1930,6 +2139,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     });
     root.querySelectorAll<HTMLButtonElement>('[data-open-shensha]').forEach((btn) => {
       btn.addEventListener('click', () => {
+        rememberReturnPalace();
         shenshaId = btn.dataset.openShensha ?? '';
         clearDetailExcept('shensha');
         openDetailFromMeet('shensha');
@@ -1951,8 +2161,10 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     root.querySelectorAll<HTMLButtonElement>('[data-open-palace]').forEach((btn) => {
       btn.addEventListener('click', () => {
         palaceId = btn.dataset.openPalace ?? '';
+        returnPalaceId = '';
         clearDetailExcept('palace');
         openDetailFromMeet('palace');
+        palaceTab = defaultPalacePracticeTab(chartContext().view, palaceId);
         setUrl({ layer: 'palaces', palace: palaceId });
         paint();
       });
@@ -1999,6 +2211,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回</button>
         ${atlasTopTabsHtml('stars')}
         ${renderMinorDetail(getMinorStarLore(minorId)!, chartHits, hasChart, detailTab)}
+        ${palaceLoopFooterHtml()}
       `;
       bindDetailUpBack();
       bindAtlasTopTabs();
@@ -2030,6 +2243,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <button type="button" class="back-link life-back">← 返回</button>
         ${atlasTopTabsHtml('stars')}
         ${renderShenshaDetail(getShenshaLore(shenshaId)!, chartHits, hasChart, detailTab)}
+        ${palaceLoopFooterHtml()}
       `;
       bindDetailUpBack();
       bindAtlasTopTabs();
@@ -2044,14 +2258,26 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     }
 
     if (palaceId && getPalaceLore(palaceId)) {
+      const { view, personId } = chartContext();
+      if (!palaceTab) palaceTab = defaultPalacePracticeTab(view, palaceId);
       page.innerHTML = `
         <button type="button" class="back-link life-back">← 返回</button>
         ${atlasTopTabsHtml('palaces')}
-        ${renderPalaceDetail(palaceId)}
+        ${renderPalaceDetail(palaceId, view, personId, palaceTab)}
       `;
       bindDetailUpBack();
       bindAtlasTopTabs();
       bindOpeners();
+      bindChartJumps();
+      page.querySelectorAll<HTMLButtonElement>('[data-palace-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const next = btn.dataset.palaceTab as PalacePracticeTab;
+          if (PALACE_PRACTICE_TAB_ORDER.includes(next)) {
+            palaceTab = next;
+            paint();
+          }
+        });
+      });
       return;
     }
 
@@ -2084,6 +2310,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
           personId,
           view,
         })}
+        ${palaceLoopFooterHtml()}
       `;
       bindDetailUpBack();
       bindAtlasTopTabs();
@@ -2155,6 +2382,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
     }
 
     const all = codexProgress();
+    const readPath = resolveZiweiReadPath(view);
 
     const meetEntry = `
       <button type="button" class="ziwei-meet-entry" data-open-meet>
@@ -2190,6 +2418,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         <p class="page-subtitle">全图鉴 ${all.collected}/${all.total}</p>
       </header>
       ${ziweiSysTabsHtml(null)}
+      ${renderReadPathCard(readPath)}
       ${meetEntry}
       ${atlasTopTabsHtml(layer as CatalogSection)}
       ${body}

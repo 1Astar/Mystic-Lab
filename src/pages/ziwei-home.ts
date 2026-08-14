@@ -120,6 +120,11 @@ export function renderZiweiHome(root: HTMLElement): () => void {
           <span>角色 · 场景 · 搭戏 · 相遇 · ${progress.collected}/${progress.total}</span>
           <em aria-hidden="true">›</em>
         </button>
+        <button type="button" class="bazi-home-link" data-path="/ziwei/guess">
+          <strong>猜星曜盲盒</strong>
+          <span>每日一题 · 复习主星与宫位</span>
+          <em aria-hidden="true">›</em>
+        </button>
         <button type="button" class="bazi-home-link" data-path="/ziwei/journal">
           <strong>紫微手札</strong>
           <span>记体感 · AI 解读可回看</span>

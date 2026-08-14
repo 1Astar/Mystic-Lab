@@ -34,6 +34,29 @@ export const SAN_HE: { members: string[]; result: string }[] = [
   { members: ['亥', '卯', '未'], result: '木' },
 ];
 
+/** 三会：四季方位成方 */
+export const SAN_HUI: { members: string[]; result: string }[] = [
+  { members: ['寅', '卯', '辰'], result: '木' },
+  { members: ['巳', '午', '未'], result: '火' },
+  { members: ['申', '酉', '戌'], result: '金' },
+  { members: ['亥', '子', '丑'], result: '水' },
+];
+
+/** 半合：三合局任意两支 */
+export function banHePairs(): { a: string; b: string; result: string }[] {
+  const out: { a: string; b: string; result: string }[] = [];
+  for (const g of SAN_HE) {
+    const [a, b, c] = g.members;
+    if (!a || !b || !c) continue;
+    out.push(
+      { a, b, result: g.result },
+      { a: b, b: c, result: g.result },
+      { a, b: c, result: g.result },
+    );
+  }
+  return out;
+}
+
 export const SAN_XING = [
   ['寅', '巳', '申'],
   ['丑', '戌', '未'],

@@ -25,8 +25,16 @@ import {
 } from '../bazi/codex-wuxing-map.ts';
 import { renderEntryRelationFragmentHtml } from '../bazi/codex-relations-atlas.ts';
 import { renderStructureMapHtml } from '../bazi/codex-structure-map.ts';
+import { buildPracticeComboCards } from '../bazi/codex-practice-combo.ts';
+import { buildAdvancedDeduceModules } from '../bazi/codex-advanced-deduce.ts';
 import type { BaziChart } from '../bazi/cast.ts';
 import type { LuckCycles } from '../bazi/luck-cycles.ts';
+import { navigate } from '../router.ts';
+import {
+  codexSkeletonChromeHtml,
+  codexSkeletonPracticeCtaHtml,
+  codexSkeletonSlotHtml,
+} from './lab-codex-skeleton.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -212,20 +220,105 @@ export function renderBaziCodexDetailHtml(
         .join('')}</ul>`
     : '';
 
+  const practiceCards = buildPracticeComboCards(
+    id,
+    opts.chart ?? null,
+    opts.luck ?? null,
+  );
+  const practiceHtml = practiceCards.length
+    ? `<div class="bazi-practice-combos" data-practice-combos>
+        ${practiceCards
+          .map(
+            (c) => `
+          <article class="bazi-practice-card${c.bound ? ' is-bound' : ''}">
+            <p class="bazi-practice-kicker">${escapeHtml(c.title)}</p>
+            ${
+              c.classicName
+                ? `<h3 class="bazi-practice-name">${escapeHtml(c.classicName)}</h3>`
+                : ''
+            }
+            <p class="bazi-practice-body">${escapeHtml(c.body)}</p>
+            ${
+              c.ctaHref && c.ctaLabel
+                ? `<button type="button" class="bazi-practice-cta" data-practice-href="${escapeHtml(c.ctaHref)}">${escapeHtml(c.ctaLabel)} →</button>`
+                : ''
+            }
+          </article>`,
+          )
+          .join('')}
+      </div>`
+    : '';
+
+  const deduceModules = buildAdvancedDeduceModules(
+    id,
+    opts.chart ?? null,
+    opts.luck ?? null,
+  );
+  const deduceHtml = deduceModules.length
+    ? `<div class="bazi-deduce-modules" data-deduce-modules>
+        ${deduceModules
+          .map(
+            (m) => `
+          <article class="bazi-deduce-card is-${escapeHtml(m.kind)} is-${escapeHtml(m.source)}">
+            <p class="bazi-deduce-kicker">${escapeHtml(m.title)}</p>
+            <p class="bazi-deduce-where">${escapeHtml(m.where)}</p>
+            <p class="bazi-deduce-body">${escapeHtml(m.body)}</p>
+            <div class="bazi-deduce-peers">
+              ${m.peerIds
+                .map(
+                  (p) =>
+                    `<button type="button" class="bazi-deduce-peer" data-open-entry="${escapeHtml(p)}">看【${escapeHtml(p)}】</button>`,
+                )
+                .join('')}
+              ${
+                m.ctaHref && m.ctaLabel
+                  ? `<button type="button" class="bazi-deduce-cta" data-practice-href="${escapeHtml(m.ctaHref)}">${escapeHtml(m.ctaLabel)} →</button>`
+                  : ''
+              }
+            </div>
+          </article>`,
+          )
+          .join('')}
+      </div>`
+    : '';
+
   const panes: Partial<Record<CodexDetailPane, string>> = {
     basics: `
       <div class="bazi-enc-memory${entry.kind === 'shensha' ? ' is-shensha' : ''}">
+        ${codexSkeletonChromeHtml({ active: 'what', yoursLabel: '在你身上' })}
         <div class="bazi-enc-art ${entry.kind === 'shensha' ? 'is-badge' : ''} ${lit ? 'is-lit' : 'is-dim'}">${opts.artHtml}${lit || entry.kind === 'shensha' ? '' : '<span class="bazi-art-seal"></span>'}</div>
         <div class="bazi-enc-tags">
           ${tags.map((t) => `<span class="bazi-enc-tag">${escapeHtml(t)}</span>`).join('')}
         </div>
         <h2 class="bazi-enc-title">${escapeHtml(entry.title)}</h2>
-        <p class="bazi-enc-oneliner">${escapeHtml(dossier.whatIs)}</p>
-        ${
-          presenceBrief
+        ${codexSkeletonSlotHtml({
+          slot: 'what',
+          title: '是什么',
+          bodyHtml: `<p class="bazi-enc-oneliner">${escapeHtml(dossier.whatIs)}</p>`,
+        })}
+        ${codexSkeletonSlotHtml({
+          slot: 'yours',
+          title: '在你身上',
+          hideIfEmpty: true,
+          bodyHtml: presenceBrief
             ? `<p class="bazi-enc-presence-brief">${escapeHtml(presenceBrief)}</p>`
-            : ''
-        }
+            : '',
+        })}
+        ${codexSkeletonSlotHtml({
+          slot: 'practice',
+          title: '练一题',
+          hideIfEmpty: true,
+          bodyHtml: `${practiceHtml}${codexSkeletonPracticeCtaHtml([
+            { href: '/bazi/guess', label: '猜命盘练一题 ›' },
+            { href: '/bazi/journal', label: '记一句到手札 ›' },
+          ])}`,
+        })}
+        ${codexSkeletonSlotHtml({
+          slot: 'related',
+          title: '相关可跳',
+          hideIfEmpty: true,
+          bodyHtml: deduceHtml,
+        })}
         ${section('季节与旺衰', `<p>${escapeHtml(dossier.season)}</p>`)}
         ${section('喜', bullets(dossier.likes))}
         ${section('忌', bullets(dossier.dislikes))}
@@ -268,6 +361,7 @@ export function renderBaziCodexDetailHtml(
     relation: bodyOrTeaser(`
       ${shengKe}
       ${fragment}
+      ${deduceHtml}
       ${section('常见组合', comboHtml)}
     `),
     chart: renderChartPane(
@@ -360,6 +454,14 @@ export function bindBaziCodexDetail(root: HTMLElement): void {
           root.dispatchEvent(
             new CustomEvent('bazi-codex-marks-changed', { bubbles: true }),
           );
+    });
+  });
+
+  panel.querySelectorAll<HTMLButtonElement>('[data-practice-href]').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const href = btn.dataset.practiceHref || btn.getAttribute('data-practice-href') || '';
+      if (href) navigate(href);
     });
   });
 }

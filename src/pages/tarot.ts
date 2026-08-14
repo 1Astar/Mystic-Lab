@@ -91,6 +91,7 @@ import {
 } from '../ui/question-rewrite-panel.ts';
 import { openQuestionGuideModal, renderQuestionStageBackdrop } from '../ui/question-type-guide.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
+import { bindLabLearnStrip, labLearnStripHtml } from '../ui/lab-learn-strip.ts';
 
 type TarotState =
   | 'landing'
@@ -1184,6 +1185,13 @@ export function renderTarot(root: HTMLElement): () => void {
       <h2 class="section-title">占问结果</h2>
       <p class="tarot-hint">先看整盘；点牌可看牌面与探索 · 新牌已收入探索</p>
       <div class="result-panel" id="result-cards">
+        ${labLearnStripHtml({
+          tip:
+            (learningNote || '').trim() ||
+            '先看整盘叙事；想查单牌深度含义，进图鉴。误读纠正也在图鉴里。',
+          deepen: { href: '/tarot/tujian', label: '进塔罗图鉴 ›' },
+          practice: { href: '/tarot/guess', label: '猜牌义练一题 ›' },
+        })}
         <div id="reading-switch-panel"></div>
         <div class="learning-card">
           <h3>写下此刻的感悟</h3>
@@ -1282,6 +1290,7 @@ export function renderTarot(root: HTMLElement): () => void {
     };
 
     paintPanel();
+    bindLabLearnStrip(stage);
 
     const reflectionEl = document.getElementById('result-reflection') as HTMLTextAreaElement | null;
     const reflectionEcho = document.getElementById('result-reflection-echo');
@@ -1354,6 +1363,12 @@ export function renderTarot(root: HTMLElement): () => void {
     codexBtn.textContent = '查看探索';
     codexBtn.addEventListener('click', () => navigate('/tarot/tujian'));
 
+    const guessBtn = document.createElement('button');
+    guessBtn.type = 'button';
+    guessBtn.className = 'btn btn-ghost';
+    guessBtn.textContent = '猜牌义盲盒';
+    guessBtn.addEventListener('click', () => navigate('/tarot/guess'));
+
     const journalBtn = document.createElement('button');
     journalBtn.type = 'button';
     journalBtn.className = 'btn btn-ghost';
@@ -1377,7 +1392,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
     const resultActions = document.createElement('div');
     resultActions.className = 'result-actions';
-    resultActions.append(cardPngBtn, codexBtn, journalBtn, crossBtn, retryBtn);
+    resultActions.append(cardPngBtn, codexBtn, guessBtn, journalBtn, crossBtn, retryBtn);
 
     if (supplementCount < MAX_SUPPLEMENT) {
       const theme = supplementThemeLabel(question);

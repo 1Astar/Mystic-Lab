@@ -4,6 +4,7 @@ import {
   loadLabNoteText,
   mergeUserTags,
   normalizeUserTag,
+  notesSurfaceChips,
   saveLabNote,
 } from './lab-notes-sheet.ts';
 
@@ -65,5 +66,15 @@ describe('lab notes tags', () => {
     expect(normalizeUserTag('   ')).toBeNull();
     const many = Array.from({ length: 20 }, (_, i) => `标签${i}`);
     expect(mergeUserTags([], many)).toHaveLength(12);
+  });
+
+  it('surface chips always offer atlas/reading/chart to switch', () => {
+    expect(notesSurfaceChips('atlas', [])).toEqual(['atlas', 'reading', 'chart']);
+    expect(notesSurfaceChips('reading', ['chart'])).toEqual([
+      'atlas',
+      'reading',
+      'chart',
+    ]);
+    expect(notesSurfaceChips('learn', ['learn'])).toContain('learn');
   });
 });

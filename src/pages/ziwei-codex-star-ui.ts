@@ -38,6 +38,10 @@ import {
 } from '../ziwei/term-glossary.ts';
 import { isZiweiCodexFavorite, ziweiFavButtonLabel } from '../ziwei/codex-favorites.ts';
 import type { StarCard } from '../ziwei/stars.ts';
+import {
+  codexSkeletonChromeHtml,
+  codexSkeletonPracticeCtaHtml,
+} from '../ui/lab-codex-skeleton.ts';
 import type { MinorStarLore } from '../ziwei/minor-star-lore.ts';
 import type { ShenshaLore } from '../ziwei/shensha-lore.ts';
 import {
@@ -479,6 +483,12 @@ export function renderStarDetail(star: StarCard, opts: StarDetailOpts): string {
   }
 
   const counsel = escapeHtml(p?.counsel ?? star.counsel);
+  const skelActive =
+    detailTab === 'you' ? 'yours' : detailTab === 'portrait' ? 'what' : null;
+  const practiceCta = codexSkeletonPracticeCtaHtml([
+    { href: '/ziwei/guess', label: '猜星曜练一题 ›' },
+    { href: '/ziwei/journal', label: '记一句到手札 ›' },
+  ]);
 
   return `
     <article class="ziwei-star-detail is-${state}">
@@ -499,9 +509,11 @@ export function renderStarDetail(star: StarCard, opts: StarDetailOpts): string {
         }
         ${questBanner}
       </header>
+      ${codexSkeletonChromeHtml({ active: skelActive })}
       <div class="ziwei-detail-tabs" role="tablist">${tabs}</div>
       <section class="ziwei-detail-tab-panel" data-tab-panel>${tabBody}</section>
       <section class="ziwei-detail-counsel"><h3>给你的箴言</h3><p>${counsel}</p></section>
+      ${practiceCta}
     </article>`;
 }
 
@@ -592,11 +604,18 @@ function renderSoftStarShell(
         </div>
         <ul class="ziwei-keywords">${sections.keywords.map((k) => `<li>${escapeHtml(k)}</li>`).join('')}</ul>
       </header>
+      ${codexSkeletonChromeHtml({
+        active: opts.detailTab === 'you' ? 'yours' : opts.detailTab === 'portrait' ? 'what' : null,
+      })}
       <div class="ziwei-detail-tabs" role="tablist">${tabs}</div>
       <section class="ziwei-detail-tab-panel" data-tab-panel>${tabBody}</section>
       ${opts.schoolBlock ?? ''}
       ${opts.footHint ? `<p class="ziwei-codex-hint">${escapeHtml(opts.footHint)}</p>` : ''}
       <section class="ziwei-detail-counsel"><h3>给你的箴言</h3><p>${escapeHtml(sections.howTo)}</p></section>
+      ${codexSkeletonPracticeCtaHtml([
+        { href: '/ziwei/guess', label: '猜星曜练一题 ›' },
+        { href: '/ziwei/journal', label: '记一句到手札 ›' },
+      ])}
     </article>`;
 }
 

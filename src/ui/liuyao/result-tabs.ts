@@ -35,6 +35,7 @@ import { buildOfflineAnswerPack } from '../../mystic-engine/build-pack.ts';
 import { bindAnswerPackGestures } from '../../mystic-engine/render-pack.ts';
 import { loadUseProfilePref } from '../../life/profile-context.ts';
 import { bindFollowupGestures } from '../../liuyao/followup-chat.ts';
+import { bindLabLearnStrip, labLearnStripHtml } from '../lab-learn-strip.ts';
 import {
   bindPersonalizeFab,
   bindPersonalizeGuide,
@@ -170,6 +171,13 @@ export function mountLiuyaoResultTabs(
     const answerLine = pack.script?.headline ?? pack.answers[0]?.lean ?? pack.decision;
     host.innerHTML = `
       ${renderHexHero(cast, { castAt, askable: true, answerLine })}
+      ${labLearnStripHtml({
+        tip: `${cast.primary.fullName}：先看本卦结论与变爻；卦象名录与概念详解在图鉴里查。`,
+        deepen: {
+          href: `/liuyao/hexagrams?gua=${encodeURIComponent(cast.primary.name)}`,
+          label: '查卦象图鉴 ›',
+        },
+      })}
       ${renderQuickBoard(cast, castAt, { omitHeader: true })}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="速断解读">
@@ -200,6 +208,13 @@ export function mountLiuyaoResultTabs(
 
     host.innerHTML = `
       ${renderHexHero(cast, { castAt, askable: true, answerLine })}
+      ${labLearnStripHtml({
+        tip: `${cast.primary.fullName}：先跟「此刻解读」；想查卦象与概念深度，进图鉴。六步学习是方法，不是百科。`,
+        deepen: {
+          href: `/liuyao/hexagrams?gua=${encodeURIComponent(cast.primary.name)}`,
+          label: '查卦象图鉴 ›',
+        },
+      })}
       ${renderPatternSummaryHtml(pattern)}
       <section class="ly-result-tabs" data-result-tabs data-result-layers data-cast-iso="${castAt.toISOString()}">
         <div class="ly-result-tab-bar" role="tablist" aria-label="卦象解读">
@@ -232,6 +247,7 @@ export function mountLiuyaoResultTabs(
     `;
   }
 
+  bindLabLearnStrip(host);
   const layersApi = bindResultLayers(host, cast, question);
   bindYaoAskButtons(host, cast, question, castAt);
   bindFollowupGestures(host, { cast, question, castAt, journalId });

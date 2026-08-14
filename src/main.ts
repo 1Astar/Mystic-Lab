@@ -4,6 +4,8 @@ import './styles/module-themes.css';
 import './styles/birth-datetime.css';
 import './styles/profile-bar.css';
 import './styles/share.css';
+import './styles/lab-codex-skeleton.css';
+import './styles/lab-learn-strip.css';
 /** 最后加载：保证主题阅读面覆盖硬编码色 */
 import './styles/theme-reading.css';
 import { initTheme } from './theme/theme.ts';
@@ -64,6 +66,10 @@ const ziweiStyles = [
   () => import('./styles/bazi.css'),
   () => import('./styles/ziwei.css'),
 ];
+const labGuessStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/lab-guess.css'),
+];
 
 registerRoute('/', renderLabHome);
 
@@ -74,6 +80,13 @@ registerRoute(
 registerRoute(
   '/tarot/reading',
   lazy(() => import('./pages/tarot.ts'), 'renderTarot', tarotStyles),
+);
+registerRoute(
+  '/tarot/guess',
+  lazy(() => import('./pages/tarot-guess.ts'), 'renderTarotGuess', [
+    ...tarotStyles,
+    ...labGuessStyles,
+  ]),
 );
 registerRoute(
   '/tarot/tujian',
@@ -212,6 +225,14 @@ registerRoute(
   '/ziwei/tujian',
   lazy(() => import('./pages/ziwei-codex.ts'), 'renderZiweiCodex', ziweiStyles),
 );
+registerRoute(
+  '/ziwei/guess',
+  lazy(() => import('./pages/ziwei-guess.ts'), 'renderZiweiGuess', [
+    ...ziweiStyles,
+    () => import('./styles/lab-guess.css'),
+  ]),
+);
+
 registerRoute(
   '/ziwei/journal',
   lazy(() => import('./pages/ziwei-journal.ts'), 'renderZiweiJournal', [

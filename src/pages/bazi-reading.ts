@@ -48,7 +48,12 @@ import {
   energyBalanceBoardHtml,
   mountEnergyBalanceBoard,
 } from '../ui/bazi-energy-balance.ts';
+import {
+  bindInsightGuessEmbed,
+  insightGuessEmbedHtml,
+} from '../ui/bazi-insight-guess-embed.ts';
 import { learnBadgeHtml, mountWhyBlocks, whyBlockHtml } from '../ui/bazi-why-block.ts';
+import { bindLabLearnStrip, labLearnStripHtml } from '../ui/lab-learn-strip.ts';
 import { ifSimHtml, mountIfSim } from '../ui/bazi-if-sim.ts';
 import { buildIfScenarios } from '../bazi/sense-if.ts';
 import {
@@ -352,6 +357,14 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </nav>
 
         <p class="bazi-reading-keyword">${escapeHtml(portrait.keyword)}</p>
+        ${labLearnStripHtml({
+          tip: `先抓住「${portrait.keyword}」这一句人设，再点下方「为什么这么解」——深度词条请进图鉴，别在人生地图里硬背百科。`,
+          deepen: {
+            href: '/bazi/tujian',
+            label: '进图鉴补深度 ›',
+          },
+          practice: { href: '/bazi/guess', label: '猜命盘练一题 ›' },
+        })}
         ${learnBadgeHtml()}
         ${
           question.trim()
@@ -365,6 +378,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
           <p class="bazi-insight-hook">${escapeHtml(insight.hook)}</p>
           <p class="bazi-sense-body bazi-insight-story">${escapeHtml(insight.story)}</p>
           ${whyBlockHtml(buildInsightWhy(chartResult))}
+          ${insightGuessEmbedHtml('insight')}
         </section>
 
         <section id="bazi-ov-season" class="bazi-sense-block bazi-sense-season" aria-label="季节定调">
@@ -461,6 +475,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
               year: yearNow,
             }),
           )}
+          ${insightGuessEmbedHtml('luck')}
         </section>
 
         <section class="bazi-yiji" aria-label="宜忌">
@@ -511,6 +526,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
     `;
 
     bindNav();
+    bindInsightGuessEmbed(page);
     const packHost = page.querySelector<HTMLElement>('[data-bazi-pack]');
     if (packHost) bindAnswerPackGestures(packHost);
 
@@ -682,6 +698,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
       },
     });
     disposeWhy = mountWhyBlocks(page);
+    bindLabLearnStrip(page);
     disposeIf = mountIfSim(page, ifScenarios);
     disposeFloat = mountLabFloatActions(page, {
       system: 'bazi',

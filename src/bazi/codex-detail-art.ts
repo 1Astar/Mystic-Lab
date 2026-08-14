@@ -4,6 +4,7 @@
 import { BRANCH_LORE, STEM_LORE, WUXING_ORDER } from './codex-lore.ts';
 import type { WuXing } from './elements.ts';
 import { memoryCoverHtml, shenshaBadgeArtHtml } from './codex-cover.ts';
+import { getBaziEncyclopedia } from './codex-encyclopedia.ts';
 import { getStarCard } from './codex-tags.ts';
 import {
   stemBranchArtSvg,
@@ -11,13 +12,18 @@ import {
   wuxingArtSvg,
 } from './codex-art.ts';
 import { nayinArtSvg } from './codex-nayin-art.ts';
+import { conceptDetailArtHtml } from './codex-concept-diagrams.ts';
 import { NAYIN_ATLAS, nayinId } from './codex-atlas-catalog.ts';
+import { nayinOf } from './pillar-meta.ts';
 
 const NAYIN_BY_ID = Object.fromEntries(
   NAYIN_ATLAS.map((n) => [nayinId(n.name), n.name]),
 ) as Record<string, string>;
 
 export function codexDetailArtHtml(id: string): string {
+  if (id.startsWith('luck:') || id.startsWith('rel:')) {
+    return conceptDetailArtHtml(id);
+  }
   if (WUXING_ORDER.includes(id as WuXing)) {
     return memoryCoverHtml(id, wuxingArtSvg(id as WuXing, { uid: `det-wx-${id}` }));
   }
@@ -33,6 +39,17 @@ export function codexDetailArtHtml(id: string): string {
       nayinArtSvg(nayinName, { uid: `det-ny${idx >= 0 ? idx : 'x'}` }),
     );
   }
+
+  const enc = getBaziEncyclopedia(id);
+  if (enc?.kind === 'jiazi' && enc.title.length >= 2) {
+    const ny = nayinOf(enc.title);
+    const idx = NAYIN_ATLAS.findIndex((n) => n.name === ny);
+    return memoryCoverHtml(
+      id,
+      nayinArtSvg(ny || '海中金', { uid: `det-jz${idx >= 0 ? idx : 'x'}` }),
+    );
+  }
+
   const star = getStarCard(id);
   if (star) {
     if (star.kind === 'tengod') {
@@ -42,6 +59,10 @@ export function codexDetailArtHtml(id: string): string {
       );
     }
     return shenshaBadgeArtHtml(id, star.glyph);
+  }
+
+  if (enc?.kind === 'shensha') {
+    return shenshaBadgeArtHtml(id, enc.title.slice(0, 1));
   }
   return '';
 }

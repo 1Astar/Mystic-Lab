@@ -1,24 +1,19 @@
 /**
- * 盘面点词：居中弹窗直接开完整图鉴百科（非底部摘要抽屉）
+ * 盘面点词：浅带学 peek（一句话 + 在你盘上）
+ * 完整百科只在图鉴（可查），不在解读侧堆厚百科。
  */
 import type { BaziChart } from '../bazi/cast.ts';
 import type { LuckCycles } from '../bazi/luck-cycles.ts';
-import { isBaziCodexUnlocked } from '../bazi/codex.ts';
 import {
   getBaziEncyclopedia,
-  isAtlasLibraryKind,
 } from '../bazi/codex-encyclopedia.ts';
 import { buildChartLinkReport } from '../bazi/codex-chart-link.ts';
-import { codexDetailArtHtml } from '../bazi/codex-detail-art.ts';
+import { chartPresenceBrief } from '../bazi/codex-presence-brief.ts';
 import {
   answerFromCodexEntity,
   resolveCodexEntityId,
 } from '../bazi/codex-entity-resolve.ts';
-import { ICON_SPARK } from './lab-icons.ts';
-import {
-  bindBaziCodexDetail,
-  renderBaziCodexDetailHtml,
-} from './bazi-codex-detail.ts';
+import { navigate } from '../router.ts';
 import { openLabConceptPeek } from './lab-concept-peek.ts';
 
 export type BaziCodexPopupOpts = {
@@ -29,15 +24,7 @@ export type BaziCodexPopupOpts = {
   onMiss?: (q: string) => void;
 };
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/** @returns true 已打开百科弹窗；false 无实体（已回落普通释义弹窗） */
+/** @returns true 已打开浅 peek；false 无实体（已回落普通释义弹窗） */
 export function openBaziCodexPopup(opts: BaziCodexPopupOpts): boolean {
   document.querySelector('.lab-codex-popup')?.remove();
   const term = opts.term.trim();
@@ -56,7 +43,8 @@ export function openBaziCodexPopup(opts: BaziCodexPopupOpts): boolean {
         }),
       onMiss: opts.onMiss,
       onOpenAsk: opts.onOpenAsk,
-      sourceHint: '本地词条 · 百科摘要',
+      sourceHint: '本地词条 · 浅释义',
+      onOpenAtlas: () => navigate('/bazi/tujian'),
     });
     return false;
   }
@@ -67,53 +55,30 @@ export function openBaziCodexPopup(opts: BaziCodexPopupOpts): boolean {
     opts.chart ?? null,
     opts.luck ?? null,
   );
-  // 盘面点开：完整百科默认可读（命盘已见 / 图鉴索引类 / 已点亮）
-  const lit =
-    isBaziCodexUnlocked(id) ||
-    chartLink.present ||
-    isAtlasLibraryKind(entry.kind);
-  const detailHtml = renderBaziCodexDetailHtml(id, {
-    artHtml: codexDetailArtHtml(id),
-    lit,
-    chartLink,
-    chart: opts.chart ?? null,
-    luck: opts.luck ?? null,
+  const presence =
+    chartPresenceBrief(id, opts.chart ?? null, opts.luck ?? null).trim() ||
+    chartLink.summary.trim() ||
+    (chartLink.present
+      ? '此词已在你的原局或流年里出现，可进图鉴看完整落点。'
+      : '当前盘面未直接点亮此条；图鉴仍可查通识与结构。');
+
+  openLabConceptPeek({
+    term: entry.title,
+    sourceHint: '解读带学 · 深度请查图鉴',
+    tabs: [
+      { id: 'what', label: '是什么', body: entry.oneLiner },
+      { id: 'you', label: '在你身上', body: presence },
+    ],
+    initialTab: chartLink.present ? 'you' : 'what',
+    onOpenAsk: opts.onOpenAsk,
+    onOpenAtlas: () => {
+      try {
+        sessionStorage.setItem('mystic-lab-open-codex-id', id);
+      } catch {
+        /* ignore */
+      }
+      navigate('/bazi/tujian');
+    },
   });
-
-  const modal = document.createElement('div');
-  modal.className = 'lab-codex-popup is-open';
-  modal.innerHTML = `
-    <button type="button" class="lab-codex-popup-backdrop" data-popup-close aria-label="关闭"></button>
-    <div class="lab-codex-popup-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(term)}">
-      ${detailHtml}
-      <footer class="lab-codex-popup-foot">
-        <p class="lab-codex-popup-hint">图鉴知识库 · 完整百科</p>
-        ${
-          opts.onOpenAsk
-            ? `<button type="button" class="lab-codex-popup-ask" data-popup-ask>
-                ${ICON_SPARK}
-                <span>继续追问</span>
-              </button>`
-            : ''
-        }
-      </footer>
-    </div>
-  `;
-
-  const close = () => {
-    modal.classList.remove('is-open');
-    setTimeout(() => modal.remove(), 200);
-  };
-
-  modal.querySelectorAll('[data-popup-close], [data-codex-close]').forEach((el) => {
-    el.addEventListener('click', close);
-  });
-  modal.querySelector('[data-popup-ask]')?.addEventListener('click', () => {
-    close();
-    opts.onOpenAsk?.(term);
-  });
-
-  document.body.appendChild(modal);
-  bindBaziCodexDetail(modal);
   return true;
 }

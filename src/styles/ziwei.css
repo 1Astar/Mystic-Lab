@@ -569,6 +569,158 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   padding-top: 12px;
   border-top: 1px solid rgba(201, 168, 76, 0.16);
 }
+.ziwei-palace-practice-sec.is-config {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 28%, var(--line));
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+  border-top: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 28%, var(--line));
+}
+.ziwei-palace-practice-config-line {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.ziwei-palace-practice-hedu {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 32%, var(--line));
+}
+.ziwei-palace-practice-hedu-kicker {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  vertical-align: middle;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 90%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+}
+.ziwei-palace-practice-stars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ziwei-palace-practice-star {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 5.5rem;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface-1) 90%, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-palace-practice-star.is-static {
+  cursor: default;
+  opacity: 0.85;
+}
+.ziwei-palace-practice-star strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.ziwei-palace-practice-star em {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-palace-practice-star-meta {
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 70%, var(--ink));
+}
+.ziwei-palace-practice-star-cta {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 75%, var(--ink-muted));
+}
+.ziwei-palace-practice-click-hint {
+  margin: 8px 0 0;
+}
+.ziwei-palace-practice-loop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  margin: 14px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, var(--line));
+}
+.ziwei-palace-practice-loop.is-footer {
+  margin: 16px 0 8px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+}
+.ziwei-palace-practice-tip {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, var(--line));
+}
+.ziwei-palace-practice-tip:last-child {
+  margin-bottom: 0;
+}
+.ziwei-palace-practice-tip h4 {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-palace-practice-tip p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-palace-practice-tip.is-quest {
+  border-color: color-mix(in srgb, #e67a3a 35%, var(--line));
+}
+.ziwei-palace-practice-tip.is-annual {
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+}
+.ziwei-palace-practice-badge {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 80%, var(--ink));
+}
+.ziwei-palace-practice .ziwei-detail-tabs {
+  margin-top: 12px;
+}
+.ziwei-palace-practice-panel-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-palace-practice-sec.is-config.ziwei-detail-tab-panel {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 28%, var(--line));
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+}
 
 .ziwei-detail-block h3 {
   margin: 0 0 8px;
@@ -1684,6 +1836,82 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   border-bottom-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 92%, #e67a3a 20%);
 }
 
+/* 读盘路径 · 薄引导（本周一宫 / 先命再财） */
+.ziwei-read-path {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, var(--gold) 12%);
+  background: color-mix(in srgb, var(--surface-2) 92%, var(--gold) 8%);
+}
+.ziwei-read-path-kicker {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+.ziwei-read-path-lead {
+  margin: 0 0 4px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.ziwei-read-path-sub {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+.ziwei-read-path-trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 2px;
+  margin: 0 0 10px;
+}
+.ziwei-read-path-chip {
+  appearance: none;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.ziwei-read-path-chip.is-on {
+  border-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--line));
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
+}
+.ziwei-read-path-sep {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  opacity: 0.55;
+  padding: 0 1px;
+}
+.ziwei-read-path-cta {
+  display: block;
+  width: 100%;
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-1));
+}
+.ziwei-read-path-cta:hover {
+  background: color-mix(in srgb, var(--gold) 16%, var(--surface-1));
+}
+
 /* 我的相遇 · 独立大按钮（在命盘解读/完整命盘之下） */
 .ziwei-meet-entry {
   display: grid;
@@ -2400,8 +2628,53 @@ html[data-theme='moon'] .ziwei-meet-backdrop {
 .ziwei-codex-short.is-pending .ziwei-codex-short-thumb.is-empty,
 .ziwei-codex-short.is-absent .ziwei-codex-short-thumb-img,
 .ziwei-codex-short.is-pending .ziwei-codex-short-glyph,
-.ziwei-codex-short.is-absent .ziwei-codex-short-glyph {
+.ziwei-codex-short.is-absent .ziwei-codex-short-glyph,
+.ziwei-codex-short.is-absent .ziwei-palace-glyph,
+.ziwei-codex-short.is-soft .ziwei-palace-glyph {
   filter: grayscale(0.85) brightness(0.92);
+}
+.ziwei-codex-short.is-soft .ziwei-codex-short-thumb {
+  border-color: color-mix(in srgb, var(--line) 85%, var(--ink-muted));
+  opacity: 0.92;
+}
+.ziwei-codex-short-thumb.is-palace {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--gold) 8%);
+}
+.ziwei-palace-glyph {
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1;
+}
+.ziwei-palace-card-role {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  vertical-align: middle;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 85%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.ziwei-codex-short.is-palace .ziwei-codex-short-keys {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
+  font-size: 0.84rem;
+  color: var(--ink);
+  opacity: 0.92;
 }
 /* 相遇态：盘中有、雷达未加成 — 稍暗未激活 */
 .ziwei-codex-short.is-met .ziwei-codex-short-thumb-img,
@@ -6047,6 +6320,35 @@ html[data-theme='moon'] .ziwei-learn-backdrop {
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   color: var(--gold);
+}
+.ziwei-learn-block.is-atlas-tease {
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+  border-radius: 12px;
+  padding: 12px 14px;
+  border-bottom: 0;
+}
+.ziwei-learn-tease {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ink-muted, var(--ink));
+  opacity: 0.88;
+}
+.ziwei-learn-atlas-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  cursor: pointer;
+}
+.ziwei-learn-atlas-cta:hover {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 .ziwei-learn-body {
   margin: 0;

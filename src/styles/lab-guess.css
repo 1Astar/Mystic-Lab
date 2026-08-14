@@ -1,0 +1,117 @@
+/* Lab 轻练习盲盒（紫微 / 塔罗；交互对标八字猜盘） */
+
+.lab-guess-page .life-header {
+  margin-bottom: 12px;
+}
+
+.lab-guess-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-ink, var(--gold));
+  opacity: 0.92;
+}
+
+.lab-guess-card {
+  margin: 0 0 14px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-1) 90%, var(--gold-soft));
+}
+
+.lab-guess-seal {
+  margin: 4px 0 12px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.lab-guess-clues {
+  margin: 0 0 12px;
+  padding: 0 0 0 1.1em;
+  display: grid;
+  gap: 6px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--surface-ink, var(--ink));
+}
+
+.lab-guess-q {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.lab-guess-options {
+  display: grid;
+  gap: 8px;
+}
+
+.lab-guess-opt {
+  appearance: none;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg, #fff) 70%, transparent);
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.lab-guess-opt:hover,
+.lab-guess-opt:focus-visible {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  outline: none;
+}
+
+.lab-guess-result {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.lab-guess-result.is-ok {
+  border-color: color-mix(in srgb, #5a8068 45%, var(--line));
+}
+
+.lab-guess-result.is-miss {
+  border-color: color-mix(in srgb, #a06050 40%, var(--line));
+}
+
+.lab-guess-verdict {
+  margin: 0 0 6px;
+  font-weight: 700;
+  color: var(--gold-ink, var(--gold));
+}
+
+.lab-guess-result.is-miss .lab-guess-verdict {
+  color: color-mix(in srgb, #a06050 70%, var(--ink));
+}
+
+.lab-guess-pick,
+.lab-guess-explain,
+.lab-guess-xp {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink-muted, var(--ink));
+}
+
+.lab-guess-xp {
+  margin-bottom: 0;
+  opacity: 0.85;
+}
+
+.lab-guess-note {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-muted, var(--ink));
+  opacity: 0.85;
+}

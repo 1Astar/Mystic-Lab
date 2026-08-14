@@ -40,6 +40,11 @@ export function renderTarotHome(root: HTMLElement): () => void {
         stat: () => `${getCollectedCount()} 张已收集`,
       },
       {
+        path: '/tarot/guess',
+        title: '猜牌义盲盒',
+        desc: '每日一题 · 复习大阿卡纳',
+      },
+      {
         path: '/journal',
         title: '随心手札',
         desc: '塔罗占问记录',

@@ -16,18 +16,13 @@ import {
 import { renderBaziCodexDetailHtml } from '../ui/bazi-codex-detail.ts';
 
 describe('codex cover prompts', () => {
-  it('has 10+12+10+12 prompt entries', () => {
+  it('has 10+12+10+89 prompt entries', () => {
     expect(STEM_COVER_PROMPTS).toHaveLength(10);
     expect(BRANCH_COVER_PROMPTS).toHaveLength(12);
     expect(TENGOD_COVER_PROMPTS).toHaveLength(10);
-    expect(SHENSHA_COVER_PROMPTS).toHaveLength(12);
-    expect(ALL_COVER_PROMPTS).toHaveLength(44);
-    expect(
-      ALL_COVER_PROMPTS.filter((p) => p.kind !== 'shensha' || p.id !== 'ss:劫煞').every(
-        (p) => p.assetReady,
-      ),
-    ).toBe(true);
-    expect(ALL_COVER_PROMPTS.find((p) => p.id === 'ss:劫煞')?.assetReady).toBe(false);
+    expect(SHENSHA_COVER_PROMPTS).toHaveLength(89);
+    expect(ALL_COVER_PROMPTS).toHaveLength(121);
+    expect(ALL_COVER_PROMPTS.every((p) => p.assetReady)).toBe(true);
   });
 
   it('builds stem prompts with negative constraints', () => {
@@ -61,6 +56,9 @@ describe('codex cover prompts', () => {
     expect(badge).toContain('bazi-enc-badge');
     expect(badge).toContain('tianyi.webp');
     expect(badge).not.toContain('bazi-art-cover');
+
+    const ext = shenshaBadgeArtHtml('ss:天德', '德');
+    expect(ext).toContain('tiande.webp');
 
     const html = renderBaziCodexDetailHtml('ss:天乙贵人', {
       artHtml: badge,

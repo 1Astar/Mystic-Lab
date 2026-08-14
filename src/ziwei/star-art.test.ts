@@ -19,18 +19,35 @@ vi.mock('../craft/spirit-activate.ts', async (importOriginal) => {
 });
 
 describe('star-art', () => {
-  it('maps major and lucky stars to webp path', () => {
-    expect(majorStarArtUrl('天机')).toBe('/ziwei/stars/%E5%A4%A9%E6%9C%BA.webp');
-    expect(majorStarArtUrl('文昌')).toBe('/ziwei/stars/%E6%96%87%E6%98%8C.webp');
-    expect(majorStarArtUrl('左辅')).toMatch(/\.webp$/);
-    expect(majorStarArtUrl('擎羊')).toBeNull();
+  it('maps major, lucky, sha, and featured aux/minor to webp', () => {
+    expect(majorStarArtUrl('天机')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('文昌')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('擎羊')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('禄存')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('红鸾')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('咸池')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('龙池')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('三台')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('封诰')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('天巫')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('天寿')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('蜚廉')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('天德')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('月德')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('天空')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('岁破')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('天官')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('将星')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('飞廉')).toBe(majorStarArtUrl('蜚廉'));
+    expect(majorStarArtUrl('旬空')).toBeNull();
   });
 
-  it('falls back to glyph for shensha/minor; lucky uses poster', () => {
-    expect(starListThumbInnerHtml('红鸾', { tone: 'shensha' })).toContain('ziwei-codex-short-glyph');
-    expect(starListThumbInnerHtml('红鸾', { tone: 'shensha' })).toContain('红');
+  it('falls back to glyph when no poster; otherwise uses webp', () => {
+    expect(starListThumbInnerHtml('旬空', { tone: 'shensha' })).toContain('ziwei-codex-short-glyph');
+    expect(starListThumbInnerHtml('旬空', { tone: 'shensha' })).toContain('旬');
     expect(starListThumbInnerHtml('天机')).toContain('.webp');
-    expect(starListThumbInnerHtml('文昌', { tone: 'lucky' })).toContain('.webp');
+    expect(starListThumbInnerHtml('岁破', { tone: 'shensha' })).toContain('.webp');
+    expect(starListThumbInnerHtml('飞廉', { tone: 'shensha' })).toContain('.webp');
   });
 });
 

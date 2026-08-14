@@ -23,14 +23,19 @@ import {
   renderLifeScenesHtml,
   renderOrientationBriefHtml,
 } from './codex-scene-cards.ts';
+import {
+  codexSkeletonChromeHtml,
+  codexSkeletonPracticeCtaHtml,
+  codexSkeletonSlotHtml,
+} from './lab-codex-skeleton.ts';
 
 type CodexDetailTab = 'basic' | 'scene' | 'visual' | 'encounter';
 
 const TAB_LABELS: Record<CodexDetailTab, string> = {
-  basic: '基础牌义',
+  basic: '是什么',
   scene: '现实映射',
   visual: '看懂牌面',
-  encounter: '我的相遇',
+  encounter: '在你身上',
 };
 
 function escapeHtml(text: string): string {
@@ -191,6 +196,11 @@ export function mountCodexDetail(
         <p class="codex-detail-role">${escapeHtml(role.formula)}</p>
       </div>
     </div>
+    ${codexSkeletonChromeHtml({
+      active: 'what',
+      yoursLabel: '这次怎么显',
+      practiceLabel: '练一题',
+    })}
     <div class="codex-detail-tab-bar" role="tablist">
       ${(Object.keys(TAB_LABELS) as CodexDetailTab[])
         .map(
@@ -206,7 +216,10 @@ export function mountCodexDetail(
             .slice(0, 8)
             .map((k) => `<span class="codex-kw-tag">${escapeHtml(k)}</span>`)
             .join('')}</div>
-          <h3 style="margin-top:14px">一句话理解</h3>
+          ${codexSkeletonSlotHtml({
+            slot: 'what',
+            title: '是什么',
+            bodyHtml: `<h3 style="margin-top:0">一句话理解</h3>
           <p class="codex-one-liner">${escapeHtml(knowledge.oneSentence)}</p>
           ${renderAlertMisreadHtml(knowledge)}
           ${
@@ -220,7 +233,25 @@ export function mountCodexDetail(
                 </details>`
               : ''
           }
-          ${renderOrientationBriefHtml(knowledge)}
+          ${renderOrientationBriefHtml(knowledge)}`,
+          })}
+          ${codexSkeletonSlotHtml({
+            slot: 'related',
+            title: '相关可跳',
+            bodyHtml: `<p class="codex-muted">去愚者之旅或牌组数字页继续串读。</p>
+            <p>${codexSkeletonPracticeCtaHtml([
+              { href: '/tarot/tujian/fool-journey', label: '愚者之旅 ›' },
+              { href: '/tarot/tujian/suit-numbers', label: '牌组×数字 ›' },
+            ])}</p>`,
+          })}
+          ${codexSkeletonSlotHtml({
+            slot: 'practice',
+            title: '练一题',
+            bodyHtml: codexSkeletonPracticeCtaHtml([
+              { href: '/tarot/guess', label: '猜牌义练一题 ›' },
+              { href: '/journal', label: '记一句到手札 ›' },
+            ]),
+          })}
         </div>
       </section>
       <section class="codex-detail-panel" data-panel="scene" role="tabpanel" hidden>

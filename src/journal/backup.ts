@@ -33,6 +33,8 @@ export const BACKUP_KEYS = [
   'mystic-lab-bazi-rectify-ai-narrate',
   'mystic-lab-bazi-learn-v1',
   'mystic-lab-bazi-guess-v1',
+  'mystic-lab-ziwei-guess-v1',
+  'mystic-lab-tarot-guess-v1',
   'mystic-lab-bazi-week-weather-v1',
   'mystic-lab-bazi-journal',
   'mystic-lab-bazi-codex-marks',
