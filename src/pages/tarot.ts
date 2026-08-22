@@ -1789,9 +1789,9 @@ export function renderTarot(root: HTMLElement): () => void {
       setState('draw');
       return;
     }
-    // 补牌路径：仅新牌未翻；首轮全部未翻
-    if (backgroundPromptDone) {
-      revealedFlags = drawnCards.map((_, i) => i < currentIndex);
+    // 补牌：旧牌保持已翻状态；新牌待翻
+    if (backgroundPromptDone && revealedFlags.length > 0) {
+      revealedFlags = drawnCards.map((_, i) => revealedFlags[i] ?? false);
     } else {
       revealedFlags = drawnCards.map(() => false);
     }
@@ -1871,13 +1871,24 @@ export function renderTarot(root: HTMLElement): () => void {
   async function revealCardAt(index: number): Promise<void> {
     if (index < 0 || index >= drawnCards.length || revealedFlags[index]) return;
     const host = stage.querySelector<HTMLElement>(`[data-card-host="${index}"]`);
-    if (host) {
-      host.classList.add('is-flipping');
-      await wait(420);
-      const card = drawnCards[index];
-      if (card) renderCardFace(host, card, true);
-      host.querySelector('.tarot-card')?.classList.add('is-board-card');
-      host.classList.remove('is-flipping', 'tarot-slot-single', 'is-revealable');
+    const card = drawnCards[index];
+    if (!host || !card) return;
+    host.classList.add('is-flipping');
+    await wait(420);
+    renderCardFace(host, card, true);
+    host.querySelector('.tarot-card')?.classList.add('is-board-card');
+    host.classList.remove('is-flipping', 'tarot-slot-single', 'is-revealable');
+    const slot = stage.querySelector<HTMLElement>(`[data-slot-index="${index}"]`);
+    if (slot) {
+      slot.classList.add('is-revealed');
+      const labelEl = slot.querySelector('.spread-board-label');
+      const spread = resolveActiveSpread(spreadType);
+      const posLabel = spread.positions[index]?.label ?? `第 ${index + 1} 张`;
+      if (labelEl) {
+        const name = card.card.nameZh || card.card.name;
+        const orient = card.reversed ? '逆位' : '正位';
+        labelEl.textContent = `${posLabel} · ${name}（${orient}）`;
+      }
     }
     revealedFlags = revealedFlags.map((r, i) => (i === index ? true : r));
   }
