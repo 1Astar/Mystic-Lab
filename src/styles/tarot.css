@@ -2916,12 +2916,62 @@ html[data-theme='moon'] .reading-replay-backdrop {
 }
 
 .thread-overall-card,
+.thread-direct-card,
 .thread-oneliner-card {
   padding: 14px;
   border-radius: 14px;
   border: 1px solid var(--line);
   background: var(--surface-1);
   color: var(--ink);
+}
+
+.thread-direct-card {
+  border-color: rgba(212, 175, 95, 0.45);
+  background: linear-gradient(145deg, rgba(212, 175, 95, 0.08), var(--surface-1));
+}
+
+.reading-status-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink-muted);
+}
+
+.reading-status-banner.is-loading {
+  border-color: rgba(212, 175, 95, 0.5);
+  color: var(--ink);
+  animation: reading-status-pulse 1.4s ease-in-out infinite;
+}
+
+.reading-status-banner.is-llm {
+  border-color: rgba(120, 200, 160, 0.45);
+  background: rgba(120, 200, 160, 0.08);
+}
+
+.reading-status-banner.is-offline,
+.reading-status-banner.is-quota {
+  border-color: rgba(232, 160, 90, 0.4);
+  background: rgba(232, 160, 90, 0.07);
+}
+
+.reading-status-banner.is-error {
+  border-color: rgba(232, 90, 69, 0.45);
+  background: rgba(232, 90, 69, 0.08);
+  color: var(--ink);
+}
+
+@keyframes reading-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
 }
 
 .thread-card-strip {
