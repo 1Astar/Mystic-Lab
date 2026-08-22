@@ -252,9 +252,15 @@ export function renderQuestionThreadHtml(
         <div class="thread-oneliner thread-prose">${formatHighlight(thread.oneLiner)}</div>
       </section>`
       : '';
+  const series = thread.readingSeries;
+  const seriesBadge =
+    series && series.totalEpisodes > 1
+      ? `<p class="thread-series-badge" aria-label="同日连载">同日连载 · 第 ${series.episodeIndex}/${series.totalEpisodes} 局 · ${escapeHtml(series.themeLabel)}</p>`
+      : '';
   return `
     <div class="question-thread">
-      <p class="thread-empathy">${escapeHtml(polishReadingCopy(thread.empathyLead))}</p>
+      ${seriesBadge}
+      <p class="thread-empathy${series?.lead ? ' thread-empathy--series' : ''}">${escapeHtml(polishReadingCopy(thread.empathyLead))}</p>
       ${renderCardStrip(cards)}
       ${directBlock}
       <section class="thread-answers">

@@ -1,5 +1,7 @@
+import { matchCardArchetype } from './card-archetypes.ts';
 import type { ReadingLens } from './card-psychology.ts';
 import { imageSketch, motherTheme, resolveReadingLens } from './card-psychology.ts';
+import type { ReadingSeriesContext } from '../journal/reading-series.ts';
 import type { CardReading } from './types.ts';
 
 export type QuestionSubject = 'father' | 'mother' | 'self' | 'partner' | 'other';
@@ -34,85 +36,6 @@ export function positionalFrame(card: CardReading, index: number): string {
   return `第 ${index + 1} 张`;
 }
 
-type CardArchetype = {
-  match: RegExp;
-  upright: { theme: string; sketch: string; questionHook: string };
-  reversed?: { theme: string; sketch: string; questionHook: string };
-};
-
-/** 常见牌：画面 + 母题 + 对应问句的钩子（可逐步扩库） */
-const ARCHETYPES: CardArchetype[] = [
-  {
-    match: /宝剑九|九.*剑/,
-    upright: {
-      theme: '痛苦、焦虑、内耗',
-      sketch: '一人坐在床上捂着脸，背景九把剑——极度的精神压力、噩梦、担忧，像夜里睡不着的那种绷紧。',
-      questionHook:
-        '往往不是「感情有多深」，而是他正极度焦虑、无助，潜意识里在找一个熟悉、能依赖的「安全港湾」。',
-    },
-  },
-  {
-    match: /愚者/,
-    upright: {
-      theme: '新的开始、冒险',
-      sketch: '青年站在崖边望向远方，行囊轻便，能量偏向前行。',
-      questionHook: '可能带着冲动或「先走一步再说」的心态。',
-    },
-    reversed: {
-      theme: '逃避、盲目、缺乏规划',
-      sketch: '脚步悬空、方向不明——逆位愚者像不顾后果的逃离，或没想清楚就伸手抓一根稻草。',
-      questionHook:
-        '带有逃避现实的性质：可能面对烂摊子想逃，一时冲动、孤独或想回避责任，而非成熟的长远打算。',
-    },
-  },
-  {
-    match: /宝剑王后|王后.*剑|剑.*王后/,
-    upright: {
-      theme: '理智、冷酷、划清界限',
-      sketch: '端坐的王后手持利剑，表情冷静甚至锋利——用头脑切断情绪纠缠。',
-      questionHook: '过去或平时：要面子、强势，用冷硬态度处理问题，亲手斩断温情也可能。',
-    },
-  },
-  {
-    match: /圣杯六|六.*杯/,
-    upright: {
-      theme: '回忆、馈赠、过去的温情',
-      sketch: '孩童与花、旧日馈赠——美好的过往与熟悉的人。',
-      questionHook: '可能打「回忆牌」，唤起同情或旧情。',
-    },
-    reversed: {
-      theme: '回不去的过去、单方面索取',
-      sketch: '逆位圣杯六：温情变质，变成利用旧关系解燃眉之急，而非真心回到从前。',
-      questionHook:
-        '打破高高在上的姿态来索取帮助，但过去的情感已变质——更像利益交换或单方面的「卖惨」。',
-    },
-  },
-  {
-    match: /倒吊人/,
-    upright: {
-      theme: '停滞、拖累、死胡同、被迫等待',
-      sketch: '一人倒吊在树上无法动弹——局面卡住，只能被动承受。',
-      questionHook:
-        '挣扎往往换不来解脱，反而陷入拖延与被动；因果回到身上，要用等待和痛苦来偿还之前的冷漠或逃避。',
-    },
-    reversed: {
-      theme: '挣脱或更深的固执',
-      sketch: '逆位倒吊人：要么终于想通，要么更顽固地困在原地。',
-      questionHook: '僵局可能持续，别指望别人能替他把账还清。',
-    },
-  },
-];
-
-function matchArchetype(card: CardReading): CardArchetype['upright'] | null {
-  const rev = card.orientation === 'reversed';
-  for (const a of ARCHETYPES) {
-    if (!a.match.test(card.cardName)) continue;
-    if (rev && a.reversed) return a.reversed;
-    return a.upright;
-  }
-  return null;
-}
-
 function orientLabel(card: CardReading): string {
   return card.orientation === 'reversed' ? '逆位' : '正位';
 }
@@ -137,7 +60,7 @@ export function buildNarrativeCardInsight(
   const subject = inferQuestionSubject(question);
   const subj = SUBJECT_LABEL[subject];
   const frame = positionalFrame(card, index);
-  const arch = matchArchetype(card);
+  const arch = matchCardArchetype(card);
   const mother = motherTheme(card);
   const sketch = arch?.sketch || imageSketch(card);
   const theme = arch?.theme || mother;
@@ -199,6 +122,7 @@ export function buildSpreadSynthesis(
   question: string,
   lens: ReadingLens,
   userIntuition?: string,
+  series?: ReadingSeriesContext | null,
 ): string {
   if (cards.length < 2) return '';
 
@@ -209,7 +133,8 @@ export function buildSpreadSynthesis(
   const frames = cards.map((c, i) => positionalFrame(c, i));
   const isTimeline = frames.some((f) => f === '过去' || f === '现在' || f === '未来');
 
-  let body = `这组牌（${names}）`;
+  let body = series?.synthesisPrefix ? `${series.synthesisPrefix}\n` : '';
+  body += `这组牌（${names}）`;
 
   if (/为什么|原因|动机/.test(question)) {
     body += `没有给出「因为想复合」或「因为缺钱」式的绝对答案，而是在描绘${subj}目前真实的心理状态。`;
@@ -222,7 +147,7 @@ export function buildSpreadSynthesis(
   if (isTimeline) {
     const chapters = cards
       .map((c, i) => {
-        const arch = matchArchetype(c);
+        const arch = matchCardArchetype(c);
         const f = frames[i];
         return `${f}【${c.cardName}】${arch ? `：${arch.theme}` : ''}`;
       })
@@ -279,7 +204,9 @@ export function empathyNarrativeLead(
   cards: CardReading[],
   question: string,
   lens: ReadingLens,
+  series?: ReadingSeriesContext | null,
 ): string {
+  if (series?.lead) return series.lead;
   const names = cards.map((c) => c.cardName).join('、');
   const subject = inferQuestionSubject(question);
   if (lens === 'family' && subject === 'father') {

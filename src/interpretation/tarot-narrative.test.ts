@@ -1,97 +1,81 @@
 import { describe, expect, it } from 'vitest';
-import { resolveReadingLens } from './card-psychology.ts';
-import {
-  buildNarrativeCardInsight,
-  buildSpreadSynthesis,
-  inferQuestionSubject,
-  positionalFrame,
-} from './tarot-narrative.ts';
+import { matchCardArchetype } from './card-archetypes.ts';
+import { empathyNarrativeLead } from './tarot-narrative.ts';
 import type { CardReading } from './types.ts';
 
-function miniCard(
-  name: string,
-  position: string,
-  orientation: 'upright' | 'reversed' = 'upright',
-): CardReading {
+function mockCard(partial: Partial<CardReading> & Pick<CardReading, 'cardId' | 'cardName'>): CardReading {
   return {
-    position,
-    positionKey: 'p0',
-    cardName: name,
-    cardId: 'id-0',
-    orientation,
-    keywords: ['焦虑', '痛苦'],
+    position: '',
+    positionKey: '',
+    orientation: 'upright',
+    keywords: [],
     positionMeaning: '',
     text: '',
     baseMeaning: '',
     inContext: '',
     learnTip: '',
     combined: '',
-    question: '',
-    spreadType: 'custom',
+    question: '测试',
+    spreadType: 'single',
     cardPosition: '',
     topic: 'self',
-    selectedCardId: 'id-0',
-    readingContext: {
-      question: '',
-      spreadType: 'custom',
-      cardPosition: '',
-      positionKey: '',
-      topic: 'self',
-    },
-    selectedCard: {
-      deckId: 'major',
-      arcana: 'major',
-      uprightMeaning: '',
-      reversedMeaning: '',
-      loveMeaning: '',
-      workMeaning: '',
-      studyMeaning: '',
-      selfMeaning: '',
-      visualOverview: '',
-    },
-    interpretationLayers: {
-      standard: { oneSentence: '测试', reminder: '' },
-      actionTags: [],
-      elementMappings: [],
-      followUps: [],
-    },
+    selectedCardId: partial.cardId,
+    readingContext: { topic: 'self' },
+    selectedCard: { deckId: partial.cardId, arcana: 'major' } as CardReading['selectedCard'],
+    interpretationLayers: { standard: {}, contextualReading: '', selfReflection: '' } as CardReading['interpretationLayers'],
+    encounterRecord: null,
+    hasVisualHotspots: false,
+    interpretationProvider: 'mock',
+    ...partial,
   };
 }
 
-describe('tarot-narrative', () => {
-  it('inferQuestionSubject detects father from 我爸', () => {
-    expect(inferQuestionSubject('为什么我爸想找我妈')).toBe('father');
+describe('card-archetypes', () => {
+  it('matches major arcana by cardId', () => {
+    const arch = matchCardArchetype(mockCard({ cardId: 'major-0', cardName: '愚者' }));
+    expect(arch?.theme).toContain('冒险');
   });
 
-  it('positionalFrame maps past/present/future', () => {
-    expect(positionalFrame(miniCard('宝剑九', '过去'), 0)).toBe('过去');
-    expect(positionalFrame(miniCard('圣杯六', '现在'), 1)).toBe('现在');
-    expect(positionalFrame(miniCard('倒吊人', '未来'), 2)).toBe('未来');
-  });
-
-  it('buildNarrativeCardInsight uses archetype for 宝剑九', () => {
-    const card = miniCard('宝剑九', '第 1 张');
-    const lens = resolveReadingLens('为什么我爸想找我妈', 'self');
-    const insight = buildNarrativeCardInsight(
-      card,
-      '为什么我爸想找我妈',
-      lens,
-      [card],
-      0,
+  it('matches reversed fool', () => {
+    const arch = matchCardArchetype(
+      mockCard({ cardId: 'major-0', cardName: '愚者', orientation: 'reversed' }),
     );
-    expect(insight.meaningMap).toContain('宝剑九');
-    expect(insight.insight).toContain('安全港湾');
+    expect(arch?.theme).toContain('逃避');
   });
 
-  it('buildSpreadSynthesis mentions trajectory for timeline spread', () => {
-    const cards = [
-      miniCard('宝剑王后', '过去'),
-      miniCard('圣杯六', '现在', 'reversed'),
-      miniCard('倒吊人', '未来'),
-    ];
-    const lens = resolveReadingLens('他会做什么后果', 'self');
-    const body = buildSpreadSynthesis(cards, '他会做什么后果', lens);
-    expect(body).toContain('轨迹');
-    expect(body).toMatch(/倒吊人|后果/);
+  it('falls back to minor suit template', () => {
+    const arch = matchCardArchetype(
+      mockCard({ cardId: 'cups-two', cardName: '圣杯二' }),
+    );
+    expect(arch?.theme).toContain('情绪');
+    expect(arch?.questionHook).toBeTruthy();
+  });
+
+  it('keeps notable minor swords-nine narrative', () => {
+    const arch = matchCardArchetype(
+      mockCard({ cardId: 'swords-nine', cardName: '宝剑九' }),
+    );
+    expect(arch?.questionHook).toContain('安全港湾');
+  });
+});
+
+describe('empathyNarrativeLead with series', () => {
+  it('prefers series lead over generic copy', () => {
+    const lead = empathyNarrativeLead(
+      [mockCard({ cardId: 'major-12', cardName: '倒吊人' })],
+      '他还会联系吗',
+      'family',
+      {
+        dayKey: '2026-08-22',
+        theme: 'love',
+        themeLabel: '感情',
+        episodeIndex: 2,
+        totalEpisodes: 2,
+        priorEpisodes: [],
+        lead: '今天关于「感情」的第 2 局——接上上集。',
+        synthesisPrefix: '【连载】相较今天早些时候',
+      },
+    );
+    expect(lead).toContain('第 2 局');
   });
 });

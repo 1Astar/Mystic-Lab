@@ -1,4 +1,8 @@
 import type { QuestionAnswer, QuestionTopic } from '../knowledge/types.ts';
+import {
+  resolveReadingSeries,
+  type ReadingSeriesContext,
+} from '../journal/reading-series.ts';
 import { intentActionsPlain } from '../mystic-engine/intent-actions.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
 import { isFreeArrangeSpread } from '../tarot/spread-layout.ts';
@@ -61,11 +65,19 @@ export type QuestionThread = {
   synthesis?: string;
   /** 边界 / 行动建议列表 */
   adviceLines?: string[];
+  /** 同日连载提示（有上集/下集时） */
+  seriesLead?: string;
+  readingSeries?: ReadingSeriesContext;
 };
 
 export type BuildQuestionThreadOptions = {
   spreadType?: SpreadType | string;
   userIntuition?: string;
+  entryId?: string | null;
+  at?: string;
+  subjectId?: string;
+  sceneTags?: string[];
+  series?: ReadingSeriesContext | null;
 };
 
 const INTENT_HEAD: Record<SubQuestionIntent, string> = {
@@ -255,12 +267,62 @@ function fillActionFromIntent(
   return sanitizeTopicText(existing, topic);
 }
 
-function empathyFor(topic: QuestionTopic, cards: CardReading[]): string {
+function empathyFor(
+  topic: QuestionTopic,
+  cards: CardReading[],
+  series?: ReadingSeriesContext | null,
+): string {
+  if (series?.lead) return series.lead;
   const names = cards.map((c) => c.cardName).join('、');
   if (topic === 'work') {
     return mockWorkEmpathy(names);
   }
   return `根据你的牌阵（${names}），我先帮你把问题理清——答案最终仍在你心里。`;
+}
+
+function resolveSeriesContext(
+  question: string,
+  options?: BuildQuestionThreadOptions,
+): ReadingSeriesContext | null {
+  if (options?.series !== undefined) return options.series;
+  if (!options?.at) return null;
+  return resolveReadingSeries({
+    question,
+    at: options.at,
+    entryId: options.entryId,
+    subjectId: options.subjectId,
+    sceneTags: options.sceneTags,
+  });
+}
+
+function attachSeries(thread: QuestionThread, series: ReadingSeriesContext | null): QuestionThread {
+  return applyReadingSeriesToThread(thread, series);
+}
+
+/** 给已有 thread 贴上同日连载信息（结果页 / 手札回看） */
+export function applyReadingSeriesToThread(
+  thread: QuestionThread,
+  series: ReadingSeriesContext | null,
+): QuestionThread {
+  if (!series?.lead) return thread;
+  const hasPrefix = (thread.synthesis || thread.overall || '').includes('【连载】');
+  const synthesis = series.synthesisPrefix
+    ? hasPrefix
+      ? thread.synthesis
+      : [series.synthesisPrefix, thread.synthesis].filter(Boolean).join('\n')
+    : thread.synthesis;
+  const overall =
+    series.synthesisPrefix && !thread.synthesis && !hasPrefix
+      ? `${series.synthesisPrefix}\n${thread.overall}`
+      : thread.overall;
+  return {
+    ...thread,
+    seriesLead: series.lead,
+    readingSeries: series,
+    empathyLead: series.lead,
+    synthesis,
+    overall: synthesis || overall,
+  };
 }
 
 /** 每张牌各一段：牌意心理学 + 共时性共振 */
@@ -276,6 +338,7 @@ export function buildPerCardQuestionThread(
   const topic = cards[0]!.topic;
   const lens = resolveReadingLens(q, topic);
   const userIntuition = options?.userIntuition?.trim();
+  const series = resolveSeriesContext(q, options);
 
   const answers: ThreadAnswer[] = cards.map((card, i) => {
     const narrative = buildNarrativeCardInsight(
@@ -302,7 +365,7 @@ export function buildPerCardQuestionThread(
   });
 
   const synthesis = sanitizeTopicText(
-    buildSpreadSynthesis(cards, q, lens, userIntuition),
+    buildSpreadSynthesis(cards, q, lens, userIntuition, series),
     topic,
   );
   const adviceLines = buildAdviceLines(cards, q, lens).map((line) =>
@@ -318,16 +381,19 @@ export function buildPerCardQuestionThread(
     topic,
   );
 
-  return {
-    empathyLead: sanitizeTopicText(empathyNarrativeLead(cards, q, lens), topic),
-    overall,
-    answers,
-    oneLiner,
-    provider,
-    perCardMode: true,
-    synthesis: synthesis || undefined,
-    adviceLines: adviceLines.length ? adviceLines : undefined,
-  };
+  return attachSeries(
+    {
+      empathyLead: sanitizeTopicText(empathyNarrativeLead(cards, q, lens, series), topic),
+      overall,
+      answers,
+      oneLiner,
+      provider,
+      perCardMode: true,
+      synthesis: synthesis || undefined,
+      adviceLines: adviceLines.length ? adviceLines : undefined,
+    },
+    series,
+  );
 }
 
 /**
@@ -398,8 +464,9 @@ export function buildQuestionThread(
   })();
 
   const lens = resolveReadingLens(q, topic);
+  const series = resolveSeriesContext(q, options);
   const spreadSynth = sanitizeTopicText(
-    buildSpreadSynthesis(cards, q, lens, options?.userIntuition),
+    buildSpreadSynthesis(cards, q, lens, options?.userIntuition, series),
     topic,
   );
 
@@ -424,15 +491,18 @@ export function buildQuestionThread(
     topic,
   );
 
-  return {
-    empathyLead: empathyFor(topic, cards),
-    overall,
-    answers,
-    oneLiner,
-    provider,
-    synthesis: spreadSynth || undefined,
-    adviceLines: adviceLines.length ? adviceLines : undefined,
-  };
+  return attachSeries(
+    {
+      empathyLead: empathyFor(topic, cards, series),
+      overall,
+      answers,
+      oneLiner,
+      provider,
+      synthesis: spreadSynth || undefined,
+      adviceLines: adviceLines.length ? adviceLines : undefined,
+    },
+    series,
+  );
 }
 
 /** 优先用「绑定牌」上的 questionAnswers，避免多牌各答全套造成重复 */

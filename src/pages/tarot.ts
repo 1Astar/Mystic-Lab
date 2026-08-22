@@ -9,7 +9,8 @@ import {
 import { GestureBridge } from '../core/gesture-bridge.ts';
 import { createFallbackInput, type FallbackAction } from '../core/fallback-input.ts';
 import { createInterpretationProvider, readingCoversDrawn } from '../interpretation/llm-provider.ts';
-import { buildQuestionThread, shouldUsePerCardThread } from '../interpretation/question-thread.ts';
+import { buildQuestionThread, shouldUsePerCardThread, applyReadingSeriesToThread } from '../interpretation/question-thread.ts';
+import { resolveReadingSeries } from '../journal/reading-series.ts';
 import { polishReadingCopy } from '../interpretation/reading-polish.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { detectQuestionTheme, unlockSingleCard } from '../codex/collection.ts';
@@ -1293,12 +1294,31 @@ export function renderTarot(root: HTMLElement): () => void {
         perCard &&
         live.questionThread?.answers.length &&
         live.questionThread.answers.length < live.cards.length;
-      if ((!live.questionThread?.answers.length || threadStale) && question.trim()) {
-        const rebuilt = buildQuestionThread(live.cards, question, live.provider ?? 'mock', {
+      if (question.trim()) {
+        const journalEntry = currentJournalId ? getJournalEntryById(currentJournalId) : null;
+        const threadOpts = {
           spreadType,
           userIntuition: live.userIntuition,
-        });
-        if (rebuilt) live.questionThread = rebuilt;
+          entryId: currentJournalId,
+          at: journalEntry?.createdAt ?? new Date().toISOString(),
+          subjectId: journalEntry?.subjectId,
+          sceneTags: journalEntry?.sceneTags,
+        };
+        if (!live.questionThread?.answers.length || threadStale) {
+          const rebuilt = buildQuestionThread(live.cards, question, live.provider ?? 'mock', threadOpts);
+          if (rebuilt) live.questionThread = rebuilt;
+        } else {
+          const series = resolveReadingSeries({
+            question,
+            at: threadOpts.at,
+            entryId: threadOpts.entryId,
+            subjectId: threadOpts.subjectId,
+            sceneTags: threadOpts.sceneTags,
+          });
+          if (series && live.questionThread) {
+            live.questionThread = applyReadingSeriesToThread(live.questionThread, series);
+          }
+        }
       }
 
       const tip = live.userIntuition?.trim();
