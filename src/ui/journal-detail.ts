@@ -1,3 +1,4 @@
+import { resolveReadingSeriesForEntry } from '../journal/reading-series.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import type { JournalEntry } from '../journal/records.ts';
 import { updateJournalReadingSnapshot } from '../journal/records.ts';
@@ -49,7 +50,11 @@ export function mountJournalDetail(
   const supplementUsed = countJournalSupplements(entry);
   const supplementLeft = Math.max(0, MAX_TAROT_SUPPLEMENT - supplementUsed);
   const canSupplement = Boolean(!isPartial && onSupplement && supplementLeft > 0);
-  const hasAi = (entry.aiSessions?.length ?? 0) > 0;
+  const series = resolveReadingSeriesForEntry(entry);
+  const seriesMeta =
+    series && series.totalEpisodes > 1
+      ? `<p class="journal-detail-series">同日连载 · 第 ${series.episodeIndex}/${series.totalEpisodes} 局 · ${escapeHtml(series.themeLabel)}</p>`
+      : '';
 
   if (hydratedThread && reading.questionThread) {
     updateJournalReadingSnapshot(entry.id, reading);
@@ -62,6 +67,7 @@ export function mountJournalDetail(
       <time class="journal-detail-date">${escapeHtml(date)}${isPartial ? ' · 未完成' : ''}</time>
       <h2 class="journal-detail-question">${escapeHtml(entry.question || '（未记录问题）')}</h2>
       <p class="journal-detail-meta">${escapeHtml(spreadLabel)} · ${reading.cards.length} 张牌</p>
+      ${seriesMeta}
       ${tarotAiBadgeHtml(entry.aiSessions?.length ?? 0)}
       ${
         canContinue
