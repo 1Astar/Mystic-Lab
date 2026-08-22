@@ -1,4 +1,4 @@
-﻿import { detectBrowserEnv } from '../core/browser-env.ts';
+import { detectBrowserEnv } from '../core/browser-env.ts';
 import { CameraService } from '../core/camera-service.ts';
 import {
   HeldGestureDetector,
@@ -40,6 +40,8 @@ import { draftFromTarot, draftGeneric } from '../share/drafts.ts';
 import { mountInviteCompanionBar } from '../share/invite-bar.ts';
 import { downloadShareCard } from '../share/card-renderer.ts';
 import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
+import { openLabDeepSheet } from '../ui/lab-deep-sheet.ts';
+import { openTarotDeepReadingEntry } from '../tarot/personalize-deep.ts';
 import { renderCardFace, runShuffleAnimation, wait } from '../tarot/animations.ts';
 import { renderDeckFanHTML, type DeckFanHandle } from '../ui/tarot-deck-fan.ts';
 import {
@@ -89,6 +91,7 @@ import {
 } from '../ui/question-rewrite-panel.ts';
 import { openQuestionGuideModal, renderQuestionStageBackdrop } from '../ui/question-type-guide.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
+import { bindLabLearnStrip, labLearnStripHtml } from '../ui/lab-learn-strip.ts';
 
 type TarotState =
   | 'landing'
@@ -205,6 +208,36 @@ export function renderTarot(root: HTMLElement): () => void {
         summary: question ? `问题：${question}` : '正在塔罗解读。',
         label: '塔罗',
         invitePosterPath: TAROT_SHARE_POSTER_PATH,
+      });
+    },
+    onDeep: () => {
+      if (!reading || drawnCards.length === 0) {
+        openLabDeepSheet({
+          system: 'tarot',
+          title: '塔罗追问',
+          initialTab: 'ask',
+          deepHint: '完成抽牌并出结果后，可生成贴合你的 AI 深度解读。',
+          answerConcept: (q) => ({
+            answer: `关于「${q}」：抽牌结果出来后，可用深度解读结合牌阵追问。`,
+            hit: false,
+          }),
+        });
+        return;
+      }
+      const journalId = ensureJournalSaved();
+      openTarotDeepReadingEntry({
+        journalId,
+        question,
+        spreadType,
+        cards: drawnCards.map((c) => ({
+          name: c.card.nameZh,
+          position: c.position ?? '',
+          reversed: c.reversed,
+        })),
+        summary: reading.summary,
+        learningNote: reading.learningNote ?? learningNote,
+        readingSnapshot: reading,
+        initialTab: 'deep',
       });
     },
   });
@@ -339,6 +372,11 @@ export function renderTarot(root: HTMLElement): () => void {
     ritualInputUnbind?.();
     ritualInputUnbind = null;
 
+    // place 阶段：手势/触屏/随心自由摆放均需点空位放下
+    if (state === 'place') {
+      bindPlaceSlotTaps();
+    }
+
     const step = ritualInputStep();
     if (!step) return;
 
@@ -367,10 +405,6 @@ export function renderTarot(root: HTMLElement): () => void {
         step === 'flip'
       ) {
         ritualInputUnbind = bindRitualInput(stage, step, callbacks);
-      }
-      // place：手势瞄准，触屏可点空位放下
-      if (state === 'place') {
-        bindPlaceSlotTaps();
       }
       return;
     }
@@ -1152,6 +1186,13 @@ export function renderTarot(root: HTMLElement): () => void {
       <h2 class="section-title">占问结果</h2>
       <p class="tarot-hint">先看整盘；点牌可看牌面与探索 · 新牌已收入探索</p>
       <div class="result-panel" id="result-cards">
+        ${labLearnStripHtml({
+          tip:
+            (learningNote || '').trim() ||
+            '先看整盘叙事；想查单牌深度含义，进图鉴。误读纠正也在图鉴里。',
+          deepen: { href: '/tarot/tujian', label: '进塔罗图鉴 ›' },
+          practice: { href: '/tarot/guess', label: '猜牌义练一题 ›' },
+        })}
         <div id="reading-switch-panel"></div>
         <div class="learning-card">
           <h3>写下此刻的感悟</h3>
@@ -1173,7 +1214,10 @@ export function renderTarot(root: HTMLElement): () => void {
 
       // 旧手札 / 缺 thread 时现场补齐，避免落到干瘪的文字列表
       if (!live.questionThread?.answers.length && question.trim()) {
-        const rebuilt = buildQuestionThread(live.cards, question, 'mock');
+        const rebuilt = buildQuestionThread(live.cards, question, 'mock', {
+          spreadType,
+          userIntuition: live.userIntuition,
+        });
         if (rebuilt) live.questionThread = rebuilt;
       }
 
@@ -1250,6 +1294,7 @@ export function renderTarot(root: HTMLElement): () => void {
     };
 
     paintPanel();
+    bindLabLearnStrip(stage);
 
     const reflectionEl = document.getElementById('result-reflection') as HTMLTextAreaElement | null;
     const reflectionEcho = document.getElementById('result-reflection-echo');
@@ -1322,6 +1367,12 @@ export function renderTarot(root: HTMLElement): () => void {
     codexBtn.textContent = '查看探索';
     codexBtn.addEventListener('click', () => navigate('/tarot/tujian'));
 
+    const guessBtn = document.createElement('button');
+    guessBtn.type = 'button';
+    guessBtn.className = 'btn btn-ghost';
+    guessBtn.textContent = '猜牌义盲盒';
+    guessBtn.addEventListener('click', () => navigate('/tarot/guess'));
+
     const journalBtn = document.createElement('button');
     journalBtn.type = 'button';
     journalBtn.className = 'btn btn-ghost';
@@ -1345,7 +1396,7 @@ export function renderTarot(root: HTMLElement): () => void {
 
     const resultActions = document.createElement('div');
     resultActions.className = 'result-actions';
-    resultActions.append(cardPngBtn, codexBtn, journalBtn, crossBtn, retryBtn);
+    resultActions.append(cardPngBtn, codexBtn, guessBtn, journalBtn, crossBtn, retryBtn);
 
     if (supplementCount < MAX_SUPPLEMENT) {
       const theme = supplementThemeLabel(question);
@@ -1815,6 +1866,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const provider = createInterpretationProvider();
     const next = await provider.interpret(drawnCards, question, spreadType, {
       background: questionBackground,
+      userIntuition: reading?.userIntuition,
     });
     const prevCards = reading?.cards ?? [];
     reading = {
