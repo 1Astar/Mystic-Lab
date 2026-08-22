@@ -2134,6 +2134,34 @@
   opacity: 1;
 }
 
+.journal-detail-supplement {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.journal-detail-deep {
+  margin-top: 8px;
+}
+
+.journal-detail-ai-fold {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+
+.journal-detail-ai-fold summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
 .journal-detail {
   position: fixed;
   inset: 0;
