@@ -6,7 +6,7 @@ import {
   updateJournalReflection,
   type JournalEntry,
 } from '../journal/records.ts';
-import { canResumePartial, stashResumeJournalId } from '../journal/resume.ts';
+import { canResumePartial, stashResumeJournalId, stashSupplementJournalId } from '../journal/resume.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
@@ -14,6 +14,11 @@ import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
 function continuePartialReading(entry: JournalEntry): void {
   if (!canResumePartial(entry)) return;
   stashResumeJournalId(entry.id);
+  navigate('/tarot/reading');
+}
+
+function continueSupplementReading(entry: JournalEntry): void {
+  stashSupplementJournalId(entry.id);
   navigate('/tarot/reading');
 }
 
@@ -40,7 +45,11 @@ export function renderJournal(root: HTMLElement): void {
   reviewHost.className = 'tarot-journal-review-host';
   page.appendChild(reviewHost);
 
+  let disposeDetail: (() => void) | null = null;
+
   function closeDetail(): void {
+    disposeDetail?.();
+    disposeDetail = null;
     page.querySelector('.journal-detail')?.remove();
   }
 
@@ -49,13 +58,15 @@ export function renderJournal(root: HTMLElement): void {
       const { reading, regenerated, hydratedThread } = resolveJournalReading(entry);
       closeDetail();
       const detail = document.createElement('aside');
-      mountJournalDetail(detail, {
+      disposeDetail = mountJournalDetail(detail, {
         entry,
         reading,
         regenerated,
         hydratedThread,
         onClose: closeDetail,
         onContinue: entry.status === 'partial' ? () => continuePartialReading(entry) : undefined,
+        onSupplement:
+          entry.status !== 'partial' ? () => continueSupplementReading(entry) : undefined,
       });
       page.appendChild(detail);
     } catch {

@@ -33,7 +33,12 @@ import {
   updateJournalReflection,
   upsertJournalProgress,
 } from '../journal/records.ts';
-import { resolveResumeFromStash } from '../journal/resume.ts';
+import {
+  resolveResumeFromStash,
+  resolveSupplementFromStash,
+  MAX_TAROT_SUPPLEMENT,
+  type TarotResumeSession,
+} from '../journal/resume.ts';
 import { mergeReadingBackground } from '../life/profile-context.ts';
 import { navigate } from '../router.ts';
 import { TAROT_SHARE_POSTER_PATH } from '../share/cover.ts';
@@ -142,7 +147,7 @@ export function renderTarot(root: HTMLElement): () => void {
   let gestureFallback = !env.canUseGesture;
   let cameraOn = false;
   let supplementCount = 0;
-  const MAX_SUPPLEMENT = 2;
+  const MAX_SUPPLEMENT = MAX_TAROT_SUPPLEMENT;
   /** 当前牌解读的后台 Promise（保留字段；全翻后统一 interpret） */
   let pendingInterpret: Promise<void> | null = null;
 
@@ -2078,6 +2083,32 @@ export function renderTarot(root: HTMLElement): () => void {
     setState('draw');
   }
 
+  function applySupplementSession(s: TarotResumeSession): void {
+    currentJournalId = s.journalId;
+    question = s.question;
+    spreadType = s.spreadType;
+    drawnCards = [...s.drawnCards];
+    supplementCount = s.supplementCount ?? 0;
+    reading = s.reading;
+    backgroundPromptDone = s.backgroundPromptDone ?? true;
+    questionBackground = reading?.questionBackground ?? questionBackground;
+    revealedFlags = [...s.revealedFlags];
+    drawMode = 'touch';
+    syncGestureEnvBanner();
+    boardPlacements = ensurePlacements(resolveActiveSpread(spreadType), null);
+    const excludeIds = drawnCards.map((d) => d.card.id);
+    const clarifier = drawClarifierCard(excludeIds);
+    if (!clarifier) {
+      hintBar.setProgress('无法补牌：牌堆已用尽');
+      return;
+    }
+    cardPool = [...drawnCards, clarifier];
+    supplementCount += 1;
+    currentIndex = drawnCards.length;
+    setState('draw');
+    hintBar.setProgress('已从手札恢复 · 请抽补牌');
+  }
+
   const resume = resolveResumeFromStash();
   if (resume?.ok) {
     const s = resume.session;
@@ -2098,13 +2129,19 @@ export function renderTarot(root: HTMLElement): () => void {
         ? '已恢复未完成的占问 · 牌已齐，可看解读'
         : `已恢复未完成的占问 · 已抽 ${s.drawnCards.length}/${s.cardPool.length} 张`,
     );
-    } else {
+  } else {
     if (resume && !resume.ok) {
       hintBar.setProgress(resume.reason);
     }
+    const supplement = resolveSupplementFromStash();
+    if (supplement?.ok) {
+      applySupplementSession(supplement.session);
+    } else if (supplement && !supplement.ok) {
+      hintBar.setProgress(supplement.reason);
+    }
+  }
   renderStage();
   syncHintBar();
-  }
 
   window.addEventListener('pagehide', onPageHide);
 

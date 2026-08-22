@@ -15,6 +15,39 @@ import {
 import { reconstructDrawnCards } from './replay.ts';
 
 export const RESUME_JOURNAL_KEY = 'mystic-lab-tarot-resume-journal';
+export const SUPPLEMENT_JOURNAL_KEY = 'mystic-lab-tarot-supplement-journal';
+export const MAX_TAROT_SUPPLEMENT = 2;
+
+export function stashSupplementJournalId(id: string): void {
+  try {
+    sessionStorage.setItem(SUPPLEMENT_JOURNAL_KEY, id);
+  } catch {
+    /* private mode / quota */
+  }
+}
+
+export function consumeSupplementJournalId(): string | null {
+  try {
+    const id = sessionStorage.getItem(SUPPLEMENT_JOURNAL_KEY);
+    if (id) sessionStorage.removeItem(SUPPLEMENT_JOURNAL_KEY);
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+/** 已完成局已补张数（position 含「补牌」） */
+export function countJournalSupplements(entry: JournalEntry): number {
+  return entry.cards.filter((c) => c.position.includes('补牌')).length;
+}
+
+export function canSupplementJournal(entry: JournalEntry): boolean {
+  return (
+    entry.status !== 'partial' &&
+    entry.cards.length > 0 &&
+    countJournalSupplements(entry) < MAX_TAROT_SUPPLEMENT
+  );
+}
 
 export function stashResumeJournalId(id: string): void {
   try {
@@ -54,6 +87,10 @@ export type TarotResumeSession = {
   reading: ReadingResult | null;
   /** true：牌阵已抽满，应进入翻开后/结果路径 */
   readyForResult: boolean;
+  /** 从手札补牌续作 */
+  supplementMode?: boolean;
+  supplementCount?: number;
+  backgroundPromptDone?: boolean;
 };
 
 export type BuildResumeResult =
@@ -123,6 +160,53 @@ export function buildResumeSession(entry: JournalEntry): BuildResumeResult {
       readyForResult,
     },
   };
+}
+
+export function buildSupplementSession(entry: JournalEntry): BuildResumeResult {
+  if (entry.status === 'partial') {
+    return { ok: false, reason: '请先完成原牌阵，再补牌' };
+  }
+  if (!canSupplementJournal(entry)) {
+    return { ok: false, reason: `本场已补满 ${MAX_TAROT_SUPPLEMENT} 张` };
+  }
+
+  let drawn: DrawnCard[];
+  try {
+    drawn = reconstructDrawnCards(entry);
+  } catch {
+    return { ok: false, reason: '无法恢复此占问（牌面数据缺失）' };
+  }
+  if (!drawn.length) {
+    return { ok: false, reason: '无法补牌（尚无已抽牌）' };
+  }
+
+  return {
+    ok: true,
+    session: {
+      journalId: entry.id,
+      question: entry.question,
+      spreadType: entry.spreadType,
+      drawnCards: drawn,
+      cardPool: [...drawn],
+      currentIndex: drawn.length,
+      revealedFlags: drawn.map(() => true),
+      reading: entry.readingSnapshot ?? null,
+      readyForResult: false,
+      supplementMode: true,
+      supplementCount: countJournalSupplements(entry),
+      backgroundPromptDone: true,
+    },
+  };
+}
+
+export function resolveSupplementFromStash(): BuildResumeResult | null {
+  const id = consumeSupplementJournalId();
+  if (!id) return null;
+  const entry = getJournalEntryById(id);
+  if (!entry) {
+    return { ok: false, reason: '未找到要补牌的手札' };
+  }
+  return buildSupplementSession(entry);
 }
 
 export function resolveResumeFromStash(): BuildResumeResult | null {
