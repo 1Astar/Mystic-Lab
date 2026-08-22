@@ -6,15 +6,19 @@ import {
   updateJournalReflection,
   type JournalEntry,
 } from '../journal/records.ts';
-import { canResumePartial, stashResumeJournalId } from '../journal/resume.ts';
+import { canResumePartial, stashResumeJournalId, stashSupplementJournalId } from '../journal/resume.ts';
 import { resolveJournalReading } from '../journal/replay.ts';
 import { mountJournalDetail } from '../ui/journal-detail.ts';
 import { mountTarotReviewBanner } from '../ui/tarot/review-banner.ts';
-import { tarotAiBadgeHtml } from '../ui/tarot-ai-sessions.ts';
 
 function continuePartialReading(entry: JournalEntry): void {
   if (!canResumePartial(entry)) return;
   stashResumeJournalId(entry.id);
+  navigate('/tarot/reading');
+}
+
+function continueSupplementReading(entry: JournalEntry): void {
+  stashSupplementJournalId(entry.id);
   navigate('/tarot/reading');
 }
 
@@ -41,7 +45,11 @@ export function renderJournal(root: HTMLElement): void {
   reviewHost.className = 'tarot-journal-review-host';
   page.appendChild(reviewHost);
 
+  let disposeDetail: (() => void) | null = null;
+
   function closeDetail(): void {
+    disposeDetail?.();
+    disposeDetail = null;
     page.querySelector('.journal-detail')?.remove();
   }
 
@@ -50,13 +58,15 @@ export function renderJournal(root: HTMLElement): void {
       const { reading, regenerated, hydratedThread } = resolveJournalReading(entry);
       closeDetail();
       const detail = document.createElement('aside');
-      mountJournalDetail(detail, {
+      disposeDetail = mountJournalDetail(detail, {
         entry,
         reading,
         regenerated,
         hydratedThread,
         onClose: closeDetail,
         onContinue: entry.status === 'partial' ? () => continuePartialReading(entry) : undefined,
+        onSupplement:
+          entry.status !== 'partial' ? () => continueSupplementReading(entry) : undefined,
       });
       page.appendChild(detail);
     } catch {
@@ -105,12 +115,10 @@ export function renderJournal(root: HTMLElement): void {
           : !isPartial && entry.fulfilled === false
             ? '后来觉得：不太准'
             : '';
-      const aiBadge = tarotAiBadgeHtml(entry.aiSessions?.length ?? 0);
 
       item.innerHTML = `
         <time class="journal-date">${date}${isPartial ? ' · <span class="journal-badge">未完成</span>' : ''}</time>
         <p class="journal-question">${entry.question || '（未记录问题）'}</p>
-        ${aiBadge}
         <p class="journal-cards">${entry.cards.map((c) => `${c.position}·${c.name}`).join(' / ')}</p>
         <p class="journal-note">${isPartial ? entry.summary : entry.learningNote}</p>
         <p class="journal-open-hint">点击查看牌面与解读 →</p>
