@@ -36,6 +36,8 @@ export type ShareVisual =
         symbol?: string;
         cardId?: string;
         reversed?: boolean;
+        /** 导出用 data URL（withResolvedArt 填充） */
+        imageSrc?: string;
       }[];
     }
   | {
