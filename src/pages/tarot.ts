@@ -9,7 +9,7 @@ import {
 import { GestureBridge } from '../core/gesture-bridge.ts';
 import { createFallbackInput, type FallbackAction } from '../core/fallback-input.ts';
 import { createInterpretationProvider, readingCoversDrawn } from '../interpretation/llm-provider.ts';
-import { buildQuestionThread } from '../interpretation/question-thread.ts';
+import { buildQuestionThread, shouldUsePerCardThread } from '../interpretation/question-thread.ts';
 import { polishReadingCopy } from '../interpretation/reading-polish.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { detectQuestionTheme, unlockSingleCard } from '../codex/collection.ts';
@@ -22,6 +22,7 @@ import {
   type ChipGroup,
 } from '../knowledge/pre-reading-chips.ts';
 import { mountQuestionThread, openThreadCardPeek } from '../ui/question-thread-panel.ts';
+import { renderReadingStatusBanner } from '../ui/reading-status-banner.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
 import { mountReadingFeedbackPanel } from '../ui/reading-feedback-panel.ts';
 import { showRitualCompleteModal } from '../ui/ritual-complete-modal.ts';
@@ -1222,22 +1223,23 @@ export function renderTarot(root: HTMLElement): () => void {
     actions.innerHTML = '';
     stage.innerHTML = `
       <h2 class="section-title">占问结果</h2>
-      <p class="tarot-hint">先看整盘；点牌可看牌面与探索 · 新牌已收入探索</p>
+      <p class="tarot-hint">先看牌阵与直接回答；右下 ✦ 可开 AI 深度解读 · 点牌可看大图</p>
       <div class="result-panel" id="result-cards">
         ${labLearnStripHtml({
           tip:
             (learningNote || '').trim() ||
-            '先看整盘叙事；想查单牌深度含义，进图鉴。误读纠正也在图鉴里。',
+            '先看直接回答与按牌细读；想查单牌深度含义，进图鉴。',
           deepen: { href: '/tarot/tujian', label: '进塔罗图鉴 ›' },
           practice: { href: '/tarot/guess', label: '猜牌义练一题 ›' },
         })}
+        <div id="reading-status-host"></div>
         <div id="reading-switch-panel"></div>
+        <div id="result-feedback-host"></div>
         <div class="learning-card">
           <h3>写下此刻的感悟</h3>
           <textarea id="result-reflection" class="question-input" rows="3" placeholder="这次占问，你想记住什么？"></textarea>
           <p class="result-reflection-echo" id="result-reflection-echo" hidden></p>
         </div>
-        <div id="result-feedback-host"></div>
         <div class="result-rewrite-block">
           <button type="button" class="result-rewrite-trigger">
             对结果有疑问？可能是问法不对 — 让 AI 帮你改问
@@ -1248,11 +1250,23 @@ export function renderTarot(root: HTMLElement): () => void {
 
     const paintPanel = (): void => {
       const panel = document.getElementById('reading-switch-panel');
+      const statusHost = document.getElementById('reading-status-host');
       if (!panel) return;
 
-      // 旧手札 / 缺 thread 时现场补齐，避免落到干瘪的文字列表
-      if (!live.questionThread?.answers.length && question.trim()) {
-        const rebuilt = buildQuestionThread(live.cards, question, 'mock', {
+      if (statusHost) {
+        statusHost.innerHTML = renderReadingStatusBanner({
+          provider: live.provider,
+        });
+      }
+
+      // 旧手札 / 缺 thread / 多牌只绑了一张时现场补齐
+      const perCard = shouldUsePerCardThread(live.cards, question, spreadType);
+      const threadStale =
+        perCard &&
+        live.questionThread?.answers.length &&
+        live.questionThread.answers.length < live.cards.length;
+      if ((!live.questionThread?.answers.length || threadStale) && question.trim()) {
+        const rebuilt = buildQuestionThread(live.cards, question, live.provider ?? 'mock', {
           spreadType,
           userIntuition: live.userIntuition,
         });
