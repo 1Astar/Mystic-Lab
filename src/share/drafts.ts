@@ -83,39 +83,83 @@ export function draftFromTarot(input: {
   reading: ReadingResult;
   question: string;
 }): ShareDraft {
-  const sections: ShareDraft['sections'] = [
-    { heading: '核心', body: input.reading.summary },
-  ];
-  if (input.reading.questionThread?.answers?.length) {
-    for (const item of input.reading.questionThread.answers.slice(0, 4)) {
-      const body = [item.insight, item.action].filter(Boolean).join('\n');
-      if (body) {
-        sections.push({
-          heading: (item.heading || item.question || '解读').slice(0, 24),
-          body,
-        });
-      }
+  const cardLineup = input.cards
+    .map((c) => {
+      const pos = c.position?.trim() || '';
+      const label = cardLabel(c);
+      return pos ? `${pos}·${label}` : label;
+    })
+    .join(' / ');
+
+  const thread = input.reading.questionThread;
+  const sections: ShareDraft['sections'] = [];
+
+  if (cardLineup) {
+    sections.push({ heading: '本局牌阵', body: cardLineup });
+  }
+
+  if (thread?.synthesis?.trim()) {
+    sections.push({ heading: '综合结论', body: thread.synthesis.trim() });
+  } else if (thread?.overall?.trim() && thread.perCardMode) {
+    sections.push({ heading: '综合结论', body: thread.overall.trim() });
+  }
+
+  if (thread?.answers?.length) {
+    for (const item of thread.answers) {
+      const body = [item.meaningMap, item.insight, item.action]
+        .filter(Boolean)
+        .join('\n')
+        .trim();
+      if (!body) continue;
+      sections.push({
+        heading: (item.heading || item.question || '解读').slice(0, 36),
+        body: body.slice(0, 720),
+      });
+    }
+    if (thread.adviceLines?.length) {
+      sections.push({
+        heading: '给你的建议',
+        body: thread.adviceLines.join('\n'),
+      });
     }
   } else {
-    for (const c of input.reading.cards.slice(0, 4)) {
+    sections.push({ heading: '核心', body: input.reading.summary });
+    for (const c of input.reading.cards.slice(0, 5)) {
+      const body =
+        c.combined ||
+        c.inContext ||
+        c.interpretationLayers?.contextualReading ||
+        c.text ||
+        '';
+      if (!body.trim()) continue;
       sections.push({
-        heading: c.position || c.cardName,
-        body: c.combined || c.interpretationLayers?.contextualReading || c.text,
+        heading: `${c.cardName}${c.position ? ` · ${c.position}` : ''}`,
+        body: body.slice(0, 600),
       });
     }
   }
+
   if (input.reading.learningNote) {
     sections.push({ heading: '我学到了', body: input.reading.learningNote });
   }
+
+  const genericOneLiner = /把下一步缩成|今天就能做的小事/;
+  const headline = (
+    thread?.synthesis?.trim().slice(0, 80) ||
+    (thread?.perCardMode && thread.overall?.trim() && !genericOneLiner.test(thread.overall)
+      ? thread.overall.slice(0, 80)
+      : '') ||
+    (thread?.oneLiner && !genericOneLiner.test(thread.oneLiner) ? thread.oneLiner : '') ||
+    (cardLineup.length > 0 ? cardLineup.slice(0, 80) : '') ||
+    input.reading.summary.slice(0, 80) ||
+    '塔罗'
+  );
+
   return {
     system: 'tarot',
     question: input.question,
-    headline: (
-      input.reading.questionThread?.oneLiner ||
-      input.reading.summary ||
-      '塔罗'
-    ).slice(0, 80),
-    summary: input.reading.summary.slice(0, 400),
+    headline,
+    summary: (thread?.overall || input.reading.summary).slice(0, 400),
     sections,
     visual: {
       kind: 'tarot',
