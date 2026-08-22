@@ -807,15 +807,22 @@ export function renderTarot(root: HTMLElement): () => void {
     }
     hintBar.setStep(null);
     fallback.setVisible(false);
+    if (question.trim()) {
+      stage.querySelector('.flip-question-echo')?.remove();
+      stage.insertAdjacentHTML(
+        'beforeend',
+        `<p class="flip-question-echo">你问的是：「${escapePreReading(question.trim())}」</p>`,
+      );
+    }
     const lead = document.createElement('p');
     lead.className = 'teach-hint teach-hint-soft';
-    lead.textContent = '先一眼看全盘，再写下直觉或直接进入解读。';
+    lead.textContent = '牌已全部翻开。可先写直觉，也可直接看解读（新手推荐跳过）。';
     actions.appendChild(lead);
     if (backgroundPromptDone) {
       appendBtn('看解读', () => void finishAfterReveal(), 'btn');
     } else {
       appendBtn('写下直觉', () => setState('cardIntuition'), 'btn');
-      appendBtn('跳过，直接看解读', () => void finishAfterReveal(), 'btn btn-ghost');
+      appendBtn('跳过，直接看解读（新手推荐）', () => void finishAfterReveal(), 'btn btn-ghost');
     }
   }
 
@@ -1070,30 +1077,46 @@ export function renderTarot(root: HTMLElement): () => void {
     stage.innerHTML = `
       <div class="card-intuition-stage">
         <h2 class="section-title">全盘翻开 · 先听自己</h2>
-        <p class="tarot-hint">先一眼看过全阵，再写一句直觉；也可点选焦点牌。</p>
+        ${
+          question.trim()
+            ? `<p class="intuition-question-echo">你问的是：「${escapePreReading(question.trim())}」</p>`
+            : ''
+        }
+        <p class="intuition-optional-hint">处境与直觉<strong>可写可不写</strong> · 新手推荐直接点下方「跳过，直接看解读」</p>
+        <p class="tarot-hint">先一眼看过全阵；想写再展开下面两项，也可点选焦点牌。</p>
         <div class="intuition-board-mini" data-intuition-board></div>
         <div class="intuition-focus-row" role="group" aria-label="直觉焦点">${focusChips}</div>
 
         ${
           showBackground
-            ? `<section class="pre-block" data-pre-block="bg">
-          <h3 class="pre-block-title">当下情况 <span class="pre-optional">可选</span></h3>
-          <p class="teach-hint teach-hint-soft">补充一句处境，解读会更贴你；点选或手写都行。</p>
+            ? `<details class="pre-fold">
+          <summary class="pre-fold-summary">
+            <span class="pre-fold-title">当下情况</span>
+            <span class="pre-optional">可写可不写</span>
+          </summary>
+          <div class="pre-fold-body pre-block" data-pre-block="bg">
+          <p class="teach-hint teach-hint-soft">补充一句处境，解读会更贴你；点选或手写都行。不写也完全 OK。</p>
           ${renderProfileContextBarHtml('tarot-profile')}
           ${renderChipGroupsHtml(bgGroups, 'bg')}
           <label class="pre-reading-label" for="pre-reading-bg">也可以自己写</label>
           <textarea id="pre-reading-bg" class="question-input" rows="2" placeholder="例如：刚离职 / 已面了 3 家…">${escapePreReading(questionBackground)}</textarea>
-        </section>`
+          </div>
+        </details>`
             : ''
         }
 
-        <section class="pre-block" data-pre-block="feel">
-          <h3 class="pre-block-title">你的第一直觉 <span class="pre-optional">可选</span></h3>
-          <p class="teach-hint teach-hint-soft">对焦点牌或整阵，心里第一个念头是什么？</p>
+        <details class="pre-fold">
+          <summary class="pre-fold-summary">
+            <span class="pre-fold-title">你的第一直觉</span>
+            <span class="pre-optional">可写可不写</span>
+          </summary>
+          <div class="pre-fold-body pre-block" data-pre-block="feel">
+          <p class="teach-hint teach-hint-soft">对焦点牌或整阵，心里第一个念头是什么？跳过也不影响看解读。</p>
           ${renderChipGroupsHtml(feelGroups, 'feel')}
           <label class="pre-reading-label" for="card-intuition-input">也可以自己写</label>
           <textarea id="card-intuition-input" class="question-input" rows="3" placeholder="例如：整阵偏紧、中间那张在防守…"></textarea>
-        </section>
+          </div>
+        </details>
 
         <p class="intuition-status" hidden>正在生成解读…</p>
       </div>
@@ -1165,7 +1188,7 @@ export function renderTarot(root: HTMLElement): () => void {
     const skipBtn = document.createElement('button');
     skipBtn.type = 'button';
     skipBtn.className = 'btn btn-ghost';
-    skipBtn.textContent = '跳过，直接看解读';
+    skipBtn.textContent = '跳过，直接看解读（新手推荐）';
     skipBtn.addEventListener('click', () => finish('', true));
 
     const goBtn = document.createElement('button');
