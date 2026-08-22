@@ -397,16 +397,29 @@ export function buildQuestionThread(
     return '';
   })();
 
-  const overall = sanitizeTopicText(
-    topic === 'work'
-      ? mockWorkOverview(suitHint)
-      : `先抓住方向，再下钻细节——牌在帮你看清局面，而不是替你做绝对宣判。`,
+  const lens = resolveReadingLens(q, topic);
+  const spreadSynth = sanitizeTopicText(
+    buildSpreadSynthesis(cards, q, lens, options?.userIntuition),
     topic,
+  );
+
+  const overall = spreadSynth
+    ? spreadSynth
+    : sanitizeTopicText(
+        topic === 'work'
+          ? mockWorkOverview(suitHint)
+          : `先抓住方向，再下钻细节——牌在帮你看清局面，而不是替你做绝对宣判。`,
+        topic,
+      );
+
+  const adviceLines = buildAdviceLines(cards, q, lens).map((line) =>
+    sanitizeTopicText(line, topic),
   );
 
   const oneLiner = sanitizeTopicText(
     advice?.action?.trim() ||
       reason?.action?.trim() ||
+      adviceLines[0] ||
       (topic === 'work' ? mockWorkOneLiner() : '把下一步缩成一件今天就能做的小事。'),
     topic,
   );
@@ -417,6 +430,8 @@ export function buildQuestionThread(
     answers,
     oneLiner,
     provider,
+    synthesis: spreadSynth || undefined,
+    adviceLines: adviceLines.length ? adviceLines : undefined,
   };
 }
 

@@ -210,8 +210,18 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
     </article>`;
 }
 
+const GENERIC_OVERALL = /先抓住方向|把下一步缩成|今天就能做的小事/;
+
 const BRIDGE_COPY =
   '以上是针对你问题的专属解读。想看牌面热点或探索，点上方牌面即可打开。';
+
+function directAnswerText(thread: QuestionThread): string {
+  if (thread.synthesis?.trim()) return thread.synthesis.trim();
+  if (thread.overall?.trim() && !GENERIC_OVERALL.test(thread.overall)) {
+    return thread.overall.trim();
+  }
+  return '';
+}
 
 export function renderQuestionThreadHtml(
   thread: QuestionThread,
@@ -220,10 +230,11 @@ export function renderQuestionThreadHtml(
 ): string {
   const answers = thread.answers.map((a, i) => renderAnswer(a, i, cards)).join('');
   const showBridge = options?.showBridge !== false && cards.length > 0;
-  const synthesisBlock = thread.synthesis?.trim()
-    ? `<section class="thread-synthesis-card">
-        <h3 class="thread-section-title">综合结论</h3>
-        <div class="thread-synthesis-body thread-prose">${formatHighlight(thread.synthesis)}</div>
+  const direct = directAnswerText(thread);
+  const directBlock = direct
+    ? `<section class="thread-direct-card">
+        <h3 class="thread-section-title">直接回答你的问题</h3>
+        <div class="thread-direct-body thread-prose">${formatHighlight(direct)}</div>
       </section>`
     : '';
   const adviceBlock =
@@ -233,23 +244,24 @@ export function renderQuestionThreadHtml(
         <ul class="thread-advice-list">${thread.adviceLines.map((line) => `<li>${formatHighlight(line)}</li>`).join('')}</ul>
       </section>`
       : '';
+  const oneLinerGeneric = GENERIC_OVERALL.test(thread.oneLiner);
+  const oneLinerBlock =
+    thread.oneLiner?.trim() && !oneLinerGeneric
+      ? `<section class="thread-oneliner-card">
+        <h3 class="thread-section-title">一句话破局</h3>
+        <div class="thread-oneliner thread-prose">${formatHighlight(thread.oneLiner)}</div>
+      </section>`
+      : '';
   return `
     <div class="question-thread">
       <p class="thread-empathy">${escapeHtml(polishReadingCopy(thread.empathyLead))}</p>
-      <section class="thread-overall-card">
-        <h3 class="thread-section-title">整盘结论</h3>
-        <div class="thread-overall-body thread-prose">${formatHighlight(thread.overall)}</div>
-      </section>
       ${renderCardStrip(cards)}
+      ${directBlock}
       <section class="thread-answers">
-        <h3 class="thread-section-title">${thread.perCardMode ? '按牌解读 · 意象与共时性' : '按你的问题'}</h3>
+        <h3 class="thread-section-title">${thread.perCardMode ? '按牌细读 · 过去现在未来' : '按你的问题展开'}</h3>
         ${answers}
       </section>
-      ${synthesisBlock}
-      <section class="thread-oneliner-card">
-        <h3 class="thread-section-title">一句话破局</h3>
-        <div class="thread-oneliner thread-prose">${formatHighlight(thread.oneLiner)}</div>
-      </section>
+      ${oneLinerBlock}
       ${adviceBlock}
       ${
         showBridge
