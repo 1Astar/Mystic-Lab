@@ -197,17 +197,16 @@ function visualBlock(v: ShareVisual): string {
       return `<div class="ms-cover-cards">${v.cards
         .slice(0, 5)
         .map((c) => {
-          const img = c.cardId
-            ? `<img class="ms-cover-card-img${c.reversed ? ' is-reversed' : ''}" src="${escapeHtml(cardSrc(c.cardId))}" alt="${escapeHtml(c.name)}" />`
+          const imgSrc = c.imageSrc || (c.cardId ? cardSrc(c.cardId) : '');
+          const img = imgSrc
+            ? `<img class="ms-cover-card-img${c.reversed ? ' is-reversed' : ''}" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(c.name)}" crossorigin="anonymous" />`
             : `<span class="ms-cover-card-sym">${escapeHtml(c.symbol || '✦')}</span>`;
-          // 有牌面图时只出图，牌名留给背面；封面下方放总体结论
-          if (c.cardId) {
-            return `<div class="ms-cover-card has-art">${img}</div>`;
-          }
+          const pos = c.position ? `<span class="ms-cover-card-pos">${escapeHtml(c.position)}</span>` : '';
           return `
-        <div class="ms-cover-card">
+        <div class="ms-cover-card has-art">
           ${img}
           <span class="ms-cover-card-name">${escapeHtml(c.name)}</span>
+          ${pos}
         </div>`;
         })
         .join('')}</div>`;
@@ -247,9 +246,9 @@ function isLabInvite(snap: ShareCoverSnap): boolean {
   return snap.system === 'lab';
 }
 
-/** Lab 邀请，或已解析出满版海报（紫微 / 八字等） */
+/** 仅 Lab 邀请用满版海报铺满正面；塔罗等有牌局正面展示牌阵 */
 function usesPosterFront(snap: ShareCoverSnap): boolean {
-  return isLabInvite(snap) || Boolean(snap.invitePosterSrc);
+  return isLabInvite(snap);
 }
 
 function labInviteVisual(posterSrc?: string): string {
@@ -453,7 +452,19 @@ async function withResolvedArt(snap: ShareCoverSnap): Promise<ShareCoverSnap> {
     );
     if (invitePosterSrc) next = { ...next, invitePosterSrc };
   }
-  if (next.visual.kind !== 'liuyao') return next;
+  if (next.visual.kind !== 'liuyao' && next.visual.kind !== 'tarot') return next;
+
+  if (next.visual.kind === 'tarot') {
+    const cards = await Promise.all(
+      next.visual.cards.map(async (c) => {
+        if (!c.cardId) return c;
+        const imageSrc = await resolveCorsSafeImageSrc(cardSrc(c.cardId));
+        return imageSrc ? { ...c, imageSrc } : c;
+      }),
+    );
+    return { ...next, visual: { ...next.visual, cards } };
+  }
+
   const v = next.visual;
   const [primaryArtSrc, changedArtSrc] = await Promise.all([
     resolveCorsSafeImageSrc(v.primaryArtSrc),
