@@ -17,6 +17,9 @@ export type QuestionPattern =
   | 'money'
   | 'move_city'
   | 'anxiety_decide'
+  | 'family_motive'
+  | 'family_action_outcome'
+  | 'family_general'
   | 'generic_closed'
   | 'open';
 
@@ -49,6 +52,20 @@ const CLOSED_RE =
 
 const JOB_SEARCH_RE = /找工作|找到.*工作|下一份工作|新工作|失业|换工作|跳槽|求职|offer|录用/;
 
+const FAMILY_RE = /爸|妈|父|母|家人|家庭|父母|公婆|孩子|亲子|爷爷|奶奶|外公|外婆/;
+
+function isFamilyQuestion(q: string): boolean {
+  return FAMILY_RE.test(q);
+}
+
+function familySubject(q: string): string {
+  if (/我爸|父亲|爸爸/.test(q)) return '你父亲';
+  if (/我妈|母亲|妈妈/.test(q)) return '你母亲';
+  if (/他/.test(q)) return '他';
+  if (/她/.test(q)) return '她';
+  return '家人';
+}
+
 function detectClosed(q: string): boolean {
   return isClosedQuestion(q) || CLOSED_RE.test(q);
 }
@@ -73,6 +90,12 @@ function extractPersonName(q: string): string | undefined {
 }
 
 function detectPattern(q: string, topic: QuestionTheme): QuestionPattern {
+  if (isFamilyQuestion(q)) {
+    if (/做什么|会怎样|后果|接下来|以后|将来|未来/.test(q)) return 'family_action_outcome';
+    if (/为什么|为何|动机|原因|想找|联系|回头|复合/.test(q)) return 'family_motive';
+    return 'family_general';
+  }
+
   if (/回来|复合|回头|还会联系/.test(q) && topic === 'love') return 'love_return';
   if (/喜欢我|是不是喜欢|爱不爱|有感觉|喜欢我吗/.test(q) && topic === 'love') return 'love_likes';
   if (/第三者|劈腿|出轨|有别人/.test(q) && topic === 'love') return 'love_third';
@@ -225,6 +248,34 @@ function buildAngles(
         { id: 'both', label: '看两面', question: '这件事的阻碍和机会分别是什么？' },
       ];
 
+    case 'family_motive': {
+      const who = familySubject(q);
+      return [
+        { id: 'direct', label: '直接问', question: q },
+        { id: 'psyche', label: '看他的状态', question: `${who}当下的心理状态与内在需要是什么？` },
+        { id: 'why_now', label: '看为何此刻', question: `是什么让${who}在这个时间点想联系对方？` },
+        { id: 'boundary', label: '看我的边界', question: '我该如何关心家人，又不替他承担情绪债？' },
+      ];
+    }
+
+    case 'family_action_outcome': {
+      const who = familySubject(q);
+      return [
+        { id: 'direct', label: '直接问', question: q },
+        { id: 'action', label: '看行动轨迹', question: `${who}接下来最可能采取怎样的行动？` },
+        { id: 'consequence', label: '看可能后果', question: '若保持当下路径，可能带来哪些后果？' },
+        { id: 'my_role', label: '看我的应对', question: '我该如何守住边界、不过度卷入？' },
+      ];
+    }
+
+    case 'family_general':
+      return [
+        { id: 'direct', label: '直接问', question: q },
+        { id: 'dynamic', label: '看关系动态', question: '这段家庭关系里正在发生什么？' },
+        { id: 'need', label: '看真实需要', question: '各方真正需要被看见的是什么？' },
+        { id: 'boundary', label: '看边界', question: '我该如何关心家人，又守住自己的界限？' },
+      ];
+
     case 'generic_closed':
       return [
         { id: 'direct', label: '直接问', question: q },
@@ -275,6 +326,13 @@ function buildNote(pattern: QuestionPattern, _q: string, personName?: string): s
 
     case 'move_city':
       return '去留可以直接问。也可以先看动机、得失与适应面。';
+
+    case 'family_motive':
+      return '家人动机可以直接问。牌更适合照见心理状态与关系动力，而不是判对错或替你做决定。';
+    case 'family_action_outcome':
+      return '问行动与后果适合用时间线牌阵。牌描摹的是能量走势，不是不可更改的宿命。';
+    case 'family_general':
+      return '家庭议题可以直接问。也可以先看关系动态与你能守住的边界。';
 
     case 'anxiety_decide':
     case 'generic_closed':

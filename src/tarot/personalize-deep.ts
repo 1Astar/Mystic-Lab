@@ -195,7 +195,7 @@ export function openTarotPersonalizeDeep(opts: OpenTarotPersonalizeDeepOpts): vo
           { role: 'system', content: system },
           { role: 'user', content: user },
         ],
-        { temperature: 0.55 },
+        { temperature: 0.62 },
       );
       if (modeNow === 'mystic') recordDeepUse();
       const sessionId = opts.journalId

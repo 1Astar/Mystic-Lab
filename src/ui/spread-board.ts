@@ -1,4 +1,5 @@
 import { renderCardFace } from '../tarot/animations.ts';
+import { formatCardNameZh } from '../tarot/card-names.ts';
 import type { DrawnCard } from '../tarot/engine.ts';
 import {
   isFreeArrangeSpread,
@@ -123,8 +124,21 @@ export function paintSpreadBoard(
     host.classList.toggle('tarot-slot-single', revealable);
     host.classList.toggle('is-revealable', revealable);
     slot.classList.toggle('is-active', revealable);
+    slot.classList.toggle('is-revealed', revealed && phase === 'flip');
     renderCardFace(host, card, revealed);
     host.querySelector('.tarot-card')?.classList.add('is-board-card');
+
+    const labelEl = slot.querySelector('.spread-board-label');
+    if (labelEl) {
+      const posLabel = spread.positions[i]?.label ?? `第 ${i + 1} 张`;
+      if (revealed && phase === 'flip') {
+        const name = formatCardNameZh(card.card);
+        const orient = card.reversed ? '逆位' : '正位';
+        labelEl.textContent = `${posLabel} · ${name}（${orient}）`;
+      } else {
+        labelEl.textContent = posLabel;
+      }
+    }
 
     // 待翻开的牌留给翻牌点击，不绑拖拽
     if (revealable) return;

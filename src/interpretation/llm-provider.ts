@@ -7,8 +7,7 @@ import { isAiConfigured, loadAiSettings } from '../ai/settings.ts';
 import type { DrawnCard } from '../tarot/engine.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
 import type { FollowUpAnswer } from '../knowledge/types.ts';
-import { buildQuestionThread } from './question-thread.ts';
-import { splitUserQuestions } from './question-parts.ts';
+import { buildQuestionThread, shouldUseSpreadThreadLlm } from './question-thread.ts';
 import {
   buildStructuredMockReading,
   parseStructuredReading,
@@ -90,9 +89,14 @@ async function enrichWithLlm(
   result: ReadingResult,
   question: string,
   options?: InterpretOptions,
+  spreadType?: SpreadType,
 ): Promise<ReadingResult> {
   const settings = loadAiSettings();
   const background = options?.background?.trim() || result.questionBackground;
+  const threadOpts = {
+    spreadType: spreadType ?? result.cards[0]?.spreadType,
+    userIntuition: options?.userIntuition?.trim() || result.userIntuition,
+  };
   if (!isAiConfigured(settings)) {
     return {
       ...result,
@@ -100,24 +104,23 @@ async function enrichWithLlm(
       questionBackground: background,
       questionThread:
         result.questionThread ??
-        buildQuestionThread(result.cards, question, 'mock') ??
+        buildQuestionThread(result.cards, question, 'mock', threadOpts) ??
         undefined,
     };
   }
 
-  const parts = splitUserQuestions(question);
-  const multiCard = result.cards.length > 1 && parts.length >= 2;
+  const useSpreadThread = shouldUseSpreadThreadLlm(result.cards, question);
 
   try {
-    if (multiCard) {
-      // 整盘一次调用，避免每张牌各答全套子问 → 重复+跑题
+    if (useSpreadThread) {
+      // 多牌单问 / 自定义牌阵：整盘一次调用，每张各一段叙事
       const raw = await fetchSpreadThreadReading(
         { question, cards: result.cards, background },
         settings,
       );
       const thread =
         parseSpreadThreadJson(raw, result.cards, question) ??
-        buildQuestionThread(result.cards, question, 'mock');
+        buildQuestionThread(result.cards, question, 'mock', threadOpts);
 
       // 把绑定到该牌的问答回写，便于单牌 Tab 精简展示
       const cards = result.cards.map((card, cardIndex) => {
@@ -166,7 +169,7 @@ async function enrichWithLlm(
     );
 
     const thread =
-      buildQuestionThread(cards, question, 'llm') ??
+      buildQuestionThread(cards, question, 'llm', threadOpts) ??
       result.questionThread ??
       undefined;
 
@@ -185,7 +188,7 @@ async function enrichWithLlm(
       questionBackground: background,
       questionThread:
         result.questionThread ??
-        buildQuestionThread(result.cards, question, 'mock') ??
+        buildQuestionThread(result.cards, question, 'mock', threadOpts) ??
         undefined,
     };
   }
@@ -199,7 +202,7 @@ export class LlmInterpretationProvider implements InterpretationProvider {
     options?: InterpretOptions,
   ): Promise<ReadingResult> {
     const base = await staticProvider.interpret(cards, question, spreadType, options);
-    return enrichWithLlm(base, question ?? '', options);
+    return enrichWithLlm(base, question ?? '', options, spreadType);
   }
 }
 

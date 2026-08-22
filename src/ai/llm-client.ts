@@ -5,6 +5,7 @@ import {
 } from '../interpretation/structured-reading.ts';
 import {
   assignCardsToQuestions,
+  shouldUsePerCardThread,
   type QuestionThread,
 } from '../interpretation/question-thread.ts';
 import {
@@ -170,8 +171,75 @@ function buildPrompt(req: LlmContextualRequest): string {
     .join('\n');
 }
 
+function buildPerCardSpreadPrompt(req: LlmSpreadRequest): string {
+  const { question, cards, background } = req;
+  const topic = cards[0]?.topic ?? 'self';
+  const mode = /做什么|后果|会怎样|接下来/.test(question)
+    ? 'action_outcome'
+    : /为什么|原因|动机/.test(question)
+      ? 'why'
+      : 'general';
+
+  const cardBlock = cards
+    .map((c, i) => {
+      const orient = c.orientation === 'reversed' ? '逆位' : '正位';
+      return `${i}. 【${c.cardName}】${orient} · 位置「${c.position || '—'}」· 关键词：${c.keywords.slice(0, 4).join('、')}`;
+    })
+    .join('\n');
+
+  return [
+    '你是精通心理学叙事与家庭/关系议题的塔罗师。用户只有一个问题，但抽了多张牌——必须每张各写一段，再写综合结论。',
+    '禁止恋爱/职场套话偏离主题；禁止只解读第一张牌；禁止模板句「先抓住方向」「都不算剧烈」。',
+    mode === 'action_outcome'
+      ? '用户问的是行为与后果：synthesis 必须直接回答「更可能做什么 + 可能带来什么后果」，再用三张牌讲故事。'
+      : '',
+    mode === 'why'
+      ? '用户问的是动机：synthesis 先给心理假设，再分牌展开。'
+      : '',
+    ...topicLockLines(topic),
+    ...orientationLogicForSpread(cards),
+    '',
+    `用户问题：${question.trim()}`,
+    '牌阵：',
+    cardBlock,
+    '',
+    '严格输出 JSON（不要 markdown 围栏）：',
+    JSON.stringify({
+      empathyLead: '一句共情，点出用户真正担心的事',
+      synthesis:
+        '3–5句综合：直接回答用户问题（行为倾向+后果/边界），串起三张牌的故事线',
+      overview: '与 synthesis 相同或为其精简版',
+      questionAnswers: cards.map((c, i) => ({
+        question,
+        cardIndexes: [i],
+        heading: `【${c.cardName}】· ${c.position || `第${i + 1}张`}`,
+        meaningMap: '画面意象 + 母题（1–2句，点名正逆位差异）',
+        insight:
+          '针对用户问题的叙事（4–8句）：承接上一张牌的因果；用「因为…所以…」；禁止百科式牌义',
+        action: '可选：与该位相关的边界/核实建议',
+      })),
+      adviceLines: ['边界建议1', '边界建议2'],
+      oneLiner: '一句破局，具体可执行',
+    }),
+    '',
+    '硬性要求：questionAnswers 条数必须等于牌数；每条 cardIndexes 只含一个下标且与顺序一致。',
+    '每条 insight 必须引用该牌位（过去/现在/未来）在用户问题上的含义，不得三张写同一段话。',
+    '逆位必须在 meaningMap/insight 体现阻滞、变质、单方面索取等，禁止写成正位。',
+    '用『』标出每段最关键的一句。',
+    background?.trim()
+      ? `用户补充背景：${background.trim()}`
+      : '用户补充背景：（无）',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 function buildSpreadPrompt(req: LlmSpreadRequest): string {
   const { question, cards, background } = req;
+  const spreadType = cards[0]?.spreadType;
+  if (shouldUsePerCardThread(cards, question, spreadType)) {
+    return buildPerCardSpreadPrompt(req);
+  }
   const topic = cards[0]?.topic ?? 'self';
   const parts = splitUserQuestions(question);
   const intents = parts.map((p) => classifySubQuestion(p));
@@ -298,7 +366,7 @@ export async function fetchSpreadThreadReading(
 ): Promise<string> {
   return chatCompletion(
     buildSpreadPrompt(req),
-    '你是精通心理学与职场的塔罗师。只输出合法 JSON。整盘按问题串讲；主题锁定时禁止恋爱套话；指哪打哪，行动导向。逆位牌必须按逆位逻辑，禁止复述正位。职场多子问须达到金标准深度：分阶段走势、短中长期建议、insight 允许 6–12 句。',
+    '你是精通心理学叙事与家庭/关系议题的塔罗师。只输出合法 JSON。多牌单问须每张各一段 + synthesis 直接答行为与后果；禁止模板套话与只解读第一张牌。逆位必须按逆位逻辑。',
     settings,
     4200,
   );
@@ -317,16 +385,90 @@ export function parseSpreadThreadJson(
     const parsed = JSON.parse(jsonText) as {
       empathyLead?: unknown;
       overview?: unknown;
+      synthesis?: unknown;
       oneLiner?: unknown;
       questionAnswers?: unknown;
+      adviceLines?: unknown;
     };
     const parts = splitUserQuestions(question);
+    const perCard = shouldUsePerCardThread(cards, question, cards[0]?.spreadType);
     const topic = cards[0]?.topic ?? 'self';
     const intents = parts.map((p) => classifySubQuestion(p));
     const assignment = assignCardsToQuestions(intents, cards.length);
     const rawAnswers = Array.isArray(parsed.questionAnswers)
       ? parsed.questionAnswers
       : [];
+
+    if (perCard) {
+      const answers = cards.map((card, i) => {
+        const row = (rawAnswers[i] ?? {}) as {
+          question?: unknown;
+          insight?: unknown;
+          action?: unknown;
+          meaningMap?: unknown;
+          heading?: unknown;
+          cardIndexes?: unknown;
+        };
+        const pos = card.position?.trim() || `第 ${i + 1} 张`;
+        const insight = polishReadingCopy(
+          sanitizeTopicText(
+            String(row.insight ?? '').trim() ||
+              `【${card.cardName}】在「${pos}」照见与用户问题相关的一层心理。`,
+            topic,
+          ),
+        );
+        return polishInsightFields({
+          question: String(row.question ?? question).trim() || question,
+          intent: 'general',
+          cardIndexes: [i],
+          heading:
+            String(row.heading ?? '').trim() ||
+            `【${card.cardName}】· ${pos}`,
+          meaningMap: String(row.meaningMap ?? '').trim()
+            ? polishReadingCopy(sanitizeTopicText(String(row.meaningMap).trim(), topic))
+            : undefined,
+          insight,
+          action: String(row.action ?? '').trim()
+            ? polishReadingCopy(sanitizeTopicText(String(row.action).trim(), topic))
+            : undefined,
+          perCard: true,
+        });
+      });
+
+      const synthesisRaw = String(parsed.synthesis ?? parsed.overview ?? '').trim();
+      const synthesis = synthesisRaw
+        ? polishReadingCopy(sanitizeTopicText(synthesisRaw, topic))
+        : '';
+      const adviceLines = Array.isArray(parsed.adviceLines)
+        ? parsed.adviceLines
+            .map((line) => polishReadingCopy(sanitizeTopicText(String(line).trim(), topic)))
+            .filter(Boolean)
+        : undefined;
+
+      return {
+        empathyLead: polishReadingCopy(
+          sanitizeTopicText(
+            String(parsed.empathyLead ?? '').trim() ||
+              '根据你的牌阵，我先帮你把问题理清。',
+            topic,
+          ),
+        ),
+        overall: synthesis || answers.map((a) => a.insight).join(' ').slice(0, 200),
+        answers,
+        oneLiner: polishReadingCopy(
+          sanitizeTopicText(
+            String(parsed.oneLiner ?? '').trim() ||
+              adviceLines?.[0] ||
+              '先稳住边界，再决定要不要回应。',
+            topic,
+          ),
+        ),
+        provider: 'llm',
+        perCardMode: true,
+        synthesis: synthesis || undefined,
+        adviceLines: adviceLines?.length ? adviceLines : undefined,
+      };
+    }
 
     const answers = parts.map((part, i) => {
       const row = (rawAnswers[i] ?? {}) as {

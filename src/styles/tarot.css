@@ -147,6 +147,7 @@
 .tarot-card-front {
   position: absolute;
   inset: 0;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   border-radius: 8px;
   display: flex;
@@ -1153,6 +1154,52 @@
   margin-top: 14px;
 }
 
+.spread-recommend-hint {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+  background: var(--gold-soft);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.spread-recommend-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.spread-recommend-badge {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.spread-option-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spread-option-head .spread-recommend-badge {
+  margin-right: 0;
+}
+
+.spread-option-wrap.is-selected {
+  outline: 2px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 .spread-option {
   width: 100%;
   padding: 14px 16px;
@@ -1321,6 +1368,33 @@
 
 .spread-board-card-host .tarot-card-inner {
   border-radius: 6px;
+}
+
+/* 阵面小牌：不用 3D 翻转（移动端易只显示牌背），直接展示正面 */
+.spread-board-card-host .tarot-card.is-revealed.is-board-card .tarot-card-inner {
+  transform: none !important;
+}
+
+.spread-board-card-host .tarot-card.is-revealed.is-board-card .tarot-card-back {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.spread-board-card-host .tarot-card.is-revealed.is-board-card .tarot-card-front {
+  transform: none;
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+}
+
+.spread-board-slot.is-revealed .spread-board-label {
+  color: var(--gold);
+  font-weight: 600;
+  max-width: min(26vw, 92px);
+  line-height: 1.25;
+  text-align: center;
 }
 
 .spread-board.is-free-arrange .spread-board-slot.is-filled {
@@ -2060,6 +2134,34 @@
   opacity: 1;
 }
 
+.journal-detail-supplement {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.journal-detail-deep {
+  margin-top: 8px;
+}
+
+.journal-detail-ai-fold {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+
+.journal-detail-ai-fold summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
 .journal-detail {
   position: fixed;
   inset: 0;
@@ -2148,70 +2250,6 @@
   margin-top: 18px;
   font-size: 0.88rem;
   line-height: 1.65;
-  color: var(--ink);
-}
-
-.tr-journal-ai-badge {
-  margin: 8px 0 0;
-  font-size: 0.78rem;
-  color: var(--gold);
-  letter-spacing: 0.02em;
-}
-
-.tr-ai-fold {
-  margin-top: 14px;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(201, 168, 76, 0.28);
-  background: rgba(201, 168, 76, 0.05);
-}
-
-.tr-ai-fold > summary {
-  cursor: pointer;
-  font-size: 0.84rem;
-  color: var(--gold);
-  font-weight: 600;
-}
-
-.tr-replay-ai-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.tr-replay-ai h4 {
-  margin: 0 0 6px;
-  font-size: 0.82rem;
-  color: var(--gold);
-}
-
-.tr-replay-pre {
-  margin: 0;
-  white-space: pre-wrap;
-  font-size: 0.84rem;
-  line-height: 1.6;
-  color: var(--ink);
-}
-
-.tr-replay-ai-turns {
-  margin-top: 8px;
-}
-
-.tr-replay-ai-turns summary {
-  cursor: pointer;
-  font-size: 0.78rem;
-  color: var(--ink-muted);
-}
-
-.tr-replay-ai-turn {
-  margin: 6px 0 0;
-  font-size: 0.8rem;
-  line-height: 1.55;
-  color: var(--ink-muted);
-}
-
-.tr-replay-ai-turn.is-user {
   color: var(--ink);
 }
 
@@ -2418,11 +2456,10 @@
   margin: 8px 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border-left: 3px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, transparent);
-  background: color-mix(in srgb, var(--gold) 10%, transparent);
+  border-left: 3px solid rgba(201, 168, 76, 0.5);
+  background: rgba(201, 168, 76, 0.08);
   font-size: 0.88rem;
   line-height: 1.5;
-  color: var(--gold-ink, var(--ink));
 }
 
 .codex-quick-muted {
@@ -2796,6 +2833,79 @@ html[data-theme='moon'] .reading-replay-backdrop {
 
 .pre-reading-stage,
 .card-intuition-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.intuition-question-echo,
+.flip-question-echo {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(201, 168, 76, 0.08);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.intuition-optional-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.intuition-optional-hint strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.pre-fold {
+  margin-top: 4px;
+  border-top: 1px solid rgba(191, 163, 255, 0.18);
+  padding-top: 8px;
+}
+
+.pre-fold-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  padding: 6px 0;
+  user-select: none;
+}
+
+.pre-fold-summary::-webkit-details-marker {
+  display: none;
+}
+
+.pre-fold-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pre-fold-summary::before {
+  content: '▸';
+  color: var(--gold);
+  font-size: 0.85rem;
+  transition: transform 0.15s ease;
+}
+
+.pre-fold[open] > .pre-fold-summary::before {
+  transform: rotate(90deg);
+}
+
+.pre-fold-body {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.card-intuition-stage {
   width: min(100%, 420px);
   margin: 0 auto;
   display: flex;
@@ -2898,6 +3008,26 @@ html[data-theme='moon'] .reading-replay-backdrop {
   color: var(--ink);
 }
 
+.thread-series-badge {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.thread-empathy--series {
+  border-left-color: #6b8fd4;
+  background: rgba(107, 143, 212, 0.12);
+}
+
+.journal-detail-series {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #6b8fd4;
+  font-weight: 600;
+}
+
 .thread-section-title {
   margin: 0 0 8px;
   font-size: 0.78rem;
@@ -2907,12 +3037,62 @@ html[data-theme='moon'] .reading-replay-backdrop {
 }
 
 .thread-overall-card,
+.thread-direct-card,
 .thread-oneliner-card {
   padding: 14px;
   border-radius: 14px;
   border: 1px solid var(--line);
   background: var(--surface-1);
   color: var(--ink);
+}
+
+.thread-direct-card {
+  border-color: rgba(212, 175, 95, 0.45);
+  background: linear-gradient(145deg, rgba(212, 175, 95, 0.08), var(--surface-1));
+}
+
+.reading-status-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--ink-muted);
+}
+
+.reading-status-banner.is-loading {
+  border-color: rgba(212, 175, 95, 0.5);
+  color: var(--ink);
+  animation: reading-status-pulse 1.4s ease-in-out infinite;
+}
+
+.reading-status-banner.is-llm {
+  border-color: rgba(120, 200, 160, 0.45);
+  background: rgba(120, 200, 160, 0.08);
+}
+
+.reading-status-banner.is-offline,
+.reading-status-banner.is-quota {
+  border-color: rgba(232, 160, 90, 0.4);
+  background: rgba(232, 160, 90, 0.07);
+}
+
+.reading-status-banner.is-error {
+  border-color: rgba(232, 90, 69, 0.45);
+  background: rgba(232, 90, 69, 0.08);
+  color: var(--ink);
+}
+
+@keyframes reading-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
 }
 
 .thread-card-strip {

@@ -1,7 +1,8 @@
 import type { CodexEncounter } from '../codex/collection.ts';
 import type { DrawnCard } from '../tarot/engine.ts';
 import { buildReadingResult } from '../interpretation/contextual-reading.ts';
-import { buildQuestionThread } from '../interpretation/question-thread.ts';
+import { buildQuestionThread, applyReadingSeriesToThread } from '../interpretation/question-thread.ts';
+import { resolveReadingSeriesForEntry } from './reading-series.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
 import { SPREADS, isKnownSpreadType } from '../tarot/spreads.ts';
 import { TAROT_DECK } from '../tarot/deck.ts';
@@ -38,14 +39,36 @@ export function reconstructDrawnCards(entry: JournalEntry): DrawnCard[] {
 export function hydrateReadingQuestionThread(
   reading: ReadingResult,
   question?: string,
+  entry?: JournalEntry,
 ): ReadingResult {
-  if (reading.questionThread?.answers?.length) return reading;
+  if (reading.questionThread?.answers?.length) {
+    if (entry) {
+      const series = resolveReadingSeriesForEntry(entry);
+      if (series && reading.questionThread) {
+        return {
+          ...reading,
+          questionThread: applyReadingSeriesToThread(reading.questionThread, series),
+        };
+      }
+    }
+    return reading;
+  }
   const q = (question ?? reading.cards[0]?.question ?? '').trim();
   if (!q || !reading.cards.length) return reading;
   const thread = buildQuestionThread(
     reading.cards,
     q,
     reading.provider === 'llm' ? 'llm' : 'mock',
+    entry
+      ? {
+          spreadType: entry.spreadType,
+          entryId: entry.id,
+          at: entry.createdAt,
+          subjectId: entry.subjectId,
+          sceneTags: entry.sceneTags,
+          series: resolveReadingSeriesForEntry(entry),
+        }
+      : undefined,
   );
   if (!thread) return reading;
   return {
@@ -70,6 +93,7 @@ export function resolveJournalReading(entry: JournalEntry): JournalReadingResolv
     const reading = hydrateReadingQuestionThread(
       entry.readingSnapshot,
       entry.question,
+      entry,
     );
     return {
       reading,
