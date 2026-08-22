@@ -37,6 +37,7 @@ export type SubQuestionIntent =
 export function classifySubQuestion(text: string): SubQuestionIntent {
   const t = text;
   if (/原因|为什么想|真正想|内心|心累|疲惫/.test(t)) return 'reason';
+  if (/做什么|会怎样|什么后果|接下来|将来会/.test(t)) return 'general';
   if (/离职|离开|走了|不干|辞职/.test(t) && /走势|三个月|未来|之后|会怎样/.test(t))
     return 'leave_path';
   if (/留|转正|继续|不走/.test(t) && /走势|三个月|未来|之后|会怎样/.test(t))
