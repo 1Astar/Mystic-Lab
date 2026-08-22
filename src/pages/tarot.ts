@@ -90,6 +90,7 @@ import {
   type QuestionRewritePanelHandle,
 } from '../ui/question-rewrite-panel.ts';
 import { openQuestionGuideModal, renderQuestionStageBackdrop } from '../ui/question-type-guide.ts';
+import { recommendSpread } from '../tarot/spread-recommend.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { bindLabLearnStrip, labLearnStripHtml } from '../ui/lab-learn-strip.ts';
 
@@ -549,8 +550,31 @@ export function renderTarot(root: HTMLElement): () => void {
         break;
 
       case 'spread':
-        stage.innerHTML = `<h2 class="section-title">选择牌阵</h2><div class="spread-list" id="spread-list"></div>`;
         {
+          const spreadRec = recommendSpread(question);
+          spreadType = spreadRec.spreadType;
+          if (spreadRec.spreadType === 'custom') {
+            const labels =
+              spreadRec.customLabels ??
+              freeCustomLabels(spreadRec.customCount ?? CUSTOM_SPREAD_MAX);
+            setSessionCustomPositions(buildCustomPositions(labels));
+          } else {
+            setSessionCustomPositions(null);
+          }
+
+          const recSpreadName = SPREADS[spreadRec.spreadType].name;
+          const recHint = spreadRec.reason
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          stage.innerHTML = `
+            <h2 class="section-title">选择牌阵</h2>
+            <p class="spread-recommend-hint">
+              <span class="spread-recommend-badge">推荐</span>
+              <strong>${recSpreadName}</strong> — ${recHint}
+              <span class="spread-recommend-note">（可改选其他牌阵）</span>
+            </p>
+            <div class="spread-list" id="spread-list"></div>`;
           const list = document.getElementById('spread-list')!;
 
           const selectSpread = (type: SpreadType, wrap: HTMLElement) => {
@@ -559,10 +583,18 @@ export function renderTarot(root: HTMLElement): () => void {
               el.classList.remove('is-selected');
             });
             wrap.classList.add('is-selected');
+            if (type === 'custom') {
+              setSessionCustomPositions(
+                buildCustomPositions(freeCustomLabels(CUSTOM_SPREAD_MAX)),
+              );
+            } else {
+              setSessionCustomPositions(null);
+            }
           };
 
           for (const type of SPREAD_ORDER) {
             const spread = SPREADS[type];
+            const isRecommended = type === spreadRec.spreadType;
             const card = document.createElement('div');
             card.className = `spread-option-wrap ${spread.type === spreadType ? 'is-selected' : ''}`;
 
@@ -570,7 +602,10 @@ export function renderTarot(root: HTMLElement): () => void {
             btn.type = 'button';
             btn.className = 'spread-option';
             btn.innerHTML = `
-              <strong>${spread.name}</strong>
+              <span class="spread-option-head">
+                <strong>${spread.name}</strong>
+                ${isRecommended ? '<span class="spread-recommend-badge">推荐</span>' : ''}
+              </span>
               <span class="spread-light">${spread.lightHint}</span>
               <em>${spread.description}</em>
             `;
@@ -593,6 +628,9 @@ export function renderTarot(root: HTMLElement): () => void {
             card.append(btn, moreToggle, moreBox);
             list.appendChild(card);
           }
+
+          const selectedWrap = list.querySelector<HTMLElement>('.spread-option-wrap.is-selected');
+          selectedWrap?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
         appendBtn('← 返回修改问题', () => setState('question'), 'btn btn-ghost');
         appendBtn('下一步 · 选择抽牌方式', () => {
