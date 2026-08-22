@@ -11,6 +11,7 @@ import {
   type CraftAxisId,
   type CraftAxisScore,
 } from './spirit-roots.ts';
+import { buildBuffEntriesFromBazi } from './spirit-buff-bazi.ts';
 
 export const BUFF_MULT_MIN = 0.5;
 export const BUFF_MULT_MAX = 1.8;
@@ -32,6 +33,10 @@ export type YearBuffEntry = {
   advice: string;
   /** 流年 / 流月 */
   scope?: BuffScope;
+  /** 紫微四化默认；八字十神为 bazi */
+  lane?: 'ziwei' | 'bazi';
+  /** 八字层 */
+  baziLayer?: 'dayun' | 'liunian' | 'liuyue';
 };
 
 export type YearBuffPack = {
@@ -50,8 +55,10 @@ export type YearBuffPack = {
   monthEntries: YearBuffEntry[];
   /** 六轴最终乘子：年×月（已夹紧） */
   multByAxis: Record<CraftAxisId, number>;
-  /** 八字弱提示，不改系数 */
+  /** 八字弱提示，不改系数 / 或格局叙事 */
   baziHint: string;
+  /** 同轴过叠已调和时的说明 */
+  conflictNote?: string;
 };
 
 const KIND_ORDER: MutagenKind[] = ['禄', '权', '科', '忌'];
@@ -160,17 +167,59 @@ export function emptyMultByAxis(): Record<CraftAxisId, number> {
   };
 }
 
-export function composeMultByAxis(entries: YearBuffEntry[]): Record<CraftAxisId, number> {
-  const mults = emptyMultByAxis();
+/** 同轴第 3 条起向 1.0 衰减，再夹紧 */
+export const CONFLICT_FULL_STACK = 2;
+export const CONFLICT_DAMP = 0.5;
+
+export type ComposeMultResult = {
+  multByAxis: Record<CraftAxisId, number>;
+  harmonized: boolean;
+  note: string;
+};
+
+/**
+ * 叠乘词条乘子；同轴超过 2 条时后段衰减（冲突细则切片）。
+ */
+export function composeMultByAxisDetailed(
+  entries: YearBuffEntry[],
+): ComposeMultResult {
+  const bags = new Map<CraftAxisId, number[]>();
+  for (const a of CRAFT_AXES) bags.set(a.id, []);
   for (const e of entries) {
     for (const fx of e.effects) {
-      mults[fx.axis] *= fx.mult;
+      bags.get(fx.axis)!.push(fx.mult);
     }
   }
+
+  let harmonized = false;
+  const mults = emptyMultByAxis();
   for (const a of CRAFT_AXES) {
-    mults[a.id] = clampBuffMult(mults[a.id]);
+    const list = bags.get(a.id)!;
+    // 偏离 1 更大的优先保留满额
+    list.sort((x, y) => Math.abs(y - 1) - Math.abs(x - 1));
+    let m = 1;
+    for (let i = 0; i < list.length; i++) {
+      let factor = list[i]!;
+      if (i >= CONFLICT_FULL_STACK) {
+        factor = 1 + (factor - 1) * CONFLICT_DAMP;
+        harmonized = true;
+      }
+      m *= factor;
+    }
+    mults[a.id] = clampBuffMult(m);
   }
-  return mults;
+
+  return {
+    multByAxis: mults,
+    harmonized,
+    note: harmonized
+      ? '同轴词条较多，已做衰减调和（仍夹紧），避免有效分被叠爆。'
+      : '',
+  };
+}
+
+export function composeMultByAxis(entries: YearBuffEntry[]): Record<CraftAxisId, number> {
+  return composeMultByAxisDetailed(entries).multByAxis;
 }
 
 /** 从 iztro mutagen 数组（顺序禄权科忌）建词条 */
@@ -242,12 +291,21 @@ export function resolveYearBuffPack(
     `${year}m${mo}`,
     'month',
   );
+  const baziEntries = buildBuffEntriesFromBazi(person, year, mo, {
+    layers: ['dayun', 'liunian', 'liuyue'],
+  });
+  const baziDayun = baziEntries.filter((e) => e.baziLayer === 'dayun');
+  const baziYear = baziEntries.filter((e) => e.baziLayer === 'liunian');
+  const baziMonth = baziEntries.filter((e) => e.baziLayer === 'liuyue');
   const yearMutagenLine =
     snap?.yearMutagenLine ||
     (yearMutagen.length ? yearMutagen.join(' · ') : '流年四化未能排出');
   const monthMutagenLine =
     snap?.monthMutagenLine ||
     (monthMutagen.length ? monthMutagen.join(' · ') : '流月四化未能排出');
+  const allYear = [...yearEntries, ...baziDayun, ...baziYear];
+  const allMonth = [...monthEntries, ...baziMonth];
+  const composed = composeMultByAxisDetailed([...allYear, ...allMonth]);
 
   return {
     year,
@@ -257,9 +315,10 @@ export function resolveYearBuffPack(
     mutagenLine: `流年 ${yearMutagenLine} · 流月 ${monthMutagenLine}`,
     yearMutagenLine,
     monthMutagenLine,
-    entries: yearEntries,
-    monthEntries,
-    multByAxis: composeMultByAxis([...yearEntries, ...monthEntries]),
+    entries: allYear,
+    monthEntries: allMonth,
+    multByAxis: composed.multByAxis,
     baziHint,
+    conflictNote: composed.note || undefined,
   };
 }

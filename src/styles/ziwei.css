@@ -522,6 +522,9 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   border-radius: 18px;
   border: 1px solid rgba(212, 181, 106, 0.4);
   background: var(--zw-panel);
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
 }
 
 .ziwei-star-detail.is-lit {
@@ -566,6 +569,158 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   padding-top: 12px;
   border-top: 1px solid rgba(201, 168, 76, 0.16);
 }
+.ziwei-palace-practice-sec.is-config {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 28%, var(--line));
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+  border-top: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 28%, var(--line));
+}
+.ziwei-palace-practice-config-line {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.ziwei-palace-practice-hedu {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 32%, var(--line));
+}
+.ziwei-palace-practice-hedu-kicker {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  vertical-align: middle;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 90%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+}
+.ziwei-palace-practice-stars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ziwei-palace-practice-star {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 5.5rem;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface-1) 90%, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-palace-practice-star.is-static {
+  cursor: default;
+  opacity: 0.85;
+}
+.ziwei-palace-practice-star strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.ziwei-palace-practice-star em {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-palace-practice-star-meta {
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 70%, var(--ink));
+}
+.ziwei-palace-practice-star-cta {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 75%, var(--ink-muted));
+}
+.ziwei-palace-practice-click-hint {
+  margin: 8px 0 0;
+}
+.ziwei-palace-practice-loop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  margin: 14px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, var(--line));
+}
+.ziwei-palace-practice-loop.is-footer {
+  margin: 16px 0 8px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+}
+.ziwei-palace-practice-tip {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, var(--line));
+}
+.ziwei-palace-practice-tip:last-child {
+  margin-bottom: 0;
+}
+.ziwei-palace-practice-tip h4 {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-palace-practice-tip p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-palace-practice-tip.is-quest {
+  border-color: color-mix(in srgb, #e67a3a 35%, var(--line));
+}
+.ziwei-palace-practice-tip.is-annual {
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+}
+.ziwei-palace-practice-badge {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 80%, var(--ink));
+}
+.ziwei-palace-practice .ziwei-detail-tabs {
+  margin-top: 12px;
+}
+.ziwei-palace-practice-panel-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-palace-practice-sec.is-config.ziwei-detail-tab-panel {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 28%, var(--line));
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+}
 
 .ziwei-detail-block h3 {
   margin: 0 0 8px;
@@ -578,6 +733,82 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   margin: 0 0 8px;
   color: var(--zw-muted);
   line-height: 1.65;
+}
+
+.ziwei-in-chart-block {
+  margin: 10px 0 18px;
+  padding: 12px 0 4px;
+  border-top: 1px solid rgba(201, 168, 76, 0.28);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.16);
+}
+.ziwei-in-chart-place {
+  color: var(--ink, var(--zw-ink, var(--text-primary, #f2e8d5))) !important;
+  font-weight: 650;
+  margin: 0 0 10px !important;
+}
+.ziwei-in-chart-explains {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.ziwei-in-chart-explain {
+  margin: 0 !important;
+  color: var(--ink, var(--zw-ink)) !important;
+  font-size: 0.9rem;
+  line-height: 1.7 !important;
+}
+.ziwei-in-chart-role {
+  line-height: 1.6;
+}
+.ziwei-goto-chart-cta {
+  font-weight: 600;
+}
+
+.ziwei-meet-timeline {
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(201, 168, 76, 0.06);
+}
+.ziwei-meet-timeline-title {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--zw-gold);
+}
+.ziwei-enc-first {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(201, 168, 76, 0.22);
+}
+.ziwei-enc-first-label {
+  margin: 0 0 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--zw-gold);
+}
+.ziwei-enc-list {
+  display: grid;
+  gap: 8px;
+}
+.ziwei-enc-item {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.ziwei-enc-item time,
+.ziwei-enc-first time {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin-bottom: 2px;
+}
+.ziwei-enc-palace {
+  margin: 2px 0 0;
+  font-size: 0.74rem;
+  opacity: 0.7;
 }
 
 .ziwei-detail-counsel {
@@ -949,6 +1180,119 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   font-size: 0.88rem;
 }
 
+/* —— 我的相遇：去边框、大字点亮、主星格、宫位卡 —— */
+.ziwei-meet-hero {
+  margin: 4px 0 18px;
+  text-align: center;
+}
+.ziwei-meet-lit-count {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.ziwei-meet-lit-count strong {
+  color: var(--gold-ink, var(--zw-gold));
+  font-size: 1.75rem;
+}
+.ziwei-meet-hero-sub {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-meet-section {
+  margin: 0 0 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.ziwei-meet-section h3 {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ziwei-meet-major-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.ziwei-meet-major {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--line-soft, var(--zw-line));
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.55;
+}
+.ziwei-meet-major.is-lit {
+  opacity: 1;
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-2));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 25%, transparent);
+}
+.ziwei-meet-palace-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 480px) {
+  .ziwei-meet-palace-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.ziwei-meet-palace-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 35%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-1, var(--surface-2)));
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.ziwei-meet-palace-card strong {
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+.ziwei-meet-palace-ico {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.ziwei-meet-recent {
+  margin: 8px 0 24px;
+  border: 0;
+  padding: 0;
+}
+.ziwei-meet-recent > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--ink-muted, var(--zw-muted));
+  padding: 8px 0;
+}
+.ziwei-meet-recent > summary::-webkit-details-marker {
+  display: none;
+}
+.ziwei-meet-recent[open] > summary {
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
 .ziwei-meet-block {
   margin: 0 0 16px;
   padding: 14px 14px 16px;
@@ -1101,7 +1445,7 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   text-align: center;
 }
 
-/* 多级吸顶栈：上级 + 当前级同粘，不互相压盖 */
+/* 多级吸顶：上级＝面包屑一行；当前级＝完整可横滑 */
 .ziwei-codex-sticky-stack {
   position: sticky;
   top: 0;
@@ -1114,36 +1458,127 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   background: color-mix(in srgb, var(--bg-deep) 94%, transparent);
   backdrop-filter: blur(10px);
 }
-.ziwei-codex-sticky-stack .ziwei-layer-tabs-caps {
+.ziwei-codex-crumb-trail {
+  order: -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 2px;
+  padding: 6px 4px 4px;
+  min-width: 0;
+}
+.ziwei-codex-crumb {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--gold-ink, var(--gold));
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  padding: 2px 4px;
+  cursor: pointer;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ziwei-codex-crumb.is-open {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ziwei-codex-crumb-sep {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  opacity: 0.7;
+  padding: 0 1px;
+}
+.ziwei-codex-sticky-stack .ziwei-layer-tabs-caps,
+.ziwei-codex-sticky-stack .ziwei-atlas-top-tabs {
   position: static;
   top: auto;
   z-index: auto;
   margin: 0;
-  padding: 6px 12px 4px 0;
+  padding: 4px 0 2px;
+  width: 100%;
   background: transparent;
   backdrop-filter: none;
 }
+.ziwei-codex-sticky-stack .is-parent-level:not(.is-expanded) {
+  display: none;
+}
+.ziwei-codex-sticky-stack .is-pinned-level {
+  display: flex;
+}
+.ziwei-codex-sticky-stack .is-parent-level.is-expanded {
+  display: block;
+  padding: 2px 0 6px;
+}
 .ziwei-codex-sticky-row {
   padding: 2px 0 4px;
+  min-width: 0;
 }
 .ziwei-codex-sticky-row .ziwei-codex-tabs,
+.ziwei-codex-sticky-row .ziwei-meet-underline-tabs,
 .ziwei-codex-sticky-row .ziwei-star-kind-chips,
-.ziwei-codex-sticky-row .ziwei-shensha-theme-chips {
+.ziwei-codex-sticky-row .ziwei-shensha-theme-chips,
+.ziwei-codex-sticky-row .ziwei-star-kind-rail,
+.ziwei-codex-sticky-row .ziwei-shensha-theme-rail,
+.ziwei-codex-sticky-row .ziwei-shensha-tone-chips,
+.ziwei-codex-sticky-row .ziwei-shensha-tone-overview {
   margin: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 .ziwei-codex-sticky-row .ziwei-codex-tabs {
   background: color-mix(in srgb, var(--surface-2) 55%, transparent);
 }
 .ziwei-codex-sticky-row .ziwei-star-kind-chips,
-.ziwei-codex-sticky-row .ziwei-shensha-theme-chips {
+.ziwei-codex-sticky-row .ziwei-shensha-tone-chips,
+.ziwei-codex-sticky-stack .is-parent-level.is-expanded .ziwei-layer-tabs-caps,
+.ziwei-codex-sticky-stack .is-parent-level.is-expanded.ziwei-layer-tabs-caps,
+.ziwei-codex-sticky-stack .is-current-level.ziwei-layer-tabs-caps {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  flex-wrap: nowrap;
-  padding: 2px 12px 2px 0;
+  flex-wrap: nowrap !important;
+  padding: 2px 4px 4px 0;
+  scroll-padding-inline: 16px;
+}
+/* 议题胶囊：吸顶时也单行横滑（与星曜分类一致） */
+.ziwei-codex-sticky-row .ziwei-shensha-theme-chips,
+.ziwei-codex-sticky-row .ziwei-star-kind-chips.is-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-wrap: nowrap !important;
+  padding: 2px 28px 6px 0;
+  scroll-padding-inline: 16px;
+}
+.ziwei-codex-sticky-row .ziwei-shensha-theme-chips::-webkit-scrollbar,
+.ziwei-codex-sticky-row .ziwei-star-kind-chips.is-scroll::-webkit-scrollbar {
+  display: none;
 }
 .ziwei-codex-sticky-row .ziwei-star-kind-chips::-webkit-scrollbar,
-.ziwei-codex-sticky-row .ziwei-shensha-theme-chips::-webkit-scrollbar {
+.ziwei-codex-sticky-row .ziwei-shensha-tone-chips::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-codex-sticky-stack .ziwei-sticky-end-spacer {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 1px;
+  pointer-events: none;
+}
+.ziwei-codex-sticky-stack .ziwei-shensha-theme-chip,
+.ziwei-codex-sticky-stack .ziwei-shensha-tone-chip,
+.ziwei-codex-sticky-stack .ziwei-star-kind-chips .ziwei-shensha-theme-chip,
+.ziwei-codex-sticky-stack .ziwei-star-kind-chips.is-fullrow .ziwei-shensha-theme-chip {
+  flex: 0 0 auto;
+}
+.ziwei-codex-sticky-stack .ziwei-shensha-tone-chips.is-fullrow .ziwei-shensha-tone-chip {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.ziwei-codex-sticky-stack .ziwei-shensha-tone-chips.is-fullrow .ziwei-sticky-end-spacer {
   display: none;
 }
 
@@ -1356,6 +1791,739 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   flex: 0 0 12px;
 }
 
+/* 微信/小红书风：图鉴五件事顶栏 */
+.ziwei-atlas-top-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  margin: 2px 0 14px;
+  padding: 0;
+  border-bottom: 1px solid var(--line-soft, var(--zw-line));
+  background: color-mix(in srgb, var(--bg-deep, var(--bg)) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+.ziwei-atlas-top-tabs::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-atlas-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 2px 11px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  font-size: clamp(0.78rem, 3.4vw, 0.9rem);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ziwei-atlas-tab.is-on {
+  color: var(--ink);
+  font-weight: 700;
+  border-bottom-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 92%, #e67a3a 20%);
+}
+
+/* 读盘路径 · 薄引导（本周一宫 / 先命再财） */
+.ziwei-read-path {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, var(--gold) 12%);
+  background: color-mix(in srgb, var(--surface-2) 92%, var(--gold) 8%);
+}
+.ziwei-read-path-kicker {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+.ziwei-read-path-lead {
+  margin: 0 0 4px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.ziwei-read-path-sub {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+.ziwei-read-path-trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 2px;
+  margin: 0 0 10px;
+}
+.ziwei-read-path-chip {
+  appearance: none;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.ziwei-read-path-chip.is-on {
+  border-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--line));
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
+}
+.ziwei-read-path-sep {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  opacity: 0.55;
+  padding: 0 1px;
+}
+.ziwei-read-path-cta {
+  display: block;
+  width: 100%;
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-1));
+}
+.ziwei-read-path-cta:hover {
+  background: color-mix(in srgb, var(--gold) 16%, var(--surface-1));
+}
+
+/* 我的相遇 · 独立大按钮（在命盘解读/完整命盘之下） */
+.ziwei-meet-entry {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 40%, var(--line));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--gold) 12%, var(--surface-2)),
+    var(--surface-1)
+  );
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-meet-entry-kicker {
+  grid-column: 1;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+.ziwei-meet-entry-title {
+  grid-column: 1;
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: var(--gold-ink, var(--gold));
+}
+.ziwei-meet-entry-desc {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+.ziwei-meet-entry-cta {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  font-size: 1.2rem;
+  color: var(--gold-ink, var(--gold));
+  opacity: 0.85;
+}
+.ziwei-meet-entry.is-on {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 22%, transparent);
+}
+.ziwei-meet-entry.is-on .ziwei-meet-entry-cta {
+  opacity: 0.45;
+}
+
+/* 我的相遇 · 独立页 */
+.ziwei-meet-page-head .ziwei-meet-page-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ziwei-codex-help.is-meet-notes {
+  flex: 0 0 auto;
+  min-width: 2.6rem;
+  height: 2.2rem;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.ziwei-meet-page-body {
+  padding-bottom: 28px;
+}
+.ziwei-meet-section {
+  margin: 0 0 18px;
+}
+.ziwei-meet-section-head {
+  margin: 0 0 8px;
+}
+.ziwei-meet-section-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+.ziwei-meet-section-head em {
+  font-style: normal;
+  font-weight: 700;
+  opacity: 0.75;
+  margin-left: 4px;
+}
+
+.ziwei-meet-kind-overview-hint {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-meet-kind-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.ziwei-meet-kind-overview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 10px 9px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-meet-kind-overview-card strong {
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+.ziwei-meet-kind-overview-card em {
+  font-style: normal;
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: var(--gold-ink, var(--gold));
+}
+.ziwei-meet-kind-overview-card.is-on {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+.ziwei-meet-kind-overview-card.is-empty,
+.ziwei-meet-kind-overview-card:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.ziwei-meet-atlas-exit {
+  margin: 16px 0 8px;
+  text-align: center;
+}
+.ziwei-ge-section-title {
+  margin: 14px 0 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-ge-candidates {
+  margin: 12px 0 8px;
+  border: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
+  border-radius: 12px;
+  padding: 4px 10px 10px;
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+}
+.ziwei-ge-candidates > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 4px;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+.ziwei-ge-candidates > summary em {
+  font-style: normal;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+.ziwei-ge-candidates > summary::-webkit-details-marker {
+  display: none;
+}
+.ziwei-journey-step.is-rank-strong.is-complete .ziwei-journey-badge {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 700;
+}
+
+/* 旧弹窗样式保留兼容，运行时不再挂载 */
+.ziwei-meet-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 560;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  color: var(--ink);
+}
+.ziwei-meet-sheet.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ziwei-meet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: color-mix(in srgb, #06040e 72%, transparent);
+  cursor: pointer;
+}
+html[data-theme='moon'] .ziwei-meet-backdrop {
+  background: rgba(42, 48, 60, 0.38);
+}
+.ziwei-meet-panel {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  max-height: min(88vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--drawer-bg, var(--surface-1));
+  box-shadow: var(--shadow);
+  transform: translateY(12px) scale(0.97);
+  transition: transform 0.24s ease;
+}
+.ziwei-meet-sheet.is-visible .ziwei-meet-panel {
+  transform: translateY(0) scale(1);
+}
+.ziwei-meet-sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 8px;
+  flex: 0 0 auto;
+}
+.ziwei-meet-sheet-head h2 {
+  margin: 2px 0 0;
+  font-size: 1.15rem;
+  color: var(--gold-ink, var(--gold));
+}
+.ziwei-meet-sheet-close {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.ziwei-meet-sheet-close:hover,
+.ziwei-meet-sheet-close:focus-visible {
+  color: var(--ink);
+}
+.ziwei-meet-sheet-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 14px 20px;
+}
+.ziwei-meet-sheet-scroll .ziwei-swipe-hint {
+  margin-top: 4px;
+}
+
+/* 各 Tab 统一二级下划线导航 */
+.ziwei-sub-underline-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 0 12px;
+  padding: 0 4px 0 0;
+  border-bottom: 1px solid var(--line-soft, var(--zw-line));
+}
+.ziwei-sub-underline-tabs::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-sub-underline-tab {
+  flex: 0 0 auto;
+  min-width: 4.2rem;
+  padding: 10px 14px 11px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ziwei-sub-underline-tab.is-on {
+  color: var(--ink);
+  font-weight: 700;
+  border-bottom-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 92%, #e67a3a 20%);
+}
+
+/* 我的相遇等：满行分段切换 */
+.ziwei-sub-underline-tabs.is-segment {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+  overflow: visible;
+  margin: 0 0 14px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+  box-sizing: border-box;
+}
+.ziwei-sub-underline-tabs.is-segment .ziwei-sub-underline-tab {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 6px;
+  border: 0;
+  border-radius: 9px;
+  border-bottom: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 550;
+  color: var(--ink-muted, var(--zw-muted));
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.ziwei-sub-underline-tabs.is-segment .ziwei-sub-underline-tab.is-on {
+  color: var(--ink);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--surface-1) 92%, var(--gold) 8%);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--gold) 28%, transparent),
+    0 1px 3px color-mix(in srgb, #000 8%, transparent);
+  border-bottom-color: transparent;
+}
+.ziwei-sub-underline-tabs.is-segment .ziwei-sub-underline-tab:hover:not(.is-on),
+.ziwei-sub-underline-tabs.is-segment .ziwei-sub-underline-tab:focus-visible:not(.is-on) {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--surface-1) 45%, transparent);
+}
+.ziwei-codex-sticky-stack .ziwei-sub-underline-tabs.is-segment {
+  margin: 0;
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+}
+
+.ziwei-codex-sticky-stack .ziwei-sub-underline-tabs {
+  margin: 0;
+  background: transparent;
+}
+.ziwei-meet-hero.is-compact {
+  margin-bottom: 10px;
+}
+.ziwei-meet-hero.is-compact .ziwei-meet-hero-sub {
+  margin: 0;
+}
+.ziwei-codex-sticky-stack .ziwei-atlas-top-tabs {
+  position: static;
+  margin: 0;
+  width: 100%;
+  padding: 4px 0 2px;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+/* 已收集 / 全部 / 收藏：大号下划线 Tab */
+.ziwei-meet-underline-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 0 0 2px;
+  border-bottom: 1px solid var(--line-soft, var(--zw-line));
+}
+.ziwei-meet-underline-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px 12px;
+  border: 0;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  cursor: pointer;
+}
+.ziwei-meet-underline-tab em {
+  font-style: normal;
+  font-weight: 700;
+}
+.ziwei-meet-underline-ico {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.ziwei-meet-underline-label {
+  font-size: 0.88rem;
+  font-weight: 550;
+  white-space: nowrap;
+}
+.ziwei-meet-underline-tab.is-on {
+  color: var(--ink);
+  border-bottom-color: color-mix(in srgb, #e67a3a 80%, var(--gold-ink, var(--gold)));
+}
+.ziwei-meet-underline-tab.is-on .ziwei-meet-underline-label {
+  font-weight: 750;
+}
+
+.ziwei-star-kind-chips.is-underline {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 0 12px;
+  padding: 0 0 2px;
+  border-bottom: 1px solid var(--line-soft, var(--zw-line));
+}
+.ziwei-star-kind-chips.is-underline::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-star-kind-tab {
+  flex: 0 0 auto;
+  padding: 8px 12px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ziwei-star-kind-tab.is-on {
+  color: var(--ink);
+  font-weight: 700;
+  border-bottom-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 90%, transparent);
+}
+
+/* 星曜分类 / 议题：单行横滑 + 滑动提示 + 右侧渐隐 */
+.ziwei-swipe-hint {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--ink-muted, var(--zw-muted)) 78%, transparent);
+}
+.ziwei-star-kind-rail {
+  position: relative;
+  margin: 0 0 10px;
+}
+.ziwei-star-kind-chips.is-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 28px 6px 0;
+  margin: 0;
+  border: 0;
+}
+.ziwei-star-kind-chips.is-scroll::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-star-kind-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ziwei-star-kind-chip em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink);
+  opacity: 0.85;
+}
+.ziwei-star-kind-chip.is-on {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold) 16%, var(--surface-2));
+  color: var(--ink);
+  font-weight: 650;
+}
+.ziwei-star-kind-chips.is-scroll .ziwei-codex-help {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+/* 议题：单行横滑 + 右侧渐隐提示 */
+.ziwei-shensha-theme-rail {
+  position: relative;
+  margin: 0 0 10px;
+}
+.ziwei-shensha-theme-chips.is-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 28px 6px 0;
+}
+.ziwei-shensha-theme-chips.is-scroll::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-shensha-theme-fade {
+  display: none; /* 假箭头已弃用：标签单行横滑即可 */
+}
+.ziwei-star-kind-rail:has(.ziwei-swipe-hint) .ziwei-shensha-theme-fade,
+.ziwei-shensha-theme-rail:has(.ziwei-swipe-hint) .ziwei-shensha-theme-fade {
+  top: 1.35rem;
+}
+
+/* 色调总览：图例 + 比例条（区别于议题胶囊） */
+.ziwei-shensha-tone-overview {
+  margin: 0 0 14px;
+  padding: 10px 0 4px;
+}
+.ziwei-shensha-tone-caption {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: var(--ink-muted, var(--zw-muted));
+}
+.ziwei-shensha-tone-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  margin: 0 0 8px;
+}
+.ziwei-shensha-tone-stat {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink-muted, var(--zw-muted));
+  cursor: pointer;
+}
+.ziwei-shensha-tone-stat em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-shensha-tone-stat.is-on {
+  color: var(--ink);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ziwei-shensha-tone-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+}
+.ziwei-shensha-tone-bar i {
+  display: block;
+  min-width: 0;
+}
+.ziwei-shensha-tone-bar .is-tone-support {
+  background: color-mix(in srgb, #3d9a6a 75%, #8fd4a8);
+}
+.ziwei-shensha-tone-bar .is-tone-neutral {
+  background: color-mix(in srgb, var(--ink-muted) 35%, #c8c4d0);
+}
+.ziwei-shensha-tone-bar .is-tone-caution {
+  background: color-mix(in srgb, #c45c4a 70%, #e8a090);
+}
+
+.ziwei-palace-mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 16px;
+  flex-wrap: wrap;
+}
+.ziwei-palace-mode-tab {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-muted, var(--zw-muted));
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.ziwei-palace-mode-tab.is-on {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  font-weight: 650;
+}
+.ziwei-palace-journey {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft, var(--zw-line));
+}
+
 /* 列表短卡 → 点开完整图鉴 */
 .ziwei-codex-short-grid {
   display: grid;
@@ -1369,13 +2537,14 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   }
 }
 .ziwei-codex-short {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   width: 100%;
   min-height: 88px;
-  padding: 12px 4px 14px;
+  padding: 12px 7.2rem 14px 4px;
   border: 0;
   border-bottom: 1px solid var(--line-soft);
   border-radius: 0;
@@ -1459,12 +2628,142 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 .ziwei-codex-short.is-pending .ziwei-codex-short-thumb.is-empty,
 .ziwei-codex-short.is-absent .ziwei-codex-short-thumb-img,
 .ziwei-codex-short.is-pending .ziwei-codex-short-glyph,
-.ziwei-codex-short.is-absent .ziwei-codex-short-glyph {
+.ziwei-codex-short.is-absent .ziwei-codex-short-glyph,
+.ziwei-codex-short.is-absent .ziwei-palace-glyph,
+.ziwei-codex-short.is-soft .ziwei-palace-glyph {
   filter: grayscale(0.85) brightness(0.92);
 }
+.ziwei-codex-short.is-soft .ziwei-codex-short-thumb {
+  border-color: color-mix(in srgb, var(--line) 85%, var(--ink-muted));
+  opacity: 0.92;
+}
+.ziwei-codex-short-thumb.is-palace {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--gold) 8%);
+}
+.ziwei-palace-glyph {
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1;
+}
+.ziwei-palace-card-role {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  vertical-align: middle;
+  color: color-mix(in srgb, var(--gold-ink, var(--gold)) 85%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.ziwei-codex-short.is-palace .ziwei-codex-short-keys {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
+  font-size: 0.84rem;
+  color: var(--ink);
+  opacity: 0.92;
+}
+/* 相遇态：盘中有、雷达未加成 — 稍暗未激活 */
+.ziwei-codex-short.is-met .ziwei-codex-short-thumb-img,
+.ziwei-codex-short.is-met .ziwei-codex-short-glyph {
+  filter: grayscale(0.35) brightness(0.94) saturate(0.75);
+  opacity: 0.88;
+}
+.ziwei-codex-short.is-met .ziwei-codex-short-thumb {
+  border-color: color-mix(in srgb, var(--line) 80%, var(--gold));
+  box-shadow: none;
+}
+.ziwei-codex-short.is-met .ziwei-codex-short-name {
+  opacity: 0.92;
+}
+.ziwei-codex-short.is-met .ziwei-codex-short-status {
+  color: color-mix(in srgb, var(--ink-muted) 70%, var(--gold));
+}
+.ziwei-codex-short.is-activated .ziwei-codex-short-status,
+.ziwei-codex-short.is-awakened .ziwei-codex-short-status.is-activated {
+  color: var(--gold-ink, var(--gold));
+}
 .ziwei-codex-short.is-awakened .ziwei-codex-short-thumb,
+.ziwei-codex-short.is-activated .ziwei-codex-short-thumb,
 .ziwei-codex-short.is-lit .ziwei-codex-short-thumb {
-  box-shadow: 0 0 12px color-mix(in srgb, var(--gold) 28%, transparent);
+  border-color: color-mix(in srgb, var(--gold) 62%, var(--line));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--gold) 35%, transparent),
+    0 0 14px color-mix(in srgb, var(--gold) 38%, transparent),
+    0 4px 12px color-mix(in srgb, var(--ink) 8%, transparent);
+  animation: ziwei-codex-thumb-breathe 4.2s ease-in-out infinite;
+}
+.ziwei-codex-short.is-awakened .ziwei-codex-short-thumb-img,
+.ziwei-codex-short.is-awakened .ziwei-codex-short-glyph,
+.ziwei-codex-short.is-activated .ziwei-codex-short-thumb-img,
+.ziwei-codex-short.is-activated .ziwei-codex-short-glyph,
+.ziwei-codex-short.is-lit .ziwei-codex-short-thumb-img,
+.ziwei-codex-short.is-lit .ziwei-codex-short-glyph {
+  filter: saturate(1.12) brightness(1.06);
+}
+.ziwei-codex-thumb-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 28%,
+      color-mix(in srgb, #fff8e8 55%, transparent) 46%,
+      color-mix(in srgb, var(--gold) 35%, transparent) 52%,
+      transparent 68%
+    );
+  background-size: 220% 100%;
+  animation: ziwei-codex-thumb-sheen 3.6s ease-in-out infinite;
+  opacity: 0.85;
+  mix-blend-mode: soft-light;
+}
+@keyframes ziwei-codex-thumb-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--gold) 32%, transparent),
+      0 0 12px color-mix(in srgb, var(--gold) 30%, transparent),
+      0 4px 12px color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent),
+      0 0 18px color-mix(in srgb, var(--gold) 48%, transparent),
+      0 4px 14px color-mix(in srgb, var(--ink) 10%, transparent);
+  }
+}
+@keyframes ziwei-codex-thumb-sheen {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ziwei-codex-short.is-awakened .ziwei-codex-short-thumb,
+  .ziwei-codex-short.is-activated .ziwei-codex-short-thumb,
+  .ziwei-codex-short.is-lit .ziwei-codex-short-thumb,
+  .ziwei-codex-thumb-sheen {
+    animation: none;
+  }
 }
 .ziwei-codex-short-name {
   font-size: 0.98rem;
@@ -1496,10 +2795,16 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 }
 .ziwei-star-kind-chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
   margin: 0 0 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ziwei-star-kind-chips::-webkit-scrollbar {
+  display: none;
 }
 .ziwei-star-kind-chips.is-fullrow {
   width: 100%;
@@ -1534,9 +2839,16 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 }
 .ziwei-shensha-theme-chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   margin: 0 0 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 4px 6px 0;
+}
+.ziwei-shensha-theme-chips::-webkit-scrollbar {
+  display: none;
 }
 .ziwei-shensha-theme-chip {
   flex: 0 0 auto;
@@ -1560,6 +2872,377 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   border-color: color-mix(in srgb, var(--gold) 70%, var(--line));
   background: color-mix(in srgb, var(--gold) 16%, var(--surface-2));
   font-weight: 650;
+}
+.ziwei-shensha-tone-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 4px 2px 0;
+}
+.ziwei-shensha-tone-chips.is-fullrow {
+  width: 100%;
+  overflow: visible;
+  gap: 6px;
+}
+.ziwei-shensha-tone-chips.is-fullrow .ziwei-shensha-tone-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+}
+.ziwei-shensha-tone-chips::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-shensha-tone-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ziwei-shensha-tone-chip em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+}
+.ziwei-shensha-tone-chip.is-tone-support {
+  border-color: color-mix(in srgb, #5a9e78 45%, var(--line));
+}
+.ziwei-shensha-tone-chip.is-tone-neutral {
+  border-color: color-mix(in srgb, var(--gold) 40%, var(--line));
+}
+.ziwei-shensha-tone-chip.is-tone-caution {
+  border-color: color-mix(in srgb, #c47a5a 45%, var(--line));
+}
+.ziwei-shensha-tone-chip.is-on {
+  font-weight: 650;
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold-soft, var(--gold)) 28%, var(--surface-1));
+}
+.ziwei-shensha-tone-chip.is-tone-support.is-on {
+  border-color: color-mix(in srgb, #5a9e78 65%, var(--line));
+  background: color-mix(in srgb, #5a9e78 16%, var(--surface-1));
+  color: color-mix(in srgb, #2f6b48 70%, var(--ink));
+}
+.ziwei-shensha-tone-chip.is-tone-caution.is-on {
+  border-color: color-mix(in srgb, #c47a5a 65%, var(--line));
+  background: color-mix(in srgb, #c47a5a 14%, var(--surface-1));
+  color: color-mix(in srgb, #8a4a32 70%, var(--ink));
+}
+.ziwei-shensha-tone-hint {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+.ziwei-shensha-meet-highlight {
+  margin: 0 0 14px;
+  padding: 12px 14px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--gold) 10%, transparent),
+      color-mix(in srgb, var(--surface-2) 88%, transparent)
+    );
+}
+.ziwei-shensha-meet-highlight.is-pulse {
+  padding-bottom: 16px;
+}
+.ziwei-shensha-meet-highlight.is-empty {
+  border-style: dashed;
+  opacity: 0.92;
+}
+.ziwei-shensha-meet-highlight-head {
+  font-size: 0.82rem;
+  font-weight: 650;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.ziwei-shensha-meet-highlight-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.ziwei-shensha-meet-highlight-item {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.ziwei-shensha-meet-highlight-empty {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.ziwei-meet-stage-card {
+  display: block;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-1, var(--surface-2)) 92%, transparent);
+  border: 1px solid var(--line-soft, var(--line));
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-meet-stage-card:hover,
+.ziwei-meet-stage-card:focus-visible {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+}
+.ziwei-meet-stage-kicker {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-meet-stage-blurb {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.ziwei-meet-stage-lead {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+.ziwei-meet-summary-card {
+  display: block;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 12px 12px 12px 14px;
+  border: 0;
+  border-left: 3px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 70%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  border-radius: 0 10px 10px 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-meet-summary-card:hover,
+.ziwei-meet-summary-card:focus-visible {
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-2));
+}
+.ziwei-meet-summary-badge {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold-ink, var(--gold));
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+}
+.ziwei-meet-summary-card p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.ziwei-meet-pulse-heading {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+.ziwei-meet-pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+}
+@media (min-width: 560px) {
+  .ziwei-meet-pulse-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.ziwei-meet-pulse-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-1, var(--surface-2)) 94%, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ziwei-meet-pulse-card.is-on {
+  border-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 55%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 22%, transparent);
+}
+.ziwei-meet-pulse-card.is-muted {
+  opacity: 0.55;
+}
+.ziwei-meet-pulse-card.is-muted .ziwei-meet-pulse-num {
+  color: var(--ink-muted);
+}
+.ziwei-meet-pulse-emoji {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.ziwei-meet-pulse-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.ziwei-meet-pulse-num {
+  font-size: 1.35rem;
+  font-weight: 750;
+  font-style: normal;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.ziwei-meet-pulse-line {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  line-height: 1.3;
+}
+.ziwei-meet-niche-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 0;
+  margin: 0 0 14px;
+  padding: 4px 0;
+}
+.ziwei-meet-niche-sep {
+  width: 1px;
+  height: 14px;
+  margin: 0 8px;
+  background: var(--line);
+  opacity: 0.7;
+}
+.ziwei-meet-niche-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+.ziwei-meet-niche-chip em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--gold-ink, var(--gold));
+}
+.ziwei-meet-niche-chip.is-on {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ziwei-meet-niche-empty {
+  margin: 0 0 14px;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+.ziwei-meet-tone-block {
+  margin: 0;
+}
+.ziwei-meet-tone-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 0 8px;
+}
+.ziwei-meet-tone-stat {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.ziwei-meet-tone-stat em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ziwei-meet-tone-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+  margin: 0 0 6px;
+}
+.ziwei-meet-tone-bar i {
+  display: block;
+  min-width: 0;
+}
+.ziwei-meet-tone-bar .is-tone-support {
+  background: color-mix(in srgb, #3d9a6a 75%, #8fd4a8);
+}
+.ziwei-meet-tone-bar .is-tone-neutral {
+  background: color-mix(in srgb, var(--ink-muted) 35%, #c8c4d0);
+}
+.ziwei-meet-tone-bar .is-tone-caution {
+  background: color-mix(in srgb, #c45c4a 70%, #e8a090);
+}
+.ziwei-shensha-tone-legend.is-pipe {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 6px 10px;
+  margin: 0 0 10px;
+}
+.ziwei-shensha-tone-legend.is-pipe::-webkit-scrollbar {
+  display: none;
+}
+.ziwei-shensha-tone-pipe {
+  color: color-mix(in srgb, var(--ink-muted) 45%, transparent);
+  font-size: 0.75rem;
+  user-select: none;
+}
+.ziwei-shensha-tone-overview.is-compact {
+  margin: 0 0 10px;
+  padding: 0;
+}
+.ziwei-codex-short.is-shensha .ziwei-codex-short-meet {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  color: color-mix(in srgb, var(--ink-muted) 88%, transparent);
+  letter-spacing: 0.01em;
+}
+.ziwei-shensha-tone-note {
+  flex: 0 0 auto;
+  margin: 0 0 0 4px;
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
 }
 .ziwei-shensha-tone-legend {
   display: flex;
@@ -1599,7 +3282,29 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   color: var(--ink-muted);
   line-height: 1.35;
 }
-.ziwei-codex-short-status,
+.ziwei-codex-short-status {
+  position: absolute;
+  top: 8px;
+  right: 2px;
+  z-index: 2;
+  margin: 0;
+  max-width: 7.5rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--gold-ink, var(--gold));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.ziwei-codex-short-status.is-activated {
+  border-color: color-mix(in srgb, #5a9e78 45%, var(--line));
+  color: color-mix(in srgb, #3d7a58 70%, var(--ink));
+}
 .ziwei-codex-short-cta {
   font-size: 0.72rem;
   color: var(--gold-ink, var(--gold));
@@ -1787,6 +3492,8 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   color: var(--ink);
   font-size: 0.95rem;
   line-height: 1.7;
+  min-width: 0;
+  max-width: 100%;
 }
 .ziwei-detail-tab-panel p {
   color: var(--ink);
@@ -1828,18 +3535,69 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   letter-spacing: 0.04em;
   font-weight: 650;
 }
+.ziwei-palace-chips-rail {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 0 10px;
+}
+.ziwei-palace-chips-nav {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line));
+  background: color-mix(in srgb, var(--surface-1) 92%, var(--gold) 8%);
+  color: var(--gold-ink, var(--gold));
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 12%, transparent);
+}
+.ziwei-palace-chips-nav:hover:not(:disabled),
+.ziwei-palace-chips-nav:focus-visible:not(:disabled) {
+  border-color: color-mix(in srgb, var(--gold) 70%, var(--line));
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
+}
+.ziwei-palace-chips-nav:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
 .ziwei-palace-chips {
   display: flex;
   flex-wrap: nowrap;
   gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pinch-zoom;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 0 0 8px;
-  margin: 0 0 8px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--gold) 40%, transparent) transparent;
+  padding: 4px 2px 8px;
+  margin: 0;
+  cursor: grab;
+}
+.ziwei-palace-chips.is-dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 .ziwei-palace-chips::-webkit-scrollbar {
-  display: none;
+  height: 3px;
+}
+.ziwei-palace-chips::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius: 999px;
 }
 .ziwei-palace-chip {
   flex: 0 0 auto;
@@ -1988,6 +3746,85 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 
 .ziwei-codex-shensha-group {
   margin: 0 0 22px;
+}
+
+.ziwei-codex-shensha-group.is-fold {
+  margin: 0 0 10px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  overflow: hidden;
+}
+
+.ziwei-codex-shensha-group.is-fold[open] {
+  margin-bottom: 18px;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent);
+}
+
+.ziwei-codex-shensha-head.is-fold-summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ziwei-codex-shensha-head.is-fold-summary::-webkit-details-marker {
+  display: none;
+}
+
+.ziwei-codex-shensha-head.is-fold-summary h3 {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+}
+
+.ziwei-codex-shensha-head.is-fold-summary p {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.ziwei-codex-shensha-fold-hint {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 0.72rem;
+  color: var(--gold-ink, var(--gold));
+  white-space: nowrap;
+}
+
+.ziwei-codex-shensha-fold-hint::after {
+  content: '展开';
+}
+
+.ziwei-codex-shensha-group.is-fold[open] .ziwei-codex-shensha-fold-hint::after {
+  content: '收起';
+  opacity: 0.7;
+}
+
+.ziwei-codex-shensha-group.is-fold .ziwei-codex-short-grid {
+  padding: 0 10px 12px;
+}
+
+.ziwei-codex-shensha-group.is-flow {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.ziwei-codex-shensha-head.is-flow-head h3 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.ziwei-codex-short-grid.is-flow-grid {
+  opacity: 0.96;
 }
 
 .ziwei-codex-school-foot {
@@ -4484,6 +6321,35 @@ html[data-theme='moon'] .ziwei-learn-backdrop {
   letter-spacing: 0.08em;
   color: var(--gold);
 }
+.ziwei-learn-block.is-atlas-tease {
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+  border-radius: 12px;
+  padding: 12px 14px;
+  border-bottom: 0;
+}
+.ziwei-learn-tease {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ink-muted, var(--ink));
+  opacity: 0.88;
+}
+.ziwei-learn-atlas-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  cursor: pointer;
+}
+.ziwei-learn-atlas-cta:hover {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
 .ziwei-learn-body {
   margin: 0;
   white-space: pre-wrap;
@@ -5431,7 +7297,7 @@ button.craft-axis-row:focus-visible,
   padding-left: 0.5rem;
 }
 
-/* 流年剧情弹层 */
+/* 流年剧情弹层 · 吃全局 surface/ink，勿硬编码暗紫 */
 .ziwei-year-stance-sheet {
   position: fixed;
   inset: 0;
@@ -5444,8 +7310,11 @@ button.craft-axis-row:focus-visible,
 .ziwei-ys-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(8, 6, 18, 0.55);
+  background: color-mix(in srgb, #06040e 55%, transparent);
   pointer-events: auto;
+}
+html[data-theme='moon'] .ziwei-ys-backdrop {
+  background: rgba(42, 48, 60, 0.38);
 }
 .ziwei-ys-card {
   position: relative;
@@ -5454,10 +7323,10 @@ button.craft-axis-row:focus-visible,
   margin-bottom: env(safe-area-inset-bottom, 0);
   padding: 20px 18px 16px;
   border-radius: 16px 16px 12px 12px;
-  background: linear-gradient(165deg, #2a2438 0%, #1a1624 55%, #14101c 100%);
-  border: 1px solid color-mix(in srgb, var(--gold, #d4b56a) 40%, transparent);
-  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45);
-  color: var(--ink, #f2ebe0);
+  background: var(--drawer-bg, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--gold, #d4b56a) 40%, var(--line));
+  box-shadow: var(--shadow, 0 -8px 40px rgba(0, 0, 0, 0.2));
+  color: var(--ink);
   pointer-events: auto;
   animation: plate-awaken-up 0.28s ease-out;
 }
@@ -5465,12 +7334,12 @@ button.craft-axis-row:focus-visible,
   margin: 0;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--gold-ink, #e8d5a3) 80%, var(--ink-muted, #9aa6bc));
+  color: var(--gold-ink, var(--gold));
 }
 .ziwei-ys-title {
   margin: 6px 0 8px;
   font-size: 1.25rem;
-  color: var(--gold-ink, #e8d5a3);
+  color: var(--gold-ink, var(--gold));
 }
 .ziwei-ys-blurb,
 .ziwei-ys-meta,
@@ -5479,7 +7348,11 @@ button.craft-axis-row:focus-visible,
   margin: 0 0 8px;
   font-size: 0.9rem;
   line-height: 1.55;
-  color: color-mix(in srgb, var(--ink, #f2ebe0) 88%, transparent);
+  color: var(--ink);
+}
+.ziwei-ys-meta,
+.ziwei-ys-current {
+  color: var(--ink-muted);
 }
 .ziwei-ys-tips,
 .ziwei-ys-inline-tips {
@@ -5487,7 +7360,7 @@ button.craft-axis-row:focus-visible,
   padding-left: 1.1em;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: color-mix(in srgb, var(--ink, #f2ebe0) 80%, transparent);
+  color: var(--ink-muted);
 }
 .ziwei-ys-actions {
   display: flex;
@@ -5497,20 +7370,22 @@ button.craft-axis-row:focus-visible,
 }
 .ziwei-ys-btn {
   appearance: none;
-  border: 1px solid color-mix(in srgb, var(--gold, #d4b56a) 45%, transparent);
-  background: transparent;
-  color: var(--gold-ink, #e8d5a3);
+  border: 1px solid color-mix(in srgb, var(--gold, #d4b56a) 45%, var(--line));
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: var(--gold-ink, var(--gold));
   border-radius: 999px;
   padding: 8px 14px;
   font-size: 0.88rem;
   cursor: pointer;
 }
 .ziwei-ys-btn.is-primary {
-  background: color-mix(in srgb, var(--gold, #d4b56a) 22%, transparent);
+  background: color-mix(in srgb, var(--gold, #d4b56a) 22%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
 }
 .ziwei-ys-btn.is-ghost {
   border-color: transparent;
-  color: var(--ink-muted, #9aa6bc);
+  background: transparent;
+  color: var(--ink-muted);
 }
 .ziwei-tl-stance .ziwei-year-why {
   margin-top: 6px;
@@ -5540,4 +7415,53 @@ button.craft-axis-row:focus-visible,
 }
 .ziwei-tl-pane.is-locked-preview .ziwei-tl-theme {
   color: var(--gold-ink, var(--gold));
+}
+
+/* 牌面相遇时间线 */
+.ziwei-enc-block {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2, #1a2233) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold, #d4b56a) 22%, transparent);
+}
+.ziwei-enc-first-label,
+.ziwei-enc-timeline-title {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  color: var(--gold-ink, var(--gold));
+}
+.ziwei-enc-first-date,
+.ziwei-enc-time {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.ziwei-enc-first-q,
+.ziwei-enc-q {
+  margin: 0 0 4px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+.ziwei-enc-palace,
+.ziwei-enc-summary,
+.ziwei-enc-more {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+.ziwei-enc-timeline {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ziwei-enc-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface, #121826) 70%, transparent);
 }

@@ -1,4 +1,4 @@
-﻿import {
+import {
   formatClockTime,
   getChineseHour,
   sectorPointerAngle,

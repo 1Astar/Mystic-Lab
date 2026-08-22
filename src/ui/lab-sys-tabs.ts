@@ -32,9 +32,18 @@ export function bindLabSysTabs(scope: ParentNode): void {
 }
 
 export const BAZI_SYS_TABS = {
-  reading: { path: '/bazi/reading', label: '命盘解读' },
-  chart: { path: '/bazi/chart', label: '命盘解析' },
+  reading: { path: '/bazi/reading', label: '人生地图' },
+  chart: { path: '/bazi/reading?mode=chart', label: '完整命盘' },
 } as const;
+
+/** 紫微同款：人生地图 | 完整命盘（同页模式切换） */
+export function baziViewModeTabsHtml(active: 'theater' | 'chart'): string {
+  return `
+    <div class="bazi-view-tabs lab-sys-tabs" role="tablist" aria-label="八字导航">
+      <button type="button" class="bazi-view-tab lab-sys-tab ${active === 'theater' ? 'is-on' : ''}" data-bazi-view="theater">人生地图</button>
+      <button type="button" class="bazi-view-tab lab-sys-tab ${active === 'chart' ? 'is-on' : ''}" data-bazi-view="chart">完整命盘</button>
+    </div>`;
+}
 
 export const ZIWEI_SYS_TABS = {
   reading: { path: '/ziwei/reading', label: '命盘解读' },

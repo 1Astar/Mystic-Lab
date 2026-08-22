@@ -15,6 +15,8 @@ import {
   saveBaziJournalEntry,
   snapshotLine,
   updateBaziJournalReflection,
+  type BaziAiSession,
+  type BaziJournalEntry,
   type BaziJournalMood,
 } from '../bazi/journal.ts';
 import { buildLuckCycles } from '../bazi/luck-cycles.ts';
@@ -28,6 +30,45 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function renderAiSessionsHtml(sessions: BaziAiSession[] | undefined): string {
+  if (!sessions?.length) return '';
+  const blocks = sessions
+    .map((s) => {
+      const title = s.kind === 'deep' ? '深度解读' : '追问';
+      const body =
+        s.deepReading?.trim() ||
+        s.turns
+          .filter((t) => t.role === 'assistant')
+          .map((t) => t.content)
+          .join('\n\n') ||
+        '';
+      if (!body.trim()) return '';
+      const extra =
+        s.turns.length > 1
+          ? `<details class="ly-replay-ai-turns"><summary>追问记录（${s.turns.length} 条）</summary>${s.turns
+              .map(
+                (t) =>
+                  `<p class="ly-replay-ai-turn is-${t.role}"><strong>${
+                    t.role === 'user' ? '你' : '陪读'
+                  }</strong> · ${escapeHtml(t.content)}</p>`,
+              )
+              .join('')}</details>`
+          : '';
+      return `<section class="ly-replay-ai"><h4>${title}</h4><p class="ly-replay-pre">${escapeHtml(
+        body,
+      )}</p>${extra}</section>`;
+    })
+    .filter(Boolean)
+    .join('');
+  return blocks ? `<div class="ly-replay-ai-wrap bj-ai-wrap">${blocks}</div>` : '';
+}
+
+function aiBadge(entry: BaziJournalEntry): string {
+  const n = entry.aiSessions?.length ?? 0;
+  if (!n) return '';
+  return `<p class="bj-ai-badge">含深度解读 · ${n} 段</p>`;
 }
 
 function currentSnapshot() {
@@ -65,7 +106,7 @@ export function renderBaziJournal(root: HTMLElement): () => void {
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <p class="home-eyebrow">JOURNAL</p>
         <h1 class="page-title">八字手札</h1>
-        <p class="page-subtitle">记下此刻体感 · 附上当时格局与运程快照</p>
+        <p class="page-subtitle">记下此刻体感 · 附上当时格局与运程快照 · AI 解读可回看 · <button type="button" class="bj-journey-link" data-path="/records">我的旅程 ›</button></p>
       </header>
 
       <section class="bj-compose" aria-label="写一条手札">
@@ -99,7 +140,7 @@ export function renderBaziJournal(root: HTMLElement): () => void {
         <h2 class="bj-list-title">已记 ${entries.length} 条</h2>
         ${
           entries.length === 0
-            ? `<div class="bj-empty"><p>还没有手札。</p><p class="bj-empty-hint">写一句今天的体感，或从解读页点进来记。</p></div>`
+            ? `<div class="bj-empty"><p>还没有手札。</p><p class="bj-empty-hint">写一句今天的体感，或在解读页生成深度解读后自动写入。</p></div>`
             : entries
                 .map((e) => {
                   const date = new Date(e.createdAt);
@@ -113,15 +154,22 @@ export function renderBaziJournal(root: HTMLElement): () => void {
                       });
                   const mood = moodLabel(e.mood);
                   const line = snapshotLine(e.snapshot);
+                  const hasAi = (e.aiSessions?.length ?? 0) > 0;
                   return `
-                  <article class="bj-item" data-id="${escapeHtml(e.id)}">
+                  <article class="bj-item${hasAi ? ' has-ai' : ''}" data-id="${escapeHtml(e.id)}">
                     <div class="bj-item-head">
                       <time>${escapeHtml(when)}</time>
                       ${mood ? `<span class="bj-mood-pill">${escapeHtml(mood)}</span>` : ''}
                       ${e.subjectName ? `<span class="bj-who">${escapeHtml(e.subjectName)}</span>` : ''}
                     </div>
+                    ${aiBadge(e)}
                     <p class="bj-body">${escapeHtml(e.body || '（空白）')}</p>
                     ${line ? `<p class="bj-snap">${escapeHtml(line)}${e.snapshot?.dayunHint ? ` · ${escapeHtml(e.snapshot.dayunHint)}` : ''}</p>` : ''}
+                    ${
+                      hasAi
+                        ? `<details class="bj-ai-fold"><summary>回看 AI 解读</summary>${renderAiSessionsHtml(e.aiSessions)}</details>`
+                        : ''
+                    }
                     <textarea class="bj-reflect" rows="2" data-reflect placeholder="后来补写…">${escapeHtml(e.reflection)}</textarea>
                     <div class="bj-item-actions">
                       <button type="button" class="life-btn-ghost bj-del" data-del>删除</button>

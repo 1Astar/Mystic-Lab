@@ -68,12 +68,16 @@ const PLATE_KEY_PALACE: Record<string, string[]> = {
 const PLATE_CHANGSHENG = new Set([
   '长生',
   '沐浴',
+  '冠带',
   '临官',
   '帝旺',
+  '衰',
   '病',
   '死',
   '墓',
   '绝',
+  '胎',
+  '养',
 ]);
 
 /** 深度解析权重（越高越优先讲） */

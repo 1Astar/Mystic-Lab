@@ -16,7 +16,7 @@ import {
   updateLiuyaoReflection,
   updateLiuyaoTags,
 } from '../liuyao/journal.ts';
-import { meetCountFor, meetLineFor, buildVaultSnapshot } from '../liuyao/vault.ts';
+import { meetLineFor, buildVaultSnapshot } from '../liuyao/vault.ts';
 import { playLiuyaoSfx, preloadLiuyaoSfx } from '../liuyao/sfx.ts';
 import { LIUYAO_ASSETS, preloadLiuyaoCoins } from '../liuyao/assets.ts';
 import {
@@ -30,6 +30,7 @@ import { getLiuyaoMode, mountLiuyaoModeSwitch } from '../liuyao/mode.ts';
 import { mergeReadingBackground } from '../life/profile-context.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mountLiuyaoResultTabs } from '../ui/liuyao/result-tabs.ts';
+import { showUnlockToast } from '../ui/unlock-toast.ts';
 import { mountLiuyaoSfxToggle } from '../ui/liuyao/sfx-toggle.ts';
 import { mountPersonSwitcher } from '../ui/person-switcher.ts';
 import {
@@ -163,9 +164,18 @@ export function renderLiuyaoReading(root: HTMLElement): () => void {
   }
 
   function showMeetToast(result: CastResult): void {
-    const count = meetCountFor(result.primary.name);
     const stat = buildVaultSnapshot().meets.find((m) => m.name === result.primary.name) ?? null;
-    const line = meetLineFor(stat) || `这是你第 ${count} 次遇见「${result.primary.fullName}」。`;
+    const isFirst = !stat || stat.count <= 1;
+    if (isFirst) {
+      showUnlockToast({
+        isFirstTime: true,
+        count: 1,
+        cardName: result.primary.fullName,
+        intoLabel: '已收入六爻探索',
+      });
+      return;
+    }
+    const line = meetLineFor(stat);
     const toast = document.createElement('div');
     toast.className = 'ly-meet-toast';
     toast.setAttribute('role', 'status');

@@ -396,7 +396,7 @@ html.thread-peek-open .lab-scroll-top {
 .lab-notes-sheet {
   position: fixed;
   inset: 0;
-  z-index: 560;
+  z-index: 620;
   display: flex;
   align-items: stretch;
   justify-content: flex-end;
@@ -478,22 +478,51 @@ html[data-theme='moon'] .lab-notes-backdrop {
   margin: 8px 0 0;
 }
 
+.lab-notes-surface {
+  margin: 8px 0 0;
+}
+
+.lab-notes-surface .lab-notes-tags {
+  margin: 0;
+}
+
+.lab-notes-surface-hint {
+  margin: 6px 0 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--ink-muted);
+}
+
 .lab-notes-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 22px;
-  padding: 2px 8px;
+  min-height: 26px;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--ink-muted);
-  font-size: 0.68rem;
+  font: inherit;
+  font-size: 0.72rem;
   letter-spacing: 0.04em;
+  cursor: default;
+}
+
+button.lab-notes-tag {
+  cursor: pointer;
+}
+
+button.lab-notes-tag:hover,
+button.lab-notes-tag:focus-visible {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+  color: var(--ink);
 }
 
 .lab-notes-tag.is-current,
 .lab-notes-tag.is-auto.is-current {
   background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--gold) 50%, var(--line));
   color: var(--gold-ink, var(--gold));
   font-weight: 600;
 }

@@ -20,12 +20,28 @@ export function renderHexEncounterPanelHtml(hex: Hexagram, sediment = ''): strin
   const list = encountersForHex(hex.name);
   const banner = meetBannerForHex(hex);
   const latest = list[0];
+  const first = list.length
+    ? [...list].sort((a, b) =>
+        (a.castAt || a.createdAt).localeCompare(b.castAt || b.createdAt),
+      )[0]
+    : null;
   const countLabel = stat ? `${stat.count} 次` : '0 次';
   const lastQ = latest?.question?.trim() || '（暂无）';
   const lastTendency =
     latest?.reading?.summary?.trim() ||
     latest?.summary?.trim() ||
     '（完成占问并保存后，答案倾向会记录在这里）';
+
+  const firstMeetHtml = first
+    ? `<section class="ly-enc-first-meet" aria-label="第一次相遇">
+        <h3 class="ly-enc-first-meet-label">第一次相遇</h3>
+        <time>${escapeHtml(formatEncounterAt(first.castAt || first.createdAt))}</time>
+        <p class="ly-enc-first-meet-q">你问：${escapeHtml(first.question || '（未写问题）')}</p>
+        <p class="ly-enc-first-meet-sum">${escapeHtml(
+          first.reading?.summary?.trim() || first.summary?.trim() || '（当时尚未留下一句话）',
+        )}</p>
+      </section>`
+    : '';
 
   const history =
     list.length === 0
@@ -47,6 +63,7 @@ export function renderHexEncounterPanelHtml(hex: Hexagram, sediment = ''): strin
   return `
     <div class="ly-enc-panel" data-hex-encounter data-hex="${escapeHtml(hex.name)}">
       <p class="ly-enc-banner">${escapeHtml(banner)}</p>
+      ${firstMeetHtml}
       <div class="ly-enc-stats">
         <p><span class="ly-enc-stat-k">抽到次数</span><strong>${escapeHtml(countLabel)}</strong></p>
         <p><span class="ly-enc-stat-k">最近一次问题</span>${escapeHtml(lastQ)}</p>

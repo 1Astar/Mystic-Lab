@@ -6,6 +6,10 @@ import { TIAN_GAN_HE } from './relations.ts';
 import { STEM_WUXING, type WuXing } from './elements.ts';
 import { SHENG_OF, KE_OF } from './codex-wuxing-map.ts';
 import { isBaziCodexUnlocked } from './codex.ts';
+import {
+  STEM_MODE_HELP,
+  relationHelpDetailsHtml,
+} from './codex-relation-help.ts';
 
 export const STEM_RING_ORDER = [
   '甲',
@@ -31,25 +35,25 @@ export const TIAN_GAN_CHONG: [string, string][] = [
 export type StemRingMode = 'he' | 'chong' | 'sheng' | 'ke';
 
 export const STEM_RING_MODES: { id: StemRingMode; label: string; hint: string }[] = [
-  { id: 'he', label: '五合', hint: '十天干配对 · 合化五行（≠地支六合）' },
-  { id: 'chong', label: '相冲', hint: '甲庚乙辛丙壬丁癸 · 力大易震荡' },
+  { id: 'he', label: '五合', hint: '十天干配对 · 合化五行 · 共 5 对（≠地支六合）' },
+  { id: 'chong', label: '相冲', hint: '甲庚乙辛丙壬丁癸 · 共 4 对' },
   { id: 'sheng', label: '相生', hint: '按天干五行相生 · 滋养泄秀' },
   { id: 'ke', label: '相克', hint: '按天干五行相克 · 压力成器' },
 ];
 
 const CHONG_COLORS = [
-  '#ff8a7a',
-  '#ffb86b',
-  '#7eb6ff',
-  '#c9a0ff',
+  'var(--br-c1)',
+  'var(--br-c2)',
+  'var(--br-c5)',
+  'var(--br-c6)',
 ];
 
 const HE_COLORS = [
-  '#c4a574',
-  '#e8d59a',
-  '#7eb6ff',
-  '#7ed0a0',
-  '#ff8a7a',
+  'var(--br-c3)',
+  'var(--br-c3)',
+  'var(--br-c5)',
+  'var(--br-c4)',
+  'var(--br-c1)',
 ];
 
 function escapeHtml(s: string): string {
@@ -114,7 +118,7 @@ function stemsOfWx(wx: WuXing): string[] {
 /** 相生：木→火→土→金→水→木，各阴阳干各连对方两干（抽主轴：阳→阳、阴→阴，减线） */
 function shengEdges(): string {
   const order: WuXing[] = ['木', '火', '土', '金', '水'];
-  const colors = ['#7ed0a0', '#ff8a7a', '#c4a574', '#e8d59a', '#7eb6ff'];
+  const colors = ['var(--br-c4)', 'var(--br-c1)', 'var(--br-c3)', 'var(--br-c3)', 'var(--br-c5)'];
   const parts: string[] = [];
   for (let i = 0; i < order.length; i++) {
     const from = order[i]!;
@@ -146,7 +150,7 @@ function shengEdges(): string {
 
 function keEdges(): string {
   const order: WuXing[] = ['木', '火', '土', '金', '水'];
-  const colors = ['#ff8a7a', '#c4a574', '#e8d59a', '#7eb6ff', '#7ed0a0'];
+  const colors = ['var(--br-c1)', 'var(--br-c3)', 'var(--br-c3)', 'var(--br-c5)', 'var(--br-c4)'];
   const parts: string[] = [];
   for (let i = 0; i < order.length; i++) {
     const from = order[i]!;
@@ -202,7 +206,7 @@ function pairCardsHtml(mode: StemRingMode): string {
   if (mode === 'he') {
     return `
       <div class="bazi-br-pairs" aria-label="天干五合对照">
-        <p class="bazi-br-pairs-lead">五合 · 十天干配对（合化五行）：</p>
+        <p class="bazi-br-pairs-lead">五合 · 十天干配对 · 共 <strong>5</strong> 对（合化五行；≠地支六合）：</p>
         <div class="bazi-br-pair-grid">
           ${TIAN_GAN_HE.map(
             ([a, b, el], i) => `
@@ -218,7 +222,7 @@ function pairCardsHtml(mode: StemRingMode): string {
   if (mode === 'chong') {
     return `
       <div class="bazi-br-pairs" aria-label="天干相冲对照">
-        <p class="bazi-br-pairs-lead">相冲 · 力大易震荡（常见四对）：</p>
+        <p class="bazi-br-pairs-lead">相冲 · 共 <strong>4</strong> 对 · 力大易震荡：</p>
         <div class="bazi-br-pair-grid">
           ${TIAN_GAN_CHONG.map(
             ([a, b], i) => `
@@ -351,8 +355,11 @@ export function renderStemRelationRingHtml(opts: StemRingOpts = {}): string {
   return `
     <section class="bazi-br-map" data-stem-ring aria-label="${escapeHtml(title)}">
       <div class="bazi-br-head">
-        <h2 class="bazi-codex-section-title">${escapeHtml(title)}</h2>
-        <p class="bazi-codex-hint">${escapeHtml(meta.hint)} · 点天干看词条</p>
+        <div class="bazi-br-title-row">
+          <h2 class="bazi-codex-section-title">${escapeHtml(title)}</h2>
+          ${relationHelpDetailsHtml(STEM_MODE_HELP[mode])}
+        </div>
+        <p class="bazi-codex-hint">${escapeHtml(meta.hint)} · 标题旁 ? 看释义 · 点天干对照</p>
       </div>
       ${tabs}
       <svg class="bazi-br-svg" viewBox="0 0 200 200" role="img" aria-label="${escapeHtml(meta.label)}图">

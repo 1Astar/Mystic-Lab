@@ -13,6 +13,8 @@ describe('codex stem relation ring', () => {
     expect(html).toContain('天干 · 五合');
     expect(html).toContain('合土');
     expect(html).toContain('bazi-br-pair-grid');
+    expect(html).toContain('bazi-br-help');
+    expect(html).toMatch(/天干五合|≠地支六合/);
     for (const st of STEM_RING_ORDER) {
       expect(html).toContain(`data-codex-id="${st}"`);
     }

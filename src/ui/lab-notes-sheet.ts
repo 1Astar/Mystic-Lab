@@ -27,6 +27,34 @@ export const SURFACE_LABEL: Record<LabNotesSurface, string> = {
   learn: '学习',
 };
 
+const SURFACE_SWITCH_ORDER: readonly LabNotesSurface[] = [
+  'atlas',
+  'reading',
+  'chart',
+  'learn',
+];
+
+function surfaceContextLine(
+  system: LabNotesSystem,
+  surface: LabNotesSurface | undefined,
+): string {
+  const sys = SYSTEM_LABEL[system];
+  if (!surface) return `${sys}笔记`;
+  return `${sys}${SURFACE_LABEL[surface]}`;
+}
+
+/** 笔记来源芯片：默认可在图鉴/解读/盘面之间切换（同本笔记，只改来源标记） */
+export function notesSurfaceChips(
+  surface: LabNotesSurface | undefined,
+  accumulated: LabNotesSurface[],
+): LabNotesSurface[] {
+  const seen = new Set<LabNotesSurface>(accumulated);
+  if (surface) seen.add(surface);
+  return SURFACE_SWITCH_ORDER.filter(
+    (t) => t !== 'learn' || seen.has('learn') || surface === 'learn',
+  );
+}
+
 export type NoteDocV1 = {
   v: 1;
   text: string;
@@ -139,18 +167,29 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function autoTagsHtml(surface: LabNotesSurface | undefined, accumulated: LabNotesSurface[]): string {
-  const tags = new Set<LabNotesSurface>();
-  if (surface) tags.add(surface);
-  for (const t of accumulated) tags.add(t);
-  if (!tags.size) return '';
-  const chips = [...tags]
+function autoTagsHtml(
+  surface: LabNotesSurface | undefined,
+  accumulated: LabNotesSurface[],
+): string {
+  const chips = notesSurfaceChips(surface, accumulated);
+  if (!chips.length) return '';
+  const buttons = chips
     .map((t) => {
-      const current = t === surface ? ' is-current' : '';
-      return `<span class="lab-notes-tag is-auto${current}" title="界面自动标签">${escapeHtml(SURFACE_LABEL[t])}</span>`;
+      const current = t === surface;
+      return `<button
+        type="button"
+        class="lab-notes-tag is-auto${current ? ' is-current' : ''}"
+        data-notes-surface="${t}"
+        aria-pressed="${current ? 'true' : 'false'}"
+        title="标记这次笔记来自「${escapeHtml(SURFACE_LABEL[t])}」"
+      >${escapeHtml(SURFACE_LABEL[t])}</button>`;
     })
     .join('');
-  return `<div class="lab-notes-tags is-auto" aria-label="界面标签">${chips}</div>`;
+  return `
+    <div class="lab-notes-surface" data-notes-surface-row>
+      <div class="lab-notes-tags is-auto" role="group" aria-label="笔记来源">${buttons}</div>
+      <p class="lab-notes-surface-hint">同一本笔记 · 点选标记这次从哪打开（不是跳转页面）</p>
+    </div>`;
 }
 
 function userTagsEditorHtml(userTags: string[]): string {
@@ -218,6 +257,9 @@ export function openLabNotesSheet(opts: OpenLabNotesSheetOpts): void {
   const custom = Boolean(opts.bodyHtml);
   const showPad = opts.showNotePad !== false;
   let userTags = [...doc.userTags];
+  let activeSurface: LabNotesSurface | undefined = opts.surface;
+  let contextLine =
+    opts.context?.trim() || surfaceContextLine(opts.system, activeSurface);
 
   const reflectHtml =
     opts.reflect?.items?.length
@@ -271,8 +313,8 @@ export function openLabNotesSheet(opts: OpenLabNotesSheetOpts): void {
         <div>
           <p class="lab-notes-kicker">笔记 · ${escapeHtml(sysLabel)}</p>
           <h2>${escapeHtml(person.nickname || '自己')}</h2>
-          ${autoTagsHtml(opts.surface, doc.autoTags)}
-          ${opts.context ? `<p class="lab-notes-context">${escapeHtml(opts.context)}</p>` : ''}
+          ${autoTagsHtml(activeSurface, doc.autoTags)}
+          <p class="lab-notes-context" data-notes-context>${escapeHtml(contextLine)}</p>
         </div>
         <button type="button" class="lab-notes-x" data-notes-close aria-label="关闭">×</button>
       </header>
@@ -326,7 +368,33 @@ export function openLabNotesSheet(opts: OpenLabNotesSheetOpts): void {
   const persist = () => {
     const ta = sheet.querySelector<HTMLTextAreaElement>('#lab-notes-ta');
     const text = ta?.value ?? loadLabNoteText(opts.system, person.id);
-    saveLabNote(opts.system, person.id, text, opts.surface, userTags);
+    saveLabNote(opts.system, person.id, text, activeSurface, userTags);
+  };
+
+  const paintSurfaceRow = (): void => {
+    const host = sheet.querySelector<HTMLElement>('[data-notes-surface-row]');
+    if (host) host.outerHTML = autoTagsHtml(activeSurface, doc.autoTags);
+    const ctx = sheet.querySelector<HTMLElement>('[data-notes-context]');
+    if (ctx) {
+      // 用户未自带 context 时，随来源切换；有自带 context 则保留原文，仅改 chip
+      if (!opts.context?.trim()) {
+        contextLine = surfaceContextLine(opts.system, activeSurface);
+        ctx.textContent = contextLine;
+      }
+    }
+    bindSurfaceControls();
+  };
+
+  const bindSurfaceControls = (): void => {
+    sheet.querySelectorAll<HTMLButtonElement>('[data-notes-surface]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.notesSurface;
+        if (!isSurface(next) || next === activeSurface) return;
+        activeSurface = next;
+        if (!doc.autoTags.includes(next)) doc.autoTags.push(next);
+        paintSurfaceRow();
+      });
+    });
   };
 
   const close = () => {
@@ -343,6 +411,7 @@ export function openLabNotesSheet(opts: OpenLabNotesSheetOpts): void {
     close();
   });
   bindUserTagControls();
+  bindSurfaceControls();
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {

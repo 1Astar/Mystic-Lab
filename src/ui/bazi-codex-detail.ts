@@ -4,12 +4,20 @@ import {
   codexDetailPanesFor,
   type CodexDetailPane,
 } from '../bazi/codex-encyclopedia.ts';
-import { isBaziCodexUnlocked } from '../bazi/codex.ts';
+import { isBaziCodexUnlocked, listBaziCodexEntries, type BaziCodexEncounter } from '../bazi/codex.ts';
 import { buildCodexDossier } from '../bazi/codex-dossier.ts';
 import {
   buildChartLinkReport,
   type ChartLinkReport,
 } from '../bazi/codex-chart-link.ts';
+import {
+  baziCodexMarkButtonLabel,
+  hasBaziCodexMark,
+  toggleBaziCodexMark,
+  type BaziCodexMark,
+} from '../bazi/codex-favorites.ts';
+import { chartPresenceBrief } from '../bazi/codex-presence-brief.ts';
+import { findCodexInsightTip } from '../bazi/codex-insight-tip.ts';
 import {
   focusWuxingFromEntry,
   renderRelationStarMapHtml,
@@ -17,6 +25,16 @@ import {
 } from '../bazi/codex-wuxing-map.ts';
 import { renderEntryRelationFragmentHtml } from '../bazi/codex-relations-atlas.ts';
 import { renderStructureMapHtml } from '../bazi/codex-structure-map.ts';
+import { buildPracticeComboCards } from '../bazi/codex-practice-combo.ts';
+import { buildAdvancedDeduceModules } from '../bazi/codex-advanced-deduce.ts';
+import type { BaziChart } from '../bazi/cast.ts';
+import type { LuckCycles } from '../bazi/luck-cycles.ts';
+import { navigate } from '../router.ts';
+import {
+  codexSkeletonChromeHtml,
+  codexSkeletonPracticeCtaHtml,
+  codexSkeletonSlotHtml,
+} from './lab-codex-skeleton.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -36,6 +54,46 @@ function section(title: string, body: string): string {
   return `<section class="bazi-enc-section"><h3>${escapeHtml(title)}</h3>${body}</section>`;
 }
 
+function formatEncounterTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('zh-CN');
+  } catch {
+    return iso;
+  }
+}
+
+function renderMeetEncountersHtml(encounters: BaziCodexEncounter[]): string {
+  if (!encounters.length) return '';
+  const first = encounters[encounters.length - 1]!;
+  const timeline = encounters
+    .map(
+      (e) => `
+      <li class="bazi-meet-enc-item">
+        <time>${escapeHtml(formatEncounterTime(e.at))}</time>
+        <p>${e.question ? `问：${escapeHtml(e.question)}` : '（未记录问题）'}</p>
+        ${e.summary.trim() ? `<p class="bazi-meet-enc-summary">${escapeHtml(e.summary)}</p>` : ''}
+      </li>`,
+    )
+    .join('');
+  return section(
+    '我的相遇',
+    `
+    <div class="bazi-meet-enc">
+      <div class="bazi-meet-enc-first">
+        <p class="bazi-meet-enc-label">第一次相遇</p>
+        <time>${escapeHtml(formatEncounterTime(first.at))}</time>
+        <p>${first.question ? `你问：${escapeHtml(first.question)}` : '（未记录问题）'}</p>
+        ${
+          encounters.length > 1
+            ? `<p class="bazi-meet-enc-more">此后又相遇 <strong>${encounters.length - 1}</strong> 次</p>`
+            : ''
+        }
+      </div>
+      <ol class="bazi-meet-enc-timeline">${timeline}</ol>
+    </div>`,
+  );
+}
+
 export type BaziCodexDetailOpts = {
   artHtml: string;
   lit: boolean;
@@ -43,6 +101,8 @@ export type BaziCodexDetailOpts = {
   memoryExtraHtml?: string;
   /** 命盘关联层（动态） */
   chartLink?: ChartLinkReport | null;
+  chart?: BaziChart | null;
+  luck?: LuckCycles | null;
 };
 
 function renderChartPane(link: ChartLinkReport | null | undefined, lit: boolean): string {
@@ -112,6 +172,11 @@ export function renderBaziCodexDetailHtml(
   if (!dossier) return '';
 
   const lit = opts.lit ?? isBaziCodexUnlocked(id);
+  const codexEntry = listBaziCodexEntries().find((e) => e.id === id);
+  const meetHtml =
+    lit && (codexEntry?.encounters?.length ?? 0) > 0
+      ? renderMeetEncountersHtml(codexEntry!.encounters ?? [])
+      : '';
   const tags = [
     dossier.yinyangLabel !== '—' ? dossier.yinyangLabel : entry.tags.yinyang,
     dossier.wuxingLabel,
@@ -128,6 +193,11 @@ export function renderBaziCodexDetailHtml(
       : `${lockedBanner}<div class="bazi-enc-teaser is-dim">${html}</div>`;
 
   const focus = focusWuxingFromEntry(entry);
+  const presenceBrief = chartPresenceBrief(id, opts.chart ?? null, opts.luck ?? null);
+        const insightTip = findCodexInsightTip(id, opts.chart ?? null);
+  const markFire = hasBaziCodexMark(id, 'fire');
+  const markUseful = hasBaziCodexMark(id, 'useful');
+
   const shengKe =
     focus
       ? renderWuxingShengKeMapHtml({
@@ -150,20 +220,111 @@ export function renderBaziCodexDetailHtml(
         .join('')}</ul>`
     : '';
 
+  const practiceCards = buildPracticeComboCards(
+    id,
+    opts.chart ?? null,
+    opts.luck ?? null,
+  );
+  const practiceHtml = practiceCards.length
+    ? `<div class="bazi-practice-combos" data-practice-combos>
+        ${practiceCards
+          .map(
+            (c) => `
+          <article class="bazi-practice-card${c.bound ? ' is-bound' : ''}">
+            <p class="bazi-practice-kicker">${escapeHtml(c.title)}</p>
+            ${
+              c.classicName
+                ? `<h3 class="bazi-practice-name">${escapeHtml(c.classicName)}</h3>`
+                : ''
+            }
+            <p class="bazi-practice-body">${escapeHtml(c.body)}</p>
+            ${
+              c.ctaHref && c.ctaLabel
+                ? `<button type="button" class="bazi-practice-cta" data-practice-href="${escapeHtml(c.ctaHref)}">${escapeHtml(c.ctaLabel)} →</button>`
+                : ''
+            }
+          </article>`,
+          )
+          .join('')}
+      </div>`
+    : '';
+
+  const deduceModules = buildAdvancedDeduceModules(
+    id,
+    opts.chart ?? null,
+    opts.luck ?? null,
+  );
+  const deduceHtml = deduceModules.length
+    ? `<div class="bazi-deduce-modules" data-deduce-modules>
+        ${deduceModules
+          .map(
+            (m) => `
+          <article class="bazi-deduce-card is-${escapeHtml(m.kind)} is-${escapeHtml(m.source)}">
+            <p class="bazi-deduce-kicker">${escapeHtml(m.title)}</p>
+            <p class="bazi-deduce-where">${escapeHtml(m.where)}</p>
+            <p class="bazi-deduce-body">${escapeHtml(m.body)}</p>
+            <div class="bazi-deduce-peers">
+              ${m.peerIds
+                .map(
+                  (p) =>
+                    `<button type="button" class="bazi-deduce-peer" data-open-entry="${escapeHtml(p)}">看【${escapeHtml(p)}】</button>`,
+                )
+                .join('')}
+              ${
+                m.ctaHref && m.ctaLabel
+                  ? `<button type="button" class="bazi-deduce-cta" data-practice-href="${escapeHtml(m.ctaHref)}">${escapeHtml(m.ctaLabel)} →</button>`
+                  : ''
+              }
+            </div>
+          </article>`,
+          )
+          .join('')}
+      </div>`
+    : '';
+
   const panes: Partial<Record<CodexDetailPane, string>> = {
     basics: `
       <div class="bazi-enc-memory${entry.kind === 'shensha' ? ' is-shensha' : ''}">
+        ${codexSkeletonChromeHtml({ active: 'what', yoursLabel: '在你身上' })}
         <div class="bazi-enc-art ${entry.kind === 'shensha' ? 'is-badge' : ''} ${lit ? 'is-lit' : 'is-dim'}">${opts.artHtml}${lit || entry.kind === 'shensha' ? '' : '<span class="bazi-art-seal"></span>'}</div>
         <div class="bazi-enc-tags">
           ${tags.map((t) => `<span class="bazi-enc-tag">${escapeHtml(t)}</span>`).join('')}
         </div>
         <h2 class="bazi-enc-title">${escapeHtml(entry.title)}</h2>
-        <p class="bazi-enc-oneliner">${escapeHtml(dossier.whatIs)}</p>
+        ${codexSkeletonSlotHtml({
+          slot: 'what',
+          title: '是什么',
+          bodyHtml: `<p class="bazi-enc-oneliner">${escapeHtml(dossier.whatIs)}</p>`,
+        })}
+        ${codexSkeletonSlotHtml({
+          slot: 'yours',
+          title: '在你身上',
+          hideIfEmpty: true,
+          bodyHtml: presenceBrief
+            ? `<p class="bazi-enc-presence-brief">${escapeHtml(presenceBrief)}</p>`
+            : '',
+        })}
+        ${codexSkeletonSlotHtml({
+          slot: 'practice',
+          title: '练一题',
+          hideIfEmpty: true,
+          bodyHtml: `${practiceHtml}${codexSkeletonPracticeCtaHtml([
+            { href: '/bazi/guess', label: '猜命盘练一题 ›' },
+            { href: '/bazi/journal', label: '记一句到手札 ›' },
+          ])}`,
+        })}
+        ${codexSkeletonSlotHtml({
+          slot: 'related',
+          title: '相关可跳',
+          hideIfEmpty: true,
+          bodyHtml: deduceHtml,
+        })}
         ${section('季节与旺衰', `<p>${escapeHtml(dossier.season)}</p>`)}
         ${section('喜', bullets(dossier.likes))}
         ${section('忌', bullets(dossier.dislikes))}
         ${section('一句话记忆', `<p class="bazi-enc-memory-line">${escapeHtml(dossier.memory)}</p>`)}
         ${opts.memoryExtraHtml ?? ''}
+        ${meetHtml}
         ${lit ? '' : lockedBanner}
       </div>`,
     express: bodyOrTeaser(`
@@ -200,6 +361,7 @@ export function renderBaziCodexDetailHtml(
     relation: bodyOrTeaser(`
       ${shengKe}
       ${fragment}
+      ${deduceHtml}
       ${section('常见组合', comboHtml)}
     `),
     chart: renderChartPane(
@@ -214,9 +376,19 @@ export function renderBaziCodexDetailHtml(
   return `
     <div class="bazi-codex-sheet bazi-enc-sheet" role="dialog" aria-modal="true">
       <div class="bazi-codex-panel bazi-enc-panel" data-enc-root data-enc-id="${escapeHtml(id)}">
-        <button type="button" class="bazi-codex-close" data-codex-close aria-label="关闭">
-          <span aria-hidden="true">✕</span> 关闭
-        </button>
+        <div class="bazi-enc-toolbar">
+          <div class="bazi-enc-marks" role="group" aria-label="收藏标记">
+            <button type="button" class="bazi-enc-mark${markFire ? ' is-on' : ''}" data-codex-mark="fire" aria-pressed="${markFire}">
+              ${escapeHtml(baziCodexMarkButtonLabel('fire', markFire))}
+            </button>
+            <button type="button" class="bazi-enc-mark${markUseful ? ' is-on' : ''}" data-codex-mark="useful" aria-pressed="${markUseful}">
+              ${escapeHtml(baziCodexMarkButtonLabel('useful', markUseful))}
+            </button>
+          </div>
+          <button type="button" class="bazi-codex-close" data-codex-close aria-label="关闭">
+            <span aria-hidden="true">✕</span> 关闭
+          </button>
+        </div>
         <div class="bazi-enc-tab-bar" role="tablist">
           ${tabPanes
             .map(
@@ -235,17 +407,24 @@ export function renderBaziCodexDetailHtml(
             )
             .join('')}
         </div>
+        ${
+          insightTip
+            ? `<aside class="bazi-enc-insight-tip" role="note">
+                <p>${escapeHtml(insightTip.text)}</p>
+              </aside>`
+            : ''
+        }
       </div>
     </div>`;
 }
 
-/** 纯 Tab：点切换，一次只显示一屏 */
+/** 纯 Tab：点切换，一次只显示一屏；收藏标记可切换 */
 export function bindBaziCodexDetail(root: HTMLElement): void {
   const panel = root.querySelector<HTMLElement>('[data-enc-root]');
   if (!panel) return;
+  const id = panel.dataset.encId ?? '';
   const tabs = [...panel.querySelectorAll<HTMLButtonElement>('[data-enc-tab]')];
   const panes = [...panel.querySelectorAll<HTMLElement>('[data-enc-pane]')];
-  if (!tabs.length || !panes.length) return;
 
   const activate = (paneId: CodexDetailPane) => {
     for (const tab of tabs) {
@@ -263,4 +442,26 @@ export function bindBaziCodexDetail(root: HTMLElement): void {
       activate(tab.dataset.encTab as CodexDetailPane);
     });
   }
+
+  panel.querySelectorAll<HTMLButtonElement>('[data-codex-mark]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mark = btn.dataset.codexMark as BaziCodexMark;
+      if (!id || (mark !== 'fire' && mark !== 'useful')) return;
+          const on = toggleBaziCodexMark(id, mark);
+          btn.classList.toggle('is-on', on);
+          btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+          btn.textContent = baziCodexMarkButtonLabel(mark, on);
+          root.dispatchEvent(
+            new CustomEvent('bazi-codex-marks-changed', { bubbles: true }),
+          );
+    });
+  });
+
+  panel.querySelectorAll<HTMLButtonElement>('[data-practice-href]').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const href = btn.dataset.practiceHref || btn.getAttribute('data-practice-href') || '';
+      if (href) navigate(href);
+    });
+  });
 }

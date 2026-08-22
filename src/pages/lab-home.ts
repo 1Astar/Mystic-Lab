@@ -13,6 +13,7 @@ import { openAiSettingsModal } from '../ui/ai-settings-panel.ts';
 import { draftLabInvite } from '../share/drafts.ts';
 import { openShareSheet } from '../share/sheet.ts';
 import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
+import { mountLabWeekFocusCard } from '../ui/lab-week-focus-card.ts';
 
 interface LabEntry {
   path: string;
@@ -171,6 +172,8 @@ export function renderLabHome(root: HTMLElement): () => void {
       </div>
     </header>
 
+    <div data-lab-week-focus></div>
+
     <section class="lab-section" aria-label="体系入口">
       <div class="lab-systems" data-lab-systems></div>
     </section>
@@ -186,6 +189,9 @@ export function renderLabHome(root: HTMLElement): () => void {
   const aiHost = page.querySelector<HTMLElement>('[data-lab-ai-host]')!;
   mountLabHomeAiButton(aiHost);
   mountLabHomeShareButton(aiHost);
+
+  const weekHost = page.querySelector<HTMLElement>('[data-lab-week-focus]')!;
+  mountLabWeekFocusCard(weekHost);
 
   const systemsHost = page.querySelector<HTMLElement>('[data-lab-systems]')!;
   for (const entry of ALL_SYSTEMS) {

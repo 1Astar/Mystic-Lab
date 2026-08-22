@@ -82,6 +82,11 @@ describe('bazi sense · 规则拟人 A', () => {
     const i = buildRealityInsight(chart);
     expect(i.hook.length).toBeGreaterThan(8);
     expect(forJargonCheck(`${i.hook}${i.story}`)).not.toMatch(FORBIDDEN);
+    expect(i.links.length).toBeGreaterThanOrEqual(2);
+    expect(i.links.some((l) => l.codexId === chart.dayMaster)).toBe(true);
+    if (chart.dayMasterWx) {
+      expect(i.links.some((l) => l.codexId === chart.dayMasterWx)).toBe(true);
+    }
   });
 
   it('神煞减量改名', () => {

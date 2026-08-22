@@ -48,6 +48,29 @@ export const STATUS_PRODUCT: Record<
 export const STATUS_DISCLAIMER =
   '「陷」不等于坏，「庙」也不等于一定好。它描述的是星曜如何发挥，不是人生结果的好坏。状态必须和星曜性质、所在宫位、四化、会照一起看。';
 
+/**
+ * 产品口径：部分主星不讲「庙 / 旺」两档（亮度仍用得利平陷等）。
+ * 例：天机以灵动盘算为主，不走「入庙 / 旺地」那套说法。
+ */
+const STARS_WITHOUT_MIAO_WANG = new Set(['天机']);
+
+/** 该星亮度说明里列出的档位文案 */
+export function brightnessGradeLabel(starId: string): string {
+  return STARS_WITHOUT_MIAO_WANG.has(starId.replace(/星$/, ''))
+    ? '得利平陷'
+    : '庙旺得利平陷';
+}
+
+export function brightnessSectionTitle(starId: string): string {
+  return STARS_WITHOUT_MIAO_WANG.has(starId.replace(/星$/, ''))
+    ? '亮度状态'
+    : '庙旺状态';
+}
+
+export function starUsesMiaoWang(starId: string): boolean {
+  return !STARS_WITHOUT_MIAO_WANG.has(starId.replace(/星$/, ''));
+}
+
 export type GlossaryEntry = {
   id: string;
   category: TermCategory;

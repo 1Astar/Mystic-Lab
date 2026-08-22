@@ -14,7 +14,7 @@ import {
 export type LabDeepSystem = 'bazi' | 'ziwei' | 'liuyao' | 'tarot' | 'xiaoliuren';
 
 const DEEP_FALLBACK_PATH: Record<LabDeepSystem, string> = {
-  bazi: '/bazi/chart',
+  bazi: '/bazi/reading?mode=chart',
   ziwei: '/ziwei/reading?mode=chart',
   liuyao: '/liuyao/reading',
   tarot: '/tarot/reading',

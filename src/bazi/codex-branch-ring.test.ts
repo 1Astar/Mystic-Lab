@@ -23,7 +23,36 @@ describe('codex branch relation ring', () => {
   it('六合 shows 合化 cards', () => {
     const html = renderBranchRelationRingHtml({ mode: 'he' });
     expect(html).toContain('合土');
-    expect(html).toContain('牵绊成局');
+    expect(html).toMatch(/两支一对|六合/);
+    expect(html).toContain('bazi-br-help');
+    expect(html).toMatch(/六合和三合|三合/);
+  });
+
+  it('三合 cards expose each branch as clickable node', () => {
+    const html = renderBranchRelationRingHtml({ mode: 'sanhe' });
+    expect(html).toContain('三合');
+    expect(html).toContain('bazi-br-help');
+    for (const br of ['申', '子', '辰', '寅', '午', '戌']) {
+      expect(html).toContain(`data-codex-id="${br}"`);
+    }
+    expect(html).toContain('合水');
+    expect(html).toContain('合火');
+  });
+
+  it('半合 / 三会 modes render ring + pair cards', () => {
+    const banhe = renderBranchRelationRingHtml({ mode: 'banhe' });
+    expect(banhe).toContain('地支 · 半合');
+    expect(banhe).toContain('data-branch-ring-mode="banhe"');
+    expect(banhe).toContain('半水');
+    expect(banhe).toMatch(/半合/);
+
+    const sanhui = renderBranchRelationRingHtml({ mode: 'sanhui' });
+    expect(sanhui).toContain('地支 · 三会');
+    expect(sanhui).toContain('data-branch-ring-mode="sanhui"');
+    expect(sanhui).toContain('会木');
+    for (const br of ['寅', '卯', '辰', '亥', '子', '丑']) {
+      expect(sanhui).toContain(`data-codex-id="${br}"`);
+    }
   });
 
   it('hit circle sits above label for clicks', () => {

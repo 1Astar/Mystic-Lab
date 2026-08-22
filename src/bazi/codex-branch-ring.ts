@@ -1,5 +1,5 @@
 /**
- * 十二地支关系环图：六冲 / 六合 / 六害 / 刑 / 三合
+ * 十二地支关系环图：六冲 / 六合 / 六害 / 刑 / 三合 / 半合 / 三会
  * 六冲为直径对穿，线交于圆心难辨——用分色 + 下方配对表兜底。
  */
 import {
@@ -7,10 +7,16 @@ import {
   LIU_HAI,
   LIU_HE,
   SAN_HE,
+  SAN_HUI,
   SAN_XING,
   ZI_XING,
+  banHePairs,
 } from './relations.ts';
 import { isBaziCodexUnlocked } from './codex.ts';
+import {
+  BRANCH_MODE_HELP,
+  relationHelpDetailsHtml,
+} from './codex-relation-help.ts';
 
 export const BRANCH_RING_ORDER = [
   '子',
@@ -27,24 +33,33 @@ export const BRANCH_RING_ORDER = [
   '亥',
 ] as const;
 
-export type BranchRingMode = 'chong' | 'he' | 'hai' | 'xing' | 'sanhe';
+export type BranchRingMode =
+  | 'chong'
+  | 'he'
+  | 'hai'
+  | 'xing'
+  | 'sanhe'
+  | 'banhe'
+  | 'sanhui';
 
 export const BRANCH_RING_MODES: { id: BranchRingMode; label: string; hint: string }[] = [
-  { id: 'chong', label: '六冲', hint: '对面相冲 · 直径两端是一对' },
-  { id: 'he', label: '六合', hint: '牵绊成局 · 合化五行' },
-  { id: 'hai', label: '六害', hint: '隐性摩擦 · 不顺眼' },
-  { id: 'xing', label: '刑', hint: '别扭内耗 · 含自刑' },
-  { id: 'sanhe', label: '三合', hint: '三支合局 · 成势' },
+  { id: 'chong', label: '六冲', hint: '对面相冲 · 直径两端是一对 · 共 6 对' },
+  { id: 'he', label: '六合', hint: '两支一对牵绊 · 共 6 对（≠三合）' },
+  { id: 'hai', label: '六害', hint: '隐性摩擦 · 共 6 对' },
+  { id: 'xing', label: '刑', hint: '别扭内耗 · 含三刑与自刑' },
+  { id: 'sanhe', label: '三合', hint: '三支成局 · 共 4 组（≠六合）' },
+  { id: 'banhe', label: '半合', hint: '三合缺一 · 两支半成局 · 共 12 对' },
+  { id: 'sanhui', label: '三会', hint: '方位成方 · 相邻三支 · 共 4 组（≠三合）' },
 ];
 
-/** 六冲分色，避免六线同色糊成一团 */
+/** 六冲分色：走主题 CSS 变量，避免月白/星夜糊成一团 */
 const CHONG_COLORS = [
-  '#ff8a7a',
-  '#ffb86b',
-  '#e8d59a',
-  '#7ed0a0',
-  '#7eb6ff',
-  '#c9a0ff',
+  'var(--br-c1)',
+  'var(--br-c2)',
+  'var(--br-c3)',
+  'var(--br-c4)',
+  'var(--br-c5)',
+  'var(--br-c6)',
 ];
 
 function escapeHtml(s: string): string {
@@ -107,7 +122,7 @@ function pairLine(
       ? (() => {
           const lx = p.x + (q.x - p.x) * 0.28;
           const ly = p.y + (q.y - p.y) * 0.28;
-          return `<text class="bazi-br-edge-label is-chong" x="${lx}" y="${ly}" text-anchor="middle" fill="${opts.color ?? '#ff8a7a'}">${escapeHtml(opts.label)}</text>`;
+          return `<text class="bazi-br-edge-label is-chong" x="${lx}" y="${ly}" text-anchor="middle" fill="${opts.color ?? 'var(--br-c1)'}">${escapeHtml(opts.label)}</text>`;
         })()
       : '';
   return `<g class="bazi-br-pair" ${pairAttr}>
@@ -151,7 +166,7 @@ function edgesForMode(mode: BranchRingMode): string {
     ).join('');
   }
   if (mode === 'xing') {
-    const colors = ['#e8a0a0', '#d4b56a', '#9ec4ff', '#c9a0ff'];
+    const colors = ['var(--br-c1)', 'var(--br-c3)', 'var(--br-c5)', 'var(--br-c6)'];
     const parts = [
       ...SAN_XING.map((g, i) => trianglePath(g, 'xing', colors[i])),
       pairLine('子', '卯', 'xing', { label: '刑', pairKey: '子卯' }),
@@ -159,7 +174,21 @@ function edgesForMode(mode: BranchRingMode): string {
     ];
     return parts.join('');
   }
-  const sanColors = ['#7eb6ff', '#ff8a7a', '#e8d59a', '#7ed0a0'];
+  if (mode === 'banhe') {
+    return banHePairs()
+      .map((p) =>
+        pairLine(p.a, p.b, 'banhe', {
+          label: `半${p.result}`,
+          pairKey: `${p.a}${p.b}`,
+        }),
+      )
+      .join('');
+  }
+  if (mode === 'sanhui') {
+    const colors = ['var(--br-c4)', 'var(--br-c1)', 'var(--br-c3)', 'var(--br-c5)'];
+    return SAN_HUI.map((g, i) => trianglePath(g.members, 'sanhui', colors[i])).join('');
+  }
+  const sanColors = ['var(--br-c5)', 'var(--br-c1)', 'var(--br-c3)', 'var(--br-c4)'];
   return SAN_HE.map((g, i) => trianglePath(g.members, 'sanhe', sanColors[i])).join('');
 }
 
@@ -168,7 +197,7 @@ function pairCardsHtml(mode: BranchRingMode): string {
   if (mode === 'chong') {
     return `
       <div class="bazi-br-pairs" aria-label="六冲对照">
-        <p class="bazi-br-pairs-lead">六冲 = 对面相撞。环上<strong>直径两端</strong>是一对；下表一一对应：</p>
+        <p class="bazi-br-pairs-lead">六冲 = 对面相撞 · 共 <strong>6</strong> 对。环上<strong>直径两端</strong>是一对：</p>
         <div class="bazi-br-pair-grid">
           ${LIU_CHONG.map(
             ([a, b], i) => `
@@ -184,7 +213,7 @@ function pairCardsHtml(mode: BranchRingMode): string {
   if (mode === 'he') {
     return `
       <div class="bazi-br-pairs" aria-label="六合对照">
-        <p class="bazi-br-pairs-lead">六合 · 牵绊成局（合化五行）：</p>
+        <p class="bazi-br-pairs-lead">六合 · 两支一对 · 共 <strong>6</strong> 对（合化五行；≠三合）：</p>
         <div class="bazi-br-pair-grid">
           ${LIU_HE.map(
             ([a, b, el]) => `
@@ -200,7 +229,7 @@ function pairCardsHtml(mode: BranchRingMode): string {
   if (mode === 'hai') {
     return `
       <div class="bazi-br-pairs" aria-label="六害对照">
-        <p class="bazi-br-pairs-lead">六害 · 隐性摩擦：</p>
+        <p class="bazi-br-pairs-lead">六害 · 隐性摩擦 · 共 <strong>6</strong> 对：</p>
         <div class="bazi-br-pair-grid">
           ${LIU_HAI.map(
             ([a, b]) => `
@@ -214,26 +243,91 @@ function pairCardsHtml(mode: BranchRingMode): string {
       </div>`;
   }
   if (mode === 'xing') {
+    const groups: { label: string; members: string[] }[] = [
+      { label: '三刑', members: ['寅', '巳', '申'] },
+      { label: '三刑', members: ['丑', '戌', '未'] },
+      { label: '相刑', members: ['子', '卯'] },
+      { label: '自刑', members: ['辰', '午', '酉', '亥'] },
+    ];
     return `
       <div class="bazi-br-pairs" aria-label="相刑对照">
-        <p class="bazi-br-pairs-lead">刑 · 别扭内耗（含自刑）：</p>
-        <ul class="bazi-br-pair-list">
-          <li>寅巳申 三刑</li>
-          <li>丑戌未 三刑</li>
-          <li>子卯 相刑</li>
-          <li>辰午酉亥 自刑</li>
-        </ul>
+        <p class="bazi-br-pairs-lead">刑 · 内耗纠结（点支对照）：</p>
+        <div class="bazi-br-pair-grid is-tri">
+          ${groups
+            .map(
+              (g) => `
+            <div class="bazi-br-pair-card is-xing is-multi">
+              <div class="bazi-br-pair-members">
+                ${g.members
+                  .map(
+                    (m) =>
+                      `<button type="button" class="bazi-br-pair-node" data-codex-id="${escapeHtml(m)}">${escapeHtml(m)}</button>`,
+                  )
+                  .join('')}
+              </div>
+              <span class="bazi-br-pair-verb">${escapeHtml(g.label)}</span>
+            </div>`,
+            )
+            .join('')}
+        </div>
+      </div>`;
+  }
+  if (mode === 'banhe') {
+    return `
+      <div class="bazi-br-pairs" aria-label="半合对照">
+        <p class="bazi-br-pairs-lead">半合 · 三合缺一 · 两支半成局 · 共 <strong>12</strong> 对（弱于三合）：</p>
+        <div class="bazi-br-pair-grid">
+          ${banHePairs()
+            .map(
+              (p) => `
+            <div class="bazi-br-pair-card is-banhe">
+              <button type="button" class="bazi-br-pair-node" data-codex-id="${escapeHtml(p.a)}">${escapeHtml(p.a)}</button>
+              <span class="bazi-br-pair-verb">半${escapeHtml(p.result)}</span>
+              <button type="button" class="bazi-br-pair-node" data-codex-id="${escapeHtml(p.b)}">${escapeHtml(p.b)}</button>
+            </div>`,
+            )
+            .join('')}
+        </div>
+      </div>`;
+  }
+  if (mode === 'sanhui') {
+    return `
+      <div class="bazi-br-pairs" aria-label="三会对照">
+        <p class="bazi-br-pairs-lead">三会 · 方位成方 · 共 <strong>4</strong> 组（≠三合；相邻三支）：</p>
+        <div class="bazi-br-pair-grid is-tri">
+          ${SAN_HUI.map(
+            (g) => `
+            <div class="bazi-br-pair-card is-sanhui is-multi">
+              <div class="bazi-br-pair-members">
+                ${g.members
+                  .map(
+                    (m) =>
+                      `<button type="button" class="bazi-br-pair-node" data-codex-id="${escapeHtml(m)}">${escapeHtml(m)}</button>`,
+                  )
+                  .join('')}
+              </div>
+              <span class="bazi-br-pair-verb">会${escapeHtml(g.result)}</span>
+            </div>`,
+          ).join('')}
+        </div>
       </div>`;
   }
   return `
     <div class="bazi-br-pairs" aria-label="三合对照">
-      <p class="bazi-br-pairs-lead">三合 · 三支成局：</p>
+      <p class="bazi-br-pairs-lead">三合 · 三支成局 · 共 <strong>4</strong> 组（≠六合；每支可点）：</p>
       <div class="bazi-br-pair-grid is-tri">
         ${SAN_HE.map(
           (g) => `
-          <div class="bazi-br-pair-card is-sanhe">
-            <span>${escapeHtml(g.members.join(''))}</span>
-            <span class="bazi-br-pair-verb">→${escapeHtml(g.result)}</span>
+          <div class="bazi-br-pair-card is-sanhe is-multi">
+            <div class="bazi-br-pair-members">
+              ${g.members
+                .map(
+                  (m) =>
+                    `<button type="button" class="bazi-br-pair-node" data-codex-id="${escapeHtml(m)}">${escapeHtml(m)}</button>`,
+                )
+                .join('')}
+            </div>
+            <span class="bazi-br-pair-verb">合${escapeHtml(g.result)}</span>
           </div>`,
         ).join('')}
       </div>
@@ -279,7 +373,12 @@ export function renderBranchRelationRingHtml(opts: BranchRingOpts = {}): string 
       if (focus === '子') peers.add('卯');
       if (focus === '卯') peers.add('子');
       if (ZI_XING.has(focus)) peers.add(focus);
+    } else if (mode === 'sanhui') {
+      for (const g of SAN_HUI) {
+        if (g.members.includes(focus)) g.members.forEach((x) => peers.add(x));
+      }
     } else {
+      // sanhe / banhe：同属一三合局的支
       for (const g of SAN_HE) {
         if (g.members.includes(focus)) g.members.forEach((x) => peers.add(x));
       }
@@ -313,8 +412,11 @@ export function renderBranchRelationRingHtml(opts: BranchRingOpts = {}): string 
   return `
     <section class="bazi-br-map" data-branch-ring aria-label="${escapeHtml(title)}">
       <div class="bazi-br-head">
-        <h2 class="bazi-codex-section-title">${escapeHtml(title)}</h2>
-        <p class="bazi-codex-hint">${escapeHtml(meta.hint)} · 点地支看词条</p>
+        <div class="bazi-br-title-row">
+          <h2 class="bazi-codex-section-title">${escapeHtml(title)}</h2>
+          ${relationHelpDetailsHtml(BRANCH_MODE_HELP[mode])}
+        </div>
+        <p class="bazi-codex-hint">${escapeHtml(meta.hint)} · 标题旁 ? 看释义 · 点地支对照</p>
       </div>
       ${tabs}
       <svg class="bazi-br-svg" viewBox="0 0 200 200" role="img" aria-label="${escapeHtml(meta.label)}图">

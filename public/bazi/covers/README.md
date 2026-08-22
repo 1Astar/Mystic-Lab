@@ -5,4 +5,5 @@
 - Prompt：`src/bazi/codex-cover-prompts.ts`
 - 转换：`node scripts/convert-bazi-covers.mjs`（结束后会再跑神煞归一化）
 - 精品神煞章面大小：`node scripts/normalize-shensha-badges.mjs`（只改 webp，png 源不动）
-- 已出齐：十天干 + 十二地支 + 十神 + 十二星煞（44）
+- 已出齐：十天干 + 十二地支 + 十神 + 神煞图鉴名录章面（提示 89 全就绪；扩展 SVG 光栅约 78）
+- 扩展神煞：`npx tsx scripts/rasterize-extended-shensha.ts` → `normalize-shensha-badges.mjs`

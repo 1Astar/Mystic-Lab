@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { loadXiaoliurenJournal } from '../xiaoliuren/journal.ts';
 import {
   getPalmJourneyDoneCount,
@@ -13,6 +13,7 @@ import { mountNotifyTryControl } from '../ui/xiaoliuren/notify-try.ts';
 import { mountXiaoliurenReviewBanner } from '../ui/xiaoliuren/review-banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { preloadXlrFlowAssets } from '../ui/xiaoliuren/assets.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 export function renderXiaoliurenHome(root: HTMLElement): () => void {
   preloadXlrFlowAssets();
@@ -77,6 +78,14 @@ export function renderXiaoliurenHome(root: HTMLElement): () => void {
   root.appendChild(page);
   attachPersonSwitcherToPage(page);
   mountXiaoliurenHero(page);
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'xiaoliuren',
+    surface: 'learn',
+    tujianPath: '/xiaoliuren/codex',
+    notesContext: '小六壬首页',
+  });
 
-  return () => {};
+  return () => {
+    disposeFloat();
+  };
 }

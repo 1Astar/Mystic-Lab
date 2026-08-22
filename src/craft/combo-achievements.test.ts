@@ -2,8 +2,6 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import {
   COMBO_FLAT_GAIN,
   COMBO_FLAT_GAIN_LINGYUN,
-  COMBO_FLAT_GAIN_S,
-  COMBO_FLAT_GAIN_YELI,
   DI_XING_GAIN_ZHENSHOU,
   YE_HUO_GUANGYAO_MULT,
   applyFlatComboBonuses,
@@ -16,6 +14,7 @@ import {
 import { applyBuffToAxes, BUFF_MULT_MAX } from './spirit-buff.ts';
 import type { CraftAxisScore } from './spirit-roots.ts';
 import { COMBO_LORE } from '../ziwei/combo-lore.ts';
+import type { PalaceSnap, ZiweiChartView } from '../ziwei/types.ts';
 
 const mem = new Map<string, string>();
 
@@ -58,6 +57,48 @@ const ALL_AXES = (): CraftAxisScore[] => [
   axis('yeli', 10),
 ];
 
+/** 同宫成格：把成员都塞进命宫 */
+function formedView(starNames: string[], mutagen?: Array<{ star: string; hua: string }>): ZiweiChartView {
+  const majors = starNames
+    .filter((n) => !n.startsWith('化'))
+    .map((name) => {
+      const h = mutagen?.find((x) => x.star === name);
+      return h ? { name, mutagen: h.hua } : { name };
+    });
+  const soul = {
+    name: '命宫',
+    earthlyBranch: '子',
+    heavenlyStem: '甲',
+    isSoul: true,
+    isBody: false,
+    majors,
+    minors: [],
+    adjectives: [],
+  } as unknown as PalaceSnap;
+  const rest = ['丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'].map(
+    (br, i) =>
+      ({
+        name: ['兄弟', '夫妻', '子女', '财帛', '疾厄', '迁移', '仆役', '官禄', '田宅', '福德', '父母'][i]!,
+        earthlyBranch: br,
+        heavenlyStem: '甲',
+        isSoul: false,
+        isBody: false,
+        majors: [],
+        minors: [],
+        adjectives: [],
+      }) as unknown as PalaceSnap,
+  );
+  return {
+    palaces: [soul, ...rest],
+    soulPalace: soul,
+    bodyPalace: soul,
+    soul: '紫微',
+    body: '天相',
+    fiveElementsClass: '水二局',
+    theater: { headline: '测' },
+  } as unknown as ZiweiChartView;
+}
+
 describe('craft combo achievements', () => {
   it('has a thick catalog (core + 贵人/煞拆/名局)', () => {
     expect(CRAFT_COMBO_ACHIEVEMENTS.length).toBeGreaterThanOrEqual(20);
@@ -67,20 +108,23 @@ describe('craft combo achievements', () => {
     expect(COMBO_LORE.length).toBeGreaterThanOrEqual(12);
   });
 
-  it('evaluates di_xing / ye_huo by unlocked members', () => {
+  it('evaluates di_xing / ye_huo by chart formation not atlas set', () => {
     const di = CRAFT_COMBO_ACHIEVEMENTS.find((a) => a.id === 'di_xing')!;
-    expect(evaluateCraftComboAch(di, new Set(['紫微', '天府'])).status).toBe('partial');
+    expect(evaluateCraftComboAch(di, null).status).toBe('locked');
     expect(
-      evaluateCraftComboAch(di, new Set(['紫微', '天府', '天相'])).status,
+      evaluateCraftComboAch(di, formedView(['紫微', '天府'])).status,
+    ).toBe('partial');
+    expect(
+      evaluateCraftComboAch(di, formedView(['紫微', '天府', '天相'])).status,
     ).toBe('complete');
     const ye = CRAFT_COMBO_ACHIEVEMENTS.find((a) => a.id === 'ye_huo')!;
     expect(
-      evaluateCraftComboAch(ye, new Set(['擎羊', '陀罗', '火星', '铃星'])).status,
+      evaluateCraftComboAch(ye, formedView(['擎羊', '陀罗', '火星', '铃星'])).status,
     ).toBe('complete');
   });
 
-  it('applies flat bonuses for 贵人 and 煞拆', () => {
-    const unlocked = new Set([
+  it('applies flat bonuses when combos are formed on chart', () => {
+    const view = formedView([
       '左辅',
       '右弼',
       '天魁',
@@ -96,36 +140,39 @@ describe('craft combo achievements', () => {
       '紫微',
       '天府',
     ]);
-    const next = applyFlatComboBonuses(ALL_AXES(), unlocked);
-    // 紫府+8 · 辅弼+10 · 君臣辅弼+12
+    const next = applyFlatComboBonuses(ALL_AXES(), view);
     expect(next.find((a) => a.id === 'zhenshou')?.value).toBe(10 + 8 + 10 + 12);
-    // 魁钺+10 · 昌曲+8 · 君臣+8
     expect(next.find((a) => a.id === 'lingyun')?.value).toBe(10 + 10 + 8 + 8);
-    // 羊陀+12 · 火铃+12 · 空劫+10
     expect(next.find((a) => a.id === 'yeli')?.value).toBe(10 + 12 + 12 + 10);
     expect(next.find((a) => a.id === 'tongbian')?.sources).toContain('成就·昌曲');
     expect(next.find((a) => a.id === 'zhenshou')?.sources).toContain('成就·君臣辅弼');
   });
 
   it('applies core stack including 帝星 and 杀破狼', () => {
-    const unlocked = new Set([
-      '紫微',
-      '天府',
-      '天相',
-      '七杀',
-      '破军',
-      '贪狼',
-      '天机',
-      '太阴',
-      '天同',
-      '天梁',
-      '太阳',
-      '化禄',
-      '化权',
-      '化科',
-      '化忌',
-    ]);
-    const next = applyFlatComboBonuses(ALL_AXES(), unlocked);
+    const view = formedView(
+      [
+        '紫微',
+        '天府',
+        '天相',
+        '七杀',
+        '破军',
+        '贪狼',
+        '天机',
+        '太阴',
+        '天同',
+        '天梁',
+        '太阳',
+        '廉贞',
+        '武曲',
+      ],
+      [
+        { star: '廉贞', hua: '禄' },
+        { star: '破军', hua: '权' },
+        { star: '武曲', hua: '科' },
+        { star: '太阳', hua: '忌' },
+      ],
+    );
+    const next = applyFlatComboBonuses(ALL_AXES(), view);
     expect(next.find((a) => a.id === 'zhenshou')?.value).toBeGreaterThan(
       10 + DI_XING_GAIN_ZHENSHOU,
     );
@@ -138,7 +185,7 @@ describe('craft combo achievements', () => {
   });
 
   it('applies 业火 burst when yeli is max, clamping mult', () => {
-    const unlocked = new Set(['擎羊', '陀罗', '火星', '铃星']);
+    const view = formedView(['擎羊', '陀罗', '火星', '铃星']);
     const afterYear = applyBuffToAxes(
       [axis('guangyao', 40), axis('yeli', 80), axis('tongbian', 10)],
       {
@@ -150,20 +197,21 @@ describe('craft combo achievements', () => {
         yeli: 1,
       },
     );
-    const { axes, active } = applyYeHuoConditionalBurst(afterYear, unlocked);
+    const { axes, active } = applyYeHuoConditionalBurst(afterYear, view);
     expect(active).toBe(true);
     const g = axes.find((a) => a.id === 'guangyao')!;
     expect(g.buffMult).toBe(BUFF_MULT_MAX);
     expect(g.value).toBe(Math.round(40 * BUFF_MULT_MAX));
+    expect(YE_HUO_GUANGYAO_MULT).toBeGreaterThan(1);
   });
 
-  it('claims toast once per newly completed achievement', () => {
-    const unlocked = new Set(['紫微', '天府', '天相']);
-    const a = claimNewCraftComboToasts(unlocked);
+  it('toasts each formed achievement once', () => {
+    const view = formedView(['紫微', '天府', '天相']);
+    const a = claimNewCraftComboToasts(view);
     expect(a.some((x) => x.id === 'di_xing')).toBe(true);
-    const b = claimNewCraftComboToasts(unlocked);
-    expect(b).toHaveLength(0);
-    expect(craftComboProgress(unlocked).total).toBe(CRAFT_COMBO_ACHIEVEMENTS.length);
+    const b = claimNewCraftComboToasts(view);
+    expect(b.length).toBe(0);
+    expect(craftComboProgress(view).total).toBe(CRAFT_COMBO_ACHIEVEMENTS.length);
   });
 
   it('documents ye_huo multiplier constant', () => {

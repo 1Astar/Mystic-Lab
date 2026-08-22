@@ -53,8 +53,46 @@ function focusFromDataset(el: HTMLElement): LearnFocus | null {
   return { kind, starName, palaceName, status, term };
 }
 
+/** 解读抽屉只浅带学；深度进图鉴（可查） */
+function resolveAtlasHint(
+  focus: LearnFocus,
+  model: ReturnType<typeof buildLearnExplain>,
+): { path: string; label: string } {
+  if (model.atlasHint) return model.atlasHint;
+  const q = new URLSearchParams();
+  if (focus.starName) {
+    q.set('star', focus.starName);
+    return { path: `/ziwei/tujian?${q.toString()}`, label: '图鉴查深度' };
+  }
+  if (focus.palaceName) {
+    q.set('layer', 'palaces');
+    q.set('palace', focus.palaceName);
+    return { path: `/ziwei/tujian?${q.toString()}`, label: '图鉴查深度' };
+  }
+  if (focus.term) {
+    q.set('term', focus.term);
+    return { path: `/ziwei/tujian?${q.toString()}`, label: '图鉴查深度' };
+  }
+  if (focus.status) {
+    q.set('layer', 'structure');
+    q.set('bucket', 'brightness');
+    return { path: `/ziwei/tujian?${q.toString()}`, label: '图鉴查深度' };
+  }
+  return { path: '/ziwei/tujian', label: '打开紫微图鉴' };
+}
+
+function atlasTeaseHtml(hint: { path: string; label: string }): string {
+  return `
+    <section class="ziwei-learn-block is-atlas-tease">
+      <h3>可查 · 图鉴</h3>
+      <p class="ziwei-learn-tease">传统含义与展开说明放在图鉴，这里只带你看盘上这一处。</p>
+      <button type="button" class="ziwei-learn-atlas-cta" data-learn-atlas data-atlas-path="${escapeHtml(hint.path)}">${escapeHtml(hint.label)} ›</button>
+    </section>`;
+}
+
 function starPanelHtml(
   model: ReturnType<typeof buildLearnExplain>,
+  atlas: { path: string; label: string },
 ): string {
   const titleLine = model.subtitle
     ? `${escapeHtml(model.title)}｜${escapeHtml(model.subtitle)}`
@@ -93,10 +131,7 @@ function starPanelHtml(
         <pre class="ziwei-learn-body">${escapeHtml(model.inChart)}</pre>
       </section>
       ${statusRow}
-      <section class="ziwei-learn-block is-layer-2">
-        <h3>传统含义</h3>
-        <pre class="ziwei-learn-body">${escapeHtml(model.traditional || '（本星暂无展开传统释义）')}</pre>
-      </section>
+      ${atlasTeaseHtml(atlas)}
       <section class="ziwei-learn-block is-layer-explore">
         <h3>相关探索</h3>
         <div class="ziwei-learn-chips">${model.related.map(relatedChip).join('') || '<span class="ziwei-learn-term">暂无</span>'}</div>
@@ -106,6 +141,7 @@ function starPanelHtml(
 
 function defaultPanelHtml(
   model: ReturnType<typeof buildLearnExplain>,
+  atlas: { path: string; label: string },
 ): string {
   const relationHtml = model.relationMap
     ? `<div class="ziwei-learn-map" aria-label="关系地图">
@@ -165,10 +201,6 @@ function defaultPanelHtml(
       <button type="button" class="ziwei-learn-close" data-learn-close>关闭</button>
     </header>
     <div class="ziwei-learn-scroll">
-      <section class="ziwei-learn-block is-layer-2">
-        <h3>传统含义</h3>
-        <pre class="ziwei-learn-body">${escapeHtml(model.traditional || '（本词条暂无展开传统释义）')}</pre>
-      </section>
       <section class="ziwei-learn-block is-layer-3">
         <h3>在你的命盘里</h3>
         <pre class="ziwei-learn-body">${escapeHtml(model.inChart)}</pre>
@@ -176,6 +208,7 @@ function defaultPanelHtml(
         ${branchHtml}
         ${relationHtml}
       </section>
+      ${atlasTeaseHtml(atlas)}
       <section class="ziwei-learn-block is-layer-4">
         <h3>相关探索</h3>
         <div class="ziwei-learn-chips">${model.related.map(relatedChip).join('') || '<span class="ziwei-learn-term">暂无关联词</span>'}</div>
@@ -183,13 +216,14 @@ function defaultPanelHtml(
     </div>`;
 }
 
-/** 底部半屏学习抽屉：点哪里解释从哪里出；抽屉内继续探索 */
+/** 底部半屏学习抽屉：点哪里解释从哪里出；浅带学，深度进图鉴 */
 export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
   document.querySelector('.ziwei-learn-sheet')?.remove();
   learnSheetEsc?.abort();
   learnSheetEsc = new AbortController();
 
   const model = buildLearnExplain(opts.view, opts.focus);
+  const atlas = resolveAtlasHint(opts.focus, model);
   opts.onFocusChange?.(opts.focus);
 
   const sheet = document.createElement('div');
@@ -199,7 +233,7 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
   sheet.setAttribute('aria-label', model.title);
 
   const body =
-    model.category === 'star' ? starPanelHtml(model) : defaultPanelHtml(model);
+    model.category === 'star' ? starPanelHtml(model, atlas) : defaultPanelHtml(model, atlas);
 
   sheet.innerHTML = `
     <button type="button" class="ziwei-learn-backdrop" data-learn-close aria-label="关闭"></button>
@@ -207,11 +241,7 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
       ${body}
       <footer class="ziwei-learn-foot">
         <button type="button" class="life-btn-ghost" data-learn-close>关闭</button>
-        ${
-          model.atlasHint
-            ? `<button type="button" class="life-btn-ghost" data-learn-atlas>${escapeHtml(model.atlasHint.label)} ›</button>`
-            : ''
-        }
+        <button type="button" class="life-btn-ghost" data-learn-atlas data-atlas-path="${escapeHtml(atlas.path)}">${escapeHtml(atlas.label)} ›</button>
         <button type="button" class="life-btn-primary" data-learn-chart>回到盘面看关系 ›</button>
       </footer>
     </aside>
@@ -244,11 +274,14 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
     el.addEventListener('click', close);
   });
 
-  sheet.querySelector('[data-learn-atlas]')?.addEventListener('click', () => {
-    const path = model.atlasHint?.path;
-    if (!path) return;
-    close();
-    navigate(path);
+  sheet.querySelectorAll('[data-learn-atlas]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const path =
+        (el as HTMLElement).dataset.atlasPath || atlas.path || model.atlasHint?.path;
+      if (!path) return;
+      close();
+      navigate(path);
+    });
   });
 
   sheet

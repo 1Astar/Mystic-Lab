@@ -1,0 +1,54 @@
+/* 解读页 · 带学浅条（深度留给图鉴） */
+
+.lab-learn-strip {
+  margin: 10px 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--gold) 35%, var(--line, rgba(255, 255, 255, 0.14)));
+  background: color-mix(in srgb, var(--gold) 7%, transparent);
+}
+
+.lab-learn-strip-kicker {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.lab-learn-strip-tip {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.lab-learn-strip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.lab-learn-strip-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lab-learn-strip-btn.is-deepen {
+  color: var(--gold-ink, var(--gold));
+}
+
+.lab-learn-strip-btn.is-practice {
+  color: var(--ink-muted, var(--ink));
+}
+
+.lab-learn-strip-btn:hover {
+  color: var(--ink);
+}

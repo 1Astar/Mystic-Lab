@@ -2,6 +2,7 @@ import type { JourneyItem, JourneySystem } from './journey.ts';
 
 const STORAGE_KEY = 'mystic-lab-cross-ask-question';
 
+/** 同题互跳仅限占问体系；八字/紫微手札可出现在旅程列表，但不参与「也用 X 看一眼」 */
 const ALL_SYSTEMS: JourneySystem[] = ['tarot', 'xiaoliuren', 'liuyao'];
 
 /** 规范化问题文本，用于同题匹配 */
@@ -49,7 +50,9 @@ export function findSiblingJourneyItems(
 export function systemDisplayLabel(system: JourneySystem): string {
   if (system === 'tarot') return '塔罗';
   if (system === 'xiaoliuren') return '小六壬';
-  return '六爻';
+  if (system === 'liuyao') return '六爻';
+  if (system === 'bazi') return '八字';
+  return '紫微';
 }
 
 /** 除当前体系外的其它体系（用于同题互跳） */
@@ -67,7 +70,9 @@ export function otherSystemLabel(system: JourneySystem): string {
 export function readingPathFor(system: JourneySystem): string {
   if (system === 'tarot') return '/tarot/reading';
   if (system === 'xiaoliuren') return '/xiaoliuren/reading';
-  return '/liuyao/reading';
+  if (system === 'liuyao') return '/liuyao/reading';
+  if (system === 'bazi') return '/bazi/journal';
+  return '/ziwei/journal';
 }
 
 /** @deprecated 多体系时优先用 readingPathFor(other) */

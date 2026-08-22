@@ -33,8 +33,12 @@ export const BACKUP_KEYS = [
   'mystic-lab-bazi-rectify-ai-narrate',
   'mystic-lab-bazi-learn-v1',
   'mystic-lab-bazi-guess-v1',
+  'mystic-lab-ziwei-guess-v1',
+  'mystic-lab-tarot-guess-v1',
   'mystic-lab-bazi-week-weather-v1',
   'mystic-lab-bazi-journal',
+  'mystic-lab-bazi-codex-marks',
+  'mystic-lab-ziwei-journal',
   'mystic.ziwei.yearVerify.v1',
   'mystic.ziwei.dayVerify.v1',
   // 造命功课
@@ -639,6 +643,32 @@ function mergeBaziCodex(localRaw: string | null, importedRaw: string): string {
   });
 }
 
+/** 八字图鉴标记：按 id 并集 fire/useful */
+function mergeBaziCodexMarks(localRaw: string | null, importedRaw: string): string {
+  const local = tryParseJson(localRaw ?? '{}');
+  const imported = tryParseJson(importedRaw);
+  if (!imported || typeof imported !== 'object' || Array.isArray(imported)) {
+    return importedRaw;
+  }
+  const l =
+    local && typeof local === 'object' && !Array.isArray(local)
+      ? (local as Record<string, unknown>)
+      : {};
+  const i = imported as Record<string, unknown>;
+  const out: Record<string, string[]> = {};
+  for (const src of [l, i]) {
+    for (const [id, marks] of Object.entries(src)) {
+      if (!id || !Array.isArray(marks)) continue;
+      const set = new Set(out[id] ?? []);
+      for (const m of marks) {
+        if (m === 'fire' || m === 'useful') set.add(m);
+      }
+      if (set.size) out[id] = [...set];
+    }
+  }
+  return JSON.stringify(out);
+}
+
 function mergeZiweiCodex(localRaw: string | null, importedRaw: string): string {
   const local = tryParseJson(localRaw ?? '{"entries":[]}');
   const imported = tryParseJson(importedRaw);
@@ -972,6 +1002,7 @@ function mergeKeyValue(
     case 'mystic-lab-xiaoliuren-journal':
     case 'mystic-lab-liuyao-journal':
     case 'mystic-lab-bazi-journal':
+    case 'mystic-lab-ziwei-journal':
       return mergeIdArray(localRaw, importedRaw, { max: 80, sortKey: 'createdAt' });
     case 'mystic-lab-question-rewrite-feedback':
       return mergeIdArray(localRaw, importedRaw, {
@@ -1003,6 +1034,8 @@ function mergeKeyValue(
       return mergeLifeUniverse(localRaw, importedRaw);
     case 'mystic-lab-bazi-codex':
       return mergeBaziCodex(localRaw, importedRaw);
+    case 'mystic-lab-bazi-codex-marks':
+      return mergeBaziCodexMarks(localRaw, importedRaw);
     case 'mystic-lab-ziwei-codex':
       return mergeZiweiCodex(localRaw, importedRaw);
     case 'mystic-lab-craft-xp-v1':

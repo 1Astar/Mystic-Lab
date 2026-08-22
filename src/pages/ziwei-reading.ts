@@ -16,6 +16,7 @@ import {
 import type { ZiweiChartView } from '../ziwei/types.ts';
 import { showUnlockToast } from '../ui/unlock-toast.ts';
 import { bindZiweiLearnHotspots, openZiweiLearnSheet } from '../ui/ziwei-learn-sheet.ts';
+import { bindLabLearnStrip, labLearnStripHtml } from '../ui/lab-learn-strip.ts';
 import { mountZiweiPlate, type MountZiweiPlateHandle } from '../ui/ziwei-plate.ts';
 import {
   mountZiweiTimeLadder,
@@ -38,7 +39,6 @@ import {
   mountQuestBannerAndCheckIn,
   type QuestUiHandle,
 } from '../ui/quest-banner-checkin.ts';
-import { craftAwakenProgressHtml } from '../craft/combo-achievements.ts';
 import { draftFromZiwei } from '../share/drafts.ts';
 
 function escapeHtml(s: string): string {
@@ -74,10 +74,27 @@ function queryFocus(): { star?: string; palace?: string; status?: string } {
   }
 }
 
-function setModeUrl(mode: ViewMode): void {
+function queryTheaterDeepLink(): { tab?: TheaterTab; pillar?: string } {
+  try {
+    const q = new URLSearchParams(location.search);
+    const tabRaw = q.get('tab')?.trim();
+    const pillar = q.get('pillar')?.trim() || undefined;
+    const tab: TheaterTab | undefined =
+      tabRaw === 'pillars' || tabRaw === 'luck' || tabRaw === 'self' ? tabRaw : undefined;
+    return { tab, pillar };
+  } catch {
+    return {};
+  }
+}
+
+function setModeUrl(mode: ViewMode, extras?: { tab?: TheaterTab; pillar?: string | null }): void {
   try {
     const q = new URLSearchParams();
     if (mode === 'chart') q.set('mode', 'chart');
+    if (mode === 'theater') {
+      if (extras?.tab && extras.tab !== 'self') q.set('tab', extras.tab);
+      if (extras?.pillar) q.set('pillar', extras.pillar);
+    }
     const qs = q.toString();
     history.replaceState({}, '', qs ? `/ziwei/reading?${qs}` : '/ziwei/reading');
   } catch {
@@ -93,8 +110,10 @@ export function renderZiweiReading(root: HTMLElement): () => void {
   const intent = loadZiweiIntent();
   let question = loadZiweiQuestion();
   let mode: ViewMode = queryMode();
-  let theaterTab: TheaterTab = 'self';
-  let openPillar: string | null = 'core';
+  const theaterDeep = queryTheaterDeepLink();
+  let theaterTab: TheaterTab = theaterDeep.tab ?? 'self';
+  let openPillar: string | null = theaterDeep.pillar ?? 'core';
+  if (theaterDeep.pillar && !theaterDeep.tab) theaterTab = 'pillars';
   let drill: { title: string; body: string } | null = null;
   let unlockedOnce = false;
   let unmountPlate: MountZiweiPlateHandle | null = null;
@@ -114,7 +133,10 @@ export function renderZiweiReading(root: HTMLElement): () => void {
     if (unlockedOnce) return;
     unlockedOnce = true;
     const { ids, palaceByStar } = collectUnlockIdsFromPalaces(view.palaces);
-    const unlocked = unlockStarsFromChart(ids, palaceByStar);
+    const unlocked = unlockStarsFromChart(ids, palaceByStar, {
+      question: question.trim() || undefined,
+      summary: view.theater.headline || '',
+    });
     if (unlocked.newly.length > 0) {
       const first = unlocked.newly[0]!;
       const lore = getStarLore(first);
@@ -322,7 +344,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
     page.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode === 'chart' ? 'chart' : 'theater';
-        setModeUrl(mode);
+        setModeUrl(mode, mode === 'theater' ? { tab: theaterTab, pillar: openPillar } : undefined);
         paint();
       });
     });
@@ -331,6 +353,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         const next = btn.dataset.theaterTab;
         theaterTab =
           next === 'pillars' ? 'pillars' : next === 'luck' ? 'luck' : 'self';
+        setModeUrl(mode, { tab: theaterTab, pillar: openPillar });
         paint();
         page.querySelector('.ziwei-theater-tabs')?.scrollIntoView({
           block: 'nearest',
@@ -342,6 +365,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       btn.addEventListener('click', () => {
         const id = btn.dataset.pillar ?? '';
         openPillar = openPillar === id ? null : id;
+        setModeUrl(mode, { tab: 'pillars', pillar: openPillar });
         paint();
       });
     });
@@ -418,6 +442,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         },
       });
     }
+    bindLabLearnStrip(page);
   }
 
   function paintError(msg: string): void {
@@ -467,14 +492,16 @@ export function renderZiweiReading(root: HTMLElement): () => void {
             .map(
               (r) => `
             <li class="${highlightNames.has(r.name) ? 'is-focus' : ''}">
-              <button type="button" class="ziwei-term-hot" data-learn-star="${escapeHtml(r.name)}" data-learn-palace="${escapeHtml(r.palace)}">${escapeHtml(r.name)} · ${escapeHtml(r.epithet)}</button>
+              <button type="button" class="ziwei-term-hot" data-path="/ziwei/tujian?bucket=shensha&shensha=${encodeURIComponent(r.name)}">${escapeHtml(r.name)} · ${escapeHtml(r.epithet)}</button>
               <span>${escapeHtml(r.palace.replace(/宫$/, ''))}</span>
               ${highlightNames.has(r.name) ? '<em>重点</em>' : ''}
             </li>`,
             )
             .join('')}
         </ul>
-        <button type="button" class="ziwei-drill-link" data-path="/ziwei/tujian?bucket=shensha">打开图鉴 · 神煞 ›</button>
+        <button type="button" class="ziwei-drill-link" data-path="/ziwei/tujian?bucket=shensha">打开图鉴 · 神煞全部 ›</button>
+        <button type="button" class="ziwei-drill-link" data-path="/ziwei/guess">猜星曜盲盒 ›</button>
+        <button type="button" class="ziwei-drill-link" data-path="/ziwei/journal">紫微手札 ›</button>
       </details>`;
   }
 
@@ -587,6 +614,18 @@ export function renderZiweiReading(root: HTMLElement): () => void {
       ${theaterTabsHtml(theaterTab)}
 
       <div class="ziwei-theater-pane" data-theater-pane="self" ${theaterTab === 'self' ? '' : 'hidden'}>
+        ${labLearnStripHtml({
+          tip: spotLore
+            ? `本命主戏偏「${spotLore.title} · ${spotLore.epithet}」——点星名看浅解；完整画像请进图鉴。`
+            : '点盘上星名或宫位，先看一句浅解；完整百科留在图鉴。',
+          deepen: {
+            href: spot
+              ? `/ziwei/tujian?star=${encodeURIComponent(spot)}`
+              : '/ziwei/tujian',
+            label: spot ? `进图鉴看${spot} ›` : '进紫微图鉴 ›',
+          },
+          practice: { href: '/ziwei/guess', label: '猜星曜练一题 ›' },
+        })}
         <section class="ziwei-combo" aria-label="内核主星组合">
           <p class="ziwei-kicker">核心星曜 · 组合技</p>
           <div class="ziwei-combo-lead">
@@ -619,7 +658,7 @@ export function renderZiweiReading(root: HTMLElement): () => void {
                 (h) => `
               <li>
                 <div class="ziwei-shensha-deep-head">
-                  <button type="button" class="ziwei-term-hot" data-learn-star="${escapeHtml(h.name)}" data-learn-palace="${escapeHtml(h.palace)}">${escapeHtml(h.name)} · ${escapeHtml(h.epithet)}</button>
+                  <button type="button" class="ziwei-term-hot" data-path="/ziwei/tujian?bucket=shensha&shensha=${encodeURIComponent(h.name)}">${escapeHtml(h.name)} · ${escapeHtml(h.epithet)}</button>
                   <span class="ziwei-shensha-deep-tags">${(h.pillarLabels ?? [])
                     .map((lab) => `<em>${escapeHtml(lab)}</em>`)
                     .join('')}${h.annualHook ? '<em class="is-year">流年</em>' : ''}</span>
@@ -724,7 +763,6 @@ export function renderZiweiReading(root: HTMLElement): () => void {
         <div class="life-header-emblem">${mysticEmblemHtml('cosmos', 'md')}</div>
         <h1 class="page-title">完整命盘</h1>
         <p class="page-subtitle">年看主题 · 月看推进 · 日看当天 · 时看当下</p>
-        ${craftAwakenProgressHtml()}
         <button type="button" class="ziwei-edit-birth" id="ziwei-edit-birth">改出生信息</button>
       </header>
 

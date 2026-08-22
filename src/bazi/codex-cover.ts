@@ -3,6 +3,7 @@ import {
   getCoverPrompt,
   type CodexCoverPrompt,
 } from './codex-cover-prompts.ts';
+import { shenshaBadgeSvg } from './codex-shensha-badge-art.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -34,11 +35,22 @@ export function memoryCoverHtml(id: string, fallbackSvg: string): string {
 
 /**
  * 神煞详情 / 列表共用：顶上小圆徽章（非全幅大图）
+ * 优先 webp → SVG 章面 → 字标
  */
 export function shenshaBadgeArtHtml(id: string, glyph = '煞'): string {
   const src = getCodexCoverSrc(id);
-  const inner = src
-    ? `<div class="bazi-ss-badge-art" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" loading="lazy" /></div>`
-    : `<div class="bazi-ss-badge-glyph" aria-hidden="true">${escapeHtml(glyph)}</div>`;
-  return `<div class="bazi-ss-badge-stage bazi-enc-badge" data-cover-id="${escapeHtml(id)}">${inner}</div>`;
+  if (src) {
+    return `<div class="bazi-ss-badge-stage bazi-enc-badge" data-cover-id="${escapeHtml(id)}">
+      <div class="bazi-ss-badge-art" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" loading="lazy" /></div>
+    </div>`;
+  }
+  const svg = shenshaBadgeSvg(id, { uid: `badge-${id}` });
+  if (svg) {
+    return `<div class="bazi-ss-badge-stage bazi-enc-badge is-svg" data-cover-id="${escapeHtml(id)}">
+      <div class="bazi-ss-badge-art" aria-hidden="true">${svg}</div>
+    </div>`;
+  }
+  return `<div class="bazi-ss-badge-stage bazi-enc-badge" data-cover-id="${escapeHtml(id)}">
+    <div class="bazi-ss-badge-glyph" aria-hidden="true">${escapeHtml(glyph)}</div>
+  </div>`;
 }

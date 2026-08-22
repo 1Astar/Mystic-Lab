@@ -22,6 +22,8 @@ export function renderTarotHome(root: HTMLElement): () => void {
     subtitle: SYSTEM_POSITION.tarot,
     showStars: true,
     showAiSettings: true,
+    floatSystem: 'tarot',
+    floatTujianPath: '/tarot/tujian',
     entries: [
       {
         path: '/tarot/reading',
@@ -36,6 +38,11 @@ export function renderTarotHome(root: HTMLElement): () => void {
         title: '随心探索',
         desc: '78 张牌 / 愚人之旅 / 牌组×数字',
         stat: () => `${getCollectedCount()} 张已收集`,
+      },
+      {
+        path: '/tarot/guess',
+        title: '猜牌义盲盒',
+        desc: '每日一题 · 复习大阿卡纳',
       },
       {
         path: '/journal',

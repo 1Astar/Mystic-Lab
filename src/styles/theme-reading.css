@@ -707,12 +707,14 @@ html[data-theme='moon'] .codex-progress-suit-bar i {
   background: linear-gradient(90deg, var(--gold-ink, var(--gold)), var(--gold)) !important;
 }
 
-/* 八字/紫微图鉴：吸顶分类条月白底 */
+/* 八字/紫微图鉴：吸顶分类条贴宣纸底，勿掺纯白 */
+html[data-theme='moon'] .bazi-codex-sticky-stack,
 html[data-theme='moon'] .bazi-codex-tabs,
 html[data-theme='moon'] .ziwei-codex-sticky-stack,
 html[data-theme='moon'] .ziwei-layer-tabs-caps {
-  background: color-mix(in srgb, var(--bg-deep) 96%, #fff) !important;
+  background: color-mix(in srgb, var(--bg-deep) 97%, transparent) !important;
 }
+html[data-theme='moon'] .bazi-codex-sticky-stack .bazi-codex-tabs,
 html[data-theme='moon'] .ziwei-codex-sticky-stack .ziwei-layer-tabs-caps {
   background: transparent !important;
 }

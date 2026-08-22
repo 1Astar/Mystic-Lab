@@ -154,6 +154,105 @@ body {
   margin-top: 12px;
 }
 
+.lab-week-focus {
+  margin: 4px 0 18px;
+}
+
+.lab-week-focus-card {
+  appearance: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 14px;
+  align-items: start;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--gold) 10%, transparent),
+      color-mix(in srgb, var(--bg-deep, #1a1520) 88%, transparent)
+    );
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.lab-week-focus-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 48%, transparent);
+  transform: translateY(-1px);
+}
+
+.lab-week-focus-emblem {
+  margin-top: 2px;
+}
+
+.lab-week-focus-kicker {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-ink, var(--gold));
+  opacity: 0.92;
+}
+
+.lab-week-focus-title {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.lab-week-focus-blurb {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink-muted, var(--ink));
+}
+
+.lab-week-focus-why {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--ink-muted, var(--ink)) 85%, transparent);
+}
+
+.lab-week-focus-cta {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--gold-ink, var(--gold));
+}
+
+.lab-week-focus-meta {
+  margin: 8px 2px 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted, var(--ink));
+  opacity: 0.75;
+}
+
+.lab-week-focus-drill {
+  margin: 8px 2px 0;
+}
+
+.lab-week-focus-drill-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--gold-ink, var(--gold));
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lab-week-focus-drill-btn:hover {
+  color: var(--ink);
+}
+
 .lab-home-cta-row .lab-guide-trigger {
   margin-top: 0;
 }
@@ -1434,6 +1533,16 @@ html[data-theme='moon'] .stars {
 .journey-system-liuyao {
   color: var(--gold-ink);
   border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
+}
+
+.journey-system-bazi {
+  color: color-mix(in srgb, var(--wx-tu) 75%, var(--ink));
+  border-color: color-mix(in srgb, var(--wx-tu) 40%, var(--line));
+}
+
+.journey-system-ziwei {
+  color: color-mix(in srgb, var(--purple) 40%, var(--ink));
+  border-color: color-mix(in srgb, #7a6bb5 45%, var(--line));
 }
 
 .journey-sibling-cross-actions {

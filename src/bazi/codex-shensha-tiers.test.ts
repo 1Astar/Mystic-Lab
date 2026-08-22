@@ -32,8 +32,8 @@ describe('shensha tiers', () => {
     expect(shenshaTierOf('天德')).toBe('more');
   });
 
-  it('shensha progress totals featured only', () => {
+  it('shensha progress totals full atlas', () => {
     const p = baziCodexProgress('shensha');
-    expect(p.total).toBe(SHENSHA_FEATURED.length);
+    expect(p.total).toBeGreaterThanOrEqual(80);
   });
 });

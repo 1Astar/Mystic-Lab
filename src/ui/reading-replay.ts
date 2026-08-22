@@ -7,6 +7,7 @@ import { clearSideActionFabs, mountInviteCompanionBar } from '../share/invite-ba
 import { SPREADS } from '../tarot/spreads.ts';
 import { mountQuestionThread, openThreadCardPeek } from './question-thread-panel.ts';
 import { mountReadingFeedbackPanel } from './reading-feedback-panel.ts';
+import { renderTarotAiSessionsHtml, tarotAiBadgeHtml } from './tarot-ai-sessions.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -39,6 +40,8 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
     updateJournalReadingSnapshot(entry.id, reading);
   }
 
+  const hasAi = (entry.aiSessions?.length ?? 0) > 0;
+
   container.className = 'reading-replay';
   container.innerHTML = `
     <div class="reading-replay-backdrop" data-close></div>
@@ -49,6 +52,7 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
         <time class="reading-replay-date">${escapeHtml(date)}</time>
         <h2 id="reading-replay-title" class="reading-replay-question">${escapeHtml(entry.question || '（未记录问题）')}</h2>
         <p class="reading-replay-meta">${escapeHtml(spreadLabel)} · ${reading.cards.length} 张牌</p>
+        ${tarotAiBadgeHtml(entry.aiSessions?.length ?? 0)}
       </header>
       ${
         regenerated || isSynthetic
@@ -63,6 +67,11 @@ export function mountReadingReplay(container: HTMLElement, options: ReadingRepla
           : ''
       }
       <p class="reading-replay-summary">${escapeHtml(reading.summary)}</p>
+      ${
+        hasAi
+          ? `<details class="tr-ai-fold" open><summary>回看 AI 解读</summary>${renderTarotAiSessionsHtml(entry.aiSessions)}</details>`
+          : ''
+      }
       <div id="reading-replay-feedback"></div>
     </div>
   `;

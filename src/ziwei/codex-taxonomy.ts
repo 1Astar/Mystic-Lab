@@ -39,17 +39,28 @@ export const CATALOG_SECTIONS: Array<{
   title: string;
   blurb: string;
 }> = [
-  { id: 'stars', title: '星曜', blurb: '主星 · 吉煞 · 辅杂' },
-  { id: 'palaces', title: '宫位', blurb: '十二宫 · 对合' },
-  { id: 'mutagen', title: '四化', blurb: '禄权科忌 · 运限' },
+  { id: 'stars', title: '星曜', blurb: '百科查阅' },
+  { id: 'palaces', title: '宫位格局', blurb: '十二宫 · 成格' },
+  { id: 'mutagen', title: '四化断事', blurb: '禄权科忌 · 运限' },
   { id: 'structure', title: '命盘规则', blurb: '庙旺 · 局 · 运限' },
 ];
 
-export type PalaceBucket = 'twelve' | 'sanfang' | 'dui';
+/** 图鉴顶栏（「我的相遇」为独立页 layer=meet，不进此列） */
+export const ATLAS_TOP_TABS: Array<{
+  id: CatalogSection;
+  title: string;
+}> = [
+  { id: 'palaces', title: '宫位格局' },
+  { id: 'stars', title: '星曜' },
+  { id: 'mutagen', title: '四化断事' },
+  { id: 'structure', title: '命盘规则' },
+];
+
+export type PalaceBucket = 'twelve' | 'geju' | 'read';
 export const PALACE_BUCKET_META: Record<PalaceBucket, { title: string; blurb: string }> = {
   twelve: { title: '十二宫', blurb: '人生场景' },
-  sanfang: { title: '三方四正', blurb: '读宫主镜头' },
-  dui: { title: '对宫关系', blurb: '正对对照' },
+  geju: { title: '格局名录', blurb: '古典格 + 星曜组合全表' },
+  read: { title: '读宫规则', blurb: '三方四正 · 对宫' },
 };
 
 export type MutagenBucket = 'stars' | 'birth' | 'limit';

@@ -138,10 +138,14 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
       </div>
       <footer class="lab-concept-peek-foot">
         ${atlasBtn}
-        <button type="button" class="lab-concept-peek-more" data-peek-more>
+        ${
+          opts.onOpenAsk
+            ? `<button type="button" class="lab-concept-peek-more" data-peek-more>
           ${ICON_SPARK}
           <span>继续追问</span>
-        </button>
+        </button>`
+            : ''
+        }
       </footer>
     </div>
   `;

@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { attachPersonSwitcherToPage } from '../ui/module-person-chrome.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
@@ -16,6 +16,7 @@ import {
 import { parseBirthParts } from '../bazi/parse-birth.ts';
 import { baziCodexProgress } from '../bazi/codex.ts';
 import { SYSTEM_POSITION } from '../lab/system-positioning.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -80,29 +81,19 @@ export function renderBaziHome(root: HTMLElement): () => void {
     const codex = baziCodexProgress();
     return `
     <nav class="bazi-home-nav" aria-label="八字入口">
-      <button type="button" class="bazi-home-link" data-path="/bazi/structure" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
-        <strong>生命结构</strong>
-        <span>五行属性 · 长期底色 · 大运阶段</span>
-        ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
-      </button>
-      <button type="button" class="bazi-home-link" data-path="/bazi/reading" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
-        <strong>我的命盘</strong>
-        <span>白话解读 · 认识自己</span>
-        ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
-      </button>
-      <button type="button" class="bazi-home-link" data-path="/bazi/chart" data-open="${castReady ? '1' : '0'}" ${castReady ? '' : 'disabled'}>
-        <strong>命盘解析</strong>
-        <span>出生密码五步 · 专业盘</span>
-        ${castReady ? '<em aria-hidden="true">›</em>' : '<em class="tag">需出生日期</em>'}
-      </button>
       <button type="button" class="bazi-home-link" data-path="/bazi/tujian">
         <strong>八字探索</strong>
-        <span>金木水火土 · 天干地支 · ${codex.collected}/${codex.total}</span>
+        <span>全库进度 · ${codex.collected}/${codex.total}</span>
         <em aria-hidden="true">›</em>
       </button>
       <button type="button" class="bazi-home-link" data-path="/bazi/journal">
         <strong>八字手札</strong>
         <span>记体感 · 附格局与运程快照</span>
+        <em aria-hidden="true">›</em>
+      </button>
+      <button type="button" class="bazi-home-link" data-path="/records">
+        <strong>我的旅程</strong>
+        <span>与塔罗 / 紫微等同级回顾手札</span>
         <em aria-hidden="true">›</em>
       </button>
     </nav>`;
@@ -245,7 +236,14 @@ export function renderBaziHome(root: HTMLElement): () => void {
       navigate(canCast(getActivePerson()) ? '/bazi/reading' : '/bazi?edit=1');
     },
   });
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'bazi',
+    surface: 'learn',
+    tujianPath: '/bazi/codex',
+    notesContext: '八字首页',
+  });
   return () => {
+    disposeFloat();
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();
   };

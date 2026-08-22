@@ -80,9 +80,12 @@ describe('bazi codex', () => {
     const wx = baziCodexProgress('wuxing');
     const gz = baziCodexProgress('stem-branch');
     const star = baziCodexProgress('star');
+    const all = baziCodexProgress();
     expect(wx.total).toBe(5);
     expect(gz.total).toBe(22);
     expect(star.total).toBeGreaterThan(15);
-    expect(wx.collected + gz.collected + star.collected).toBe(first.total);
+    expect(all.total).toBeGreaterThan(200);
+    expect(all.collected).toBe(first.total);
+    expect(all.collected).toBeGreaterThan(wx.collected + gz.collected);
   });
 });

@@ -14,6 +14,40 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function renderAiSessionsHtml(entry: XiaoliurenJournalEntry): string {
+  const sessions = entry.aiSessions ?? [];
+  if (!sessions.length) return '';
+  const blocks = sessions
+    .map((s) => {
+      const title = s.kind === 'deep' ? '深度解读' : '追问';
+      const body =
+        s.deepReading?.trim() ||
+        s.turns
+          .filter((t) => t.role === 'assistant')
+          .map((t) => t.content)
+          .join('\n\n') ||
+        '';
+      if (!body.trim()) return '';
+      const extra =
+        s.turns.length > 1
+          ? `<details class="ly-replay-ai-turns"><summary>追问记录（${s.turns.length} 条）</summary>${s.turns
+              .map(
+                (t) =>
+                  `<p class="ly-replay-ai-turn is-${t.role}"><strong>${
+                    t.role === 'user' ? '你' : '陪读'
+                  }</strong> · ${escapeHtml(t.content)}</p>`,
+              )
+              .join('')}</details>`
+          : '';
+      return `<section class="ly-replay-ai"><h4>${title}</h4><p class="ly-replay-pre">${escapeHtml(
+        body,
+      )}</p>${extra}</section>`;
+    })
+    .filter(Boolean)
+    .join('');
+  return blocks ? `<div class="ly-replay-ai-wrap">${blocks}</div>` : '';
+}
+
 /** 复原当时起课结果场景（对齐塔罗 reading-replay） */
 export function mountXiaoliurenReadingReplay(
   container: HTMLElement,
@@ -33,6 +67,7 @@ export function mountXiaoliurenReadingReplay(
         <p class="xlr-replay-regen">旧记录缺少时辰信息，无法重建盘面。</p>
         <h2 class="xlr-replay-question">${escapeHtml(entry.question || '（未记录问题）')}</h2>
         <p class="xlr-replay-meta">${escapeHtml(entry.resultName)} · ${escapeHtml(entry.summary)}</p>
+        ${renderAiSessionsHtml(entry)}
       </div>
     `;
     container.querySelectorAll('[data-replay-close]').forEach((el) => {
@@ -97,6 +132,7 @@ export function mountXiaoliurenReadingReplay(
           ? `<section class="xlr-result-block"><h3>当时感想</h3><p>${escapeHtml(entry.reflection)}</p></section>`
           : ''
       }
+      ${renderAiSessionsHtml(entry)}
     </div>
   `;
 
@@ -115,6 +151,7 @@ export function openXiaoliurenJournalReplay(
   overlay.dataset.xlrReplay = '';
   host.appendChild(overlay);
   void import('../styles/xiaoliuren.css').then(() => {
+    void import('../styles/liuyao.css');
     if (!overlay.isConnected) return;
     mountXiaoliurenReadingReplay(overlay, entry, () => {
       overlay.classList.remove('is-visible');

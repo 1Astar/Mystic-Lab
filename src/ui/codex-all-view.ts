@@ -2,6 +2,15 @@ import type { CardDefinition } from '../tarot/deck.ts';
 import { buildCodexGridGroups, renderCodexCell } from '../codex/grid.ts';
 import { navigate } from '../router.ts';
 
+/** 全部牌面分段导航短名（下划线小 tab，非胶囊） */
+const DECK_NAV_SHORT: Record<string, string> = {
+  major: '大阿卡那',
+  wands: '权杖',
+  cups: '圣杯',
+  swords: '宝剑',
+  pentacles: '星币',
+};
+
 const MINOR_SUIT_HUBS = [
   {
     id: 'wands',
@@ -73,6 +82,7 @@ export function mountCodexAllView(
     </section>
     <section class="codex-all-decks">
       <h3 class="codex-all-decks-title">全部牌面</h3>
+      <nav class="codex-all-deck-nav" role="tablist" aria-label="牌组导航"></nav>
       <div class="codex-all-decks-host"></div>
     </section>
   `;
@@ -104,12 +114,39 @@ export function mountCodexAllView(
   }
 
   const decksHost = container.querySelector('.codex-all-decks-host') as HTMLElement;
+  const deckNav = container.querySelector('.codex-all-deck-nav') as HTMLElement;
   const groups = buildCodexGridGroups(cards);
+  let activeDeck = groups[0]?.id ?? 'major';
+
+  function setActiveNav(groupId: string): void {
+    activeDeck = groupId;
+    deckNav.querySelectorAll<HTMLButtonElement>('.codex-all-deck-nav-tab').forEach((btn) => {
+      const on = btn.dataset.deck === groupId;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    decksHost.querySelectorAll<HTMLElement>('.codex-grid-section').forEach((section) => {
+      const on = section.dataset.deck === groupId;
+      section.hidden = !on;
+      section.classList.toggle('is-active', on);
+    });
+  }
 
   for (const group of groups) {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'codex-all-deck-nav-tab';
+    tab.role = 'tab';
+    tab.dataset.deck = group.id;
+    tab.textContent = DECK_NAV_SHORT[group.id] ?? group.label;
+    tab.addEventListener('click', () => setActiveNav(group.id));
+    deckNav.appendChild(tab);
+
     const section = document.createElement('section');
     section.className = 'codex-grid-section';
-    section.id = group.id === 'major' ? 'codex-deck-major' : `codex-deck-${group.id}`;
+    section.dataset.deck = group.id;
+    section.setAttribute('role', 'tabpanel');
+    section.hidden = group.id !== activeDeck;
     section.innerHTML = `
       <header class="codex-grid-section-head">
         <div>
@@ -126,4 +163,6 @@ export function mountCodexAllView(
     }
     decksHost.appendChild(section);
   }
+
+  if (groups[0]) setActiveNav(groups[0].id);
 }

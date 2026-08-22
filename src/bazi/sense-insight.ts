@@ -2,12 +2,23 @@ import type { BaziChart } from './cast.ts';
 import { buildBaziFacts } from './bazi-facts.ts';
 import type { SeasonLabel, WuXing } from './elements.ts';
 import type { TenGodCategory } from './ten-gods.ts';
+import { tengodCardId } from './codex-tags.ts';
 
 export type RealityInsight = {
   title: string;
   story: string;
   /** 一句追问式开场 */
   hook: string;
+  /** 生成本段感悟时绑定的图鉴词条（硬链） */
+  links: RealityInsightLink[];
+};
+
+/** 现实感悟 ↔ 图鉴词条硬绑定 */
+export type RealityInsightLink = {
+  codexId: string;
+  factor: 'dayMaster' | 'dayWx' | 'dayBranch' | 'monthBranch' | 'monthStem' | 'tengod' | 'strength';
+  /** 感悟里对应的短句（用于浮窗引用） */
+  snippet: string;
 };
 
 type StoryBits = {
@@ -64,6 +75,14 @@ const BY_CAT: Partial<Record<TenGodCategory, string>> = {
   bi_jie: '同辈与协作会缠着你：并肩有力，较劲也费神。',
 };
 
+const CAT_TO_TENGODS: Record<TenGodCategory, string[]> = {
+  guan_sha: ['正官', '七杀'],
+  cai: ['正财', '偏财'],
+  shi_shang: ['食神', '伤官'],
+  yin: ['正印', '偏印'],
+  bi_jie: ['比肩', '劫财'],
+};
+
 const BY_WX: Partial<Record<WuXing, string>> = {
   木: '你骨子里在意「往哪长」——没方向比没力气更折磨。',
   火: '你容易把情绪烧到表面，也容易被看见；记得给热度留退路。',
@@ -83,8 +102,20 @@ function hash(chart: BaziChart): number {
   return Math.abs(h);
 }
 
+function pushLink(
+  links: RealityInsightLink[],
+  seen: Set<string>,
+  link: RealityInsightLink,
+): void {
+  if (!link.codexId || !link.snippet.trim()) return;
+  if (seen.has(link.codexId)) return;
+  seen.add(link.codexId);
+  links.push(link);
+}
+
 /**
  * 第一层：现实感悟。完全口语场景化，禁止术语。
+ * links：按日主 / 五行 / 日支月支 / 主导十神硬绑图鉴词条。
  */
 export function buildRealityInsight(chart: BaziChart): RealityInsight {
   const facts = buildBaziFacts(chart);
@@ -99,9 +130,77 @@ export function buildRealityInsight(chart: BaziChart): RealityInsight {
   if (catLine) parts.push(catLine);
   if (wxLine) parts.push(wxLine);
 
+  const links: RealityInsightLink[] = [];
+  const seen = new Set<string>();
+
+  pushLink(links, seen, {
+    codexId: facts.dayMaster,
+    factor: 'dayMaster',
+    snippet: base.body,
+  });
+  pushLink(links, seen, {
+    codexId: facts.dayMaster,
+    factor: 'strength',
+    snippet: base.hook,
+  });
+  // dayMaster already seen — strength share same id, skip duplicate via seen
+
+  if (facts.dayMasterWx) {
+    pushLink(links, seen, {
+      codexId: facts.dayMasterWx,
+      factor: 'dayWx',
+      snippet: wxLine || base.body,
+    });
+  }
+
+  if (chart.dayBranch) {
+    pushLink(links, seen, {
+      codexId: chart.dayBranch,
+      factor: 'dayBranch',
+      snippet: wxLine || base.body,
+    });
+  }
+
+  const month = chart.pillars.find((p) => p.key === 'month' && !p.empty);
+  if (month?.branch) {
+    pushLink(links, seen, {
+      codexId: month.branch,
+      factor: 'monthBranch',
+      snippet: base.body,
+    });
+  }
+  if (month?.stem) {
+    pushLink(links, seen, {
+      codexId: month.stem,
+      factor: 'monthStem',
+      snippet: catLine || base.body,
+    });
+  }
+
+  for (const cat of facts.dominantCategories) {
+    const line = BY_CAT[cat];
+    if (!line) continue;
+    for (const name of CAT_TO_TENGODS[cat]) {
+      pushLink(links, seen, {
+        codexId: tengodCardId(name),
+        factor: 'tengod',
+        snippet: line,
+      });
+    }
+  }
+
   return {
     title: '你的现实感悟',
     hook: base.hook,
     story: parts.join(''),
+    links,
   };
+}
+
+/** 某词条是否被当前盘的现实感悟硬绑定 */
+export function realityLinksForCodexId(
+  chart: BaziChart,
+  codexId: string,
+): RealityInsightLink[] {
+  return buildRealityInsight(chart).links.filter((l) => l.codexId === codexId);
 }

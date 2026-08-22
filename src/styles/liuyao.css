@@ -669,6 +669,33 @@
   font-size: 0.84rem;
   line-height: 1.45;
 }
+.ly-enc-first-meet {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: linear-gradient(160deg, rgba(199, 164, 91, 0.1), rgba(8, 10, 14, 0.35));
+}
+.ly-enc-first-meet-label {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ly-gold);
+}
+.ly-enc-first-meet time {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.74rem;
+  color: rgba(232, 224, 208, 0.55);
+}
+.ly-enc-first-meet-q,
+.ly-enc-first-meet-sum {
+  margin: 0 0 4px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(232, 224, 208, 0.88);
+}
 .ly-enc-stats {
   display: grid;
   gap: 8px;

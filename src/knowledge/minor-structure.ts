@@ -10,7 +10,20 @@ export type SuitGroup = {
 export type NumberStage = {
   num: string;
   label: string;
+  /** 记忆锚词：种子 / 选择 / 成长… */
+  anchor: string;
   theme: string;
+};
+
+export type NumberArcChapter = {
+  id: 'sprout' | 'friction' | 'harvest';
+  title: string;
+  range: string;
+  /** 一段总括 */
+  blurb: string;
+  /** 箭头串：种子 → 选择 → 成长 */
+  chain: string;
+  nums: string[];
 };
 
 export type CombinationExample = {
@@ -21,6 +34,19 @@ export type CombinationExample = {
   num: string;
   numTheme: string;
   reading: string;
+};
+
+export type LiveSuitNumberBlend = {
+  suitKey: SuitGroup['key'];
+  suitLabel: string;
+  suitShort: string;
+  num: string;
+  anchor: string;
+  theme: string;
+  /** 星币（现实）× 5（冲突）→ 物质与工作里的摩擦与挑战 */
+  line: string;
+  deckId: string;
+  nameCn: string;
 };
 
 export const SUIT_NUMBER_INTRO = {
@@ -57,17 +83,106 @@ export const SUIT_GROUPS: SuitGroup[] = [
 ];
 
 export const NUMBER_STAGES: NumberStage[] = [
-  { num: '1', label: '王牌', theme: '开始、种子、新契机' },
-  { num: '2', label: '二', theme: '选择、对照、平衡' },
-  { num: '3', label: '三', theme: '发展、表达、成长' },
-  { num: '4', label: '四', theme: '稳定、结构、休息' },
-  { num: '5', label: '五', theme: '冲突、挑战、摩擦' },
-  { num: '6', label: '六', theme: '调整、回馈、过渡' },
-  { num: '7', label: '七', theme: '试炼、坚持、考验' },
-  { num: '8', label: '八', theme: '推进、变化、加速' },
-  { num: '9', label: '九', theme: '临近完成、积累、警觉' },
-  { num: '10', label: '十', theme: '阶段结果、圆满或负担' },
+  { num: '1', label: '王牌', anchor: '种子', theme: '开始、种子、新契机' },
+  { num: '2', label: '二', anchor: '选择', theme: '选择、对照、平衡' },
+  { num: '3', label: '三', anchor: '成长', theme: '发展、表达、成长' },
+  { num: '4', label: '四', anchor: '稳住', theme: '稳定、结构、休息' },
+  { num: '5', label: '五', anchor: '冲突', theme: '冲突、挑战、摩擦' },
+  { num: '6', label: '六', anchor: '调整', theme: '调整、回馈、过渡' },
+  { num: '7', label: '七', anchor: '试炼', theme: '试炼、坚持、考验' },
+  { num: '8', label: '八', anchor: '加速', theme: '推进、变化、加速' },
+  { num: '9', label: '九', anchor: '临门', theme: '临近完成、积累、警觉' },
+  { num: '10', label: '十', anchor: '结果', theme: '阶段结果、圆满或负担' },
 ];
+
+/** 数字人生弧：三段记，比十条词条更好记 */
+export const NUMBER_ARCS: NumberArcChapter[] = [
+  {
+    id: 'sprout',
+    title: '萌芽',
+    range: '1–3',
+    blurb: '事情刚冒头：从一粒种子，到对照选择，再到展开成长。',
+    chain: '种子 → 选择 → 成长',
+    nums: ['1', '2', '3'],
+  },
+  {
+    id: 'friction',
+    title: '磨合',
+    range: '4–6',
+    blurb: '进入现实摩擦：先稳住结构，再撞上冲突，然后调整过渡。',
+    chain: '稳住 → 冲突 → 调整',
+    nums: ['4', '5', '6'],
+  },
+  {
+    id: 'harvest',
+    title: '冲刺收成',
+    range: '7–10',
+    blurb: '后半段加压收口：试炼坚持、加速推进、临门积累，落到结果。',
+    chain: '试炼 → 加速 → 临门 → 结果',
+    nums: ['7', '8', '9', '10'],
+  },
+];
+
+/** 牌组短域 + 场景前缀，用于当场合成 */
+const SUIT_BLEND: Record<
+  SuitGroup['key'],
+  { short: string; scene: string }
+> = {
+  wands: { short: '行动', scene: '动力与项目里的' },
+  cups: { short: '情绪', scene: '情感与关系里的' },
+  swords: { short: '思考', scene: '念头与沟通里的' },
+  pentacles: { short: '现实', scene: '物质与工作里的' },
+};
+
+const ANCHOR_BLEND: Record<string, string> = {
+  种子: '新契机刚冒头',
+  选择: '对照与权衡',
+  成长: '展开与表达',
+  稳住: '结构与休息',
+  冲突: '摩擦与挑战',
+  调整: '回馈与过渡',
+  试炼: '坚持与考验',
+  加速: '变化与推进',
+  临门: '积累与警觉',
+  结果: '圆满或负担',
+};
+
+const NUM_TO_RANK: Record<string, string> = {
+  '1': 'ace',
+  '2': 'two',
+  '3': 'three',
+  '4': 'four',
+  '5': 'five',
+  '6': 'six',
+  '7': 'seven',
+  '8': 'eight',
+  '9': 'nine',
+  '10': 'ten',
+};
+
+export function buildLiveSuitNumberBlend(
+  suitKey: SuitGroup['key'],
+  num: string,
+): LiveSuitNumberBlend | null {
+  const suit = SUIT_GROUPS.find((s) => s.key === suitKey);
+  const stage = NUMBER_STAGES.find((n) => n.num === num);
+  const rank = NUM_TO_RANK[num];
+  const blend = SUIT_BLEND[suitKey];
+  if (!suit || !stage || !rank || !blend) return null;
+
+  const tail = ANCHOR_BLEND[stage.anchor] ?? stage.theme;
+  return {
+    suitKey,
+    suitLabel: suit.label,
+    suitShort: blend.short,
+    num: stage.num,
+    anchor: stage.anchor,
+    theme: stage.theme,
+    line: `${suit.label}（${blend.short}）× ${stage.num}（${stage.anchor}）→ ${blend.scene}${tail}`,
+    deckId: `${suitKey}-${rank}`,
+    nameCn: `${suit.label}${stage.label === '王牌' ? '王牌' : stage.label}`,
+  };
+}
 
 export const COURT_NOTE =
   '侍从 / 骑士 / 王后 / 国王代表该花色在不同阶段的人格面向——探索、行动、滋养、掌控。可在收集探索中逐张展开。';

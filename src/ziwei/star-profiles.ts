@@ -4,16 +4,17 @@
  */
 import { getStarLore, MAJOR_STARS, type MajorStarId, type StarCard } from './stars.ts';
 import { MORE_PROFILES } from './star-profiles-more.ts';
+import { AUX_PROFILES } from './star-profiles-aux.ts';
 import { completePalaceHits } from './star-palace-complete.ts';
 
 export type DetailTabId = 'portrait' | 'trait' | 'mirror' | 'you';
 
-/** 白话 Tab：是谁 / 性格 / 生活 / 我的盘（内部 id 仍用 portrait|trait|mirror|you） */
+/** 白话 Tab：是什么 / 性格 / 生活 / 在你身上（内部 id 仍用 portrait|trait|mirror|you） */
 export const DETAIL_TAB_LABEL: Record<DetailTabId, string> = {
-  portrait: '是谁',
+  portrait: '是什么',
   trait: '性格',
   mirror: '生活',
-  you: '我的盘',
+  you: '在你身上',
 };
 
 /** 落宫优先（生活语言，避免宫斗叙事） */
@@ -396,7 +397,8 @@ export function getStarProfile(starId: string): StarProfile | undefined {
   if (!card) return undefined;
   const raw =
     DEMO[starId as MajorStarId] ??
-    (MORE_PROFILES[starId as MajorStarId] as RawStarProfile | undefined);
+    (MORE_PROFILES[starId as MajorStarId] as RawStarProfile | undefined) ??
+    AUX_PROFILES[starId];
   const base = raw ? normalizeProfile(raw) : fallbackProfile(card);
   if (card.category !== 'major') return base;
   return {

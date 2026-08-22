@@ -1,5 +1,5 @@
 /**
- * 八字深度解读后的多轮追问（对齐六爻 followup-chat；落库在 person 键文档）
+ * 八字深度解读后的多轮追问（对齐六爻 followup-chat；person 键 + 手札 aiSessions）
  */
 import type { PersonProfile } from '../life/types.ts';
 import type { BaziChart } from './cast.ts';
@@ -9,6 +9,7 @@ import {
   loadBaziAiDeepDoc,
   type BaziAiDeepTurn,
 } from './ai-deep-store.ts';
+import { appendBaziAiTurns } from './journal.ts';
 import {
   buildBaziFollowupPresets,
   buildBaziFollowupSystemPrompt,
@@ -178,7 +179,10 @@ export function openBaziFollowupChat(opts: OpenBaziFollowupChatOpts): void {
               : isAiConfigured()
                 ? '默认用你上次选的 AI Key'
                 : '请先配置 AI Key，或改选 Mystic AI';
-          return `<p class="ly-follow-ai-hint">${escapeHtml(modeHint)} · 追问会保存在本机档案。${
+          const journalHint = doc?.journalId
+            ? ' · 已同步到手札，可回看'
+            : ' · 追问会保存在本机档案';
+          return `<p class="ly-follow-ai-hint">${escapeHtml(modeHint)}${escapeHtml(journalHint)}。${
             modeNow === 'byok' && !isAiConfigured()
               ? ` <button type="button" class="ly-ask-ai-link" data-follow-ai-settings>去配置</button>`
               : ''
@@ -349,6 +353,13 @@ export function openBaziFollowupChat(opts: OpenBaziFollowupChatOpts): void {
         { role: 'assistant', content: answer, at: new Date().toISOString() },
       ];
       appendBaziAiDeepTurns(opts.person.id, turns);
+      const link = loadBaziAiDeepDoc(opts.person.id);
+      if (link?.journalId) {
+        appendBaziAiTurns(link.journalId, link.sessionId, [
+          { role: 'user', content: userAsk },
+          { role: 'assistant', content: answer },
+        ]);
+      }
     } catch (err) {
       thinking.remove();
       history.pop();

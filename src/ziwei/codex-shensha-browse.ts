@@ -59,6 +59,12 @@ export const SHENSHA_THEME_ORDER: ShenshaThemeId[] = [
   'flow',
 ];
 
+/** 「全部议题」下列表默认展开的大类（其余折叠 / 单条流式） */
+export const SHENSHA_THEME_PIN_OPEN: readonly ShenshaThemeId[] = ['patron', 'romance'];
+
+/** 达到此数量也默认展开（呼吸节奏：大块展开、小块收起） */
+export const SHENSHA_THEME_OPEN_MIN = 5;
+
 export const SHENSHA_TONE_META: Record<
   ShenshaToneId,
   { title: string; short: string }
@@ -67,6 +73,8 @@ export const SHENSHA_TONE_META: Record<
   neutral: { title: '中性色', short: '中性' },
   caution: { title: '提醒色', short: '提醒' },
 };
+
+export const SHENSHA_TONE_ORDER: ShenshaToneId[] = ['support', 'neutral', 'caution'];
 
 type BrowseMeta = { theme: ShenshaThemeId; tone: ShenshaToneId };
 
@@ -189,9 +197,10 @@ function inferBrowseMeta(s: ShenshaLore): BrowseMeta {
 }
 
 export function shenshaBrowseMeta(id: string): BrowseMeta {
+  if (BY_ID[id]) return BY_ID[id];
   const lore = getShenshaLore(id);
   if (lore) return inferBrowseMeta(lore);
-  return BY_ID[id] ?? { theme: 'flow', tone: 'neutral' };
+  return { theme: 'flow', tone: 'neutral' };
 }
 
 export function listCodexShenshaFlat(): ShenshaLore[] {
@@ -241,6 +250,24 @@ export function countShenshaByTheme(inChartIds?: Set<string>): Record<ShenshaThe
   for (const s of listCodexShenshaFlat()) {
     if (inChartIds && !inChartIds.has(s.id)) continue;
     base[shenshaBrowseMeta(s.id).theme] += 1;
+  }
+  return base;
+}
+
+/** 在指定 id 集合内统计色调数量（可再按议题收窄） */
+export function countShenshaByTone(opts?: {
+  ids?: Set<string>;
+  theme?: ShenshaThemeId | 'all';
+}): Record<ShenshaToneId, number> {
+  const base = Object.fromEntries(SHENSHA_TONE_ORDER.map((t) => [t, 0])) as Record<
+    ShenshaToneId,
+    number
+  >;
+  for (const s of listCodexShenshaFlat()) {
+    if (opts?.ids && !opts.ids.has(s.id)) continue;
+    const m = shenshaBrowseMeta(s.id);
+    if (opts?.theme && opts.theme !== 'all' && m.theme !== opts.theme) continue;
+    base[m.tone] += 1;
   }
   return base;
 }

@@ -19,6 +19,7 @@ import {
   saveZiweiIntent,
   type StoredIntent,
 } from '../ziwei/session.ts';
+import { mountLabFloatShell } from '../ui/lab-float-shell.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -117,6 +118,21 @@ export function renderZiweiHome(root: HTMLElement): () => void {
         <button type="button" class="bazi-home-link" data-path="/ziwei/tujian">
           <strong>星曜探索</strong>
           <span>角色 · 场景 · 搭戏 · 相遇 · ${progress.collected}/${progress.total}</span>
+          <em aria-hidden="true">›</em>
+        </button>
+        <button type="button" class="bazi-home-link" data-path="/ziwei/guess">
+          <strong>猜星曜盲盒</strong>
+          <span>每日一题 · 复习主星与宫位</span>
+          <em aria-hidden="true">›</em>
+        </button>
+        <button type="button" class="bazi-home-link" data-path="/ziwei/journal">
+          <strong>紫微手札</strong>
+          <span>记体感 · AI 解读可回看</span>
+          <em aria-hidden="true">›</em>
+        </button>
+        <button type="button" class="bazi-home-link" data-path="/records">
+          <strong>我的旅程</strong>
+          <span>与塔罗 / 八字等同级回顾手札</span>
           <em aria-hidden="true">›</em>
         </button>
       </nav>
@@ -227,7 +243,14 @@ export function renderZiweiHome(root: HTMLElement): () => void {
   }
 
   paint();
+  const disposeFloat = mountLabFloatShell(page, {
+    system: 'ziwei',
+    surface: 'learn',
+    tujianPath: '/ziwei/codex',
+    notesContext: '紫微首页',
+  });
   return () => {
+    disposeFloat();
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();
   };
