@@ -3008,6 +3008,26 @@ html[data-theme='moon'] .reading-replay-backdrop {
   color: var(--ink);
 }
 
+.thread-series-badge {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.thread-empathy--series {
+  border-left-color: #6b8fd4;
+  background: rgba(107, 143, 212, 0.12);
+}
+
+.journal-detail-series {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #6b8fd4;
+  font-weight: 600;
+}
+
 .thread-section-title {
   margin: 0 0 8px;
   font-size: 0.78rem;
