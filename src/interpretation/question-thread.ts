@@ -1,6 +1,17 @@
 import type { QuestionAnswer, QuestionTopic } from '../knowledge/types.ts';
 import { intentActionsPlain } from '../mystic-engine/intent-actions.ts';
+import type { SpreadType } from '../tarot/spreads.ts';
+import { isFreeArrangeSpread } from '../tarot/spread-layout.ts';
 import type { CardReading } from './types.ts';
+import {
+  resolveReadingLens,
+} from './card-psychology.ts';
+import {
+  buildAdviceLines,
+  buildNarrativeCardInsight,
+  buildSpreadSynthesis,
+  empathyNarrativeLead,
+} from './tarot-narrative.ts';
 import {
   classifySubQuestion,
   splitUserQuestions,
@@ -25,12 +36,14 @@ export type ThreadAnswer = {
   cardIndexes: number[];
   /** 如 【宝剑四】的真相 */
   heading: string;
-  /** 牌意映射（一句） */
+  /** 牌意映射 / 意象·共振 */
   meaningMap?: string;
   /** 深度剖析 / 走势 */
   insight: string;
   /** 可执行行动（1–2 点） */
   action?: string;
+  /** 按张解读（自由摆放 / 多牌单问） */
+  perCard?: boolean;
 };
 
 export type QuestionThread = {
@@ -42,6 +55,17 @@ export type QuestionThread = {
   /** 一句话破局 */
   oneLiner: string;
   provider: 'mock' | 'llm';
+  /** 每张各一段 */
+  perCardMode?: boolean;
+  /** 多牌综合结论 */
+  synthesis?: string;
+  /** 边界 / 行动建议列表 */
+  adviceLines?: string[];
+};
+
+export type BuildQuestionThreadOptions = {
+  spreadType?: SpreadType | string;
+  userIntuition?: string;
 };
 
 const INTENT_HEAD: Record<SubQuestionIntent, string> = {
@@ -90,6 +114,26 @@ function meaningForCards(cards: CardReading[], indexes: number[]): string {
     })
     .filter(Boolean)
     .join('；');
+}
+
+/** 自由摆放 / 多牌单问：每张各出一段 */
+export function shouldUsePerCardThread(
+  cards: CardReading[],
+  question: string,
+  spreadType?: SpreadType | string,
+): boolean {
+  if (cards.length <= 1) return false;
+  const st = spreadType ?? cards[0]?.spreadType;
+  if (st && isFreeArrangeSpread(st as SpreadType)) return true;
+  const parts = splitUserQuestions(question);
+  return parts.length === 1;
+}
+
+/** 多牌单问 / 自定义牌阵：是否走整盘 LLM */
+export function shouldUseSpreadThreadLlm(cards: CardReading[], question: string): boolean {
+  if (cards.length <= 1) return false;
+  const parts = splitUserQuestions(question);
+  return parts.length >= 2 || parts.length === 1;
 }
 
 /** 位次对齐：前 N 个路径/事实问 ↔ 牌；风险/建议用多牌合成 */
@@ -189,7 +233,6 @@ function buildMockInsight(
         insight: work
           ? `${mockAdviceInsight(names)}${revNote ? ` ${revNote}` : ''}`
           : `先稳住状态，再谈大决定。把下一步缩成可验证的小行动。`,
-        // action 由 buildQuestionThread 用意图库回填
       };
     default:
       return {
@@ -220,24 +263,96 @@ function empathyFor(topic: QuestionTopic, cards: CardReading[]): string {
   return `根据你的牌阵（${names}），我先帮你把问题理清——答案最终仍在你心里。`;
 }
 
+/** 每张牌各一段：牌意心理学 + 共时性共振 */
+export function buildPerCardQuestionThread(
+  cards: CardReading[],
+  question: string,
+  provider: 'mock' | 'llm' = 'mock',
+  options?: BuildQuestionThreadOptions,
+): QuestionThread | null {
+  const q = question.trim();
+  if (!cards.length || !q) return null;
+
+  const topic = cards[0]!.topic;
+  const lens = resolveReadingLens(q, topic);
+  const userIntuition = options?.userIntuition?.trim();
+
+  const answers: ThreadAnswer[] = cards.map((card, i) => {
+    const narrative = buildNarrativeCardInsight(
+      card,
+      q,
+      lens,
+      cards,
+      i,
+      userIntuition,
+    );
+    const pos = card.position?.trim() || `第 ${i + 1} 张`;
+    return {
+      question: q,
+      intent: 'general',
+      cardIndexes: [i],
+      heading: `【${card.cardName}】· ${pos}`,
+      meaningMap: sanitizeTopicText(narrative.meaningMap, topic),
+      insight: sanitizeTopicText(narrative.insight, topic),
+      action: narrative.action
+        ? sanitizeTopicText(narrative.action, topic)
+        : undefined,
+      perCard: true,
+    };
+  });
+
+  const synthesis = sanitizeTopicText(
+    buildSpreadSynthesis(cards, q, lens, userIntuition),
+    topic,
+  );
+  const adviceLines = buildAdviceLines(cards, q, lens).map((line) =>
+    sanitizeTopicText(line, topic),
+  );
+  const overall = synthesis || sanitizeTopicText(
+    `整盘 ${cards.length} 张牌各照见一层心理——把画面与感受对齐，再谈下一步。`,
+    topic,
+  );
+  const lastAction = answers[answers.length - 1]?.action?.trim();
+  const oneLiner = sanitizeTopicText(
+    lastAction || adviceLines[0] || '把三张形容词写成一句给自己的话，比死记牌意更接近真相。',
+    topic,
+  );
+
+  return {
+    empathyLead: sanitizeTopicText(empathyNarrativeLead(cards, q, lens), topic),
+    overall,
+    answers,
+    oneLiner,
+    provider,
+    perCardMode: true,
+    synthesis: synthesis || undefined,
+    adviceLines: adviceLines.length ? adviceLines : undefined,
+  };
+}
+
 /**
  * 从多张牌 + 用户问题，构建「按问题串讲」的整盘解读（规则兜底）。
- * 去重：每条只答该问；总结论不复述子问全文。
+ * 自由摆放 / 多牌单问 → 每张各一段（buildPerCardQuestionThread）。
  */
 export function buildQuestionThread(
   cards: CardReading[],
   question: string,
   provider: 'mock' | 'llm' = 'mock',
+  options?: BuildQuestionThreadOptions,
 ): QuestionThread | null {
   const q = question.trim();
   if (!cards.length || !q) return null;
+
+  const spreadType = options?.spreadType ?? cards[0]?.spreadType;
+  if (shouldUsePerCardThread(cards, q, spreadType)) {
+    return buildPerCardQuestionThread(cards, q, provider, options);
+  }
 
   const parts = splitUserQuestions(q);
   const topic = cards[0]!.topic;
   const intents = parts.map((p) => classifySubQuestion(p));
   const assignment = assignCardsToQuestions(intents, cards.length);
 
-  // 若牌上已有逐条问答，优先复用（并按位次对齐到牌），避免再生成一套重复文案
   const seedAnswers = pickSeedAnswers(cards, parts);
 
   const answers: ThreadAnswer[] = parts.map((part, i) => {
@@ -315,7 +430,6 @@ function pickSeedAnswers(
     return parts.map((_, i) => qa?.[i]);
   }
 
-  // 多牌：每张牌若有全量子问答，只取与自身位次对齐的那一条，避免 3×N 重复
   const intents = parts.map((p) => classifySubQuestion(p));
   const assignment = assignCardsToQuestions(intents, cards.length);
 

@@ -1,4 +1,4 @@
-﻿import type { QuestionThread, ThreadAnswer } from '../interpretation/question-thread.ts';
+import type { QuestionThread, ThreadAnswer } from '../interpretation/question-thread.ts';
 import type { CardReading, ReadingResult } from '../interpretation/types.ts';
 import { polishInsightFields, polishReadingCopy } from '../interpretation/reading-polish.ts';
 import { cardFaceImageHtml } from '../tarot/card-images.ts';
@@ -174,6 +174,8 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
           : a.intent === 'leave_path'
             ? 'is-leave'
             : 'is-insight';
+  const resonanceLabel = a.perCard ? '意象·共振' : '牌意映射';
+  const insightLabel = a.perCard ? '牌意心理学' : intentLabel(a.intent);
 
   return `
     <article class="thread-q-card ${tone}">
@@ -188,8 +190,8 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
           <p class="thread-q-heading">${escapeHtml(a.heading)}</p>
           ${
             a.meaningMap
-              ? `<p class="thread-meaning"><span class="thread-label">牌意映射</span></p><div class="thread-prose">${formatHighlight(a.meaningMap)}</div>`
-              : `<p class="thread-meaning"><span class="thread-label">牌意映射</span></p><div class="thread-prose">${formatHighlight(
+              ? `<p class="thread-meaning"><span class="thread-label">${resonanceLabel}</span></p><div class="thread-prose">${formatHighlight(a.meaningMap)}</div>`
+              : `<p class="thread-meaning"><span class="thread-label">${resonanceLabel}</span></p><div class="thread-prose">${formatHighlight(
                   a.cardIndexes
                     .map((i) => cards[i])
                     .filter(Boolean)
@@ -197,7 +199,7 @@ function renderAnswer(a: ThreadAnswer, index: number, cards: CardReading[]): str
                     .join('；') || '结合本问绑定牌读。',
                 )}</div>`
           }
-          <div class="thread-insight${a.intent === 'risk' ? ' is-risk-block' : ''}"><span class="thread-label${a.intent === 'risk' ? ' is-risk-label' : ''}">${intentLabel(a.intent)}</span><div class="thread-prose">${formatHighlight(a.insight)}</div></div>
+          <div class="thread-insight${a.intent === 'risk' ? ' is-risk-block' : ''}"><span class="thread-label${a.intent === 'risk' ? ' is-risk-label' : ''}">${insightLabel}</span><div class="thread-prose">${formatHighlight(a.insight)}</div></div>
           ${
             a.action
               ? `<div class="thread-action"><span class="thread-label">可执行</span><div class="thread-prose">${formatHighlight(a.action)}</div></div>`
@@ -218,6 +220,19 @@ export function renderQuestionThreadHtml(
 ): string {
   const answers = thread.answers.map((a, i) => renderAnswer(a, i, cards)).join('');
   const showBridge = options?.showBridge !== false && cards.length > 0;
+  const synthesisBlock = thread.synthesis?.trim()
+    ? `<section class="thread-synthesis-card">
+        <h3 class="thread-section-title">综合结论</h3>
+        <div class="thread-synthesis-body thread-prose">${formatHighlight(thread.synthesis)}</div>
+      </section>`
+    : '';
+  const adviceBlock =
+    thread.adviceLines && thread.adviceLines.length
+      ? `<section class="thread-advice-card">
+        <h3 class="thread-section-title">给你的建议</h3>
+        <ul class="thread-advice-list">${thread.adviceLines.map((line) => `<li>${formatHighlight(line)}</li>`).join('')}</ul>
+      </section>`
+      : '';
   return `
     <div class="question-thread">
       <p class="thread-empathy">${escapeHtml(polishReadingCopy(thread.empathyLead))}</p>
@@ -227,13 +242,15 @@ export function renderQuestionThreadHtml(
       </section>
       ${renderCardStrip(cards)}
       <section class="thread-answers">
-        <h3 class="thread-section-title">按你的问题</h3>
+        <h3 class="thread-section-title">${thread.perCardMode ? '按牌解读 · 意象与共时性' : '按你的问题'}</h3>
         ${answers}
       </section>
+      ${synthesisBlock}
       <section class="thread-oneliner-card">
         <h3 class="thread-section-title">一句话破局</h3>
         <div class="thread-oneliner thread-prose">${formatHighlight(thread.oneLiner)}</div>
       </section>
+      ${adviceBlock}
       ${
         showBridge
           ? `<p class="thread-bridge"><span class="thread-bridge-mark" aria-hidden="true">✦</span>${escapeHtml(BRIDGE_COPY)}</p>`
@@ -286,8 +303,7 @@ export function openThreadCardPeek(
 
   const host = overlay.querySelector('.thread-card-peek-tabs') as HTMLElement | null;
   if (host) {
-    mountCardResultTabs(host, card, options?.initialTab ?? 'visual', {
-      hideReadingTab: true,
+    mountCardResultTabs(host, card, options?.initialTab ?? 'reading', {
       onCardReadingChange: options?.onCardReadingChange,
     });
   }
@@ -334,3 +350,4 @@ export function mountQuestionThread(
 
   return true;
 }
+
