@@ -28,7 +28,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '慢热；先安全感再敞开。',
     body: '肺与肾水感；久潜易闷，宜规律吐纳活动。',
     memory: '海中金 = 深海蓄金：要火炼、要出水时机。纳音补画面，勿单断。',
-    coreKeyword: '海中金 · 蓄势待发',
+    coreKeyword: '蓄势待发',
   },
   炉中火: {
     scene: '炉冶之火：在可控容器里加热、锤炼、成形。',
@@ -42,7 +42,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '热烈专一；记得降温说话。',
     body: '心火与睡眠；过热宜清润作息。',
     memory: '炉中火 = 可控锤炼：要木生、要土收。纳音补画面，勿单断。',
-    coreKeyword: '炉中火 · 锤炼热力',
+    coreKeyword: '锤炼热力',
   },
   大林木: {
     scene: '成片森林：个体靠群体生长，也易埋没在林中。',
@@ -56,7 +56,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '重视圈子与共同成长；要个人边界。',
     body: '肝气筋络；林密易闷，宜疏通。',
     memory: '大林木 = 成林：要水润、要疏伐。纳音补画面，勿单断。',
-    coreKeyword: '大林木 · 群体生长',
+    coreKeyword: '群体生长',
   },
   路旁土: {
     scene: '路旁之土：承载往来脚步，被踩踏也连接四方。',
@@ -70,7 +70,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '能托人；要说清「我也要被养」。',
     body: '脾胃；过载时宜休息与轻食。',
     memory: '路旁土 = 承往来：要火暖、要边界。纳音补画面，勿单断。',
-    coreKeyword: '路旁土 · 承载往来',
+    coreKeyword: '承载往来',
   },
   剑锋金: {
     scene: '锋刃之金：为切开、决断、立标准而生。',
@@ -84,7 +84,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '要清晰契约；锋利话要收。',
     body: '肺与筋骨刚；压力宜泄。',
     memory: '剑锋金 = 刃：要土生、要收放。纳音补画面，勿单断。',
-    coreKeyword: '剑锋金 · 决断锐利',
+    coreKeyword: '决断锐利',
   },
   山头火: {
     scene: '山巅之火：远处可见，外放照明，也怕风吹。',
@@ -98,7 +98,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '大方热情；留不公开的亲密。',
     body: '心血管与上火；宜降温睡眠。',
     memory: '山头火 = 高处可见：要木生、要水调。纳音补画面，勿单断。',
-    coreKeyword: '山头火 · 外放可见',
+    coreKeyword: '外放可见',
   },
   涧下水: {
     scene: '山涧细流：清澈渗透，不求浩大，求不断。',
@@ -112,7 +112,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '心意细；要说清需求。',
     body: '肾与情志；宜作息稳定。',
     memory: '涧下水 = 细流不断：要金生、要出口。纳音补画面，勿单断。',
-    coreKeyword: '涧下水 · 清澈渗透',
+    coreKeyword: '清澈渗透',
   },
   城头土: {
     scene: '城垣之土：防卫、边界、把一圈人护住。',
@@ -126,7 +126,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '能给安全感；学会开门让人进。',
     body: '脾胃沉重感；宜活动疏通。',
     memory: '城头土 = 城垣：要火暖、要有门。纳音补画面，勿单断。',
-    coreKeyword: '城头土 · 防卫边界',
+    coreKeyword: '防卫边界',
   },
   白蜡金: {
     scene: '白蜡之金：可塑、精致，适合成形与美化。',
@@ -140,7 +140,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '要被珍惜；别把挑剔当关心。',
     body: '肺与皮肤敏感；宜润。',
     memory: '白蜡金 = 可塑精金：要土生、要敢定稿。纳音补画面，勿单断。',
-    coreKeyword: '白蜡金 · 精致可塑',
+    coreKeyword: '精致可塑',
   },
   杨柳木: {
     scene: '杨柳柔枝：善弯善随，风景好看，也怕无根。',
@@ -154,7 +154,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '重氛围；边界要清。',
     body: '肝气筋络；宜舒展。',
     memory: '杨柳木 = 柔枝：要水、要支架。纳音补画面，勿单断。',
-    coreKeyword: '杨柳木 · 柔韧善弯',
+    coreKeyword: '柔韧善弯',
   },
   泉中水: {
     scene: '泉涌之水：有源头的清润，一点点冒出来。',
@@ -168,7 +168,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '能润人；记得补自己的泉。',
     body: '肾与睡眠；源头在休息。',
     memory: '泉中水 = 有源清润：要金生、要护源。纳音补画面，勿单断。',
-    coreKeyword: '泉中水 · 源头清润',
+    coreKeyword: '源头清润',
   },
   屋上土: {
     scene: '屋上之土：覆盖、庇护、让人有顶可依。',
@@ -182,7 +182,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '能给家的感觉；别变成控制。',
     body: '脾胃与闷湿；宜通风活动。',
     memory: '屋上土 = 庇护之顶：要暖、要开窗。纳音补画面，勿单断。',
-    coreKeyword: '屋上土 · 覆盖庇护',
+    coreKeyword: '覆盖庇护',
   },
   霹雳火: {
     scene: '雷火骤发：来得快、力道猛，适合破局也怕误伤。',
@@ -196,7 +196,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '热情来得猛；要学会收。',
     body: '心火与血压；爆发后要休息。',
     memory: '霹雳火 = 骤发：要有目标、要复盘。纳音补画面，勿单断。',
-    coreKeyword: '霹雳火 · 爆发破局',
+    coreKeyword: '爆发破局',
   },
   松柏木: {
     scene: '松柏常青：耐寒耐岁，慢长却长久。',
@@ -210,7 +210,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '忠诚耐久；要表达温度。',
     body: '筋骨肝气；宜伸展防僵。',
     memory: '松柏木 = 常青：要水润、要温度。纳音补画面，勿单断。',
-    coreKeyword: '松柏木 · 坚韧长久',
+    coreKeyword: '坚韧长久',
   },
   长流水: {
     scene: '长河之水：源远流长，宜流通、宜载舟。',
@@ -224,7 +224,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '要自由也要锚点。',
     body: '肾与循环；思虑散时宜收束睡眠。',
     memory: '长流水 = 长河：要金生、要岸。纳音补画面，勿单断。',
-    coreKeyword: '长流水 · 源远流长',
+    coreKeyword: '源远流长',
   },
   沙中金: {
     scene: '沙里淘金：细筛才得精，过程慢、结果精。',
@@ -238,7 +238,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '慢热甄别；别筛到无人可近。',
     body: '肺与耐心消耗；宜节奏感。',
     memory: '沙中金 = 淘金：要筛、要炼、要交卷。纳音补画面，勿单断。',
-    coreKeyword: '沙中金 · 细筛得精',
+    coreKeyword: '细筛得精',
   },
   山下火: {
     scene: '山下之火：热力在山内，外未必见，待扬。',
@@ -252,7 +252,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '热情在内；要学会让对方看见。',
     body: '闷火与睡眠；宜表达泄压。',
     memory: '山下火 = 内蕴：要出口、要调节。纳音补画面，勿单断。',
-    coreKeyword: '山下火 · 内蕴待扬',
+    coreKeyword: '内蕴待扬',
   },
   平地木: {
     scene: '平地之木：开阔处生长，易成材也易被风雨见。',
@@ -266,7 +266,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '坦诚开阔；也要深度一棵树。',
     body: '肝气；开阔也防风寒。',
     memory: '平地木 = 开阔生：要水、要根。纳音补画面，勿单断。',
-    coreKeyword: '平地木 · 开阔生长',
+    coreKeyword: '开阔生长',
   },
   壁上土: {
     scene: '墙壁之土：成形为障，可承重、可分隔空间。',
@@ -280,7 +280,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '边界清；别把墙当成拒绝亲密。',
     body: '脾胃燥滞；宜润与动。',
     memory: '壁上土 = 墙：要成形、要留门。纳音补画面，勿单断。',
-    coreKeyword: '壁上土 · 屏障成形',
+    coreKeyword: '屏障成形',
   },
   金箔金: {
     scene: '金箔薄金：贴合装饰，薄而亮，怕撕扯。',
@@ -294,7 +294,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '重仪式体面；要有里子感情。',
     body: '肺与皮肤；薄敏宜护。',
     memory: '金箔金 = 薄亮：要托、要有里。纳音补画面，勿单断。',
-    coreKeyword: '金箔金 · 装饰贴合',
+    coreKeyword: '装饰贴合',
   },
   覆灯火: {
     scene: '灯火覆照：照亮一小方，温暖而有罩。',
@@ -308,7 +308,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '暖一人即深；别耗干自己。',
     body: '目与睡眠；灯旁宜息。',
     memory: '覆灯火 = 小光暖一方：要续油、要通风。纳音补画面，勿单断。',
-    coreKeyword: '覆灯火 · 照明一方',
+    coreKeyword: '照明一方',
   },
   天河水: {
     scene: '天河之水：高远清流，意象大、落地要桥。',
@@ -322,7 +322,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '精神契合；也要烟火日常。',
     body: '情志与睡眠；高远时脚踩地。',
     memory: '天河水 = 高远清流：要桥、要岸。纳音补画面，勿单断。',
-    coreKeyword: '天河水 · 高远清流',
+    coreKeyword: '高远清流',
   },
   大驿土: {
     scene: '驿路厚土：通行、承载、让人马走过远路。',
@@ -336,7 +336,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '能陪走长路；记得设休息站。',
     body: '脾胃与劳顿；远行后要养。',
     memory: '大驿土 = 驿路：要通、要歇。纳音补画面，勿单断。',
-    coreKeyword: '大驿土 · 通行承载',
+    coreKeyword: '通行承载',
   },
   钗钏金: {
     scene: '钗钏饰金：贴身佩饰，精美、亲密、要被佩戴才发光。',
@@ -350,7 +350,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '要被珍视；关系是「佩戴」不是陈列。',
     body: '肺与皮肤；精致也要实用护理。',
     memory: '钗钏金 = 贴身饰：要被佩戴才亮。纳音补画面，勿单断。',
-    coreKeyword: '钗钏金 · 精美佩饰',
+    coreKeyword: '精美佩饰',
   },
   桑柘木: {
     scene: '桑柘之木：养蚕生业，实用、循环、与生计绑定。',
@@ -364,7 +364,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '用供养表达爱；也要被养。',
     body: '肝与劳作伤；宜轮休。',
     memory: '桑柘木 = 养蚕生业：要水、要闭环。纳音补画面，勿单断。',
-    coreKeyword: '桑柘木 · 养蚕生业',
+    coreKeyword: '养蚕生业',
   },
   大溪水: {
     scene: '溪涧壮流：比涧大、比河野，奔涌有声。',
@@ -378,7 +378,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '热情有声；别淹没对方。',
     body: '肾与情绪起伏；宜有岸的发泄。',
     memory: '大溪水 = 壮流有声：要岸、要闸。纳音补画面，勿单断。',
-    coreKeyword: '大溪水 · 奔涌有声',
+    coreKeyword: '奔涌有声',
   },
   沙中土: {
     scene: '沙中之土：细碎可聚，也可一盘散沙。',
@@ -392,7 +392,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '关系由小事堆积；别散到无形状。',
     body: '脾胃湿碎感；宜规律。',
     memory: '沙中土 = 可聚可散：要黏合、要成塔。纳音补画面，勿单断。',
-    coreKeyword: '沙中土 · 细碎可聚',
+    coreKeyword: '细碎可聚',
   },
   天上火: {
     scene: '天上之火：日照普照，覆盖面大，也遥远。',
@@ -406,7 +406,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '大爱之外留专属光。',
     body: '耗散与上火；普照也要休息。',
     memory: '天上火 = 日照：要落地、要调节。纳音补画面，勿单断。',
-    coreKeyword: '天上火 · 日照普照',
+    coreKeyword: '日照普照',
   },
   石榴木: {
     scene: '石榴之木：华彩多子，外艳内繁，重结果。',
@@ -420,7 +420,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '重视家庭/成果感；别只考核对方。',
     body: '肝与消耗；繁盛期护睡眠。',
     memory: '石榴木 = 华彩多子：要水、要根。纳音补画面，勿单断。',
-    coreKeyword: '石榴木 · 多子华彩',
+    coreKeyword: '多子华彩',
   },
   大海水: {
     scene: '大海之水：吞吐包容，量极大，也要有岸与航线。',
@@ -434,7 +434,7 @@ export const NAYIN_LORE: Record<string, NayinLore> = {
     love: '能容；也要说清航线。',
     body: '肾与水肿感；容量大更要规律。',
     memory: '大海水 = 吞吐：要岸、要航线。纳音补画面，勿单断。',
-    coreKeyword: '大海水 · 吞吐包容',
+    coreKeyword: '吞吐包容',
   },
 };
 

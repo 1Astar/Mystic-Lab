@@ -1,5 +1,6 @@
 /** 搭戏组合 / 古典格局探索 */
 import { mergeClassicCatalog } from './combo-classic-catalog.ts';
+import { stampGeCategory } from './combo-categories.ts';
 
 export type ComboFamily = 'classic-ge' | 'star-combo';
 
@@ -18,6 +19,17 @@ export type ComboFormationRule =
 
 export type ComboTone = 'ji' | 'xiong' | 'neutral';
 
+/** 图鉴门类；缺省由 combo-categories 按 id/family 推断 */
+export type GeCategory =
+  | 'di-fu'
+  | 'ji-sha'
+  | 'ri-yue'
+  | 'wen-gui'
+  | 'lu-ma'
+  | 'huo-tan'
+  | 'xiong'
+  | 'star-combo';
+
 export type ComboLore = {
   id: string;
   title: string;
@@ -35,6 +47,7 @@ export type ComboLore = {
   formationRule?: ComboFormationRule;
   /** 古典吉/凶色调；缺省中性 */
   tone?: ComboTone;
+  category?: GeCategory;
 };
 
 
@@ -564,10 +577,20 @@ export const COMBO_LORE_CORE: ComboLore[] = [
 ];
 
 /** 专规古典格 + 完整名录 + 星曜组合 */
-export const COMBO_LORE: ComboLore[] = mergeClassicCatalog(COMBO_LORE_CORE);
+export const COMBO_LORE: ComboLore[] = mergeClassicCatalog(COMBO_LORE_CORE).map(stampGeCategory);
+
+/** 又称 / 别名 → 名录 id */
+const COMBO_ALIASES: Record<string, string> = {
+  日丽中天: '金灿光辉',
+  日照雷门: '日出扶桑',
+  月落亥宫: '月朗天门',
+  刑囚印: '刑囚夹印',
+  官封三代: '巨日同宫',
+};
 
 export function getComboLore(id: string): ComboLore | undefined {
-  return COMBO_LORE.find((c) => c.id === id || c.title === id);
+  const key = COMBO_ALIASES[id] ?? id;
+  return COMBO_LORE.find((c) => c.id === key || c.title === key || c.id === id || c.title === id);
 }
 
 

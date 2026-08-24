@@ -1,5 +1,13 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { majorStarArtUrl, starListThumbInnerHtml } from './star-art.ts';
+import {
+  majorStarArtUrl,
+  palaceArtUrl,
+  palaceListThumbInnerHtml,
+  starListThumbInnerHtml,
+  comboArtUrl,
+  comboHeroInnerHtml,
+  comboListThumbInnerHtml,
+} from './star-art.ts';
 import {
   collectStateLabel,
   resolveCodexCollectState,
@@ -39,15 +47,62 @@ describe('star-art', () => {
     expect(majorStarArtUrl('天官')).toMatch(/\.webp$/);
     expect(majorStarArtUrl('将星')).toMatch(/\.webp$/);
     expect(majorStarArtUrl('飞廉')).toBe(majorStarArtUrl('蜚廉'));
-    expect(majorStarArtUrl('旬空')).toBeNull();
+    expect(majorStarArtUrl('白虎')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('吊客')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('化禄')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('化权')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('化科')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('化忌')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('旬空')).toMatch(/\.webp$/);
+    expect(majorStarArtUrl('__无此星__')).toBeNull();
   });
 
   it('falls back to glyph when no poster; otherwise uses webp', () => {
-    expect(starListThumbInnerHtml('旬空', { tone: 'shensha' })).toContain('ziwei-codex-short-glyph');
-    expect(starListThumbInnerHtml('旬空', { tone: 'shensha' })).toContain('旬');
+    expect(starListThumbInnerHtml('__无此星__', { tone: 'shensha' })).toContain('ziwei-codex-short-glyph');
     expect(starListThumbInnerHtml('天机')).toContain('.webp');
-    expect(starListThumbInnerHtml('岁破', { tone: 'shensha' })).toContain('.webp');
+    expect(starListThumbInnerHtml('白虎', { tone: 'shensha' })).toContain('.webp');
     expect(starListThumbInnerHtml('飞廉', { tone: 'shensha' })).toContain('.webp');
+    expect(starListThumbInnerHtml('化禄')).toContain('.webp');
+  });
+
+  it('maps twelve palaces to webp', () => {
+    expect(palaceArtUrl('命宫')).toMatch(/\.webp$/);
+    expect(palaceArtUrl('奴仆宫')).toBe(palaceArtUrl('仆役'));
+    expect(palaceListThumbInnerHtml('财帛', { glyph: '财' })).toContain('.webp');
+    expect(palaceArtUrl('__无此宫__')).toBeNull();
+  });
+
+  it('maps featured combos to webp and aliases variants', () => {
+    expect(comboArtUrl('杀破狼格')).toMatch(/combos\/.*\.webp$/);
+    expect(comboArtUrl('杀破狼')).toBe(comboArtUrl('杀破狼格'));
+    expect(comboArtUrl('机月同梁')).toBe(comboArtUrl('机月同梁格'));
+    expect(comboArtUrl('紫府')).toBe(comboArtUrl('紫府同宫'));
+    expect(comboArtUrl('阳梁昌禄')).toMatch(/\.webp$/);
+    expect(comboArtUrl('马头带剑')).toMatch(/\.webp$/);
+    expect(comboArtUrl('紫府朝垣')).toMatch(/\.webp$/);
+    expect(comboArtUrl('火铃贪')).toMatch(/\.webp$/);
+    expect(comboArtUrl('左右夹命')).toMatch(/\.webp$/);
+    expect(comboArtUrl('贪武同行')).toMatch(/\.webp$/);
+    expect(comboArtUrl('甲第登科')).toMatch(/\.webp$/);
+    expect(comboArtUrl('官封三代')).toBe(comboArtUrl('巨日同宫'));
+    expect(comboArtUrl('日照雷门')).toBe(comboArtUrl('日出扶桑'));
+    expect(comboArtUrl('日丽中天')).toBe(comboArtUrl('金灿光辉'));
+    expect(comboArtUrl('空劫夹命')).toBe(comboArtUrl('空劫守命'));
+    expect(comboArtUrl('昌曲')).toMatch(/\.webp$/);
+    expect(comboArtUrl('禄权科忌')).toMatch(/\.webp$/);
+    expect(comboArtUrl('府相')).toMatch(/\.webp$/);
+    expect(comboListThumbInnerHtml({ id: '羊陀', title: '羊陀', members: ['擎羊', '陀罗'] })).toContain('.webp');
+    expect(comboListThumbInnerHtml({ id: '杀破狼格', title: '杀破狼格', members: ['七杀'] })).toContain(
+      '.webp',
+    );
+    expect(comboListThumbInnerHtml({ id: '昌曲夹命', title: '昌曲夹命格', members: ['文昌', '文曲'] })).toContain(
+      '.webp',
+    );
+    expect(comboListThumbInnerHtml({ id: '紫府夹命', title: '紫府夹命格', members: ['紫微', '天府'] })).toContain(
+      '.webp',
+    );
+    expect(comboHeroInnerHtml({ id: '命无正曜', title: '命无正曜格', members: [] })).toContain('.webp');
+    expect(comboArtUrl('__无此格__')).toBeNull();
   });
 });
 

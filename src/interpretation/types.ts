@@ -46,6 +46,8 @@ export type CardReading = {
 export type InterpretOptions = {
   /** 用户补充的情境背景 */
   background?: string;
+  /** 翻牌后写下的直觉，传给串讲 / LLM */
+  userIntuition?: string;
 };
 
 export type ReadingResult = {

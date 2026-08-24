@@ -158,7 +158,7 @@ export function buildPsychologyInsight(
 
 export function buildSpreadOverallPsychology(
   cards: CardReading[],
-  question: string,
+  _question: string,
   lens: ReadingLens,
 ): string {
   const names = cards.map((c) => c.cardName).join('、');

@@ -38,8 +38,8 @@ describe('codex cover prompts', () => {
     const shensha = buildCoverPrompt(SHENSHA_COVER_PROMPTS[0]!);
     expect(branch).toMatch(/Earthly Branch|season|earth-qi/i);
     expect(tengod).toMatch(/Ten God|personality|archetyp/i);
-    expect(shensha).toMatch(/Shen Sha|badge|amulet|footnote/i);
-    expect(shensha).toMatch(/talisman|seal|compact|30%|BADGE/i);
+    expect(shensha).toMatch(/Shen Sha|atlas|footnote|almanac/i);
+    expect(shensha).toMatch(/rice-paper|title band|NO text|NO Chinese/i);
   });
 
   it('all ready covers resolve webp paths', () => {
@@ -50,15 +50,22 @@ describe('codex cover prompts', () => {
     }
   });
 
-  it('shensha detail uses small badge not full cover', () => {
+  it('shensha detail uses atlas folio with CSS caption overlay', () => {
     const badge = shenshaBadgeArtHtml('ss:天乙贵人', '贵');
     expect(badge).toContain('bazi-ss-badge-stage');
+    expect(badge).toContain('is-atlas');
     expect(badge).toContain('bazi-enc-badge');
     expect(badge).toContain('tianyi.webp');
+    expect(badge).toContain('bazi-ss-atlas-caption');
+    expect(badge).toContain('天乙贵人');
     expect(badge).not.toContain('bazi-art-cover');
 
     const ext = shenshaBadgeArtHtml('ss:天德', '德');
     expect(ext).toContain('tiande.webp');
+
+    const listThumb = shenshaBadgeArtHtml('ss:天乙贵人', '贵', { overlayName: false });
+    expect(listThumb).toContain('tianyi.webp');
+    expect(listThumb).not.toContain('bazi-ss-atlas-caption');
 
     const html = renderBaziCodexDetailHtml('ss:天乙贵人', {
       artHtml: badge,

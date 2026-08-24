@@ -11,6 +11,7 @@ import {
 import {
   classifySubQuestion,
   splitUserQuestions,
+  type SubQuestionIntent,
 } from '../interpretation/question-parts.ts';
 import { sanitizeTopicText } from '../interpretation/topic-sanitize.ts';
 import { polishInsightFields, polishReadingCopy } from '../interpretation/reading-polish.ts';
@@ -417,9 +418,10 @@ export function parseSpreadThreadJson(
             topic,
           ),
         );
+        const intent: SubQuestionIntent = 'general';
         return polishInsightFields({
           question: String(row.question ?? question).trim() || question,
-          intent: 'general',
+          intent,
           cardIndexes: [i],
           heading:
             String(row.heading ?? '').trim() ||

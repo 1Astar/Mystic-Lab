@@ -2,11 +2,10 @@
  * PNG → WebP（记忆封面）
  * usage: node scripts/convert-bazi-covers.mjs
  *
- * 精品神煞会再跑 normalize-shensha-badges，统一章面大小。
+ * 神煞已改为「东方命理博物志」竖幅图谱，不再跑暗宇宙圆章归一化。
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import sharp from 'sharp';
 
 const dir = path.resolve('public/bazi/covers');
@@ -33,8 +32,4 @@ for (const file of pngs) {
   );
 }
 
-const norm = spawnSync(process.execPath, [path.resolve('scripts/normalize-shensha-badges.mjs')], {
-  cwd: path.resolve('.'),
-  stdio: 'inherit',
-});
-if (norm.status !== 0) process.exit(norm.status ?? 1);
+console.log('done', pngs.length, '(atlas folio — skip normalize-shensha-badges)');

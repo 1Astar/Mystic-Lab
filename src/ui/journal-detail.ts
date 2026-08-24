@@ -51,6 +51,7 @@ export function mountJournalDetail(
   const supplementLeft = Math.max(0, MAX_TAROT_SUPPLEMENT - supplementUsed);
   const canSupplement = Boolean(!isPartial && onSupplement && supplementLeft > 0);
   const series = resolveReadingSeriesForEntry(entry);
+  const hasAi = (entry.aiSessions?.length ?? 0) > 0;
   const seriesMeta =
     series && series.totalEpisodes > 1
       ? `<p class="journal-detail-series">同日连载 · 第 ${series.episodeIndex}/${series.totalEpisodes} 局 · ${escapeHtml(series.themeLabel)}</p>`

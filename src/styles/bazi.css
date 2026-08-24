@@ -987,8 +987,9 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   top: 0;
   z-index: 4;
   padding: 8px 0;
-  background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .bazi-reading-tab {
@@ -1038,8 +1039,9 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   top: 56px;
   z-index: 3;
   padding: 0;
-  background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
-  backdrop-filter: blur(6px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
 }
 
@@ -3231,8 +3233,9 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   gap: 0;
   margin: 0 0 12px;
   padding: 0 0 6px;
-  background: color-mix(in srgb, var(--bg-deep) 97%, transparent);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .bazi-codex-sticky-stack .bazi-codex-tabs {
@@ -3261,15 +3264,12 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   column-gap: 10px;
   row-gap: 2px;
   width: 100%;
-  margin: 0 0 12px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--gold-ink, var(--gold)) 40%, var(--line));
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--gold) 12%, var(--surface-2)),
-    var(--surface-1)
-  );
+  margin: 0 0 16px;
+  padding: 10px 2px 14px;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft, var(--line));
+  background: none;
   color: var(--ink);
   font: inherit;
   text-align: left;
@@ -3520,8 +3520,9 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   padding: 6px 16px 0 0;
   scroll-padding-inline: 16px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
-  background: color-mix(in srgb, var(--bg-deep) 97%, transparent);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .bazi-codex-tabs::-webkit-scrollbar {
@@ -4481,9 +4482,25 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   box-shadow: none;
 }
 
+.bazi-ss-row .bazi-ss-badge-stage.is-atlas {
+  width: 2.35rem;
+  height: 3.15rem;
+  border-radius: 0.35rem;
+  background: #f3ead8;
+  border: 1px solid rgba(120, 90, 50, 0.22);
+}
+
 .bazi-ss-row .bazi-ss-badge-art img {
   transform: scale(3.05);
   transform-origin: center;
+}
+
+.bazi-ss-row .bazi-ss-badge-stage.is-atlas .bazi-ss-badge-art img {
+  transform: none;
+}
+
+.bazi-ss-row .bazi-ss-atlas-caption {
+  display: none;
 }
 
 .bazi-ss-row-text {
@@ -4504,11 +4521,12 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 .bazi-ss-row-text em {
   font-style: normal;
   font-size: 0.68rem;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--ink-muted);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .bazi-ss-row.is-dim {
@@ -4559,6 +4577,37 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   border: none;
 }
 
+.bazi-ss-badge-stage.is-atlas {
+  position: relative;
+  width: 2.4rem;
+  height: 3.2rem;
+  border-radius: 0.35rem;
+  background: #f3ead8;
+  border: 1px solid rgba(120, 90, 50, 0.22);
+}
+
+.bazi-ss-atlas-caption {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: 5%;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-family: "Songti SC", "Noto Serif SC", "STSong", "SimSun", serif;
+  font-size: 0.42rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  color: #3a2a18;
+  text-shadow: 0 0 2px rgba(243, 234, 216, 0.9);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .bazi-ss-badge-art {
   width: 100%;
   height: 100%;
@@ -4572,6 +4621,12 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   display: block;
   transform: scale(3.05);
   transform-origin: center;
+}
+
+.bazi-ss-badge-stage.is-atlas .bazi-ss-badge-art img {
+  transform: none;
+  object-fit: cover;
+  object-position: center top;
 }
 
 .bazi-ss-badge-stage.is-svg .bazi-ss-badge-art {
@@ -4776,15 +4831,52 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   display: block;
 }
 
+/* 生克关系页：四段用空白 + 发丝线分开，不套卡片 */
+.bazi-shengke-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bazi-shengke-stack > * {
+  margin: 0;
+  padding: 1.55rem 0 1.7rem;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--gold) 32%, var(--line));
+  background: none;
+}
+
+.bazi-shengke-stack > *:first-child {
+  padding-top: 0.25rem;
+  border-top: 0;
+}
+
+.bazi-shengke-stack .bazi-codex-section-title {
+  margin: 0 0 0.28rem;
+  font-size: 1.08rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.bazi-shengke-stack .bazi-codex-hint {
+  margin: 0 0 0.85rem;
+}
+
+.bazi-shengke-stack .bazi-sk-head,
+.bazi-shengke-stack .bazi-cx-head,
+.bazi-shengke-stack .bazi-br-head {
+  margin-bottom: 0.7rem;
+}
+
 /* —— 五行生克图 —— */
 .bazi-sk-map {
   margin: 0 0 18px;
-  padding: 14px 12px 12px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 60%),
-    var(--surface-1);
+  padding: 4px 0 8px;
+  border-radius: 0;
+  border: none;
+  background: none;
   color: var(--ink);
 }
 
@@ -4819,10 +4911,10 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   align-items: flex-start;
   gap: 1px;
   margin: 0;
-  padding: 5px 8px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface-2);
+  padding: 2px 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
   color: var(--ink);
   font: inherit;
   cursor: pointer;
@@ -4863,6 +4955,26 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   font-size: 0.86rem;
   line-height: 1.45;
   color: var(--ink-muted);
+}
+
+.bazi-codex-guide-block {
+  margin: 0 0 14px;
+}
+
+.bazi-codex-guide-block .bazi-codex-guide {
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.bazi-codex-guide-blurb {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.bazi-codex-guide-blurb:last-child {
+  margin-bottom: 0;
 }
 
 .bazi-codex-tabs {
@@ -4959,11 +5071,11 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 
 .bazi-jz-chip {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  padding: 8px 10px;
+  padding: 7px 8px;
   min-width: 0;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -4977,15 +5089,30 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   overflow-wrap: normal;
 }
 
+.bazi-jz-chip .bazi-codex-thumb {
+  flex: 0 0 2.4rem;
+  width: 2.4rem;
+  height: 1.85rem;
+  border-radius: 0.35rem;
+  background: transparent;
+}
+
+.bazi-jz-chip-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
 .bazi-jz-chip strong {
-  font-size: 0.92rem;
-  letter-spacing: 0.08em;
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .bazi-jz-ny {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   color: var(--gold-ink, var(--gold));
   line-height: 1.3;
   white-space: nowrap;
@@ -4995,15 +5122,20 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 }
 
 .bazi-jz-hit {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   color: rgba(160, 210, 255, 0.85);
   line-height: 1.3;
 }
 
 .bazi-jz-chip.is-soft {
-  opacity: 0.78;
+  opacity: 0.9;
   border-color: var(--line-soft, var(--line));
   background: var(--surface-2);
+}
+
+.bazi-jz-chip.is-soft .bazi-codex-thumb {
+  filter: grayscale(0.55) brightness(0.78);
+  opacity: 0.85;
 }
 
 .bazi-jz-chip.is-hit {
@@ -5047,14 +5179,14 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 }
 
 .bazi-codex-entry-grid.is-shensha .bazi-ss-row.is-soft .bazi-ss-row-text em {
-  color: rgba(160, 160, 170, 0.55);
+  color: var(--ink-muted);
 }
 
 .bazi-ss-chip {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   padding: 8px 10px;
   min-width: 0;
@@ -5065,6 +5197,23 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.bazi-ss-chip .bazi-ss-badge-stage.is-atlas {
+  width: 2.35rem;
+  height: 3.15rem;
+  flex-shrink: 0;
+}
+
+.bazi-ss-chip .bazi-ss-atlas-caption {
+  display: none;
+}
+
+.bazi-ss-chip-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
 .bazi-ss-chip strong {
@@ -5094,6 +5243,11 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   background: var(--surface-2);
   color: var(--ink-muted);
   filter: grayscale(0.45);
+}
+
+.bazi-ss-chip.is-soft .bazi-ss-badge-stage {
+  filter: grayscale(1) brightness(0.7) contrast(0.92);
+  opacity: 0.78;
 }
 
 .bazi-ss-chip.is-soft strong {
@@ -5622,7 +5776,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 
 .bazi-sk-map.is-compact {
   margin: 0;
-  padding: 10px 8px;
+  padding: 4px 0;
 }
 
 /* —— 十二地支关系环 —— */
@@ -5633,13 +5787,11 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   --br-c4: color-mix(in srgb, var(--wx-mu) 70%, var(--gold));
   --br-c5: color-mix(in srgb, var(--wx-shui) 75%, var(--ink-muted));
   --br-c6: color-mix(in srgb, var(--purple) 45%, var(--wx-shui));
-  margin: 0 0 18px;
-  padding: 14px 12px 12px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(70% 50% at 50% 40%, color-mix(in srgb, var(--chart-gz) 8%, transparent), transparent 65%),
-    var(--surface-1);
+  margin: 0 0 22px;
+  padding: 4px 0 8px;
+  border-radius: 0;
+  border: none;
+  background: none;
   color: var(--ink);
 }
 
@@ -6082,18 +6234,18 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 /* —— 合冲刑害 / 运程概念示意 —— */
 .bazi-lk-concept,
 .bazi-cx-concept {
-  margin: 0 0 1.1rem;
-  padding: 0.85rem 0.9rem 1rem;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface-2) 88%, var(--ink) 4%);
+  margin: 0 0 1.25rem;
+  padding: 0.2rem 0 0.4rem;
+  border-radius: 0;
+  border: none;
+  background: none;
 }
 
 .bazi-lk-concept.is-compact {
   margin: 0 0 0.75rem;
-  padding: 0.55rem 0.65rem 0.65rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  padding: 0.15rem 0 0.35rem;
+  border-radius: 0;
+  background: none;
 }
 
 .bazi-lk-head.is-compact {
@@ -6163,11 +6315,11 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   height: auto;
   display: block;
   margin: 0 auto;
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .bazi-cx-stage {
-  fill: color-mix(in srgb, var(--surface-1) 70%, var(--ink) 8%);
+  fill: none;
 }
 
 .bazi-cx-line {
@@ -6480,6 +6632,25 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   background: transparent;
   border: none;
   box-shadow: none;
+}
+
+.bazi-enc-art.is-badge .bazi-ss-badge-stage.is-atlas,
+.bazi-enc-badge.is-atlas {
+  width: min(100%, 12.5rem);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border-radius: 0.5rem;
+  background: #f3ead8;
+  border: 1px solid rgba(120, 90, 50, 0.28);
+  box-shadow: 0 8px 24px rgba(60, 40, 20, 0.12);
+}
+
+.bazi-enc-art.is-badge .bazi-ss-atlas-caption,
+.bazi-enc-badge.is-atlas .bazi-ss-atlas-caption {
+  bottom: 6.5%;
+  font-size: 0.92rem;
+  letter-spacing: 0.14em;
+  color: #2f2416;
 }
 
 .bazi-enc-memory.is-shensha {
@@ -7089,11 +7260,10 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 214, 166, 0.14);
-  background:
-    linear-gradient(180deg, rgba(40, 28, 18, 0.55), rgba(18, 14, 12, 0.35));
+  padding: 4px 0 10px;
+  border-radius: 0;
+  border: none;
+  background: none;
 }
 
 .bazi-st-hint {
@@ -7350,7 +7520,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 
 .bazi-st-map {
   border: none;
-  background: var(--surface-2);
+  background: none;
   color: var(--ink);
 }
 

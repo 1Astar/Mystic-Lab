@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -7,7 +7,22 @@ import {
 } from '../ziwei/stars.ts';
 import { type DetailTabId } from '../ziwei/star-profiles.ts';
 import { getComboLore } from '../ziwei/combo-lore.ts';
+import {
+  GE_CATEGORY_META,
+  GE_CATEGORY_ORDER,
+  geCategoryLabel,
+  parseGeCategory,
+  resolveGeCategory,
+  type GeCategory,
+} from '../ziwei/combo-categories.ts';
 import { PALACE_LORE, getPalaceLore, type PalaceLore } from '../ziwei/palace-lore.ts';
+import {
+  palaceArtImgHtml,
+  palaceListThumbInnerHtml,
+  comboArtUrl,
+  comboHeroInnerHtml,
+  comboListThumbInnerHtml,
+} from '../ziwei/star-art.ts';
 import {
   buildPalacePracticeTips,
   defaultPalacePracticeTab,
@@ -189,13 +204,16 @@ function underlineSubTabsHtml(
   aria: string,
   items: Array<{ id: string; label: string; attr: string }>,
   activeId: string,
-  opts?: { variant?: 'underline' | 'segment' },
+  opts?: { variant?: 'underline' | 'segment'; className?: string },
 ): string {
   const variant = opts?.variant ?? 'underline';
-  const tabsCls =
+  const base =
     variant === 'segment'
       ? 'ziwei-sub-underline-tabs is-segment'
-      : 'ziwei-sub-underline-tabs';
+      : items.length <= 4
+        ? 'ziwei-sub-underline-tabs is-fullrow'
+        : 'ziwei-sub-underline-tabs';
+  const tabsCls = opts?.className ? `${base} ${opts.className}` : base;
   return `
     <div class="${tabsCls}" role="tablist" aria-label="${escapeHtml(aria)}">
       ${items
@@ -221,6 +239,7 @@ function setUrl(opts: {
   bucket?: string;
   meet?: string;
   hub?: MeetHubTab;
+  gecat?: GeCategory | 'all';
 }): void {
   try {
     const q = new URLSearchParams();
@@ -233,6 +252,7 @@ function setUrl(opts: {
       q.set('bucket', opts.bucket);
     }
     if (opts.meet && opts.meet !== 'all') q.set('meet', opts.meet);
+    if (opts.gecat && opts.gecat !== 'all') q.set('gecat', opts.gecat);
     if (opts.star) q.set('star', opts.star);
     if (opts.palace) q.set('palace', opts.palace);
     if (opts.combo) q.set('combo', opts.combo);
@@ -524,11 +544,16 @@ function renderPalaceDetail(
   const practiceCta = codexSkeletonPracticeCtaHtml([
     { href: '/ziwei/guess', label: '猜星曜练一题 ›' },
   ]);
+  const palaceHero = palaceArtImgHtml(p.id, {
+    className: 'ziwei-detail-hero-img',
+    alt: p.title,
+  });
 
   return `
     <article class="ziwei-star-detail is-lit ziwei-palace-practice">
       <button type="button" class="ziwei-detail-back" data-close-sub>← 返回宫位图鉴</button>
       <p class="ziwei-kicker">十二宫 · 实战融合 · ${escapeHtml(p.hint)}</p>
+      ${palaceHero ? `<div class="ziwei-detail-hero">${palaceHero}</div>` : ''}
       <h2 class="ziwei-remember-name">${escapeHtml(p.title)}</h2>
       <p class="ziwei-remember-line">${escapeHtml(p.oneLiner)}</p>
       <ul class="ziwei-keywords">${p.keywords.map((k) => `<li>${escapeHtml(k)}</li>`).join('')}</ul>
@@ -553,6 +578,7 @@ function renderComboDetail(id: string, view: ZiweiChartView | null = null): stri
         ? `进行中 ${ev.litMembers.length}/${c.members.length}`
         : '尚未成格';
   const family = c.family === 'classic-ge' ? '古典格局' : '星曜组合';
+  const catLabel = geCategoryLabel(resolveGeCategory(c));
   const members = c.members
     .map((m) => {
       const lit = isStarUnlocked(m) || ev.litMembers.includes(m);
@@ -561,10 +587,12 @@ function renderComboDetail(id: string, view: ZiweiChartView | null = null): stri
       </li>`;
     })
     .join('');
+  const hero = comboHeroInnerHtml(c);
   return `
     <article class="ziwei-star-detail is-lit">
       <button type="button" class="ziwei-detail-back" data-close-sub>← 返回</button>
-      <p class="ziwei-kicker">${escapeHtml(family)} · ${escapeHtml(statusLabel)}</p>
+      ${hero ? `<div class="ziwei-detail-hero${comboArtUrl(c.id) ? '' : ' is-combo-stack'}">${hero}</div>` : ''}
+      <p class="ziwei-kicker">${escapeHtml(family)} · ${escapeHtml(catLabel)} · ${escapeHtml(statusLabel)}</p>
       <h2 class="ziwei-remember-name">${escapeHtml(c.title)}</h2>
       <p class="ziwei-remember-line">${escapeHtml(c.oneLiner)}</p>
       <p class="ziwei-codex-hint">${escapeHtml(ev.ruleLine ?? '')}</p>
@@ -618,10 +646,12 @@ function renderJourneyStepCard(s: import('../ziwei/combo-journey.ts').ComboJourn
     ? `${s.combo.members.join(' · ')} · 锚 ${s.focusPalace}`
     : s.combo.members.join(' · ');
   const family =
-    s.combo.family === 'classic-ge' ? '古典格局' : '星曜组合';
+    s.combo.family === 'classic-ge'
+      ? geCategoryLabel(resolveGeCategory(s.combo))
+      : '星曜组合';
   return `
     <button type="button" class="ziwei-journey-step is-${s.status} is-rank-${s.combo.rank}" data-open-combo="${escapeHtml(s.combo.id)}">
-      <span class="ziwei-journey-order">${s.order}</span>
+      <span class="ziwei-journey-thumb">${comboListThumbInnerHtml(s.combo)}</span>
       <span class="ziwei-journey-body">
         <strong>${escapeHtml(s.combo.title)}</strong>
         <em>${escapeHtml(s.combo.oneLiner)}</em>
@@ -1102,19 +1132,17 @@ function renderStarsCatalog(
       neutral: '⚪',
       caution: '🔴',
     };
-    /** 色调总览：图例 + 比例条（可点筛选） */
+    /** 色调总览：四格均分 + 比例条（可点筛选） */
     const toneChips = `
-      <div class="ziwei-shensha-tone-overview" role="group" aria-label="色调筛选">
-        <p class="ziwei-shensha-tone-caption">色调总览：</p>
-        <div class="ziwei-shensha-tone-legend is-pipe">
-          ${SHENSHA_TONE_ORDER.map((id, i) => {
+      <div class="ziwei-shensha-tone-overview" role="group" aria-label="色调总览">
+        <div class="ziwei-shensha-tone-legend is-equal">
+          ${SHENSHA_TONE_ORDER.map((id) => {
             const n = toneCounts[id] ?? 0;
-            const sep = i > 0 ? `<span class="ziwei-shensha-tone-pipe" aria-hidden="true">|</span>` : '';
-            return `${sep}<button type="button" class="ziwei-shensha-tone-stat is-tone-${id} ${shenshaTone === id ? 'is-on' : ''}" data-shensha-tone="${id}">
-              <span aria-hidden="true">${toneDots[id]}</span> ${escapeHtml(SHENSHA_TONE_META[id].short)} <em>${n}</em> 颗
+            return `<button type="button" class="ziwei-shensha-tone-stat is-tone-${id} ${shenshaTone === id ? 'is-on' : ''}" data-shensha-tone="${id}">
+              <span aria-hidden="true">${toneDots[id]}</span>
+              <span class="ziwei-shensha-tone-label">${escapeHtml(SHENSHA_TONE_META[id].short)} <em>${n}</em></span>
             </button>`;
           }).join('')}
-          <span class="ziwei-shensha-tone-pipe" aria-hidden="true">|</span>
           <button type="button" class="ziwei-shensha-tone-stat is-all ${shenshaTone === 'all' ? 'is-on' : ''}" data-shensha-tone="all">全部</button>
         </div>
         <div class="ziwei-shensha-tone-bar" aria-hidden="true">
@@ -1189,7 +1217,7 @@ function renderShortPalaceCard(p: PalaceLore, view: ZiweiChartView | null): stri
       ${statusLine}
       <span class="ziwei-codex-short-row">
         <span class="ziwei-codex-short-thumb is-palace" aria-hidden="true">
-          <span class="ziwei-palace-glyph">${escapeHtml(presence.glyph)}</span>
+          ${palaceListThumbInnerHtml(p.id, { glyph: presence.glyph, alt: p.title })}
         </span>
         <span class="ziwei-codex-short-copy">
           <span class="ziwei-codex-short-name">${escapeHtml(p.title)}${roleBit}</span>
@@ -1201,7 +1229,11 @@ function renderShortPalaceCard(p: PalaceLore, view: ZiweiChartView | null): stri
     </button>`;
 }
 
-function renderPalacesCatalog(bucket: PalaceBucket, view: ZiweiChartView | null = null): string {
+function renderPalacesCatalog(
+  bucket: PalaceBucket,
+  view: ZiweiChartView | null = null,
+  geCat: GeCategory | 'all' = 'all',
+): string {
   const tabs = underlineSubTabsHtml(
     '宫位分类',
     [
@@ -1228,18 +1260,43 @@ function renderPalacesCatalog(bucket: PalaceBucket, view: ZiweiChartView | null 
   if (bucket === 'geju') {
     const steps = listComboJourney(view);
     const classic = steps.filter((s) => s.combo.family === 'classic-ge');
-    const ji = classic.filter((s) => (s.combo.tone ?? 'ji') !== 'xiong');
-    const xiong = classic.filter((s) => s.combo.tone === 'xiong');
     const combos = steps.filter((s) => s.combo.family === 'star-combo');
+    const catTabs = underlineSubTabsHtml(
+      '格局门类',
+      [
+        { id: 'all', label: '全部', attr: 'data-ge-cat="all"' },
+        ...GE_CATEGORY_ORDER.map((id) => ({
+          id,
+          label: GE_CATEGORY_META[id].label,
+          attr: `data-ge-cat="${id}"`,
+        })),
+      ],
+      geCat,
+      { className: 'ziwei-ge-cat-tabs' },
+    );
+    const filtered =
+      geCat === 'all'
+        ? steps
+        : steps.filter((s) => resolveGeCategory(s.combo) === geCat);
+    const sections =
+      geCat === 'all'
+        ? GE_CATEGORY_ORDER.map((id) => {
+            const list = steps.filter((s) => resolveGeCategory(s.combo) === id);
+            if (!list.length) return '';
+            const meta = GE_CATEGORY_META[id];
+            return `
+      <h3 class="ziwei-ge-section-title">${escapeHtml(meta.label)} · ${list.length}</h3>
+      <p class="ziwei-codex-hint is-ge-cat">${escapeHtml(meta.blurb)}</p>
+      <div class="ziwei-journey-path">${list.map(renderJourneyStepCard).join('')}</div>`;
+          }).join('')
+        : `
+      <p class="ziwei-codex-hint is-ge-cat">${escapeHtml(GE_CATEGORY_META[geCat].blurb)}</p>
+      <div class="ziwei-journey-path">${filtered.map(renderJourneyStepCard).join('')}</div>`;
     return `
       ${tabs}
-      <p class="ziwei-codex-hint">完整格局词库 · ${classic.length} 古典格 + ${combos.length} 星曜组合。点开看释义；「我的格局」只显示盘上已成格的。</p>
-      <h3 class="ziwei-ge-section-title">古典吉格 · ${ji.length}</h3>
-      <div class="ziwei-journey-path">${ji.map(renderJourneyStepCard).join('')}</div>
-      <h3 class="ziwei-ge-section-title">古典凶格 / 警示 · ${xiong.length}</h3>
-      <div class="ziwei-journey-path">${xiong.map(renderJourneyStepCard).join('')}</div>
-      <h3 class="ziwei-ge-section-title">星曜组合 · ${combos.length}</h3>
-      <div class="ziwei-journey-path">${combos.map(renderJourneyStepCard).join('')}</div>`;
+      ${catTabs}
+      <p class="ziwei-codex-hint">传统格局词库 · ${classic.length} 古典格 + ${combos.length} 星曜组合。按门类浏览；「我的格局」只显示盘上已成格的。</p>
+      ${sections}`;
   }
 
   // read：原「三方四正」「对宫」合并（词条本身在命盘图层更完整）
@@ -1513,8 +1570,9 @@ function assembleZiweiStickyNav(page: HTMLElement): void {
     stack.appendChild(row);
   };
 
-  hoist('.ziwei-sub-underline-tabs', 'l2');
+  hoist('.ziwei-sub-underline-tabs:not(.ziwei-ge-cat-tabs)', 'l2');
   hoist('.ziwei-meet-underline-tabs', 'l2');
+  hoist('.ziwei-ge-cat-tabs', 'l3');
   hoist('.ziwei-star-kind-rail', 'l3');
   hoist('.ziwei-shensha-theme-rail', 'l4');
   hoist('.ziwei-shensha-tone-overview', 'l5');
@@ -1556,7 +1614,16 @@ function assembleZiweiStickyNav(page: HTMLElement): void {
     return;
   }
 
-  /** 神煞：议题轨 + 色调总览两级常显；上级收成面包屑 */
+  /** 星曜分类 / 格局门类常显，不收成面包屑，方便点回上一级 */
+  if (stack.querySelector('.ziwei-star-kind-rail') || stack.querySelector('.ziwei-ge-cat-tabs')) {
+    rest.forEach((row) => {
+      row.classList.add('is-current-level');
+      scrollInto(row);
+    });
+    return;
+  }
+
+  /** 神煞以外：议题轨 + 色调总览两级常显；上级收成面包屑 */
   const hasTone = Boolean(stack.querySelector('.ziwei-shensha-tone-overview'));
   const currentCount = hasTone ? 2 : 1;
   const parents = rest.slice(0, -currentCount);
@@ -1742,6 +1809,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       ? rawBucket
       : 'twelve',
   );
+  let geCat: GeCategory | 'all' = parseGeCategory(queryParam('gecat'));
   let mutagenBucket: MutagenBucket = MUTAGEN_BUCKETS.includes(rawBucket as MutagenBucket)
     ? (rawBucket as MutagenBucket)
     : 'stars';
@@ -2174,7 +2242,12 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         comboId = btn.dataset.openCombo ?? '';
         clearDetailExcept('combo');
         openDetailFromMeet('combo');
-        setUrl({ layer, combo: comboId, bucket: starKindToBucket(starKind) });
+        setUrl({
+          layer,
+          combo: comboId,
+          bucket: layer === 'palaces' ? palaceBucket : starKindToBucket(starKind),
+          gecat: layer === 'palaces' && palaceBucket === 'geju' ? geCat : 'all',
+        });
         paint();
       });
     });
@@ -2405,7 +2478,7 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
         view,
         { mode: 'atlas' },
       );
-    } else if (layer === 'palaces') body = renderPalacesCatalog(palaceBucket, view);
+    } else if (layer === 'palaces') body = renderPalacesCatalog(palaceBucket, view, geCat);
     else if (layer === 'mutagen')
       body = renderMutagenCatalog(mutagenBucket, map, chartHits, hasChart, person, view);
     else body = renderStructureCatalog(structureBucket);
@@ -2489,7 +2562,20 @@ export function renderZiweiCodex(root: HTMLElement): () => void {
       btn.addEventListener('click', () => {
         palaceBucket = normalizePalaceBucket(btn.dataset.palaceBucket);
         layer = 'palaces';
-        setUrl({ layer: 'palaces', bucket: palaceBucket });
+        setUrl({
+          layer: 'palaces',
+          bucket: palaceBucket,
+          gecat: palaceBucket === 'geju' ? geCat : 'all',
+        });
+        paint();
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('[data-ge-cat]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        geCat = parseGeCategory(btn.dataset.geCat);
+        layer = 'palaces';
+        palaceBucket = 'geju';
+        setUrl({ layer: 'palaces', bucket: 'geju', gecat: geCat });
         paint();
       });
     });

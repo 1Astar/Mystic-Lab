@@ -1305,7 +1305,9 @@ export function renderTarot(root: HTMLElement): () => void {
           sceneTags: journalEntry?.sceneTags,
         };
         if (!live.questionThread?.answers.length || threadStale) {
-          const rebuilt = buildQuestionThread(live.cards, question, live.provider ?? 'mock', threadOpts);
+          const threadProvider =
+            live.provider === 'llm' ? 'llm' : 'mock';
+          const rebuilt = buildQuestionThread(live.cards, question, threadProvider, threadOpts);
           if (rebuilt) live.questionThread = rebuilt;
         } else {
           const series = resolveReadingSeries({
@@ -1947,7 +1949,7 @@ export function renderTarot(root: HTMLElement): () => void {
       const spread = resolveActiveSpread(spreadType);
       const posLabel = spread.positions[index]?.label ?? `第 ${index + 1} 张`;
       if (labelEl) {
-        const name = card.card.nameZh || card.card.name;
+        const name = card.card.nameZh || card.card.nameEn;
         const orient = card.reversed ? '逆位' : '正位';
         labelEl.textContent = `${posLabel} · ${name}（${orient}）`;
       }

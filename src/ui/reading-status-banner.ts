@@ -15,7 +15,7 @@ function escapeHtml(s: string): string {
 }
 
 export type ReadingStatusOpts = {
-  provider?: 'mock' | 'llm';
+  provider?: 'mock' | 'llm' | 'static';
   loading?: boolean;
   error?: string;
 };

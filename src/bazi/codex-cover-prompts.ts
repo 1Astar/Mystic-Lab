@@ -1,7 +1,13 @@
 /**
  * 八字探索 · 记忆封面 Prompt 库
- * 风格：宇宙档案 / 神秘知识卡 / 象征记忆图
+ * 干支/十神可保留档案卡；神煞＝东方命理博物志（古籍图谱页）
  */
+
+import {
+  SHENSHA_ATLAS_SCENES,
+  atlasSubjectForSlug,
+} from './codex-shensha-atlas-scenes.ts';
+export { SHENSHA_ATLAS_STYLE } from './codex-shensha-atlas-scenes.ts';
 
 export type CodexCoverKind = 'stem' | 'branch' | 'tengod' | 'shensha' | 'wuxing';
 
@@ -70,13 +76,13 @@ Suitable visuals: archetypal role presence, strong identification ("this is a fa
 May use distant silhouette or implied figure without face close-up.
 Avoid: empty landscape only, pure badge emblems, pure material still-life.`,
 
-  shensha: `Category: Star / Shen Sha (星煞) — FEATURED BADGE only.
-Keywords: tag, destiny footnote, amulet.
-CRITICAL composition: a SINGLE small round badge / talisman floating in the CENTER.
-The emblem must occupy ONLY about 25–35% of the frame height.
-MOST of the canvas is empty deep indigo void with faint dust light — generous negative space.
-Looks like a collectible seal sticker on a dark card, NOT a landscape, NOT a large relic filling the frame.
-Avoid: mountains, rivers, wide scenery, oversized lanterns/objects, character drama.`,
+  shensha: `Category: Star / Shen Sha (星煞) — Oriental metaphysics atlas folio (神煞图谱).
+Keywords: omen, destiny footnote, illustrated almanac plate.
+CRITICAL composition: vertical rice-paper atlas plate with symbolic omen object + living environment.
+Thin ornamental frame, four corner gilt motifs, one vermilion seal stamp only.
+CRITICAL: leave the bottom ~18% as empty blank rice-paper title band — App overlays the name in CSS.
+ABSOLUTELY NO text / Chinese characters / glyphs / calligraphy in the image.
+Avoid: round dark-void badge amulets, cosmic night posters, complex human faces.`,
 };
 
 /** 拼出可直接投模型的完整 prompt */
@@ -258,99 +264,116 @@ export const TENGOD_COVER_PROMPTS: CodexCoverPrompt[] = [
   { id: 'tg:劫财', kind: 'tengod', title: '劫财', slug: 'jiecai', accent: 'split gold', mood: 'sharing, rivalry, exchange — the contested self', metaphor: 'archetype of contested sharing / split paths', subject: 'Archetypal contested exchange: implied figures or presence where treasure-light splits into two paths. Feels like “my rivalrous / sharing face.” Relational tension of divide.', assetReady: true },
 ];
 
-/** 星煞封面：精品 AI + 扩展 SVG 光栅；图鉴名录尽量出齐章面 */
-export const SHENSHA_COVER_PROMPTS: CodexCoverPrompt[] = [
-  { id: 'ss:天乙贵人', kind: 'shensha', title: '天乙贵人', slug: 'tianyi', accent: 'warm lamp gold', mood: 'protective help footnote', metaphor: 'tiny lantern amulet badge', subject: 'A tiny ancient copper lantern as a ROUND amulet badge only 30% of frame height, centered in vast empty midnight indigo. Soft gold glow inside the small lantern. No mountains, no river, no landscape.', assetReady: true },
-  { id: 'ss:文昌', kind: 'shensha', title: '文昌', slug: 'wenchang', accent: 'ink gold', mood: 'scholarly wit footnote', metaphor: 'tiny scroll-and-arrow seal', subject: 'A tiny dark-gold mini scroll crossed by a small bronze arrow, as a round scholarly seal-badge ~30% of frame, centered in empty indigo void. No desk scene, no landscape.', assetReady: true },
-  { id: 'ss:禄神', kind: 'shensha', title: '禄神', slug: 'lushen', accent: 'rice gold', mood: 'livelihood foundation footnote', metaphor: 'tiny grain-vessel badge', subject: 'A tiny glowing grain vessel as a round livelihood badge ~30% of frame height, centered in vast empty indigo. Soft gold rim only. No fields, no landscape.', assetReady: true },
-  { id: 'ss:将星', kind: 'shensha', title: '将星', slug: 'jiangxing', accent: 'command gold', mood: 'backbone command footnote', metaphor: 'tiny command crest badge', subject: 'A tiny command crest / star seal as a heraldic round badge ~30% of frame, centered in empty midnight void. No fortress, no army.', assetReady: true },
-  { id: 'ss:红鸾', kind: 'shensha', title: '红鸾', slug: 'hongluan', accent: 'soft rose gold', mood: 'joyful bond footnote', metaphor: 'tiny rose-gold bird seal', subject: 'A tiny rose-gold bird emblem inside a small round amulet frame ~30% of frame, centered in empty indigo. No garden vista.', assetReady: true },
-  { id: 'ss:天喜', kind: 'shensha', title: '天喜', slug: 'tianxi', accent: 'warm festive gold', mood: 'delight footnote', metaphor: 'tiny festive bloom seal', subject: 'A tiny festive bloom seal as a warm gold round badge ~30% of frame, centered in empty cosmic dark. Emblem only.', assetReady: true },
-  { id: 'ss:桃花', kind: 'shensha', title: '桃花', slug: 'taohua', accent: 'petal rose gold', mood: 'charm affinity footnote', metaphor: 'tiny mirror-and-blossom badge', subject: 'A tiny bronze mirror with a soft peach-blossom mark as a round charm badge ~30% of frame, centered in empty indigo. No garden.', assetReady: true },
-  { id: 'ss:羊刃', kind: 'shensha', title: '羊刃', slug: 'yangren', accent: 'cold blade silver', mood: 'fierce edge footnote', metaphor: 'tiny blade-seal badge', subject: 'A tiny short blade leaving a miniature sheath as a cold silver round seal ~30% of frame, centered in empty indigo. No stone platform landscape.', assetReady: true },
-  { id: 'ss:华盖', kind: 'shensha', title: '华盖', slug: 'huagai', accent: 'violet silver', mood: 'solitude spirit footnote', metaphor: 'tiny canopy parasol seal', subject: 'A tiny elegant spiritual canopy/parasol as a violet-silver round badge ~30% of frame, centered in empty star-dust void. No wide mist scenery.', assetReady: true },
-  { id: 'ss:孤辰寡宿', kind: 'shensha', title: '孤辰寡宿', slug: 'guchen', accent: 'cold mist silver', mood: 'aloneness footnote', metaphor: 'tiny lone-stone board seal', subject: 'A tiny single stone on a miniature empty board inside a small round amulet ~30% of frame, centered in empty cold indigo. Not a wide boardroom.', assetReady: true },
-  { id: 'ss:驿马', kind: 'shensha', title: '驿马', slug: 'yima', accent: 'wind silver', mood: 'travel motion footnote', metaphor: 'tiny hoofprint wind seal', subject: 'A tiny luminous hoofprint with silver wind trails as a round motion badge ~30% of frame, centered in empty indigo. No road landscape.', assetReady: true },
-  { id: 'ss:劫煞', kind: 'shensha', title: '劫煞', slug: 'jiesha', accent: 'storm iron silver', mood: 'sudden shift footnote', metaphor: 'tiny crossed-alert seal', subject: 'Tiny cool iron crossed-alert seal ~30% of frame, empty indigo. Backup reminder, not doom.', assetReady: true },
-  // 扩展章：SVG 光栅化 webp（与精品同路径；仍可用 AI 日后替换 png）
-  { id: 'ss:天德', kind: 'shensha', title: '天德', slug: 'tiande', accent: 'soft virtue gold', mood: 'protective resolve footnote', metaphor: 'tiny soft-gold virtue droplet seal', subject: 'A tiny soft-gold virtue droplet inside a round amulet badge ~30% of frame, centered in empty midnight indigo. No landscape.', assetReady: true },
-  { id: 'ss:月德', kind: 'shensha', title: '月德', slug: 'yuede', accent: 'cool moon silver', mood: 'gentle shelter footnote', metaphor: 'tiny crescent moon seal', subject: 'A tiny silver crescent moon as a round amulet badge ~30% of frame, centered in empty indigo void. Emblem only.', assetReady: true },
-  { id: 'ss:福星', kind: 'shensha', title: '福星', slug: 'fuxing', accent: 'warm fortune gold', mood: 'blessing footing footnote', metaphor: 'tiny star-seal badge', subject: 'A tiny warm-gold five-point star seal as a round badge ~30% of frame, centered in empty indigo. No temple scenery.', assetReady: true },
-  { id: 'ss:金舆', kind: 'shensha', title: '金舆', slug: 'jinyu', accent: 'carriage gold', mood: 'dignified carriage footnote', metaphor: 'tiny carriage-seal badge', subject: 'A tiny bronze carriage emblem as a round amulet ~30% of frame, centered in empty indigo. No road landscape.', assetReady: true },
-  { id: 'ss:天厨', kind: 'shensha', title: '天厨', slug: 'tianchu', accent: 'hearth gold', mood: 'nourishment footnote', metaphor: 'tiny vessel-hearth seal', subject: 'A tiny warm vessel / hearth seal as a round badge ~30% of frame, centered in empty indigo. No kitchen scene.', assetReady: true },
-  { id: 'ss:学堂', kind: 'shensha', title: '学堂', slug: 'xuetang', accent: 'ink study gold', mood: 'learning field footnote', metaphor: 'tiny open-book seal', subject: 'A tiny open-book diamond seal as a round scholarly badge ~30% of frame, centered in empty indigo. No classroom.', assetReady: true },
-  { id: 'ss:空亡', kind: 'shensha', title: '空亡', slug: 'kongwang', accent: 'void silver', mood: 'gap / pause footnote', metaphor: 'tiny dashed-ring void seal', subject: 'A tiny dashed hollow ring as a cool silver round seal ~30% of frame, centered in empty indigo. Emblem only, no abyss scenery.', assetReady: true },
-  { id: 'ss:病符', kind: 'shensha', title: '病符', slug: 'bingfu', accent: 'healing sage green', mood: 'recovery reminder footnote', metaphor: 'tiny cross-care seal', subject: 'A tiny soft sage-green care cross seal as a round badge ~30% of frame, centered in empty indigo. Not medical horror.', assetReady: true },
-  { id: 'ss:白虎', kind: 'shensha', title: '白虎', slug: 'baihu', accent: 'cold white metal', mood: 'sharp guard footnote', metaphor: 'tiny white-tiger mask seal', subject: 'A tiny stylized white-tiger mask seal as a cold silver round badge ~30% of frame, centered in empty indigo. No mountain landscape.', assetReady: true },
-  { id: 'ss:灾煞', kind: 'shensha', title: '灾煞', slug: 'zaisha', accent: 'amber warning', mood: 'caution factor footnote', metaphor: 'tiny alert triangle seal', subject: 'A tiny amber alert triangle seal as a round badge ~30% of frame, centered in empty indigo. Soft caution, not gore.', assetReady: true },
-  { id: 'ss:亡神', kind: 'shensha', title: '亡神', slug: 'wangshen', accent: 'ash silver', mood: 'fading / loss rhythm footnote', metaphor: 'tiny fading-wave seal', subject: 'A tiny ash-silver fading curve seal as a round badge ~30% of frame, centered in empty indigo. Emblem only.', assetReady: true },
-  { id: 'ss:咸池', kind: 'shensha', title: '咸池', slug: 'xianchi', accent: 'rose mist gold', mood: 'affinity pool footnote', metaphor: 'tiny rose-pool seal', subject: 'A tiny rose-gold pool-circle seal as a round charm badge ~30% of frame, centered in empty indigo. No garden vista.', assetReady: true },
-  { id: 'ss:天德合', kind: 'shensha', title: '天德合', slug: 'tiandehe', accent: 'paired virtue gold', mood: 'buffer via union footnote', metaphor: 'tiny twin-ring seal', subject: 'Two tiny overlapping gold rings as a round amulet ~30% of frame, empty indigo. Emblem only.', assetReady: true },
-  { id: 'ss:月德合', kind: 'shensha', title: '月德合', slug: 'yuedehe', accent: 'moon-pair silver', mood: 'soft relational buffer', metaphor: 'crescent meeting circle', subject: 'Tiny crescent meeting a pale ring as round badge ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:天赦', kind: 'shensha', title: '天赦', slug: 'tianshe', accent: 'pardon gold', mood: 'release window footnote', metaphor: 'tiny cross-of-pardon seal', subject: 'Tiny soft-gold pardon cross in a round seal ~30% of frame, empty indigo. Not a court scene.', assetReady: true },
-  { id: 'ss:三奇贵人', kind: 'shensha', title: '三奇贵人', slug: 'sanqi', accent: 'triple spark gold', mood: 'rare opening footnote', metaphor: 'three tiny sparks seal', subject: 'Three tiny gold sparks as a round badge ~30% of frame, empty indigo. Emblem only.', assetReady: true },
-  { id: 'ss:天医', kind: 'shensha', title: '天医', slug: 'tianyimed', accent: 'healing sage', mood: 'care / recover footnote', metaphor: 'tiny care-cross seal', subject: 'Tiny sage-green care cross seal ~30% of frame, empty indigo. Soft care, not clinic.', assetReady: true },
-  { id: 'ss:解神', kind: 'shensha', title: '解神', slug: 'jieshen', accent: 'unknot gold', mood: 'untangle footnote', metaphor: 'tiny unknot ribbon seal', subject: 'Tiny gold unknot / open-loop seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:词馆', kind: 'shensha', title: '词馆', slug: 'ciguan', accent: 'ink folio gold', mood: 'writing hall footnote', metaphor: 'tiny folio tablet seal', subject: 'Tiny dark folio tablet with gold lines as round badge ~30% of frame, empty indigo. No library hall.', assetReady: true },
-  { id: 'ss:文曲', kind: 'shensha', title: '文曲', slug: 'wenqu', accent: 'ink flourish gold', mood: 'clever expression footnote', metaphor: 'tiny ink-curve seal', subject: 'Tiny gold ink flourish curve as round badge ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:天马', kind: 'shensha', title: '天马', slug: 'tianma', accent: 'sky wind silver', mood: 'far travel footnote', metaphor: 'tiny wind-arrow seal', subject: 'Tiny silver wind-arrow travel seal ~30% of frame, empty indigo. No road landscape.', assetReady: true },
-  { id: 'ss:吊客', kind: 'shensha', title: '吊客', slug: 'diaoke', accent: 'ash farewell silver', mood: 'farewell tone footnote', metaphor: 'tiny farewell plaque seal', subject: 'Tiny ash-silver farewell plaque seal ~30% of frame, empty indigo. Soft, not grim.', assetReady: true },
-  { id: 'ss:天哭', kind: 'shensha', title: '天哭', slug: 'tianku', accent: 'mist sorrow silver', mood: 'wistful tone footnote', metaphor: 'tiny tear-curve seal', subject: 'Tiny mist-silver soft curve seal ~30% of frame, empty indigo. Gentle mood, not horror.', assetReady: true },
-  { id: 'ss:天虚', kind: 'shensha', title: '天虚', slug: 'tianxu', accent: 'hollow cool silver', mood: 'empty-feel footnote', metaphor: 'tiny hollow dashed ring', subject: 'Tiny dashed hollow ring seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:破碎', kind: 'shensha', title: '破碎', slug: 'posui', accent: 'crack amber', mood: 'fragile backup footnote', metaphor: 'tiny cracked vessel seal', subject: 'Tiny cracked vessel outline seal ~30% of frame, empty indigo. Soft caution.', assetReady: true },
-  { id: 'ss:大耗', kind: 'shensha', title: '大耗', slug: 'dahao', accent: 'drain amber', mood: 'leak / outflow footnote', metaphor: 'tiny outflow arrow seal', subject: 'Tiny amber outflow arrow seal ~30% of frame, empty indigo. Reminder, not doom.', assetReady: true },
-  { id: 'ss:丧门', kind: 'shensha', title: '丧门', slug: 'sangmen', accent: 'threshold ash', mood: 'grief-window footnote', metaphor: 'tiny gate outline seal', subject: 'Tiny ash gate outline seal ~30% of frame, empty indigo. Soft reminder.', assetReady: true },
-  { id: 'ss:魁罡', kind: 'shensha', title: '魁罡', slug: 'kuigang', accent: 'decisive steel gold', mood: 'resolve / edge footnote', metaphor: 'tiny spearhead seal', subject: 'Tiny steel-gold spearhead seal ~30% of frame, empty indigo. Emblem only.', assetReady: true },
-  { id: 'ss:沐浴', kind: 'shensha', title: '沐浴', slug: 'muyu', accent: 'water-soft blue', mood: 'exposure / soft field footnote', metaphor: 'tiny ripple seal', subject: 'Tiny soft water-ripple seal as round badge ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:风流', kind: 'shensha', title: '风流', slug: 'fengliu', accent: 'charm rose', mood: 'charm / gossip boundary footnote', metaphor: 'tiny breeze-petal seal', subject: 'Tiny rose breeze-petal outline seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:流霞', kind: 'shensha', title: '流霞', slug: 'liuxia', accent: 'dusk rose gold', mood: 'emotional wave footnote', metaphor: 'tiny dusk-ribbon seal', subject: 'Tiny dusk ribbon seal ~30% of frame, empty indigo. Soft caution.', assetReady: true },
-  { id: 'ss:血刃', kind: 'shensha', title: '血刃', slug: 'xueren', accent: 'guard rose steel', mood: 'sharp guard footnote', metaphor: 'tiny blade tip seal', subject: 'Tiny soft-rose steel blade tip seal ~30% of frame, empty indigo. Guard, not gore.', assetReady: true },
-  { id: 'ss:国印', kind: 'shensha', title: '国印', slug: 'guoyin', accent: 'seal gold', mood: 'authority stamp footnote', metaphor: 'tiny square seal badge', subject: 'Tiny gold square official seal badge ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:台阁', kind: 'shensha', title: '台阁', slug: 'taige', accent: 'platform gold', mood: 'institution platform footnote', metaphor: 'tiny pavilion roof seal', subject: 'Tiny pavilion / platform roof seal ~30% of frame, empty indigo. No cityscape.', assetReady: true },
-  { id: 'ss:权星', kind: 'shensha', title: '权星', slug: 'quanxing', accent: 'command orb gold', mood: 'decision handle footnote', metaphor: 'tiny orb-and-stem seal', subject: 'Tiny gold orb with stem seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:飞刃', kind: 'shensha', title: '飞刃', slug: 'feiren', accent: 'flying edge silver', mood: 'sharp motion footnote', metaphor: 'tiny flying blade seal', subject: 'Tiny silver flying-blade trail seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:紫微', kind: 'shensha', title: '紫微', slug: 'ziwei', accent: 'violet center gold', mood: 'hub / center footnote', metaphor: 'tiny violet star seal', subject: 'Tiny violet-gold center star seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:天官', kind: 'shensha', title: '天官', slug: 'tianguan', accent: 'honor gold', mood: 'name / honor footnote', metaphor: 'tiny honor crest seal', subject: 'Tiny honor crest triangle seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:仓廪', kind: 'shensha', title: '仓廪', slug: 'cangling', accent: 'storehouse gold', mood: 'storage / reserve footnote', metaphor: 'tiny granary seal', subject: 'Tiny granary storehouse seal ~30% of frame, empty indigo. No farmland.', assetReady: true },
-  { id: 'ss:飞财', kind: 'shensha', title: '飞财', slug: 'feicai', accent: 'mobile gold', mood: 'money in motion footnote', metaphor: 'tiny coin-flight seal', subject: 'Tiny coin with flight arrow seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:进神', kind: 'shensha', title: '进神', slug: 'jinshen', accent: 'advance green-gold', mood: 'push forward footnote', metaphor: 'tiny upward chevron seal', subject: 'Tiny upward advance chevron seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:退神', kind: 'shensha', title: '退神', slug: 'tuishen', accent: 'retreat cool silver', mood: 'pull back footnote', metaphor: 'tiny downward chevron seal', subject: 'Tiny cool downward retreat chevron seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:富星', kind: 'shensha', title: '富星', slug: 'caixing', accent: 'abundance gold', mood: 'resource plenty footnote', metaphor: 'tiny coin-cross seal', subject: 'Tiny abundance coin-cross seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:孤辰', kind: 'shensha', title: '孤辰', slug: 'guchenxing', accent: 'lone cool silver', mood: 'self-standing footnote', metaphor: 'tiny lone stone seal', subject: 'Tiny lone cool stone seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:寡宿', kind: 'shensha', title: '寡宿', slug: 'guasu', accent: 'quiet mist silver', mood: 'quiet solitude footnote', metaphor: 'tiny twin pale rings', subject: 'Tiny quiet twin pale rings seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:隔角', kind: 'shensha', title: '隔角', slug: 'gejiao', accent: 'gap amber', mood: 'misalignment footnote', metaphor: 'tiny split-corner seal', subject: 'Tiny split-corner gap seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:元辰', kind: 'shensha', title: '元辰', slug: 'yuanchen', accent: 'inner drain mauve', mood: 'inner friction footnote', metaphor: 'tiny opposing curves seal', subject: 'Tiny opposing mauve curves seal ~30% of frame, empty indigo. Soft reminder.', assetReady: true },
-  { id: 'ss:天罗', kind: 'shensha', title: '天罗', slug: 'tianluo', accent: 'net cool silver', mood: 'encircle / detour footnote', metaphor: 'tiny crossed-net seal', subject: 'Tiny cool crossed-net ring seal ~30% of frame, empty indigo. Detour, not doom.', assetReady: true },
-  { id: 'ss:地网', kind: 'shensha', title: '地网', slug: 'diwang', accent: 'grid earth silver', mood: 'ground tangle footnote', metaphor: 'tiny grid seal', subject: 'Tiny soft earth-grid seal ~30% of frame, empty indigo. Clear step by step.', assetReady: true },
-  { id: 'ss:马头带剑', kind: 'shensha', title: '马头带剑', slug: 'matoudaojian', accent: 'travel edge silver', mood: 'motion with edge footnote', metaphor: 'tiny hoof-and-blade seal', subject: 'Tiny hoof-and-blade travel seal ~30% of frame, empty indigo. Guard while moving.', assetReady: true },
-  { id: 'ss:阴差阳错', kind: 'shensha', title: '阴差阳错', slug: 'yinchayangcuo', accent: 'misalign mauve', mood: 'timing twist footnote', metaphor: 'tiny opposing arcs seal', subject: 'Tiny opposing mauve arcs seal ~30% of frame, empty indigo. Align timing, soft reminder.', assetReady: true },
-  { id: 'ss:童子', kind: 'shensha', title: '童子', slug: 'tongzi', accent: 'clear gold', mood: 'plain practice footnote', metaphor: 'tiny clear-head seal', subject: 'Tiny clear-gold simple head-and-curve seal ~30% of frame, empty indigo. Practice path, not doom.', assetReady: true },
-  { id: 'ss:挂剑', kind: 'shensha', title: '挂剑', slug: 'guajian', accent: 'sheathed silver', mood: 'edge on standby footnote', metaphor: 'tiny hanging blade seal', subject: 'Tiny hanging silver blade seal ~30% of frame, empty indigo. Guard posture.', assetReady: true },
-  { id: 'ss:死符', kind: 'shensha', title: '死符', slug: 'sifu', accent: 'still cool silver', mood: 'stagnation reminder footnote', metaphor: 'tiny still plaque seal', subject: 'Tiny cool still plaque seal ~30% of frame, empty indigo. Pause reminder, not literal death.', assetReady: true },
-  { id: 'ss:绞煞', kind: 'shensha', title: '绞煞', slug: 'jiaosha', accent: 'knot mauve', mood: 'entangle caution footnote', metaphor: 'tiny loop-knot seal', subject: 'Tiny soft mauve loop-knot seal ~30% of frame, empty indigo. Untangle carefully.', assetReady: true },
-  { id: 'ss:五鬼', kind: 'shensha', title: '五鬼', slug: 'wugui', accent: 'scatter violet', mood: 'scatter / noise footnote', metaphor: 'tiny five-dot seal', subject: 'Tiny five soft violet dots seal ~30% of frame, empty indigo. Noise reminder, not haunt.', assetReady: true },
-  { id: 'ss:勾绞', kind: 'shensha', title: '勾绞', slug: 'goujiao', accent: 'hook rose silver', mood: 'pull-and-tangle footnote', metaphor: 'tiny twin hooks seal', subject: 'Tiny twin hook curves seal ~30% of frame, empty indigo. Soft caution.', assetReady: true },
-  { id: 'ss:披麻', kind: 'shensha', title: '披麻', slug: 'pima', accent: 'mourning ash', mood: 'farewell cloth footnote', metaphor: 'tiny vertical cloth lines', subject: 'Tiny ash vertical cloth-line seal ~30% of frame, empty indigo. Soft farewell tone.', assetReady: true },
-  { id: 'ss:六厄', kind: 'shensha', title: '六厄', slug: 'liue', accent: 'hardship amber', mood: 'hard stretch footnote', metaphor: 'tiny hardship chevron', subject: 'Tiny amber hardship chevron seal ~30% of frame, empty indigo. Stretch reminder.', assetReady: true },
-  { id: 'ss:胎神', kind: 'shensha', title: '胎神', slug: 'taishen', accent: 'seed rose gold', mood: 'gestation care footnote', metaphor: 'tiny seed oval seal', subject: 'Tiny rose-gold seed oval seal ~30% of frame, empty indigo. Care / beginning.', assetReady: true },
-  { id: 'ss:养神', kind: 'shensha', title: '养神', slug: 'yangshen', accent: 'nourish sage', mood: 'nurture footing footnote', metaphor: 'tiny nurture curve seal', subject: 'Tiny sage nurture curve seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:截路空亡', kind: 'shensha', title: '截路空亡', slug: 'jielukongwang', accent: 'blocked path silver', mood: 'detour / gap footnote', metaphor: 'tiny blocked-path seal', subject: 'Tiny dashed blocked-path ring seal ~30% of frame, empty indigo. Detour, not doom.', assetReady: true },
-  { id: 'ss:正印', kind: 'shensha', title: '正印', slug: 'zhengyin', accent: 'seal nurture gold', mood: 'support / study footing footnote', metaphor: 'tiny nurture seal plaque', subject: 'Tiny gold nurture seal plaque ~30% of frame, empty indigo. Support footing, not ten-god lecture.', assetReady: true },
-  { id: 'ss:华盖（驿）', kind: 'shensha', title: '华盖（驿）', slug: 'huagaiyi', accent: 'canopy wind silver', mood: 'travel solitude footnote', metaphor: 'tiny canopy-with-trail seal', subject: 'Tiny canopy with wind trail seal ~30% of frame, empty indigo. Move then rest.', assetReady: true },
-  { id: 'ss:动态', kind: 'shensha', title: '动态', slug: 'dongtai', accent: 'motion teal silver', mood: 'motion overview footnote', metaphor: 'tiny motion curve seal', subject: 'Tiny teal motion-curve seal ~30% of frame, empty indigo. Return to shore.', assetReady: true },
-  { id: 'ss:羊刃（凶读）', kind: 'shensha', title: '羊刃（凶读）', slug: 'yangrenxiong', accent: 'fierce blade rose', mood: 'sharp edge caution footnote', metaphor: 'tiny fierce blade tip seal', subject: 'Tiny rose-steel fierce blade tip seal ~30% of frame, empty indigo. Soft caution, not gore.', assetReady: true },
-  { id: 'ss:天喜红鸾', kind: 'shensha', title: '天喜红鸾', slug: 'tianxihongluan', accent: 'festive rose gold', mood: 'joy bond pair footnote', metaphor: 'tiny twin joy seals', subject: 'Tiny twin festive rose-gold seals ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:咸池桃花', kind: 'shensha', title: '咸池桃花', slug: 'xianchitaohua', accent: 'pool blossom rose', mood: 'affinity pool footnote', metaphor: 'tiny pool-blossom seal', subject: 'Tiny rose pool-blossom seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:妻妾', kind: 'shensha', title: '妻妾', slug: 'qiqie', accent: 'pair bond rose', mood: 'partner role footnote', metaphor: 'tiny twin rings seal', subject: 'Tiny twin pale rose rings seal ~30% of frame, empty indigo. Role note, not judgment.', assetReady: true },
-  { id: 'ss:夫星', kind: 'shensha', title: '夫星', slug: 'fuxingrole', accent: 'partner crest gold', mood: 'partner role footnote', metaphor: 'tiny crest triangle seal', subject: 'Tiny gold partner crest seal ~30% of frame, empty indigo. Role note.', assetReady: true },
-  { id: 'ss:词馆学堂', kind: 'shensha', title: '词馆学堂', slug: 'ciguanxuetang', accent: 'study hall gold', mood: 'learning hall footnote', metaphor: 'tiny hall-book seal', subject: 'Tiny study-hall book seal ~30% of frame, empty indigo. No classroom scene.', assetReady: true },
-  { id: 'ss:子孙星', kind: 'shensha', title: '子孙星', slug: 'zisunxing', accent: 'offspring sage', mood: 'next-gen role footnote', metaphor: 'tiny sprout curve seal', subject: 'Tiny sage sprout curve seal ~30% of frame, empty indigo.', assetReady: true },
-  { id: 'ss:长生', kind: 'shensha', title: '长生', slug: 'changsheng', accent: 'sprout green-gold', mood: 'life-cycle start footnote', metaphor: 'tiny sprout seal', subject: 'Tiny sprout green-gold seal ~30% of frame, empty indigo. Stage mark.', assetReady: true },
-  { id: 'ss:帝旺', kind: 'shensha', title: '帝旺', slug: 'diwangstage', accent: 'peak gold', mood: 'life-cycle peak footnote', metaphor: 'tiny peak star seal', subject: 'Tiny peak gold star seal ~30% of frame, empty indigo. Stage mark, not throne scene.', assetReady: true },
-  { id: 'ss:墓库', kind: 'shensha', title: '墓库', slug: 'muku', accent: 'storehouse ash gold', mood: 'life-cycle store footnote', metaphor: 'tiny storehouse seal', subject: 'Tiny ash-gold storehouse seal ~30% of frame, empty indigo. Storage stage.', assetReady: true },
-  { id: 'ss:旬空', kind: 'shensha', title: '旬空', slug: 'xunkong', accent: 'void dashed silver', mood: 'gap / pause footnote', metaphor: 'tiny dashed void ring', subject: 'Tiny dashed void ring seal ~30% of frame, empty indigo. Borrow real footing.', assetReady: true },
-  { id: 'ss:天罗地网', kind: 'shensha', title: '天罗地网', slug: 'tianluodiwang', accent: 'net-grid silver', mood: 'encircle detour footnote', metaphor: 'tiny net-over-grid seal', subject: 'Tiny net-over-grid seal ~30% of frame, empty indigo. Detour step by step.', assetReady: true },
+const SHENSHA_COVER_META: { id: string; title: string; slug: string }[] = [
+  { id: 'ss:天乙贵人', title: '天乙贵人', slug: 'tianyi' },
+  { id: 'ss:文昌', title: '文昌', slug: 'wenchang' },
+  { id: 'ss:禄神', title: '禄神', slug: 'lushen' },
+  { id: 'ss:将星', title: '将星', slug: 'jiangxing' },
+  { id: 'ss:红鸾', title: '红鸾', slug: 'hongluan' },
+  { id: 'ss:天喜', title: '天喜', slug: 'tianxi' },
+  { id: 'ss:桃花', title: '桃花', slug: 'taohua' },
+  { id: 'ss:羊刃', title: '羊刃', slug: 'yangren' },
+  { id: 'ss:华盖', title: '华盖', slug: 'huagai' },
+  { id: 'ss:孤辰寡宿', title: '孤辰寡宿', slug: 'guchen' },
+  { id: 'ss:驿马', title: '驿马', slug: 'yima' },
+  { id: 'ss:劫煞', title: '劫煞', slug: 'jiesha' },
+  { id: 'ss:天德', title: '天德', slug: 'tiande' },
+  { id: 'ss:月德', title: '月德', slug: 'yuede' },
+  { id: 'ss:福星', title: '福星', slug: 'fuxing' },
+  { id: 'ss:金舆', title: '金舆', slug: 'jinyu' },
+  { id: 'ss:天厨', title: '天厨', slug: 'tianchu' },
+  { id: 'ss:学堂', title: '学堂', slug: 'xuetang' },
+  { id: 'ss:空亡', title: '空亡', slug: 'kongwang' },
+  { id: 'ss:病符', title: '病符', slug: 'bingfu' },
+  { id: 'ss:白虎', title: '白虎', slug: 'baihu' },
+  { id: 'ss:灾煞', title: '灾煞', slug: 'zaisha' },
+  { id: 'ss:亡神', title: '亡神', slug: 'wangshen' },
+  { id: 'ss:咸池', title: '咸池', slug: 'xianchi' },
+  { id: 'ss:天德合', title: '天德合', slug: 'tiandehe' },
+  { id: 'ss:月德合', title: '月德合', slug: 'yuedehe' },
+  { id: 'ss:天赦', title: '天赦', slug: 'tianshe' },
+  { id: 'ss:三奇贵人', title: '三奇贵人', slug: 'sanqi' },
+  { id: 'ss:天医', title: '天医', slug: 'tianyimed' },
+  { id: 'ss:解神', title: '解神', slug: 'jieshen' },
+  { id: 'ss:词馆', title: '词馆', slug: 'ciguan' },
+  { id: 'ss:文曲', title: '文曲', slug: 'wenqu' },
+  { id: 'ss:天马', title: '天马', slug: 'tianma' },
+  { id: 'ss:吊客', title: '吊客', slug: 'diaoke' },
+  { id: 'ss:天哭', title: '天哭', slug: 'tianku' },
+  { id: 'ss:天虚', title: '天虚', slug: 'tianxu' },
+  { id: 'ss:破碎', title: '破碎', slug: 'posui' },
+  { id: 'ss:大耗', title: '大耗', slug: 'dahao' },
+  { id: 'ss:丧门', title: '丧门', slug: 'sangmen' },
+  { id: 'ss:魁罡', title: '魁罡', slug: 'kuigang' },
+  { id: 'ss:沐浴', title: '沐浴', slug: 'muyu' },
+  { id: 'ss:风流', title: '风流', slug: 'fengliu' },
+  { id: 'ss:流霞', title: '流霞', slug: 'liuxia' },
+  { id: 'ss:血刃', title: '血刃', slug: 'xueren' },
+  { id: 'ss:国印', title: '国印', slug: 'guoyin' },
+  { id: 'ss:台阁', title: '台阁', slug: 'taige' },
+  { id: 'ss:权星', title: '权星', slug: 'quanxing' },
+  { id: 'ss:飞刃', title: '飞刃', slug: 'feiren' },
+  { id: 'ss:紫微', title: '紫微', slug: 'ziwei' },
+  { id: 'ss:天官', title: '天官', slug: 'tianguan' },
+  { id: 'ss:仓廪', title: '仓廪', slug: 'cangling' },
+  { id: 'ss:飞财', title: '飞财', slug: 'feicai' },
+  { id: 'ss:进神', title: '进神', slug: 'jinshen' },
+  { id: 'ss:退神', title: '退神', slug: 'tuishen' },
+  { id: 'ss:富星', title: '富星', slug: 'caixing' },
+  { id: 'ss:孤辰', title: '孤辰', slug: 'guchenxing' },
+  { id: 'ss:寡宿', title: '寡宿', slug: 'guasu' },
+  { id: 'ss:隔角', title: '隔角', slug: 'gejiao' },
+  { id: 'ss:元辰', title: '元辰', slug: 'yuanchen' },
+  { id: 'ss:天罗', title: '天罗', slug: 'tianluo' },
+  { id: 'ss:地网', title: '地网', slug: 'diwang' },
+  { id: 'ss:马头带剑', title: '马头带剑', slug: 'matoudaojian' },
+  { id: 'ss:阴差阳错', title: '阴差阳错', slug: 'yinchayangcuo' },
+  { id: 'ss:童子', title: '童子', slug: 'tongzi' },
+  { id: 'ss:挂剑', title: '挂剑', slug: 'guajian' },
+  { id: 'ss:死符', title: '死符', slug: 'sifu' },
+  { id: 'ss:绞煞', title: '绞煞', slug: 'jiaosha' },
+  { id: 'ss:五鬼', title: '五鬼', slug: 'wugui' },
+  { id: 'ss:勾绞', title: '勾绞', slug: 'goujiao' },
+  { id: 'ss:披麻', title: '披麻', slug: 'pima' },
+  { id: 'ss:六厄', title: '六厄', slug: 'liue' },
+  { id: 'ss:胎神', title: '胎神', slug: 'taishen' },
+  { id: 'ss:养神', title: '养神', slug: 'yangshen' },
+  { id: 'ss:截路空亡', title: '截路空亡', slug: 'jielukongwang' },
+  { id: 'ss:正印', title: '正印', slug: 'zhengyin' },
+  { id: 'ss:华盖（驿）', title: '华盖（驿）', slug: 'huagaiyi' },
+  { id: 'ss:动态', title: '动态', slug: 'dongtai' },
+  { id: 'ss:羊刃（凶读）', title: '羊刃（凶读）', slug: 'yangrenxiong' },
+  { id: 'ss:天喜红鸾', title: '天喜红鸾', slug: 'tianxihongluan' },
+  { id: 'ss:咸池桃花', title: '咸池桃花', slug: 'xianchitaohua' },
+  { id: 'ss:妻妾', title: '妻妾', slug: 'qiqie' },
+  { id: 'ss:夫星', title: '夫星', slug: 'fuxingrole' },
+  { id: 'ss:词馆学堂', title: '词馆学堂', slug: 'ciguanxuetang' },
+  { id: 'ss:子孙星', title: '子孙星', slug: 'zisunxing' },
+  { id: 'ss:长生', title: '长生', slug: 'changsheng' },
+  { id: 'ss:帝旺', title: '帝旺', slug: 'diwangstage' },
+  { id: 'ss:墓库', title: '墓库', slug: 'muku' },
+  { id: 'ss:旬空', title: '旬空', slug: 'xunkong' },
+  { id: 'ss:天罗地网', title: '天罗地网', slug: 'tianluodiwang' },
 ];
+
+/** 星煞封面：东方命理博物志竖幅图谱（图内无字，CSS 叠名） */
+export const SHENSHA_COVER_PROMPTS: CodexCoverPrompt[] = SHENSHA_COVER_META.map((m) => {
+  const sc = SHENSHA_ATLAS_SCENES[m.slug];
+  if (!sc) throw new Error('missing atlas scene for ' + m.slug);
+  const subject = atlasSubjectForSlug(m.slug);
+  if (!subject) throw new Error('missing atlas subject for ' + m.slug);
+  return {
+    id: m.id,
+    kind: 'shensha' as const,
+    title: m.title,
+    slug: m.slug,
+    accent: sc.accent,
+    mood: sc.mood,
+    metaphor: sc.metaphor,
+    subject,
+    assetReady: true,
+  };
+});
 
 export const ALL_COVER_PROMPTS: CodexCoverPrompt[] = [
   ...STEM_COVER_PROMPTS,

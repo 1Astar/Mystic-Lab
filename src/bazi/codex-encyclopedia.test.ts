@@ -215,6 +215,8 @@ describe('bazi encyclopedia', () => {
       expect(d.season, n.name).not.toMatch(/骨架条目/);
       expect(d.likes.length, n.name).toBeGreaterThanOrEqual(2);
       expect(d.memory, n.name).toMatch(/纳音|勿单断|画面/);
+      expect(d.coreKeyword, n.name).not.toContain(n.name);
+      expect(d.coreKeyword, n.name).not.toMatch(/·/);
     }
   });
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { NAYIN_ATLAS, nayinId } from './codex-atlas-catalog.ts';
+import { NAYIN_ATLAS, listSixtyJiazi, nayinId } from './codex-atlas-catalog.ts';
 import { listNayinArtNames, nayinArtSvg } from './codex-nayin-art.ts';
 import { codexDetailArtHtml } from './codex-detail-art.ts';
+import { nayinOf } from './pillar-meta.ts';
 
 describe('nayin cover art', () => {
   it('三十纳音均有专属 SVG 场景且无解释字', () => {
@@ -38,5 +39,16 @@ describe('nayin cover art', () => {
     const furnace = nayinArtSvg('炉中火');
     expect(furnace).toMatch(/H112/);
     expect(furnace).toMatch(/Q80 52|Q48 58/);
+  });
+
+  it('六十甲子均可解析纳音并出列表同源图', () => {
+    const sixty = listSixtyJiazi();
+    expect(sixty).toHaveLength(60);
+    expect(nayinOf('甲子')).toBe(nayinOf('乙丑'));
+    for (const gz of sixty) {
+      const ny = nayinOf(gz);
+      expect(ny.length, gz).toBeGreaterThan(0);
+      expect(nayinArtSvg(ny, { uid: `jz-${gz}` }), gz).toContain('bazi-art-nayin');
+    }
   });
 });

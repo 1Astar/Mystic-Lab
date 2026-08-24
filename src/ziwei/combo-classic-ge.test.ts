@@ -124,7 +124,23 @@ describe('classic ge formation', () => {
 
   it('classic catalog is substantially complete', () => {
     const classic = COMBO_LORE.filter((c) => c.family === 'classic-ge');
-    expect(classic.length).toBeGreaterThanOrEqual(40);
+    expect(classic.length).toBeGreaterThanOrEqual(80);
+    for (const id of ['阳梁昌禄', '紫府朝垣', '日出扶桑', '空劫夹命', '马头带剑', '善荫朝纲']) {
+      expect(getComboLore(id)?.family).toBe('classic-ge');
+    }
+    expect(getComboLore('日丽中天')?.id).toBe('金灿光辉');
+    expect(getComboLore('日照雷门')?.id).toBe('日出扶桑');
+  });
+
+  it('stamps traditional ge categories', () => {
+    expect(getComboLore('阳梁昌禄')?.category).toBe('wen-gui');
+    expect(getComboLore('紫府同宫')?.category).toBe('di-fu');
+    expect(getComboLore('马头带剑')?.category).toBe('xiong');
+    expect(getComboLore('火贪')?.category).toBe('huo-tan');
+    const starCombo = COMBO_LORE.find(
+      (c) => c.family === 'star-combo' && !['杀破狼', '机月同梁'].includes(c.id),
+    );
+    expect(starCombo?.category).toBe('star-combo');
   });
 });
 

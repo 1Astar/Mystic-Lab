@@ -1,4 +1,4 @@
-﻿import { navigate } from '../router.ts';
+import { navigate } from '../router.ts';
 import { mountEnvBanner } from '../ui/banner.ts';
 import { mysticEmblemHtml } from '../ui/mystic-emblem.ts';
 import { createStarsLayer } from '../tarot/animations.ts';
@@ -36,7 +36,6 @@ import { codexDetailArtHtml } from '../bazi/codex-detail-art.ts';
 import {
   conceptThumbSvg,
   renderChongHeXingHaiConceptHtml,
-  renderLuckScaleConceptHtml,
 } from '../bazi/codex-concept-diagrams.ts';
 import { baziSysTabsHtml } from '../ui/lab-sys-tabs.ts';
 import {
@@ -81,6 +80,7 @@ import {
   listSixtyJiazi,
   nayinId,
   shenshaAtlasByCategory,
+  shenshaAtlasGloss,
   type ShenshaCategory,
 } from '../bazi/codex-atlas-catalog.ts';
 import { castBaziChart, type BaziChart } from '../bazi/cast.ts';
@@ -126,8 +126,7 @@ type Tab =
   | 'tengod'
   | 'shensha'
   | 'nayin'
-  | 'jiazi'
-  | 'luck';
+  | 'jiazi';
 
 const TAB_ORDER: Tab[] = [
   'relation',
@@ -135,10 +134,20 @@ const TAB_ORDER: Tab[] = [
   'branch',
   'tengod',
   'shensha',
-  'nayin',
   'jiazi',
-  'luck',
+  'nayin',
 ];
+
+/** 甲子 / 纳音共用：柱与气象标签的关系 */
+const JIAZI_NAYIN_RELATION = [
+  '甲子是柱，纳音是这柱的「气象标签」。',
+  '六十甲子 = 天干×地支的 60 种组合（甲子、乙丑…癸亥），排盘里每一柱、每一段大运都是其中一个。',
+  '纳音把这 60 柱按传统配成 30 个画面名（海中金、炉中火…）。',
+] as const;
+
+/** 甲子页追加：运程入口说明（原「运程」Tab 已并入） */
+const JIAZI_LUCK_HINT =
+  '真运程看排盘里的大运 / 流年板；某段十年主题，点对应甲子词条的「作大运时」。';
 
 const TAB_GUIDE: Record<Tab, string> = {
   relation: '五行生克 · 地支环图 · 天干环图',
@@ -146,10 +155,24 @@ const TAB_GUIDE: Record<Tab, string> = {
   branch: '环境、根基与行动方式',
   tengod: '你如何与世界发生关系',
   shensha: '神煞按类浏览 · 辅助信息，勿单断',
-  nayin: '三十纳音 · 干支组合的气象象意',
   jiazi: '六十甲子 · 每柱干支的完整索引',
-  luck: '大运流年 · 如何触发原局',
+  nayin: '三十纳音 · 干支组合的气象象意',
 };
+
+function tabGuideHtml(tab: Tab): string {
+  const lead = `<p class="bazi-codex-guide">${escapeHtml(TAB_GUIDE[tab])}</p>`;
+  if (tab !== 'jiazi' && tab !== 'nayin') return lead;
+  const blurbs =
+    tab === 'jiazi'
+      ? [...JIAZI_NAYIN_RELATION, JIAZI_LUCK_HINT]
+      : [...JIAZI_NAYIN_RELATION];
+  return `<div class="bazi-codex-guide-block">
+    ${lead}
+    ${blurbs
+      .map((line) => `<p class="bazi-codex-guide-blurb">${escapeHtml(line)}</p>`)
+      .join('')}
+  </div>`;
+}
 
 /** 图鉴「我的旅程」· 仿紫微「我的相遇」 */
 type JourneyHub = 'lit' | 'chart' | 'marks';
@@ -170,6 +193,8 @@ function parseJourneyHub(raw: string | undefined): JourneyHub {
 function parseTab(raw: string | undefined): Tab {
   if (raw === 'wuxing' || raw === 'bonds') return 'relation';
   if (raw === 'marks') return 'relation';
+  /** 旧「运程」Tab 已并入甲子 */
+  if (raw === 'luck') return 'jiazi';
   if (raw && (TAB_ORDER as string[]).includes(raw)) return raw as Tab;
   return 'relation';
 }
@@ -183,16 +208,14 @@ function quizCategoryFromEntryId(id: string): Tab | null {
     if (enc.kind === 'tengod') return 'tengod';
     if (enc.kind === 'shensha') return 'shensha';
     if (enc.kind === 'nayin') return 'nayin';
-    if (enc.kind === 'jiazi') return 'jiazi';
-    if (enc.kind === 'luck') return 'luck';
+    if (enc.kind === 'jiazi' || enc.kind === 'luck') return 'jiazi';
   }
   if (WUXING_ORDER.includes(id as WuXing)) return 'relation';
   if (id.startsWith('tg:')) return 'tengod';
   if (id.startsWith('ss:')) return 'shensha';
   if (id.startsWith('ny:')) return 'nayin';
-  if (id.startsWith('jz:')) return 'jiazi';
+  if (id.startsWith('jz:') || id.startsWith('luck:')) return 'jiazi';
   if (id.startsWith('rel:')) return 'relation';
-  if (id.startsWith('luck:')) return 'luck';
   return null;
 }
 
@@ -327,9 +350,8 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       detailId = pending;
       const enc = getBaziEncyclopedia(pending);
       if (enc?.kind === 'nayin') tab = 'nayin';
-      else if (enc?.kind === 'jiazi') tab = 'jiazi';
+      else if (enc?.kind === 'jiazi' || enc?.kind === 'luck') tab = 'jiazi';
       else if (enc?.kind === 'relation') tab = 'relation';
-      else if (enc?.kind === 'luck') tab = 'luck';
       else if (enc?.kind === 'shensha') tab = 'shensha';
       else if (enc?.kind === 'stem') tab = 'stem';
       else if (enc?.kind === 'branch') tab = 'branch';
@@ -354,9 +376,8 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       else if (enc.kind === 'tengod') tab = 'tengod';
       else if (enc.kind === 'shensha') tab = 'shensha';
       else if (enc.kind === 'nayin') tab = 'nayin';
-      else if (enc.kind === 'jiazi') tab = 'jiazi';
+      else if (enc.kind === 'jiazi' || enc.kind === 'luck') tab = 'jiazi';
       else if (enc.kind === 'relation') tab = 'relation';
-      else if (enc.kind === 'luck') tab = 'luck';
     } else if (WUXING_ORDER.includes(id as WuXing)) {
       tab = 'relation';
     } else if (STEM_LORE.some((s) => s.id === id)) {
@@ -369,12 +390,10 @@ export function renderBaziCodex(root: HTMLElement): () => void {
       tab = 'shensha';
     } else if (id.startsWith('ny:')) {
       tab = 'nayin';
-    } else if (id.startsWith('jz:')) {
+    } else if (id.startsWith('jz:') || id.startsWith('luck:')) {
       tab = 'jiazi';
     } else if (id.startsWith('rel:')) {
       tab = 'relation';
-    } else if (id.startsWith('luck:')) {
-      tab = 'luck';
     }
     detailId = id;
     trackCodexBrowse(id, tab);
@@ -515,12 +534,11 @@ export function renderBaziCodex(root: HTMLElement): () => void {
         ${tabBtn('branch', '十二地支', branchP)}
         ${tabBtn('tengod', '十神', tgP)}
         ${tabBtn('shensha', `神煞`, ssP)}
-        ${tabBtn('nayin', '纳音', nyP)}
         ${tabBtn('jiazi', '甲子', jzP)}
-        ${tabBtn('luck', '运程')}
+        ${tabBtn('nayin', '纳音', nyP)}
       </div>
 
-      <p class="bazi-codex-guide">${escapeHtml(TAB_GUIDE[tab])}</p>
+      ${tabGuideHtml(tab)}
 
       ${
         tab === 'relation'
@@ -533,11 +551,9 @@ export function renderBaziCodex(root: HTMLElement): () => void {
                 ? renderTengodGrid()
                 : tab === 'shensha'
                   ? renderShenshaAtlas(shenshaCat)
-                  : tab === 'nayin'
-                    ? renderNayinGrid()
-                    : tab === 'jiazi'
-                      ? renderJiaziGrid()
-                      : renderLuckGrid()
+                  : tab === 'jiazi'
+                    ? renderJiaziGrid()
+                    : renderNayinGrid()
       }
       ${detailId ? renderDetail(detailId, map) : ''}
     `;
@@ -765,7 +781,9 @@ function cardThumbHtml(id: string): string {
     return `<span class="bazi-codex-thumb is-svg is-nayin" aria-hidden="true">${nayinArtSvg(ny || '海中金', { uid: `card-${id}` })}</span>`;
   }
   if (enc?.kind === 'shensha' || id.startsWith('ss:')) {
-    const badge = shenshaBadgeArtHtml(id, enc?.title?.charAt(0) || '煞');
+    const badge = shenshaBadgeArtHtml(id, enc?.title?.charAt(0) || '煞', {
+      overlayName: false,
+    });
     return `<span class="bazi-codex-thumb is-ss-badge" aria-hidden="true">${badge}</span>`;
   }
   if (id.startsWith('luck:') || id.startsWith('rel:')) {
@@ -776,6 +794,17 @@ function cardThumbHtml(id: string): string {
   }
   const star = getStarCard(id);
   return `<span class="bazi-codex-thumb is-glyph" aria-hidden="true">${escapeHtml(star?.glyph || enc?.title?.charAt(0) || '·')}</span>`;
+}
+
+function listCoreBlurb(title: string, raw: string): string {
+  const t = title.trim();
+  const text = raw.trim();
+  if (!t || !text) return text;
+  const prefixes = [`${t} · `, `${t}· `, `${t} ·`, `${t}·`];
+  for (const p of prefixes) {
+    if (text.startsWith(p)) return text.slice(p.length).trim();
+  }
+  return text;
 }
 
 /** 卡片层：图 / 名 / 五行阴阳 / 核心词 / 命盘状态 */
@@ -796,7 +825,7 @@ function compactEntryHtml(opts: {
   const enc = getBaziEncyclopedia(opts.id);
   const dossier = buildCodexDossier(opts.id);
   const meta = enc ? cardMetaLabels(enc) : { wuxing: '', yinyang: '' };
-  const keyword = dossier?.coreKeyword || opts.core;
+  const keyword = listCoreBlurb(opts.title, dossier?.coreKeyword || opts.core);
   const lit = opts.lit ?? entryIsLit(opts.id);
   const brief = chartPresenceBriefLine(opts.id, chart, luck, 48);
   const presence = brief || chartPresenceLabel(opts.id, chart, lit);
@@ -844,6 +873,7 @@ function renderShengKeTab(
     if (reason) statusByWx[wx] = reason;
   }
   return `
+    <div class="bazi-shengke-stack">
     ${renderWuxingShengKeMapHtml({
       title: '五行生克',
       hint: wxFocus
@@ -855,6 +885,7 @@ function renderShengKeTab(
     ${renderChongHeXingHaiConceptHtml()}
     ${renderBranchRelationRingHtml({ mode: ringMode })}
     ${renderStemRelationRingHtml({ mode: stemMode })}
+    </div>
   `;
 }
 
@@ -945,10 +976,16 @@ function renderShenshaAtlas(cat: ShenshaCatFilter = 'all'): string {
             .map((s) => {
               const id = shenshaCardId(s.name);
               const lit = isBaziCodexUnlocked(id);
+              const art = shenshaBadgeArtHtml(id, s.name.slice(0, 1) || '煞', {
+                overlayName: false,
+              });
               return `
                 <button type="button" class="bazi-ss-chip ${lit ? 'is-lit' : 'is-soft'}" data-codex-id="${escapeHtml(id)}">
-                  <strong>${escapeHtml(s.name)}</strong>
-                  <em>${escapeHtml(lit ? s.gloss : '未解锁')}</em>
+                  ${art}
+                  <span class="bazi-ss-chip-text">
+                    <strong>${escapeHtml(s.name)}</strong>
+                    <em>${escapeHtml(s.gloss)}</em>
+                  </span>
                 </button>`;
             })
             .join('')}
@@ -1002,17 +1039,16 @@ function renderJiaziGrid(): string {
           const where = hitTitles(gz);
           return `
             <button type="button" class="bazi-jz-chip ${hit ? 'is-hit' : 'is-soft'}" data-codex-id="${escapeHtml(id)}">
-              <strong>${escapeHtml(gz)}</strong>
-              <span class="bazi-jz-ny">${escapeHtml(ny)}</span>
-              ${hit ? `<span class="bazi-jz-hit">命盘·${escapeHtml(where)}</span>` : ''}
+              ${cardThumbHtml(id)}
+              <span class="bazi-jz-chip-text">
+                <strong>${escapeHtml(gz)}</strong>
+                <span class="bazi-jz-ny">${escapeHtml(ny)}</span>
+                ${hit ? `<span class="bazi-jz-hit">命盘·${escapeHtml(where)}</span>` : ''}
+              </span>
             </button>`;
         })
         .join('')}
     </div>`;
-}
-
-function renderLuckGrid(): string {
-  return `${renderLuckScaleConceptHtml()}`;
 }
 
 function renderJourneyLayer(
@@ -1062,9 +1098,8 @@ function renderJourneyLitHub(progress: { collected: number; total: number }): st
     { tab: 'branch', label: '十二地支' },
     { tab: 'tengod', label: '十神' },
     { tab: 'shensha', label: '神煞' },
-    { tab: 'nayin', label: '纳音' },
     { tab: 'jiazi', label: '甲子' },
-    { tab: 'luck', label: '运程' },
+    { tab: 'nayin', label: '纳音' },
   ];
 
   const hero = `
@@ -1080,9 +1115,7 @@ function renderJourneyLitHub(progress: { collected: number; total: number }): st
         ${cats
           .map((c) => {
             const n = countForTab(c.tab);
-            const p = baziCodexProgress(
-              c.tab === 'relation' ? 'relation' : c.tab === 'luck' ? 'luck' : c.tab,
-            );
+            const p = baziCodexProgress(c.tab === 'relation' ? 'relation' : c.tab);
             return `
             <button type="button" class="bazi-journey-kind-card${n ? '' : ' is-empty'}"
               data-goto-atlas-tab="${c.tab}" ${n ? '' : 'disabled'}>
@@ -1217,7 +1250,8 @@ function renderJourneyChartHub(): string {
           const card = getStarCard(x.id);
           const enc = getBaziEncyclopedia(x.id);
           const name = card?.name ?? enc?.title ?? x.id;
-          const gloss = card?.modern ?? enc?.oneLiner ?? '盘上神煞';
+          const gloss =
+            shenshaAtlasGloss(name) || card?.impression || card?.modern || enc?.oneLiner || '盘上神煞';
           return `
             <button type="button" class="bazi-ss-chip is-lit" data-codex-id="${escapeHtml(x.id)}">
               <strong>${escapeHtml(name)}</strong>
@@ -1269,8 +1303,8 @@ function renderJourneyChartHub(): string {
     ${section('天干', byKind.stem, 'stem', '本盘天干会列在这里')}
     ${section('地支', byKind.branch, 'branch', '本盘地支会列在这里')}
     ${section('十神', byKind.tengod, 'tengod', '本盘十神会列在这里')}
-    ${section('纳音', byKind.nayin, 'nayin', '四柱纳音会列在这里')}
     ${section('甲子', byKind.jiazi, 'jiazi', '四柱甲子会列在这里')}
+    ${section('纳音', byKind.nayin, 'nayin', '四柱纳音会列在这里')}
     ${section('生克关系', byKind.relation, 'relation', '盘面冲合刑害等关系会列在这里')}`;
 }
 
@@ -1315,26 +1349,22 @@ function renderMarksGrid(filter: MarksFilter): string {
   return `${sub}<div class="bazi-codex-entry-grid">${cards}</div>`;
 }
 
-/** 精品：单独条目 = 小徽章 + 名称 + xx之星 */
+/** 精品：缩略图纯画面 + 名称 + 含义（未解锁也显示内容，只灰图） */
 function featuredBadgeHtml(card: StarCardLore): string {
   const unlocked = isBaziCodexUnlocked(card.id);
   const visual = getShenshaVisual(card.name);
   const warm =
     visual?.light === 'warm' ||
     (!visual && card.zone === 'auspicious');
-  const src = getCodexCoverSrc(card.id);
-  const art = `<div class="bazi-ss-badge-stage" aria-hidden="true">${
-    src
-      ? `<div class="bazi-ss-badge-art"><img src="${escapeHtml(src)}" alt="" loading="lazy" /></div>`
-      : `<div class="bazi-ss-badge-glyph">${escapeHtml(card.glyph)}</div>`
-  }</div>`;
-
+  const art = shenshaBadgeArtHtml(card.id, card.glyph, { overlayName: false });
+  const blurb =
+    shenshaAtlasGloss(card.name) || card.impression || card.modern;
   return `
     <button type="button" class="bazi-ss-row ${warm ? 'is-warm' : 'is-cold'} ${unlocked ? 'is-lit' : 'is-soft'}" data-codex-id="${escapeHtml(card.id)}">
       ${art}
       <span class="bazi-ss-row-text">
         <strong>${escapeHtml(card.name)}</strong>
-        <em>${escapeHtml(unlocked ? card.modern : '未解锁 · 排盘遇见后点亮')}</em>
+        <em>${escapeHtml(blurb)}</em>
       </span>
     </button>`;
 }

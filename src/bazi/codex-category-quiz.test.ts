@@ -27,7 +27,6 @@ describe('codex-category-quiz', () => {
       'stem',
       'branch',
       'tengod',
-      'shensha',
       'nayin',
       'jiazi',
       'luck',
@@ -35,6 +34,11 @@ describe('codex-category-quiz', () => {
       expect(cats.has(c), c).toBe(true);
       expect(pickCategoryQuiz(c, '2026-08-14')).not.toBeNull();
     }
+  });
+
+  it('神煞不出态度题', () => {
+    expect(quizzesForCategory('shensha')).toEqual([]);
+    expect(pickCategoryQuiz('shensha', '2026-08-18')).toBeNull();
   });
 });
 

@@ -3,7 +3,18 @@
 - **App 只接 webp**：`/bazi/covers/{slug}.webp`
 - 同目录 `{slug}.png` 仅作原图归档，不在代码里引用
 - Prompt：`src/bazi/codex-cover-prompts.ts`
-- 转换：`node scripts/convert-bazi-covers.mjs`（结束后会再跑神煞归一化）
-- 精品神煞章面大小：`node scripts/normalize-shensha-badges.mjs`（只改 webp，png 源不动）
-- 已出齐：十天干 + 十二地支 + 十神 + 神煞图鉴名录章面（提示 89 全就绪；扩展 SVG 光栅约 78）
-- 扩展神煞：`npx tsx scripts/rasterize-extended-shensha.ts` → `normalize-shensha-badges.mjs`
+- 转换：`node scripts/convert-bazi-covers.mjs`（**不再**跑暗宇宙圆章归一化）
+
+## 视觉分家（硬规则）
+
+| | 紫微星曜 | 八字神煞 |
+|---|---|---|
+| 核心 | 星曜人格与命宫力量 | 人生命运中的征兆 |
+| 视觉 | 宇宙、神祇、星轨 | 古籍、器物、动物、自然 |
+| 气质 | 壮丽、神圣、宏大 | 雅致、隐喻、博物志 |
+| 色彩 | 深蓝、黑金、星光 | 宣纸色、黛青、朱砂、赭石、鎏金 |
+
+**八字神煞母版＝东方命理博物志**：竖幅古籍插画；中央象征＋环境寓意；四角金纹；底预留神煞名（图内不写字）；不画复杂人物脸；水墨晕染＋矿物颜料；明度高于紫微；神秘但不黑暗压迫。
+
+样张优先：天乙贵人、文昌、桃花、驿马、华盖、羊刃。
+**图内无汉字**：列表缩略图不叠字（名称和含义写在图旁）；详情底栏可叠神煞名。

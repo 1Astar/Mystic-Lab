@@ -339,6 +339,10 @@ export function assertNayinCoverage(): { ok: boolean; missing: string[] } {
   return { ok: missing.length === 0, missing };
 }
 
+export function shenshaAtlasGloss(name: string): string | undefined {
+  return SHENSHA_ATLAS.find((s) => s.name === name)?.gloss;
+}
+
 export function shenshaAtlasByCategory(): Record<
   ShenshaCategory,
   { name: string; category: ShenshaCategory; gloss: string; tone: '吉' | '凶' | '中性' }[]

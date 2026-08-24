@@ -295,8 +295,9 @@
   top: 0;
   z-index: 4;
   padding: 8px 0;
-  background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 .ziwei-theater-tab {
   min-height: 48px;
@@ -914,10 +915,11 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 }
 
 .ziwei-layer-card {
-  padding: 14px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--zw-line);
-  background: var(--zw-panel);
+  padding: 12px 2px 14px;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft, var(--zw-line));
+  background: transparent;
   text-align: left;
   cursor: pointer;
   color: inherit;
@@ -1352,7 +1354,7 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 .ziwei-journey-step {
   position: relative;
   display: grid;
-  grid-template-columns: 36px 1fr auto;
+  grid-template-columns: 48px 1fr auto;
   gap: 10px 12px;
   align-items: start;
   width: 100%;
@@ -1377,6 +1379,82 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 
 .ziwei-journey-step.is-locked {
   opacity: 0.72;
+}
+
+.ziwei-journey-thumb {
+  position: relative;
+  width: 48px;
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.ziwei-journey-thumb .ziwei-codex-short-thumb-img,
+.ziwei-journey-thumb .ziwei-codex-short-glyph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ziwei-combo-stack,
+.ziwei-combo-hero-stack {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ziwei-combo-stack-img {
+  position: absolute;
+  inset: 8% 0 auto 0;
+  width: 72%;
+  height: 84%;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px color-mix(in srgb, #000 28%, transparent);
+}
+.ziwei-combo-stack-img:nth-child(1) {
+  left: 0;
+  top: 10%;
+  z-index: 1;
+}
+.ziwei-combo-stack-img:nth-child(2) {
+  left: 16%;
+  top: 2%;
+  z-index: 2;
+}
+.ziwei-combo-stack-img:nth-child(3) {
+  left: 28%;
+  top: 12%;
+  z-index: 3;
+}
+.ziwei-combo-stack-img:only-child,
+.ziwei-combo-stack-img:first-child:last-child {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ziwei-star-detail > .ziwei-detail-hero.is-combo-stack {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+  aspect-ratio: auto;
+  min-height: 140px;
+  padding: 6px;
+}
+.ziwei-star-detail > .ziwei-detail-hero.is-combo-stack .ziwei-combo-hero-stack {
+  display: flex;
+  width: 100%;
+  height: 180px;
+  gap: 6px;
+}
+.ziwei-star-detail > .ziwei-detail-hero.is-combo-stack .ziwei-combo-stack-img {
+  position: static;
+  flex: 1 1 0;
+  width: auto;
+  height: 100%;
+  inset: auto;
+  border-radius: 8px;
 }
 
 .ziwei-journey-order {
@@ -1455,8 +1533,9 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   gap: 0;
   margin: 4px 0 12px;
   padding: 0 0 6px;
-  background: color-mix(in srgb, var(--bg-deep) 94%, transparent);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 .ziwei-codex-crumb-trail {
   order: -1;
@@ -1519,6 +1598,7 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
 }
 .ziwei-codex-sticky-row .ziwei-codex-tabs,
 .ziwei-codex-sticky-row .ziwei-meet-underline-tabs,
+.ziwei-codex-sticky-row .ziwei-sub-underline-tabs,
 .ziwei-codex-sticky-row .ziwei-star-kind-chips,
 .ziwei-codex-sticky-row .ziwei-shensha-theme-chips,
 .ziwei-codex-sticky-row .ziwei-star-kind-rail,
@@ -1528,6 +1608,11 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   margin: 0;
   min-width: 0;
   max-width: 100%;
+}
+.ziwei-codex-sticky-row .ziwei-sub-underline-tabs.is-fullrow,
+.ziwei-codex-sticky-row .ziwei-shensha-tone-legend.is-equal {
+  width: 100%;
+  overflow: hidden;
 }
 .ziwei-codex-sticky-row .ziwei-codex-tabs {
   background: color-mix(in srgb, var(--surface-2) 55%, transparent);
@@ -1650,11 +1735,12 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  min-height: 64px;
-  padding: 12px 12px 10px;
-  border: 1px solid rgba(201, 168, 76, 0.28);
+  min-height: 56px;
+  padding: 10px 4px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft, rgba(201, 168, 76, 0.22));
   border-radius: 0;
-  background: linear-gradient(160deg, rgba(40, 32, 58, 0.55), rgba(12, 10, 20, 0.35));
+  background: transparent;
   color: inherit;
   text-align: left;
   cursor: pointer;
@@ -1741,8 +1827,9 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   margin: 4px 0 12px;
   padding: 6px 12px 8px 0;
   scroll-padding-inline: 12px;
-  background: color-mix(in srgb, var(--bg-deep) 94%, transparent);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
   z-index: 22;
@@ -1804,8 +1891,9 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   margin: 2px 0 14px;
   padding: 0;
   border-bottom: 1px solid var(--line-soft, var(--zw-line));
-  background: color-mix(in srgb, var(--bg-deep, var(--bg)) 92%, transparent);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 .ziwei-atlas-top-tabs::-webkit-scrollbar {
   display: none;
@@ -2022,10 +2110,11 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   align-items: flex-start;
   gap: 4px;
   min-width: 0;
-  padding: 10px 10px 9px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  padding: 8px 2px 10px;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
   color: var(--ink);
   font: inherit;
   text-align: left;
@@ -2043,9 +2132,9 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   color: var(--gold-ink, var(--gold));
 }
 .ziwei-meet-kind-overview-card.is-on {
-  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
-  background: color-mix(in srgb, var(--gold) 14%, var(--surface-1));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 18%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--gold) 78%, var(--gold-ink, var(--gold)));
+  background: transparent;
+  box-shadow: none;
 }
 .ziwei-meet-kind-overview-card.is-empty,
 .ziwei-meet-kind-overview-card:disabled {
@@ -2061,6 +2150,14 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--ink);
+}
+.ziwei-codex-hint.is-ge-cat {
+  margin: -2px 0 10px;
+  font-size: 0.78rem;
+}
+.ziwei-codex-sticky-row .ziwei-ge-cat-tabs {
+  width: 100%;
+  max-width: 100%;
 }
 .ziwei-ge-candidates {
   margin: 12px 0 8px;
@@ -2208,6 +2305,24 @@ html[data-theme='moon'] .ziwei-meet-backdrop {
   border-bottom-color: color-mix(in srgb, var(--gold-ink, var(--gold)) 92%, #e67a3a 20%);
 }
 
+/* 二级 Tab（十二宫 / 四化分类等）与顶栏一样满行均分、字居中 */
+.ziwei-sub-underline-tabs.is-fullrow {
+  width: 100%;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 0;
+}
+.ziwei-sub-underline-tabs.is-fullrow .ziwei-sub-underline-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 2px;
+  padding-right: 2px;
+  text-align: center;
+}
+
 /* 我的相遇等：满行分段切换 */
 .ziwei-sub-underline-tabs.is-segment {
   display: grid;
@@ -2260,6 +2375,9 @@ html[data-theme='moon'] .ziwei-meet-backdrop {
 .ziwei-codex-sticky-stack .ziwei-sub-underline-tabs {
   margin: 0;
   background: transparent;
+}
+.ziwei-codex-sticky-stack .ziwei-sub-underline-tabs.is-fullrow {
+  width: 100%;
 }
 .ziwei-meet-hero.is-compact {
   margin-bottom: 10px;
@@ -2640,12 +2758,14 @@ html[data-theme='moon'] .ziwei-meet-backdrop {
 .ziwei-codex-short-thumb.is-palace {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line));
-  background: color-mix(in srgb, var(--surface-2) 70%, var(--gold) 8%);
+  width: 44px;
+  flex: 0 0 44px;
+  aspect-ratio: 3 / 4;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  overflow: hidden;
 }
 .ziwei-palace-glyph {
   font-size: 0.82rem;
@@ -3209,21 +3329,32 @@ html[data-theme='moon'] .ziwei-meet-backdrop {
 .ziwei-meet-tone-bar .is-tone-caution {
   background: color-mix(in srgb, #c45c4a 70%, #e8a090);
 }
-.ziwei-shensha-tone-legend.is-pipe {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  gap: 6px 10px;
-  margin: 0 0 10px;
+.ziwei-shensha-tone-legend.is-equal {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  width: 100%;
+  overflow: visible;
+  margin: 0 0 8px;
 }
-.ziwei-shensha-tone-legend.is-pipe::-webkit-scrollbar {
-  display: none;
+.ziwei-shensha-tone-legend.is-equal .ziwei-shensha-tone-stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 2px;
+  white-space: nowrap;
+  font-size: 0.78rem;
 }
-.ziwei-shensha-tone-pipe {
-  color: color-mix(in srgb, var(--ink-muted) 45%, transparent);
-  font-size: 0.75rem;
-  user-select: none;
+.ziwei-shensha-tone-legend.is-equal .ziwei-shensha-tone-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ziwei-shensha-tone-legend.is-equal .ziwei-shensha-tone-stat.is-on {
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--gold-ink, var(--gold)) 92%, #e67a3a 20%);
 }
 .ziwei-shensha-tone-overview.is-compact {
   margin: 0 0 10px;

@@ -1,6 +1,6 @@
 import { matchCardArchetype } from './card-archetypes.ts';
 import type { ReadingLens } from './card-psychology.ts';
-import { imageSketch, motherTheme, resolveReadingLens } from './card-psychology.ts';
+import { imageSketch, motherTheme } from './card-psychology.ts';
 import type { ReadingSeriesContext } from '../journal/reading-series.ts';
 import type { CardReading } from './types.ts';
 
@@ -101,7 +101,7 @@ export function buildNarrativeCardInsight(
 
 function boundaryAdviceLine(
   lens: ReadingLens,
-  subject: QuestionSubject,
+  _subject: QuestionSubject,
   card: CardReading,
 ): string {
   if (lens === 'family') {
@@ -177,7 +177,7 @@ export function buildSpreadSynthesis(
 /** 多条边界建议（对应范例 💌 分段） */
 export function buildAdviceLines(
   cards: CardReading[],
-  question: string,
+  _question: string,
   lens: ReadingLens,
 ): string[] {
   const lines: string[] = [];

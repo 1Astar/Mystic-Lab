@@ -555,8 +555,9 @@
   top: 0;
   z-index: 12;
   padding: 8px 0 10px;
-  background: color-mix(in srgb, var(--bg-deep) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 .ly-vault-tabs {
   display: flex;
@@ -12979,11 +12980,7 @@ html[data-theme='moon'] .ly-vault-trend-insight {
 }
 
 html[data-theme='moon'] .ly-topbar {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--bg-deep) 96%, transparent) 55%,
-    color-mix(in srgb, var(--bg-deep) 72%, transparent) 100%
-  );
+  background: transparent;
 }
 
 html[data-theme='moon'] .ly-reading-page,

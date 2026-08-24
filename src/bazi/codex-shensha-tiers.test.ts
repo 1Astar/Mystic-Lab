@@ -8,6 +8,7 @@ import {
   shenshaTierOf,
 } from './codex-shensha-tiers.ts';
 import { getStarCardByName } from './codex-tags.ts';
+import { shenshaAtlasGloss } from './codex-atlas-catalog.ts';
 import { baziCodexProgress } from './codex.ts';
 
 describe('shensha tiers', () => {
@@ -17,6 +18,7 @@ describe('shensha tiers', () => {
     for (const name of SHENSHA_FEATURED) {
       expect(isFeaturedShensha(name)).toBe(true);
       expect(getStarCardByName('shensha', name)?.name).toBe(name);
+      expect(shenshaAtlasGloss(name)?.length).toBeGreaterThan(4);
     }
   });
 

@@ -162,20 +162,6 @@ export const CODEX_CATEGORY_QUIZZES: CodexQuiz[] = [
     explainWrong: '冲不是失败标签，也不该停在死记。对照自己的盘，才变成可用知识。',
   },
   {
-    id: 'cq-shensha-assist',
-    category: 'shensha',
-    categoryLabel: '神煞',
-    prompt: '浏览神煞时，哪条态度更贴近本产品？',
-    options: [
-      { id: 'a', label: '神煞是辅助信号，要合干支十神看，勿单断' },
-      { id: 'b', label: '神煞一条就能定终身吉凶' },
-      { id: 'c', label: '神煞全部无意义，可以删掉' },
-    ],
-    answerId: 'a',
-    explainCorrect: '对。神煞像天气符号：提示氛围，要嵌回整盘结构里读。',
-    explainWrong: '既不要神煞定终身，也不要全盘否定。当辅助层即可。',
-  },
-  {
     id: 'cq-nayin-scene',
     category: 'nayin',
     categoryLabel: '纳音',

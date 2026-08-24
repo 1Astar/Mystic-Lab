@@ -407,6 +407,10 @@ initRouter();
 mountAppVersion();
 void syncShareOwnerRewards();
 
+void import('./ui/bug-feedback.ts')
+  .then((m) => m.mountBugFeedback())
+  .catch(() => {});
+
 function paintBootError(err: unknown): void {
   const root = document.querySelector<HTMLElement>('#app');
   if (!root) return;

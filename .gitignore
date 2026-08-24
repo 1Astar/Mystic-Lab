@@ -37,6 +37,8 @@ assets/
 
 # 运行时只用 webp；png 原图本地归档不入库
 public/ziwei/stars/*.png
+public/ziwei/palaces/*.png
+public/ziwei/combos/*.png
 public/bazi/covers/*.png
 public/bazi/covers/samples/*.png
 

@@ -38,7 +38,7 @@ export function renderModuleHome(root: HTMLElement, config: ModuleHomeConfig): (
   if (stars) document.body.appendChild(stars);
 
   const page = document.createElement('div');
-  page.className = 'page';
+  page.className = 'page module-home-page';
   mountEnvBanner(page);
 
   const header = document.createElement('header');

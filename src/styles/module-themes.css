@@ -394,22 +394,24 @@
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 15px 16px;
+  padding: 14px 2px;
   text-align: left;
   text-decoration: none;
   color: var(--ink);
-  background: var(--surface-1);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft, var(--line));
+  border-radius: 0;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: color 0.2s, border-color 0.2s;
   box-shadow: none;
 }
 
 .theme-entry-card:not(.is-soon):hover {
   border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--gold-ink, var(--gold));
+  transform: none;
+  box-shadow: none;
 }
 
 .theme-entry-card.is-soon {
@@ -1215,13 +1217,13 @@ html[data-theme='moon'] .theme-footer-mark {
   opacity: 1;
 }
 
-/* 星夜：入口卡保持深面可读 */
+/* 星夜：入口仍贴画布，不另铺深面卡 */
 html[data-theme='star'] .theme-entry-card {
-  background: color-mix(in srgb, var(--surface-1) 88%, #2e1b4b 18%);
-  border-color: color-mix(in srgb, var(--purple) 28%, var(--line));
+  background: transparent;
+  border-color: color-mix(in srgb, var(--purple) 28%, var(--line-soft, var(--line)));
 }
 
 html[data-theme='star'] .theme-meihua .theme-entry-card {
-  background: linear-gradient(135deg, rgba(46, 27, 75, 0.55), rgba(26, 18, 48, 0.82));
-  border-color: rgba(232, 160, 200, 0.18);
+  background: transparent;
+  border-color: rgba(232, 160, 200, 0.22);
 }

@@ -707,14 +707,61 @@ html[data-theme='moon'] .codex-progress-suit-bar i {
   background: linear-gradient(90deg, var(--gold-ink, var(--gold)), var(--gold)) !important;
 }
 
-/* 八字/紫微图鉴：吸顶分类条贴宣纸底，勿掺纯白 */
-html[data-theme='moon'] .bazi-codex-sticky-stack,
-html[data-theme='moon'] .bazi-codex-tabs,
-html[data-theme='moon'] .ziwei-codex-sticky-stack,
-html[data-theme='moon'] .ziwei-layer-tabs-caps {
-  background: color-mix(in srgb, var(--bg-deep) 97%, transparent) !important;
+/* mystic-lab-ui：吸顶贴画布，不要实心条幅 */
+.module-topbar,
+.ly-topbar,
+.bazi-codex-sticky-stack,
+.bazi-codex-tabs,
+.bazi-reading-tabs,
+.bazi-reading-anchors,
+.ziwei-codex-sticky-stack,
+.ziwei-layer-tabs-caps,
+.ziwei-atlas-top-tabs,
+.ziwei-theater-tabs,
+.ly-vault-codex-bar,
+.codex-tabs {
+  background: transparent !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
+
 html[data-theme='moon'] .bazi-codex-sticky-stack .bazi-codex-tabs,
 html[data-theme='moon'] .ziwei-codex-sticky-stack .ziwei-layer-tabs-caps {
   background: transparent !important;
+}
+
+/* 塔罗等体系内首页：主入口不当大卡，次入口用发丝行 */
+.module-home-page .entry-card-primary {
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 28px 8px 22px;
+  margin-top: 8px;
+}
+
+.module-home-page .entry-card-primary:hover {
+  transform: none;
+  border-color: transparent;
+}
+
+.module-home-page .entry-cta {
+  margin-top: 18px;
+  padding: 11px 28px;
+  font-size: 0.92rem;
+  color: var(--ink-on-gold);
+}
+
+.module-home-page .home-nav .entry-card:not(.entry-card-primary) {
+  background: transparent !important;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft, var(--line));
+  border-radius: 0;
+  box-shadow: none !important;
+  padding: 14px 4px 16px;
+  margin-top: 0;
+}
+
+.module-home-page .home-nav .entry-card:not(.entry-card-primary):hover {
+  transform: none;
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
 }

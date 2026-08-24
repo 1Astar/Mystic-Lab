@@ -2532,10 +2532,10 @@ body.xlr-huangli-lock {
 }
 
 .xlr-home-panel {
-  padding: 12px 10px 10px;
-  border-radius: 12px;
-  background: var(--surface-1);
-  border: 1px solid var(--line);
+  padding: 12px 0 10px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
   overflow: hidden;
 }
 
@@ -4936,9 +4936,9 @@ html[data-theme='moon'] .xlr-home-gods-hint {
 }
 
 html[data-theme='moon'] .xlr-home-panel {
-  background: var(--surface-1);
-  border-color: var(--line);
-  box-shadow: 0 8px 20px rgba(44, 51, 64, 0.06);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 html[data-theme='moon'] .xlr-home-panel-label {
