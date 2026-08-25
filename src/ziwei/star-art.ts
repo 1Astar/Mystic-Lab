@@ -1,3 +1,5 @@
+import { artSizeForClass, ziweiArtDisplayUrl, type ZiweiArtSize } from './cf-image-resize.ts';
+
 /** 已有人格海报的星名（仅 webp）：十四主星 + 六吉六煞 + 辅曜/杂曜 + 四化 */
 const STARS_WITH_ART = new Set([
   // 十四主星
@@ -149,15 +151,28 @@ export function majorStarArtUrl(starName: string): string | null {
   return `/ziwei/stars/${encodeURIComponent(name)}.webp`;
 }
 
+function artImgTag(
+  url: string,
+  opts?: { className?: string; alt?: string; size?: ZiweiArtSize },
+): string {
+  const size = opts?.size ?? artSizeForClass(opts?.className);
+  const src = ziweiArtDisplayUrl(url, size);
+  const cls = opts?.className ? ` class="${opts.className}"` : '';
+  const alt = opts?.alt ?? '';
+  const fallback =
+    src !== url
+      ? ` onerror="this.onerror=null;this.src='${url.replace(/'/g, '%27')}'"`
+      : '';
+  return `<img${cls} src="${src}" alt="${alt}" loading="lazy" decoding="async"${fallback} />`;
+}
+
 export function majorStarArtImgHtml(
   starName: string,
-  opts?: { className?: string; alt?: string },
+  opts?: { className?: string; alt?: string; size?: ZiweiArtSize },
 ): string {
   const url = majorStarArtUrl(starName);
   if (!url) return '';
-  const cls = opts?.className ? ` class="${opts.className}"` : '';
-  const alt = opts?.alt ?? starName;
-  return `<img${cls} src="${url}" alt="${alt}" loading="lazy" decoding="async" />`;
+  return artImgTag(url, { ...opts, alt: opts?.alt ?? starName });
 }
 
 function escapeAttr(s: string): string {
@@ -227,18 +242,16 @@ function resolvePalaceArtKey(palaceId: string): string | null {
 export function palaceArtUrl(palaceId: string): string | null {
   const name = resolvePalaceArtKey(palaceId);
   if (!name) return null;
-  return `/ziwei/stars/${encodeURIComponent(name)}.webp`;
+  return `/ziwei/palaces/${encodeURIComponent(name)}.webp`;
 }
 
 export function palaceArtImgHtml(
   palaceId: string,
-  opts?: { className?: string; alt?: string },
+  opts?: { className?: string; alt?: string; size?: ZiweiArtSize },
 ): string {
   const url = palaceArtUrl(palaceId);
   if (!url) return '';
-  const cls = opts?.className ? ` class="${opts.className}"` : '';
-  const alt = opts?.alt ?? palaceId;
-  return `<img${cls} src="${url}" alt="${alt}" loading="lazy" decoding="async" />`;
+  return artImgTag(url, { ...opts, alt: opts?.alt ?? palaceId });
 }
 
 export function palaceListThumbInnerHtml(
@@ -385,13 +398,11 @@ export function comboArtUrl(comboId: string): string | null {
 
 export function comboArtImgHtml(
   comboId: string,
-  opts?: { className?: string; alt?: string },
+  opts?: { className?: string; alt?: string; size?: ZiweiArtSize },
 ): string {
   const url = comboArtUrl(comboId);
   if (!url) return '';
-  const cls = opts?.className ? ` class="${opts.className}"` : '';
-  const alt = opts?.alt ?? comboId;
-  return `<img${cls} src="${url}" alt="${alt}" loading="lazy" decoding="async" />`;
+  return artImgTag(url, { ...opts, alt: opts?.alt ?? comboId });
 }
 
 export type ComboArtInput = {
@@ -408,10 +419,7 @@ function comboMemberStackHtml(members: string[], className: string): string {
     .slice(0, 3);
   if (!urls.length) return '';
   return `<span class="${className}" aria-hidden="true">${urls
-    .map(
-      (x) =>
-        `<img class="ziwei-combo-stack-img" src="${x.url}" alt="" loading="lazy" decoding="async" />`,
-    )
+    .map((x) => artImgTag(x.url, { className: 'ziwei-combo-stack-img', alt: '' }))
     .join('')}</span>`;
 }
 

@@ -66,7 +66,7 @@ describe('star-art', () => {
   });
 
   it('maps twelve palaces to webp', () => {
-    expect(palaceArtUrl('命宫')).toMatch(/\.webp$/);
+    expect(palaceArtUrl('命宫')).toMatch(/palaces\/.*\.webp$/);
     expect(palaceArtUrl('奴仆宫')).toBe(palaceArtUrl('仆役'));
     expect(palaceListThumbInnerHtml('财帛', { glyph: '财' })).toContain('.webp');
     expect(palaceArtUrl('__无此宫__')).toBeNull();
