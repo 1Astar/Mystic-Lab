@@ -8289,3 +8289,404 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   border-radius: 8px;
   background: var(--surface-2, #1a2233);
 }
+
+/* —— 生时校准 v2 · 时光填空题侦探 —— */
+.bazi-det-page .bazi-det-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(152px, 200px);
+  grid-template-areas:
+    'guide guide'
+    'main panel';
+  gap: 20px 28px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 4px 48px;
+}
+.bazi-det-guide {
+  grid-area: guide;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 0 0 8px;
+  border: none;
+  background: transparent;
+}
+.bazi-det-brief {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
+  color: var(--ink-muted);
+}
+.bazi-det-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+.bazi-det-steps span.is-on {
+  color: var(--gold);
+}
+.bazi-det-main {
+  grid-area: main;
+  min-width: 0;
+}
+.bazi-det-panel {
+  grid-area: panel;
+  position: sticky;
+  top: 56px;
+  align-self: start;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  padding-left: 4px;
+  border-left: 1px solid color-mix(in srgb, var(--ink-muted) 16%, transparent);
+}
+.bazi-det-kicker {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+.bazi-det-lead {
+  margin: 0 0 18px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+.bazi-det-bullets {
+  margin: 0 0 22px;
+  padding-left: 1.1em;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+.bazi-det-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 18px;
+}
+.bazi-det-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0 20px;
+}
+.bazi-det-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-muted) 28%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.bazi-det-option strong {
+  display: block;
+  font-weight: 600;
+}
+.bazi-det-option span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+.bazi-det-option:hover,
+.bazi-det-option:focus-visible {
+  color: var(--gold);
+}
+.bazi-det-clue-input {
+  margin-top: 20px;
+}
+.bazi-det-clue-input label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+.bazi-det-clue-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.bazi-det-clue-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 35%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--body-bg, transparent) 92%, var(--ink) 4%);
+  color: var(--ink);
+}
+.bazi-det-panel-title {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+/* 十二时辰日晷：午上子下 */
+.bazi-det-clock {
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto 6px;
+}
+.bazi-det-clock-face {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  --clock-r: 5.55em;
+}
+.bazi-det-clock-face::before {
+  content: '';
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+  pointer-events: none;
+}
+.bazi-det-clock-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--gold) 70%, var(--ink-muted));
+  pointer-events: none;
+}
+.bazi-det-chip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.6em;
+  margin: -1.15em 0 0 -1.3em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  opacity: 0.42;
+  transform: rotate(calc(var(--i, 0) * 30deg)) translateY(calc(-1 * var(--clock-r, 5.55em)))
+    rotate(calc(var(--i, 0) * -30deg));
+  transition: opacity 0.2s, color 0.2s, text-shadow 0.2s;
+}
+.bazi-det-chip em {
+  font-style: normal;
+  font-size: 1.05em;
+  font-weight: 600;
+}
+.bazi-det-chip small {
+  font-size: 0.58em;
+  letter-spacing: -0.02em;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.bazi-det-chip.is-active {
+  opacity: 1;
+  color: var(--ink);
+}
+.bazi-det-chip.is-glow {
+  color: var(--gold);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--gold) 55%, transparent);
+  opacity: 1;
+}
+.bazi-det-chip.is-dim {
+  opacity: 0.2;
+  text-decoration: line-through;
+}
+.bazi-det-gap {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+.bazi-det-clue-pop {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 25%, transparent);
+  max-width: 100%;
+  overflow: hidden;
+}
+.bazi-det-clue-pop strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--gold);
+  font-size: 0.85rem;
+}
+.bazi-det-clue-pop p,
+.bazi-det-panel-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.bazi-det-script-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+.bazi-det-tab {
+  border: none;
+  background: transparent;
+  padding: 4px 0;
+  color: var(--ink-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.bazi-det-tab.is-on {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.bazi-det-script header {
+  margin-bottom: 14px;
+}
+.bazi-det-script-kicker {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+.bazi-det-script h3 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.bazi-det-script-weather {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+.bazi-det-script-majors {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.bazi-det-script-majors li {
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-muted) 22%, transparent);
+}
+.bazi-det-script-age {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+.bazi-det-script-majors strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.bazi-det-script-majors p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+.bazi-det-script-micros {
+  margin-bottom: 16px;
+}
+.bazi-det-micro-row {
+  display: grid;
+  grid-template-columns: 5.5em 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.86rem;
+}
+.bazi-det-micro-row span {
+  color: var(--gold);
+}
+.bazi-det-micro-row p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.bazi-det-contrast {
+  margin: 18px 0;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+}
+.bazi-det-contrast summary {
+  cursor: pointer;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.bazi-det-contrast ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bazi-det-contrast li {
+  padding: 8px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-muted) 18%, transparent);
+  display: grid;
+  gap: 4px;
+}
+.bazi-det-contrast li em {
+  color: var(--ink-muted);
+  font-style: normal;
+  opacity: 0.6;
+}
+.bazi-det-pairdiff {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.bazi-det-events-note {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  .bazi-det-page .bazi-det-shell {
+    grid-template-columns: minmax(0, 1fr) 120px;
+    gap: 12px 10px;
+    padding-bottom: 32px;
+  }
+  .bazi-det-panel {
+    top: 48px;
+    padding-left: 2px;
+  }
+  .bazi-det-panel-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  .bazi-det-clock {
+    max-width: 100%;
+  }
+  .bazi-det-clock-face {
+    --clock-r: 3.65em;
+  }
+  .bazi-det-chip {
+    font-size: 0.74rem;
+    width: 2.2em;
+    margin-left: -1.1em;
+  }
+  .bazi-det-chip small {
+    font-size: 0.52em;
+  }
+  .bazi-det-gap {
+    font-size: 0.68rem;
+  }
+  .bazi-det-clue-pop p {
+    font-size: 0.72rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+  }
+}

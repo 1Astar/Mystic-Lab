@@ -108,6 +108,13 @@ export function renderBaziRectify(root: HTMLElement): () => void {
       return;
     }
 
+    // 入口提示：主路径已迁到侦探流
+    const detBanner = `
+      <p class="bazi-det-events-note">
+        这是「大事件年表」加深校准。
+        <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">改走时光填空题主路径 ›</button>
+      </p>`;
+
     const allCand = listHourCandidates(store.profile, draft.band);
     const keptSet = new Set(draft.keptBranches);
     const activeCand =
@@ -129,6 +136,8 @@ export function renderBaziRectify(root: HTMLElement): () => void {
         <h1 class="page-title">生时校准</h1>
         <p class="page-subtitle">先圈时段 → 填大事 → 对比解释力 → 得到暂定时辰</p>
       </header>
+
+      ${detBanner}
 
       <section class="bazi-rectify-guide" aria-label="怎么用">
         <ol>

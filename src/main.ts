@@ -173,6 +173,14 @@ registerRoute(
 );
 registerRoute(
   '/bazi/rectify',
+  lazy(
+    () => import('./pages/bazi-rectify-detective.ts'),
+    'renderBaziRectifyDetective',
+    baziStyles,
+  ),
+);
+registerRoute(
+  '/bazi/rectify/events',
   lazy(() => import('./pages/bazi-rectify.ts'), 'renderBaziRectify', baziStyles),
 );
 registerRoute(

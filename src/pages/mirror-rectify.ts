@@ -82,9 +82,9 @@ export function renderMirrorRectify(root: HTMLElement): () => void {
           eventsOk
             ? `<p class="mirror-footnote">已有 ${filledN} 条可用事件，可直接双盘打分。</p>
                <button type="button" class="life-btn-primary" data-path="/mirror/rectify/result">对照双盘打分 ›</button>
-               <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">编辑时段与事件</button>`
+               <button type="button" class="life-btn-ghost" data-path="/bazi/rectify/events">编辑时段与事件</button>`
             : `<p class="mirror-footnote">还没有足够事件（当前 ${filledN} 条）。先去生时校准填时段与年表，再回来打分。</p>
-               <button type="button" class="life-btn-primary" data-path="/bazi/rectify">去填写时段与事件 ›</button>`
+               <button type="button" class="life-btn-primary" data-path="/bazi/rectify/events">去填写时段与事件 ›</button>`
         }
       </section>`;
   }

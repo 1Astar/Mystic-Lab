@@ -97,8 +97,8 @@ export function mountBirthTimeMetaField(opts: MountBirthTimeMetaOpts): {
       showCard && coarse
         ? `<button type="button" class="birth-meta-rectify is-nudge" data-open-rectify>
             <span>
-              <strong>时间不太确定？</strong>
-              <em>查看生时校准（用大事件反推时辰）</em>
+              <strong>只差临门一脚？</strong>
+              <em>做个小小的「时光填空题」，用性格与回忆反推时辰</em>
             </span>
             <i aria-hidden="true">›</i>
           </button>`
@@ -183,8 +183,8 @@ export function birthRectifyCtaHtml(opts?: { soft?: boolean }): string {
   const soft = opts?.soft !== false;
   return `
     <button type="button" class="bazi-home-link ${soft ? 'bazi-home-link-soft' : ''}" data-path="/bazi/rectify">
-      <strong>觉得不准？试试生时校准</strong>
-      <span>用大事件反推更贴近的时辰</span>
+      <strong>只差临门一脚？做个小小的「时光填空题」</strong>
+      <span>不知道几点生？答几道性格题，我们帮你「盲猜」人生剧本</span>
       <em aria-hidden="true">›</em>
     </button>`;
 }

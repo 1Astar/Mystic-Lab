@@ -161,7 +161,7 @@ export function renderMirrorRectifyResult(root: HTMLElement): () => void {
           <h1 class="page-title">双盘校准结果</h1>
           <p class="page-subtitle">请先完成时段与大事件</p>
         </header>
-        <button type="button" class="life-btn-primary" data-path="/bazi/rectify">去填写事件</button>`;
+        <button type="button" class="life-btn-primary" data-path="/bazi/rectify/events">去填写事件</button>`;
       bindNav();
       return;
     }
@@ -210,7 +210,7 @@ export function renderMirrorRectifyResult(root: HTMLElement): () => void {
                 <div class="bazi-rectify-actions">
                   <button type="button" class="life-btn-primary" data-adopt="${escapeHtml(top.candidate.branch)}">采用为暂定时辰</button>
                   <button type="button" class="life-btn-ghost" data-path="/mirror">回双盘映照</button>
-                  <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">改事件</button>
+                  <button type="button" class="life-btn-ghost" data-path="/bazi/rectify/events">改事件</button>
                 </div>
               </article>
             </section>`

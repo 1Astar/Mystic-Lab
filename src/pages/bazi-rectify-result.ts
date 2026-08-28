@@ -96,12 +96,12 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
 
     if (!draft || !eventsReadyForScore(draft.events, draft.mode)) {
       page.innerHTML = `
-        <button type="button" class="back-link life-back" data-path="/bazi/rectify">← 回到校准</button>
+        <button type="button" class="back-link life-back" data-path="/bazi/rectify/events">← 回到校准</button>
         <header class="life-header">
           <h1 class="page-title">校准结果</h1>
           <p class="page-subtitle">请先完成时段与大事件</p>
         </header>
-        <button type="button" class="life-btn-primary" data-path="/bazi/rectify">去填写事件</button>
+        <button type="button" class="life-btn-primary" data-path="/bazi/rectify/events">去填写事件</button>
       `;
       bindNav();
       return;
@@ -123,7 +123,7 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
     const filled = filledEvents(draft.events);
 
     page.innerHTML = `
-      <button type="button" class="back-link life-back" data-path="/bazi/rectify">← 改事件 / 时段</button>
+      <button type="button" class="back-link life-back" data-path="/bazi/rectify/events">← 改事件 / 时段</button>
       <header class="life-header">
         <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'md')}</div>
         <p class="home-eyebrow">RECTIFY · 暂定结论</p>
@@ -149,7 +149,7 @@ export function renderBaziRectifyResult(root: HTMLElement): () => void {
             <div class="bazi-rectify-actions">
               <button type="button" class="life-btn-primary" data-adopt="${escapeHtml(top.candidate.branch)}">采用为暂定时辰</button>
               <button type="button" class="life-btn-ghost" data-path="/mirror/rectify/result">看双盘对照打分 ›</button>
-              <button type="button" class="life-btn-ghost" data-path="/bazi/rectify">继续补充事件</button>
+              <button type="button" class="life-btn-ghost" data-path="/bazi/rectify/events">继续补充事件</button>
             </div>
           </article>
         </section>
