@@ -8325,6 +8325,28 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   letter-spacing: 0.04em;
   color: var(--ink-muted);
 }
+.bazi-det-step {
+  border: none;
+  background: transparent;
+  padding: 2px 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.bazi-det-step:hover:not(:disabled) {
+  color: var(--gold);
+}
+.bazi-det-step.is-on {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.bazi-det-step.is-locked,
+.bazi-det-step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 .bazi-det-steps span.is-on {
   color: var(--gold);
 }

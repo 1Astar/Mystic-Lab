@@ -122,7 +122,6 @@ export function renderLifeProfile(root: HTMLElement): () => void {
   `;
 
   root.appendChild(page);
-  attachPersonSwitcherToPage(page);
 
   const body = page.querySelector<HTMLElement>('[data-profile-body]')!;
 
@@ -445,11 +444,20 @@ export function renderLifeProfile(root: HTMLElement): () => void {
   }
 
   page.querySelector('.life-back')?.addEventListener('click', () => navigate('/'));
+  attachPersonSwitcherToPage(page, {
+    onChange: (person) => {
+      creatingNew = false;
+      editingId = person.id;
+      paint();
+    },
+  });
   paint();
 
   return () => {
     stars.remove();
     document.querySelector('.birth-dt-sheet')?.remove();
+    document.querySelector('[data-person-sheet-portal]')?.remove();
+    document.querySelector('[data-person-drop-backdrop]')?.remove();
   };
 }
 

@@ -1,7 +1,12 @@
 /**
  * 命盘时光机：滑杆 + 流年云/大运叠层 + 换运气泡
  */
-import type { DecadeShiftCard, ShuttleFrame, ShuttleRange } from '../bazi/sense-shuttle.ts';
+import {
+  isDecadeBubbleStale,
+  type DecadeShiftCard,
+  type ShuttleFrame,
+  type ShuttleRange,
+} from '../bazi/sense-shuttle.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -114,6 +119,8 @@ export type MountTimeShuttleOpts = {
   /** 当前是否应展示气泡（prev 为上一帧大运天干十神） */
   resolveBubble?: (frame: ShuttleFrame, prevDayunGod: string) => DecadeShiftCard | null;
   initialPrevDayunGod?: string;
+  /** 首屏已写入 HTML 的换运气泡（用于过期判定） */
+  initialBubble?: DecadeShiftCard | null;
 };
 
 export function mountTimeShuttleBoard(
@@ -133,6 +140,7 @@ export function mountTimeShuttleBoard(
   let frame = initial;
   let prevDayunGod =
     opts.initialPrevDayunGod ?? (initial.dayunEmpty ? '' : initial.dayunStemGod);
+  let activeBubble: DecadeShiftCard | null = opts.initialBubble ?? null;
   let interacted = false;
   let longPressTimer = 0;
 
@@ -204,11 +212,13 @@ export function mountTimeShuttleBoard(
   function showBubble(card: DecadeShiftCard | null): void {
     if (!bubbleEl) return;
     if (!card) {
+      activeBubble = null;
       bubbleEl.hidden = true;
       bubbleEl.classList.remove('is-on');
       bubbleEl.innerHTML = '';
       return;
     }
+    activeBubble = card;
     bubbleEl.hidden = false;
     bubbleEl.classList.add('is-on');
     bubbleEl.innerHTML = `<p>${escapeHtml(card.body)}</p>
@@ -220,15 +230,26 @@ export function mountTimeShuttleBoard(
     opts.onDecadeBubble?.(card);
   }
 
+  function syncBubble(next: ShuttleFrame): void {
+    if (!opts.resolveBubble) return;
+    const card = opts.resolveBubble(next, prevDayunGod);
+    if (card) {
+      showBubble(card);
+      return;
+    }
+    // 未弹出新卡时：若当前大运十神已对不上旧气泡的「切到」，清掉过期旁白
+    if (isDecadeBubbleStale(activeBubble, next.dayunStemGod, next.dayunEmpty)) {
+      showBubble(null);
+      opts.onBubbleDismiss?.();
+    }
+  }
+
   function onYearLive(year: number): void {
     frame = opts.buildFrame(year);
     patchForecast(frame);
     if (rangeInput) rangeInput.setAttribute('aria-valuenow', String(year));
 
-    if (opts.resolveBubble) {
-      const card = opts.resolveBubble(frame, prevDayunGod);
-      if (card) showBubble(card);
-    }
+    syncBubble(frame);
     if (!frame.dayunEmpty && frame.dayunStemGod) {
       prevDayunGod = frame.dayunStemGod;
     }
@@ -299,6 +320,12 @@ export function mountTimeShuttleBoard(
     showBubble(null);
     opts.onBubbleDismiss?.();
   });
+
+  // 首屏若 HTML 里挂着过期换运旁白，立刻清掉
+  if (isDecadeBubbleStale(activeBubble, initial.dayunStemGod, initial.dayunEmpty)) {
+    showBubble(null);
+    opts.onBubbleDismiss?.();
+  }
 
   return () => {
     window.clearTimeout(longPressTimer);

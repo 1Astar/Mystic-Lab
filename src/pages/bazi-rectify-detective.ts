@@ -122,6 +122,33 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
     paint();
   }
 
+  /** 顶栏切换：已走过的可回；未完成前置时剧本/结果先锁住 */
+  function canVisitStep(step: DetectiveDraftStep): boolean {
+    if (step === 'welcome' || step === 'objective') return true;
+    const order: DetectiveDraftStep[] = [
+      'welcome',
+      'objective',
+      'personality',
+      'script',
+      'result',
+    ];
+    const curIdx = order.indexOf(draft.step);
+    const targetIdx = order.indexOf(step);
+    if (targetIdx >= 0 && targetIdx <= curIdx) return true;
+
+    const hasObj = draft.answers.some((a) => a.questionId.startsWith('obj'));
+    const hasPer = draft.answers.some((a) => a.questionId.startsWith('per'));
+    const objDone = state ? isObjectiveComplete(state) : false;
+    const perDone = state ? isPersonalityComplete(state) : false;
+
+    if (step === 'personality') return hasObj || objDone;
+    if (step === 'script') return hasPer || perDone;
+    if (step === 'result') {
+      return Boolean(draft.preferredBranch) || (hasPer && state != null && rankDetectiveBranches(state).length > 0);
+    }
+    return false;
+  }
+
   function boardHtml(): string {
     if (!state) return '';
     const board = getDetectiveBoard(state);
@@ -345,11 +372,21 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
           <div>
             <p class="bazi-det-brief">${escapeHtml(brief)}</p>
             <nav class="bazi-det-steps" aria-label="进度">
-              <span class="${stage === 'welcome' ? 'is-on' : ''}">欢迎</span>
-              <span class="${stage === 'objective' ? 'is-on' : ''}">粗筛</span>
-              <span class="${stage === 'personality' ? 'is-on' : ''}">性格</span>
-              <span class="${stage === 'script' ? 'is-on' : ''}">剧本</span>
-              <span class="${stage === 'result' ? 'is-on' : ''}">结果</span>
+              ${(
+                [
+                  ['welcome', '欢迎'],
+                  ['objective', '粗筛'],
+                  ['personality', '性格'],
+                  ['script', '剧本'],
+                  ['result', '结果'],
+                ] as const
+              )
+                .map(([id, label]) => {
+                  const on = stage === id;
+                  const unlocked = canVisitStep(id);
+                  return `<button type="button" class="bazi-det-step ${on ? 'is-on' : ''} ${unlocked ? '' : 'is-locked'}" data-nav-step="${id}" ${unlocked ? '' : 'disabled'} aria-current="${on ? 'step' : 'false'}">${label}</button>`;
+                })
+                .join('')}
             </nav>
           </div>
         </header>
@@ -377,6 +414,13 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
       el.addEventListener('click', () => {
         const path = el.dataset.path;
         if (path) navigate(path);
+      });
+    });
+    page.querySelectorAll<HTMLButtonElement>('[data-nav-step]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const step = btn.dataset.navStep as DetectiveDraftStep | undefined;
+        if (!step || !canVisitStep(step)) return;
+        setStep(step);
       });
     });
     page.querySelector('[data-reset]')?.addEventListener('click', () => {

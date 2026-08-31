@@ -1294,10 +1294,10 @@ button.lab-notes-tag:focus-visible {
   cursor: default;
 }
 
-/* 挂在「自己 ▾」下方的下拉抽屉 */
+/* 下拉挂 #app（fixed），须高于 backdrop(580)，否则 sticky 顶栏内会被遮罩挡住点击 */
 .person-switch-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
+  position: fixed;
+  top: 0;
   left: 50%;
   width: min(300px, calc(100vw - 24px));
   max-height: min(70vh, 420px);
@@ -1313,6 +1313,10 @@ button.lab-notes-tag:focus-visible {
   opacity: 1;
   transform: translate(-50%, 0);
   pointer-events: auto;
+}
+
+.person-switch-dropdown[data-person-sheet-portal] {
+  z-index: 601;
 }
 
 .person-switch-drop-inner {

@@ -127,6 +127,20 @@ export function decadeShiftCard(fromGod: string, toGod: string): DecadeShiftCard
   };
 }
 
+/**
+ * 换运气泡是否过期：气泡写的是「切到 toGod」，
+ * 但当前季节云已是另一段大运十神 → 必须清掉，否则会出现「丙戌偏印旁还挂着偏财→七杀」。
+ */
+export function isDecadeBubbleStale(
+  bubble: DecadeShiftCard | null | undefined,
+  dayunStemGod: string,
+  dayunEmpty = false,
+): boolean {
+  if (!bubble) return false;
+  if (dayunEmpty || !dayunStemGod.trim()) return true;
+  return bubble.toGod !== dayunStemGod.trim();
+}
+
 export function findDayunForYear(luck: LuckCycles, year: number): DayunColumn | null {
   return (
     luck.dayun.find((d) => year >= d.startYear && year <= d.endYear) ??

@@ -78,6 +78,7 @@ import {
   buildShuttleFrame,
   clampShuttleYear,
   decadeShiftCard,
+  isDecadeBubbleStale,
   shuttleYearRange,
   type DecadeShiftCard,
 } from '../bazi/sense-shuttle.ts';
@@ -837,6 +838,10 @@ export function renderBaziChart(root: HTMLElement): () => void {
     if (shuttle && !shuttle.dayunEmpty && shuttle.dayunStemGod && !shuttlePrevDayunGod) {
       shuttlePrevDayunGod = shuttle.dayunStemGod;
     }
+    // 重绘前丢掉对不上当前大运的过期换运气泡
+    if (isDecadeBubbleStale(pendingBubble, shuttle?.dayunStemGod ?? '', shuttle?.dayunEmpty ?? true)) {
+      pendingBubble = null;
+    }
     return `
       ${temperamentBlock(chart)}
 
@@ -876,6 +881,7 @@ export function renderBaziChart(root: HTMLElement): () => void {
     disposeShuttle = mountTimeShuttleBoard(page, initial, {
       range,
       initialPrevDayunGod: shuttlePrevDayunGod,
+      initialBubble: pendingBubble,
       buildFrame: (year) => {
         const cast = castBaziChart(store.profile, year, { gender: person.gender });
         if ('error' in cast) return initial;
@@ -902,9 +908,24 @@ export function renderBaziChart(root: HTMLElement): () => void {
         pendingBubble = null;
       },
       resolveBubble: (frame, prevGod) => {
-        if (frame.dayunEmpty || !frame.dayunStemGod) return null;
+        if (frame.dayunEmpty || !frame.dayunStemGod) {
+          pendingBubble = null;
+          return null;
+        }
         const card = decadeShiftCard(prevGod, frame.dayunStemGod);
-        if (!card || shownDecadeKeys.has(card.key)) return null;
+        if (!card) {
+          if (isDecadeBubbleStale(pendingBubble, frame.dayunStemGod, frame.dayunEmpty)) {
+            pendingBubble = null;
+          }
+          return null;
+        }
+        if (shownDecadeKeys.has(card.key)) {
+          // 同一次跨越不重复弹；但仍要清掉「挂在错误大运上」的旧旁白
+          if (isDecadeBubbleStale(pendingBubble, frame.dayunStemGod, frame.dayunEmpty)) {
+            pendingBubble = null;
+          }
+          return null;
+        }
         shownDecadeKeys.add(card.key);
         pendingBubble = card;
         shuttlePrevDayunGod = frame.dayunStemGod;

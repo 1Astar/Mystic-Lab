@@ -109,4 +109,39 @@ describe('script director · 渐→艮 面试金样', () => {
     expect(play.actionRuleId).toMatch(/interview_/);
     expect(play.beats[1]!.body).toMatch(/用神/);
   });
+
+  it('不同卦 + 不同问题：对你这个问题 headline 明显不同', () => {
+    const castAt = new Date('2026-08-28T22:52:00+08:00');
+    const family = buildScriptPlay({
+      question: '我爸威胁我妈这件事最终会怎么解决？或者怎么解决比较好？',
+      cast: castNamed('复', '豫', [0, 3]),
+      castAt,
+    });
+    const decide = buildScriptPlay({
+      question: '这件事要不要一次摊牌说清楚？',
+      cast: castNamed('夬', '大过', [0]),
+      castAt,
+    });
+    const tired = buildScriptPlay({
+      question: '最近总是很累，该怎么调整节奏？',
+      cast: castNamed('需', null, []),
+      castAt,
+    });
+
+    // 各自带本/变卦关键词桥，禁止再落回同一句拉锯死模板
+    expect(family.headline).toMatch(/家事|安全/);
+    expect(family.headline).toMatch(/复.*豫|归来|预备|愉悦|响应/);
+    expect(decide.headline).toMatch(/夬|决断|大过|过重|承压/);
+    expect(tired.headline).toMatch(/需|等待|时机/);
+
+    expect(family.headline).not.toBe(decide.headline);
+    expect(family.headline).not.toBe(tired.headline);
+    expect(decide.headline).not.toBe(tired.headline);
+
+    const dead =
+      '局面偏拉锯，宜小步核对，别一次下死结论。能推进也有拦阻时，先换到一份可核对信息，再决定加码。';
+    expect(family.headline).not.toBe(dead);
+    expect(decide.headline).not.toBe(dead);
+    expect(tired.headline).not.toBe(dead);
+  });
 });

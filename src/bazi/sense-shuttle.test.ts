@@ -8,6 +8,7 @@ import {
   clampShuttleYear,
   decadeShiftCard,
   ganZhiPlainHint,
+  isDecadeBubbleStale,
   shuttleYearRange,
 } from './sense-shuttle.ts';
 import {
@@ -39,6 +40,14 @@ describe('sense-shuttle', () => {
     expect(card?.body).toMatch(/并肩硬刚/);
     expect(decadeShiftCard('食神', '食神')).toBeNull();
     expect(attitudeOfGod('伤官')).toBe('锋芒表达');
+  });
+
+  it('换运气泡过期判定：当前大运十神对不上就视为过期', () => {
+    const card = decadeShiftCard('偏财', '七杀')!;
+    expect(isDecadeBubbleStale(card, '七杀', false)).toBe(false);
+    expect(isDecadeBubbleStale(card, '偏印', false)).toBe(true);
+    expect(isDecadeBubbleStale(card, '', true)).toBe(true);
+    expect(isDecadeBubbleStale(null, '偏印', false)).toBe(false);
   });
 
   it('年份范围与夹取', () => {

@@ -37,16 +37,54 @@ const ADDABLE_RELATIONS: AddableRelation[] = [
   'other',
 ];
 
+function portalRoot(): HTMLElement {
+  return document.querySelector('#app') || document.body;
+}
+
 function findDropdown(host: HTMLElement): HTMLElement | null {
-  return host.querySelector<HTMLElement>('[data-person-sheet]');
+  return (
+    host.querySelector<HTMLElement>('[data-person-sheet]') ??
+    document.querySelector<HTMLElement>('[data-person-sheet][data-person-sheet-portal]')
+  );
+}
+
+function findWrap(host: HTMLElement): HTMLElement | null {
+  return host.querySelector<HTMLElement>('.person-switcher');
+}
+
+function clearPortalStyles(drop: HTMLElement): void {
+  drop.style.top = '';
+  drop.style.left = '';
+  drop.style.width = '';
+  drop.removeAttribute('data-person-sheet-portal');
+}
+
+function positionPortal(drop: HTMLElement, trigger: HTMLElement): void {
+  const rect = trigger.getBoundingClientRect();
+  const width = Math.min(300, window.innerWidth - 24);
+  const centerX = rect.left + rect.width / 2;
+  const left = Math.min(
+    Math.max(12 + width / 2, centerX),
+    window.innerWidth - 12 - width / 2,
+  );
+  drop.style.top = `${Math.round(rect.bottom + 6)}px`;
+  drop.style.left = `${Math.round(left)}px`;
+  drop.style.width = `${width}px`;
 }
 
 function closeDropdown(host: HTMLElement): void {
   const drop = findDropdown(host);
-  if (!drop) return;
-  drop.classList.remove('is-open');
-  drop.hidden = true;
-  host.querySelector('.person-switcher')?.classList.remove('is-open');
+  const wrap = findWrap(host);
+  if (drop) {
+    drop.classList.remove('is-open');
+    drop.hidden = true;
+    clearPortalStyles(drop);
+    // 收回顶栏内，避免下次 mount 残留在 #app
+    if (wrap && drop.parentElement !== wrap) {
+      wrap.appendChild(drop);
+    }
+  }
+  wrap?.classList.remove('is-open');
   host
     .querySelector<HTMLButtonElement>('[data-person-trigger]')
     ?.setAttribute('aria-expanded', 'false');
@@ -171,7 +209,8 @@ function bindDropdownChrome(
   options?: PersonSwitcherOptions,
 ): void {
   drop.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const id = btn.dataset.pick!;
       const store = setActivePersonId(id);
       const person = store.profiles.find((p) => p.id === id)!;
@@ -181,9 +220,13 @@ function bindDropdownChrome(
     });
   });
   drop.querySelectorAll('[data-add]').forEach((el) => {
-    el.addEventListener('click', () => paintAddView(drop, host, options));
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      paintAddView(drop, host, options);
+    });
   });
-  drop.querySelector('[data-manage]')?.addEventListener('click', () => {
+  drop.querySelector('[data-manage]')?.addEventListener('click', (e) => {
+    e.stopPropagation();
     closeDropdown(host);
     navigate('/profile');
   });
@@ -197,13 +240,24 @@ function ensureBackdrop(host: HTMLElement): void {
   backdrop.dataset.personDropBackdrop = '';
   backdrop.setAttribute('aria-label', '关闭档案切换');
   backdrop.addEventListener('click', () => closeDropdown(host));
-  (document.querySelector('#app') || document.body).appendChild(backdrop);
+  portalRoot().appendChild(backdrop);
+}
+
+/**
+ * 下拉必须挂到 #app（与 backdrop 同层、更高 z-index）。
+ * 留在 sticky 顶栏内会被全屏 backdrop 挡住点击。
+ */
+function portalDropdown(drop: HTMLElement, trigger: HTMLElement): void {
+  drop.dataset.personSheetPortal = '';
+  positionPortal(drop, trigger);
+  portalRoot().appendChild(drop);
 }
 
 function openDropdown(host: HTMLElement, options?: PersonSwitcherOptions): void {
-  const wrap = host.querySelector<HTMLElement>('.person-switcher');
+  const wrap = findWrap(host);
   const drop = findDropdown(host);
-  if (!wrap || !drop) return;
+  const trigger = host.querySelector<HTMLButtonElement>('[data-person-trigger]');
+  if (!wrap || !drop || !trigger) return;
 
   if (drop.classList.contains('is-open')) {
     closeDropdown(host);
@@ -214,7 +268,12 @@ function openDropdown(host: HTMLElement, options?: PersonSwitcherOptions): void 
   drop.hidden = false;
   wrap.classList.add('is-open');
   ensureBackdrop(host);
-  requestAnimationFrame(() => drop.classList.add('is-open'));
+  portalDropdown(drop, trigger);
+  trigger.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => {
+    // 仍在打开态时再播入场；关闭途中勿加回 is-open
+    if (!drop.hidden) drop.classList.add('is-open');
+  });
 }
 
 function paintTrigger(host: HTMLElement): void {
@@ -231,6 +290,11 @@ function paintTrigger(host: HTMLElement): void {
   btn.setAttribute('aria-label', `当前所问对象：${person.nickname}，点击切换`);
 }
 
+function cleanupOrphanSheets(): void {
+  document.querySelectorAll('[data-person-sheet-portal]').forEach((el) => el.remove());
+  document.querySelector('[data-person-drop-backdrop]')?.remove();
+}
+
 /**
  * 顶栏居中：当前人名 ▾ → 下拉切换 / 添加他人
  */
@@ -238,8 +302,9 @@ export function mountPersonSwitcher(
   host: HTMLElement,
   options?: PersonSwitcherOptions,
 ): { refresh: () => void } {
+  closeDropdown(host);
   host.querySelector('[data-person-switcher]')?.remove();
-  document.querySelector('[data-person-drop-backdrop]')?.remove();
+  cleanupOrphanSheets();
 
   const wrap = document.createElement('div');
   wrap.className = 'person-switcher';
@@ -255,11 +320,6 @@ export function mountPersonSwitcher(
   trigger?.addEventListener('click', (e) => {
     e.stopPropagation();
     openDropdown(host, options);
-    const drop = findDropdown(host);
-    trigger.setAttribute(
-      'aria-expanded',
-      drop?.classList.contains('is-open') ? 'true' : 'false',
-    );
   });
 
   return {
