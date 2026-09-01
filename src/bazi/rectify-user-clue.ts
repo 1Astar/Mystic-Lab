@@ -10,6 +10,8 @@ import {
 } from './rectify-detective-engine.ts';
 import type { ShichenTraitId } from './rectify-shichen-diff.ts';
 import type { TenGodCategory } from './ten-gods.ts';
+import { resolveBirthPlaceLng } from './cities.ts';
+import { hourToShichenBranch, toTrueSolarDate } from './true-solar.ts';
 
 export type ParsedUserClue = {
   raw: string;
@@ -17,6 +19,14 @@ export type ParsedUserClue = {
   effect: DetectiveOptionEffect;
   /** 没命中规则词库 */
   weak: boolean;
+};
+
+/** 解析钟点时可选：用出生地做真太阳校正 */
+export type UserClueContext = {
+  birthYear?: string;
+  birthMonth?: string;
+  birthDay?: string;
+  birthPlace?: string;
 };
 
 type Rule = {
@@ -76,7 +86,7 @@ const CN_HOUR: Record<string, number> = {
 
 /** 生活/文化时间锚点 → 约几点（24h） */
 const TIME_ANCHORS: ReadonlyArray<{ keys: string[]; hour: number; label: string }> = [
-  { keys: ['新闻联播', '联播开始', '看新闻联播'], hour: 19, label: '新闻联播≈19点→戌时' },
+  { keys: ['新闻联播', '联播开始', '看新闻联播'], hour: 19, label: '新闻联播≈钟表19点' },
   { keys: ['春晚', '除夕晚会'], hour: 20, label: '春晚时段≈20点→戌时' },
   { keys: ['午夜场', '跨年倒计时', '零点钟声'], hour: 0, label: '午夜零点→子时' },
   { keys: ['鸡叫', '公鸡叫', '打鸣'], hour: 5, label: '鸡鸣≈5点→卯时' },
@@ -184,17 +194,38 @@ function uniq<T>(arr: T[]): T[] {
 
 /** 0–23 点 → 地支；邻近支用于软加权 */
 export function hourToBranch(hour: number): { branch: string; neighbors: string[] } {
-  const h = ((Math.floor(hour) % 24) + 24) % 24;
-  for (const row of HOUR_TO_BRANCH) {
-    if (row.start < row.end) {
-      if (h >= row.start && h < row.end) {
-        return neighborsOf(row.branch);
-      }
-    } else if (h >= row.start || h < row.end) {
-      return neighborsOf(row.branch);
-    }
+  return neighborsOf(hourToShichenBranch(hour));
+}
+
+/**
+ * 文化/口述钟点（东八区钟表）→ 真太阳时小时。
+ * 未填可识别出生地时原样返回钟点。
+ */
+export function clockHourToTrueSolarHour(
+  clockHour: number,
+  ctx?: UserClueContext,
+): { hour: number; labelSuffix: string } {
+  const place = resolveBirthPlaceLng(ctx?.birthPlace);
+  if (!place.matched && !(ctx?.birthPlace ?? '').trim()) {
+    return { hour: clockHour, labelSuffix: '' };
   }
-  return neighborsOf('子');
+  const y = Number(ctx?.birthYear);
+  const m = Number(ctx?.birthMonth);
+  const d = Number(ctx?.birthDay);
+  const year = Number.isFinite(y) && y >= 1900 ? y : 2000;
+  const month = Number.isFinite(m) && m >= 1 && m <= 12 ? m : 6;
+  const day = Number.isFinite(d) && d >= 1 && d <= 31 ? d : 15;
+  const h = ((Math.floor(clockHour) % 24) + 24) % 24;
+  const minute = Math.round((clockHour % 1) * 60);
+  const clock = new Date(year, month - 1, day, h, minute, 0);
+  const tst = toTrueSolarDate(clock, place.lng);
+  const tstHour = tst.getHours() + tst.getMinutes() / 60;
+  const city = place.cityName ?? '当地';
+  const pad = String(tst.getMinutes()).padStart(2, '0');
+  return {
+    hour: tstHour,
+    labelSuffix: `（${city}钟表${h}点→真太阳约${tst.getHours()}:${pad}）`,
+  };
 }
 
 function neighborsOf(branch: string): { branch: string; neighbors: string[] } {
@@ -324,16 +355,17 @@ function mergeEffects(
   };
 }
 
-/** 解析用户自由文本 → 规则效果（关键词 + 钟点/文化锚点） */
-export function parseUserClue(text: string): ParsedUserClue {
+/** 解析用户自由文本 → 规则效果（关键词 + 钟点/文化锚点；钟点按出生地真太阳校正） */
+export function parseUserClue(text: string, ctx?: UserClueContext): ParsedUserClue {
   const raw = text.trim().slice(0, 200);
   const matched: string[] = [];
   const parts: Array<Omit<DetectiveOptionEffect, 'clueHint'>> = [];
 
-  // 1) 文化时间锚点（优先于泛化「晚上」）
+  // 1) 文化时间锚点（优先于泛化「晚上」）——锚点小时是「钟表印象」
   for (const a of TIME_ANCHORS) {
     if (a.keys.some((k) => raw.includes(k))) {
-      const pack = effectFromHour(a.hour, a.label);
+      const { hour, labelSuffix } = clockHourToTrueSolarHour(a.hour, ctx);
+      const pack = effectFromHour(hour, `${a.label}${labelSuffix}`);
       matched.push(pack.label);
       parts.push(pack.effect);
       break; // 一个明确锚点即可
@@ -344,8 +376,13 @@ export function parseUserClue(text: string): ParsedUserClue {
   if (!matched.some((m) => m.includes('点') || m.includes('时'))) {
     const clock = extractClockHour(raw);
     if (clock) {
-      const pack = effectFromHour(clock.hour, clock.label);
-      const { branch } = hourToBranch(clock.hour);
+      // 「戌时」等点名地支：已是时辰，不再做钟表→真太阳
+      const namedBranch = BRANCH_NAMES.some((b) => raw.includes(`${b}时`));
+      const { hour, labelSuffix } = namedBranch
+        ? { hour: clock.hour, labelSuffix: '' }
+        : clockHourToTrueSolarHour(clock.hour, ctx);
+      const pack = effectFromHour(hour, `${clock.label}${labelSuffix}`);
+      const { branch } = hourToBranch(hour);
       matched.push(`${pack.label}→${branch}时`);
       parts.push(pack.effect);
     }
@@ -414,8 +451,9 @@ export function applyParsedUserClue(
 export function applyUserClueText(
   state: DetectiveEngineState,
   text: string,
+  ctx?: UserClueContext,
 ): { state: DetectiveEngineState; clue: DetectiveClue; parsed: ParsedUserClue } {
-  const parsed = parseUserClue(text);
+  const parsed = parseUserClue(text, ctx);
   const res = applyParsedUserClue(state, parsed);
   return { ...res, parsed };
 }

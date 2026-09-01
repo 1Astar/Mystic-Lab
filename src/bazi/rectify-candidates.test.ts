@@ -54,4 +54,19 @@ describe('listHourCandidates', () => {
       ),
     ).toEqual([]);
   });
+
+  it('uses later clock than midHour for 赣州 戌 so true solar stays 戌', () => {
+    const list = listHourCandidates(
+      { ...base, birthPlace: '赣州', birthYear: '2003', birthMonth: '2', birthDay: '11' },
+      { kind: 'branches', branches: ['戌'] },
+    );
+    expect(list).toHaveLength(1);
+    const xu = list[0]!;
+    const [hh, mm] = xu.birthHour.split(':').map(Number);
+    const clockMin = (hh ?? 0) * 60 + (mm ?? 0);
+    // 标准中点 20:00；赣州偏西，钟表应晚于 20:00 才落到真太阳戌中点
+    expect(clockMin).toBeGreaterThan(20 * 60);
+    expect(xu.label).toMatch(/钟表约/);
+    expect(xu.hourPillar.length).toBe(2);
+  });
 });

@@ -136,6 +136,83 @@ export const QUICK_PRESETS: Array<{ type: RectifyEventType; note: string }> = [
   { type: 'wealth', note: '财富明显变化' },
 ];
 
+/**
+ * 理想大事件引导（Lab 口径：八字流年 / 紫微宫年能对照的节点）
+ * 优先精确到日；没有钟点也可。
+ */
+export type IdealEventGuide = {
+  type: RectifyEventType;
+  title: string;
+  example: string;
+  why: string;
+};
+
+export const IDEAL_EVENT_GUIDES: IdealEventGuide[] = [
+  {
+    type: 'enroll',
+    title: '学业转折',
+    example: '高考录取放榜日、入学注册日（年月日）',
+    why: '对照流年印/官杀与学业相关宫年',
+  },
+  {
+    type: 'love',
+    title: '恋爱',
+    example: '初恋开始或分手日（年月日）',
+    why: '对照流年财/食伤与感情相关宫年',
+  },
+  {
+    type: 'illness',
+    title: '伤病 / 手术',
+    example: '骨折、阑尾炎、住院或手术日',
+    why: '对照流年伤官/七杀与疾厄相关年',
+  },
+  {
+    type: 'move',
+    title: '搬家 / 远行',
+    example: '第一次离开家乡去外地上学（年月日）',
+    why: '对照驿马/冲合与迁移相关年',
+  },
+  {
+    type: 'family',
+    title: '家庭变故',
+    example: '父母离异、亲人大事、突然搬家日',
+    why: '对照印星与父母/田宅相关年',
+  },
+  {
+    type: 'other',
+    title: '重大决定',
+    example: '突然转专业、退学复读、留学决定日',
+    why: '对照官杀/比劫变动年',
+  },
+];
+
+export function idealEventGuideHtml(): string {
+  const rows = IDEAL_EVENT_GUIDES.map(
+    (g) => `
+    <tr>
+      <th scope="row">${g.title}</th>
+      <td>${g.example}</td>
+      <td>${g.why}</td>
+    </tr>`,
+  ).join('');
+  return `
+    <details class="bazi-rectify-ideal">
+      <summary>什么样的大事件更有用</summary>
+      <p class="life-footnote">优先精确到「日」；没有出生钟点也可以。年份模糊的权重更低。</p>
+      <div class="bazi-rectify-ideal-scroll">
+        <table class="bazi-rectify-ideal-table">
+          <thead>
+            <tr>
+              <th scope="col">类型</th>
+              <th scope="col">举例</th>
+              <th scope="col">有用在哪</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </details>`;
+}
 export function parseEventYear(raw: string): number | null {
   const n = Number(String(raw).trim());
   if (!Number.isFinite(n)) return null;
@@ -157,7 +234,7 @@ export function createEmptyEvent(
     type: 'other',
     note: '',
     yearSlack: 0,
-    precision: 'year',
+    precision: 'ymd',
     ...partial,
   });
 }

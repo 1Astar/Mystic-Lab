@@ -1,7 +1,15 @@
 import type { LifeProfileInput } from '../life/types.ts';
 import { castBaziChart } from './cast.ts';
+import { resolveBirthPlaceLng } from './cities.ts';
+import {
+  clockDateFromTrueSolar,
+  clockHmForShichenMid,
+  formatHm,
+  hourToShichenBranch,
+  toTrueSolarDate,
+} from './true-solar.ts';
 
-/** 十二时辰中点钟点（与 parse-birth SHICHEN 一致） */
+/** 十二时辰中点（真太阳时）与标准钟表区间说明 */
 export const SHICHEN_MID: ReadonlyArray<{ branch: string; midHour: number; clockRange: string }> = [
   { branch: '子', midHour: 0, clockRange: '23–1点' },
   { branch: '丑', midHour: 2, clockRange: '1–3点' },
@@ -30,13 +38,15 @@ export type RectifyTimeBand =
 export type HourCandidate = {
   branch: string;
   midHour: number;
-  /** 写入档案 / cast 用，如 `6:00` */
+  /** 写入档案 / cast 用（当地钟表，已反推真太阳） */
   birthHour: string;
-  /** 展示：卯时（约5–7点） */
+  /** 展示：含真太阳区间与当地钟表约点 */
   label: string;
   /** 时柱干支二字 */
   hourPillar: string;
   dayMaster: string;
+  /** 当地钟表相对真太阳中点的偏移（分钟） */
+  clockOffsetMin?: number;
 };
 
 /** 上午≈卯辰巳；下午≈午未申；傍晚≈酉戌；夜间≈亥子丑寅 */
@@ -56,21 +66,72 @@ function metaOf(branch: string): (typeof SHICHEN_MID)[number] | undefined {
   return SHICHEN_MID.find((s) => s.branch === branch);
 }
 
+function parseYmd(profile: LifeProfileInput): { y: number; m: number; d: number } | null {
+  const y = Number(profile.birthYear);
+  const m = Number(profile.birthMonth);
+  const d = Number(profile.birthDay);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+  if (y < 1900 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  return { y, m, d };
+}
+
+/** 时辰起止（真太阳）两端 → 当地钟表区间文案 */
+function localClockRangeLabel(
+  y: number,
+  m: number,
+  d: number,
+  midHour: number,
+  lng: number,
+): string {
+  const startHour = midHour === 0 ? 23 : midHour - 1;
+  const endHour = midHour === 0 ? 1 : midHour + 1;
+  const startClock = clockDateFromTrueSolar(new Date(y, m - 1, d, startHour, 0, 0), lng);
+  const endClock = clockDateFromTrueSolar(new Date(y, m - 1, d, endHour, 0, 0), lng);
+  return `${formatHm(startClock)}–${formatHm(endClock)}`;
+}
+
 /**
- * 固定年月日，按时段展开候选时柱（走现有 cast，含真太阳时）。
- * 日期无效或候选排盘失败 → 跳过该支；全无效 → []。
+ * 固定年月日，按时段展开候选时柱。
+ * birthHour = 使真太阳落在该时辰中点的当地钟表（含经度+均时差），避免「默认 19/20 点标准时」跨时辰。
  */
 export function listHourCandidates(
   profile: LifeProfileInput,
   band: RectifyTimeBand,
 ): HourCandidate[] {
   const branches = resolveBranchesForBand(band);
+  const ymd = parseYmd(profile);
+  if (!ymd) return [];
+  const place = resolveBirthPlaceLng(profile.birthPlace);
   const out: HourCandidate[] = [];
 
   for (const branch of branches) {
     const meta = metaOf(branch);
     if (!meta) continue;
-    const birthHour = `${meta.midHour}:00`;
+
+    let birthHour = clockHmForShichenMid(ymd.y, ymd.m, ymd.d, meta.midHour, place.lng).clockHm;
+    let pack = clockHmForShichenMid(ymd.y, ymd.m, ymd.d, meta.midHour, place.lng);
+
+    // 校验：钟表 → 真太阳 → 时辰支应等于目标；边界再微调 ±30 分
+    const verify = (hm: string): string | null => {
+      const [hh, mm] = hm.split(':').map(Number);
+      const clock = new Date(ymd.y, ymd.m - 1, ymd.d, hh ?? 0, mm ?? 0, 0);
+      const tst = toTrueSolarDate(clock, place.lng);
+      return hourToShichenBranch(tst.getHours()) === branch ? hm : null;
+    };
+
+    if (!verify(birthHour)) {
+      for (const delta of [15, -15, 30, -30, 45, -45]) {
+        const [hh, mm] = pack.clockHm.split(':').map(Number);
+        const nudged = new Date(ymd.y, ymd.m - 1, ymd.d, hh ?? 0, (mm ?? 0) + delta, 0);
+        const cand = formatHm(nudged);
+        if (verify(cand)) {
+          birthHour = cand;
+          pack = { ...pack, clockHm: cand, offsetMin: pack.offsetMin + delta };
+          break;
+        }
+      }
+    }
+
     const chart = castBaziChart(
       { ...profile, birthHour },
       new Date().getFullYear(),
@@ -79,13 +140,20 @@ export function listHourCandidates(
     if ('error' in chart) continue;
     const hourCell = chart.pillars.find((p) => p.key === 'hour');
     if (!hourCell || hourCell.empty) continue;
+
+    // 时柱地支应以真太阳为准；若仍不一致则跳过（极端边界）
+    if (hourCell.branch && hourCell.branch !== branch) continue;
+
+    const localRange = localClockRangeLabel(ymd.y, ymd.m, ymd.d, meta.midHour, place.lng);
+    const placeBit = place.matched ? place.cityName : '东八区';
     out.push({
       branch,
       midHour: meta.midHour,
       birthHour,
-      label: `${branch}时（约${meta.clockRange}）`,
+      label: `${branch}时 · 真太阳约${meta.clockRange} · ${placeBit}钟表约${localRange}`,
       hourPillar: `${hourCell.stem}${hourCell.branch}`,
       dayMaster: chart.dayMaster,
+      clockOffsetMin: pack.offsetMin,
     });
   }
 

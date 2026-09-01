@@ -2,6 +2,7 @@
  * 生时校准 v2 · 侦探打分 / 排除引擎（纯规则）
  */
 import type { LifeProfileInput } from '../life/types.ts';
+import { resolveBirthPlaceLng } from './cities.ts';
 import { resolveBranchesForBand } from './rectify-candidates.ts';
 import {
   optionById,
@@ -385,4 +386,13 @@ export function detectiveHonestGap(state: DetectiveEngineState): string {
     return `最接近 ${top.branch}时 与 ${second.branch}时，建议进入剧本对照`;
   }
   return `暂倾向 ${top.branch}时（${top.confidencePct}%），次选 ${second.branch}时`;
+}
+
+/** 真太阳时校正状态（产品文案：只陈述，不教学） */
+export function detectiveSolarBiasNote(birthPlace: string): string {
+  const place = resolveBirthPlaceLng(birthPlace);
+  if (!place.matched) {
+    return '未填可识别出生地时，按时区标准钟点估算时辰。';
+  }
+  return place.note;
 }

@@ -20,6 +20,7 @@ import {
   loadDetectiveDraft,
   rebuildDetectiveEngine,
   saveDetectiveDraft,
+  setOpposePick,
   undoDetectiveStep,
   type DetectiveDraft,
   type DetectiveDraftStep,
@@ -27,6 +28,7 @@ import {
 import {
   applyDetectiveAnswer,
   detectiveHonestGap,
+  detectiveSolarBiasNote,
   getDetectiveBoard,
   isObjectiveComplete,
   isPersonalityComplete,
@@ -57,7 +59,7 @@ function nextUnanswered(
   return questions.find((q) => !done.has(q.id));
 }
 
-function scriptHtml(script: LifeScript, side: 'left' | 'right' | 'hidden'): string {
+function scriptHtml(script: LifeScript, side: 'left' | 'right' | 'hidden', slim = false): string {
   const majors = script.majors
     .map(
       (m) => `
@@ -68,16 +70,18 @@ function scriptHtml(script: LifeScript, side: 'left' | 'right' | 'hidden'): stri
       </li>`,
     )
     .join('');
-  const micros = script.micros
-    .slice(0, 6)
-    .map(
-      (m) => `
+  const micros = slim
+    ? ''
+    : script.micros
+        .slice(0, 6)
+        .map(
+          (m) => `
       <div class="bazi-det-micro-row">
         <span>${escapeHtml(m.dim)}</span>
         <p>${escapeHtml(m.text)}</p>
       </div>`,
-    )
-    .join('');
+        )
+        .join('');
   return `
     <article class="bazi-det-script" data-script-side="${side}">
       <header>
@@ -86,9 +90,125 @@ function scriptHtml(script: LifeScript, side: 'left' | 'right' | 'hidden'): stri
         <p class="bazi-det-script-weather">${escapeHtml(script.weatherMetaphor)}</p>
       </header>
       <ol class="bazi-det-script-majors">${majors}</ol>
-      <div class="bazi-det-script-micros">${micros}</div>
+      ${micros ? `<div class="bazi-det-script-micros">${micros}</div>` : ''}
       <button type="button" class="life-btn-primary" data-prefer="${escapeHtml(script.branch)}">更像我 · 选这版</button>
     </article>`;
+}
+
+function detailContrastHtml(
+  pack: NonNullable<ReturnType<typeof buildScriptContrastPack>>,
+  userClueCount: number,
+  opposePicks: { pairId: string; side: 'left' | 'right' }[],
+): string {
+  const pickMap = new Map(opposePicks.map((p) => [p.pairId, p.side]));
+  const scenarioRows = pack.scenarioRows
+    .map(
+      (r) => `
+      <tr class="${r.leanLeft ? 'is-lean-left' : r.leanRight ? 'is-lean-right' : ''}">
+        <th scope="row">
+          <strong>${escapeHtml(r.topic)}</strong>
+          ${r.clue ? `<span class="bazi-det-scenario-clue">${escapeHtml(r.clue)}</span>` : ''}
+        </th>
+        <td>${escapeHtml(r.left)}</td>
+        <td>${escapeHtml(r.right)}</td>
+      </tr>`,
+    )
+    .join('');
+
+  const dimRows = pack.contrastTable
+    .filter((r) =>
+      ['气场天气', '外貌倾向', '性情标签', '家宅气象', '工作气质', '亲密关系'].includes(r.dim),
+    )
+    .map(
+      (r) => `
+      <tr>
+        <th scope="row">${escapeHtml(r.dim)}</th>
+        <td>${escapeHtml(r.left)}</td>
+        <td>${escapeHtml(r.right)}</td>
+      </tr>`,
+    )
+    .join('');
+
+  const opposeRows = pack.opposePairs
+    .map((p) => {
+      const side = pickMap.get(p.id);
+      return `
+      <li class="bazi-det-oppose-item">
+        <p class="bazi-det-oppose-topic">${escapeHtml(p.topic)}</p>
+        <div class="bazi-det-oppose-choices">
+          <button type="button" class="bazi-det-oppose-btn ${side === 'left' ? 'is-on' : ''}" data-oppose-pair="${escapeHtml(p.id)}" data-oppose-side="left" data-oppose-left="${escapeHtml(pack.left.branch)}" data-oppose-right="${escapeHtml(pack.right.branch)}">
+            <em>${escapeHtml(pack.left.branch)}时</em>
+            <span>${escapeHtml(p.left)}</span>
+          </button>
+          <button type="button" class="bazi-det-oppose-btn ${side === 'right' ? 'is-on' : ''}" data-oppose-pair="${escapeHtml(p.id)}" data-oppose-side="right" data-oppose-left="${escapeHtml(pack.left.branch)}" data-oppose-right="${escapeHtml(pack.right.branch)}">
+            <em>${escapeHtml(pack.right.branch)}时</em>
+            <span>${escapeHtml(p.right)}</span>
+          </button>
+        </div>
+      </li>`;
+    })
+    .join('');
+
+  const clueHint =
+    userClueCount > 0
+      ? `已根据你补充的 ${userClueCount} 条细节生成对照；下方还可继续补。`
+      : '补一句人生大事或生活细节（如「新闻联播时出生」「小时候常搬家」），对照表会跟着变。';
+
+  return `
+    <div class="bazi-det-detail-pane">
+      <p class="bazi-det-lead">${escapeHtml(clueHint)}</p>
+      <div class="bazi-det-clue-input bazi-det-clue-input--inline">
+        <label for="det-script-clue">补充细节</label>
+        <div class="bazi-det-clue-row">
+          <input id="det-script-clue" type="text" maxlength="200" placeholder="人生大事或生活小事，越具体越好" />
+          <button type="button" class="life-btn-ghost" data-submit-clue>补线索</button>
+        </div>
+      </div>
+      ${
+        pack.opposePairs.length
+          ? `<section class="bazi-det-scenario-block" aria-labelledby="det-oppose-title">
+        <h3 id="det-oppose-title" class="bazi-det-detail-heading">性格对照</h3>
+        <p class="bazi-det-detail-note">每组点选更像你的一边，会抬高对应时辰权重。</p>
+        <ul class="bazi-det-oppose-list">${opposeRows}</ul>
+      </section>`
+          : ''
+      }
+      <section class="bazi-det-scenario-block" aria-labelledby="det-scenario-title">
+        <h3 id="det-scenario-title" class="bazi-det-detail-heading">情境细节</h3>
+        <p class="bazi-det-detail-note">同一行左右必须能问出口、能辨认——来自你补充的内容或默认可对立场景。</p>
+        <div class="bazi-det-compare-scroll">
+          <table class="bazi-det-compare-table">
+            <thead>
+              <tr>
+                <th scope="col">细节</th>
+                <th scope="col">${escapeHtml(pack.left.branch)}时</th>
+                <th scope="col">${escapeHtml(pack.right.branch)}时</th>
+              </tr>
+            </thead>
+            <tbody>${scenarioRows || '<tr><td colspan="3">暂无可对照场景，请补充细节。</td></tr>'}</tbody>
+          </table>
+        </div>
+      </section>
+      <section class="bazi-det-scenario-block" aria-labelledby="det-dim-title">
+        <h3 id="det-dim-title" class="bazi-det-detail-heading">维度画像</h3>
+        <div class="bazi-det-compare-scroll">
+          <table class="bazi-det-compare-table">
+            <thead>
+              <tr>
+                <th scope="col">维度</th>
+                <th scope="col">${escapeHtml(pack.left.branch)}时</th>
+                <th scope="col">${escapeHtml(pack.right.branch)}时</th>
+              </tr>
+            </thead>
+            <tbody>${dimRows}</tbody>
+          </table>
+        </div>
+      </section>
+      <div class="bazi-det-cta-row">
+        <button type="button" class="life-btn-primary" data-prefer="${escapeHtml(pack.left.branch)}">更像 ${escapeHtml(pack.left.branch)}时</button>
+        <button type="button" class="life-btn-ghost" data-prefer="${escapeHtml(pack.right.branch)}">更像 ${escapeHtml(pack.right.branch)}时</button>
+      </div>
+    </div>`;
 }
 
 export function renderBaziRectifyDetective(root: HTMLElement): () => void {
@@ -106,6 +226,7 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
     : null;
   let lastClue: DetectiveClue | null = state?.clues.at(-1) ?? null;
   let scriptView: 'left' | 'right' | 'hidden' = 'left';
+  let scriptContentTab: 'story' | 'detail' = 'detail';
 
   const page = document.createElement('div');
   page.className = 'page life-page bazi-rectify-page bazi-det-page';
@@ -178,7 +299,19 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
           ${chips}
         </div>
       </div>
-      <p class="bazi-det-gap">${escapeHtml(detectiveHonestGap(state))}</p>`;
+      <details class="bazi-det-extra"${lastClue ? ' open' : ''}>
+        <summary>补充细节 · 线索</summary>
+        <p class="bazi-det-gap">${escapeHtml(detectiveHonestGap(state))}</p>
+        <p class="bazi-det-gap bazi-det-solar-note">${escapeHtml(detectiveSolarBiasNote(store.profile.birthPlace))}</p>
+        ${
+          lastClue
+            ? `<div class="bazi-det-clue-pop" role="status">
+                <strong>${escapeHtml(lastClue.title)}</strong>
+                <p>${escapeHtml(lastClue.body)}</p>
+              </div>`
+            : `<p class="bazi-det-panel-hint">答一题，这里会亮起线索。</p>`
+        }
+      </details>`;
   }
 
   function paint(): void {
@@ -256,13 +389,16 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
               )
               .join('')}
           </div>
-          <div class="bazi-det-clue-input">
-            <label for="det-user-clue">还有细节？写一句给我们反查</label>
-            <div class="bazi-det-clue-row">
-              <input id="det-user-clue" type="text" maxlength="200" placeholder="例如：小时候经常搬家 / 口才好" />
-              <button type="button" class="life-btn-ghost" data-submit-clue>补线索</button>
+          <details class="bazi-det-clue-fold">
+            <summary>补充细节（可选）</summary>
+            <div class="bazi-det-clue-input">
+              <label for="det-user-clue">写一句给我们反查</label>
+              <div class="bazi-det-clue-row">
+                <input id="det-user-clue" type="text" maxlength="200" placeholder="例如：小时候经常搬家 / 新闻联播开始时出生" />
+                <button type="button" class="life-btn-ghost" data-submit-clue>补线索</button>
+              </div>
             </div>
-          </div>
+          </details>
           ${
             canUndoDetectiveStep(draft)
               ? `<div class="bazi-det-cta-row"><button type="button" class="life-btn-ghost" data-undo-step>← 返回上一步</button></div>`
@@ -274,7 +410,11 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
         stageHtml = `<section class="bazi-det-stage"><p>引擎未就绪</p></section>`;
       } else {
         const ranked = rankDetectiveBranches(state);
-        const pack = buildScriptContrastPack(store.profile, ranked);
+        const pack = buildScriptContrastPack(
+          store.profile,
+          ranked,
+          draft.userClues.map((c) => c.text),
+        );
         if (!pack) {
           stageHtml = `
             <section class="bazi-det-stage">
@@ -302,7 +442,15 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
             <section class="bazi-det-stage">
               <p class="bazi-det-kicker">剧本对照</p>
               <h2 class="life-route-title">哪一版人生更像你？</h2>
-              <p class="bazi-det-lead">左右滑看 Top2；差异来自当日排盘，不是泛化性格文案。</p>
+              <div class="bazi-det-content-tabs" role="tablist" aria-label="剧本内容">
+                <button type="button" class="bazi-det-content-tab ${scriptContentTab === 'detail' ? 'is-on' : ''}" data-script-content="detail" role="tab" aria-selected="${scriptContentTab === 'detail'}">细节对照</button>
+                <button type="button" class="bazi-det-content-tab ${scriptContentTab === 'story' ? 'is-on' : ''}" data-script-content="story" role="tab" aria-selected="${scriptContentTab === 'story'}">人生故事</button>
+              </div>
+              ${
+                scriptContentTab === 'detail'
+                  ? detailContrastHtml(pack, draft.userClues.length, draft.opposePicks)
+                  : `
+              <p class="bazi-det-lead">先看人生大走向；要认具体细节请切「细节对照」。</p>
               <div class="bazi-det-script-tabs">
                 <button type="button" class="bazi-det-tab ${scriptView === 'left' ? 'is-on' : ''}" data-script-view="left">${escapeHtml(pack.left.branch)}时</button>
                 <button type="button" class="bazi-det-tab ${scriptView === 'right' ? 'is-on' : ''}" data-script-view="right">${escapeHtml(pack.right.branch)}时</button>
@@ -312,25 +460,8 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
                     : ''
                 }
               </div>
-              ${scriptHtml(show, side)}
-              <details class="bazi-det-contrast">
-                <summary>对照表 · 微细节差异</summary>
-                <ul>
-                  ${pack.contrastTable
-                    .slice(0, 10)
-                    .map(
-                      (r) => `
-                    <li>
-                      <strong>${escapeHtml(r.dim)}</strong>
-                      <span>${escapeHtml(r.left)}</span>
-                      <em>vs</em>
-                      <span>${escapeHtml(r.right)}</span>
-                    </li>`,
-                    )
-                    .join('')}
-                </ul>
-                <p class="bazi-det-pairdiff">${pack.pairDiffLines.map(escapeHtml).join(' · ')}</p>
-              </details>
+              ${scriptHtml(show, side, true)}`
+              }
               <div class="bazi-det-cta-row">
                 <button type="button" class="life-btn-ghost" data-undo-step>← 返回上一步</button>
                 <button type="button" class="life-btn-ghost" data-go="result">先看结果 ›</button>
@@ -367,6 +498,10 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
     page.innerHTML = `
       <button type="button" class="back-link life-back" data-path="/bazi">← 八字</button>
       <div class="bazi-det-shell">
+        <aside class="bazi-det-panel" aria-label="侦查板">
+          <p class="bazi-det-panel-title">侦查板 · 日晷</p>
+          ${boardHtml()}
+        </aside>
         <header class="bazi-det-guide">
           <div class="life-header-emblem">${mysticEmblemHtml('bazi', 'sm')}</div>
           <div>
@@ -391,18 +526,6 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
           </div>
         </header>
         <div class="bazi-det-main">${stageHtml}</div>
-        <aside class="bazi-det-panel" aria-label="侦查板">
-          <p class="bazi-det-panel-title">侦查板 · 日晷</p>
-          ${boardHtml()}
-          ${
-            lastClue
-              ? `<div class="bazi-det-clue-pop" role="status">
-                  <strong>${escapeHtml(lastClue.title)}</strong>
-                  <p>${escapeHtml(lastClue.body)}</p>
-                </div>`
-              : `<p class="bazi-det-panel-hint">答一题，这里会亮起线索。</p>`
-          }
-        </aside>
       </div>`;
 
     bindCommon();
@@ -429,6 +552,7 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
       state = rebuildDetectiveEngine(store.profile, draft);
       lastClue = null;
       scriptView = 'left';
+      scriptContentTab = 'detail';
       paint();
     });
     page.querySelector('[data-undo-step]')?.addEventListener('click', () => {
@@ -438,6 +562,7 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
       state = rebuildDetectiveEngine(store.profile, draft);
       lastClue = state?.clues.at(-1) ?? null;
       scriptView = 'left';
+      scriptContentTab = 'detail';
       paint();
     });
   }
@@ -483,15 +608,48 @@ export function renderBaziRectifyDetective(root: HTMLElement): () => void {
 
     page.querySelector('[data-submit-clue]')?.addEventListener('click', () => {
       if (!state) return;
-      const input = page.querySelector<HTMLInputElement>('#det-user-clue');
+      const input =
+        page.querySelector<HTMLInputElement>('#det-user-clue') ??
+        page.querySelector<HTMLInputElement>('#det-script-clue');
       const text = input?.value?.trim() ?? '';
       if (!text) return;
-      const res = applyUserClueText(state, text);
+      const res = applyUserClueText(state, text, {
+        birthYear: store.profile.birthYear,
+        birthMonth: store.profile.birthMonth,
+        birthDay: store.profile.birthDay,
+        birthPlace: store.profile.birthPlace,
+      });
       state = res.state;
       lastClue = res.clue;
       draft = addUserClue(draft, text, res.parsed.matched);
       if (input) input.value = '';
+      if (draft.step === 'script') scriptContentTab = 'detail';
       paint();
+    });
+
+    page.querySelectorAll<HTMLButtonElement>('[data-oppose-pair]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!state) return;
+        const pairId = btn.dataset.opposePair ?? '';
+        const side = btn.dataset.opposeSide as 'left' | 'right' | undefined;
+        const leftBranch = btn.dataset.opposeLeft ?? '';
+        const rightBranch = btn.dataset.opposeRight ?? '';
+        if (!pairId || (side !== 'left' && side !== 'right') || !leftBranch || !rightBranch) return;
+        draft = setOpposePick(draft, { pairId, side, leftBranch, rightBranch });
+        state = rebuildDetectiveEngine(store.profile, draft);
+        lastClue = state?.clues.at(-1) ?? lastClue;
+        scriptContentTab = 'detail';
+        paint();
+      });
+    });
+
+    page.querySelectorAll<HTMLButtonElement>('[data-script-content]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.scriptContent as 'story' | 'detail' | undefined;
+        if (!tab) return;
+        scriptContentTab = tab;
+        paint();
+      });
     });
 
     page.querySelectorAll<HTMLButtonElement>('[data-script-view]').forEach((btn) => {

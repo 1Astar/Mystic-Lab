@@ -4,6 +4,7 @@
 import type { LifeProfileInput } from '../life/types.ts';
 import {
   applyDetectiveAnswer,
+  applyFreeformEffect,
   createDetectiveEngine,
   type DetectiveAnswer,
   type DetectiveEngineState,
@@ -21,10 +22,20 @@ export type DetectiveUserClue = {
   at: string;
 };
 
+export type DetectiveOpposePick = {
+  pairId: string;
+  side: 'left' | 'right';
+  leftBranch: string;
+  rightBranch: string;
+  at: string;
+};
+
 export type DetectiveDraft = {
   step: DetectiveDraftStep;
   answers: DetectiveAnswer[];
   userClues: DetectiveUserClue[];
+  /** 剧本对立人格点选 */
+  opposePicks: DetectiveOpposePick[];
   /** 剧本对照选中的时辰 */
   preferredBranch: string;
   /** 是否揭开第三套剧本 */
@@ -43,6 +54,7 @@ export function emptyDetectiveDraft(): DetectiveDraft {
     step: 'welcome',
     answers: [],
     userClues: [],
+    opposePicks: [],
     preferredBranch: '',
     revealHiddenScript: false,
     updatedAt: new Date().toISOString(),
@@ -58,6 +70,7 @@ export function loadDetectiveDraft(): DetectiveDraft | null {
       step: p.step ?? 'welcome',
       answers: Array.isArray(p.answers) ? p.answers : [],
       userClues: Array.isArray(p.userClues) ? p.userClues : [],
+      opposePicks: Array.isArray(p.opposePicks) ? (p.opposePicks as DetectiveOpposePick[]) : [],
       preferredBranch: typeof p.preferredBranch === 'string' ? p.preferredBranch : '',
       revealHiddenScript: Boolean(p.revealHiddenScript),
       updatedAt: typeof p.updatedAt === 'string' ? p.updatedAt : new Date().toISOString(),
@@ -98,7 +111,28 @@ export function rebuildDetectiveEngine(
     state = res.state;
   }
   for (const uc of d.userClues) {
-    const res = applyUserClueText(state, uc.text);
+    const res = applyUserClueText(state, uc.text, {
+      birthYear: profile.birthYear,
+      birthMonth: profile.birthMonth,
+      birthDay: profile.birthDay,
+      birthPlace: profile.birthPlace,
+    });
+    state = res.state;
+  }
+  for (const pick of d.opposePicks) {
+    const branch = pick.side === 'left' ? pick.leftBranch : pick.rightBranch;
+    const res = applyFreeformEffect(
+      state,
+      {
+        boostBranches: [branch],
+        clueHint: `对立人格：更像${branch}时`,
+      },
+      {
+        questionId: 'oppose',
+        optionId: `${pick.pairId}-${pick.side}`,
+        title: '性格对照',
+      },
+    );
     state = res.state;
   }
   return state;
@@ -139,6 +173,24 @@ export function addUserClue(draft: DetectiveDraft, text: string, tags: string[] 
         tags: tags.slice(0, 6),
         at: new Date().toISOString(),
       },
+    ],
+    updatedAt: new Date().toISOString(),
+  };
+  saveDetectiveDraft(next);
+  return next;
+}
+
+/** 同一 pairId 只保留最后一次选择 */
+export function setOpposePick(
+  draft: DetectiveDraft,
+  pick: Omit<DetectiveOpposePick, 'at'>,
+): DetectiveDraft {
+  const rest = draft.opposePicks.filter((p) => p.pairId !== pick.pairId);
+  const next: DetectiveDraft = {
+    ...draft,
+    opposePicks: [
+      ...rest,
+      { ...pick, at: new Date().toISOString() },
     ],
     updatedAt: new Date().toISOString(),
   };

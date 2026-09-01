@@ -255,7 +255,9 @@ function profileFromCandidate(
     midHour: cand.midHour,
     birthHour: cand.birthHour,
     label: cand.label,
-    clockRange: meta?.clockRange ?? '',
+    clockRange: cand.label.includes('钟表约')
+      ? (cand.label.split('·').slice(1).join('·').trim() || meta?.clockRange || '')
+      : meta?.clockRange ?? '',
     hourPillar: cand.hourPillar,
     dayPillar,
     dayMaster: chart.dayMaster,

@@ -46,7 +46,41 @@ describe('rectify-script-gen', () => {
     expect(pack).toBeTruthy();
     expect(pack!.left.branch).not.toBe(pack!.right.branch);
     expect(pack!.contrastTable.length).toBeGreaterThan(3);
+    expect(pack!.scenarioRows.length).toBeGreaterThan(0);
     expect(pack!.pairDiffLines.length).toBeGreaterThan(0);
+  });
+
+  it('builds scenario rows from user clues', () => {
+    let state = createDetectiveEngine(base)!;
+    for (const [q, o] of [
+      ['obj-slot', 'unknown'],
+      ['obj-daynight', 'unsure'],
+      ['obj-meal', 'no'],
+      ['per-weather', 'fire'],
+      ['per-work', 'create'],
+      ['per-family', 'express'],
+      ['per-anger', 'burst'],
+      ['per-social', 'center'],
+    ] as const) {
+      ({ state } = applyDetectiveAnswer(state, q, o));
+    }
+    const ranked = rankDetectiveBranches(state);
+    const pack = buildScriptContrastPack(base, ranked, [
+      '新闻联播开始时出生',
+      '新闻联播开始时出生',
+      '小时候经常搬家',
+    ]);
+    expect(pack).toBeTruthy();
+    // 重复线索只占一行；后面仍接题库
+    const birthRows = pack!.scenarioRows.filter(
+      (r) => r.topic.includes('出生') || r.clue?.includes('联播'),
+    );
+    expect(birthRows.length).toBe(1);
+    expect(pack!.scenarioRows.length).toBeGreaterThanOrEqual(6);
+    expect(pack!.scenarioRows.some((r) => r.topic === '吵完架后')).toBe(true);
+    expect(pack!.scenarioRows.some((r) => r.topic.includes('搬家') || r.clue?.includes('搬家'))).toBe(
+      true,
+    );
   });
 });
 
@@ -86,6 +120,22 @@ describe('rectify-user-clue', () => {
     expect(p.weak).toBe(false);
     expect(p.matched.some((m) => m.includes('联播') || m.includes('戌'))).toBe(true);
     expect(p.effect.boostBranches).toEqual(expect.arrayContaining(['酉', '戌', '亥']));
+  });
+
+  it('maps 新闻联播 at 赣州 via true solar toward 酉', () => {
+    const p = parseUserClue('在新闻联播开始的时候', {
+      birthYear: '2003',
+      birthMonth: '2',
+      birthDay: '11',
+      birthPlace: '赣州',
+    });
+    expect(p.weak).toBe(false);
+    expect(p.matched.some((m) => m.includes('真太阳'))).toBe(true);
+    // 钟表19点在赣州真太阳约18:4x → 酉时邻域
+    expect(p.effect.boostBranches).toEqual(expect.arrayContaining(['申', '酉', '戌']));
+    expect(p.effect.boostBranches?.[0] === '戌' && !p.effect.boostBranches?.includes('酉')).toBe(
+      false,
+    );
   });
 
   it('parses explicit clock like 晚上七点', () => {

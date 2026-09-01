@@ -21,6 +21,7 @@ import {
   createEmptyEvent,
   eventsReadyForScore,
   filledEvents,
+  idealEventGuideHtml,
   minEventsForMode,
   type EventTimePrecision,
   type RectifyEvent,
@@ -55,7 +56,7 @@ function ensureQuickEvents(draft: RectifyDraft): RectifyDraft {
   if (draft.mode !== 'quick') return draft;
   if (draft.events.length >= QUICK_PRESETS.length) return draft;
   const events = QUICK_PRESETS.map((p) =>
-    createEmptyEvent({ type: p.type, note: p.note, precision: 'year' }),
+    createEmptyEvent({ type: p.type, note: p.note, precision: 'ymd' }),
   );
   return { ...draft, events };
 }
@@ -202,6 +203,7 @@ export function renderBaziRectify(root: HTMLElement): () => void {
 
       <section class="bazi-rectify-section" aria-label="大事件">
         <h2 class="life-route-title">④ 大事件年表</h2>
+        ${idealEventGuideHtml()}
         <p class="life-footnote">
           ${
             draft.mode === 'quick'
@@ -275,6 +277,14 @@ export function renderBaziRectify(root: HTMLElement): () => void {
         <label class="life-field">
           <span>年份</span>
           <input type="number" name="year" min="1900" max="2100" value="${ev.year || ''}" placeholder="如 2018" />
+        </label>
+        <label class="life-field">
+          <span>月</span>
+          <input type="number" name="month" min="1" max="12" value="${ev.month || ''}" placeholder="选填" />
+        </label>
+        <label class="life-field">
+          <span>日</span>
+          <input type="number" name="day" min="1" max="31" value="${ev.day || ''}" placeholder="选填" />
         </label>
         <label class="life-field">
           <span>类型</span>
@@ -355,15 +365,21 @@ export function renderBaziRectify(root: HTMLElement): () => void {
       rows.forEach((row, i) => {
         const prev = draft.events[i] ?? createEmptyEvent();
         const yearRaw = (row.querySelector('[name="year"]') as HTMLInputElement)?.value ?? '';
+        const monthRaw = (row.querySelector('[name="month"]') as HTMLInputElement)?.value ?? '';
+        const dayRaw = (row.querySelector('[name="day"]') as HTMLInputElement)?.value ?? '';
         const type = ((row.querySelector('[name="type"]') as HTMLSelectElement)?.value ??
           'other') as RectifyEventType;
         const note = (row.querySelector('[name="note"]') as HTMLInputElement)?.value ?? '';
         const precision = ((row.querySelector('[name="precision"]') as HTMLSelectElement)?.value ??
-          'year') as EventTimePrecision;
+          'ymd') as EventTimePrecision;
         const year = Number(yearRaw);
+        const monthN = Number(monthRaw);
+        const dayN = Number(dayRaw);
         next.push({
           ...prev,
           year: Number.isFinite(year) ? year : 0,
+          month: Number.isFinite(monthN) && monthN >= 1 && monthN <= 12 ? monthN : undefined,
+          day: Number.isFinite(dayN) && dayN >= 1 && dayN <= 31 ? dayN : undefined,
           type,
           note,
           precision,

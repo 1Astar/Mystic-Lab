@@ -6,6 +6,14 @@
 import type { LifeProfileInput } from '../life/types.ts';
 import type { RankedDetectiveBranch } from './rectify-detective-engine.ts';
 import {
+  buildHourOpposePairs,
+  type HourOpposePair,
+} from './rectify-hour-oppose.ts';
+import {
+  buildScenarioContrastRows,
+  type ScenarioContrastRow,
+} from './rectify-scenario-contrast.ts';
+import {
   buildShichenDiffProfiles,
   diffProfileByBranch,
   summarizePairDiff,
@@ -13,6 +21,9 @@ import {
   type ShichenDiffProfile,
   type ShichenTraitId,
 } from './rectify-shichen-diff.ts';
+
+export type { ScenarioContrastRow } from './rectify-scenario-contrast.ts';
+export type { HourOpposePair } from './rectify-hour-oppose.ts';
 
 export type ScriptMajorBeat = {
   ageLabel: string;
@@ -49,6 +60,10 @@ export type ScriptContrastPack = {
   /** 第三候选，默认藏在「还有一版」 */
   hidden: LifeScript | null;
   contrastTable: ScriptContrastRow[];
+  /** 情境细节：用户线索 × Top2 时辰 */
+  scenarioRows: ScenarioContrastRow[];
+  /** 时柱对立人格：用户二选一 */
+  opposePairs: HourOpposePair[];
   pairDiffLines: string[];
 };
 
@@ -349,6 +364,7 @@ function contrastDim(
 export function buildScriptContrastPack(
   lifeProfile: LifeProfileInput,
   ranked: RankedDetectiveBranch[],
+  userClues: string[] = [],
 ): ScriptContrastPack | null {
   if (ranked.length < 2) return null;
   const profiles =
@@ -392,6 +408,8 @@ export function buildScriptContrastPack(
     right,
     hidden,
     contrastTable,
+    scenarioRows: buildScenarioContrastRows(userClues, a, b),
+    opposePairs: buildHourOpposePairs(a, b),
     pairDiffLines: summarizePairDiff(a, b),
   };
 }
