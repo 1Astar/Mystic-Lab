@@ -1,7 +1,7 @@
 {
   "name": "mystic-lab",
   "private": true,
-  "version": "0.15.3",
+  "version": "0.15.4",
   "type": "module",
   "scripts": {
     "dev": "node scripts/fetch-tarot-images.mjs && node scripts/copy-mediapipe.mjs && vite",
@@ -27,8 +27,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "optionalDependencies": {
-    "@emnapi/runtime": "1.11.3"
   }
 }
