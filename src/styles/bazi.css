@@ -3729,7 +3729,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 
 .bazi-wx-card.is-lit {
   border-color: rgba(255, 214, 166, 0.5);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 24px rgba(255, 214, 166, 0.08);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 24px rgba(255, 214, 166, 0.08);
   animation: bazi-wx-pulse 3.2s ease-in-out infinite;
 }
 
@@ -3776,19 +3776,19 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 }
 
 .bazi-wx-card.wx-mu.is-lit {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 28px rgba(96, 180, 120, 0.18);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 28px rgba(96, 180, 120, 0.18);
 }
 .bazi-wx-card.wx-huo.is-lit {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 28px rgba(220, 100, 70, 0.2);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 28px rgba(220, 100, 70, 0.2);
 }
 .bazi-wx-card.wx-tu.is-lit {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 28px rgba(196, 160, 90, 0.18);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 28px rgba(196, 160, 90, 0.18);
 }
 .bazi-wx-card.wx-jin.is-lit {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 28px rgba(220, 210, 180, 0.16);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 28px rgba(220, 210, 180, 0.16);
 }
 .bazi-wx-card.wx-shui.is-lit {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 28px rgba(90, 140, 200, 0.22);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 28px rgba(90, 140, 200, 0.22);
 }
 
 @keyframes bazi-wx-pulse {
@@ -4017,7 +4017,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   padding: 8px 12px 8px 10px;
   border-radius: 12px;
   border: 1px solid rgba(255, 214, 166, 0.28);
-  background: rgba(0, 0, 0, 0.22);
+  background: color-mix(in srgb, var(--bg-deep) 18%, var(--surface-2));
   color: #fff6e8;
   font: inherit;
   text-align: left;
@@ -4154,12 +4154,12 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 
 .bazi-star-card.is-shensha.is-lit {
   border-color: rgba(155, 127, 212, 0.55);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 24px rgba(155, 127, 212, 0.16);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 24px rgba(155, 127, 212, 0.16);
 }
 
 .bazi-star-card.is-tengod.is-lit {
   border-color: rgba(255, 180, 100, 0.5);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), 0 0 24px rgba(255, 180, 100, 0.14);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), 0 0 24px rgba(255, 180, 100, 0.14);
 }
 
 .bazi-star-card.is-dim {
@@ -4240,7 +4240,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 4 / 3;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--scrim);
 }
 
 .bazi-art-svg {
@@ -4405,7 +4405,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid rgba(255, 214, 166, 0.22);
-  background: #0a0c12;
+  background: var(--chart-bg);
   color: #fff6e8;
   font: inherit;
   text-align: left;
@@ -4780,7 +4780,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
 .bazi-ss-more {
   border-radius: 12px;
   border: 1px solid rgba(255, 214, 166, 0.14);
-  background: rgba(0, 0, 0, 0.22);
+  background: color-mix(in srgb, var(--bg-deep) 18%, var(--surface-2));
   padding: 8px 12px 10px;
 }
 
@@ -4828,7 +4828,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   overflow: hidden;
   border: 1px solid rgba(255, 214, 166, 0.22);
   aspect-ratio: 1;
-  background: #0a0c12;
+  background: var(--chart-bg);
 }
 
 .bazi-ss-detail-art img {
@@ -7460,7 +7460,7 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   gap: 6px;
   padding: 6px 8px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.22);
+  background: color-mix(in srgb, var(--bg-deep) 18%, var(--surface-2));
   border: 1px solid rgba(255, 214, 166, 0.1);
   font-size: 0.8rem;
   color: rgba(255, 236, 210, 0.88);

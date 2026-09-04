@@ -194,6 +194,8 @@ export function renderQuestionBriefingHtml(b: QuestionBriefing, classic?: Briefi
     classicHtml,
     cast: b.cast,
     question: b.question,
+    /** 页头 hero 已钉「对你这个问题」，正文勿再重复直答 */
+    answerAlreadyPinned: true,
   });
 }
 

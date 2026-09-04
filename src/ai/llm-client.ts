@@ -104,6 +104,7 @@ function buildPrompt(req: LlmContextualRequest): string {
 
   return [
     '你是精通心理学与职场经验的塔罗师。解读是帮用户理清头绪的心理模型，不是空洞预测。',
+    '【首句直答·硬规则】oneLiner 与 overview 的第一句必须直接回答用户原问的字面意思（走向/会不会/怎么办）；禁止先讲牌义关键词或「先抓住方向」类套话。',
     '开场可用一句共情（点出疲惫/纠结），但立刻进入逐条作答。',
     `用户当前这张牌是【${card.cardName}】（${orient}），牌阵位置：${card.position || '未知'}（${card.positionMeaning || '—'}）。`,
     ...orientationLogicLines(card),
@@ -190,7 +191,8 @@ function buildPerCardSpreadPrompt(req: LlmSpreadRequest): string {
 
   return [
     '你是精通心理学叙事与家庭/关系议题的塔罗师。用户只有一个问题，但抽了多张牌——必须每张各写一段，再写综合结论。',
-    '禁止恋爱/职场套话偏离主题；禁止只解读第一张牌；禁止模板句「先抓住方向」「都不算剧烈」。',
+    '【首句直答·硬规则】synthesis 第一句必须直接回答用户原问（做什么/后果/会不会/怎么解决）；禁止模板句「先抓住方向」「都不算剧烈」。',
+    '禁止恋爱/职场套话偏离主题；禁止只解读第一张牌。',
     mode === 'action_outcome'
       ? '用户问的是行为与后果：synthesis 必须直接回答「更可能做什么 + 可能带来什么后果」，再用三张牌讲故事。'
       : '',

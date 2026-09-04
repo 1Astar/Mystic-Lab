@@ -714,8 +714,8 @@
 .codex-scene-card {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(201, 168, 76, 0.22);
-  background: rgba(12, 8, 22, 0.35);
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--line));
+  background: var(--panel-inset);
 }
 
 .codex-scene-card[data-scene='love'] {
@@ -829,15 +829,15 @@
   margin-top: 4px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(201, 168, 76, 0.18);
-  background: rgba(12, 8, 22, 0.35);
+  border: 1px solid var(--line);
+  background: var(--panel-inset);
 }
 
 .codex-orient-panel-title {
   margin: 0 0 10px;
   font-size: 0.88rem;
   font-weight: 700;
-  color: rgba(245, 235, 210, 0.95);
+  color: var(--ink);
 }
 
 .codex-orient-brief {
@@ -861,7 +861,7 @@
   margin: 0;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: rgba(220, 210, 190, 0.9);
+  color: var(--ink-muted);
 }
 
 .codex-life-scenes {
@@ -873,8 +873,8 @@
 .codex-life-scene-card {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(201, 168, 76, 0.22);
-  background: rgba(12, 8, 22, 0.35);
+  border: 1px solid var(--line);
+  background: var(--panel-inset);
 }
 
 .codex-life-scene-title {

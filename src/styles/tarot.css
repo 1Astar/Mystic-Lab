@@ -242,7 +242,7 @@
   height: min(210px, 50vw);
   margin: 0 auto 16px;
   border-color: rgba(201, 168, 76, 0.5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px var(--scrim);
 }
 
 .camera-slot {
@@ -1733,7 +1733,7 @@
   height: 200px;
   border-radius: var(--radius-sm);
   border: 1px dashed rgba(201, 168, 76, 0.45);
-  background: rgba(0, 0, 0, 0.25);
+  background: color-mix(in srgb, var(--bg-deep) 22%, var(--surface-2));
   touch-action: none;
 }
 
@@ -2291,7 +2291,7 @@
 .reading-feedback-title {
   margin: 0;
   font-size: 0.84rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .reading-feedback-verdicts,
@@ -2335,7 +2335,7 @@
 .reading-feedback-note-label span {
   display: block;
   font-size: 0.72rem;
-  color: rgba(200, 190, 170, 0.78);
+  color: var(--ink-muted);
   margin-bottom: 6px;
 }
 
@@ -2351,8 +2351,8 @@
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid rgba(201, 168, 76, 0.28);
-  background: rgba(0, 0, 0, 0.25);
-  color: rgba(232, 220, 190, 0.9);
+  background: color-mix(in srgb, var(--bg-deep) 22%, var(--surface-2));
+  color: var(--ink);
   font: inherit;
   font-size: 0.78rem;
   cursor: pointer;
@@ -2369,8 +2369,8 @@
   height: 36px;
   border: 1px solid rgba(201, 168, 76, 0.28);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
-  color: rgba(200, 190, 170, 0.55);
+  background: color-mix(in srgb, var(--bg-deep) 22%, var(--surface-2));
+  color: var(--ink-muted);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -2402,7 +2402,7 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: rgba(245, 235, 210, 0.96);
+  color: var(--ink);
   font-weight: 650;
 }
 
@@ -2465,14 +2465,14 @@
 .codex-quick-muted {
   margin: 6px 0 0;
   font-size: 0.75rem;
-  color: rgba(200, 190, 170, 0.7);
+  color: var(--ink-muted);
 }
 
 .visual-number-law-line {
   margin: 0 0 6px;
   font-size: 0.88rem;
   line-height: 1.55;
-  color: rgba(245, 235, 210, 0.95);
+  color: var(--ink);
   padding: 10px 12px;
   border-radius: 10px;
   border-left: 3px solid rgba(201, 168, 76, 0.55);
@@ -2487,7 +2487,7 @@
   background: rgba(201, 168, 76, 0.08);
   font-size: 0.88rem;
   line-height: 1.55;
-  color: rgba(232, 220, 190, 0.95);
+  color: var(--ink);
 }
 
 .journal-handnote-prefix {
@@ -2504,7 +2504,7 @@
   background: rgba(201, 168, 76, 0.08);
   font-size: 0.84rem;
   line-height: 1.5;
-  color: rgba(232, 220, 190, 0.92);
+  color: var(--ink);
 }
 
 .reading-feedback-err {
@@ -2538,7 +2538,7 @@
 .reading-replay-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, #06040e 62%, transparent);
+  background: var(--scrim);
 }
 
 html[data-theme='moon'] .reading-replay-backdrop {
@@ -3184,19 +3184,19 @@ html[data-theme='moon'] .reading-replay-backdrop {
 }
 
 .thread-card-pos.is-situation {
-  color: #d8ecff;
-  background: rgba(120, 170, 220, 0.28);
-  border: 1px solid rgba(120, 170, 220, 0.55);
+  color: color-mix(in srgb, #2f6fad 85%, var(--ink));
+  background: color-mix(in srgb, #7eb6f0 22%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, #7eb6f0 45%, var(--line));
 }
 
 .thread-card-pos.is-obstacle {
-  color: #ffd4c4;
-  background: rgba(220, 120, 90, 0.28);
-  border: 1px solid rgba(220, 120, 90, 0.55);
+  color: color-mix(in srgb, #c45c5c 80%, var(--ink));
+  background: color-mix(in srgb, #e08a8a 20%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, #e08a8a 45%, var(--line));
 }
 
 .thread-card-pos.is-advice-pos {
-  color: #f0e0a8;
+  color: var(--gold-ink, var(--gold));
   font-weight: 650;
 }
 
@@ -3207,11 +3207,12 @@ html[data-theme='moon'] .reading-replay-backdrop {
   line-height: 1.25;
   padding: 0 4px;
   max-width: 100%;
+  color: var(--ink);
 }
 
 .thread-card-orient {
   font-size: 0.62rem;
-  color: var(--gold, #c9a84c);
+  color: var(--gold-ink, var(--gold));
   margin-top: -2px;
 }
 
@@ -3245,7 +3246,7 @@ html.thread-peek-open .thread-q-visual-card {
 .thread-card-peek-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, #06040e 72%, transparent);
+  background: var(--scrim);
   z-index: 0;
 }
 
@@ -3388,10 +3389,10 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   width: 100%;
   max-width: 148px;
   padding: 0 0 6px;
-  border: 1px solid rgba(201, 168, 76, 0.35);
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.35);
-  color: rgba(232, 220, 190, 0.92);
+  background: var(--surface-1);
+  color: var(--ink);
   cursor: pointer;
   overflow: hidden;
   transition: border-color 0.15s, transform 0.15s;
@@ -3407,27 +3408,27 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: rgba(245, 235, 210, 0.95);
-  background: rgba(12, 8, 22, 0.72);
-  border: 1px solid rgba(201, 168, 76, 0.4);
+  color: var(--ink);
+  background: var(--panel-inset-strong);
+  border: 1px solid var(--panel-gold-border);
   pointer-events: none;
 }
 
 .thread-q-pos-badge.is-situation {
-  color: #d8ecff;
-  background: rgba(40, 70, 110, 0.88);
-  border-color: rgba(120, 170, 220, 0.65);
+  color: color-mix(in srgb, #2f6fad 85%, var(--ink));
+  background: color-mix(in srgb, #7eb6f0 28%, var(--surface-2));
+  border-color: color-mix(in srgb, #7eb6f0 55%, var(--line));
 }
 
 .thread-q-pos-badge.is-obstacle {
-  color: #ffd4c4;
-  background: rgba(90, 40, 28, 0.9);
-  border-color: rgba(220, 120, 90, 0.7);
+  color: color-mix(in srgb, #c45c5c 80%, var(--ink));
+  background: color-mix(in srgb, #e08a8a 26%, var(--surface-2));
+  border-color: color-mix(in srgb, #e08a8a 55%, var(--line));
 }
 
 .thread-q-pos-badge.is-advice-pos {
-  color: var(--gold);
-  border-color: rgba(201, 168, 76, 0.65);
+  color: var(--gold-ink, var(--gold));
+  border-color: var(--panel-gold-border);
 }
 
 .thread-q-visual.is-multi .thread-q-visual-card {
@@ -3468,7 +3469,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   font-size: 0.7rem;
   text-align: center;
   line-height: 1.25;
-  color: rgba(220, 210, 185, 0.88);
+  color: var(--ink-muted);
 }
 
 .thread-q-copy {
@@ -3517,12 +3518,12 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.55;
-  color: rgba(245, 235, 210, 0.96);
+  color: var(--ink);
 }
 
 .thread-oneliner {
   font-weight: 650;
-  color: var(--gold, #c9a84c);
+  color: var(--gold-ink, var(--gold));
 }
 
 .thread-answers {
@@ -3535,7 +3536,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   padding: 14px;
   border-radius: 14px;
   border: 1px solid rgba(191, 163, 255, 0.22);
-  background: rgba(0, 0, 0, 0.28);
+  background: color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2));
 }
 
 .thread-q-card.is-risk {
@@ -3565,7 +3566,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   align-items: flex-start;
   font-size: 0.92rem;
   font-weight: 650;
-  color: rgba(245, 235, 210, 0.96);
+  color: var(--ink);
   line-height: 1.4;
 }
 
@@ -3585,7 +3586,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 .thread-q-heading {
   margin: 0 0 10px;
   font-size: 0.8rem;
-  color: rgba(201, 168, 76, 0.9);
+  color: var(--gold-ink, var(--gold));
 }
 
 .thread-label {
@@ -3614,7 +3615,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 
 .thread-em--risk {
   display: inline;
-  color: #f0b090;
+  color: color-mix(in srgb, var(--danger) 75%, var(--ink));
 }
 
 .thread-meaning,
@@ -3623,7 +3624,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   margin: 0 0 10px;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: rgba(232, 220, 190, 0.92);
+  color: var(--ink);
 }
 
 .thread-prose {
@@ -3640,7 +3641,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 }
 
 .thread-phase {
-  color: #e8c56a;
+  color: var(--gold-ink, var(--gold));
   font-weight: 700;
   margin-right: 0.15em;
 }
@@ -3653,7 +3654,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 }
 
 .thread-em {
-  color: #e8c56a;
+  color: var(--gold-ink, var(--gold));
   font-weight: 700;
   background: rgba(201, 168, 76, 0.12);
   padding: 0 2px;
@@ -3674,11 +3675,11 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   background: rgba(201, 168, 76, 0.06);
   font-size: 0.82rem;
   line-height: 1.55;
-  color: rgba(220, 210, 185, 0.88);
+  color: var(--ink-muted);
 }
 
 .thread-bridge-mark {
-  color: var(--gold, #c9a84c);
+  color: var(--gold-ink, var(--gold));
   margin-right: 6px;
   font-weight: 700;
 }
@@ -3698,7 +3699,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   border-radius: 999px;
   border: 1px solid rgba(201, 168, 76, 0.35);
   background: transparent;
-  color: rgba(232, 220, 190, 0.88);
+  color: var(--ink);
   font-size: 0.75rem;
   cursor: pointer;
 }
@@ -3717,14 +3718,14 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 .thread-codex-hint {
   margin: 4px 0 0;
   font-size: 0.75rem;
-  color: rgba(200, 190, 170, 0.72);
+  color: var(--ink-muted);
 }
 
 .std-compact {
   margin: 0;
   font-size: 0.84rem;
   line-height: 1.5;
-  color: rgba(232, 220, 190, 0.9);
+  color: var(--ink);
 }
 
 .overall-intuition {
@@ -3780,7 +3781,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   overflow: hidden;
   border: 1px solid rgba(201, 168, 76, 0.35);
   background: #120e18;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 16px var(--scrim);
 }
 
 .overall-face.is-reversed {
@@ -3996,7 +3997,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   padding: 12px;
   border-radius: 12px;
   border: 1px solid rgba(201, 168, 76, 0.22);
-  background: rgba(0, 0, 0, 0.22);
+  background: color-mix(in srgb, var(--bg-deep) 18%, var(--surface-2));
 }
 
 .qa-answer-card:last-of-type {
@@ -4010,7 +4011,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   align-items: flex-start;
   font-size: 0.9rem;
   font-weight: 650;
-  color: rgba(232, 220, 190, 0.96);
+  color: var(--ink);
   line-height: 1.4;
 }
 
@@ -4041,7 +4042,7 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   margin: 0 0 8px;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: rgba(232, 220, 190, 0.92);
+  color: var(--ink);
 }
 
 .qa-answer-insight .thread-prose,
@@ -4096,9 +4097,9 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 
 .reading-accordion {
   margin: 10px 0 0;
-  border: 1px solid rgba(191, 163, 255, 0.2);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: rgba(12, 8, 22, 0.35);
+  background: var(--panel-inset);
   overflow: hidden;
 }
 
@@ -4661,14 +4662,14 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(232, 220, 190, 0.92);
+  color: var(--ink);
 }
 
 .encounter-reflect {
   margin: 8px 0 0;
   font-size: 0.76rem;
   line-height: 1.5;
-  color: rgba(232, 220, 190, 0.75);
+  color: var(--ink-muted);
   font-style: italic;
 }
 
@@ -4751,14 +4752,14 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   margin: 12px 0 16px;
   padding: 14px 14px 12px;
   border-radius: var(--radius-sm);
-  background: rgba(201, 168, 76, 0.08);
-  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: var(--panel-gold);
+  border: 1px solid var(--panel-gold-border);
 }
 
 .tarot-review-banner-title {
   margin: 0 0 10px;
   font-size: 0.88rem;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
   font-weight: 600;
 }
 
@@ -4766,8 +4767,8 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
   margin-bottom: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(12, 8, 22, 0.35);
-  border: 1px solid rgba(191, 163, 255, 0.18);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .tarot-review-card-meta {
@@ -4812,7 +4813,51 @@ html[data-theme='moon'] .thread-card-peek-backdrop {
 .journal-detail-meta,
 .journal-cards,
 .journal-open-hint {
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
+}
+
+.thread-meaning,
+.thread-insight,
+.thread-action,
+.thread-bridge,
+.thread-q-visual-name,
+.thread-hotspot-btn,
+.qa-answer-q,
+.qa-answer-insight,
+.qa-answer-action,
+.journal-handnote,
+.result-reflection-echo,
+.std-compact,
+.codex-quick-muted {
+  color: var(--ink);
+}
+
+.thread-codex-hint,
+.reading-feedback-hint,
+.reading-feedback-note-label span {
+  color: var(--ink-muted);
+}
+
+.reading-feedback-mood-btn,
+.reading-feedback-star {
+  color: var(--ink);
+}
+
+.reading-feedback-mood-btn.is-active,
+.reading-feedback-verdict.is-active,
+.reading-feedback-reason.is-active {
+  color: var(--gold-ink, var(--gold));
+}
+
+.thread-phase,
+.thread-em,
+.thread-label,
+.thread-q-n {
+  color: var(--gold-ink, var(--gold));
+}
+
+.thread-card-name {
+  color: var(--ink);
 }
 
 .thread-card-pos,

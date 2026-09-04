@@ -198,6 +198,7 @@ function renderQuestionAnswerStrip(
   script: NonNullable<OfflineAnswerPack['script']>,
   cast: CastResult | undefined,
   question?: string,
+  hideHeadline = false,
 ): string {
   const q = (question ?? '').trim();
   const isDefault =
@@ -208,15 +209,20 @@ function renderQuestionAnswerStrip(
   const title = isDefault ? '对本我' : '对你这个问题';
   const sub = isDefault
     ? '默认一句话回应 · 上方可填具体问题'
-    : `「${q}」· 一句话回应`;
+    : `「${q}」· 盘面依据（点开看）`;
   const truth = script.beats.find((b) => b.id === 'truth');
+  if (hideHeadline && !truth?.body) return '';
   return `
     <section class="ly-layer-card ly-question-answer" data-briefing-section data-layer="q-answer">
       ${layerHead(title, sub)}
-      <p class="ly-pack-headline ly-verdict-card">${escapeHtml(script.headline)}</p>
+      ${
+        hideHeadline
+          ? ''
+          : `<p class="ly-pack-headline ly-verdict-card">${escapeHtml(script.headline)}</p>`
+      }
       ${
         truth?.body
-          ? `<details class="ly-truth-fold">
+          ? `<details class="ly-truth-fold"${hideHeadline ? ' open' : ''}>
               <summary>为何这样看（盘面信号）</summary>
               <div class="ly-pack-prose">${formatLinkedProse(truth.body, cast)}</div>
             </details>`
@@ -229,10 +235,16 @@ function renderScriptPlay(
   pack: OfflineAnswerPack,
   cast: CastResult | undefined,
   question?: string,
+  /** 直答已在页头「对你这个问题」出现过 → 正文不再重复 */
+  answerAlreadyPinned = false,
 ): string {
   const script = pack.script;
+  const hasDirect = Boolean(pack.directAnswer?.trim());
+  /** 有直答时：正文只留「对你这个问题」一处（或页头已钉过则连这里也不再贴正文） */
+  const hideAnswerBody = hasDirect;
+  const showAnswerInStrip = hasDirect && !answerAlreadyPinned;
   if (!script) {
-    return `${renderCoreLayer(pack, cast)}
+    return `${renderCoreLayer(pack, cast, hasDirect, hideAnswerBody)}
     ${renderPulseLayer(pack, cast)}
     ${renderActionLayer(pack, cast)}
     ${renderReassureLayer(pack, cast)}`;
@@ -240,8 +252,8 @@ function renderScriptPlay(
 
   /** 样式以旧四层卡片为主；剧本/论断作补充层 */
   return `
-    ${renderCoreLayer(pack, cast)}
-    ${renderQuestionAnswerStrip(script, cast, question)}
+    ${renderCoreLayer(pack, cast, hasDirect, hideAnswerBody)}
+    ${renderQuestionAnswerStrip(script, cast, question, !showAnswerInStrip)}
     ${renderSynthesis(script, cast)}
     ${renderPulseLayer(pack, cast)}
     ${renderActionLayer(pack, cast)}
@@ -251,6 +263,9 @@ function renderScriptPlay(
 function renderCoreLayer(
   pack: OfflineAnswerPack,
   cast: CastResult | undefined,
+  hexCollapsed = false,
+  /** 与页头/「对你这个问题」同文时，核心方向不再贴 headline */
+  hideHeadline = false,
 ): string {
   const { primaryAside, changedAside, metaphor } = splitParseAsides(pack.verdict.parse);
   const metaphorLine = metaphor || pack.coreMetaphor?.replace(/^核心隐喻[：:]\s*/, '') || '';
@@ -297,16 +312,30 @@ function renderCoreLayer(
     hexBlocks = `<div class="ly-pack-prose">${formatLinkedProse(pack.verdict.parse, undefined)}</div>`;
   }
 
+  const hexHtml =
+    hexCollapsed && cast
+      ? `<details class="ly-hex-fold">
+          <summary>卦象结构（本卦 / 变卦 · 点开看）</summary>
+          <div class="ly-hex-fold-body">${hexBlocks}</div>
+        </details>`
+      : hexBlocks;
+
+  const headline = hideHeadline
+    ? ''
+    : pack.directAnswer?.trim() || pack.verdict.headline;
+
   return `
     <section class="ly-layer-card" data-briefing-section data-layer="core">
-      ${layerHead('核心方向', '定调')}
-      <p class="ly-pack-headline">${escapeHtml(pack.verdict.headline)}</p>
+      ${layerHead('核心方向', hexCollapsed ? '卦象定调 · 细节可展开' : '定调')}
+      ${headline ? `<p class="ly-pack-headline">${escapeHtml(headline)}</p>` : ''}
       <div class="ly-layer-rule" aria-hidden="true"></div>
-      ${hexBlocks}
+      ${hexHtml}
       ${
-        metaphorLine
+        metaphorLine && !hexCollapsed
           ? `<p class="ly-metaphor"><span class="ly-role-tag">隐喻</span>${escapeHtml(metaphorLine)}</p>`
-          : ''
+          : metaphorLine && hexCollapsed
+            ? `<details class="ly-metaphor-fold"><summary>隐喻</summary><p class="ly-metaphor"><span class="ly-role-tag">隐喻</span>${escapeHtml(metaphorLine)}</p></details>`
+            : ''
       }
     </section>`;
 }
@@ -514,6 +543,11 @@ export type RenderPackOpts = {
   hideContextUsed?: boolean;
   /** 当前问题原文；用于「对你这个问题」标明对象 */
   question?: string;
+  /**
+   * 直答已在页头「对你这个问题」展示过（如六爻 hero）。
+   * 为 true 时正文不再重复同一段。
+   */
+  answerAlreadyPinned?: boolean;
 };
 
 export function renderAnswerPackHtml(
@@ -548,7 +582,7 @@ export function renderAnswerPackHtml(
       ${topicLabel ? `<p class="ly-briefing-topic">${escapeHtml(topicLabel)}</p>` : ''}
       ${pack.contextUsed && !opts.hideContextUsed ? `<p class="ly-pack-context">已带入档案</p>` : ''}
 
-      ${renderScriptPlay(pack, cast, opts.question)}
+      ${renderScriptPlay(pack, cast, opts.question, Boolean(opts.answerAlreadyPinned))}
       ${subAnswers}
 
       ${

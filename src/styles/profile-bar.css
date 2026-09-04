@@ -412,7 +412,7 @@ html.thread-peek-open .lab-scroll-top {
   position: absolute;
   inset: 0;
   border: 0;
-  background: color-mix(in srgb, #06040e 55%, transparent);
+  background: var(--scrim);
   cursor: pointer;
 }
 

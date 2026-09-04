@@ -881,8 +881,8 @@
   margin: 12px 0 4px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  background: rgba(230, 180, 34, 0.1);
-  border: 1px solid rgba(230, 180, 34, 0.35);
+  background: var(--panel-gold);
+  border: 1px solid var(--panel-gold-border);
 }
 
 .xlr-home-review-host .xlr-review-banner,
@@ -894,7 +894,7 @@
 .xlr-review-banner-title {
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-ink, var(--gold));
 }
 
 .xlr-review-banner-body {
@@ -913,8 +913,8 @@
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(230, 180, 34, 0.2);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .xlr-review-card-meta {
@@ -939,7 +939,7 @@
 }
 
 .xlr-review-card-q.is-empty {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--ink-muted);
   font-style: italic;
 }
 
@@ -1068,7 +1068,7 @@
 .xlr-replay-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, #06040e 62%, transparent);
+  background: var(--scrim);
 }
 html[data-theme='moon'] .xlr-replay-backdrop {
   background: rgba(42, 48, 60, 0.35);
@@ -1324,7 +1324,7 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   background: var(--surface-1);
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: var(--shadow, 0 16px 40px rgba(0, 0, 0, 0.35));
+  box-shadow: var(--shadow, 0 16px 40px var(--scrim));
 }
 
 .xlr-flow-panel::before {
@@ -1507,7 +1507,7 @@ html[data-theme='moon'] .xlr-replay-backdrop {
   padding: 22px 20px 24px;
   background: var(--surface-1);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow, 0 10px 36px rgba(0, 0, 0, 0.28));
+  box-shadow: var(--shadow, 0 10px 36px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)));
 }
 
 .xlr-flow-question::before {
@@ -2830,7 +2830,7 @@ body.xlr-huangli-lock {
   letter-spacing: 0.08em;
   color: #1a1208;
   background: linear-gradient(165deg, #f0e0c0 0%, #c9a86c 45%, #9a7848 100%);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--bg-deep) 25%, var(--surface-2)), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   cursor: pointer;
 }
 
@@ -3571,7 +3571,7 @@ body.xlr-huangli-lock {
 .xlr-flow-panel {
   background: var(--xlr-panel);
   border-color: var(--xlr-panel-border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--bg-deep) 22%, var(--surface-2));
 }
 
 .xlr-flow-kicker {
@@ -3849,7 +3849,7 @@ html[data-theme='moon'] .xlr-flow-kicker {
   width: 26px;
   height: 26px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 2px 6px var(--scrim));
 }
 
 .xlr-palm-live .xlr-palm-hand-img {

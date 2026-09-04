@@ -11,6 +11,7 @@ import { buildOfflineAnswerPack } from '../mystic-engine/build-pack.ts';
 import { renderAnswerPackHtml } from '../mystic-engine/render-pack.ts';
 import { loadUseProfilePref } from '../life/profile-context.ts';
 import { formatHexWithPinyin } from './hex-pinyin.ts';
+import { teachFold } from './flip-teach.ts';
 
 function escapeHtml(s: string): string {
   return s
@@ -74,7 +75,7 @@ export function renderQuickBoard(
         .join('')
     : `<tr><td colspan="4" class="ly-qb-empty">无动则无变</td></tr>`;
 
-  return `
+  const inner = `
     <header class="ly-quick-board${omitHeader ? ' is-tables-only' : ''}">
       ${
         omitHeader
@@ -104,6 +105,13 @@ export function renderQuickBoard(
       </div>
     </header>
   `;
+
+  if (omitHeader) {
+    const bian = cast.changed ? ` · 变卦 ${cast.changed.name}` : '';
+    return teachFold(`本卦 / 变卦装卦简表${bian} · 点开看`, inner);
+  }
+
+  return inner;
 }
 
 function renderConclusionTab(cast: CastResult, question: string, facts: ReadingFacts): string {
@@ -126,7 +134,7 @@ function renderConclusionTab(cast: CastResult, question: string, facts: ReadingF
   return `
     <section class="ly-result-panel">
       <h3>结论</h3>
-      ${renderAnswerPackHtml(pack, { lead, compact: true, cast })}
+      ${renderAnswerPackHtml(pack, { lead, compact: true, cast, question, answerAlreadyPinned: true })}
       <p class="ly-quick-tags">世应${escapeHtml(facts.shiYingRel.rel)} · ${escapeHtml(move)} · ${escapeHtml(arrow)}</p>
     </section>
   `;

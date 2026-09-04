@@ -8,6 +8,13 @@ import { formatHexShortWithPinyin, formatHexWithPinyin, hexPinyin } from './hex-
 import { isMetaUxQuestion } from '../mystic-engine/meta-ux.ts';
 import { buildWhyItems } from '../mystic-engine/why.ts';
 import { toneFlags } from '../mystic-engine/tone.ts';
+import { collectBoardSignals } from '../mystic-engine/board-signals.ts';
+import {
+  buildInstantDirectAnswer,
+  leanForRoute,
+  mapQuestionPlain,
+  routeQuestion,
+} from '../mystic-engine/instant-answer.ts';
 import { fillVoiceTemplate, getHexVoice } from './hex-voice.ts';
 
 export type QuestionPart = {
@@ -151,7 +158,18 @@ function leanForPart(part: QuestionPart, cast: CastResult, _bag: string): string
       if (flow || soft) return '钱能过来，但路径绕、要追、要磨。';
       return `财务结果跟「${to}」走，小步确认再加码。`;
     default:
-      return `本题核心宜用「${to}」的方式推进，少用蛮力。`;
+      if (/报了?警|报警|警察|派出所|110|立案|维权/.test(part.raw)) {
+        return '程序线会拉长：盯书面回执与下一次节点，别只听口头。';
+      }
+      if (/爸|妈|威胁|家里|家人|家事/.test(part.raw)) {
+        return '先护安全与证据，再谈和解或边界；不宜一次定终身。';
+      }
+      if (/走向|会怎么样|如何发展|最终会/.test(part.raw)) {
+        return '走势偏渐进：用可核对的小步验证，别空想终局。';
+      }
+      const routeLean = leanForRoute(routeQuestion(part.raw), part.raw);
+      if (routeLean) return routeLean;
+      return '先把问题压成一句「我最想确认什么」，再用一件本周能完成的小事去验证。';
   }
 }
 
@@ -165,6 +183,7 @@ function buildVerdict(
   if (isMetaUxQuestion(question)) {
     return '流程有一点仪式感，但不会长到劝退；解读也会压成可核对的几步，不是只剩空话。';
   }
+
   const soft = flags(cast).soft;
   const flow = flags(cast).flow;
   const to = cast.changed?.keywords[0] ?? cast.primary.keywords[0] ?? '';
@@ -193,6 +212,33 @@ function buildVerdict(
   if (flags(cast).cut && leave) {
     return '支持你果断行动：把离开当成真实选项，少用拖泥带水消耗自己。';
   }
+
+  /** 拆题细判之后，才用场景直答（报警/家事等）；避免盖掉谈薪等专判 */
+  const route = routeQuestion(question);
+  if (
+    route === 'legal_after_report' ||
+    route === 'threat_harassment' ||
+    route === 'family_dispute_outcome' ||
+    route === 'outcome_trajectory' ||
+    route === 'timing' ||
+    route === 'anxiety_choice'
+  ) {
+    const signals = collectBoardSignals({ question, cast });
+    const instant = buildInstantDirectAnswer({
+      question,
+      cast,
+      route,
+      paceSlow: signals.pace === 'slow' || signals.pace === 'slow_then_stop',
+      paceStop: signals.pace === 'stop',
+      yongWeak: signals.yongWeak,
+      tugOfWar: signals.tugOfWar,
+    });
+    if (instant) {
+      const first = instant.split(/。+/).find((s) => s.trim());
+      return first ? `${first.trim()}。` : instant;
+    }
+  }
+
   if (parts.length >= 2) {
     return `几件事绑在一起看：局面正从「${from}」滑向「${to}」——有结果，但过程磨人，宜两手准备。`;
   }
@@ -247,6 +293,9 @@ function mapPrimaryToQuestion(
       '术语能点开再看——不会只甩一堆空话让你自己猜。'
     );
   }
+  const route = routeQuestion(question);
+  const plain = mapQuestionPlain(route, question, 'primary');
+  if (plain) return plain;
   const leave = parts.some((p) => p.kind === 'leave');
   const stay = parts.some((p) => p.kind === 'stay');
   const salary = parts.some((p) => p.kind === 'salary');
@@ -284,6 +333,9 @@ function mapChangedToQuestion(
       ? '对应你的问题：有变卦时会多一层「走向」——仍是短句落地，不是再加一本天书。'
       : '对应你的问题：无变时解读更短，先看清本卦主调与可做的一小步就够。';
   }
+  const route = routeQuestion(question);
+  const plain = mapQuestionPlain(route, question, 'changed');
+  if (plain) return plain;
   if (!cast.changed) return '无变卦：先把现状谈清，再谈翻盘。';
   const window =
     hints.deadline && /三个月|月底|月初/.test(hints.deadline)

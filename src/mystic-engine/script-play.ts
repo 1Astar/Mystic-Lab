@@ -11,6 +11,11 @@ import { buildTruthFromFacts } from './fact-rules.ts';
 import { buildActionAndBoundary } from './action-rules.ts';
 import { detectIntents } from './intent.ts';
 import { isMetaUxQuestion } from './meta-ux.ts';
+import {
+  buildInstantDirectAnswer,
+  buildHumanTruthFromFacts,
+  routeQuestion,
+} from './instant-answer.ts';
 import type { IntentId } from './types.ts';
 import { sceneFromIntent, type ScriptScene } from './script-scene.ts';
 import { buildSynthesis, type ScriptSynthesis } from './synthesis.ts';
@@ -231,6 +236,19 @@ function buildHeadline(s: BoardSignals, question: string, cast: CastResult): str
     return `${lead}。${arc}：期限到就执行；关键是别拖成内耗。`;
   }
 
+  const route = routeQuestion(question, s.intentId);
+  const instant = buildInstantDirectAnswer({
+    question,
+    cast,
+    route,
+    intentId: s.intentId,
+    paceSlow: s.pace === 'slow' || s.pace === 'slow_then_stop',
+    paceStop: s.pace === 'stop',
+    yongWeak: s.yongWeak,
+    tugOfWar: s.tugOfWar,
+  });
+  if (instant) return instant;
+
   // 通用：话题定调 + 卦桥 + 盘面，三者都变则整句必变
   return `${lead}。${arc}。${board}`;
 }
@@ -250,11 +268,14 @@ export function buildScriptPlay(input: {
     intentId,
   });
   const scene = sceneFromIntent(intentId);
+  const route = routeQuestion(input.question, intentId);
   const calm = buildCalm(signals, input.question);
-  const truth = buildTruthFromFacts(signals);
+  const truth =
+    buildHumanTruthFromFacts(signals, input.question, route) ||
+    buildTruthFromFacts(signals, { question: input.question, route });
   const { action, boundary, ruleId } = buildActionAndBoundary(signals);
   const headline = buildHeadline(signals, input.question, input.cast);
-  const synthesis = buildSynthesis(signals, input.cast, castAt);
+  const synthesis = buildSynthesis(signals, input.cast, castAt, route);
 
   return {
     scene,

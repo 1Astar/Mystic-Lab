@@ -54,7 +54,7 @@
 .birth-dt-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, #06040e 55%, transparent);
+  background: var(--scrim);
 }
 
 html[data-theme='moon'] .birth-dt-backdrop {

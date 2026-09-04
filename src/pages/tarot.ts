@@ -9,7 +9,7 @@ import {
 import { GestureBridge } from '../core/gesture-bridge.ts';
 import { createFallbackInput, type FallbackAction } from '../core/fallback-input.ts';
 import { createInterpretationProvider, readingCoversDrawn } from '../interpretation/llm-provider.ts';
-import { buildQuestionThread, shouldUsePerCardThread, applyReadingSeriesToThread } from '../interpretation/question-thread.ts';
+import { buildQuestionThread, applyReadingSeriesToThread, isQuestionThreadStale } from '../interpretation/question-thread.ts';
 import { resolveReadingSeries } from '../journal/reading-series.ts';
 import { polishReadingCopy } from '../interpretation/reading-polish.ts';
 import type { ReadingResult } from '../interpretation/types.ts';
@@ -1288,12 +1288,13 @@ export function renderTarot(root: HTMLElement): () => void {
         });
       }
 
-      // 旧手札 / 缺 thread / 多牌只绑了一张时现场补齐
-      const perCard = shouldUsePerCardThread(live.cards, question, spreadType);
-      const threadStale =
-        perCard &&
-        live.questionThread?.answers.length &&
-        live.questionThread.answers.length < live.cards.length;
+      // 旧手札 / 缺 thread / 多牌只绑了一张 / 未走整盘时现场补齐
+      const threadStale = isQuestionThreadStale(
+        live.questionThread,
+        live.cards,
+        question,
+        spreadType,
+      );
       if (question.trim()) {
         const journalEntry = currentJournalId ? getJournalEntryById(currentJournalId) : null;
         const threadOpts = {
@@ -1304,7 +1305,7 @@ export function renderTarot(root: HTMLElement): () => void {
           subjectId: journalEntry?.subjectId,
           sceneTags: journalEntry?.sceneTags,
         };
-        if (!live.questionThread?.answers.length || threadStale) {
+        if (threadStale) {
           const threadProvider =
             live.provider === 'llm' ? 'llm' : 'mock';
           const rebuilt = buildQuestionThread(live.cards, question, threadProvider, threadOpts);

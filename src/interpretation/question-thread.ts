@@ -3,19 +3,22 @@ import {
   resolveReadingSeries,
   type ReadingSeriesContext,
 } from '../journal/reading-series.ts';
-import { intentActionsPlain } from '../mystic-engine/intent-actions.ts';
+import { buildPlainDirectAnswer } from '../mystic-engine/instant-answer.ts';
+import { recordQuestionScene } from '../mystic-engine/scene-library.ts';
 import type { SpreadType } from '../tarot/spreads.ts';
 import { isFreeArrangeSpread } from '../tarot/spread-layout.ts';
 import type { CardReading } from './types.ts';
-import {
-  resolveReadingLens,
-} from './card-psychology.ts';
 import {
   buildAdviceLines,
   buildNarrativeCardInsight,
   buildSpreadSynthesis,
   empathyNarrativeLead,
 } from './tarot-narrative.ts';
+import {
+  isActionOutcomeQuestion,
+  needsWholeSpreadPerCard,
+  resolveReadingScene,
+} from './reading-scene.ts';
 import {
   classifySubQuestion,
   splitUserQuestions,
@@ -128,7 +131,7 @@ function meaningForCards(cards: CardReading[], indexes: number[]): string {
     .join('；');
 }
 
-/** 自由摆放 / 多牌单问：每张各出一段 */
+/** 自由摆放 / 单问多牌 / 时间线单问：每张各一段。多子问编号题走分题绑牌。 */
 export function shouldUsePerCardThread(
   cards: CardReading[],
   question: string,
@@ -138,7 +141,30 @@ export function shouldUsePerCardThread(
   const st = spreadType ?? cards[0]?.spreadType;
   if (st && isFreeArrangeSpread(st as SpreadType)) return true;
   const parts = splitUserQuestions(question);
+  // 1/2/3… 或换行多问：按子问绑牌，不整盘 per-card
+  if (parts.length >= 2) return false;
+  if (needsWholeSpreadPerCard(question, st, cards.length)) return true;
   return parts.length === 1;
+}
+
+/** 结果页：已有 thread 是否缺牌 / 未走整盘，需现场重建 */
+export function isQuestionThreadStale(
+  thread: QuestionThread | null | undefined,
+  cards: CardReading[],
+  question: string,
+  spreadType?: SpreadType | string,
+): boolean {
+  if (!cards.length || !question.trim()) return false;
+  if (!thread?.answers?.length) return true;
+  const wantPerCard = shouldUsePerCardThread(cards, question, spreadType);
+  if (wantPerCard && !thread.perCardMode) return true;
+  if (wantPerCard && thread.answers.length < cards.length) return true;
+  const covered = new Set<number>();
+  for (const a of thread.answers) {
+    for (const i of a.cardIndexes ?? []) covered.add(i);
+  }
+  if (wantPerCard && covered.size < cards.length) return true;
+  return false;
 }
 
 /** 多牌单问 / 自定义牌阵：是否走整盘 LLM */
@@ -190,6 +216,7 @@ function buildMockInsight(
   cards: CardReading[],
   indexes: number[],
   topic: QuestionTopic,
+  questionSlice?: string,
 ): { meaningMap?: string; insight: string; action?: string } {
   const primary = cards[indexes[0]!];
   if (!primary) {
@@ -202,6 +229,7 @@ function buildMockInsight(
   const revNote = anyRev
     ? '其中有逆位：更偏阻滞、失衡或需调整，勿按正位「能量通畅」读。'
     : '';
+  const actionOutcome = questionSlice ? isActionOutcomeQuestion(questionSlice) : false;
 
   switch (intent) {
     case 'reason':
@@ -249,22 +277,34 @@ function buildMockInsight(
     default:
       return {
         meaningMap,
-        insight: `就这一问题，【${names}】落在「${primary.keywords.slice(0, 2).join('、') || primary.cardName}」——先看清局面，再谈下一步。`,
+        insight: actionOutcome
+          ? `就这一问题，【${names}】落在「${primary.keywords.slice(0, 2).join('、') || primary.cardName}」——对照牌位看对方更可能做什么、以及可能拖出的代价。`
+          : `就这一问题，【${names}】落在「${primary.keywords.slice(0, 2).join('、') || primary.cardName}」——结合牌面母题对照你的处境，再定下一步。`,
       };
   }
 }
 
-/** advice / general / 缺 action：用共享意图→动作库回填 */
+/** advice / general / 缺 action：塔罗边界建议，禁止六爻意图动作库（卦名/用神套话） */
 function fillActionFromIntent(
   slice: string,
   intent: SubQuestionIntent,
   existing: string | undefined,
   topic: QuestionTopic,
+  sceneAdvice?: string,
 ): string | undefined {
-  if (intent === 'advice' || intent === 'general' || !existing?.trim()) {
-    return sanitizeTopicText(intentActionsPlain(slice, { ctx: null }), topic);
+  const keep = existing?.trim();
+  if (keep && intent !== 'advice' && intent !== 'general') {
+    return sanitizeTopicText(keep, topic);
   }
-  return sanitizeTopicText(existing, topic);
+  if (keep && !/卦|用神|世应|六爻|爻/.test(keep)) {
+    return sanitizeTopicText(keep, topic);
+  }
+  const fallback =
+    sceneAdvice?.trim() ||
+    (isActionOutcomeQuestion(slice)
+      ? '先观察对方有没有可核对的动作；你这边只守边界，不替对方收拾烂摊子。'
+      : '把下一步缩成一件今天能核对的小事，别空转猜测。');
+  return sanitizeTopicText(fallback, topic);
 }
 
 function empathyFor(
@@ -277,7 +317,7 @@ function empathyFor(
   if (topic === 'work') {
     return mockWorkEmpathy(names);
   }
-  return `根据你的牌阵（${names}），我先帮你把问题理清——答案最终仍在你心里。`;
+  return `根据你的牌阵（${names}），先把问题压到可核对的一层再展开。`;
 }
 
 function resolveSeriesContext(
@@ -336,9 +376,15 @@ export function buildPerCardQuestionThread(
   if (!cards.length || !q) return null;
 
   const topic = cards[0]!.topic;
-  const lens = resolveReadingLens(q, topic);
-  const userIntuition = options?.userIntuition?.trim();
   const series = resolveSeriesContext(q, options);
+  const scene = resolveReadingScene({
+    question: q,
+    topic,
+    series,
+    sceneTags: options?.sceneTags,
+  });
+  const lens = scene.lens;
+  const userIntuition = options?.userIntuition?.trim();
 
   const answers: ThreadAnswer[] = cards.map((card, i) => {
     const narrative = buildNarrativeCardInsight(
@@ -348,6 +394,7 @@ export function buildPerCardQuestionThread(
       cards,
       i,
       userIntuition,
+      series,
     );
     const pos = card.position?.trim() || `第 ${i + 1} 张`;
     return {
@@ -368,18 +415,39 @@ export function buildPerCardQuestionThread(
     buildSpreadSynthesis(cards, q, lens, userIntuition, series),
     topic,
   );
+  // 有问法槽位：牌面合成优先于无盘面 plain（家庭也一样）
+  const plain = buildPlainDirectAnswer(scene.isFamily ? `${q}（家庭）` : q);
+  const useCardGrounded = scene.ask.needsWholeSpread && !!synthesis;
+  const directAnswer = useCardGrounded ? '' : plain;
   const adviceLines = buildAdviceLines(cards, q, lens).map((line) =>
     sanitizeTopicText(line, topic),
   );
-  const overall = synthesis || sanitizeTopicText(
-    `整盘 ${cards.length} 张牌各照见一层心理——把画面与感受对齐，再谈下一步。`,
-    topic,
-  );
+  const overall =
+    (useCardGrounded ? synthesis : '') ||
+    directAnswer ||
+    synthesis ||
+    sanitizeTopicText(
+      `整盘 ${cards.length} 张牌各照见一层心理——把画面与感受对齐，再谈下一步。`,
+      topic,
+    );
   const lastAction = answers[answers.length - 1]?.action?.trim();
   const oneLiner = sanitizeTopicText(
     lastAction || adviceLines[0] || '把三张形容词写成一句给自己的话，比死记牌意更接近真相。',
     topic,
   );
+
+  recordQuestionScene({
+    system: 'tarot',
+    question: q,
+    route: scene.isFamily && scene.ask.needsWholeSpread
+      ? 'family_dispute_outcome'
+      : scene.ask.primary === 'timing'
+        ? 'timing'
+        : scene.ask.needsTimeline
+          ? 'outcome_trajectory'
+          : undefined,
+    directAnswer: overall || undefined,
+  });
 
   return attachSeries(
     {
@@ -389,7 +457,7 @@ export function buildPerCardQuestionThread(
       oneLiner,
       provider,
       perCardMode: true,
-      synthesis: synthesis || undefined,
+      synthesis: overall || synthesis || undefined,
       adviceLines: adviceLines.length ? adviceLines : undefined,
     },
     series,
@@ -419,6 +487,19 @@ export function buildQuestionThread(
   const intents = parts.map((p) => classifySubQuestion(p));
   const assignment = assignCardsToQuestions(intents, cards.length);
 
+  const series = resolveSeriesContext(q, options);
+  const scene = resolveReadingScene({
+    question: q,
+    topic,
+    series,
+    sceneTags: options?.sceneTags,
+  });
+  const lens = scene.lens;
+  const adviceLines = buildAdviceLines(cards, q, lens).map((line) =>
+    sanitizeTopicText(line, topic),
+  );
+  const sceneAdvice = adviceLines[0];
+
   const seedAnswers = pickSeedAnswers(cards, parts);
 
   const answers: ThreadAnswer[] = parts.map((part, i) => {
@@ -435,10 +516,10 @@ export function buildQuestionThread(
         heading,
         meaningMap: sanitizeTopicText(meaningForCards(cards, indexes), topic) || undefined,
         insight: sanitizeTopicText(seeded.insight, topic),
-        action: fillActionFromIntent(part, intent, seeded.action, topic),
+        action: fillActionFromIntent(part, intent, seeded.action, topic, sceneAdvice),
       };
     }
-    const built = buildMockInsight(intent, cards, indexes, topic);
+    const built = buildMockInsight(intent, cards, indexes, topic, part);
     return {
       question: part,
       intent,
@@ -448,7 +529,7 @@ export function buildQuestionThread(
         ? sanitizeTopicText(built.meaningMap, topic)
         : undefined,
       insight: sanitizeTopicText(built.insight, topic),
-      action: fillActionFromIntent(part, intent, built.action, topic),
+      action: fillActionFromIntent(part, intent, built.action, topic, sceneAdvice),
     };
   });
 
@@ -463,25 +544,24 @@ export function buildQuestionThread(
     return '';
   })();
 
-  const lens = resolveReadingLens(q, topic);
-  const series = resolveSeriesContext(q, options);
+  const plain = buildPlainDirectAnswer(scene.isFamily ? `${q}（家庭）` : q);
   const spreadSynth = sanitizeTopicText(
     buildSpreadSynthesis(cards, q, lens, options?.userIntuition, series),
     topic,
   );
+  const useCardGrounded = scene.ask.needsWholeSpread && !!spreadSynth;
+  const directAnswer = useCardGrounded ? '' : plain;
 
-  const overall = spreadSynth
-    ? spreadSynth
-    : sanitizeTopicText(
-        topic === 'work'
-          ? mockWorkOverview(suitHint)
-          : `先抓住方向，再下钻细节——牌在帮你看清局面，而不是替你做绝对宣判。`,
-        topic,
-      );
-
-  const adviceLines = buildAdviceLines(cards, q, lens).map((line) =>
-    sanitizeTopicText(line, topic),
-  );
+  const overall =
+    (useCardGrounded ? spreadSynth : '') ||
+    directAnswer ||
+    spreadSynth ||
+    sanitizeTopicText(
+      topic === 'work'
+        ? mockWorkOverview(suitHint)
+        : `结合牌阵对照你的处境，先定一件可核对的下一步，再谈大结论。`,
+      topic,
+    );
 
   const oneLiner = sanitizeTopicText(
     advice?.action?.trim() ||
@@ -491,6 +571,19 @@ export function buildQuestionThread(
     topic,
   );
 
+  recordQuestionScene({
+    system: 'tarot',
+    question: q,
+    route: scene.isFamily && scene.ask.needsWholeSpread
+      ? 'family_dispute_outcome'
+      : scene.ask.primary === 'timing'
+        ? 'timing'
+        : scene.ask.needsTimeline
+          ? 'outcome_trajectory'
+          : undefined,
+    directAnswer: overall || undefined,
+  });
+
   return attachSeries(
     {
       empathyLead: empathyFor(topic, cards, series),
@@ -498,7 +591,7 @@ export function buildQuestionThread(
       answers,
       oneLiner,
       provider,
-      synthesis: spreadSynth || undefined,
+      synthesis: overall || spreadSynth || undefined,
       adviceLines: adviceLines.length ? adviceLines : undefined,
     },
     series,

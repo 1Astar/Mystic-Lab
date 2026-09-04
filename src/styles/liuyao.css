@@ -22,6 +22,67 @@
   --ly-yao-yang: var(--gold);
   --ly-yao-yin: color-mix(in srgb, var(--ink-muted) 75%, var(--chart-gz));
   --ly-yao-move: #e85a45;
+  /* 面板 / 浮层 / 画布 — 跟全站主题 token，勿锁夜黑 */
+  --ly-canvas-deep: var(--chart-bg);
+  --ly-panel-bg: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  --ly-panel-bg-mid: color-mix(in srgb, var(--surface-1) 72%, transparent);
+  --ly-panel-bg-soft: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  --ly-panel-bg-strong: color-mix(in srgb, var(--surface-2) 92%, var(--bg-deep) 6%);
+  --ly-panel-bg-solid: var(--surface-2);
+  --ly-sheet-bg: color-mix(in srgb, var(--surface-1) 98%, var(--bg-deep));
+  --ly-sheet-bg-opaque: var(--surface-1);
+  --ly-scrim: color-mix(in srgb, var(--bg-deep) 58%, transparent);
+  --ly-scrim-strong: color-mix(in srgb, var(--bg-deep) 85%, transparent);
+  --ly-inset: color-mix(in srgb, var(--bg-deep) 22%, var(--surface-1));
+  --ly-inset-soft: color-mix(in srgb, var(--bg-deep) 18%, var(--surface-1));
+  --ly-inset-faint: color-mix(in srgb, var(--ink) 16%, transparent);
+  --ly-compendium-bg: color-mix(in srgb, var(--surface-2) 88%, var(--gold-soft));
+  --ly-compendium-panel-bg: color-mix(in srgb, var(--bg-deep) 18%, var(--surface-1));
+  --ly-scene-fade-top: color-mix(in srgb, var(--chart-bg) 82%, var(--purple-mid));
+  --ly-scene-fade-bot: color-mix(in srgb, var(--chart-bg) 90%, var(--bg-deep));
+  --ly-scene-tint: color-mix(in srgb, var(--chart-bg) 78%, var(--bg-deep));
+  --ly-gold-a04: color-mix(in srgb, var(--gold) 4%, transparent);
+  --ly-gold-a06: color-mix(in srgb, var(--gold) 6%, transparent);
+  --ly-gold-a08: color-mix(in srgb, var(--gold) 8%, transparent);
+  --ly-gold-a10: color-mix(in srgb, var(--gold) 10%, transparent);
+  --ly-gold-a12: color-mix(in srgb, var(--gold) 12%, transparent);
+  --ly-gold-a14: color-mix(in srgb, var(--gold) 14%, transparent);
+  --ly-gold-a16: color-mix(in srgb, var(--gold) 16%, transparent);
+  --ly-gold-a18: color-mix(in srgb, var(--gold) 18%, transparent);
+  --ly-gold-a22: color-mix(in srgb, var(--gold) 22%, transparent);
+  --ly-gold-a28: color-mix(in srgb, var(--gold) 28%, transparent);
+  --ly-gold-a35: color-mix(in srgb, var(--gold) 35%, transparent);
+  --ly-gold-a45: color-mix(in srgb, var(--gold) 45%, transparent);
+  --ly-gold-a50: color-mix(in srgb, var(--gold) 50%, transparent);
+  --ly-gold-a55: color-mix(in srgb, var(--gold) 55%, transparent);
+  --ly-gold-a65: color-mix(in srgb, var(--gold) 65%, transparent);
+  --ly-gold-a70: color-mix(in srgb, var(--gold) 70%, transparent);
+  --ly-gold-a75: color-mix(in srgb, var(--gold) 75%, transparent);
+  --ly-gold-a85: color-mix(in srgb, var(--gold) 85%, transparent);
+  --ly-gold-a92: color-mix(in srgb, var(--gold) 92%, transparent);
+  --ly-gold-a95: color-mix(in srgb, var(--gold) 95%, transparent);
+  --ly-gold-a20: color-mix(in srgb, var(--gold) 20%, transparent);
+  --ly-gold-a25: color-mix(in srgb, var(--gold) 25%, transparent);
+  --ly-gold-a30: color-mix(in srgb, var(--gold) 30%, transparent);
+  --ly-gold-a32: color-mix(in srgb, var(--gold) 32%, transparent);
+  --ly-gold-a34: color-mix(in srgb, var(--gold) 34%, transparent);
+  --ly-gold-a40: color-mix(in srgb, var(--gold) 40%, transparent);
+  --ly-gold-a42: color-mix(in srgb, var(--gold) 42%, transparent);
+  --ly-gold-a07: color-mix(in srgb, var(--gold) 7%, transparent);
+  --ly-gold-a05: color-mix(in srgb, var(--gold) 5%, transparent);
+  --ly-gold-a03: color-mix(in srgb, var(--gold) 3%, transparent);
+  --ly-gold-a15: color-mix(in srgb, var(--gold) 15%, transparent);
+  --ly-well-bg: color-mix(in srgb, var(--bg-deep) 35%, var(--surface-1));
+  --ly-well-bg-soft: color-mix(in srgb, var(--bg-deep) 28%, transparent);
+  --ly-well-bg-mid: color-mix(in srgb, var(--bg-deep) 45%, var(--surface-1));
+  --ly-well-bg-strong: color-mix(in srgb, var(--bg-deep) 55%, var(--surface-1));
+  --ly-shadow-drop: 0 8px 24px color-mix(in srgb, var(--bg-deep) 35%, transparent);
+  --ly-shadow-sheet: -12px 0 40px color-mix(in srgb, var(--bg-deep) 45%, transparent);
+  --ly-text-shadow: 0 1px 8px color-mix(in srgb, var(--bg-deep) 85%, transparent);
+  --ly-highlight-ink: color-mix(in srgb, var(--ink) 88%, transparent);
+  --ly-bookmark-bg: linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 96%, var(--gold-soft)), color-mix(in srgb, var(--surface-1) 96%, var(--bg-deep)));
+  --ly-bookmark-bg-active: linear-gradient(180deg, color-mix(in srgb, var(--surface-1) 98%, var(--gold-soft)), color-mix(in srgb, var(--surface-2) 98%, var(--bg-deep)));
+  --ly-plaque-bg: linear-gradient(135deg, color-mix(in srgb, var(--surface-2) 88%, var(--gold-soft)), color-mix(in srgb, var(--surface-1) 72%, var(--bg-deep)));
 }
 
 .ly-home-page,
@@ -116,7 +177,7 @@
   width: 1.35rem;
   height: 1.35rem;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.45);
+  border: 1px solid var(--ly-gold-a45);
   background: transparent;
   color: var(--ly-gold);
   font-size: 0.68rem;
@@ -129,8 +190,8 @@
 
 .ly-home-info-r.is-on,
 .ly-home-info-r:hover {
-  background: rgba(199, 164, 91, 0.18);
-  border-color: rgba(199, 164, 91, 0.7);
+  background: var(--ly-gold-a18);
+  border-color: var(--ly-gold-a70);
 }
 
 .ly-home-focus-pop {
@@ -326,7 +387,7 @@
   text-decoration: none;
   font-size: 0.82rem;
   padding: 8px 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
+  border: 1px solid var(--ly-gold-a20);
   border-radius: 999px;
 }
 
@@ -646,7 +707,7 @@
   right: 8px;
   z-index: 3;
   font-size: 0.7rem;
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 1px 4px color-mix(in srgb, var(--bg-deep) 80%, transparent));
 }
 .visually-hidden {
   position: absolute;
@@ -664,8 +725,8 @@
   margin: 0 0 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-gold-a08);
   color: var(--ly-gold);
   font-size: 0.84rem;
   line-height: 1.45;
@@ -674,8 +735,8 @@
   margin: 0 0 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: linear-gradient(160deg, rgba(199, 164, 91, 0.1), rgba(8, 10, 14, 0.35));
+  border: 1px solid var(--ly-gold-a20);
+  background: linear-gradient(160deg, var(--ly-gold-a10), color-mix(in srgb, var(--bg-deep) 35%, transparent));
 }
 .ly-enc-first-meet-label {
   margin: 0 0 6px;
@@ -688,14 +749,14 @@
   display: block;
   margin: 0 0 6px;
   font-size: 0.74rem;
-  color: rgba(232, 224, 208, 0.55);
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 .ly-enc-first-meet-q,
 .ly-enc-first-meet-sum {
   margin: 0 0 4px;
   font-size: 0.84rem;
   line-height: 1.45;
-  color: rgba(232, 224, 208, 0.88);
+  color: var(--ly-highlight-ink);
 }
 .ly-enc-stats {
   display: grid;
@@ -703,8 +764,8 @@
   margin-bottom: 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(8, 10, 14, 0.5);
+  border: 1px solid var(--ly-gold-a16);
+  background: color-mix(in srgb, var(--bg-deep) 50%, transparent);
 }
 .ly-enc-stats p {
   margin: 0;
@@ -729,8 +790,8 @@
   text-align: left;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(12, 14, 18, 0.65);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--ly-panel-bg-mid);
   color: inherit;
   font: inherit;
   cursor: pointer;
@@ -775,7 +836,7 @@
 .ly-replay-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.58);
+  background: var(--ly-scrim);
 }
 .ly-replay--sheet {
   display: flex;
@@ -790,8 +851,8 @@
   overflow: auto;
   padding: 20px 16px 32px;
   border-radius: 16px 16px 0 0;
-  background: linear-gradient(165deg, rgba(22, 18, 14, 0.98), rgba(10, 10, 12, 0.98));
-  border: 1px solid rgba(199, 164, 91, 0.22);
+  background: linear-gradient(165deg, var(--ly-sheet-bg), var(--ly-sheet-bg));
+  border: 1px solid var(--ly-gold-a22);
   border-bottom: none;
 }
 .ly-replay-sheet-close {
@@ -842,14 +903,14 @@
 .ly-replay-ai {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(201, 168, 76, 0.28);
-  background: rgba(201, 168, 76, 0.07);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-gold-a07);
 }
 .ly-replay-ai h4 {
   margin: 0 0 8px;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: rgba(232, 200, 120, 0.95);
+  color: var(--chart-star);
 }
 .ly-replay-ai-turns {
   margin-top: 8px;
@@ -857,16 +918,16 @@
 .ly-replay-ai-turns summary {
   cursor: pointer;
   font-size: 0.78rem;
-  color: rgba(201, 168, 76, 0.8);
+  color: color-mix(in srgb, var(--gold) 80%, transparent);
 }
 .ly-replay-ai-turn {
   margin: 8px 0 0;
   font-size: 0.84rem;
   line-height: 1.5;
-  color: rgba(210, 200, 188, 0.88);
+  color: var(--ly-highlight-ink);
 }
 .ly-replay-ai-turn.is-user {
-  color: rgba(232, 220, 190, 0.95);
+  color: var(--ly-highlight-ink);
 }
 .ly-replay-panel {
   position: absolute;
@@ -874,19 +935,19 @@
   right: 0;
   bottom: 0;
   width: min(100%, 440px);
-  background: rgba(12, 14, 18, 0.98);
-  border-left: 1px solid rgba(199, 164, 91, 0.22);
+  background: var(--ly-sheet-bg);
+  border-left: 1px solid var(--ly-gold-a22);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--ly-shadow-sheet);
 }
 .ly-replay-head {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   padding: 14px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.14);
+  border-bottom: 1px solid var(--ly-gold-a14);
 }
 .ly-replay-kicker {
   margin: 0;
@@ -926,8 +987,8 @@
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  border-left: 2px solid rgba(199, 164, 91, 0.35);
-  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--ly-gold-a35);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 .ly-replay-layer h4 {
   margin: 0 0 6px;
@@ -953,12 +1014,12 @@
   max-width: min(92vw, 420px);
   padding: 12px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.35);
-  background: rgba(12, 14, 18, 0.96);
+  border: 1px solid var(--ly-gold-a35);
+  background: var(--ly-sheet-bg);
   color: var(--ly-gold);
   font-size: 0.88rem;
   line-height: 1.4;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--ly-shadow-drop);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.28s ease, transform 0.28s ease;
@@ -983,8 +1044,8 @@
   width: 100%;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(16, 18, 24, 0.72);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-panel-bg-mid);
   color: inherit;
   text-align: left;
   cursor: pointer;
@@ -994,7 +1055,7 @@
 .ly-vault-card-kicker {
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  color: rgba(199, 164, 91, 0.7);
+  color: var(--ly-gold-a70);
 }
 
 .ly-vault-card strong {
@@ -1034,7 +1095,7 @@
 .ly-growth-rank-item,
 .ly-growth-tl-item {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.1);
+  border-bottom: 1px solid var(--ly-gold-a10);
 }
 
 .ly-growth-rank-name {
@@ -1071,7 +1132,7 @@
 }
 
 .ly-hex-card.is-met {
-  border-color: rgba(199, 164, 91, 0.4);
+  border-color: var(--ly-gold-a40);
 }
 
 .ly-hex-card-meet {
@@ -1416,7 +1477,7 @@ html[data-theme='moon'] .ly-home-page::after {
   position: absolute;
   inset: -8%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, rgba(199, 164, 91, 0.12), transparent 62%);
+  background: radial-gradient(circle at 50% 50%, var(--ly-gold-a12), transparent 62%);
   pointer-events: none;
 }
 
@@ -1441,7 +1502,7 @@ html[data-theme='moon'] .ly-home-page::after {
 
 .ly-coins-tappable:hover,
 .ly-coins-tappable:focus-visible {
-  box-shadow: 0 0 0 1px rgba(199, 164, 91, 0.45), 0 0 24px rgba(199, 164, 91, 0.2);
+  box-shadow: 0 0 0 1px var(--ly-gold-a45), 0 0 24px var(--ly-gold-a20);
 }
 
 .ly-coins-tappable:active {
@@ -1476,12 +1537,12 @@ html[data-theme='moon'] .ly-home-page::after {
   margin: -4px 0 12px;
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-gold-a06);
   text-align: left;
   font-size: 0.74rem;
   line-height: 1.5;
-  color: rgba(200, 190, 170, 0.92);
+  color: var(--ly-highlight-ink);
 }
 
 .ly-cast-order-note {
@@ -1533,7 +1594,7 @@ html[data-theme='moon'] .ly-home-page::after {
 
 .ly-teach-fold-body {
   padding: 0 10px 10px;
-  border-top: 1px solid rgba(199, 164, 91, 0.14);
+  border-top: 1px solid var(--ly-gold-a14);
 }
 
 .ly-teach-fold .ly-flip-bar,
@@ -1564,8 +1625,8 @@ html[data-theme='moon'] .ly-home-page::after {
   margin: 12px 0 8px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(20, 22, 28, 0.75);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-flip-bar-main {
@@ -1593,7 +1654,7 @@ html[data-theme='moon'] .ly-home-page::after {
 
 .ly-flip-btn {
   flex-shrink: 0;
-  border: 1px solid rgba(199, 164, 91, 0.45);
+  border: 1px solid var(--ly-gold-a45);
   background: linear-gradient(180deg, rgba(212, 176, 106, 0.25), rgba(168, 132, 63, 0.18));
   color: var(--ly-gold);
   font-size: 0.8rem;
@@ -1607,8 +1668,8 @@ html[data-theme='moon'] .ly-home-page::after {
   margin: 12px 0 8px;
   padding: 14px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(20, 22, 28, 0.8);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-panel-bg-strong);
 }
 
 .ly-flip-module-title {
@@ -1644,7 +1705,7 @@ html[data-theme='moon'] .ly-home-page::after {
 }
 
 .ly-flip-chip:hover {
-  border-color: rgba(199, 164, 91, 0.5);
+  border-color: var(--ly-gold-a50);
 }
 
 .ly-flip-chip-n {
@@ -1733,7 +1794,7 @@ html[data-theme='moon'] .ly-home-page::after {
   height: 28px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ly-muted);
   font-size: 1.2rem;
   cursor: pointer;
@@ -1855,7 +1916,7 @@ html[data-theme='moon'] .ly-home-page::after {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid rgba(245, 239, 230, 0.12);
-  background: rgba(8, 8, 8, 0.28);
+  background: var(--ly-well-bg-soft);
 }
 
 .ly-yao-pop-block em {
@@ -1877,7 +1938,7 @@ html[data-theme='moon'] .ly-home-page::after {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid rgba(245, 239, 230, 0.18);
-  background: rgba(8, 8, 8, 0.35);
+  background: var(--ly-well-bg-soft);
 }
 
 .ly-yao-pop-contrast em {
@@ -1988,7 +2049,7 @@ html[data-theme='moon'] .ly-home-page::after {
   justify-content: center;
   overflow: hidden;
   background: transparent;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 20px var(--ly-scrim);
   transform-style: preserve-3d;
 }
 
@@ -2206,7 +2267,7 @@ html[data-theme='moon'] .ly-home-page::after {
 }
 
 .ly-shi-ring {
-  fill: rgba(199, 164, 91, 0.12);
+  fill: var(--ly-gold-a12);
   stroke: var(--ly-gold);
   stroke-width: 1.6;
 }
@@ -2241,7 +2302,7 @@ html[data-theme='moon'] .ly-home-page::after {
 }
 
 .ly-trigram-brace {
-  stroke: rgba(199, 164, 91, 0.55);
+  stroke: var(--ly-gold-a55);
   stroke-width: 1.5;
 }
 
@@ -2357,7 +2418,7 @@ html[data-theme='moon'] .ly-home-page::after {
 
 .ly-teach-name {
   padding-top: 4px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
 }
 
 .ly-teach-formula {
@@ -2469,7 +2530,7 @@ button.ly-step-card {
 }
 
 button.ly-step-card:hover {
-  border-color: rgba(199, 164, 91, 0.45);
+  border-color: var(--ly-gold-a45);
 }
 
 .ly-step-badge {
@@ -2489,8 +2550,8 @@ button.ly-step-card:hover {
 }
 
 .ly-step-card.is-active {
-  border-color: rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.12);
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-gold-a12);
 }
 
 .ly-guide-panel {
@@ -2588,7 +2649,7 @@ button.ly-step-card:hover {
 .ly-xiang-stack-mark {
   align-self: center;
   font-size: 1rem;
-  color: rgba(199, 164, 91, 0.55);
+  color: var(--ly-gold-a55);
   padding-bottom: 18px;
 }
 
@@ -2599,7 +2660,7 @@ button.ly-step-card:hover {
   align-items: center;
   gap: 6px;
   padding-top: 4px;
-  border-top: 1px dashed rgba(199, 164, 91, 0.18);
+  border-top: 1px dashed var(--ly-gold-a18);
 }
 
 .ly-xiang-merged-label {
@@ -2622,7 +2683,7 @@ button.ly-step-card:hover {
 .ly-xiang-seam {
   height: 1px;
   margin: 2px 0;
-  background: linear-gradient(90deg, transparent, rgba(199, 164, 91, 0.45), transparent);
+  background: linear-gradient(90deg, transparent, var(--ly-gold-a45), transparent);
 }
 
 .ly-xiang-line {
@@ -2685,8 +2746,8 @@ button.ly-step-card:hover {
 .ly-timeline-node {
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-panel-bg-mid);
   text-align: center;
 }
 
@@ -2751,8 +2812,8 @@ button.ly-step-card:hover {
 .ly-strategy-list li {
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(20, 22, 28, 0.55);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--ly-panel-bg-soft);
 }
 
 .ly-strategy-list strong {
@@ -2777,8 +2838,8 @@ button.ly-step-card:hover {
 }
 
 .ly-companion-btn {
-  border: 1px solid rgba(199, 164, 91, 0.35);
-  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid var(--ly-gold-a35);
+  background: var(--ly-gold-a08);
   color: var(--ly-mist);
   font-size: 0.78rem;
   padding: 8px 12px;
@@ -2956,8 +3017,8 @@ button.ly-step-card:hover {
   text-decoration: none;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(20, 22, 28, 0.72);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-panel-bg-mid);
   color: inherit;
   backdrop-filter: blur(6px);
 }
@@ -2969,7 +3030,7 @@ button.ly-step-card:hover {
   height: 56px;
   object-fit: cover;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background: radial-gradient(circle, #2a2418, #12141a);
 }
 
@@ -3001,8 +3062,8 @@ button.ly-step-card:hover {
 
 .ly-learn-hub-featured {
   grid-column: 1 / -1;
-  border-color: rgba(199, 164, 91, 0.45);
-  background: linear-gradient(160deg, rgba(199, 164, 91, 0.12), rgba(20, 22, 28, 0.75));
+  border-color: var(--ly-gold-a45);
+  background: linear-gradient(160deg, var(--ly-gold-a12), var(--ly-panel-bg-mid));
 }
 
 .ly-learn-hub-featured .ly-learn-hub-thumb {
@@ -3016,8 +3077,8 @@ button.ly-step-card:hover {
   margin: 0 16px 16px;
   padding: 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-yao-kind-title {
@@ -3062,7 +3123,7 @@ button.ly-yao-kind-card {
 }
 
 button.ly-yao-kind-card:hover {
-  border-color: rgba(199, 164, 91, 0.4);
+  border-color: var(--ly-gold-a40);
 }
 
 .ly-yao-kind-card strong {
@@ -3322,12 +3383,12 @@ button.ly-yao-kind-card:hover {
   color: var(--ly-muted);
   font-weight: 500;
   padding: 4px 2px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.14);
+  border-bottom: 1px solid var(--ly-gold-a14);
 }
 
 .ly-board-table td {
   padding: 2px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.08);
+  border-bottom: 1px solid var(--ly-gold-a08);
   text-align: center;
 }
 
@@ -3349,7 +3410,7 @@ button.ly-yao-kind-card:hover {
 .ly-board-cell:hover,
 .ly-board-cell.is-role {
   color: var(--ly-gold);
-  background: rgba(199, 164, 91, 0.08);
+  background: var(--ly-gold-a08);
 }
 
 .ly-board-glyph {
@@ -3428,7 +3489,7 @@ button.ly-yao-kind-card:hover {
   text-decoration: none;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
 }
 
 .ly-learn-header {
@@ -3456,8 +3517,8 @@ button.ly-yao-kind-card:hover {
 .ly-bagua-card {
   padding: 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-bagua-card header {
@@ -3528,8 +3589,8 @@ button.ly-yao-kind-card:hover {
   min-width: 9rem;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(12, 14, 18, 0.9);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-panel-bg-strong);
   color: var(--ly-mist);
 }
 
@@ -3560,8 +3621,8 @@ button.ly-yao-kind-card:hover {
   text-align: left;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--ly-panel-bg-mid);
   color: inherit;
   cursor: pointer;
 }
@@ -3573,15 +3634,15 @@ button.ly-yao-kind-card:hover {
   aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: #0a0c12;
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-canvas-deep);
 }
 .ly-hex-card.is-visual.is-locked {
   opacity: 0.72;
   filter: saturate(0.75);
 }
 .ly-hex-card.is-visual.is-met {
-  box-shadow: 0 0 0 1px rgba(199, 164, 91, 0.28);
+  box-shadow: 0 0 0 1px var(--ly-gold-a28);
 }
 .ly-hex-card-art {
   position: absolute;
@@ -3654,7 +3715,7 @@ button.ly-yao-kind-card:hover {
   font-size: 0.82rem;
   letter-spacing: 0.06em;
   color: var(--ly-gold);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+  text-shadow: var(--ly-text-shadow);
   pointer-events: none;
   line-height: 1.25;
 }
@@ -3755,8 +3816,8 @@ button.ly-yao-kind-card:hover {
   z-index: 10;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.35);
-  background: rgba(12, 14, 18, 0.62);
+  border: 1px solid var(--ly-gold-a35);
+  background: var(--ly-panel-bg-mid);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--ly-mist);
@@ -3765,12 +3826,12 @@ button.ly-yao-kind-card:hover {
   cursor: pointer;
   pointer-events: auto;
   line-height: 1.2;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--bg-deep) 35%, transparent);
 }
 .ly-guide-card-fav.is-on {
   color: var(--ly-gold);
   border-color: rgba(226, 196, 138, 0.55);
-  background: rgba(199, 164, 91, 0.16);
+  background: var(--ly-gold-a16);
 }
 .ly-guide-card-fav:hover {
   border-color: rgba(226, 196, 138, 0.55);
@@ -3801,8 +3862,8 @@ button.ly-yao-kind-card:hover {
   flex: 1;
   padding: 10px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(12, 14, 18, 0.55);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-soft);
   color: #a8b4d0;
   font: inherit;
   font-size: 0.82rem;
@@ -3811,7 +3872,7 @@ button.ly-yao-kind-card:hover {
 .ly-hex-learn-tab.is-active {
   color: var(--ly-gold);
   border-color: rgba(226, 196, 138, 0.45);
-  background: rgba(199, 164, 91, 0.14);
+  background: var(--ly-gold-a14);
 }
 .ly-hex-learn-panes {
   display: flex;
@@ -3828,15 +3889,15 @@ button.ly-yao-kind-card:hover {
 .ly-hex-learn-down {
   margin: 8px 0;
   text-align: center;
-  color: rgba(199, 164, 91, 0.45);
+  color: var(--ly-gold-a45);
   font-size: 1rem;
   line-height: 1;
 }
 .ly-hex-learn-group {
   margin: 0 0 8px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(12, 14, 18, 0.72);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-mid);
   overflow: hidden;
 }
 .ly-hex-learn-group-sum,
@@ -3867,8 +3928,8 @@ button.ly-yao-kind-card:hover {
 }
 .ly-hex-learn-item {
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.12);
-  background: rgba(8, 10, 14, 0.45);
+  border: 1px solid var(--ly-gold-a12);
+  background: color-mix(in srgb, var(--bg-deep) 45%, transparent);
 }
 .ly-hex-learn-item-sum {
   padding: 10px 12px;
@@ -3927,8 +3988,8 @@ button.ly-yao-kind-card:hover {
 .ly-hex-learn-tri {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.12);
-  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--ly-gold-a12);
+  background: var(--ly-inset);
 }
 .ly-hex-learn-tri-k {
   margin: 0 0 6px;
@@ -3946,10 +4007,10 @@ button.ly-yao-kind-card:hover {
 .ly-hex-learn-table td {
   padding: 6px 8px;
   text-align: left;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.1);
+  border-bottom: 1px solid var(--ly-gold-a10);
 }
 .ly-hex-learn-table th {
-  color: rgba(199, 164, 91, 0.75);
+  color: var(--ly-gold-a75);
   font-weight: 500;
 }
 .ly-hex-learn-table td {
@@ -3957,8 +4018,8 @@ button.ly-yao-kind-card:hover {
 }
 
 .ly-guide-note-btn {
-  border: 1px solid rgba(199, 164, 91, 0.35);
-  background: rgba(199, 164, 91, 0.14);
+  border: 1px solid var(--ly-gold-a35);
+  background: var(--ly-gold-a14);
   color: var(--ly-gold);
   border-radius: 999px;
   padding: 6px 12px;
@@ -3978,8 +4039,8 @@ button.ly-yao-kind-card:hover {
   aspect-ratio: 9 / 16;
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: #0a0c12;
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-canvas-deep);
 }
 
 .ly-guide-card-bg {
@@ -3996,50 +4057,50 @@ button.ly-yao-kind-card:hover {
 .ly-guide-card-bg.is-empty {
   opacity: 1;
   background:
-    radial-gradient(ellipse at 50% 18%, rgba(199, 164, 91, 0.14), transparent 52%),
-    linear-gradient(180deg, #14182a 0%, #0a0c12 55%, #12151c 100%);
+    radial-gradient(ellipse at 50% 18%, var(--ly-gold-a14), transparent 52%),
+    linear-gradient(180deg, var(--ly-scene-fade-top) 0%, var(--ly-canvas-deep) 55%, var(--ly-scene-fade-bot) 100%);
 }
 .ly-guide-card-bg.is-empty[data-upper="天"] {
   background:
     linear-gradient(180deg, rgba(120, 150, 200, 0.28) 0%, transparent 42%),
     radial-gradient(ellipse at 50% 12%, rgba(232, 213, 163, 0.22), transparent 50%),
-    linear-gradient(180deg, #10141f, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="地"] {
   background:
     linear-gradient(180deg, rgba(120, 95, 60, 0.32) 0%, transparent 45%),
-    linear-gradient(180deg, #16120e, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="水"] {
   background:
     linear-gradient(180deg, rgba(50, 80, 130, 0.4) 0%, transparent 48%),
-    linear-gradient(180deg, #0c121c, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="火"] {
   background:
     linear-gradient(180deg, rgba(180, 90, 40, 0.35) 0%, transparent 45%),
-    linear-gradient(180deg, #1a100c, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="雷"] {
   background:
     linear-gradient(180deg, rgba(160, 120, 200, 0.22) 0%, transparent 40%),
     radial-gradient(ellipse at 55% 20%, rgba(232, 213, 163, 0.2), transparent 45%),
-    linear-gradient(180deg, #12101a, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="风"] {
   background:
     linear-gradient(180deg, rgba(140, 170, 160, 0.22) 0%, transparent 48%),
-    linear-gradient(180deg, #101816, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="山"] {
   background:
     linear-gradient(180deg, rgba(90, 100, 110, 0.35) 0%, transparent 50%),
-    linear-gradient(180deg, #12151a, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-card-bg.is-empty[data-upper="泽"] {
   background:
     linear-gradient(180deg, rgba(80, 130, 150, 0.28) 0%, transparent 48%),
-    linear-gradient(180deg, #0e1518, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 
 .ly-guide-dual {
@@ -4052,10 +4113,10 @@ button.ly-yao-kind-card:hover {
   .ly-guide-dual { grid-template-columns: 1fr; }
 }
 .ly-guide-pane {
-  border: 1px solid rgba(199, 164, 91, 0.18);
+  border: 1px solid var(--ly-gold-a18);
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(12, 14, 18, 0.7);
+  background: var(--ly-panel-bg-mid);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -4066,19 +4127,19 @@ button.ly-yao-kind-card:hover {
   font-size: 0.66rem;
   letter-spacing: 0.12em;
   color: var(--ly-gold);
-  border-bottom: 1px solid rgba(199, 164, 91, 0.12);
-  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--ly-gold-a12);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .ly-guide-art {
   position: relative;
   aspect-ratio: 9 / 16;
   max-height: min(62vh, 640px);
-  background: #0a0c12;
+  background: var(--ly-canvas-deep);
 }
 .ly-guide-card {
   position: relative;
-  background: #0a0c12;
+  background: var(--ly-canvas-deep);
 }
 .ly-guide-art img {
   width: 100%;
@@ -4093,51 +4154,51 @@ button.ly-yao-kind-card:hover {
   height: 100%;
   min-height: 240px;
   background:
-    radial-gradient(ellipse at 50% 18%, rgba(199, 164, 91, 0.14), transparent 52%),
-    linear-gradient(180deg, #14182a 0%, #0a0c12 55%, #12151c 100%);
+    radial-gradient(ellipse at 50% 18%, var(--ly-gold-a14), transparent 52%),
+    linear-gradient(180deg, var(--ly-scene-fade-top) 0%, var(--ly-canvas-deep) 55%, var(--ly-scene-fade-bot) 100%);
 }
 /* 无 AI 底图时：按上下卦自然象染色分层 */
 .ly-guide-art-empty[data-upper="天"] {
   background:
     linear-gradient(180deg, rgba(120, 150, 200, 0.28) 0%, transparent 42%),
     radial-gradient(ellipse at 50% 12%, rgba(232, 213, 163, 0.22), transparent 50%),
-    linear-gradient(180deg, #10141f, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="地"] {
   background:
     linear-gradient(180deg, rgba(120, 95, 60, 0.32) 0%, transparent 45%),
-    linear-gradient(180deg, #16120e, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="水"] {
   background:
     linear-gradient(180deg, rgba(50, 80, 130, 0.4) 0%, transparent 48%),
-    linear-gradient(180deg, #0c121c, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="火"] {
   background:
     linear-gradient(180deg, rgba(180, 90, 40, 0.35) 0%, transparent 45%),
-    linear-gradient(180deg, #1a100c, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="雷"] {
   background:
     linear-gradient(180deg, rgba(160, 120, 200, 0.22) 0%, transparent 40%),
     radial-gradient(ellipse at 55% 20%, rgba(232, 213, 163, 0.2), transparent 45%),
-    linear-gradient(180deg, #12101a, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="风"] {
   background:
     linear-gradient(180deg, rgba(140, 170, 160, 0.22) 0%, transparent 48%),
-    linear-gradient(180deg, #101816, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="山"] {
   background:
     linear-gradient(180deg, rgba(90, 100, 110, 0.35) 0%, transparent 50%),
-    linear-gradient(180deg, #12151a, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-upper="泽"] {
   background:
     linear-gradient(180deg, rgba(80, 130, 150, 0.28) 0%, transparent 48%),
-    linear-gradient(180deg, #0e1518, #0a0c12);
+    linear-gradient(180deg, var(--ly-scene-tint), var(--ly-canvas-deep));
 }
 .ly-guide-art-empty[data-lower="天"]::after,
 .ly-guide-art-empty[data-lower="地"]::after,
@@ -4204,13 +4265,13 @@ button.ly-yao-kind-card:hover {
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(199, 164, 91, 0.1), transparent 42%),
+    radial-gradient(ellipse at 50% 0%, var(--ly-gold-a10), transparent 42%),
     repeating-linear-gradient(
       180deg,
       transparent 0,
       transparent 18px,
-      rgba(199, 164, 91, 0.03) 18px,
-      rgba(199, 164, 91, 0.03) 19px
+      var(--ly-gold-a03) 18px,
+      var(--ly-gold-a03) 19px
     );
   animation: ly-guide-breathe 5.5s ease-in-out infinite;
   mix-blend-mode: screen;
@@ -4259,7 +4320,7 @@ button.ly-yao-kind-card:hover {
   color: rgba(226, 196, 138, 0.55);
   opacity: 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: var(--ly-text-shadow);
 }
 .ly-guide-zone.is-upper .ly-guide-zone-hint { top: 12px; }
 .ly-guide-zone.is-lower .ly-guide-zone-hint { bottom: 12px; }
@@ -4293,7 +4354,7 @@ button.ly-yao-kind-card:hover {
   font-size: 0.58rem;
   letter-spacing: 0.18em;
   color: rgba(226, 196, 138, 0.7);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: var(--ly-text-shadow);
 }
 .ly-guide-name {
   margin: 4px 0 0;
@@ -4304,13 +4365,13 @@ button.ly-yao-kind-card:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.65));
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--bg-deep) 65%, transparent));
 }
 .ly-guide-sub {
   margin: 2px 0 0;
   font-size: 0.72rem;
   color: var(--ly-muted);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+  text-shadow: var(--ly-text-shadow);
 }
 .ly-guide-chips {
   display: flex;
@@ -4322,10 +4383,10 @@ button.ly-yao-kind-card:hover {
   font-size: 0.64rem;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background: rgba(7, 9, 15, 0.28);
   color: var(--ly-muted);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 1px 6px color-mix(in srgb, var(--bg-deep) 70%, transparent);
 }
 .ly-guide-chip.is-ying { color: #e07060; }
 
@@ -4357,9 +4418,9 @@ button.ly-yao-kind-card:hover {
   transform: translateY(-50%);
   width: 36px;
   padding: 10px 0;
-  border: 1px solid rgba(199, 164, 91, 0.35);
+  border: 1px solid var(--ly-gold-a35);
   border-radius: 999px;
-  background: rgba(12, 14, 18, 0.55);
+  background: var(--ly-panel-bg-soft);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--ly-gold);
@@ -4370,7 +4431,7 @@ button.ly-yao-kind-card:hover {
   cursor: pointer;
   pointer-events: auto;
   line-height: 1;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--bg-deep) 35%, transparent);
 }
 .ly-guide-mini-note:hover {
   background: rgba(226, 196, 138, 0.16);
@@ -4388,8 +4449,8 @@ button.ly-yao-kind-card:hover {
 .ly-guide-notes-cta {
   padding: 10px 18px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.35);
-  background: rgba(199, 164, 91, 0.12);
+  border: 1px solid var(--ly-gold-a35);
+  background: var(--ly-gold-a12);
   color: var(--ly-gold);
   font: inherit;
   font-size: 0.84rem;
@@ -4397,7 +4458,7 @@ button.ly-yao-kind-card:hover {
   cursor: pointer;
 }
 .ly-guide-notes-cta:hover {
-  background: rgba(199, 164, 91, 0.2);
+  background: var(--ly-gold-a20);
   border-color: rgba(226, 196, 138, 0.5);
 }
 .ly-guide-notes-sub {
@@ -4417,12 +4478,12 @@ button.ly-yao-kind-card:hover {
   max-width: 132px;
   height: auto;
   padding: 8px 10px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
+  border: 1px solid var(--ly-gold-a18);
   border-radius: 10px;
   background: rgba(8, 10, 16, 0.14);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 4px 14px var(--ly-inset-faint);
   pointer-events: auto;
   opacity: 0;
   visibility: hidden;
@@ -4472,7 +4533,7 @@ button.ly-yao-kind-card:hover {
 .ly-guide-tri-why {
   margin: 6px 0 0;
   padding-top: 6px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
   font-size: 0.7rem;
   line-height: 1.4;
   color: var(--ly-mist);
@@ -4555,7 +4616,7 @@ button.ly-yao-kind-card:hover {
   top: 50%;
   height: 0;
   margin-top: 0;
-  border-top: 1px dashed rgba(199, 164, 91, 0.35);
+  border-top: 1px dashed var(--ly-gold-a35);
   opacity: 0.4;
   pointer-events: none;
   background: none;
@@ -4611,14 +4672,14 @@ button.ly-yao-kind-card:hover {
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   color: var(--ly-gold);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+  text-shadow: var(--ly-text-shadow);
 }
 .ly-guide-one-line {
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.5;
   color: var(--ly-mist);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 10px color-mix(in srgb, var(--bg-deep) 90%, transparent);
 }
 .ly-guide-legend {
   display: flex;
@@ -4853,7 +4914,7 @@ a.ly-derived-name:hover {
 .ly-guide-drawer-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--ly-scrim);
 }
 .ly-guide-drawer-panel {
   position: absolute;
@@ -4861,12 +4922,12 @@ a.ly-derived-name:hover {
   right: 0;
   bottom: 0;
   width: min(100%, 420px);
-  background: rgba(12, 14, 18, 0.98);
-  border-left: 1px solid rgba(199, 164, 91, 0.22);
+  background: var(--ly-sheet-bg);
+  border-left: 1px solid var(--ly-gold-a22);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--ly-shadow-sheet);
   animation: ly-guide-drawer-in 0.28s ease;
 }
 @keyframes ly-guide-drawer-in {
@@ -4879,7 +4940,7 @@ a.ly-derived-name:hover {
   justify-content: space-between;
   gap: 10px;
   padding: 14px 14px 10px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.14);
+  border-bottom: 1px solid var(--ly-gold-a14);
   flex: 0 0 auto;
 }
 .ly-guide-drawer-head h4 {
@@ -4921,7 +4982,7 @@ a.ly-derived-name:hover {
   margin: 0 0 10px;
 }
 .ly-guide-domain-tab {
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background: transparent;
   color: var(--ly-muted);
   border-radius: 999px;
@@ -4930,9 +4991,9 @@ a.ly-derived-name:hover {
   cursor: pointer;
 }
 .ly-guide-domain-tab.is-active {
-  background: rgba(199, 164, 91, 0.18);
+  background: var(--ly-gold-a18);
   color: var(--ly-gold);
-  border-color: rgba(199, 164, 91, 0.45);
+  border-color: var(--ly-gold-a45);
 }
 .ly-guide-domain-body {
   margin: 0;
@@ -4944,7 +5005,7 @@ a.ly-derived-name:hover {
 .ly-hex-gist {
   margin: 14px 0 0;
   padding-top: 12px;
-  border-top: 1px solid rgba(199, 164, 91, 0.14);
+  border-top: 1px solid var(--ly-gold-a14);
   font-size: 0.9rem;
   line-height: 1.65;
   color: var(--ly-mist);
@@ -4960,7 +5021,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-concept-chip {
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background: transparent;
   color: var(--ly-muted);
   font-size: 0.8rem;
@@ -4970,8 +5031,8 @@ a.ly-derived-name:hover {
 }
 
 .ly-concept-chip.is-active {
-  border-color: rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.14);
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-gold-a14);
   color: var(--ly-gold);
   font-weight: 600;
 }
@@ -4983,8 +5044,8 @@ a.ly-derived-name:hover {
 .ly-concept-detail {
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-concept-kicker {
@@ -5011,7 +5072,7 @@ a.ly-derived-name:hover {
 .ly-concept-section {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
 }
 
 .ly-concept-section h3 {
@@ -5052,8 +5113,8 @@ a.ly-derived-name:hover {
 .ly-learn-card {
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-learn-card h2 {
@@ -5171,7 +5232,7 @@ a.ly-derived-name:hover {
   width: 100%;
   margin-top: 8px;
   background: rgba(232, 226, 213, 0.05);
-  border-color: rgba(199, 164, 91, 0.2);
+  border-color: var(--ly-gold-a20);
   color: var(--ly-mist);
 }
 
@@ -5201,7 +5262,7 @@ a.ly-derived-name:hover {
 
 .ly-layer-tab {
   flex-shrink: 0;
-  border: 1px solid rgba(199, 164, 91, 0.25);
+  border: 1px solid var(--ly-gold-a25);
   background: transparent;
   color: var(--ly-muted);
   font-size: 0.78rem;
@@ -5211,8 +5272,8 @@ a.ly-derived-name:hover {
 }
 
 .ly-layer-tab.is-active {
-  border-color: rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.14);
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-gold-a14);
   color: var(--ly-gold);
   font-weight: 600;
 }
@@ -5234,7 +5295,7 @@ a.ly-derived-name:hover {
 .ly-hex-hero--diagrams {
   margin-top: 22px;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .ly-hex-hero-meta {
@@ -5253,16 +5314,16 @@ a.ly-derived-name:hover {
 .ly-hex-hero-answer {
   margin: 0 0 14px;
   padding: 12px 14px;
-  border: 1px solid rgba(226, 196, 138, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(226, 196, 138, 0.12), rgba(8, 10, 16, 0.35));
+  background: linear-gradient(180deg, var(--ly-gold-a12), color-mix(in srgb, var(--surface-2) 55%, transparent));
 }
 
 .ly-hex-hero-answer-label {
   margin: 0 0 6px;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  color: rgba(226, 196, 138, 0.85);
+  color: var(--gold-ink, var(--ly-gold));
 }
 
 .ly-hex-hero-answer-body {
@@ -5303,7 +5364,7 @@ a.ly-derived-name:hover {
   text-align: center;
   border-radius: 0;
   border: none;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
   background: transparent;
 }
 
@@ -5481,7 +5542,7 @@ a.ly-derived-name:hover {
 
 .ly-result-tab {
   flex-shrink: 0;
-  border: 1px solid rgba(199, 164, 91, 0.25);
+  border: 1px solid var(--ly-gold-a25);
   background: transparent;
   color: var(--ly-muted);
   font-size: 0.78rem;
@@ -5491,8 +5552,8 @@ a.ly-derived-name:hover {
 }
 
 .ly-result-tab.is-active {
-  border-color: rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.14);
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-gold-a14);
   color: var(--ly-gold);
   font-weight: 600;
 }
@@ -5622,7 +5683,7 @@ a.ly-derived-name:hover {
   margin: 0;
   border: none;
   border-radius: 0;
-  border-top: 1px solid rgba(199, 164, 91, 0.14);
+  border-top: 1px solid var(--ly-gold-a14);
 }
 
 .ly-note-tag-add {
@@ -5636,8 +5697,8 @@ a.ly-derived-name:hover {
   min-width: 0;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(8, 9, 13, 0.5);
+  border: 1px solid var(--ly-gold-a28);
+  background: color-mix(in srgb, var(--bg-deep) 50%, var(--surface-1));
   color: var(--ly-mist);
   font-size: 0.8rem;
 }
@@ -5646,8 +5707,8 @@ a.ly-derived-name:hover {
   flex-shrink: 0;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.4);
-  background: rgba(199, 164, 91, 0.12);
+  border: 1px solid var(--ly-gold-a40);
+  background: var(--ly-gold-a12);
   color: var(--ly-gold);
   font-size: 0.78rem;
   cursor: pointer;
@@ -5656,8 +5717,8 @@ a.ly-derived-name:hover {
 .ly-layer-panel {
   padding: 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(20, 22, 28, 0.7);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-layer-guide {
@@ -5751,7 +5812,7 @@ a.ly-derived-name:hover {
 .ly-line-classic-hint {
   margin-top: 8px !important;
   padding-top: 8px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
   color: var(--ly-muted) !important;
   font-size: 0.75rem !important;
 }
@@ -5806,8 +5867,8 @@ a.ly-derived-name:hover {
 .ly-classic-lib-fold {
   padding: 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(20, 22, 28, 0.72);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-gua-card h4,
@@ -5857,15 +5918,15 @@ a.ly-derived-name:hover {
   text-align: center;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: rgba(199, 164, 91, 0.75);
+  color: var(--ly-gold-a75);
 }
 
 .ly-gua-form-why {
   margin-top: 12px;
   padding: 12px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(8, 9, 13, 0.4);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--panel-inset);
   text-align: center;
 }
 
@@ -5920,7 +5981,7 @@ a.ly-derived-name:hover {
 .ly-energy-chain-item {
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.1);
+  border-bottom: 1px solid var(--ly-gold-a10);
 }
 
 .ly-energy-chain-item:last-child {
@@ -5975,8 +6036,8 @@ a.ly-derived-name:hover {
   margin: 8px 0 0 !important;
   padding: 8px 10px;
   border-radius: 8px;
-  border-left: 2px solid rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.08);
+  border-left: 2px solid var(--ly-gold-a55);
+  background: var(--ly-gold-a08);
   color: rgba(232, 220, 190, 0.92) !important;
 }
 
@@ -6003,9 +6064,9 @@ a.ly-derived-name:hover {
 }
 
 .ly-drawer-books .ly-classic-block.is-book-focus {
-  border-color: rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.1);
-  box-shadow: 0 0 0 1px rgba(199, 164, 91, 0.2);
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-gold-a10);
+  box-shadow: 0 0 0 1px var(--ly-gold-a20);
 }
 
 .ly-classic-lib-fold > summary {
@@ -6036,8 +6097,8 @@ a.ly-derived-name:hover {
 .ly-study-note-field textarea {
   font-family: "Literata", "Noto Serif SC", "Songti SC", serif;
   line-height: 1.6;
-  background: rgba(8, 9, 13, 0.35);
-  border-color: rgba(199, 164, 91, 0.22);
+  background: var(--panel-inset);
+  border-color: var(--ly-gold-a22);
 }
 
 .ly-dict-footer-list {
@@ -6085,8 +6146,8 @@ a.ly-derived-name:hover {
 
 .ly-note-mini-tab {
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--panel-inset);
   color: var(--ly-muted);
   font-size: 0.68rem;
   padding: 6px 9px;
@@ -6095,9 +6156,9 @@ a.ly-derived-name:hover {
 }
 
 .ly-note-mini-tab.is-active {
-  border-color: rgba(199, 164, 91, 0.5);
+  border-color: var(--ly-gold-a50);
   color: var(--ly-gold);
-  background: rgba(199, 164, 91, 0.1);
+  background: var(--ly-gold-a10);
 }
 
 /* 本卦辞 ↔ 变卦辞（古籍解析） */
@@ -6111,8 +6172,8 @@ a.ly-derived-name:hover {
   margin-bottom: 10px;
   padding: 3px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(12, 10, 8, 0.35);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-well-bg);
 }
 
 .ly-gua-switch-tab {
@@ -6128,7 +6189,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-gua-switch-tab.is-active {
-  background: rgba(199, 164, 91, 0.16);
+  background: var(--ly-gold-a16);
   color: var(--ly-gold);
   font-weight: 650;
 }
@@ -6147,9 +6208,9 @@ a.ly-derived-name:hover {
 }
 
 .ly-classic-block.is-book-move {
-  border-left: 3px solid rgba(199, 164, 91, 0.55);
+  border-left: 3px solid var(--ly-gold-a55);
   padding-left: 8px;
-  background: rgba(199, 164, 91, 0.06);
+  background: var(--ly-gold-a06);
   border-radius: 0 8px 8px 0;
 }
 
@@ -6158,10 +6219,8 @@ a.ly-derived-name:hover {
   margin: 0 0 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background:
-    linear-gradient(165deg, rgba(32, 28, 22, 0.55), rgba(14, 12, 10, 0.4)),
-    rgba(199, 164, 91, 0.04);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-compendium-bg);
 }
 
 .ly-compendium-title {
@@ -6175,15 +6234,15 @@ a.ly-derived-name:hover {
 .ly-compendium-gua {
   margin: 0 0 8px;
   font-size: 0.82rem;
-  color: rgba(232, 220, 190, 0.88);
+  color: var(--ly-highlight-ink);
 }
 
 .ly-compendium-panel {
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-compendium-panel-bg);
 }
 
 .ly-compendium-panel:last-child {
@@ -6200,7 +6259,7 @@ a.ly-derived-name:hover {
 
 .ly-compendium-panel.is-bridge {
   border-color: rgba(224, 192, 120, 0.45);
-  background: rgba(199, 164, 91, 0.08);
+  background: var(--ly-gold-a08);
 }
 
 .ly-compendium-panel-title {
@@ -6215,15 +6274,15 @@ a.ly-derived-name:hover {
   margin: 0 0 8px;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
-  color: rgba(199, 164, 91, 0.75);
+  color: var(--ly-gold-a75);
 }
 
 .ly-compendium-block {
   margin: 0 0 10px;
   padding: 8px 10px 8px 12px;
   border-radius: 8px;
-  border-left: 3px solid rgba(199, 164, 91, 0.35);
-  background: rgba(0, 0, 0, 0.18);
+  border-left: 3px solid var(--ly-gold-a35);
+  background: var(--ly-inset-soft);
 }
 
 .ly-compendium-panel .ly-compendium-block:last-child {
@@ -6244,7 +6303,7 @@ a.ly-derived-name:hover {
 
 .ly-compendium-block.is-decision {
   border-left-color: #e0c078;
-  background: rgba(199, 164, 91, 0.1);
+  background: var(--ly-gold-a10);
 }
 
 .ly-compendium-tag {
@@ -6298,7 +6357,7 @@ a.ly-derived-name:hover {
   padding: 0;
   border-radius: 0;
   border: none;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.12);
+  border-bottom: 1px solid var(--ly-gold-a12);
   background: transparent;
 }
 
@@ -6319,7 +6378,7 @@ a.ly-derived-name:hover {
 
 .ly-pattern-summary-sum::before {
   content: '▸';
-  color: rgba(199, 164, 91, 0.7);
+  color: var(--ly-gold-a70);
   font-size: 0.78rem;
 }
 
@@ -6420,14 +6479,14 @@ a.ly-derived-name:hover {
   cursor: pointer;
   border-radius: 0;
   border: none;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.1);
+  border-bottom: 1px solid var(--ly-gold-a10);
   background: transparent;
   font: inherit;
   color: inherit;
 }
 
 .ly-pattern-chip:hover {
-  border-color: rgba(199, 164, 91, 0.22);
+  border-color: var(--ly-gold-a22);
   background: transparent;
 }
 
@@ -6469,7 +6528,7 @@ a.ly-derived-name:hover {
   margin-right: 0.4em;
   font-size: 0.7rem;
   letter-spacing: 0.06em;
-  color: rgba(199, 164, 91, 0.75);
+  color: var(--ly-gold-a75);
   font-weight: 650;
 }
 
@@ -6477,8 +6536,8 @@ a.ly-derived-name:hover {
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-gold-a08);
   font-size: 0.92rem;
   font-weight: 650;
   line-height: 1.45;
@@ -6521,8 +6580,8 @@ a.ly-derived-name:hover {
   overflow: hidden;
   aspect-ratio: 4 / 5;
   max-height: min(42vh, 320px);
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: #0a0c12;
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-canvas-deep);
 }
 .ly-guide-snippet.is-compact .ly-guide-snippet-hero {
   aspect-ratio: 16 / 11;
@@ -6532,8 +6591,8 @@ a.ly-derived-name:hover {
   margin-top: 8px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(12, 14, 18, 0.55);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--ly-panel-bg-soft);
 }
 .ly-guide-snippet-tri {
   margin: 0 0 10px;
@@ -6590,8 +6649,8 @@ a.ly-derived-name:hover {
 .ly-guide-snippet-hero-bg.is-empty {
   opacity: 1;
   background:
-    radial-gradient(ellipse at 50% 20%, rgba(199, 164, 91, 0.16), transparent 55%),
-    linear-gradient(180deg, #14182a, #0a0c12);
+    radial-gradient(ellipse at 50% 20%, var(--ly-gold-a16), transparent 55%),
+    linear-gradient(180deg, var(--ly-scene-fade-top), var(--ly-canvas-deep));
 }
 .ly-guide-snippet-hero-veil {
   position: absolute;
@@ -6628,13 +6687,13 @@ a.ly-derived-name:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.65));
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--bg-deep) 65%, transparent));
 }
 .ly-guide-snippet-sub {
   margin: 2px 0 0;
   font-size: 0.7rem;
   color: var(--ly-muted);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+  text-shadow: var(--ly-text-shadow);
 }
 .ly-guide-snippet-chips {
   display: flex;
@@ -6709,14 +6768,14 @@ a.ly-derived-name:hover {
 }
 .ly-guide-snippet-hero-foot .ly-guide-img-k {
   margin: 0 0 2px;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+  text-shadow: var(--ly-text-shadow);
 }
 .ly-guide-snippet-hero-foot .ly-guide-one-line {
   margin: 0;
   font-size: 0.76rem;
   line-height: 1.4;
   color: #f4efe6;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 10px color-mix(in srgb, var(--bg-deep) 90%, transparent);
 }
 
 .ly-guide-snippet-art,
@@ -6726,7 +6785,7 @@ a.ly-derived-name:hover {
   overflow: hidden;
   aspect-ratio: 16 / 10;
   max-height: min(28vh, 220px);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--ly-inset);
 }
 
 .ly-guide-snippet-img,
@@ -6742,8 +6801,8 @@ a.ly-derived-name:hover {
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(12, 14, 18, 0.55);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-soft);
 }
 .ly-foundation-bridge-lead {
   margin: 0;
@@ -6830,8 +6889,8 @@ a.ly-derived-name:hover {
   margin: 0 0 18px;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(12, 10, 8, 0.4);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-well-bg);
 }
 
 @media (min-width: 640px) {
@@ -6866,8 +6925,8 @@ a.ly-derived-name:hover {
 .ly-hex-notes-panel {
   padding: 14px 14px 8px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(8, 9, 13, 0.55);
+  border: 1px solid var(--ly-gold-a20);
+  background: color-mix(in srgb, var(--bg-deep) 55%, var(--surface-1));
 }
 
 .ly-hex-notes-panel .ly-guide-notes {
@@ -6922,7 +6981,7 @@ a.ly-derived-name:hover {
 
 .ly-hex-expand-domain {
   padding: 7px 0;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
 }
 
 .ly-hex-expand-domain:first-of-type {
@@ -6960,8 +7019,8 @@ a.ly-derived-name:hover {
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-gold-a06);
 }
 
 .ly-dress-spirit-list {
@@ -6987,10 +7046,10 @@ a.ly-derived-name:hover {
   margin: 10px 0 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background:
     linear-gradient(165deg, rgba(28, 36, 28, 0.55), rgba(18, 22, 20, 0.35)),
-    rgba(199, 164, 91, 0.05);
+    var(--ly-gold-a05);
 }
 
 .ly-spirit-nar-title {
@@ -7021,7 +7080,7 @@ a.ly-derived-name:hover {
   align-items: baseline;
   padding: 6px 8px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--ly-inset-soft);
   font-size: 0.76rem;
   line-height: 1.4;
   color: var(--ly-mist);
@@ -7059,8 +7118,8 @@ a.ly-derived-name:hover {
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--panel-inset);
 }
 
 .ly-spirit-classic-src {
@@ -7092,8 +7151,8 @@ a.ly-derived-name:hover {
   margin: 0;
   padding: 8px 10px 8px 12px;
   border-radius: 8px;
-  border-left: 3px solid rgba(199, 164, 91, 0.35);
-  background: rgba(0, 0, 0, 0.18);
+  border-left: 3px solid var(--ly-gold-a35);
+  background: var(--ly-inset-soft);
   font-size: 0.84rem;
   line-height: 1.55;
   color: rgba(232, 220, 190, 0.92);
@@ -7117,7 +7176,7 @@ a.ly-derived-name:hover {
 
 .ly-spirit-nar-p.is-verdict {
   border-left-color: #d4b56a;
-  background: rgba(199, 164, 91, 0.1);
+  background: var(--ly-gold-a10);
   color: rgba(245, 236, 214, 0.96);
 }
 
@@ -7159,7 +7218,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-deep-faq .ly-faq-item {
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
   padding: 8px 0;
 }
 
@@ -7200,8 +7259,8 @@ a.ly-derived-name:hover {
   margin: 0 0 14px;
   padding: 8px 6px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.14);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a14);
+  background: var(--panel-inset);
   overflow: visible;
 }
 
@@ -7227,7 +7286,7 @@ a.ly-derived-name:hover {
   flex: 0 0 auto;
   padding: 0 1px;
   font-size: 0.65rem;
-  color: rgba(199, 164, 91, 0.35);
+  color: var(--ly-gold-a35);
   user-select: none;
   line-height: 1;
 }
@@ -7254,7 +7313,7 @@ a.ly-derived-name:hover {
   font-size: 0.62rem;
   line-height: 1;
   letter-spacing: 0.04em;
-  color: rgba(199, 164, 91, 0.65);
+  color: var(--ly-gold-a65);
 }
 
 .ly-course-crumb-name {
@@ -7281,7 +7340,7 @@ a.ly-derived-name:hover {
 
 .ly-course-crumb.is-done .ly-course-crumb-sep,
 .ly-course-crumb.is-done + .ly-course-crumb-sep {
-  color: rgba(199, 164, 91, 0.45);
+  color: var(--ly-gold-a45);
 }
 
 .ly-course-crumb.is-todo .ly-course-crumb-btn {
@@ -7289,8 +7348,8 @@ a.ly-derived-name:hover {
 }
 
 .ly-course-crumb.is-now .ly-course-crumb-btn {
-  border-color: rgba(199, 164, 91, 0.5);
-  background: rgba(199, 164, 91, 0.12);
+  border-color: var(--ly-gold-a50);
+  background: var(--ly-gold-a12);
 }
 
 .ly-course-crumb.is-now .ly-course-crumb-n,
@@ -7299,14 +7358,14 @@ a.ly-derived-name:hover {
 }
 
 .ly-course-crumb-btn:hover {
-  border-color: rgba(199, 164, 91, 0.28);
-  background: rgba(199, 164, 91, 0.06);
+  border-color: var(--ly-gold-a28);
+  background: var(--ly-gold-a06);
 }
 
 .ly-course-trail-tip {
   margin-top: 10px;
   padding: 8px 8px 2px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
   text-align: center;
 }
 
@@ -7348,8 +7407,8 @@ a.ly-derived-name:hover {
   margin-bottom: 14px;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(8, 9, 13, 0.4);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--panel-inset);
 }
 
 .ly-course-visual.ly-course-visual-pair {
@@ -7424,10 +7483,10 @@ a.ly-derived-name:hover {
 }
 
 .ly-classic-block.is-yao-active {
-  outline: 1px solid rgba(199, 164, 91, 0.55);
+  outline: 1px solid var(--ly-gold-a55);
   border-radius: 10px;
   padding: 8px;
-  background: rgba(199, 164, 91, 0.08);
+  background: var(--ly-gold-a08);
 }
 
 .ly-course-yao-focus {
@@ -7475,8 +7534,8 @@ a.ly-derived-name:hover {
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(12, 14, 18, 0.55);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-panel-bg-soft);
 }
 .ly-yong-focus-intro,
 .ly-yong-focus-core,
@@ -7489,8 +7548,8 @@ a.ly-derived-name:hover {
 .ly-yong-focus-core {
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-gold-a08);
   color: #f4efe6;
 }
 .ly-yong-focus-expert {
@@ -7525,8 +7584,8 @@ a.ly-derived-name:hover {
   margin-top: 14px;
   padding: 14px 14px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: linear-gradient(165deg, rgba(199, 164, 91, 0.1), rgba(16, 14, 12, 0.35));
+  border: 1px solid var(--ly-gold-a28);
+  background: linear-gradient(165deg, var(--ly-gold-a10), rgba(16, 14, 12, 0.35));
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -7724,7 +7783,7 @@ a.ly-derived-name:hover {
 
 .ly-synthesis-block {
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .ly-synthesis-h {
@@ -7781,8 +7840,8 @@ a.ly-derived-name:hover {
   margin: 2px 0 4px;
   background: linear-gradient(
     90deg,
-    rgba(201, 168, 76, 0.35),
-    rgba(201, 168, 76, 0.08) 70%,
+    var(--ly-gold-a35),
+    var(--ly-gold-a08) 70%,
     transparent
   );
 }
@@ -7797,6 +7856,51 @@ a.ly-derived-name:hover {
   text-wrap: pretty;
 }
 
+.ly-instant-verdict {
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.ly-instant-verdict-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.ly-instant-verdict-q {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.ly-instant-verdict-body {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  font-weight: 650;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.ly-hex-fold,
+.ly-metaphor-fold {
+  margin-top: 0.5rem;
+}
+
+.ly-hex-fold summary,
+.ly-metaphor-fold summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.ly-hex-fold-body {
+  padding-top: 0.35rem;
+}
+
 .ly-answer-pack.is-compact .ly-pack-headline {
   font-size: 1.05rem;
 }
@@ -7809,7 +7913,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-hex-frame + .ly-hex-frame {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 5%, transparent);
 }
 
 .ly-hex-frame-lead {
@@ -8062,7 +8166,7 @@ a.ly-derived-name:hover {
   display: block;
   margin: 8px 0 10px;
   padding: 0 0 0 10px;
-  border-left: 2px solid rgba(199, 164, 91, 0.4);
+  border-left: 2px solid var(--ly-gold-a40);
   font-size: 0.82rem;
   line-height: 1.5;
   color: var(--ly-mist);
@@ -8109,7 +8213,7 @@ a.ly-derived-name:hover {
 .ly-briefing-more > summary {
   cursor: pointer;
   list-style: none;
-  color: rgba(199, 164, 91, 0.75);
+  color: var(--ly-gold-a75);
   font-size: 0.8rem;
   letter-spacing: 0.04em;
   padding: 6px 0;
@@ -8124,7 +8228,7 @@ a.ly-derived-name:hover {
 .ly-pack-why > summary::before,
 .ly-pack-subs > summary::before {
   content: '▸ ';
-  color: rgba(199, 164, 91, 0.65);
+  color: var(--ly-gold-a65);
 }
 
 .ly-pack-why[open] > summary::before,
@@ -8258,7 +8362,7 @@ a.ly-derived-name:hover {
   margin: 10px 0 0;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(201, 168, 76, 0.25);
+  border: 1px solid var(--ly-gold-a25);
   background: rgba(12, 10, 18, 0.88);
 }
 
@@ -8281,7 +8385,7 @@ a.ly-derived-name:hover {
   padding: 0;
   border: 0;
   background: transparent;
-  color: rgba(201, 168, 76, 0.85);
+  color: var(--ly-gold-a85);
   font: inherit;
   font-size: 0.78rem;
   cursor: pointer;
@@ -8337,7 +8441,7 @@ a.ly-derived-name:hover {
   margin: 0;
   padding: 10px 12px 12px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--ly-inset-soft);
   font-size: 0.78rem;
   line-height: 1.6;
   color: rgba(140, 136, 128, 0.78);
@@ -8369,7 +8473,7 @@ a.ly-derived-name:hover {
 
 .ly-pack-label {
   font-size: 0.72rem;
-  color: rgba(199, 164, 91, 0.85);
+  color: var(--ly-gold-a85);
 }
 
 .ly-pack-lean {
@@ -8399,8 +8503,8 @@ a.ly-derived-name:hover {
   margin: 10px 0 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ly-gold-a20);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 .ly-course-method-label,
@@ -8422,7 +8526,7 @@ a.ly-derived-name:hover {
   border-radius: 12px;
   border: 1px solid rgba(224, 192, 120, 0.4);
   border-left: 3px solid rgba(224, 192, 120, 0.85);
-  background: rgba(199, 164, 91, 0.08);
+  background: var(--ly-gold-a08);
 }
 
 .ly-briefing-to-course {
@@ -8437,7 +8541,7 @@ a.ly-derived-name:hover {
   font-size: 0.88rem;
   line-height: 1.5;
   letter-spacing: 0.04em;
-  color: rgba(199, 164, 91, 0.92);
+  color: var(--ly-gold-a92);
   text-decoration: underline;
   text-underline-offset: 4px;
   cursor: pointer;
@@ -8462,8 +8566,8 @@ a.ly-derived-name:hover {
   margin: 16px 0 8px;
   padding: 16px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(201, 168, 76, 0.28);
-  background: linear-gradient(165deg, rgba(201, 168, 76, 0.1), rgba(8, 10, 16, 0.35));
+  border: 1px solid var(--ly-gold-a28);
+  background: linear-gradient(165deg, var(--ly-gold-a10), var(--ly-well-bg));
 }
 
 .ly-personalize-kicker {
@@ -8589,7 +8693,7 @@ a.ly-derived-name:hover {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ly-muted);
   font-size: 0.85rem;
 }
@@ -8630,12 +8734,12 @@ a.ly-derived-name:hover {
   gap: 10px;
   padding: 12px 14px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.34);
+  border: 1px solid var(--ly-gold-a34);
   background:
     linear-gradient(165deg, rgba(36, 42, 56, 0.98), rgba(18, 22, 32, 0.98));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent),
+    inset 0 0 0 1px var(--ly-inset);
 }
 
 .ly-personalize-soft-line {
@@ -8660,8 +8764,8 @@ a.ly-derived-name:hover {
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   color: rgba(212, 196, 160, 0.88);
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-gold-a08);
   font: inherit;
 }
 
@@ -8670,7 +8774,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-personalize-soft-tag.is-tap:active {
-  background: rgba(199, 164, 91, 0.2);
+  background: var(--ly-gold-a20);
 }
 
 .ly-ctx-blocks {
@@ -8688,7 +8792,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-ctx-block.is-focus {
-  border-color: rgba(199, 164, 91, 0.42);
+  border-color: var(--ly-gold-a42);
   background: rgba(16, 20, 30, 0.65);
 }
 
@@ -8706,7 +8810,7 @@ a.ly-derived-name:hover {
   font-size: 0.88rem;
   line-height: 1.55;
   outline: none;
-  caret-color: rgba(232, 200, 120, 0.95);
+  caret-color: var(--chart-star);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -8720,7 +8824,7 @@ a.ly-derived-name:hover {
 .ly-follow-ctx-fold {
   margin: 10px 0 0;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
+  border: 1px solid var(--ly-gold-a22);
   background: rgba(12, 16, 24, 0.55);
   padding: 0 12px 12px;
 }
@@ -8740,7 +8844,7 @@ a.ly-derived-name:hover {
 
 .ly-follow-ctx-fold > summary::before {
   content: '▸ ';
-  color: rgba(199, 164, 91, 0.7);
+  color: var(--ly-gold-a70);
 }
 
 .ly-follow-ctx-fold[open] > summary::before {
@@ -8753,7 +8857,7 @@ a.ly-derived-name:hover {
 
 .ly-follow-ask {
   background: rgba(22, 28, 38, 0.95) !important;
-  border-color: rgba(199, 164, 91, 0.28) !important;
+  border-color: var(--ly-gold-a28) !important;
   color: rgba(245, 232, 200, 0.92) !important;
 }
 
@@ -8765,9 +8869,9 @@ a.ly-derived-name:hover {
 
 .ly-briefing-to-notes {
   width: 100%;
-  border-color: rgba(199, 164, 91, 0.45);
+  border-color: var(--ly-gold-a45);
   color: var(--ly-gold);
-  background: rgba(199, 164, 91, 0.1);
+  background: var(--ly-gold-a10);
 }
 
 .ly-briefing-topic {
@@ -8842,7 +8946,7 @@ a.ly-derived-name:hover {
 
 .ly-briefing-layer.is-actions {
   border-color: rgba(224, 192, 120, 0.45);
-  background: rgba(199, 164, 91, 0.1);
+  background: var(--ly-gold-a10);
 }
 
 .ly-briefing-title {
@@ -8886,13 +8990,13 @@ a.ly-derived-name:hover {
 .ly-briefing-more {
   margin: 10px 0 4px;
   border-radius: 10px;
-  border: 1px dashed rgba(199, 164, 91, 0.28);
+  border: 1px dashed var(--ly-gold-a28);
   padding: 8px 12px;
 }
 
 .ly-briefing-more > summary {
   cursor: pointer;
-  color: rgba(199, 164, 91, 0.85);
+  color: var(--ly-gold-a85);
   font-size: 0.8rem;
 }
 
@@ -8926,7 +9030,7 @@ a.ly-derived-name:hover {
 
 .ly-final-loop-block.is-conclusion .ly-final-loop-body,
 .ly-final-loop-block.is-action .ly-final-loop-body {
-  color: rgba(232, 220, 190, 0.95);
+  color: var(--ly-highlight-ink);
 }
 
 .ly-final-basis {
@@ -8951,8 +9055,8 @@ a.ly-derived-name:hover {
 .ly-final-action-item {
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--panel-inset);
   font-size: 0.84rem;
   line-height: 1.5;
   color: var(--ly-mist);
@@ -8969,8 +9073,8 @@ a.ly-derived-name:hover {
 .ly-course-method {
   padding: 12px;
   border-radius: 12px;
-  background: rgba(199, 164, 91, 0.06);
-  border: 1px solid rgba(199, 164, 91, 0.14);
+  background: var(--ly-gold-a06);
+  border: 1px solid var(--ly-gold-a14);
 }
 
 .ly-course-method-head {
@@ -9008,17 +9112,17 @@ a.ly-derived-name:hover {
   z-index: 70;
   width: 34px;
   padding: 12px 5px;
-  border: 1px solid rgba(199, 164, 91, 0.35);
+  border: 1px solid var(--ly-gold-a35);
   border-right: none;
   border-radius: 10px 0 0 10px;
-  background: linear-gradient(180deg, rgba(36, 30, 18, 0.96), rgba(20, 22, 28, 0.96));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 96%, var(--gold-soft)), var(--ly-sheet-bg));
   color: var(--ly-gold);
   font-size: 0.62rem;
   line-height: 1.25;
   letter-spacing: 0.04em;
   text-align: center;
   cursor: pointer;
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--bg-deep) 35%, transparent);
 }
 
 /* 手机：右侧书签易被忽略/点不到，加大并沉到拇指区 */
@@ -9033,8 +9137,8 @@ a.ly-derived-name:hover {
     line-height: 1.3;
     z-index: 85;
     box-shadow:
-      -6px 0 22px rgba(0, 0, 0, 0.45),
-      0 0 0 1px rgba(199, 164, 91, 0.25);
+      var(--ly-shadow-sheet),
+      0 0 0 1px var(--ly-gold-a25);
   }
 
   .ly-course.is-drawer-open .ly-course-bookmark,
@@ -9048,8 +9152,8 @@ a.ly-derived-name:hover {
 .ly-course.is-drawer-open .ly-course-bookmark,
 .ly-learn-notes.is-drawer-open .ly-course-bookmark {
   right: min(92vw, 400px);
-  border-color: rgba(199, 164, 91, 0.55);
-  background: linear-gradient(180deg, rgba(48, 40, 22, 0.98), rgba(24, 26, 32, 0.98));
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-bookmark-bg-active);
 }
 
 .ly-course-nav {
@@ -9066,8 +9170,8 @@ a.ly-derived-name:hover {
 
 .ly-course-nav-btn {
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(20, 22, 28, 0.92);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-sheet-bg);
   color: var(--ly-mist);
   font-size: 0.78rem;
   padding: 10px 12px;
@@ -9127,7 +9231,7 @@ a.ly-derived-name:hover {
 
 .ly-course-nav-next {
   justify-self: end;
-  border-color: rgba(199, 164, 91, 0.45);
+  border-color: var(--ly-gold-a45);
   color: var(--ly-gold);
 }
 
@@ -9151,7 +9255,7 @@ a.ly-derived-name:hover {
     90deg,
     transparent 0%,
     transparent calc(100% - min(92vw, 400px)),
-    rgba(0, 0, 0, 0.28) calc(100% - min(92vw, 400px))
+    var(--ly-inset-faint) calc(100% - min(92vw, 400px))
   );
   pointer-events: none;
 }
@@ -9195,11 +9299,11 @@ a.ly-derived-name:hover {
   gap: 0;
   margin: 0 0 14px;
   padding: 0;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.16);
+  border-bottom: 1px solid var(--ly-gold-a16);
   background: linear-gradient(
     180deg,
-    rgba(14, 12, 10, 0.97) 55%,
-    rgba(14, 12, 10, 0.78) 100%
+    var(--ly-sheet-bg) 55%,
+    color-mix(in srgb, var(--surface-1) 78%, var(--bg-deep)) 100%
   );
   backdrop-filter: blur(6px);
 }
@@ -9235,7 +9339,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-xiang-rail-item:hover {
-  color: rgba(232, 220, 190, 0.88);
+  color: var(--ly-highlight-ink);
 }
 
 .ly-xiang-rail-item.is-active {
@@ -9249,7 +9353,7 @@ a.ly-derived-name:hover {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(199, 164, 91, 0.95),
+    var(--ly-gold-a95),
     transparent
   );
 }
@@ -9331,8 +9435,8 @@ a.ly-derived-name:hover {
   margin-top: 8px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-gold-a06);
 }
 
 .ly-ask-answer-text {
@@ -9421,8 +9525,8 @@ a.ly-derived-name:hover {
   margin-bottom: 14px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.14);
-  background: rgba(8, 9, 13, 0.4);
+  border: 1px solid var(--ly-gold-a14);
+  background: var(--panel-inset);
 }
 
 .ly-course-classic p {
@@ -9437,7 +9541,7 @@ a.ly-derived-name:hover {
   margin-right: 6px;
   padding: 1px 6px;
   border-radius: 4px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   color: var(--ly-gold);
   font-size: 0.68rem;
 }
@@ -9462,8 +9566,8 @@ a.ly-derived-name:hover {
 .ly-course-note-field textarea {
   font-family: "Literata", "Noto Serif SC", "Songti SC", serif;
   line-height: 1.55;
-  background: rgba(8, 9, 13, 0.35);
-  border-color: rgba(199, 164, 91, 0.22);
+  background: var(--panel-inset);
+  border-color: var(--ly-gold-a22);
 }
 
 .ly-ch-bridge {
@@ -9489,8 +9593,8 @@ a.ly-derived-name:hover {
 .ly-info-card {
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(20, 22, 28, 0.72);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-mid);
 }
 
 .ly-info-card > summary {
@@ -9524,7 +9628,7 @@ a.ly-derived-name:hover {
   gap: 12px;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
 }
 
 .ly-teach-ask h4 {
@@ -9536,8 +9640,8 @@ a.ly-derived-name:hover {
 .ly-teach-classic-fold {
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(20, 22, 28, 0.65);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--ly-panel-bg-soft);
 }
 
 .ly-teach-classic-fold > summary {
@@ -9572,9 +9676,9 @@ a.ly-derived-name:hover {
   margin: 14px 0 0;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background:
-    linear-gradient(145deg, rgba(199, 164, 91, 0.1), rgba(20, 22, 28, 0.55));
+    linear-gradient(145deg, var(--ly-gold-a10), var(--ly-panel-bg-soft));
 }
 
 .ly-q-card-label {
@@ -9655,8 +9759,8 @@ a.ly-derived-name:hover {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.12);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--ly-gold-a12);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 
 .ly-story-gua-name {
@@ -9689,8 +9793,8 @@ a.ly-derived-name:hover {
 .ly-story-classic {
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(20, 22, 28, 0.55);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--ly-panel-bg-soft);
   font-size: 0.8rem;
   color: var(--ly-muted);
 }
@@ -9715,8 +9819,8 @@ a.ly-derived-name:hover {
 .ly-action-card {
   padding: 14px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(8, 9, 13, 0.4);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--panel-inset);
 }
 
 .ly-action-card-label {
@@ -9741,13 +9845,13 @@ a.ly-derived-name:hover {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(199, 164, 91, 0.45);
-  background: rgba(20, 22, 28, 0.92);
+  border: 1px solid var(--ly-gold-a45);
+  background: var(--ly-sheet-bg);
   color: var(--ly-gold);
   font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--ly-shadow-drop);
 }
 
 .ly-help-sheet[hidden] {
@@ -9839,8 +9943,8 @@ a.ly-derived-name:hover {
   margin: 16px 0;
   padding: 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(20, 22, 28, 0.65);
+  border: 1px solid var(--ly-gold-a18);
+  background: var(--ly-panel-bg-soft);
 }
 
 .ly-faq-panel h3 {
@@ -9850,7 +9954,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-faq-item {
-  border-top: 1px solid rgba(199, 164, 91, 0.12);
+  border-top: 1px solid var(--ly-gold-a12);
   padding: 8px 0;
 }
 
@@ -9863,7 +9967,7 @@ a.ly-derived-name:hover {
   margin: 0;
   padding: 12px 0;
   border: none;
-  border-top: 1px solid var(--line-soft, rgba(199, 164, 91, 0.12));
+  border-top: 1px solid var(--line-soft, var(--ly-gold-a12));
   background: transparent;
   color: inherit;
   font: inherit;
@@ -9904,7 +10008,7 @@ a.ly-derived-name:hover {
   margin-top: 8px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(8, 9, 13, 0.45);
+  background: color-mix(in srgb, var(--bg-deep) 45%, var(--surface-1));
 }
 
 .ly-faq-body p {
@@ -9960,8 +10064,8 @@ a.ly-derived-name:hover {
   gap: 4px;
   padding: 4px 9px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(199, 164, 91, 0.08);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-gold-a08);
   font-size: 0.72rem;
   line-height: 1.35;
   color: rgba(235, 225, 200, 0.92);
@@ -9994,8 +10098,8 @@ a.ly-derived-name:hover {
   font-size: 0.7rem;
   font-weight: 650;
   color: var(--ly-gold);
-  background: rgba(199, 164, 91, 0.1);
-  border: 1px solid rgba(199, 164, 91, 0.2);
+  background: var(--ly-gold-a10);
+  border: 1px solid var(--ly-gold-a20);
   vertical-align: baseline;
 }
 
@@ -10009,8 +10113,8 @@ a.ly-derived-name:hover {
   margin: 0;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ly-gold-a18);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 .ly-domain-card-head {
@@ -10075,7 +10179,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-note-tag {
-  border: 1px solid rgba(199, 164, 91, 0.25);
+  border: 1px solid var(--ly-gold-a25);
   background: transparent;
   color: var(--ly-muted);
   font-size: 0.72rem;
@@ -10085,8 +10189,8 @@ a.ly-derived-name:hover {
 }
 
 .ly-note-tag.is-on {
-  border-color: rgba(199, 164, 91, 0.55);
-  background: rgba(199, 164, 91, 0.14);
+  border-color: var(--ly-gold-a55);
+  background: var(--ly-gold-a14);
   color: var(--ly-gold);
 }
 
@@ -10168,17 +10272,17 @@ a.ly-derived-name:hover {
   margin: 0 0 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background:
-    linear-gradient(135deg, rgba(62, 48, 28, 0.55), rgba(22, 20, 16, 0.72)),
+    var(--ly-plaque-bg),
     repeating-linear-gradient(
       -12deg,
       transparent,
       transparent 6px,
-      rgba(199, 164, 91, 0.03) 6px,
-      rgba(199, 164, 91, 0.03) 7px
+      var(--ly-gold-a03) 6px,
+      var(--ly-gold-a03) 7px
     );
-  box-shadow: inset 0 1px 0 rgba(255, 230, 180, 0.06);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .ly-time-plaque.is-compact {
@@ -10215,21 +10319,21 @@ a.ly-derived-name:hover {
   gap: 1px;
   padding: 5px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.32);
-  background: rgba(12, 10, 8, 0.45);
+  border: 1px solid var(--ly-gold-a32);
+  background: var(--ly-well-bg);
   font-size: 0.92rem;
   line-height: 1.2;
 }
 
 .ly-time-stem {
   font-style: normal;
-  color: #e8e0d0;
+  color: var(--ink);
   font-weight: 600;
 }
 
 .ly-time-branch {
   font-weight: 700;
-  color: #c45c48;
+  color: var(--ly-change);
 }
 
 .ly-time-unit {
@@ -10240,7 +10344,7 @@ a.ly-derived-name:hover {
 }
 
 .ly-time-sep {
-  color: rgba(199, 164, 91, 0.45);
+  color: var(--ly-gold-a45);
   font-size: 0.85rem;
   padding: 0 2px;
 }
@@ -10264,8 +10368,8 @@ a.ly-derived-name:hover {
 }
 
 .ly-time-token.is-accent {
-  border-color: rgba(199, 164, 91, 0.4);
-  background: rgba(199, 164, 91, 0.1);
+  border-color: var(--ly-gold-a40);
+  background: var(--ly-gold-a10);
 }
 
 .ly-time-hint {
@@ -10282,8 +10386,8 @@ a.ly-derived-name:hover {
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--panel-inset);
 }
 
 .ly-date-chong-time {
@@ -10345,8 +10449,8 @@ a.ly-derived-name:hover {
   min-width: 0;
   padding: 10px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a18);
+  background: color-mix(in srgb, var(--surface-1) 72%, transparent);
 }
 
 .ly-dress-plate.is-empty {
@@ -10373,8 +10477,8 @@ a.ly-derived-name:hover {
   margin: 0 0 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-gold-a06);
 }
 
 .ly-dress-archive .ly-yong-status {
@@ -10385,8 +10489,8 @@ a.ly-derived-name:hover {
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(8, 9, 13, 0.28);
+  border: 1px solid var(--ly-gold-a16);
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
 }
 
 .ly-dress-energy .ly-spirit-nar {
@@ -10483,7 +10587,7 @@ a.ly-derived-name:hover {
   height: 28px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ly-muted);
   font-size: 1.2rem;
   line-height: 1;
@@ -10533,8 +10637,8 @@ body.ly-yao-modal-open {
   font-size: 0.72rem;
   font-weight: 650;
   color: var(--ly-gold);
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--panel-inset);
 }
 
 .ly-yong-status-meta {
@@ -10553,7 +10657,7 @@ body.ly-yao-modal-open {
 .ly-yong-why {
   margin: 10px 0 0;
   padding-top: 8px;
-  border-top: 1px solid rgba(199, 164, 91, 0.16);
+  border-top: 1px solid var(--ly-gold-a16);
 }
 
 .ly-yong-why-lead {
@@ -10575,7 +10679,7 @@ body.ly-yao-modal-open {
 .ly-yong-why-table th,
 .ly-yong-why-table td {
   padding: 6px 8px;
-  border: 1px solid rgba(199, 164, 91, 0.14);
+  border: 1px solid var(--ly-gold-a14);
   text-align: left;
   vertical-align: top;
 }
@@ -10583,7 +10687,7 @@ body.ly-yao-modal-open {
 .ly-yong-why-table thead th {
   color: var(--ly-muted);
   font-weight: 600;
-  background: rgba(8, 9, 13, 0.28);
+  background: color-mix(in srgb, var(--bg-deep) 28%, var(--surface-2));
 }
 
 .ly-yong-why-table tbody th {
@@ -10687,7 +10791,7 @@ body.ly-yao-modal-open {
 .ly-dress-table th,
 .ly-dress-table td {
   padding: 8px 6px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.12);
+  border-bottom: 1px solid var(--ly-gold-a12);
   text-align: left;
   white-space: nowrap;
 }
@@ -10707,7 +10811,7 @@ body.ly-yao-modal-open {
 
 .ly-dress-row:hover,
 .ly-dress-row.is-open {
-  background: rgba(199, 164, 91, 0.1);
+  background: var(--ly-gold-a10);
 }
 
 .ly-yao-card-slot {
@@ -10718,8 +10822,8 @@ body.ly-yao-modal-open {
   margin-top: 8px;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(20, 22, 28, 0.85);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-panel-bg-strong);
 }
 
 .ly-yao-card header {
@@ -10748,8 +10852,8 @@ body.ly-yao-modal-open {
 .ly-yao-card-relate {
   padding: 6px 8px;
   border-radius: 8px;
-  background: rgba(199, 164, 91, 0.08);
-  border-left: 3px solid rgba(199, 164, 91, 0.4);
+  background: var(--ly-gold-a08);
+  border-left: 3px solid var(--ly-gold-a40);
 }
 
 .ly-yao-card p {
@@ -10761,7 +10865,7 @@ body.ly-yao-modal-open {
 
 .ly-yao-card-yong {
   color: var(--ly-gold) !important;
-  border-top: 1px solid rgba(199, 164, 91, 0.16);
+  border-top: 1px solid var(--ly-gold-a16);
   padding-top: 8px;
   margin-top: 4px !important;
 }
@@ -10769,7 +10873,7 @@ body.ly-yao-modal-open {
 .ly-yao-card-sec {
   margin: 12px 0 0;
   padding-top: 10px;
-  border-top: 1px solid rgba(199, 164, 91, 0.16);
+  border-top: 1px solid var(--ly-gold-a16);
 }
 
 .ly-yao-card-sec-title {
@@ -10843,15 +10947,15 @@ body.ly-yao-modal-open {
 }
 
 .ly-sk-node circle {
-  fill: rgba(20, 22, 28, 0.95);
-  stroke: rgba(199, 164, 91, 0.45);
+  fill: color-mix(in srgb, var(--surface-2) 95%, var(--bg-deep));
+  stroke: var(--ly-gold-a45);
   stroke-width: 1.5;
 }
 
 .ly-sk-node.is-yong circle {
   stroke: #c7a45b;
   stroke-width: 2.2;
-  fill: rgba(199, 164, 91, 0.18);
+  fill: var(--ly-gold-a18);
 }
 
 .ly-sk-node.is-yuan circle {
@@ -10863,12 +10967,12 @@ body.ly-yao-modal-open {
 }
 
 .ly-sk-node.is-shi circle {
-  stroke: rgba(199, 164, 91, 0.35);
+  stroke: var(--ly-gold-a35);
 }
 
 .ly-sk-node.is-open circle {
   stroke-width: 2.5;
-  filter: drop-shadow(0 0 4px rgba(199, 164, 91, 0.55));
+  filter: drop-shadow(0 0 4px var(--ly-gold-a55));
 }
 
 .ly-sk-role {
@@ -10897,8 +11001,8 @@ body.ly-yao-modal-open {
   margin: 12px 0 4px;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(8, 9, 13, 0.45);
+  border: 1px solid var(--ly-gold-a20);
+  background: color-mix(in srgb, var(--bg-deep) 45%, var(--surface-1));
 }
 
 .ly-sk-course-tease {
@@ -10912,8 +11016,8 @@ body.ly-yao-modal-open {
   margin: 10px 0 6px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(199, 164, 91, 0.07);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--ly-gold-a07);
   font-size: 0.88rem;
   line-height: 1.55;
   color: var(--ly-mist);
@@ -10931,8 +11035,8 @@ body.ly-yao-modal-open {
 }
 
 @keyframes ly-sk-shi-pulse {
-  0%, 100% { filter: drop-shadow(0 0 0 rgba(199, 164, 91, 0)); }
-  50% { filter: drop-shadow(0 0 8px rgba(199, 164, 91, 0.85)); }
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 8px var(--ly-gold-a85)); }
 }
 
 .ly-sk-course-svg .ly-sk-edge {
@@ -11015,8 +11119,8 @@ body.ly-yao-modal-open {
   margin: 14px 0 10px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(8, 9, 13, 0.4);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--panel-inset);
 }
 
 .ly-classic-head {
@@ -11034,7 +11138,7 @@ body.ly-yao-modal-open {
 }
 
 .ly-classic-fav {
-  border: 1px solid rgba(199, 164, 91, 0.3);
+  border: 1px solid var(--ly-gold-a30);
   background: transparent;
   color: var(--ly-gold);
   font-size: 0.72rem;
@@ -11062,7 +11166,7 @@ body.ly-yao-modal-open {
   padding: 10px;
   border-radius: 10px;
   border: 1px solid rgba(245, 239, 230, 0.12);
-  background: rgba(8, 8, 8, 0.28);
+  background: var(--ly-well-bg-soft);
 }
 
 .ly-classic-tag {
@@ -11074,13 +11178,13 @@ body.ly-yao-modal-open {
   font-weight: 600;
   letter-spacing: 0.04em;
   color: #a0a0a0;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   vertical-align: 1px;
 }
 
 .ly-classic-tag.is-bai {
   color: var(--ly-mist);
-  background: rgba(199, 164, 91, 0.22);
+  background: var(--ly-gold-a22);
 }
 
 .ly-classic-tag.is-muted {
@@ -11125,7 +11229,7 @@ body.ly-yao-modal-open {
   margin: 0 0 10px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(8, 9, 13, 0.35);
+  background: var(--panel-inset);
 }
 
 .ly-classic-line.is-focus {
@@ -11193,8 +11297,8 @@ body.ly-yao-modal-open {
 .ly-classic-lib-card {
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(20, 22, 28, 0.65);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--ly-panel-bg-soft);
 }
 
 .ly-classic-lib-card header {
@@ -11235,8 +11339,8 @@ body.ly-yao-modal-open {
 /* Lab emblem 六爻 */
 
 .mystic-emblem-hex .mystic-emblem-ring {
-  border-color: rgba(199, 164, 91, 0.45);
-  box-shadow: 0 0 18px rgba(199, 164, 91, 0.15);
+  border-color: var(--ly-gold-a45);
+  box-shadow: 0 0 18px var(--ly-gold-a15);
 }
 
 .mystic-emblem-hex .mystic-emblem-aura {
@@ -11257,8 +11361,15 @@ body.ly-yao-modal-open {
   margin: 0 0 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(18, 20, 26, 0.72);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-panel-bg-mid);
+}
+
+.ly-teach-fold .ly-quick-board {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .ly-quick-board.is-tables-only {
@@ -11286,7 +11397,7 @@ body.ly-yao-modal-open {
 .ly-qb-table th,
 .ly-qb-table td {
   padding: 4px 5px;
-  border-bottom: 1px solid rgba(199, 164, 91, 0.12);
+  border-bottom: 1px solid var(--ly-gold-a12);
   text-align: left;
   color: var(--ly-mist);
 }
@@ -11303,7 +11414,7 @@ body.ly-yao-modal-open {
 }
 
 .ly-qb-mark {
-  color: #c45c48;
+  color: var(--ly-change);
   font-weight: 600;
 }
 
@@ -11334,12 +11445,12 @@ body.ly-yao-modal-open {
 .ly-quick-cats li {
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.14);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ly-gold-a14);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 .ly-quick-cats li.is-hot {
-  border-color: rgba(199, 164, 91, 0.35);
+  border-color: var(--ly-gold-a35);
 }
 
 .ly-quick-cats strong {
@@ -11359,7 +11470,7 @@ body.ly-yao-modal-open {
   margin-bottom: 8px;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.12);
+  border: 1px solid var(--ly-gold-a12);
 }
 
 .ly-quick-classic-item summary {
@@ -11420,8 +11531,8 @@ body.ly-yao-modal-open {
 
 .ly-lesson-step {
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(8, 9, 13, 0.35);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--panel-inset);
   overflow: hidden;
 }
 
@@ -11484,8 +11595,8 @@ body.ly-yao-modal-open {
 .ly-lesson-action {
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-gold-a06);
 }
 
 .ly-lesson-action-label {
@@ -11533,14 +11644,14 @@ body.ly-yao-modal-open {
   border-left: 3px solid var(--ly-gold);
   font-size: 0.85rem;
   color: var(--ly-mist);
-  background: rgba(199, 164, 91, 0.06);
+  background: var(--ly-gold-a06);
 }
 
 .ly-bian-quiz {
   margin-top: 12px;
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
+  border: 1px solid var(--ly-gold-a18);
 }
 
 .ly-bian-opts {
@@ -11553,8 +11664,8 @@ body.ly-yao-modal-open {
   text-align: left;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
-  background: rgba(20, 22, 28, 0.8);
+  border: 1px solid var(--ly-gold-a22);
+  background: var(--ly-panel-bg-strong);
   color: var(--ly-mist);
   font-size: 0.8rem;
   line-height: 1.4;
@@ -11562,7 +11673,7 @@ body.ly-yao-modal-open {
 }
 
 .ly-bian-opt:hover:not(:disabled) {
-  border-color: rgba(199, 164, 91, 0.45);
+  border-color: var(--ly-gold-a45);
 }
 
 .ly-bian-opt.is-right {
@@ -11591,7 +11702,7 @@ body.ly-yao-modal-open {
   font-size: 0.78rem;
   color: var(--ly-gold);
   background: transparent;
-  border: 1px solid rgba(199, 164, 91, 0.3);
+  border: 1px solid var(--ly-gold-a30);
   border-radius: 6px;
   padding: 4px 8px;
   cursor: pointer;
@@ -11601,8 +11712,8 @@ body.ly-yao-modal-open {
   margin: 10px 0 14px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(199, 164, 91, 0.05);
+  border: 1px solid var(--ly-gold-a16);
+  background: var(--ly-gold-a05);
 }
 
 .ly-sk-why {
@@ -11616,7 +11727,7 @@ body.ly-yao-modal-open {
   margin: 12px 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px dashed rgba(199, 164, 91, 0.25);
+  border: 1px dashed var(--ly-gold-a25);
 }
 
 .ly-classic-triple {
@@ -11634,8 +11745,8 @@ body.ly-yao-modal-open {
 /* —— 点爻问号 / 能量聚焦 / 用神授课 —— */
 
 .ly-yao-ask-bg {
-  fill: rgba(20, 22, 28, 0.9);
-  stroke: rgba(199, 164, 91, 0.55);
+  fill: color-mix(in srgb, var(--surface-2) 90%, var(--bg-deep));
+  stroke: var(--ly-gold-a55);
   stroke-width: 1.2;
 }
 
@@ -11648,15 +11759,15 @@ body.ly-yao-modal-open {
 
 .ly-yao-ask:hover .ly-yao-ask-bg,
 .ly-yao-ask:focus .ly-yao-ask-bg {
-  stroke: rgba(199, 164, 91, 0.95);
-  fill: rgba(199, 164, 91, 0.15);
+  stroke: var(--ly-gold-a95);
+  fill: var(--ly-gold-a15);
 }
 
 .ly-yong-glow {
   fill: none;
-  stroke: rgba(199, 164, 91, 0.55);
+  stroke: var(--ly-gold-a55);
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 4px rgba(199, 164, 91, 0.45));
+  filter: drop-shadow(0 0 4px var(--ly-gold-a45));
 }
 
 .ly-yao-highlight .ly-yao-yang {
@@ -11701,10 +11812,10 @@ body.ly-yao-modal-open {
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.45);
+  border: 1px solid var(--ly-gold-a45);
   border-left-width: 3px;
   background: rgba(16, 14, 12, 0.97);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--ly-shadow-drop);
   pointer-events: auto;
 }
 
@@ -11746,7 +11857,7 @@ body.ly-yao-modal-open {
   font-size: 0.66rem;
   padding: 2px 6px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.35);
+  border: 1px solid var(--ly-gold-a35);
   color: var(--ly-gold);
 }
 
@@ -11802,8 +11913,8 @@ body.ly-yao-modal-open {
 }
 
 .ly-yao-row.is-tip-open .ly-yao-ask-bg {
-  fill: rgba(199, 164, 91, 0.35);
-  stroke: rgba(199, 164, 91, 0.85);
+  fill: var(--ly-gold-a35);
+  stroke: var(--ly-gold-a85);
 }
 
 /* 本卦 / 变卦同高，避免带问号的本卦因 viewBox 更宽而被压扁 */
@@ -11833,7 +11944,7 @@ body.ly-yao-modal-open {
 .ly-yao-ask-card {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  border: 1px solid var(--ly-gold-a28);
   background: rgba(28, 24, 18, 0.92);
   font-size: 0.82rem;
   line-height: 1.5;
@@ -11850,8 +11961,8 @@ body.ly-yao-modal-open {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.2);
-  background: rgba(199, 164, 91, 0.06);
+  border: 1px solid var(--ly-gold-a20);
+  background: var(--ly-gold-a06);
   font-size: 0.84rem;
   color: var(--ly-mist);
   line-height: 1.5;
@@ -11882,8 +11993,8 @@ body.ly-yao-modal-open {
 .ly-energy-focus-list li {
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.14);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ly-gold-a14);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 .ly-energy-focus-list strong {
@@ -11913,8 +12024,8 @@ body.ly-yao-modal-open {
   margin: 0 0 8px;
   padding: 0;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ly-gold-a16);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
   overflow: hidden;
 }
 
@@ -11954,14 +12065,14 @@ body.ly-yao-modal-open {
   margin: 8px 0 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px dashed rgba(199, 164, 91, 0.25);
+  border: 1px dashed var(--ly-gold-a25);
 }
 
 .ly-classic-plate-intro {
   margin: 0 0 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(199, 164, 91, 0.22);
+  border: 1px solid var(--ly-gold-a22);
   background:
     linear-gradient(180deg, rgba(58, 48, 32, 0.35), rgba(28, 24, 18, 0.55));
 }
@@ -11996,7 +12107,7 @@ body.ly-yao-modal-open {
   margin: 12px 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(199, 164, 91, 0.18);
+  border: 1px solid var(--ly-gold-a18);
   background: rgba(18, 16, 12, 0.55);
 }
 
@@ -12025,7 +12136,7 @@ body.ly-yao-modal-open {
 .ly-infer-confluence {
   margin: 8px 0 0;
   padding-top: 8px;
-  border-top: 1px dashed rgba(199, 164, 91, 0.2);
+  border-top: 1px dashed var(--ly-gold-a20);
   font-size: 0.84rem;
   line-height: 1.5;
   color: var(--ly-mist);
@@ -12046,16 +12157,16 @@ body.ly-yao-modal-open {
 .ly-qin-dict-tag {
   padding: 5px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(199, 164, 91, 0.28);
-  background: rgba(12, 10, 8, 0.4);
+  border: 1px solid var(--ly-gold-a28);
+  background: var(--ly-well-bg);
   color: var(--ly-mist);
   font-size: 0.75rem;
   cursor: pointer;
 }
 
 .ly-qin-dict-tag[aria-pressed='true'] {
-  border-color: rgba(199, 164, 91, 0.65);
-  background: rgba(199, 164, 91, 0.14);
+  border-color: var(--ly-gold-a65);
+  background: var(--ly-gold-a14);
   color: var(--ly-gold);
 }
 
@@ -12063,8 +12174,8 @@ body.ly-yao-modal-open {
   margin-top: 10px;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid rgba(199, 164, 91, 0.16);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ly-gold-a16);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
   font-size: 0.82rem;
   line-height: 1.5;
   color: var(--ly-mist);
@@ -12096,7 +12207,7 @@ body.ly-yao-modal-open {
   align-items: start;
   padding: 6px 8px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.16);
+  background: var(--ly-inset-faint);
 }
 
 .ly-qin-facet dt {
@@ -12139,7 +12250,7 @@ body.ly-yao-modal-open {
 
 .ly-yao-inline-tip .ly-qin-facet,
 .ly-yao-card .ly-qin-facet {
-  background: rgba(199, 164, 91, 0.06);
+  background: var(--ly-gold-a06);
 }
 
 
@@ -12174,7 +12285,7 @@ body.ly-yao-modal-open {
 
 .ly-swipe-ask.is-swiped {
   /* 给操作条留空：内容略左移观感 */
-  box-shadow: inset -120px 0 0 rgba(0, 0, 0, 0.12);
+  box-shadow: inset -120px 0 0 var(--ly-inset-faint);
 }
 
 .ly-swipe-ask-btn {
@@ -12437,7 +12548,7 @@ html.thread-peek-open .ly-ai-side-fab {
 .ly-personalize-field em {
   font-style: normal;
   font-size: 0.72rem;
-  color: rgba(201, 168, 76, 0.55);
+  color: var(--ly-gold-a55);
   margin-left: 4px;
 }
 
@@ -12482,7 +12593,7 @@ html.thread-peek-open .ly-ai-side-fab {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--ly-scrim);
   opacity: 0;
   transition: opacity 0.22s ease;
   cursor: pointer;
@@ -12505,7 +12616,7 @@ html.thread-peek-open .ly-ai-side-fab {
   border: 1px solid var(--line, rgba(201, 168, 108, 0.2));
   border-bottom: 0;
   color: var(--ink, #f5efe6);
-  box-shadow: var(--shadow, 0 -16px 40px rgba(0, 0, 0, 0.45));
+  box-shadow: var(--shadow, 0 -16px 40px color-mix(in srgb, var(--bg-deep) 45%, transparent));
   transform: translateY(110%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden auto;
@@ -12539,7 +12650,7 @@ html.thread-peek-open .ly-ai-side-fab {
 .ly-follow-presets::-webkit-scrollbar-thumb,
 .ly-personalize-sheet::-webkit-scrollbar-thumb,
 .ly-personalize-context-one::-webkit-scrollbar-thumb {
-  background: rgba(199, 164, 91, 0.32);
+  background: var(--ly-gold-a32);
   border-radius: 999px;
   border: 1px solid transparent;
   background-clip: padding-box;
@@ -12551,7 +12662,7 @@ html.thread-peek-open .ly-ai-side-fab {
 .ly-follow-presets::-webkit-scrollbar-thumb:hover,
 .ly-personalize-sheet::-webkit-scrollbar-thumb:hover,
 .ly-personalize-context-one::-webkit-scrollbar-thumb:hover {
-  background: rgba(199, 164, 91, 0.55);
+  background: var(--ly-gold-a55);
 }
 
 .ly-follow-chat-sheet::-webkit-scrollbar-button,
@@ -12608,12 +12719,12 @@ html.thread-peek-open .ly-ai-side-fab {
   margin-top: 14px;
   padding: 14px 14px 16px;
   border-radius: 14px;
-  background: rgba(199, 164, 91, 0.08);
-  border: 1px solid rgba(199, 164, 91, 0.28);
+  background: var(--ly-gold-a08);
+  border: 1px solid var(--ly-gold-a28);
   max-height: min(42vh, 420px);
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
+  scrollbar-color: var(--ly-gold-a35) transparent;
 }
 
 .ly-follow-deep-body {
@@ -12627,7 +12738,7 @@ html.thread-peek-open .ly-ai-side-fab {
 .ly-follow-messages[data-follow-qa]:not([hidden]) {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .ly-follow-seed-ctx {
@@ -12649,7 +12760,7 @@ html.thread-peek-open .ly-ai-side-fab {
   max-height: 28vh;
   overflow: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
+  scrollbar-color: var(--ly-gold-a35) transparent;
 }
 
 .ly-follow-preset {
@@ -12679,7 +12790,7 @@ html.thread-peek-open .ly-ai-side-fab {
   flex-direction: column;
   gap: 10px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(199, 164, 91, 0.35) transparent;
+  scrollbar-color: var(--ly-gold-a35) transparent;
 }
 
 .ly-follow-bubble {
@@ -12858,7 +12969,10 @@ html[data-theme='moon'] .ly-bagua-page,
 html[data-theme='moon'] .ly-concepts-page,
 html[data-theme='moon'] .ly-classic-page,
 html[data-theme='moon'] .ly-learn-page,
-html[data-theme='moon'] .ly-learn-board-page {
+html[data-theme='moon'] .ly-learn-board-page,
+html[data-theme='moon'] .ly-reading-page,
+html[data-theme='moon'] .ly-teach-page,
+html[data-theme='moon'] .ly-replay {
   color: var(--ink);
 }
 
@@ -13007,7 +13121,16 @@ html[data-theme='moon'] .ly-step-yao-card,
 html[data-theme='moon'] .ly-power-item,
 html[data-theme='moon'] .ly-yao-modal-panel,
 html[data-theme='moon'] .ly-personalize-sheet,
-html[data-theme='moon'] .ly-help-sheet-panel {
+html[data-theme='moon'] .ly-help-sheet-panel,
+html[data-theme='moon'] .ly-compendium,
+html[data-theme='moon'] .ly-compendium-panel,
+html[data-theme='moon'] .ly-gua-switch-tabs,
+html[data-theme='moon'] .ly-guide-pane,
+html[data-theme='moon'] .ly-guide-snippet-related,
+html[data-theme='moon'] .ly-course-drawer-panel,
+html[data-theme='moon'] .ly-time-plaque,
+html[data-theme='moon'] .ly-quick-board,
+html[data-theme='moon'] .ly-dress-plate {
   background: var(--surface-1);
   border-color: var(--line);
   color: var(--ink);

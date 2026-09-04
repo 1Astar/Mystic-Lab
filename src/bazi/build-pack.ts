@@ -8,6 +8,8 @@ import { buildBaziPortrait } from './portrait-template.ts';
 import { pickActions } from '../mystic-engine/actions.ts';
 import { resolveUserContext } from '../mystic-engine/context.ts';
 import { detectIntents } from '../mystic-engine/intent.ts';
+import { buildPlainDirectAnswer } from '../mystic-engine/instant-answer.ts';
+import { recordQuestionScene } from '../mystic-engine/scene-library.ts';
 import type {
   OfflineAnswerPack,
   SceneAction,
@@ -91,6 +93,19 @@ export function buildBaziAnswerPack(
     actionBody: weekActions[0]?.body ?? breakthrough.body,
   });
 
+  const directAnswer = buildPlainDirectAnswer(q, { intentId: primaryIntent });
+  const verdictHeadline = directAnswer.trim() || portrait.keyword;
+  if (directAnswer.trim()) {
+    script.headline = directAnswer.trim();
+  }
+
+  recordQuestionScene({
+    system: 'bazi',
+    question: q,
+    intentId: primaryIntent,
+    directAnswer: directAnswer.trim() || script.headline,
+  });
+
   return {
     intents,
     answers,
@@ -100,7 +115,7 @@ export function buildBaziAnswerPack(
     boardExpand: boardExpandText(input.chart),
     contextUsed: Boolean(ctx),
     verdict: {
-      headline: portrait.keyword,
+      headline: verdictHeadline,
       parse: [
         `性格：${portrait.personality}`,
         `事业：${portrait.career}`,
@@ -118,5 +133,6 @@ export function buildBaziAnswerPack(
         : '气场够用时，更怕空转与自我鞭打。允许自己停一拍对齐，再加速——地图在，路要你走。',
     coreMetaphor: `核心隐喻：出生密码像一张「${portrait.themes[0]}」的底图，行动写在上面。`,
     script,
+    directAnswer: directAnswer.trim() || undefined,
   };
 }

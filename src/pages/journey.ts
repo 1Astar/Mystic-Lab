@@ -110,7 +110,7 @@ export function renderJourney(root: HTMLElement): void {
   const header = document.createElement('header');
   header.innerHTML = `
     <h1 class="page-title">我的旅程</h1>
-    <p class="page-subtitle">各体系占问与手札 · 收藏 · 进度 · 笔记</p>
+    <p class="page-subtitle">记录备份和恢复</p>
   `;
 
   const profileSnap = getLabProfileSnapshot();

@@ -5,6 +5,11 @@
 import type { IntentId } from './types.ts';
 import type { BoardSignals, Phenomenon } from './board-signals.ts';
 import { allPhenomena, paceLabel } from './board-signals.ts';
+import {
+  buildHumanTruthFromFacts,
+  routeQuestion,
+  type QuestionRoute,
+} from './instant-answer.ts';
 
 export type FactRule = {
   id: string;
@@ -135,8 +140,21 @@ function closingLine(s: BoardSignals): string {
   return `所以：本周只用一件低成本事去验证，有结果再加码。`;
 }
 
+export type TruthFromFactsOpts = {
+  question?: string;
+  route?: QuestionRoute;
+};
+
 /** 组装真相段：盘面 + 用神 + 最多 2 条加码事实 + 收束（不复读问题） */
-export function buildTruthFromFacts(s: BoardSignals): string {
+export function buildTruthFromFacts(
+  s: BoardSignals,
+  opts?: TruthFromFactsOpts,
+): string {
+  if (opts?.question) {
+    const route = opts.route ?? routeQuestion(opts.question, s.intentId);
+    const human = buildHumanTruthFromFacts(s, opts.question, route);
+    if (human) return human;
+  }
   const fired = ANALYSIS_FACTS.filter(
     (r) => intentMatches(r, s.intentId) && allPhenomena(s, r.when),
   ).sort((a, b) => b.priority - a.priority);

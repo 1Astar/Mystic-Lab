@@ -172,7 +172,8 @@ export function buildReadingResult(
   const background = options?.background?.trim() || undefined;
   const readings = cards.map((c) => buildCardReading(c, question, spreadType, background));
   const names = readings.map((c) => c.cardName).join('、');
-  const questionThread = buildQuestionThread(readings, question, 'mock') ?? undefined;
+  const questionThread =
+    buildQuestionThread(readings, question, 'mock', { spreadType }) ?? undefined;
 
   const summary =
     questionThread?.oneLiner ||

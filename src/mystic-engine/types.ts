@@ -33,6 +33,9 @@ export type IntentId =
   // 通用
   | 'timing'
   | 'anxiety_decide'
+  | 'legal_process'
+  | 'family_dispute'
+  | 'outcome_trajectory'
   | 'open_explore';
 
 export type IntentHit = {
@@ -134,4 +137,6 @@ export type OfflineAnswerPack = {
   coreMetaphor?: string;
   /** 剧本导演四段（优先渲染） */
   script?: import('./script-play.ts').ScriptPlay;
+  /** Phase A：首屏直答原问（人话，无 jargon） */
+  directAnswer?: string;
 };

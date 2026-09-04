@@ -1,4 +1,6 @@
 import { intentActionsPlain } from '../mystic-engine/intent-actions.ts';
+import { buildPlainDirectAnswer } from '../mystic-engine/instant-answer.ts';
+import { recordQuestionScene } from '../mystic-engine/scene-library.ts';
 import type { SixGod } from './six-gods.ts';
 import { sixGodKeywordsLine } from './six-gods.ts';
 import {
@@ -12,6 +14,8 @@ export type AiReading = {
   question: string;
   god: string;
   meaning: string;
+  /** 置顶一句话直答 */
+  directAnswer?: string;
   analysis: string;
   suggestion: string;
   reflection: string;
@@ -62,11 +66,21 @@ function buildSuggestion(
 export function buildAiReading(question: string, god: SixGod): AiReading {
   const type = detectQuestionType(question);
   const q = question.trim();
+  const directAnswer = q ? buildPlainDirectAnswer(q) : undefined;
+
+  if (q) {
+    recordQuestionScene({
+      system: 'xiaoliuren',
+      question: q,
+      directAnswer,
+    });
+  }
 
   return {
     question: q || '（未填写具体问题）',
     god: god.name,
     meaning: `${god.name}代表${sixGodKeywordsLine(god)}。${god.symbolism}`,
+    directAnswer: directAnswer || undefined,
     analysis: buildAnalysis(q, god, type),
     suggestion: buildSuggestion(q, god, type),
     reflection: god.warning[0] ?? god.misread,

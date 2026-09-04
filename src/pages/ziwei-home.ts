@@ -132,7 +132,7 @@ export function renderZiweiHome(root: HTMLElement): () => void {
         </button>
         <button type="button" class="bazi-home-link" data-path="/records">
           <strong>我的旅程</strong>
-          <span>与塔罗 / 八字等同级回顾手札</span>
+          <span>记录备份和恢复</span>
           <em aria-hidden="true">›</em>
         </button>
       </nav>

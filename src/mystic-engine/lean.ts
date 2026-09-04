@@ -1,6 +1,7 @@
 import type { CastResult } from '../liuyao/engine.ts';
 import type { IntentId, Tone } from './types.ts';
 import { isMetaUxQuestion } from './meta-ux.ts';
+import { leanForRoute, routeQuestion } from './instant-answer.ts';
 import { toneFlags } from './tone.ts';
 
 /** intent × tone → 有条件倾向句（非死刑） */
@@ -12,6 +13,11 @@ export function leanForIntent(
 ): string {
   if (isMetaUxQuestion(questionSlice)) {
     return '仪式感有，但不会只有空话：下面把卦意压成你能核对的几步。';
+  }
+  const route = routeQuestion(questionSlice, intent);
+  const routeLean = leanForRoute(route, questionSlice, intent);
+  if (routeLean && route !== 'general') {
+    return routeLean;
   }
   const f = toneFlags(cast);
   const soft = tone === 'soft' || f.soft;
@@ -119,13 +125,27 @@ export function leanForIntent(
       if (cut || open) return '给纠结设决定日，到期用清单拍板，少无限内耗。';
       if (hard) return '先补最缺的那块事实，再谈要不要。';
       return `纠结处宜用「${to}」的方式推进：先事实，后决定。`;
+    case 'legal_process':
+      if (soft || flow) return '程序会拉长、会反复核对：书面回执比口头安慰可靠。';
+      if (hard) return '推进偏阻：先把证据、承办联系方式和节点记牢。';
+      return '报警/维权后宜盯受理与书面反馈，别急着要一夜定性。';
+    case 'family_dispute':
+      if (soft || flow) return '家事宜先护安全与证据，再谈和解；过程会磨，别一次定终身。';
+      if (cut) return '宜尽快把底线与止损信号写清，到期就执行。';
+      if (hard) return '阻力不小：先求稳、留证，再谈怎么处理。';
+      return '家庭纠纷走向偏渐进：用小步核对对方动作，别空想终局。';
+    case 'outcome_trajectory':
+      if (soft || flow) return '走势偏渐进、会拉扯：用可核对的小步验证，别空想终局。';
+      if (cut) return '到了该定调的窗口：把期限与底线写清再动。';
+      if (hard) return '短期偏停：先补条件与信息，再评估能不能成。';
+      return `走向跟「${to}」同向，但过程未必一步到位。`;
     case 'open_explore':
       if (soft || flow) return '宜柔进探路：低成本试探，用回应质量决定加码。';
       if (cut) return '开放也忌发散：先锁一问，推一个能打勾的动作。';
       if (open) return '有聚拢窗口：做一件能被看见的事，用反馈校准。';
       if (hard) return '先过最弱一环，再谈扩张与探索。';
-      return `本题核心宜用「${to}」的方式推进，少用蛮力；卦象是参考不是判决。`;
+      return '先把问题压成一句「我最想确认什么」，再用一件本周能完成的小事去验证。';
     default:
-      return `本题核心宜用「${to}」的方式推进，少用蛮力；卦象是参考不是判决。`;
+      return '先把问题压成一句「我最想确认什么」，再用一件本周能完成的小事去验证。';
   }
 }

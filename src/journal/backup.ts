@@ -60,6 +60,8 @@ export const BACKUP_KEYS = [
   'mystic-lab-question-rewrite-feedback',
   'mystic-lab-question-rewrite-cache',
   'mystic-lab-question-rewrite-refs',
+  // 场景库（每问入库 · playbook 聚合）
+  'mystic-lab-scene-library',
   // 主题 / 分享身份
   'mystic-lab-theme',
   'mystic-lab-share-owner-v1',
@@ -990,6 +992,59 @@ function mergeAiQuota(localRaw: string | null, importedRaw: string): string {
   return JSON.stringify(out);
 }
 
+function mergeSceneLibrary(localRaw: string | null, importedRaw: string): string {
+  type Store = {
+    version: 1;
+    events: { id: string; at: string }[];
+    playbooks: { id: string; askCount: number; updatedAt: string; exemplars?: string[]; answerHints?: string[]; systems?: string[] }[];
+  };
+  const empty = (): Store => ({ version: 1, events: [], playbooks: [] });
+  let local: Store = empty();
+  let imported: Store = empty();
+  try {
+    if (localRaw) local = { ...empty(), ...(JSON.parse(localRaw) as Store) };
+  } catch {
+    /* ignore */
+  }
+  try {
+    imported = { ...empty(), ...(JSON.parse(importedRaw) as Store) };
+  } catch {
+    return localRaw ?? importedRaw;
+  }
+
+  const eventMap = new Map<string, Store['events'][0]>();
+  for (const e of [...local.events, ...imported.events]) {
+    if (e?.id) eventMap.set(e.id, e);
+  }
+  const events = [...eventMap.values()]
+    .sort((a, b) => String(b.at).localeCompare(String(a.at)))
+    .slice(0, 400);
+
+  const pbMap = new Map<string, Store['playbooks'][0]>();
+  for (const p of [...local.playbooks, ...imported.playbooks]) {
+    if (!p?.id) continue;
+    const prev = pbMap.get(p.id);
+    if (!prev) {
+      pbMap.set(p.id, p);
+      continue;
+    }
+    pbMap.set(p.id, {
+      ...prev,
+      ...p,
+      askCount: (prev.askCount ?? 0) + (p.askCount ?? 0),
+      exemplars: [...new Set([...(p.exemplars ?? []), ...(prev.exemplars ?? [])])].slice(0, 24),
+      answerHints: [...new Set([...(p.answerHints ?? []), ...(prev.answerHints ?? [])])].slice(0, 12),
+      systems: [...new Set([...(prev.systems ?? []), ...(p.systems ?? [])])].slice(0, 6),
+      updatedAt: String(p.updatedAt) > String(prev.updatedAt) ? p.updatedAt : prev.updatedAt,
+    });
+  }
+  const playbooks = [...pbMap.values()]
+    .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
+    .slice(0, 80);
+
+  return JSON.stringify({ version: 1, events, playbooks });
+}
+
 function mergeKeyValue(
   key: string,
   localRaw: string | null,
@@ -1011,6 +1066,8 @@ function mergeKeyValue(
       });
     case 'mystic-lab-question-rewrite-cache':
       return mergeRewriteCache(localRaw, importedRaw);
+    case 'mystic-lab-scene-library':
+      return mergeSceneLibrary(localRaw, importedRaw);
     case 'mystic-lab-codex':
       return mergeCodex(localRaw, importedRaw);
     case 'mystic-lab-liuyao-classic-fav':

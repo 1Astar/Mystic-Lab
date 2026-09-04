@@ -4,20 +4,45 @@ export type RouteHandler = (
   root: HTMLElement,
 ) => void | (() => void) | Promise<void | (() => void)>;
 
+export type NavigateOptions = {
+  /**
+   * 用 replaceState 代替 pushState。
+   * 回 Lab 根 `/` 时默认 true，避免微信/浏览器「返回」误回到上一模块（如塔罗）。
+   */
+  replace?: boolean;
+};
+
 const routes = new Map<string, RouteHandler>();
 
 export function registerRoute(path: string, handler: RouteHandler): void {
   routes.set(path, handler);
 }
 
-export function navigate(path: string): void {
+function pathKey(pathname: string, search = ''): string {
+  return `${pathname.replace(/\/$/, '') || '/'}${search}`;
+}
+
+export function navigate(path: string, opts?: NavigateOptions): void {
   const next = new URL(path, location.origin);
-  const nextKey = `${next.pathname.replace(/\/$/, '') || '/'}${next.search}`;
-  const curKey = `${location.pathname.replace(/\/$/, '') || '/'}${location.search}`;
+  const nextKey = pathKey(next.pathname, next.search);
+  const curKey = pathKey(location.pathname, location.search);
+  const nextPath = next.pathname.replace(/\/$/, '') || '/';
+  const useReplace = opts?.replace ?? nextPath === '/';
+
   if (nextKey !== curKey) {
-    history.pushState({}, '', `${next.pathname}${next.search}${next.hash}`);
+    const url = `${next.pathname}${next.search}${next.hash}`;
+    if (useReplace) {
+      history.replaceState({}, '', url);
+    } else {
+      history.pushState({}, '', url);
+    }
   }
   void render();
+}
+
+/** 回 Mystic Lab 首页（replace，不叠历史） */
+export function navigateHome(): void {
+  navigate('/', { replace: true });
 }
 
 let cleanup: (() => void) | null = null;

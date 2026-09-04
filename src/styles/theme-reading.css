@@ -765,3 +765,76 @@ html[data-theme='moon'] .ziwei-codex-sticky-stack .ziwei-layer-tabs-caps {
   transform: none;
   border-color: color-mix(in srgb, var(--gold) 45%, var(--line));
 }
+
+/* —— 跨模块：提醒条 / 内嵌卡片 / 手札块 —— 跟主题 token，月白勿出夜黑 */
+.tarot-review-banner,
+.xlr-review-banner {
+  background: var(--panel-gold);
+  border-color: var(--panel-gold-border);
+}
+
+.tarot-review-card,
+.xlr-review-card {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.codex-scene-card,
+.codex-orient-panel,
+.codex-life-scene-card,
+.reading-accordion {
+  background: var(--panel-inset);
+  border-color: var(--line);
+}
+
+.tarot-review-card-meta,
+.tarot-review-card-q,
+.tarot-review-card-sum,
+.xlr-review-card-meta,
+.xlr-review-card-q,
+.xlr-review-card-sum {
+  color: var(--ink-muted);
+}
+
+.tarot-review-card-q,
+.xlr-review-card-q {
+  color: var(--ink);
+}
+
+.tarot-review-banner-title,
+.xlr-review-banner-title {
+  color: var(--gold-ink, var(--gold));
+}
+
+/* 塔罗串讲 / 反馈：正文跟 --ink，强调跟 --gold-ink（盖过星夜奶油硬编码） */
+html[data-theme='moon'] .thread-meaning,
+html[data-theme='moon'] .thread-insight,
+html[data-theme='moon'] .thread-action,
+html[data-theme='moon'] .thread-bridge,
+html[data-theme='moon'] .thread-card-name,
+html[data-theme='moon'] .qa-answer-insight,
+html[data-theme='moon'] .qa-answer-action {
+  color: var(--ink) !important;
+}
+
+html[data-theme='moon'] .thread-section-title,
+html[data-theme='moon'] .thread-card-orient,
+html[data-theme='moon'] .thread-oneliner,
+html[data-theme='moon'] .thread-phase,
+html[data-theme='moon'] .thread-em,
+html[data-theme='moon'] .thread-label {
+  color: var(--gold-ink, var(--gold)) !important;
+}
+
+html[data-theme='moon'] .reading-feedback-hint,
+html[data-theme='moon'] .thread-codex-hint {
+  color: var(--ink-muted) !important;
+}
+
+html[data-theme='moon'] .reading-feedback-mood-btn,
+html[data-theme='moon'] .reading-feedback-star,
+html[data-theme='moon'] .reading-feedback-submit.btn-secondary {
+  color: var(--ink) !important;
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+}

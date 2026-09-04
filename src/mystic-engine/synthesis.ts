@@ -11,6 +11,11 @@ import { dressHexagram, LIUSHEN_PLAIN } from '../liuyao/najia.ts';
 import { siZhuFromDate } from '../liuyao/ganzhi.ts';
 import type { BoardSignals } from './board-signals.ts';
 import { paceLabel } from './board-signals.ts';
+import {
+  humanizeSynthesisOutcome,
+  isPlainAnswerRoute,
+  type QuestionRoute,
+} from './instant-answer.ts';
 
 export type OutcomeLean = 'favorable' | 'blocked' | 'mixed' | 'neutral';
 
@@ -77,20 +82,36 @@ function decideOutcome(s: BoardSignals): ScriptSynthesis['outcome'] {
   };
 }
 
-function buildTrend(s: BoardSignals): string {
+function buildTrend(s: BoardSignals, plain = false): string {
   const bits: string[] = [];
   bits.push(`过程节奏：${paceLabel(s.pace)}。`);
   if (s.changedName) {
     bits.push(
-      `关键节点：从「${s.primaryName}」走向「${s.changedName}」——变卦侧是下一幕的主调，宜按变卦方式推进，少死磕本卦旧法。`,
+      plain
+        ? `关键节点：局面会从「${s.primaryName}」走向「${s.changedName}」——下一幕宜小步核对，少死磕旧法。`
+        : `关键节点：从「${s.primaryName}」走向「${s.changedName}」——变卦侧是下一幕的主调，宜按变卦方式推进，少死磕本卦旧法。`,
     );
   } else {
     bits.push(
-      `关键节点：暂无变卦，局面相对稳；节点在「你核对到的那一次回应」，而不是幻想中的大翻转。`,
+      plain
+        ? '关键节点：局面相对稳；节点在「你核对到的那一次回应」，而不是幻想中的大翻转。'
+        : `关键节点：暂无变卦，局面相对稳；节点在「你核对到的那一次回应」，而不是幻想中的大翻转。`,
     );
   }
-  if (s.hasYuan) bits.push(`可能助力：${s.yuanTip || '有原神生扶用神，可借资源/信息。'}`);
-  if (s.hasJi) bits.push(`可能阻碍：${s.jiTip || '有忌神拖累，宜先减干扰。'}`);
+  if (s.hasYuan) {
+    bits.push(
+      plain
+        ? `可能助力：${(s.yuanTip || '有可借的资源/信息').replace(/用神|原神/g, '助力')}`
+        : `可能助力：${s.yuanTip || '有原神生扶用神，可借资源/信息。'}`,
+    );
+  }
+  if (s.hasJi) {
+    bits.push(
+      plain
+        ? `可能阻碍：${(s.jiTip || '有干扰拖累').replace(/用神|忌神/g, '干扰')}`
+        : `可能阻碍：${s.jiTip || '有忌神拖累，宜先减干扰。'}`,
+    );
+  }
   if (s.tugOfWar) {
     bits.push('拉锯段：暗处推力与月令冲散同在，过程会反复，属正常波动不是终局。');
   }
@@ -192,10 +213,13 @@ export function buildSynthesis(
   s: BoardSignals,
   cast: CastResult,
   castAt = new Date(),
+  route?: QuestionRoute,
 ): ScriptSynthesis {
+  const plain = route ? isPlainAnswerRoute(route) : false;
+  const outcome = humanizeSynthesisOutcome(decideOutcome(s), route ?? 'general');
   return {
-    outcome: decideOutcome(s),
-    trend: buildTrend(s),
+    outcome,
+    trend: buildTrend(s, plain),
     timing: buildTiming(s, cast),
     details: buildDetails(s, cast, castAt),
     disclaimer:

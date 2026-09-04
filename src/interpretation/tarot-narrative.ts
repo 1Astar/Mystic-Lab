@@ -2,16 +2,35 @@ import { matchCardArchetype } from './card-archetypes.ts';
 import type { ReadingLens } from './card-psychology.ts';
 import { imageSketch, motherTheme } from './card-psychology.ts';
 import type { ReadingSeriesContext } from '../journal/reading-series.ts';
+import {
+  framePromptForAsk,
+  resolveAskShape,
+  slotPreferredFrame,
+  type AskShape,
+  type AskSlot,
+} from './ask-shape.ts';
+import {
+  resolveReadingScene,
+  type QuestionSubject,
+} from './reading-scene.ts';
 import type { CardReading } from './types.ts';
 
-export type QuestionSubject = 'father' | 'mother' | 'self' | 'partner' | 'other';
+export type { QuestionSubject };
 
 /** 问句主语：无明确主语时默认指向问卜者关心的人（常为父亲/母亲） */
-export function inferQuestionSubject(question: string): QuestionSubject {
+export function inferQuestionSubject(
+  question: string,
+  series?: ReadingSeriesContext | null,
+): QuestionSubject {
+  if (series?.priorEpisodes?.length) {
+    return resolveReadingScene({ question, series }).subject;
+  }
   const q = question.trim();
-  if (/我爸|父亲|爸爸|他(?!们)/.test(q)) return 'father';
-  if (/我妈|母亲|妈妈|她(?!们)/.test(q)) return 'mother';
+  if (/我爸|父亲|爸爸/.test(q)) return 'father';
+  if (/我妈|母亲|妈妈/.test(q)) return 'mother';
   if (/我对象|男友|女友|伴侣|老公|老婆/.test(q)) return 'partner';
+  if (/他(?!们)/.test(q)) return 'other';
+  if (/她(?!们)/.test(q)) return 'other';
   if (/我(?!们)|自己|本人/.test(q)) return 'self';
   return 'other';
 }
@@ -21,8 +40,18 @@ const SUBJECT_LABEL: Record<QuestionSubject, string> = {
   mother: '你母亲',
   partner: '对方',
   self: '你',
-  other: '当事人',
+  other: '对方',
 };
+
+/** 问句里的行动方（他/她/称谓） */
+function actorLabel(question: string, subject: QuestionSubject): string {
+  const q = question.trim();
+  if (/他(?!们)/.test(q)) return '他';
+  if (/她(?!们)/.test(q)) return '她';
+  if (subject === 'father') return '你父亲';
+  if (subject === 'mother') return '你母亲';
+  return SUBJECT_LABEL[subject];
+}
 
 /** 牌阵位次 → 时间/叙事框（过去现在未来等） */
 export function positionalFrame(card: CardReading, index: number): string {
@@ -40,6 +69,27 @@ function orientLabel(card: CardReading): string {
   return card.orientation === 'reversed' ? '逆位' : '正位';
 }
 
+function cardHook(card: CardReading): string {
+  const arch = matchCardArchetype(card);
+  return arch?.questionHook || arch?.theme || motherTheme(card);
+}
+
+function cardLabel(card: CardReading): string {
+  return `${card.cardName}${card.orientation === 'reversed' ? '逆' : ''}`;
+}
+
+function pickByFrame(
+  cards: CardReading[],
+  frames: string[],
+  want: string,
+): CardReading {
+  const i = frames.findIndex((f) => f === want);
+  if (i >= 0 && cards[i]) return cards[i]!;
+  if (want === '过去') return cards[0]!;
+  if (want === '现在') return cards[1] ?? cards[0]!;
+  return cards[cards.length - 1]!;
+}
+
 export type NarrativeInsight = {
   meaningMap: string;
   insight: string;
@@ -47,7 +97,7 @@ export type NarrativeInsight = {
 };
 
 /**
- * 参照「宝剑九 + 愚者逆」式解读：画面 → 母题 → 对应你的问题 → 不判死刑的措辞
+ * 画面 → 母题 → 扣进本问槽位；禁止每张牌复制同一句套话
  */
 export function buildNarrativeCardInsight(
   card: CardReading,
@@ -56,67 +106,164 @@ export function buildNarrativeCardInsight(
   allCards: CardReading[],
   index: number,
   userIntuition?: string,
+  _series?: ReadingSeriesContext | null,
 ): NarrativeInsight {
-  const subject = inferQuestionSubject(question);
-  const subj = SUBJECT_LABEL[subject];
+  const ask = resolveAskShape(question);
   const frame = positionalFrame(card, index);
   const arch = matchCardArchetype(card);
   const mother = motherTheme(card);
   const sketch = arch?.sketch || imageSketch(card);
   const theme = arch?.theme || mother;
   const orient = orientLabel(card);
+  const prompt = framePromptForAsk(frame, ask);
+  const hook = arch?.questionHook || `这张牌照见「${theme}」这一层。`;
 
   const meaningMap = [
     `${card.cardName}（${orient}）：${theme}`,
     `画面：${sketch}`,
   ].join('\n');
 
-  const hook =
-    arch?.questionHook ||
-    `就「${question.slice(0, 24)}${question.length > 24 ? '…' : ''}」而言，这张牌更像在照见${subj}当下的心理，而不是给一个绝对事实判决。`;
-
-  const temporal =
-    frame === '过去' || frame === '现在' || frame === '未来'
-      ? `【${frame}】`
-      : `【${frame}】`;
-
-  let insight = `${temporal}${hook}`;
-  if (lens === 'family' && subject === 'father') {
-    insight += ` 在家庭议题里，${subj}的行为往往牵动全家的边界——牌在描述他的状态，不是在替你做决定。`;
-  }
+  let insight = `【${frame}】${prompt}：${hook}`;
 
   const prev = index > 0 ? allCards[index - 1] : null;
-  if (prev) {
-    insight += ` 承接上一张【${prev.cardName}】：用「因为上一张的能量，所以这一张会……」来串，别孤立背牌意。`;
+  if (prev && ask.needsTimeline) {
+    insight += ` 承接【${prev.cardName}】（${cardHook(prev).replace(/。$/, '')}），这一张把压力推到「${theme}」。`;
   }
 
   if (userIntuition?.trim() && index === 0) {
-    insight += `（你写下/感受到的直觉：「${userIntuition.trim().slice(0, 48)}」——可与牌面相互印证。）`;
+    insight += `（你的直觉：「${userIntuition.trim().slice(0, 48)}」——可与牌面对照。）`;
   }
 
-  const action = boundaryAdviceLine(lens, subject, card);
+  const action = boundaryAdviceLine(lens, card, frame, ask);
 
   return { meaningMap, insight, action };
 }
 
 function boundaryAdviceLine(
   lens: ReadingLens,
-  _subject: QuestionSubject,
   card: CardReading,
+  frame: string,
+  ask: AskShape,
 ): string {
+  const hasYesNo = ask.slots.some((s) => s.kind === 'yes_no');
   if (lens === 'family') {
+    if (frame === '未来') {
+      return hasYesNo
+        ? '用切断通道兑现判断：不担保、不借钱、不回情绪战；和关键家人对齐同一套底线。'
+        : '边界短清单：不担保、不借钱、不被道德绑架。';
+    }
+    if (frame === '现在') {
+      return '本周只核对一件可观察的事：对方有没有实际动作；有则记录，无则保持低回应。';
+    }
+    if (frame === '过去') {
+      return '把旧模式记成「模式」，别再为赢一场争论搭进去。';
+    }
     if (/愚者/.test(card.cardName) && card.orientation === 'reversed') {
-      return '保持距离与观察：对方做事可能不顾后果，勿被卷入情绪漩涡；尊重你母亲的边界，他的痛苦首先是他的课题。';
+      return '保持距离：对方可能不顾后果；他的课题先还给他。';
     }
-    if (/倒吊人/.test(card.cardName)) {
-      return '拒绝被吸血：别做担保、别借钱、别被道德绑架——僵局需他自己面对。';
-    }
-    return '分清他的事、你的事、家庭的事；可以关心，不必替他还情绪债。';
+    return '分清对方的事与你的边界；关心可以，介入清单要短。';
   }
-  return '把牌当心理镜子：结合生活实情印证，不必过度共情到失去边界。';
+  if (lens === 'work') {
+    if (frame === '未来' || ask.slots.some((s) => s.kind === 'choice')) {
+      return '写清「留下可接受 / 必须走的信号 / 最晚决定日」，用书面节点核对。';
+    }
+    return '本周只推一个可打勾的职场动作，用对方回应决定加码还是停。';
+  }
+  if (lens === 'love') {
+    return '给短观察期：看对方有没有修复/配合的动作，再决定加码还是收手。';
+  }
+  return '用生活里一件可核对的小事印证这张牌，别只在想象里打转。';
 }
 
-/** 多牌综合结论（第二张范例：过去→现在→未来的轨迹叙事） */
+function cardClause(card: CardReading): string {
+  return `【${card.cardName}（${orientLabel(card)}）】${cardHook(card)}`;
+}
+
+/** 按槽位填牌：任意问法共用，不写死案例文案 */
+function answerSlotWithCard(
+  slot: AskSlot,
+  card: CardReading,
+  actor: string,
+): string {
+  const hook = cardHook(card).replace(/。$/, '');
+  const tag = card.position?.trim()
+    ? `（${card.position}·${cardLabel(card)}）`
+    : `（${cardLabel(card)}）`;
+
+  switch (slot.kind) {
+    case 'why':
+      return `${slot.label}——更像「${hook}」${tag}，不是单一罪名式结论。`;
+    case 'will_do':
+      return `${slot.label}——${actor}侧更可能：${hook}${tag}。`;
+    case 'consequence':
+      return `${slot.label}——${hook}${tag}。`;
+    case 'yes_no': {
+      const lean = card.orientation === 'reversed' ? '偏谨慎/受阻' : '偏可推进但仍要兑现';
+      return `${slot.label}——判断偏「${lean}」：${hook}${tag}；结论靠你是否落实边界/动作，不靠空想。`;
+    }
+    case 'choice':
+      return `${slot.label}——若维持现状，走势更像：${hook}${tag}；用可核对节点二选一。`;
+    case 'timing':
+      return `${slot.label}——窗口感来自「${hook}」${tag}，不是钉死某一天。`;
+    case 'how':
+      return `${slot.label}——先做能对冲「${hook}」的一小步${tag}。`;
+    default:
+      return `${slot.label}——${hook}${tag}。`;
+  }
+}
+
+function nextActionForLens(lens: ReadingLens, ask: AskShape, actor: string): string {
+  if (lens === 'family') {
+    return ask.slots.some((s) => s.kind === 'yes_no')
+      ? '对你：和关键家人对齐规则——不担保、不借钱、不透露行程；有越界就留证，不靠「再沟通一次」赌运气。'
+      : `对你：可以关心，但别做担保、别借钱、别被道德绑架——${actor}的账先由对方面对。`;
+  }
+  if (lens === 'work') {
+    return '对你：本周只定一个可打勾节点（回执/谈薪/投递），用结果决定加码还是停。';
+  }
+  if (lens === 'love') {
+    return '对你：设短观察期，看对方动作质量，再决定加码还是收手。';
+  }
+  return '对你：先核一件可观察的事实，再决定要不要加码介入。';
+}
+
+/** 通用整盘合成：槽位 → 牌位 → 牌意钩子 */
+function buildSlotDrivenSynthesis(
+  cards: CardReading[],
+  question: string,
+  subject: QuestionSubject,
+  lens: ReadingLens,
+  frames: string[],
+  ask: AskShape,
+): string {
+  const actor = actorLabel(question, subject);
+  const byFrame = (label: string) => pickByFrame(cards, frames, label);
+
+  const lines: string[] = [
+    `就你问的：${ask.slots.map((s) => s.label).join(' / ')}`,
+  ];
+
+  const circles = ['①', '②', '③', '④'];
+  ask.slots.forEach((slot, i) => {
+    const pref = slotPreferredFrame(slot.kind);
+    const card = pref === '整盘' ? cards[cards.length - 1]! : byFrame(pref);
+    lines.push(`${circles[i] ?? `${i + 1}.`} ${answerSlotWithCard(slot, card, actor)}`);
+  });
+
+  if (frames.some((f) => f === '过去' || f === '现在' || f === '未来')) {
+    const past = byFrame('过去');
+    const present = byFrame('现在');
+    const future = byFrame('未来');
+    lines.push(
+      `线：过去${cardClause(past)} → 现在${cardClause(present)} → 未来${cardClause(future)}。`,
+    );
+  }
+
+  lines.push(nextActionForLens(lens, ask, actor));
+  return lines.join('\n');
+}
+
+/** 多牌综合结论：有槽位就按槽填；否则短轨迹 */
 export function buildSpreadSynthesis(
   cards: CardReading[],
   question: string,
@@ -126,75 +273,72 @@ export function buildSpreadSynthesis(
 ): string {
   if (cards.length < 2) return '';
 
-  const subject = inferQuestionSubject(question);
-  const subj = SUBJECT_LABEL[subject];
-  const names = cards.map((c) => `${c.cardName}${c.orientation === 'reversed' ? '逆位' : '正位'}`).join('、');
-
+  const subject = inferQuestionSubject(question, series);
+  const ask = resolveAskShape(question);
   const frames = cards.map((c, i) => positionalFrame(c, i));
-  const isTimeline = frames.some((f) => f === '过去' || f === '现在' || f === '未来');
 
   let body = series?.synthesisPrefix ? `${series.synthesisPrefix}\n` : '';
-  body += `这组牌（${names}）`;
 
-  if (/为什么|原因|动机/.test(question)) {
-    body += `没有给出「因为想复合」或「因为缺钱」式的绝对答案，而是在描绘${subj}目前真实的心理状态。`;
-  } else if (/做什么|后果|未来|会怎样/.test(question)) {
-    body += `勾勒出一条清晰的行为与后果轨迹——尤其当牌阵带过去/现在/未来时，像在讲一个故事。`;
-  } else {
-    body += `合在一起，是在描摹局面如何展开，而不是宣判宿命。`;
+  if (ask.needsWholeSpread || ask.needsTimeline) {
+    body += buildSlotDrivenSynthesis(cards, question, subject, lens, frames, ask);
+    if (userIntuition?.trim()) {
+      body += `\n你的直觉（${userIntuition.trim().slice(0, 60)}）：用实际动作核对，不靠想象加戏。`;
+    }
+    return body;
   }
 
-  if (isTimeline) {
+  const names = cards
+    .map((c) => `${c.cardName}${c.orientation === 'reversed' ? '逆位' : '正位'}`)
+    .join('、');
+  const subj = SUBJECT_LABEL[subject];
+  body += `这组牌（${names}）合在一起，描摹${subj}相关局面如何展开。`;
+
+  if (frames.some((f) => f === '过去' || f === '现在' || f === '未来')) {
     const chapters = cards
       .map((c, i) => {
         const arch = matchCardArchetype(c);
-        const f = frames[i];
-        return `${f}【${c.cardName}】${arch ? `：${arch.theme}` : ''}`;
+        return `${frames[i]}【${c.cardName}】${arch ? `：${arch.theme}` : ''}`;
       })
       .join(' → ');
     body += `\n轨迹：${chapters}。`;
   }
 
   if (userIntuition?.trim()) {
-    body += `\n结合你的直觉（${userIntuition.trim().slice(0, 60)}），牌在提醒：先看清状态，再决定要不要介入。`;
+    body += `\n结合你的直觉（${userIntuition.trim().slice(0, 60)}）：先印证状态，再决定下一步。`;
   }
-
-  if (lens === 'family' && /愚者/.test(names) && /宝剑九|焦虑|痛苦/.test(names)) {
-    body +=
-      '\n核心指向：他很可能处于焦虑、痛苦且不够理智的状态；找你妈未必是为美好生活，而更像索取或求助——情感慰藉或实际帮助都有可能。';
-  }
-
-  if (isTimeline && /倒吊人/.test(names)) {
-    body +=
-      '\n后果层面：挣扎未必换来解脱，反而可能陷入停滞与被动；别指望单靠旧关系能填平烂摊子。';
-  }
-
-  body += '\n塔罗反映的是当下能量与心理投射，不是不可更改的宿命——请结合日常生活印证。';
 
   return body;
 }
 
-/** 多条边界建议（对应范例 💌 分段） */
+/** 建议：按透镜 + 问法，不写死某一家人故事 */
 export function buildAdviceLines(
   cards: CardReading[],
-  _question: string,
+  question: string,
   lens: ReadingLens,
 ): string[] {
-  const lines: string[] = [];
+  const ask = resolveAskShape(question);
   const names = cards.map((c) => c.cardName).join('');
+  const lines: string[] = [];
 
   if (lens === 'family') {
-    lines.push('不需要过度共情：他的焦虑不必由你全盘承担。');
-    if (/愚者/.test(names)) {
-      lines.push('保持距离与观察：冲动、逃避时，中立比卷入更安全。');
+    if (ask.slots.some((s) => s.kind === 'yes_no')) {
+      lines.push('安全与边界优先：通讯、金钱、行程通道能收就收。');
+      lines.push('和关键家人对齐同一套回应规则，避免被各个击破。');
+    } else {
+      lines.push('不需要过度共情：对方的焦虑不必由你全盘承担。');
+      lines.push('尊重当事人边界：是否回应、如何回应，是对方的选择。');
     }
-    lines.push('尊重你母亲的决定：是否回应、如何回应，是她的边界。');
-    if (/倒吊人/.test(names)) {
-      lines.push('拒绝被吸血：担保、借钱、道德绑架都要警惕。');
+    if (/愚者/.test(names)) lines.push('冲动、逃避时，中立比卷入更安全。');
+    if (/倒吊人/.test(names)) lines.push('拒绝担保、借钱、道德绑架。');
+  } else if (lens === 'work') {
+    lines.push('职场题用书面节点核对，口头好感不算数。');
+    if (ask.slots.some((s) => s.kind === 'choice')) {
+      lines.push('去留先写「可接受底线 / 必须走的信号 / 决定日」。');
     }
+  } else if (lens === 'love') {
+    lines.push('感情题看对方动作质量，不先写长篇剧本。');
   } else {
-    lines.push('把解读当心理防备提醒，结合实情印证，不必一次定论。');
-    lines.push('下一步缩成一件今天能做的小事，比反复问牌更有用。');
+    lines.push('用一件今天能核对的小事印证牌面，再决定加码还是收手。');
   }
 
   return lines;
@@ -208,9 +352,14 @@ export function empathyNarrativeLead(
 ): string {
   if (series?.lead) return series.lead;
   const names = cards.map((c) => c.cardName).join('、');
-  const subject = inferQuestionSubject(question);
-  if (lens === 'family' && subject === 'father') {
-    return `根据你的牌阵（${names}），我先帮你把父亲当下的心理状态理清——牌是镜子，答案仍在你如何守住边界。`;
+  const ask = resolveAskShape(question);
+  const slotHint = ask.slots.map((s) => s.label).join('、');
+  if (ask.slots.length) {
+    return `牌阵（${names}）对着「${slotHint}」——下面按牌位直接答，不绕开你的问题。`;
   }
-  return `牌阵（${names}）照见的是当下的能量与潜意识投射；同一类型的问题若同一天再问，可以把两次牌阵当作同一故事的上集与下集来读。`;
+  const subject = inferQuestionSubject(question, series);
+  if (lens === 'family' && (subject === 'father' || subject === 'mother')) {
+    return `牌阵（${names}）先照${SUBJECT_LABEL[subject]}这一侧，再谈到你的边界。`;
+  }
+  return `牌阵（${names}）按时间线串读；同一天再问，可当同一故事的下一集。`;
 }

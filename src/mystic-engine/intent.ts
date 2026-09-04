@@ -114,6 +114,22 @@ function classifySlice(s: string): KindMap {
     return { id: 'growth_choice', domain: 'growth', confidence: 'high' };
   }
 
+  // —— 生活 / 纠纷 ——
+  if (/报了?警|报警|110|立案|警察|派出所|司法机关|法院|起诉|维权|笔录|接警/.test(s)) {
+    return { id: 'legal_process', domain: 'life', confidence: 'high' };
+  }
+  if (/威胁|恐吓|骚扰|家暴|纠缠|打人|暴力/.test(s)) {
+    return { id: 'family_dispute', domain: 'life', confidence: 'high' };
+  }
+  if (/爸|妈|父亲|母亲|父母|家里|家人|家事/.test(s)) {
+    if (/怎么|走向|发展|解决|会不会|要不要|需不需要|最终/.test(s)) {
+      return { id: 'family_dispute', domain: 'life', confidence: 'high' };
+    }
+  }
+  if (/走向|会怎么样|如何发展|最终会|事情都|之后.*怎么|都走向/.test(s)) {
+    return { id: 'outcome_trajectory', domain: 'general', confidence: 'mid' };
+  }
+
   // —— 通用 ——
   if (/几月|何时|什么时候|月底|月初|年底|时机|未来三个月/.test(s)) {
     return { id: 'timing', domain: 'general', confidence: 'mid' };

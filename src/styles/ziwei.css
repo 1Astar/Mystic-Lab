@@ -2209,7 +2209,7 @@ html[data-theme='moon'] .ziwei-theater-tab.is-on {
   position: absolute;
   inset: 0;
   border: 0;
-  background: color-mix(in srgb, #06040e 72%, transparent);
+  background: var(--scrim);
   cursor: pointer;
 }
 html[data-theme='moon'] .ziwei-meet-backdrop {
@@ -4343,7 +4343,7 @@ html[data-theme='moon'] .ziwei-meet-backdrop {
   z-index: 40;
   display: grid;
   place-items: end center;
-  background: color-mix(in srgb, #06040e 62%, transparent);
+  background: var(--scrim);
   padding: 16px;
   color: var(--ink);
 }
@@ -6307,7 +6307,7 @@ html[data-theme='moon'] .ziwei-plate-dizhi.is-刑 { stroke: rgba(140, 110, 55, 0
   position: absolute;
   inset: 0;
   border: 0;
-  background: color-mix(in srgb, #06040e 72%, transparent);
+  background: var(--scrim);
   cursor: pointer;
 }
 html[data-theme='moon'] .ziwei-learn-backdrop {
@@ -7441,7 +7441,7 @@ button.craft-axis-row:focus-visible,
 .ziwei-ys-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, #06040e 55%, transparent);
+  background: var(--scrim);
   pointer-events: auto;
 }
 html[data-theme='moon'] .ziwei-ys-backdrop {

@@ -519,7 +519,7 @@ export function renderBaziReading(root: HTMLElement): () => void {
         </button>
         <button type="button" class="bazi-home-link bazi-home-link-soft" data-path="/records">
           <strong>我的旅程</strong>
-          <span>回看八字手札与各体系记录</span>
+          <span>记录备份和恢复</span>
           <em aria-hidden="true">›</em>
         </button>
       </div>

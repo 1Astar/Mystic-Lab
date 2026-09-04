@@ -1,5 +1,6 @@
 import type { IntentId, Tone } from '../mystic-engine/types.ts';
 import { isMetaUxQuestion } from '../mystic-engine/meta-ux.ts';
+import { buildPlainDirectAnswer, routeQuestion } from '../mystic-engine/instant-answer.ts';
 import type { BaziFacts } from './bazi-facts.ts';
 import type { TenGodCategory } from './ten-gods.ts';
 
@@ -24,6 +25,12 @@ export function leanForBaziIntent(
 ): string {
   if (isMetaUxQuestion(questionSlice)) {
     return '命盘解读会压成可核对的几步：先定调，再看盘面依据与本周动作。';
+  }
+  const route = routeQuestion(questionSlice, intent);
+  const plain = buildPlainDirectAnswer(questionSlice, { intentId: intent });
+  if (plain && route !== 'general') {
+    const first = plain.split(/[。！!]/).find((s) => s.trim());
+    if (first) return `${first.trim()}。`;
   }
   const soft = tone === 'soft' || tone === 'flow';
   const cut = tone === 'cut' || tone === 'hard' || tone === 'open';
@@ -71,6 +78,12 @@ export function leanForBaziIntent(
     case 'timing':
     case 'anxiety_decide':
       return '时机未一边倒时，先用一件小事验证，再决定加码或停——急不来，也不等于否决。';
+    case 'legal_process':
+      return '报警/维权后宜盯受理与书面反馈，别急着要一夜定性。';
+    case 'family_dispute':
+      return '家事宜先护安全与证据，再谈和解；过程会磨，别一次定终身。';
+    case 'outcome_trajectory':
+      return '走势偏渐进：用可核对的小步验证，别空想终局。';
     default:
       return `结合命盘结构，更宜对准「${hookPlain}」做一小步可核对动作，再决定加码还是收手。`;
   }

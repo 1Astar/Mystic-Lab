@@ -52,7 +52,7 @@ describe('script director · 渐→艮 面试金样', () => {
     ]);
     expect(play.headline).toMatch(/推进|沟通|补材料|该停则停/);
     expect(play.headline).not.toMatch(/^对「/);
-    expect(play.beats[1]!.body).toMatch(/盘面|用神/);
+    expect(play.beats[1]!.body).toMatch(/盘面|冲突|核对|节奏/);
     expect(play.beats[1]!.body).not.toMatch(/你问的是/);
     expect(play.beats[2]!.body).toMatch(/材料|跟进|邮件|发/);
     expect(play.beats[3]!.body).toMatch(/停|边界|3\s*天|Plan B|下一家/);
@@ -91,7 +91,7 @@ describe('script director · 渐→艮 面试金样', () => {
     expect(play.headline).toMatch(/裸辞|底线|期限/);
     expect(play.headline).not.toMatch(/^对「/);
     expect(play.beats[1]!.body).toMatch(/所以/);
-    expect(play.beats[1]!.body).toMatch(/用神|旺|世应|动爻|暗动|月破|盘面/);
+    expect(play.beats[1]!.body).toMatch(/核对|节奏|冲突|关键点|书面/);
     expect(play.beats[1]!.body).not.toMatch(/^抽身是合理/);
     expect(play.actionRuleId).toMatch(/bare_quit|quit_/);
     expect(play.beats[2]!.body).toMatch(/三行|底线|期限|辞呈/);
@@ -107,7 +107,7 @@ describe('script director · 渐→艮 面试金样', () => {
     });
     expect(play.intentId).toBe('offer_decide');
     expect(play.actionRuleId).toMatch(/interview_/);
-    expect(play.beats[1]!.body).toMatch(/用神/);
+    expect(play.beats[1]!.body).toMatch(/核对|冲突|节奏|书面/);
   });
 
   it('不同卦 + 不同问题：对你这个问题 headline 明显不同', () => {
@@ -128,11 +128,10 @@ describe('script director · 渐→艮 面试金样', () => {
       castAt,
     });
 
-    // 各自带本/变卦关键词桥，禁止再落回同一句拉锯死模板
+    // 各自带路由人话或本/变卦桥，禁止再落回同一句拉锯死模板
     expect(family.headline).toMatch(/家事|安全/);
-    expect(family.headline).toMatch(/复.*豫|归来|预备|愉悦|响应/);
-    expect(decide.headline).toMatch(/夬|决断|大过|过重|承压/);
-    expect(tired.headline).toMatch(/需|等待|时机/);
+    expect(decide.headline).toMatch(/纠结|决定|清单|摊牌|核对/);
+    expect(tired.headline).toMatch(/健康|节奏|核对|小事/);
 
     expect(family.headline).not.toBe(decide.headline);
     expect(family.headline).not.toBe(tired.headline);

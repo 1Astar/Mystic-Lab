@@ -764,6 +764,14 @@ export function renderXiaoliurenReading(root: HTMLElement): () => void {
                       .replace(/\n/g, ' · ')}</p>`
                   : ''
               }
+              ${
+                reading.directAnswer
+                  ? `<section class="xlr-result-block xlr-result-instant" data-instant-verdict>
+                <h3>一句话结论</h3>
+                <p class="xlr-result-direct">${reading.directAnswer}</p>
+              </section>`
+                  : ''
+              }
               <section class="xlr-result-block xlr-result-layer" data-layer="1">
                 <h3><span class="xlr-result-layer-no">一</span>传统含义</h3>
                 <p>${reading.meaning}</p>

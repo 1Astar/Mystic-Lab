@@ -11,6 +11,13 @@ import { parseWeekActions } from './week-actions.ts';
 import { buildWhyItems } from './why.ts';
 import { buildScriptPlay } from './script-play.ts';
 import type { OfflineAnswerPack, SceneAction, UserContext, WhyItem } from './types.ts';
+import { collectBoardSignals } from './board-signals.ts';
+import {
+  buildInstantDirectAnswer,
+  isPlainAnswerRoute,
+  routeQuestion,
+} from './instant-answer.ts';
+import { recordQuestionScene } from './scene-library.ts';
 
 export type BuildPackInput = {
   question: string;
@@ -96,6 +103,39 @@ export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack
     castAt,
   );
 
+  const signals = collectBoardSignals({
+    question: input.question,
+    cast: input.cast,
+    castAt,
+    intentId: primaryIntent,
+  });
+  const route = routeQuestion(input.question, primaryIntent);
+  const directAnswerRaw = buildInstantDirectAnswer({
+    question: input.question,
+    cast: input.cast,
+    route,
+    intentId: primaryIntent,
+    paceSlow: signals.pace === 'slow' || signals.pace === 'slow_then_stop',
+    paceStop: signals.pace === 'stop',
+    yongWeak: signals.yongWeak,
+    tugOfWar: signals.tugOfWar,
+  });
+  const directAnswer = isPlainAnswerRoute(route) ? directAnswerRaw.trim() : '';
+
+  const verdictHeadline = script?.headline || direct.verdict;
+
+  if (directAnswer && script) {
+    script.headline = directAnswer;
+  }
+
+  recordQuestionScene({
+    system: 'liuyao',
+    question: input.question,
+    intentId: primaryIntent,
+    route,
+    directAnswer: directAnswer || script?.headline,
+  });
+
   return {
     intents,
     answers,
@@ -106,10 +146,11 @@ export function buildOfflineAnswerPack(input: BuildPackInput): OfflineAnswerPack
     contextUsed: Boolean(ctx),
     verdict: {
       /** 旧版卦象主调一句话（核心方向大标题） */
-      headline: direct.verdict,
+      headline: directAnswer || verdictHeadline,
       parse: direct.analysis,
       decision: direct.decision,
     },
+    directAnswer: directAnswer.trim() || undefined,
     why,
     energy: undefined,
     reassurance: direct.reassurance,
