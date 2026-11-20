@@ -16,7 +16,10 @@ import {
   toggleBaziCodexMark,
   type BaziCodexMark,
 } from '../bazi/codex-favorites.ts';
-import { chartPresenceBrief } from '../bazi/codex-presence-brief.ts';
+import {
+  chartPresenceBrief,
+  formatCodexBriefHtml,
+} from '../bazi/codex-presence-brief.ts';
 import { findCodexInsightTip } from '../bazi/codex-insight-tip.ts';
 import {
   focusWuxingFromEntry,
@@ -126,10 +129,16 @@ function renderChartPane(link: ChartLinkReport | null | undefined, lit: boolean)
     '得令 · 得地 · 得势',
     `<p>${escapeHtml(link.strength.note)}</p>`,
   );
-  const impact = section('对日主是助力还是压力', `<p>${escapeHtml(link.dayMasterImpact)}</p>`);
-  const luck = section('当前大运、流年是否触发', `<p>${escapeHtml(link.luckTrigger)}</p>`);
+  const impact = section(
+    '对日主是助力还是压力',
+    `<div class="bazi-enc-presence-brief">${formatCodexBriefHtml(link.dayMasterImpact)}</div>`,
+  );
+  const luck = section(
+    '当前大运、流年是否触发',
+    `<p>${escapeHtml(link.luckTrigger).replace(/\n/g, '<br>')}</p>`,
+  );
   const role = link.dossierHint
-    ? section('命盘中的实际作用', `<p>${escapeHtml(link.dossierHint)}</p>`)
+    ? section('命盘中的实际作用', `<p>${escapeHtml(link.dossierHint).replace(/\n/g, '<br>')}</p>`)
     : '';
   const deep = link.deepBrief
     ? section(
@@ -301,7 +310,7 @@ export function renderBaziCodexDetailHtml(
           title: '在你身上',
           hideIfEmpty: true,
           bodyHtml: presenceBrief
-            ? `<p class="bazi-enc-presence-brief">${escapeHtml(presenceBrief)}</p>`
+            ? `<div class="bazi-enc-presence-brief">${formatCodexBriefHtml(presenceBrief)}</div>`
             : '',
         })}
         ${codexSkeletonSlotHtml({

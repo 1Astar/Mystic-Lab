@@ -45,6 +45,7 @@ type MeLink = {
 const PLAY_LINKS: MeLink[] = [
   { path: '/craft', label: '造命', desc: '灵根图谱 · 问答任务' },
   { path: '/life', label: '人生宇宙', desc: '平行 · 选择 · 预测' },
+  { path: '/matchmaker', label: '今日当红娘', desc: '挑人牵线 · 猜选择 · 等回信' },
   { path: '/wardrobe', label: '八字衣橱', desc: '幸运色、个人风格、每日穿搭' },
   { path: '/mirror', label: '双盘映照', desc: '八字 × 紫微对比' },
   { path: '/bazi/reading', label: '八字画像', desc: '日主白话解读 · 认识自己' },

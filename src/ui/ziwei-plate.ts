@@ -545,6 +545,11 @@ function layerExplainTerm(mode: LayerMode): string {
 
 export type MountZiweiPlateOptions = {
   initialPalace?: string;
+  /**
+   * 只出释义、不走造命「试炼与机缘」
+   * （红娘看他人盘、对照盘等：点星 = 看讲解）
+   */
+  explainOnly?: boolean;
 };
 
 export type MountZiweiPlateHandle = {
@@ -600,6 +605,8 @@ export function mountZiweiPlate(
     }
   }
 
+  const explainOnly = Boolean(opts?.explainOnly);
+
   function openLearn(focus: LearnFocus): void {
     applyFocusHighlight(focus);
     paint();
@@ -612,6 +619,8 @@ export function mountZiweiPlate(
         paint();
       },
       onClose: () => paint(),
+      inChartHeading: explainOnly ? '在此人命盘里' : undefined,
+      showChartCta: !explainOnly,
     });
   }
 
@@ -769,7 +778,9 @@ export function mountZiweiPlate(
       const isSeries = el.classList.contains('is-series');
       el.title = isSeries
         ? '点一下亮所在宫连线 · 再点看星曜释义'
-        : '点星曜：本源已亮 / 试炼激活';
+        : explainOnly
+          ? '点星曜看释义'
+          : '点星曜：本源已亮 / 试炼激活';
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         const palaceName = el.dataset.palaceName ?? '';
@@ -799,6 +810,18 @@ export function mountZiweiPlate(
           selected = findPalace(palaceName);
           if (layer === 'sanfang') showSanfangLines = true;
         }
+
+        // 他人盘：直接释义，不走本人造命试炼/机缘
+        if (explainOnly) {
+          paint();
+          openLearn({
+            kind: 'star',
+            starName,
+            palaceName: palaceName || undefined,
+          });
+          return;
+        }
+
         const isMajor = el.classList.contains('is-major');
         const ref: PlateStarRef = {
           palace: palaceName,
@@ -863,7 +886,7 @@ export function mountZiweiPlate(
     });
 
     host.querySelectorAll<HTMLElement>('[data-plate-hua]').forEach((el) => {
-      el.title = '点四化：试炼激活或查看本源';
+      el.title = explainOnly ? '点四化看释义' : '点四化：试炼激活或查看本源';
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         const palaceName = el.dataset.palaceName ?? '';
@@ -874,11 +897,13 @@ export function mountZiweiPlate(
           if (layer === 'sanfang') showSanfangLines = true;
         }
         // 底部流年四化行无宫名 → 直接释义
-        if (!palaceName) {
+        if (!palaceName || explainOnly) {
+          paint();
           openLearn({
             kind: 'mutagen',
             term: `化${hua}`,
             starName: starName || undefined,
+            palaceName: palaceName || undefined,
           });
           return;
         }

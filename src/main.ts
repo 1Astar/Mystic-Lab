@@ -226,6 +226,14 @@ registerRoute(
   lazy(() => import('./pages/ziwei-codex.ts'), 'renderZiweiCodex', ziweiStyles),
 );
 registerRoute(
+  '/ziwei/learn',
+  lazy(() => import('./pages/ziwei-learn.ts'), 'renderZiweiLearn', ziweiStyles),
+);
+registerRoute(
+  '/ziwei/learn/spouse',
+  lazy(() => import('./pages/ziwei-learn.ts'), 'renderZiweiLearnSpouse', ziweiStyles),
+);
+registerRoute(
   '/ziwei/guess',
   lazy(() => import('./pages/ziwei-guess.ts'), 'renderZiweiGuess', [
     ...ziweiStyles,
@@ -316,6 +324,17 @@ registerRoute(
 registerRoute(
   '/life/forecast',
   lazy(() => import('./pages/life-forecast.ts'), 'renderLifeForecast', lifeStyles),
+);
+
+const matchmakerStyles = [
+  () => import('./styles/life.css'),
+  () => import('./styles/matchmaker.css'),
+  () => import('./styles/bazi.css'),
+  () => import('./styles/ziwei.css'),
+];
+registerRoute(
+  '/matchmaker',
+  lazy(() => import('./pages/matchmaker.ts'), 'renderMatchmaker', matchmakerStyles),
 );
 
 registerRoute(

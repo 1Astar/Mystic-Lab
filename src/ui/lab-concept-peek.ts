@@ -2,6 +2,7 @@
  * 词条释义弹窗：小 tab 分段（画像/神话/要点…）
  * 用于边看边问常问、盘面字段点开。
  */
+import { formatCodexBriefHtml } from '../bazi/codex-presence-brief.ts';
 import { ICON_SPARK } from './lab-icons.ts';
 
 function escapeHtml(s: string): string {
@@ -10,6 +11,14 @@ function escapeHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function paneBodyHtml(tabId: string, body: string): string {
+  // 「在你身上」：落柱小标题金色加粗
+  if (tabId === 'you' || /【你的原局】|[年月日时]柱见/.test(body)) {
+    return `<div class="bazi-enc-presence-brief">${formatCodexBriefHtml(body)}</div>`;
+  }
+  return `<p>${escapeHtml(body).replace(/\n/g, '<br>')}</p>`;
 }
 
 export type LabConceptTab = {
@@ -30,6 +39,8 @@ export type LabConceptPeekOpts = {
   onOpenAsk?: (term: string) => void;
   /** 打开图鉴完整百科 */
   onOpenAtlas?: (term: string) => void;
+  /** 「看完整百科」按钮文案 */
+  atlasLabel?: string;
   /** 来源提示 */
   sourceHint?: string;
 };
@@ -95,7 +106,7 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
       ? opts.initialTab
       : tabs[0]?.id) ?? '';
   const atlasBtn = opts.onOpenAtlas
-    ? `<button type="button" class="lab-concept-peek-atlas" data-peek-atlas>看完整百科</button>`
+    ? `<button type="button" class="lab-concept-peek-atlas" data-peek-atlas>${escapeHtml(opts.atlasLabel?.trim() || '看完整百科')}</button>`
     : '';
 
   const tabBar =
@@ -117,7 +128,7 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
     .map(
       (t) => `
       <div class="lab-concept-peek-pane" data-peek-pane="${escapeHtml(t.id)}" ${t.id === initialId ? '' : 'hidden'}>
-        <p>${escapeHtml(t.body).replace(/\n/g, '<br>')}</p>
+        ${paneBodyHtml(t.id, t.body)}
       </div>`,
     )
     .join('');
@@ -179,8 +190,14 @@ export function openLabConceptPeek(opts: LabConceptPeekOpts): void {
   });
   modal.querySelector('[data-peek-atlas]')?.addEventListener('click', () => {
     close();
+    // 默认叠开下一层讲解；若回调里真要跳整页图鉴，由回调自己关宿主 dialog
     opts.onOpenAtlas?.(term);
   });
 
-  document.body.appendChild(modal);
+  /**
+   * 若已有 showModal 的 dialog（如红娘「了解此人」），释义必须挂进该 dialog，
+   * 否则会落在 top layer 下面，看起来像「释义在个人介绍后面/底下」。
+   */
+  const openDialog = document.querySelector('dialog[open]');
+  (openDialog ?? document.body).appendChild(modal);
 }

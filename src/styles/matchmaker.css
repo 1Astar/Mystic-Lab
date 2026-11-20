@@ -1,0 +1,1143 @@
+/* 今日当红娘 · 连续画布，少框 */
+
+.matchmaker-page .mm-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  justify-content: center;
+  margin: 0 0 28px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.matchmaker-page .mm-step.is-on {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 600;
+}
+
+.matchmaker-page .mm-section {
+  max-width: 860px;
+  margin: 0 auto 36px;
+}
+
+.matchmaker-page .mm-section-title {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gold-ink, var(--gold));
+  letter-spacing: 0.04em;
+}
+
+.matchmaker-page .mm-section-lead,
+.matchmaker-page .mm-muted,
+.matchmaker-page .mm-learn-hint {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
+.matchmaker-page .mm-learn-hint {
+  color: var(--ink-muted);
+}
+
+.matchmaker-page .mm-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.matchmaker-page .mm-sub {
+  margin: 24px 0 10px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 候选人区：对照 MVP 两人一排；色值跟主题 token，避免换主题发脏 */
+.matchmaker-page .mm-char-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+
+.matchmaker-page .mm-char {
+  --mm-av: color-mix(in srgb, var(--ink-muted) 18%, var(--surface-2, var(--surface-1, transparent)));
+  --mm-avin: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 18%, transparent);
+  border-radius: 15px;
+  background: var(--surface-1, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 4%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* 头像色：软粉彩叠 surface，星夜/月白都能读 */
+.matchmaker-page .mm-char.mm-tone-1 {
+  --mm-av: color-mix(in srgb, #e9ccd1 72%, var(--surface-2, #1a1624));
+  --mm-avin: color-mix(in srgb, #70384c 55%, var(--ink));
+}
+.matchmaker-page .mm-char.mm-tone-2 {
+  --mm-av: color-mix(in srgb, #e5d5bd 72%, var(--surface-2, #1a1624));
+  --mm-avin: color-mix(in srgb, #634b35 55%, var(--ink));
+}
+.matchmaker-page .mm-char.mm-tone-3 {
+  --mm-av: color-mix(in srgb, #d3e1d6 72%, var(--surface-2, #1a1624));
+  --mm-avin: color-mix(in srgb, #365245 55%, var(--ink));
+}
+.matchmaker-page .mm-char.mm-tone-4 {
+  --mm-av: color-mix(in srgb, #d6dae8 72%, var(--surface-2, #1a1624));
+  --mm-avin: color-mix(in srgb, #43476a 55%, var(--ink));
+}
+.matchmaker-page .mm-char.mm-tone-5 {
+  --mm-av: color-mix(in srgb, #ead4be 72%, var(--surface-2, #1a1624));
+  --mm-avin: color-mix(in srgb, #684631 55%, var(--ink));
+}
+
+.matchmaker-page .mm-char.is-selected {
+  outline: 2px solid color-mix(in srgb, #94627d 75%, var(--gold-ink, var(--gold)));
+  outline-offset: -2px;
+  border-color: transparent;
+  background: color-mix(in srgb, #fffbf7 70%, var(--surface-1, transparent));
+}
+
+.matchmaker-page .mm-char.is-open {
+  grid-column: 1 / -1;
+}
+
+.matchmaker-page .mm-person-top {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  margin-bottom: 1px;
+}
+
+.matchmaker-page .mm-person-id {
+  min-width: 0;
+  flex: 1;
+}
+
+.matchmaker-page .mm-char-avatar {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--mm-avin) 12%, transparent);
+  border-radius: 50% 50% 43% 43%;
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--mm-avin);
+  background: var(--mm-av);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, #fff 28%, transparent);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.matchmaker-page .mm-char-avatar:hover,
+.matchmaker-page .mm-char-avatar:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px color-mix(in srgb, #fff 28%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.matchmaker-page .mm-char-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.matchmaker-page .mm-char-name {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.matchmaker-page .mm-char-name:hover,
+.matchmaker-page .mm-char-name:focus-visible {
+  color: color-mix(in srgb, var(--ink) 70%, #8d5a77);
+  outline: none;
+}
+
+.matchmaker-page .mm-picked-badge {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-ink, var(--gold));
+  font-weight: 700;
+}
+
+.matchmaker-page .mm-picked-badge.mm-badge-soft {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.matchmaker-page .mm-gender {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, #8d5a77 28%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, #8d5a77 12%, var(--surface-1, #fff));
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ink) 72%, #4b405d);
+  letter-spacing: 0;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.matchmaker-page .mm-char-meta-line {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.35;
+}
+
+.matchmaker-page .mm-char-quote {
+  margin: 0;
+  padding-left: 9px;
+  border-left: 2px solid color-mix(in srgb, #8d5a77 28%, #e9dce3);
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ink) 82%, #594f60);
+  line-height: 1.63;
+  min-height: 3.2em;
+}
+
+.matchmaker-page .mm-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.matchmaker-page .mm-char-link {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-left: -6px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: color-mix(in srgb, var(--ink) 75%, #8d5a77);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.matchmaker-page .mm-char-link:hover,
+.matchmaker-page .mm-char-link:focus-visible {
+  background: color-mix(in srgb, #8d5a77 10%, transparent);
+  outline: none;
+}
+
+.matchmaker-page .mm-char-choose {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 80px;
+  min-height: 39px;
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, #8d5a77 28%, #d7c8d4);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-1, #fffaf6) 92%, #fff);
+  color: color-mix(in srgb, var(--ink) 78%, #8d5a77);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.matchmaker-page .mm-char-choose:hover,
+.matchmaker-page .mm-char-choose:focus-visible {
+  background: color-mix(in srgb, #8d5a77 12%, var(--surface-1, #fff));
+  outline: none;
+}
+
+.matchmaker-page .mm-char-choose.is-on {
+  background: color-mix(in srgb, #8d5a77 16%, #eee5ee);
+  border-color: transparent;
+}
+
+@media (max-width: 560px) {
+  .matchmaker-page .mm-char-grid {
+    gap: 10px;
+  }
+
+  .matchmaker-page .mm-char {
+    padding: 12px 11px 10px;
+  }
+
+  .matchmaker-page .mm-char-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 1.05rem;
+  }
+
+  .matchmaker-page .mm-char-name {
+    font-size: 1.05rem;
+  }
+
+  .matchmaker-page .mm-char-quote {
+    font-size: 0.84rem;
+    min-height: 0;
+  }
+
+  .matchmaker-page .mm-char-link,
+  .matchmaker-page .mm-char-choose {
+    font-size: 0.78rem;
+    padding: 6px 9px;
+    min-height: 34px;
+  }
+
+  .matchmaker-page .mm-char-choose {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .matchmaker-page .mm-char-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.matchmaker-page .mm-actions-top {
+  margin-bottom: 16px;
+}
+
+.matchmaker-page .mm-voice {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.matchmaker-page .mm-learn-list {
+  margin: 0 0 14px;
+  padding-left: 1.2em;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
+.matchmaker-page .mm-hepan-preview {
+  margin: 18px 0 8px;
+}
+
+.matchmaker-page .mm-scene p {
+  margin: 0 0 0.85em;
+}
+
+.matchmaker-page .mm-pillar.mm-hint-hi {
+  opacity: 1;
+  outline: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  outline-offset: 4px;
+}
+
+.matchmaker-page .mm-hint-layer2 {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+}
+
+.matchmaker-page .mm-hint-layer2 summary {
+  cursor: pointer;
+  color: var(--gold-ink, var(--gold));
+}
+
+.matchmaker-page .mm-analysis {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+}
+
+.matchmaker-page .mm-analysis summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.matchmaker-page .mm-analysis.is-actual summary {
+  color: var(--gold-ink, var(--gold));
+}
+
+.matchmaker-page .mm-analysis .mm-muted {
+  margin: 6px 0 0;
+}
+
+/* 操作链：跟正文色，不跟脏金；选中态才用金墨 */
+.matchmaker-page .mm-char-detail-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--ink-muted) 45%, transparent);
+}
+
+.matchmaker-page .mm-char-detail-btn:hover,
+.matchmaker-page .mm-char-detail-btn:focus-visible {
+  color: var(--ink);
+  text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.matchmaker-page .mm-char.is-selected .mm-picked-badge {
+  color: var(--gold-ink, var(--gold));
+}
+
+.matchmaker-page .mm-char-sheet {
+  margin-top: 4px;
+  margin-left: 0;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 22%, transparent);
+}
+
+@media (max-width: 480px) {
+  .matchmaker-page .mm-char-tools {
+    margin-left: 0;
+  }
+  .matchmaker-page .mm-char-sheet {
+    margin-left: 0;
+  }
+}
+
+.matchmaker-page .mm-timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+
+.matchmaker-page .mm-timeline-chip {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  background: color-mix(in srgb, var(--ink-muted) 14%, transparent);
+}
+
+.matchmaker-page .mm-timeline-chip.is-past {
+  color: var(--ink-muted);
+}
+
+.matchmaker-page .mm-timeline-chip.is-on {
+  color: var(--bg-deep, #1a1424);
+  background: color-mix(in srgb, var(--gold) 82%, #fff);
+  font-weight: 700;
+}
+
+.matchmaker-page .mm-ziwei-plate-host,
+.mm-person-dialog .mm-ziwei-plate-host {
+  margin: 10px 0 14px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* 一个外胶囊 + 左右两段切换（不是两个独立胶囊） */
+.matchmaker-page .mm-sys-capsule,
+.mm-person-dialog .mm-sys-capsule {
+  display: flex;
+  gap: 0;
+  margin: 2px 0 14px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 28%, transparent);
+  background: color-mix(in srgb, var(--ink-muted) 10%, transparent);
+}
+
+.matchmaker-page .mm-sys-capsule-seg,
+.mm-person-dialog .mm-sys-capsule-seg {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.matchmaker-page .mm-sys-capsule-seg.is-on,
+.mm-person-dialog .mm-sys-capsule-seg.is-on {
+  color: var(--bg-deep, #1a1424);
+  background: color-mix(in srgb, var(--gold) 78%, #fff);
+  font-weight: 700;
+}
+
+.matchmaker-page .mm-sys-capsule-seg:hover,
+.mm-person-dialog .mm-sys-capsule-seg:hover,
+.matchmaker-page .mm-sys-capsule-seg:focus-visible,
+.mm-person-dialog .mm-sys-capsule-seg:focus-visible {
+  color: var(--ink);
+  outline: none;
+}
+
+/* 处境 / 愿望强制各占一行 */
+.mm-person-dialog .mm-dialog-context {
+  display: block;
+  margin: 0 0 12px;
+}
+
+.mm-person-dialog .mm-dialog-context-line {
+  display: block;
+  margin: 0 0 6px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+}
+
+.mm-person-dialog .mm-dialog-context-line:last-child {
+  margin-bottom: 0;
+}
+
+.mm-person-dialog .mm-dialog-context-k {
+  display: inline;
+  margin-right: 0.35em;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.mm-person-dialog .mm-dialog-context-k::after {
+  content: '：';
+}
+
+/* 了解弹窗：复用命盘页四柱表，不做自定义柱卡 */
+.matchmaker-page .mm-bazi-natal,
+.mm-person-dialog .mm-bazi-natal {
+  margin: 8px 0 14px;
+  overflow-x: auto;
+}
+
+.matchmaker-page .mm-bazi-natal .bazi-grid-wrap,
+.mm-person-dialog .mm-bazi-natal .bazi-grid-wrap {
+  margin: 0;
+}
+
+.matchmaker-page .mm-ziwei-natal,
+.mm-person-dialog .mm-ziwei-natal {
+  margin: 0 0 8px;
+}
+
+.matchmaker-page .mm-ziwei-block {
+  margin: 0 0 8px;
+}
+
+.matchmaker-page .mm-reason-person {
+  margin: 0 0 16px;
+}
+
+.matchmaker-page .mm-reason-person .mm-char-tools {
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.matchmaker-page .mm-pillars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 8px 0 10px;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+}
+
+.matchmaker-page .mm-pillar {
+  opacity: 0.55;
+}
+
+.matchmaker-page .mm-pillar.is-day {
+  opacity: 1;
+}
+
+.matchmaker-page .mm-stem,
+.matchmaker-page .mm-branch {
+  font-style: normal;
+}
+
+.matchmaker-page .mm-mark-stem {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 700;
+}
+
+.matchmaker-page .mm-mark-branch {
+  color: color-mix(in srgb, #6db3c9 80%, var(--ink));
+  font-weight: 700;
+}
+
+.matchmaker-page .mm-mark-branch.is-hi {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, #6db3c9 55%, transparent);
+}
+
+.matchmaker-page .mm-day-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 40px;
+  margin-bottom: 12px;
+}
+
+.matchmaker-page .mm-day-gz {
+  margin: 6px 0 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+}
+
+.matchmaker-page .mm-relation {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.matchmaker-page .mm-term-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--gold-ink, var(--gold));
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.matchmaker-page .mm-spouse-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matchmaker-page .mm-spouse-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.matchmaker-page .mm-venue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.matchmaker-page .mm-venue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  padding-bottom: 14px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.matchmaker-page .mm-venue strong {
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.matchmaker-page .mm-venue span {
+  font-size: 0.86rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.matchmaker-page .mm-venue.is-on strong {
+  color: var(--gold-ink, var(--gold));
+}
+
+.matchmaker-page .mm-letter {
+  margin: 0 0 18px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.matchmaker-page .mm-letter p {
+  margin: 0 0 1em;
+}
+
+.matchmaker-page .mm-chart-peek {
+  margin: 0 0 22px;
+  font-size: 0.9rem;
+}
+
+.matchmaker-page .mm-chart-peek summary {
+  cursor: pointer;
+  color: var(--gold-ink, var(--gold));
+  margin-bottom: 12px;
+}
+
+.matchmaker-page .mm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.matchmaker-page .mm-rematch-banner {
+  margin: 0 0 16px;
+  padding: 12px 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-muted) 18%, transparent);
+}
+
+.matchmaker-page .mm-mainline-banner {
+  margin: 0 0 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+}
+
+.matchmaker-page .mm-mainline-banner .mm-sub {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 650;
+}
+
+.matchmaker-page .mm-rematch-actions,
+.matchmaker-page .mm-follow-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.matchmaker-page .mm-mainline-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--gold-ink, var(--gold));
+  letter-spacing: 0.02em;
+}
+
+.matchmaker-page .mm-badge-mainline {
+  color: var(--gold-ink, var(--gold));
+  border-color: color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
+.matchmaker-page .mm-char.is-mainline {
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.matchmaker-page .mm-char.is-anchor {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.mm-person-dialog .mm-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mm-lesson-order {
+  margin: 12px 0 16px;
+  padding-left: 1.2em;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--ink) 88%, transparent);
+}
+
+.mm-lesson-callout {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.mm-lesson-plate {
+  margin: 12px 0 16px;
+}
+
+.mm-lesson [data-mm-lesson-feedback].is-soft-hint {
+  color: var(--gold-ink, var(--gold));
+}
+
+.mm-lesson-day-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.mm-lesson-pick {
+  min-width: 7.5rem;
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 2px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mm-lesson-pick strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.35rem;
+  color: var(--gold-ink, var(--gold));
+}
+
+/* 教学自判：先藏十神标签，逼玩家用日干去认 */
+.mm-lesson-hide-gods tr:has(.bazi-god),
+.mm-lesson-hide-gods tr:has(.bazi-zhishen),
+.mm-lesson-hide-gods tr:has(.bazi-hide-list) {
+  display: none;
+}
+
+.mm-lesson-guesses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 14px 0 8px;
+}
+
+.mm-lesson-guess {
+  padding: 8px 2px;
+  border: none;
+  border-bottom: 2px solid color-mix(in srgb, var(--gold) 40%, transparent);
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+.mm-lesson-guess:hover,
+.mm-lesson-guess:focus-visible {
+  color: var(--gold-ink, var(--gold));
+  outline: none;
+}
+
+.mm-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.mm-create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.mm-create-field input,
+.mm-create-field select {
+  min-height: 40px;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-muted) 28%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.mm-create-field input:focus,
+.mm-create-field select:focus {
+  outline: none;
+  border-bottom-color: color-mix(in srgb, var(--gold) 70%, transparent);
+}
+
+.mm-create-details {
+  margin: 4px 0 0;
+}
+
+.mm-create-details summary {
+  cursor: pointer;
+  color: var(--gold-ink, var(--gold));
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.mm-create-fine {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.mm-create-err {
+  margin: 0;
+  color: color-mix(in srgb, #c45c5c 80%, var(--ink));
+  font-size: 0.82rem;
+}
+
+@media (max-width: 520px) {
+  .mm-create-fine {
+    grid-template-columns: 1fr;
+  }
+}
+
+.matchmaker-page .mm-ledger-nav {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 16px;
+}
+
+.matchmaker-page .mm-ledger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0 20px;
+}
+
+.matchmaker-page .mm-ledger-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 22%, transparent);
+  border-radius: 12px;
+  background: var(--surface-1, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.matchmaker-page .mm-ledger-row:hover,
+.matchmaker-page .mm-ledger-row:focus-visible {
+  border-color: color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.matchmaker-page .mm-ledger-kind {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  min-width: 2.5em;
+}
+
+.matchmaker-page .mm-ledger-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.matchmaker-page .mm-ledger-main strong {
+  font-size: 0.98rem;
+}
+
+.matchmaker-page .mm-ledger-go {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.matchmaker-page .mm-near-miss-card {
+  margin: 8px 0 20px;
+  padding: 14px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 18%, transparent);
+}
+
+.matchmaker-page .mm-near-miss-card .mm-near-miss-open {
+  margin-top: 10px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-1, transparent));
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 28%, transparent);
+}
+
+.matchmaker-page .mm-family-tree {
+  margin: 16px 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.matchmaker-page .mm-family-parents {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 16px;
+}
+
+.matchmaker-page .mm-family-plus {
+  color: var(--ink-muted);
+  font-size: 1.2rem;
+}
+
+.matchmaker-page .mm-family-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.matchmaker-page .mm-family-node strong {
+  font-size: 0.95rem;
+}
+
+.matchmaker-page .mm-family-node em {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.matchmaker-page .mm-family-node.is-child .mm-char-avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 1.2rem;
+}
+
+.matchmaker-page .mm-tryplay {
+  max-width: 720px;
+  margin: 40px auto 20px;
+  padding-top: 20px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.matchmaker-page .mm-tryplay-title {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.matchmaker-page .mm-tryplay ol {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.matchmaker-page .mm-tryplay strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .matchmaker-page .mm-char-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 「了解这个人」弹窗 · 对照 MVP dialog，色跟主题 token */
+.mm-person-dialog {
+  position: relative;
+  width: min(720px, calc(100% - 28px));
+  max-height: calc(100dvh - 36px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 28%, transparent);
+  border-radius: 16px;
+  background: var(--surface-1, var(--bg-panel, #fffaf5));
+  color: var(--ink);
+  box-shadow: var(--shadow, 0 18px 65px rgba(20, 12, 28, 0.35));
+  overflow: visible;
+}
+
+/* 遮罩不能跟 --bg-deep：月白时 bg-deep 是米色，会透出底层像「没渲染」 */
+.mm-person-dialog::backdrop {
+  background: rgba(28, 22, 36, 0.58);
+}
+
+.mm-person-dialog .mm-dialog-inner {
+  padding: 20px 20px 16px;
+  overflow: auto;
+  max-height: calc(100dvh - 48px);
+}
+
+.mm-person-dialog .mm-dialog-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.mm-person-dialog .mm-dialog-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.03em;
+}
+
+.mm-person-dialog .mm-dialog-meta {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.mm-person-dialog .mm-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 18%, transparent);
+}
+
+.mm-person-dialog .mm-dialog-footer .life-btn-ghost {
+  min-width: 5.5rem;
+}
+
+.mm-person-dialog .mm-char-sheet {
+  margin-left: 0;
+  border-top: none;
+  padding-top: 4px;
+}

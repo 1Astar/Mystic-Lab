@@ -120,10 +120,10 @@ const STEM_RICH: Record<string, Partial<CodexDossier>> = {
     memory: '甲木 = 参天大树：要水润、要火暖、要金修剪，忌土压金伐。',
     coreKeyword: '参天大树 · 栋梁之材',
     pillarMeaning: {
-      year: '出现在年柱：家族、早年环境与出身底色偏「木」——重原则、有方向感。',
-      month: '出现在月柱：父母、社会环境、职业底色——当令则生长力强。',
-      day: '出现在日柱：自我与伴侣关系——本人即甲木，要尊重与并肩成长。',
-      hour: '出现在时柱：晚年、子女、未来方向——成果向「成林成材」收口。',
+      year: '年柱见甲：早年家风与出身场偏「参天大树」——重原则、有方向感，影响你怎么被养成。',
+      month: '月柱见甲：做事与社会场底色偏开创、立方向——当令则生长力强，宜扛长期建设。',
+      day: '日柱见甲：日主或自我如栋梁——要尊重与并肩成长，忌硬碰硬折断。',
+      hour: '时柱见甲：子女/晚成与出口向「成林成材」收口——后期成果要立得住。',
     },
   },
   乙: {
@@ -148,10 +148,10 @@ const STEM_RICH: Record<string, Partial<CodexDossier>> = {
     memory: '乙木 = 藤萝花草：要细水、要暖光、要可攀之木，忌硬砍无依。',
     coreKeyword: '藤萝花草 · 柔韧生长',
     pillarMeaning: {
-      year: '年柱见乙：早年环境偏柔韧、重关系与适应。',
-      month: '月柱见乙：事业场善协调迂回，忌无主见。',
+      year: '年柱见乙：早年家风偏柔韧、重关系与适应——影响你怎么绕路求生。',
+      month: '月柱见乙：做事善协调迂回，忌无主见、把柔软活成讨好。',
       day: '日柱见乙：自我如藤——要边界，也要可依靠的支架。',
-      hour: '时柱见乙：晚成与子女缘偏柔软细作。',
+      hour: '时柱见乙：子女/晚成与出口偏柔软细作，忌无骨漂浮。',
     },
   },
   丙: {
@@ -176,10 +176,10 @@ const STEM_RICH: Record<string, Partial<CodexDossier>> = {
     memory: '丙火 = 正午太阳：要木生、要水调、忌水灭火焚。',
     coreKeyword: '正午太阳 · 光明外放',
     pillarMeaning: {
-      year: '年柱见丙：出身场偏亮、早年易被看见。',
-      month: '月柱见丙：事业靠表达与带动。',
-      day: '日柱见丙：本人即太阳——要出口，也要降温。',
-      hour: '时柱见丙：晚成与子女场偏热度与表现。',
+      year: '年柱见丙：早年出身场偏亮——易被看见，也易早担曝光。',
+      month: '月柱见丙：做事靠表达与带动，热度是本钱也是消耗。',
+      day: '日柱见丙：本人即太阳——要出口，也要降温休息。',
+      hour: '时柱见丙：子女/晚成与出口偏热度与表现，忌只烧热情。',
     },
   },
   丁: {
@@ -456,16 +456,94 @@ function buildBranchDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     positive: entry.oneLiner,
     memory: entry.oneLiner,
     pillarMeaning: {
-      year: `年支：早年环境与家族气场落在「${entry.title}」。`,
-      month: `月支：月令核心——是否得令看此柱权重最大。`,
-      day: `日支：配偶宫与自我落脚处。`,
-      hour: `时支：子女/晚成与未来出口。`,
+      year: `年支见「${entry.title}」：早年家风与出身场的地气落在这里${lore?.epithet ? `（${lore.epithet}）` : ''}——影响你怎么起步、怎么被养成。`,
+      month: `月支见「${entry.title}」：月令/事业场的核心地气——是否得令、做事节奏，权重大；当令则整盘都受它带动。`,
+      day: `日支见「${entry.title}」：坐下与配偶宫——自我落脚、亲密关系的地气；合冲刑害先看这里。`,
+      hour: `时支见「${entry.title}」：子女/晚成与往后出口的地气——后期收成往哪长，看这一支。`,
     },
     coreKeyword: lore?.epithet || entry.structure.keywords[0] || entry.title,
   };
 }
 
+/** 十神 × 四柱：写清「落在这柱具体像什么」，少空标签 */
+function tengodPillarMeanings(
+  title: string,
+): CodexDossier['pillarMeaning'] {
+  const table: Record<string, CodexDossier['pillarMeaning']> = {
+    正财: {
+      year: '年柱见正财：早年家风偏「踏实到手」——钱和资源要看得见、算得清，少凭空许诺。',
+      month:
+        '月柱见正财：做事与收入底色偏正职、契约、固定回报——你更信「付出有账可算」，不爱空转。',
+      day: '日柱见正财：自我或伴侣相处里，更在意稳定供养与实际保障，少只谈感觉。',
+      hour: '时柱见正财：子女/成果/往后出口，偏向可积累、可托付的收获，虚火一阵的不算。',
+    },
+    偏财: {
+      year: '年柱见偏财：早年就接触流动机会、人情往来或「靠项目吃饭」的气氛。',
+      month: '月柱见偏财：事业场里机会来得快——生意、人脉、额外进账更对胃口，也要防来去匆匆。',
+      day: '日柱见偏财：自己或伴侣议题里，容易因机会、应酬、资源互换起波澜。',
+      hour: '时柱见偏财：后期成果常靠窗口与人脉撬动；抓得住也要留退路。',
+    },
+    正官: {
+      year: '年柱见正官：早年规矩感强——家里或环境常有「该怎样才算对」的标准。',
+      month: '月柱见正官：做事底色重平台、职责与评价——适合有名分的位置，也易被规矩压住。',
+      day: '日柱见正官：自我要求或伴侣关系里，承诺、名分、对错会更敏感。',
+      hour: '时柱见正官：子女/晚成方向，偏向有秩序、有头衔、能被承认的成果。',
+    },
+    七杀: {
+      year: '年柱见七杀：早年压力或竞争感偏重——要早点学会扛事与边界。',
+      month: '月柱见七杀：事业场锋利——挑战、考核、硬仗多；驾驭得好成器，硬扛易耗。',
+      day: '日柱见七杀：自我或伴侣相处，张力大，要么很敢冲，要么很怕被压。',
+      hour: '时柱见七杀：后期出口常靠决断与抗压；有疏通才不易硬刚到底。',
+    },
+    正印: {
+      year: '年柱见正印：早年易被托住——学识、长辈庇护或「有人替你挡一层」。',
+      month: '月柱见正印：做事靠学习、资质与贵人支持；舒服，也要防把成长外包出去。',
+      day: '日柱见正印：自己或伴侣场里，更渴望被理解、被养着，也怕失去依靠。',
+      hour: '时柱见正印：子女/晚成常与学问、证书、被人认可的「有根基」有关。',
+    },
+    偏印: {
+      year: '年柱见偏印：早年思路偏门或家风独特——聪明，也可能孤单。',
+      month: '月柱见偏印：事业场利钻研、技艺、非常规路径；定期要把想法说成人话。',
+      day: '日柱见偏印：自我世界深，伴侣相处要防「只活在自己的逻辑里」。',
+      hour: '时柱见偏印：后期成果常是冷门专长或独立创作，忌越钻越窄。',
+    },
+    食神: {
+      year: '年柱见食神：早年氛围偏松——表达、口福、从容产出有土壤。',
+      month: '月柱见食神：做事重才艺与温和输出，节奏宜养不宜逼；过乐则散。',
+      day: '日柱见食神：自己或伴侣相处里，舒服、分享、小确幸很重要。',
+      hour: '时柱见食神：子女/成果偏向可享受、可展示的产出，记得留一点结构。',
+    },
+    伤官: {
+      year: '年柱见伤官：早年就敢说、敢反——锋芒早露，也易顶撞规矩。',
+      month: '月柱见伤官：事业场靠创意与破局；吐槽、革新是燃料，少用在无谓抬杠。',
+      day: '日柱见伤官：自我表达强，伴侣相处要防「说得太准、伤得太深」。',
+      hour: '时柱见伤官：后期成果常是作品、观点、破旧立新；见官时更要收锋。',
+    },
+    比肩: {
+      year: '年柱见比肩：早年同辈多、主张早——「我也能行」的味道重。',
+      month: '月柱见比肩：做事爱并肩、合伙、自力更生；助力大，也易较劲分功。',
+      day: '日柱见比肩：自我主张强，伴侣场要学会分工而不是抢戏。',
+      hour: '时柱见比肩：子女/晚成常靠自己人脉与并肩作战，忌事事较劲。',
+    },
+    劫财: {
+      year: '年柱见劫财：早年就经历争夺、拆借或「资源要跟人分」。',
+      month: '月柱见劫财：事业场竞争与互换多——机会在，边界不清时钱和名都易被分走。',
+      day: '日柱见劫财：自我或伴侣相处里，付出与回报要算清，防被动分享。',
+      hour: '时柱见劫财：后期成果常伴随合作与分流；先定规则，再一起做大。',
+    },
+  };
+  return (
+    table[title] ?? {
+      year: `年柱见${title}：早年家风与出身场里，这条十神的味道更重。`,
+      month: `月柱见${title}：做事与社会角色底色里，这条十神更常出手。`,
+      day: `日柱见${title}：自我节奏或伴侣相处里，更容易碰到这条十神的课题。`,
+      hour: `时柱见${title}：子女/成果/往后出口，常带这条十神的方向感。`,
+    }
+  );
+}
+
 function buildTengodDossier(entry: BaziEncyclopediaEntry): CodexDossier {
+  const card = getStarCardByName('tengod', entry.title);
   return {
     whatIs: `${entry.title}是什么：${entry.oneLiner}`,
     wuxingLabel: '十神（相对日主）',
@@ -473,9 +551,11 @@ function buildTengodDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     season: '旺衰看该十神所坐干支是否得令、得地、得势。',
     likes: ['比例适中', '有制有化', '落在有用之柱'],
     dislikes: ['过旺无制', '过弱无扶', '与忌神叠加重克'],
-    personality: entry.dimensions.personality,
+    personality: entry.dimensions.personality || card?.impression || '',
     strength: entry.structure.keywords.join('、'),
-    imbalance: `过旺过弱时，十神的正负表现都会放大。`,
+    imbalance:
+      card?.trap ||
+      `过旺过弱时，十神的正负表现都会放大。`,
     career: entry.dimensions.work,
     wealth: '财星类十神直接关联求财方式；官杀关联平台与规则。',
     love: entry.dimensions.love,
@@ -484,12 +564,7 @@ function buildTengodDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     combos: defaultCombos(entry),
     positive: `正面：${entry.structure.keywords.slice(0, 3).join('、')}。失衡见维度说明。`,
     memory: entry.oneLiner,
-    pillarMeaning: {
-      year: `年柱见${entry.title}：早年/家族议题带该十神色彩。`,
-      month: `月柱见${entry.title}：职业底色与社会角色。`,
-      day: `日柱见${entry.title}：自我或配偶议题。`,
-      hour: `时柱见${entry.title}：子女/成果/晚成方向。`,
-    },
+    pillarMeaning: tengodPillarMeanings(entry.title),
     coreKeyword: entry.structure.keywords.slice(0, 2).join(' · ') || entry.title,
   };
 }
@@ -514,7 +589,12 @@ function buildWuxingDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     combos: defaultCombos(entry),
     positive: entry.oneLiner,
     memory: entry.oneLiner,
-    pillarMeaning: PILLAR_DEFAULT,
+    pillarMeaning: {
+      year: `年柱见「${entry.title}」：早年家风与出身场偏此气——影响你怎么起步、被什么环境养成。`,
+      month: `月柱见「${entry.title}」：做事与社会场的气场底色——是否当令，权重大。`,
+      day: `日柱见「${entry.title}」：自我与伴侣相处里的本气味道；喜忌先合日主看。`,
+      hour: `时柱见「${entry.title}」：子女/成果/往后出口偏此气——后期收成往哪长。`,
+    },
     coreKeyword: entry.structure.keywords.slice(0, 2).join(' · ') || entry.title,
   };
 }
@@ -539,10 +619,10 @@ function buildShellDossier(entry: BaziEncyclopediaEntry): CodexDossier {
     positive: entry.oneLiner,
     memory: entry.oneLiner,
     pillarMeaning: {
-      year: `年柱见「${entry.title}」：早年/家族议题对照。`,
-      month: `月柱见「${entry.title}」：事业与社会场对照。`,
-      day: `日柱见「${entry.title}」：自我与伴侣对照。`,
-      hour: `时柱见「${entry.title}」：子女与晚成对照。`,
+      year: `年柱见「${entry.title}」：早年/家族场带此气质——影响起步与被养成的方式。`,
+      month: `月柱见「${entry.title}」：事业与社会场显此气质——做事节奏与窗口感。`,
+      day: `日柱见「${entry.title}」：自我与伴侣场显此气质；仍须合日主喜忌，不作单断。`,
+      hour: `时柱见「${entry.title}」：子女/晚成与出口场显此气质——后期怎么收成。`,
     },
     coreKeyword: entry.structure.keywords.slice(0, 2).join(' · ') || entry.title,
   };

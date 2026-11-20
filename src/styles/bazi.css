@@ -6550,6 +6550,37 @@ html[data-theme='moon'] .bazi-chart-page[data-bazi-wx] {
   font-size: 0.8rem;
   line-height: 1.55;
   color: color-mix(in srgb, var(--ink) 88%, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  white-space: normal;
+}
+
+.bazi-enc-presence-lead {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.bazi-enc-presence-row {
+  display: block;
+}
+
+.bazi-enc-presence-k {
+  font-weight: 650;
+  color: var(--gold-ink, var(--gold));
+}
+
+.bazi-enc-presence-v {
+  color: color-mix(in srgb, var(--ink) 90%, #1a1a1a);
+}
+
+.bazi-enc-presence-note {
+  display: block;
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  font-size: 0.94em;
 }
 
 .bazi-enc-toolbar {

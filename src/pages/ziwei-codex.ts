@@ -30,6 +30,7 @@ import {
   resolveZiweiReadPath,
   type ZiweiReadPath,
 } from '../ziwei/read-path.ts';
+import { renderCompareBlockForTerm } from '../ziwei/compare-learn.ts';
 import {
   comboJourneySummary,
   evaluateCombo,
@@ -537,6 +538,7 @@ function renderPalaceDetail(
       <div class="ziwei-detail-tabs" role="tablist" aria-label="宫位读法">${tabs}</div>
       ${panel}
       ${tab === 'tips' ? practiceCta : ''}
+      ${renderCompareBlockForTerm(p.title)}
     </article>`;
 }
 
@@ -599,6 +601,7 @@ function renderTermDetail(term: string): string {
           .join('')}</ul>
       </section>
       <p class="ziwei-codex-hint">完整解释也可在命盘里点对应图层 / 宫位，按你的盘动态展开。</p>
+      ${renderCompareBlockForTerm(g.name)}
     </article>`;
 }
 

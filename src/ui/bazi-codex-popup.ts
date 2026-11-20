@@ -13,8 +13,8 @@ import {
   answerFromCodexEntity,
   resolveCodexEntityId,
 } from '../bazi/codex-entity-resolve.ts';
-import { navigate } from '../router.ts';
 import { openLabConceptPeek } from './lab-concept-peek.ts';
+import { openBaziCodexEntryPeek } from './bazi-codex-entry-peek.ts';
 
 export type BaziCodexPopupOpts = {
   term: string;
@@ -44,7 +44,6 @@ export function openBaziCodexPopup(opts: BaziCodexPopupOpts): boolean {
       onMiss: opts.onMiss,
       onOpenAsk: opts.onOpenAsk,
       sourceHint: '本地词条 · 浅释义',
-      onOpenAtlas: () => navigate('/bazi/tujian'),
     });
     return false;
   }
@@ -64,20 +63,20 @@ export function openBaziCodexPopup(opts: BaziCodexPopupOpts): boolean {
 
   openLabConceptPeek({
     term: entry.title,
-    sourceHint: '解读带学 · 深度请查图鉴',
+    sourceHint: '解读带学 · 要更深点「看完整百科」',
     tabs: [
       { id: 'what', label: '是什么', body: entry.oneLiner },
       { id: 'you', label: '在你身上', body: presence },
     ],
     initialTab: chartLink.present ? 'you' : 'what',
     onOpenAsk: opts.onOpenAsk,
+    /** 不整页跳走：叠开本条百科；关掉仍回档案/命盘 */
     onOpenAtlas: () => {
-      try {
-        sessionStorage.setItem('mystic-lab-open-codex-id', id);
-      } catch {
-        /* ignore */
-      }
-      navigate('/bazi/tujian');
+      openBaziCodexEntryPeek({
+        id,
+        chart: opts.chart,
+        luck: opts.luck,
+      });
     },
   });
   return true;

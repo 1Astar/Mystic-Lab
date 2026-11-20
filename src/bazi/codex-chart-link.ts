@@ -15,6 +15,7 @@ import type { LuckCycles } from './luck-cycles.ts';
 import { nayinOf } from './pillar-meta.ts';
 import { shenshaForBranch } from './shensha.ts';
 import { getStarCard } from './codex-tags.ts';
+import { TEN_GOD_PLAIN } from './learn-steps.ts';
 
 const SHENG: WuXing[] = ['木', '火', '土', '金', '水'];
 
@@ -231,50 +232,134 @@ function strengthOf(
   };
 }
 
+const PILLAR_MEANING_KEY: Record<string, keyof CodexDossier['pillarMeaning']> = {
+  year: 'year',
+  month: 'month',
+  day: 'day',
+  hour: 'hour',
+};
+
+function firstSentence(s: string): string {
+  const t = s.trim();
+  if (!t) return '';
+  return `${t.split(/[。！？]/)[0]?.trim() || t}。`;
+}
+
+function pillarLinesFromHits(
+  hits: ChartLinkHit[],
+  d: ReturnType<typeof buildCodexDossier> | null,
+): string[] {
+  return hits
+    .map((h) => {
+      const mk = PILLAR_MEANING_KEY[h.key];
+      return mk && d ? d.pillarMeaning[mk] : '';
+    })
+    .filter(Boolean);
+}
+
 function dayMasterImpactOf(chart: BaziChart, id: string): string {
   const entry = getBaziEncyclopedia(id);
   if (!entry) return '—';
   const dm = chart.dayMaster;
   const dmWx = chart.dayMasterWx;
+  const hits = collectHits(chart, id);
+  const d = buildCodexDossier(id);
 
   if (entry.kind === 'stem') {
-    if (entry.id === dm) return `此即日主本体「${dm}」——一切喜忌以调候与流通为准。`;
-    const god = stemTenGod(dm, entry.id);
-    const wx = STEM_WUXING[entry.id];
-    if (!wx || !dmWx) return `相对日主为「${god}」。`;
-    if (nextWx(wx) === dmWx) return `对日主偏助力：${entry.title}生${dm}（资源/贵人感），十神「${god}」。`;
-    if (controlsWx(wx, dmWx)) return `对日主偏压力：${entry.title}克${dm}（规则/考验），十神「${god}」。`;
-    if (nextWx(dmWx) === wx) return `日主生之，偏泄气/表达出口，十神「${god}」。`;
-    if (controlsWx(dmWx, wx) ) return `日主克之，偏掌控/求财向，十神「${god}」。`;
-    if (wx === dmWx) return `与日主同气，比劫帮身或夺财，十神「${god}」。`;
-    return `相对日主为「${god}」。`;
+    const lines = pillarLinesFromHits(hits, d);
+    const rel =
+      entry.id === dm
+        ? `此即日主「${dm}」：盘上的自己，喜忌先看调候与流通。`
+        : (() => {
+            const god = stemTenGod(dm, entry.id);
+            const plain = TEN_GOD_PLAIN[god] || god;
+            const wx = STEM_WUXING[entry.id];
+            let how = `相对日主为「${god}」（${plain}）`;
+            if (wx && dmWx) {
+              if (nextWx(wx) === dmWx) how += `——${entry.title}生${dm}，偏助力/资源感`;
+              else if (controlsWx(wx, dmWx)) how += `——${entry.title}克${dm}，偏压力/规则感`;
+              else if (nextWx(dmWx) === wx) how += `——日主生之，偏表达出口`;
+              else if (controlsWx(dmWx, wx)) how += `——日主克之，偏掌控/求财向`;
+              else if (wx === dmWx) how += `——同气，比劫帮身也易争`;
+            }
+            return `${how}。`;
+          })();
+    const tip = firstSentence(d?.imbalance || d?.memory || entry.oneLiner);
+    const parts = [...lines.slice(0, 3), rel, tip].filter(Boolean);
+    return parts.length ? parts.join('\n') : rel;
   }
 
   if (entry.kind === 'branch') {
+    const lines = pillarLinesFromHits(hits, d);
     const wx = BRANCH_WUXING[entry.id];
-    if (!wx || !dmWx) return '看该支是否通根日主、是否冲合日支。';
-    if (entry.id === chart.dayBranch) return '此为日支（配偶宫/坐下），对自我落脚影响最大。';
-    if (wx === dmWx || nextWx(wx) === dmWx) return `地支「${entry.title}」气场偏生扶日主。`;
-    if (controlsWx(wx, dmWx)) return `地支「${entry.title}」气场偏克制日主。`;
-    return `地支「${entry.title}」以通根与冲合论对日主的影响。`;
+    const relParts: string[] = [];
+    if (entry.id === chart.dayBranch) {
+      relParts.push(
+        `日支「${entry.title}」是坐下/配偶宫：日干是「我」，它坐在下面；合冲刑害先看这里，对自我落脚影响最大。`,
+      );
+    } else if (wx && dmWx) {
+      if (wx === dmWx || nextWx(wx) === dmWx) {
+        relParts.push(`地支「${entry.title}」气场偏生扶日主（通根/得气）。`);
+      } else if (controlsWx(wx, dmWx)) {
+        relParts.push(`地支「${entry.title}」气场偏克制日主，注意压力与摩擦。`);
+      } else {
+        relParts.push(`地支「${entry.title}」以通根与冲合论对日主的影响。`);
+      }
+    }
+    const tip = firstSentence(d?.imbalance || d?.memory || entry.oneLiner);
+    const parts = [...lines.slice(0, 3), ...relParts, tip].filter(Boolean);
+    return parts.length
+      ? parts.join('\n')
+      : `地支「${entry.title}」：看通根、冲合与落柱。`;
   }
 
   if (entry.kind === 'tengod') {
-    const name = getStarCard(id)?.name || entry.title;
-    return `十神「${name}」相对日主：看落柱与旺衰，过旺为压、有制为用。`;
+    const card = getStarCard(id);
+    const name = card?.name || entry.title;
+    const pillarLines = pillarLinesFromHits(hits, d);
+    const tip = firstSentence(
+      card?.trap || card?.impression || d?.personality || '',
+    );
+    const parts = [...pillarLines.slice(0, 3), tip].filter(Boolean);
+    if (parts.length) return parts.join('\n');
+    return `盘上见「${name}」：先看落在哪一柱、旺不旺；过旺易成压力，有制才好用。`;
   }
 
   if (entry.kind === 'wuxing') {
     const wx = entry.id as WuXing;
-    if (!dmWx) return '—';
-    if (wx === dmWx) return '此为日主本气五行。';
-    if (nextWx(wx) === dmWx) return '此行生扶日主，多为助力资源。';
-    if (controlsWx(wx, dmWx)) return '此行克制日主，多为压力或成器之铁。';
-    if (nextWx(dmWx) === wx) return '日主生此行，多为泄秀与出口。';
-    return '与日主隔位相克/相生，看流通。';
+    const lines = pillarLinesFromHits(hits, d);
+    let rel = '—';
+    if (dmWx) {
+      if (wx === dmWx) rel = `此为日主本气五行「${wx}」。`;
+      else if (nextWx(wx) === dmWx) rel = `「${wx}」生扶日主，多为助力资源。`;
+      else if (controlsWx(wx, dmWx)) rel = `「${wx}」克制日主，多为压力或成器之铁。`;
+      else if (nextWx(dmWx) === wx) rel = `日主生「${wx}」，多为泄秀与出口。`;
+      else rel = `「${wx}」与日主隔位相生克，看流通。`;
+    }
+    const tip = firstSentence(d?.imbalance || d?.memory || entry.oneLiner);
+    const parts = [...lines.slice(0, 3), rel, tip].filter(Boolean);
+    return parts.join('\n');
   }
 
-  return '神煞对日主的影响，宜结合落柱喜忌，不作单一定论。';
+  if (entry.kind === 'shensha') {
+    const lines = pillarLinesFromHits(hits, d);
+    const tip = firstSentence(d?.chartExtra || d?.memory || d?.personality || '');
+    if (lines.length) {
+      return [...lines.slice(0, 3), tip].filter(Boolean).join('\n');
+    }
+    if (tip) return tip;
+    return `${entry.title}是辅助神煞：只标窗口气质，须合日主与喜忌看，不作单一定论。`;
+  }
+
+  if (entry.kind === 'nayin' || entry.kind === 'jiazi') {
+    const lines = pillarLinesFromHits(hits, d);
+    const tip = firstSentence(d?.chartExtra || d?.personality || d?.memory || '');
+    const parts = [...lines.slice(0, 3), tip].filter(Boolean);
+    if (parts.length) return parts.join('\n');
+    return `「${entry.title}」作索引气质看，合日主旺衰与流通，不作单一定论。`;
+  }
+
+  return `「${entry.title}」宜结合落柱喜忌看，不作单一定论。`;
 }
 
 function yearPillar(chart: BaziChart): PillarCell | undefined {
@@ -365,13 +450,6 @@ function luckTriggerOf(
   }
   return `${frame}。触发：${bits.join('；')}。`;
 }
-
-const PILLAR_MEANING_KEY: Record<string, keyof CodexDossier['pillarMeaning']> = {
-  year: 'year',
-  month: 'month',
-  day: 'day',
-  hour: 'hour',
-};
 
 /** 第三层：四柱释义 + 运程触发 + dossier 个性化（禁止另写第二套百科） */
 export function buildDeepBrief(

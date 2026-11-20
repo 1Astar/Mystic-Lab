@@ -115,6 +115,11 @@ export function renderZiweiHome(root: HTMLElement): () => void {
       </section>
 
       <nav class="ziwei-home-nav" aria-label="紫微入口">
+        <button type="button" class="bazi-home-link" data-path="/ziwei/learn">
+          <strong>紫微学习</strong>
+          <span>三节看盘课 · 整盘跟读 · 对照挂载</span>
+          <em aria-hidden="true">›</em>
+        </button>
         <button type="button" class="bazi-home-link" data-path="/ziwei/tujian">
           <strong>星曜探索</strong>
           <span>角色 · 场景 · 搭戏 · 相遇 · ${progress.collected}/${progress.total}</span>

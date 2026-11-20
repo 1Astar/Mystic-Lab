@@ -345,6 +345,41 @@ export function tianXiLookupLines(): string[] {
   return yearBranchLookupLines(TIAN_XI);
 }
 
+/** 本命年支所起红鸾落支 */
+export function hongLuanBranch(yearBranch: string): string {
+  return HONG_LUAN[yearBranch] ?? '';
+}
+
+/** 流年支见本命年支所起红鸾 → 流年逢红鸾 */
+export function liunianHasHongLuan(natalYearBranch: string, liunianBranch: string): boolean {
+  return Boolean(
+    natalYearBranch && liunianBranch && HONG_LUAN[natalYearBranch] === liunianBranch,
+  );
+}
+
+/** 流年支见本命年支所起天喜 */
+export function liunianHasTianXi(natalYearBranch: string, liunianBranch: string): boolean {
+  return Boolean(natalYearBranch && liunianBranch && TIAN_XI[natalYearBranch] === liunianBranch);
+}
+
+/** 以年支或日支三合取驿马落支 */
+export function yiMaBranch(baseBranch: string): string {
+  return sanHeOf(baseBranch)?.ma ?? '';
+}
+
+/** 流年支见年支或日支所起驿马 → 流年逢驿马（走动、出差线索） */
+export function liunianHasYiMa(
+  natalYearBranch: string,
+  natalDayBranch: string,
+  liunianBranch: string,
+): boolean {
+  if (!liunianBranch) return false;
+  return (
+    yiMaBranch(natalYearBranch) === liunianBranch ||
+    yiMaBranch(natalDayBranch) === liunianBranch
+  );
+}
+
 function sanHeOf(branch: string) {
   return SAN_HE_GROUPS.find((g) => g.members.includes(branch));
 }

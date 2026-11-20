@@ -897,7 +897,7 @@ button.lab-notes-tag:focus-visible {
   min-height: 44px;
 }
 
-/* 盘面字段轻量释义 */
+/* 盘面字段轻量释义（可挂在 dialog 内，盖住档案层） */
 .lab-concept-peek {
   position: fixed;
   inset: 0;
@@ -909,6 +909,11 @@ button.lab-notes-tag:focus-visible {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
+}
+
+/* 挂在 showModal 的 dialog 内时：仍 fixed 铺满视口，叠在档案内容之上 */
+dialog[open] > .lab-concept-peek {
+  z-index: 40;
 }
 
 .lab-concept-peek.is-open {
@@ -1112,6 +1117,29 @@ button.lab-notes-tag:focus-visible {
   font-size: 0.9rem;
   line-height: 1.65;
   color: var(--ink);
+}
+
+.lab-concept-peek-body .bazi-enc-presence-brief {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  line-height: 1.65;
+}
+
+.lab-concept-peek-body .bazi-enc-presence-lead {
+  margin-bottom: 0.15em;
+}
+
+.lab-concept-peek-body .bazi-enc-presence-k {
+  color: var(--gold-ink, var(--gold));
+  font-weight: 650;
+}
+
+.lab-concept-peek-body .bazi-enc-presence-note {
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
 }
 
 .lab-concept-peek-hint {

@@ -217,6 +217,14 @@ function renderGrid(
   `;
 }
 
+/** 供红娘等复用：与命盘页同一套四柱表 */
+export function renderBaziNatalGridHtml(
+  chart: BaziChart,
+  ariaLabel = '四柱排盘',
+): string {
+  return renderGrid(chart, { ariaLabel, natalOnly: true });
+}
+
 function shortGod(god: string): string {
   const map: Record<string, string> = {
     偏印: '印',

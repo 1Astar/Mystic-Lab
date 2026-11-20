@@ -45,12 +45,12 @@ export function chartPresenceBrief(
   const chunks: string[] = [];
 
   if (link.present) {
-    const where = link.hits.map((h) => h.title.replace(/柱/, '')).join('·');
     const impact =
       link.dayMasterImpact && link.dayMasterImpact !== '—'
         ? link.dayMasterImpact
-        : link.hits[0]?.how || '';
-    chunks.push(`【你的原局】${where}见此：${impact}`);
+        : link.hits.map((h) => `${h.title}：${h.how}`).join('\n');
+    // 一律：【你的原局】单独一行，下面落点/提醒各占一行
+    chunks.push(`【你的原局】\n${impact}`);
   }
 
   if (entry.kind === 'branch') {
@@ -64,7 +64,7 @@ export function chartPresenceBrief(
     if (short) chunks.push(`运程：${short}`);
   }
 
-  return chunks.join('；');
+  return chunks.join('\n');
 }
 
 /** 列表一行：优先短述截断，否则退回 chartPresenceLabel 由调用方处理 */
@@ -76,6 +76,46 @@ export function chartPresenceBriefLine(
 ): string {
   const full = chartPresenceBrief(id, chart, luck);
   if (!full) return '';
-  if (full.length <= maxLen) return full;
-  return `${full.slice(0, maxLen - 1)}…`;
+  // 列表一行：压成单行，避免卡片里把换行挤成乱版
+  const flat = full.replace(/^【你的原局】\n?/, '原局 · ').replace(/\n+/g, ' · ');
+  if (flat.length <= maxLen) return flat;
+  return `${flat.slice(0, maxLen - 1)}…`;
+}
+
+function escapeBriefHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** 落柱小标题：月柱见正财： / 年支见「寅」： / 相对日主… */
+const PRESENCE_LABEL_RE =
+  /^(?:【.+】|[年月日时]柱见|[年月日时]支见|地支|日支|相对日主|此即日主|此为|运程|「[^」]+」)/;
+
+/**
+ * 「在你身上」正文 → HTML：落柱小标题加粗金色，正文分行。
+ * 普通无冒号段落仍按换行输出。
+ */
+export function formatCodexBriefHtml(text: string): string {
+  const raw = text.trim();
+  if (!raw) return '';
+  const rows = raw.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  return rows
+    .map((line) => {
+      if (/^【[^】]+】$/.test(line)) {
+        return `<span class="bazi-enc-presence-lead">${escapeBriefHtml(line)}</span>`;
+      }
+      const idx = line.indexOf('：');
+      if (idx > 0 && idx <= 18) {
+        const k = line.slice(0, idx);
+        const v = line.slice(idx + 1).trim();
+        if (PRESENCE_LABEL_RE.test(k) || /见/.test(k)) {
+          return `<span class="bazi-enc-presence-row"><span class="bazi-enc-presence-k">${escapeBriefHtml(k)}：</span><span class="bazi-enc-presence-v">${escapeBriefHtml(v)}</span></span>`;
+        }
+      }
+      return `<span class="bazi-enc-presence-note">${escapeBriefHtml(line)}</span>`;
+    })
+    .join('');
 }

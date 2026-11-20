@@ -25,6 +25,7 @@ import {
   questRelateLine,
   yearHuaForStar,
 } from '../ziwei/codex-detail-extras.ts';
+import { renderCompareBlockForTerm } from '../ziwei/compare-learn.ts';
 import { majorStarArtImgHtml, starListThumbInnerHtml } from '../ziwei/star-art.ts';
 import { allMutagenNotesForStar } from '../ziwei/star-mutagen-notes.ts';
 import {
@@ -514,6 +515,7 @@ export function renderStarDetail(star: StarCard, opts: StarDetailOpts): string {
       <section class="ziwei-detail-tab-panel" data-tab-panel>${tabBody}</section>
       <section class="ziwei-detail-counsel"><h3>给你的箴言</h3><p>${counsel}</p></section>
       ${practiceCta}
+      ${renderCompareBlockForTerm(star.title)}
     </article>`;
 }
 

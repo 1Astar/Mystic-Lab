@@ -27,6 +27,12 @@ export type OpenZiweiLearnSheetOptions = {
   onFocusChange?: (focus: LearnFocus) => void;
   /** 关闭抽屉（含点空白） */
   onClose?: () => void;
+  /** 挂载节点；默认挂进当前 open 的 dialog，否则 body */
+  mountNode?: HTMLElement | null;
+  /** 「在你的命盘里」标题；他人盘可改为「在此人命盘里」 */
+  inChartHeading?: string;
+  /** 是否显示「回到盘面看关系」；他人盘释义可关 */
+  showChartCta?: boolean;
 };
 
 function relatedChip(r: LearnRelated): string {
@@ -93,6 +99,7 @@ function atlasTeaseHtml(hint: { path: string; label: string }): string {
 function starPanelHtml(
   model: ReturnType<typeof buildLearnExplain>,
   atlas: { path: string; label: string },
+  inChartHeading: string,
 ): string {
   const titleLine = model.subtitle
     ? `${escapeHtml(model.title)}｜${escapeHtml(model.subtitle)}`
@@ -127,7 +134,7 @@ function starPanelHtml(
     </header>
     <div class="ziwei-learn-scroll">
       <section class="ziwei-learn-block is-layer-chart">
-        <h3>在你的命盘里</h3>
+        <h3>${escapeHtml(inChartHeading)}</h3>
         <pre class="ziwei-learn-body">${escapeHtml(model.inChart)}</pre>
       </section>
       ${statusRow}
@@ -142,6 +149,7 @@ function starPanelHtml(
 function defaultPanelHtml(
   model: ReturnType<typeof buildLearnExplain>,
   atlas: { path: string; label: string },
+  inChartHeading: string,
 ): string {
   const relationHtml = model.relationMap
     ? `<div class="ziwei-learn-map" aria-label="关系地图">
@@ -202,7 +210,7 @@ function defaultPanelHtml(
     </header>
     <div class="ziwei-learn-scroll">
       <section class="ziwei-learn-block is-layer-3">
-        <h3>在你的命盘里</h3>
+        <h3>${escapeHtml(inChartHeading)}</h3>
         <pre class="ziwei-learn-body">${escapeHtml(model.inChart)}</pre>
         ${mutagenHtml}
         ${branchHtml}
@@ -224,6 +232,8 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
 
   const model = buildLearnExplain(opts.view, opts.focus);
   const atlas = resolveAtlasHint(opts.focus, model);
+  const inChartHeading = opts.inChartHeading?.trim() || '在你的命盘里';
+  const showChartCta = opts.showChartCta !== false;
   opts.onFocusChange?.(opts.focus);
 
   const sheet = document.createElement('div');
@@ -233,7 +243,9 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
   sheet.setAttribute('aria-label', model.title);
 
   const body =
-    model.category === 'star' ? starPanelHtml(model, atlas) : defaultPanelHtml(model, atlas);
+    model.category === 'star'
+      ? starPanelHtml(model, atlas, inChartHeading)
+      : defaultPanelHtml(model, atlas, inChartHeading);
 
   sheet.innerHTML = `
     <button type="button" class="ziwei-learn-backdrop" data-learn-close aria-label="关闭"></button>
@@ -242,12 +254,24 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
       <footer class="ziwei-learn-foot">
         <button type="button" class="life-btn-ghost" data-learn-close>关闭</button>
         <button type="button" class="life-btn-ghost" data-learn-atlas data-atlas-path="${escapeHtml(atlas.path)}">${escapeHtml(atlas.label)} ›</button>
-        <button type="button" class="life-btn-primary" data-learn-chart>回到盘面看关系 ›</button>
+        ${
+          showChartCta
+            ? `<button type="button" class="life-btn-primary" data-learn-chart>回到盘面看关系 ›</button>`
+            : ''
+        }
       </footer>
     </aside>
   `;
 
-  document.body.appendChild(sheet);
+  /**
+   * 若已有 showModal 的 dialog（如红娘「了解此人」），释义必须挂进该 dialog，
+   * 否则会落在 top layer 下面被档案挡住。
+   */
+  const mount =
+    opts.mountNode ??
+    document.querySelector('dialog[open]') ??
+    document.body;
+  mount.appendChild(sheet);
   requestAnimationFrame(() => sheet.classList.add('is-visible'));
 
   const close = (): void => {
@@ -280,6 +304,9 @@ export function openZiweiLearnSheet(opts: OpenZiweiLearnSheetOptions): void {
         (el as HTMLElement).dataset.atlasPath || atlas.path || model.atlasHint?.path;
       if (!path) return;
       close();
+      document.querySelectorAll('dialog.mm-person-dialog[open]').forEach((d) => {
+        if (d instanceof HTMLDialogElement) d.close();
+      });
       navigate(path);
     });
   });

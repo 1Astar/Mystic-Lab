@@ -6168,6 +6168,10 @@ html[data-theme='moon'] .ziwei-plate-dizhi.is-刑 { stroke: rgba(140, 110, 55, 0
   transition: opacity 0.22s ease;
   color: var(--ink);
 }
+/* 挂在 showModal 的 dialog 内时：叠在档案内容之上 */
+dialog[open] > .ziwei-learn-sheet {
+  z-index: 40;
+}
 .ziwei-learn-sheet.is-visible {
   opacity: 1;
   pointer-events: auto;
@@ -7464,4 +7468,100 @@ html[data-theme='moon'] .ziwei-ys-backdrop {
   padding: 8px 10px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface, #121826) 70%, transparent);
+}
+
+/* 紫微学习 · 对照署名（无卡片框） */
+.ziwei-learn-page .zw-learn-lesson {
+  margin: 28px 0 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+.ziwei-learn-page .zw-learn-sub {
+  margin: 20px 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gold-ink, var(--gold));
+}
+
+.zw-learn-mounts {
+  list-style: none;
+  margin: 12px 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zw-learn-mounts li {
+  display: grid;
+  grid-template-columns: 1.5rem 4.5rem 1fr;
+  gap: 8px 10px;
+  align-items: baseline;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.zw-learn-mount-kind {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--gold-ink, var(--gold));
+}
+
+.zw-learn-mounts strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.zw-compare-attr {
+  margin: 16px 0 20px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+}
+
+.zw-compare-attr-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-ink, var(--gold));
+}
+
+.zw-compare-quote {
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+}
+
+.zw-compare-quote p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.zw-compare-quote footer {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+.zw-compare-attr-meta {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.zw-compare-attr-meta a {
+  color: var(--gold-ink, var(--gold));
+}
+
+.zw-compare-attr-play {
+  margin: 10px 0 0;
+  font-size: 0.86rem;
+}
+
+.zw-compare-attr-play a {
+  color: var(--gold-ink, var(--gold));
 }
